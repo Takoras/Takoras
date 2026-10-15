@@ -4,7 +4,7 @@
 let SHOP = null, shopTimer;
 
 function itemIcon(it) {
-  if (it.kind === 'banner') { const c = bannerCanvas(it.id.slice(2)); c.classList.add('si-banner'); return c.outerHTML.replace('<canvas', '<img src="' + c.toDataURL() + '"').replace('></canvas>', '>'); }
+  if (it.kind === 'banner') { const id = it.id.slice(2); return BANNER_IMG[id] ? `<img class="si-banner" src="${BANNER_IMG[id]}" alt="">` : (() => { const c = bannerCanvas(id); return `<img class="si-banner" src="${c.toDataURL()}" alt="">`; })(); }
   return (ICONS[it.id] || ICONS.instant)();
 }
 function itemText(it) {

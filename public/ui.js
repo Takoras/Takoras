@@ -19,21 +19,73 @@ function statsOf(name, odds) {
 const jetonOf = name => SERIES.Takoras.find(j => j.name === name) || { name, odds: 1, glow: '#ffffff' };
 
 // ---------- Navigation entre pages : #inventaire, #boutique, #profil/Pseudo, #classement
+// Transition : les éléments de la page actuelle partent vers le haut en fondu, ceux de la nouvelle arrivent du bas un par un.
 const PAGES = { inv: 'page-inv', shop: 'page-shop', profile: 'page-profile' };
-function route() {
+let routeTok = 0, routeKey = null;
+const EASE_OUT = 'cubic-bezier(.6, 0, .85, .2)', EASE_IN = 'cubic-bezier(.16, 1, .3, 1)';
+
+// Les blocs à animer d'une page (et les cartes de ses grilles, pour un effet en cascade)
+function pieces(page) {
+  if (page === 'home') return [...document.querySelectorAll('.home-sec')];
+  const root = $(PAGES[page]), top = root.querySelector('.prof') || root;
+  const list = [...top.children].filter(el => !el.classList.contains('sell-bar'));
+  return list;
+}
+function cards(page) {
+  if (page === 'home') return [];
+  return [...$(PAGES[page]).querySelectorAll('.ic, .si, .sc')].slice(0, 30);
+}
+function nav(page, p) {
+  const key = p === 'classement' ? 'board' : page;
+  document.querySelectorAll('.links a').forEach(a => a.classList.toggle('on', a.dataset.page === key));
+  const on = document.querySelector('.links a.on'), ink = document.querySelector('.nav-ink');
+  if (on && ink) { ink.style.width = on.offsetWidth + 'px'; ink.style.transform = `translateX(${on.offsetLeft}px)`; ink.style.opacity = 1; }
+}
+
+async function route() {
+  const tok = ++routeTok;
   const h = decodeURIComponent(location.hash.slice(1));
   const [p, arg] = h.split('/');
   const page = p === 'inventaire' ? 'inv' : p === 'boutique' ? 'shop' : p === 'profil' ? 'profile' : 'home';
+  const key = page + '/' + (page === 'profile' ? (arg || ACC.pseudo || '') : '');
+  const from = routeKey ? routeKey.split('/')[0] : null;
+  const animate = routeKey !== null && routeKey !== key && !reducedFx();
+  nav(page, p);
+
+  // 1. La page actuelle s'en va
+  if (animate) {
+    sfx.whooshOut?.();
+    const out = pieces(from);
+    // Sécurité : si le navigateur ne joue pas l'animation (onglet en arrière-plan…), on change quand même de page
+    await Promise.race([Promise.all(out.map((el, i) => el.animate([{ opacity: 1, transform: 'none' }, { opacity: 0, transform: 'translateY(-22px) scale(.985)' }],
+      { duration: 200, delay: Math.min(i, 5) * 35, easing: EASE_OUT, fill: 'forwards' }).finished.catch(() => {}))), new Promise(r => setTimeout(r, 450))]);
+    if (tok !== routeTok) return;
+    out.forEach(el => el.getAnimations().forEach(a => a.cancel()));
+  }
+
+  // 2. On affiche la nouvelle et on la remplit
+  routeKey = key;
   document.querySelectorAll('.home-sec').forEach(s => { s.hidden = page !== 'home'; });
   Object.entries(PAGES).forEach(([k, id]) => { $(id).hidden = k !== page; });
-  document.querySelectorAll('.links a').forEach(a => a.classList.toggle('on', a.dataset.page === (p === 'classement' ? 'board' : page)));
-  if (page === 'inv') renderInventory();
-  if (page === 'shop') renderShop();
-  if (page === 'profile') renderProfile(arg || ACC.pseudo);
-  if (page === 'home' && p === 'classement') setTimeout(() => $('classement').scrollIntoView({ behavior: 'smooth' }));
-  else if (page !== 'home') scrollTo({ top: 0 });
+  if (page !== 'home' || from !== 'home') scrollTo({ top: 0 });
+  const ready = page === 'inv' ? renderInventory() : page === 'shop' ? renderShop() : page === 'profile' ? renderProfile(arg || ACC.pseudo) : null;
+  if (page === 'home' && p === 'classement') setTimeout(() => $('classement').scrollIntoView({ behavior: 'smooth' }), animate ? 250 : 0);
+
+  // 3. Elle arrive : les blocs montent un par un, puis les cartes en cascade
+  if (animate) {
+    const box = page === 'home' ? null : $(PAGES[page]);
+    if (box) box.style.opacity = 0; // invisible le temps de charger son contenu
+    await ready;
+    if (tok !== routeTok) return;
+    if (box) box.style.opacity = '';
+    pieces(page).forEach((el, i) => el.animate([{ opacity: 0, transform: 'translateY(28px)' }, { opacity: 1, transform: 'none' }],
+      { duration: 480, delay: Math.min(i, 6) * 60, easing: EASE_IN, fill: 'backwards' }));
+    cards(page).forEach((el, i) => el.animate([{ opacity: 0, transform: 'translateY(18px) scale(.96)' }, { opacity: 1, transform: 'none' }],
+      { duration: 420, delay: 80 + i * 28, easing: EASE_IN, fill: 'backwards' }));
+  }
 }
 addEventListener('hashchange', route);
+addEventListener('resize', () => nav(routeKey ? routeKey.split('/')[0] : 'home', location.hash.slice(1).split('/')[0]));
 const goProfile = pseudo => { location.hash = '#profil/' + encodeURIComponent(pseudo); };
 
 // ---------- Pixel art dessiné en code (icônes de la boutique)
@@ -47,9 +99,9 @@ function pixelArt(rows, pal, px = 4) {
 const POTION = ['....kk....', '....kk....', '...kwwk...', '...kwwk...', '..kLLLLk..', '.kLLwLLLk.', 'kLLLLLLLLk', 'kLMMMMMMLk', 'kMMMMMMMMk', 'kMMMMMMDMk', '.kMMMMMDk.', '..kkkkkk..'];
 const HOURGLASS = ['kkkkkkkk', '.kwwwwk.', '.kSSSSk.', '..kSSk..', '...kk...', '..k.Sk..', '.k..SSk.', '.kSSSSk.', 'kkkkkkkk'];
 const ICONS = { // icônes dessinées pixel par pixel
-  potion1: () => pixelArt(POTION, { k: '#1e1b2e', w: '#e2e8f0', L: '#86efac', M: '#22c55e', D: '#15803d' }, 6),
-  potion2: () => pixelArt(POTION, { k: '#1e1b2e', w: '#e2e8f0', L: '#c4b5fd', M: '#8b5cf6', D: '#5b21b6' }, 6),
-  potion3: () => pixelArt(POTION, { k: '#1e1b2e', w: '#e2e8f0', L: '#fde68a', M: '#f59e0b', D: '#b45309' }, 6),
+  potion1: () => '<img class="pix potion" src="img/potions/chance-1-3.png" alt="">', // tes potions dessinées
+  potion2: () => '<img class="pix potion" src="img/potions/chance-2.png" alt="">',
+  potion3: () => '<img class="pix potion" src="img/potions/chance-5.png" alt="">',
   hourglass: () => pixelArt(HOURGLASS, { k: '#e2e8f0', w: '#94a3b8', S: '#fbbf24' }, 7),
   instant: () => '<img class="pix" src="img/jetons/takoras.png" alt="" style="width:44px;height:44px">',
 };
@@ -86,7 +138,12 @@ function drawBanner(canvas, id) {
     x.globalAlpha = 1; x.fillStyle = B.a; x.fillRect(90, 8, 3, 1); x.fillRect(91, 7, 1, 3);
   }
 }
-const bannerCanvas = id => { const c = document.createElement('canvas'); c.className = 'banner-cv'; drawBanner(c, id); return c; };
+// Bannières dessinées par toi (images). Les anciennes bannières en code restent en secours.
+const BANNER_IMG = { plaine: 'img/bannieres/plaine.png', doodle: 'img/bannieres/doodle.png' };
+const bannerCanvas = id => {
+  if (BANNER_IMG[id]) { const i = new Image(); i.className = 'banner-cv'; i.src = BANNER_IMG[id]; i.alt = ''; return i; }
+  const c = document.createElement('canvas'); c.className = 'banner-cv'; drawBanner(c, id); return c;
+};
 
 // ---------- Photo de profil : pour l'instant l'initiale (les photos à choisir arriveront plus tard, jamais d'image Discord)
 function avatarHTML(p, size = 64) {

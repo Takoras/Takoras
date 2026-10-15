@@ -43,7 +43,7 @@ $('adm-search').addEventListener('input', () => { clearTimeout(admT); admT = set
 
 // ---------- Fiche d'un joueur
 const ITEMS = [['potion1', '🧪 Potion ×1,3 (5)'], ['potion2', '🧪 Potion ×2 (3)'], ['potion3', '🧪 Potion ×5 (1)'], ['instant', '⚡ Recharge éclair'], ['hourglass', '⏳ Sablier 1 h'],
-  ...Object.keys(BANNERS).filter(b => b !== 'nuit').map(b => ['b_' + b, '🎨 Bannière ' + t('bn_' + b)])];
+  ...Object.keys(BANNER_IMG).map(b => ['b_' + b, '🎨 Bannière ' + t('bn_' + b)])];
 async function admDetail() {
   const box = $('adm-detail');
   const { data: p, error } = await sb.rpc('admin_player', { target: admSel });

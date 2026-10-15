@@ -12,7 +12,7 @@ const SERIES = {
     { name: 'Givre', odds: 25, glow: '#a5b4fc', img: 'img/jetons/serie-takoras/givre.png' },
     { name: 'Soléo', odds: 60, glow: '#f0805c', img: 'img/jetons/serie-takoras/soleo.png' },
     { name: 'Azura', odds: 150, glow: '#7c7cc4', img: 'img/jetons/serie-takoras/azura.png' },
-    { name: 'Carmin', odds: 400, glow: '#e11d48' },
+    { name: 'Carmin', odds: 400, glow: '#d0408f', img: 'img/jetons/serie-takoras/carmin.png' },
     { name: 'Vyolis', odds: 1000, glow: '#a855f7' },
     { name: 'Lumis', odds: 2500, glow: '#ec4899' },
     { name: 'Nyx', odds: 5000, glow: '#6366f1' },
