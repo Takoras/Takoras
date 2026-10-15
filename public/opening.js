@@ -550,6 +550,7 @@ $('dbg-open').addEventListener('click', () => buy(1));
   try { saved = JSON.parse(localStorage.getItem(SAVE_KEY)); } catch {}
   if (!saved || !PULLS[saved.pull] || (saved.cur && !(SERIES[PULLS[saved.pull].name] || SERIES.Takoras).some(j => j.name === saved.cur.name))) { endSession(); return; }
   sess = saved;
+  if (!ACC.user && !(sb && localStorage.getItem('sb-joyskjoofihwhycyreyn-auth-token'))) { endSession(); return; } // pas connecté : rien à reprendre
   select(sess.pull);
   if (!sess.cur && !sess.recap) { endSession(); return; }
   showOpening();

@@ -38,6 +38,7 @@ function takePulls(n) {
 
 // Ouvre 1 pull ou tout le stock (pour les autres pulls, l'ancien fonctionnement reste)
 function openPulls(n) {
+  if (!requireAccount()) return;
   if (!isTakoras()) return buy(n === 'all' ? 10 : n);
   regen();
   const count = n === 'all' ? eco.stock : Math.min(1, eco.stock);
@@ -47,6 +48,7 @@ function openPulls(n) {
 }
 
 function upgrade() {
+  if (!requireAccount()) return;
   if (eco.max >= TOP_MAX || eco.coins < upgradeCost(eco.max + 1)) return;
   eco.coins -= upgradeCost(eco.max + 1);
   eco.max++;
@@ -58,6 +60,7 @@ function upgrade() {
 // Boutons de l'accueil : stock + Ouvrir 1 / Tout ouvrir + amélioration (Takoras), ou l'ancien achat (autres pulls)
 function renderActions() {
   const box = $('actions');
+  if (!ACC.user) { box.innerHTML = `<button class="btn primary" data-open="1">${t('acc_login_to_open')}</button>`; return; }
   if (!isTakoras()) {
     const p = PULLS[current];
     box.innerHTML = `<button class="btn primary" data-open="1">Pull ×1 · ${fmt(p.price)} ◆</button><button class="btn ghost" data-open="10">Pull ×10 · ${fmt(p.price * 10)} ◆</button>`;

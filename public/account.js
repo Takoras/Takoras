@@ -10,6 +10,13 @@ const sb = window.supabase ? window.supabase.createClient(SB_URL, SB_KEY) : null
 const ACC = { user: null, pseudo: null, hist: [] };
 const PSEUDO_RE = /^[A-Za-z0-9_.\-]{3,16}$/;
 
+// Sans compte : on peut regarder le site mais pas ouvrir de pull ni rien modifier
+function requireAccount() {
+  if (ACC.user) return true;
+  if (window.openAccount) openAccount('signup', 'acc_need');
+  return false;
+}
+
 // Ligne de la base → entrée d'historique (même forme que l'historique local)
 function rowToHist(r) {
   const j = (typeof SERIES !== 'undefined' && (SERIES[r.serie] || []).find(x => x.name === r.jeton)) || {};
@@ -30,6 +37,7 @@ async function loadAccount(user) {
   }
   renderAccBtn();
   if (typeof renderHist === 'function') { renderHist(); renderBoard(); }
+  if (typeof renderActions === 'function') renderActions(); // boutons de pull : « Se connecter » ou « Ouvrir »
 }
 
 // Appelé à chaque jeton révélé. Renvoie true si le tirage part en ligne (sinon historique local).
@@ -78,21 +86,20 @@ const esc = s => String(s).replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;'
       <button class="btn primary acc-go">${t('signup')}</button>
       <div class="acc-links"><a data-go="login">${t('acc_have_account')}</a></div>`],
     code: () => [t('acc_check_mail'), `
-      <p class="muted acc-p">${t('acc_code_sent', { e: `<b>${esc(email)}</b>` })}</p>
-      ${field('code', 'text', 'acc_code', 'inputmode="numeric" autocomplete="one-time-code" required pattern="[0-9]{6,10}" maxlength="10" class="acc-code"')}
-      <button class="btn primary acc-go">${t('acc_confirm')}</button>
+      <p class="muted acc-p">${t('acc_link_sent', { e: `<b>${esc(email)}</b>` })}</p>
+      <button type="button" class="btn primary" data-go="login">${t('acc_go_login')}</button>
       <div class="acc-links"><a data-resend="signup">${t('acc_resend')}</a><a data-go="signup">${t('back')}</a></div>`],
     forgot: () => [t('acc_forgot'), `
       <p class="muted acc-p">${t('acc_forgot_p')}</p>
       ${field('email', 'email', 'acc_email', `autocomplete="email" required value="${esc(email)}"`)}
-      <button class="btn primary acc-go">${t('acc_send_code')}</button>
+      <button class="btn primary acc-go">${t('acc_send_link')}</button>
       <div class="acc-links"><a data-go="login">${t('back')}</a></div>`],
-    reset: () => [t('acc_new_pass'), `
-      <p class="muted acc-p">${t('acc_code_sent', { e: `<b>${esc(email)}</b>` })}</p>
-      ${field('code', 'text', 'acc_code', 'inputmode="numeric" autocomplete="one-time-code" required pattern="[0-9]{6,10}" maxlength="10" class="acc-code"')}
-      ${field('password', 'password', 'acc_new_pass', 'autocomplete="new-password" required minlength="6"')}
-      <button class="btn primary acc-go">${t('acc_confirm')}</button>
+    sent: () => [t('acc_check_mail'), `
+      <p class="muted acc-p">${t('acc_link_reset', { e: `<b>${esc(email)}</b>` })}</p>
       <div class="acc-links"><a data-resend="recovery">${t('acc_resend')}</a><a data-go="login">${t('back')}</a></div>`],
+    reset: () => [t('acc_set_pass'), `
+      ${field('password', 'password', 'acc_new_pass', 'autocomplete="new-password" required minlength="6"')}
+      <button class="btn primary acc-go">${t('acc_confirm')}</button>`],
     me: () => [t('acc_my_account'), `
       <div class="acc-me"><span class="av">${esc(ACC.pseudo[0].toUpperCase())}</span><div><b>${esc(ACC.pseudo)}</b><small class="muted">${esc(ACC.user.email)}</small></div></div>
       <p class="muted acc-p">${t('acc_me_p')}</p>
@@ -107,6 +114,8 @@ const esc = s => String(s).replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;'
   }
   const go = (v, m = '') => { view = v; msg = typeof m === 'string' ? { text: m } : m; render(); };
   const fail = key => { msg = { text: t(key) }; busy = false; render(); };
+  // Ouvre la fenêtre de compte depuis le reste du site (ex. : pull sans être connecté)
+  window.openAccount = (v = 'signup', key = '') => { panel.classList.add('on'); go(v, key ? { text: t(key) } : ''); };
   // Messages d'erreur Supabase → texte du site
   function errKey(e) {
     const c = e?.code || '', m = (e?.message || '').toLowerCase();
@@ -142,17 +151,14 @@ const esc = s => String(s).replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;'
       const { data: free, error: e1 } = await sb.rpc('pseudo_available', { p: pseudo });
       if (e1) return fail('err_generic');
       if (!free) return fail('err_pseudo_taken');
-      r = await sb.auth.signUp({ email, password: v.password, options: { data: { pseudo } } });
+      r = await sb.auth.signUp({ email, password: v.password, options: { data: { pseudo }, emailRedirectTo: location.origin + '/' } });
       if (!r.error && r.data.user && !r.data.user.identities?.length) return fail('err_email_used');
       if (!r.error) { busy = false; return go('code'); }
-    } else if (view === 'code') {
-      r = await sb.auth.verifyOtp({ email, token: v.code.trim(), type: 'signup' });
     } else if (view === 'forgot') {
-      r = await sb.auth.resetPasswordForEmail(email);
-      if (!r.error) { busy = false; return go('reset'); }
+      r = await sb.auth.resetPasswordForEmail(email, { redirectTo: location.origin + '/' });
+      if (!r.error) { busy = false; return go('sent'); }
     } else if (view === 'reset') {
-      r = await sb.auth.verifyOtp({ email, token: v.code.trim(), type: 'recovery' });
-      if (!r.error) r = await sb.auth.updateUser({ password: v.password });
+      r = await sb.auth.updateUser({ password: v.password });
     }
     busy = false;
     if (r.error) return fail(errKey(r.error));
@@ -169,7 +175,7 @@ const esc = s => String(s).replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;'
     }
     const rs = e.target.closest('[data-resend]');
     if (rs) {
-      const { error } = rs.dataset.resend === 'signup' ? await sb.auth.resend({ type: 'signup', email }) : await sb.auth.resetPasswordForEmail(email);
+      const { error } = rs.dataset.resend === 'signup' ? await sb.auth.resend({ type: 'signup', email, options: { emailRedirectTo: location.origin + '/' } }) : await sb.auth.resetPasswordForEmail(email, { redirectTo: location.origin + '/' });
       return go(view, error ? { text: t(errKey(error)) } : { text: t('acc_resent'), ok: true });
     }
     if (e.target.closest('.acc-out')) { await sb.auth.signOut(); panel.classList.remove('on'); }
@@ -187,6 +193,8 @@ const esc = s => String(s).replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;'
   // Session gardée par Supabase dans le navigateur ; on recharge le compte à chaque changement
   let lastId;
   sb.auth.onAuthStateChange((ev, session) => {
+    // Arrivée depuis le lien « mot de passe oublié » du mail : on demande le nouveau mot de passe
+    if (ev === 'PASSWORD_RECOVERY') { view = 'reset'; msg = ''; panel.classList.add('on'); render(); }
     const id = session?.user?.id || null;
     if (id === lastId && ev !== 'USER_UPDATED') return;
     lastId = id;
