@@ -32,7 +32,7 @@ button { font: inherit; color: inherit; border: 0; background: none; cursor: poi
 .nav { position: sticky; top: 0; z-index: 20; background: rgba(13, 13, 18, .7); backdrop-filter: blur(14px); border-bottom: 1px solid var(--border); }
 .nav-in { display: flex; align-items: center; gap: 32px; height: 64px; }
 .logo { display: flex; align-items: center; gap: 10px; font-family: "Space Grotesk"; font-weight: 700; font-size: 19px; letter-spacing: .05em; }
-.logo span { width: 34px; height: 34px; border-radius: 10px; background: linear-gradient(135deg, var(--accent), var(--accent-2)); display: grid; place-items: center; font-size: 16px; }
+.logo img { width: 34px; height: 34px; image-rendering: pixelated; }
 .links { display: flex; gap: 24px; font-size: 14px; color: var(--muted); }
 .links a { transition: color .15s; }
 .links a:hover, .links a.on { color: var(--text); }
@@ -331,7 +331,7 @@ html.lock, html.lock body { overflow: hidden; }
 .loader canvas { position: absolute; inset: 0; width: 100%; height: 100%; image-rendering: pixelated; }
 .ld-box { position: relative; display: flex; flex-direction: column; align-items: center; gap: 14px; }
 .ld-box .logo { font-size: 26px; }
-.ld-box .logo span { width: 42px; height: 42px; font-size: 20px; }
+.ld-box .logo img { width: 44px; height: 44px; }
 .ld-bar { width: 240px; height: 18px; padding: 3px; background: #0d0d12; box-shadow: 0 0 0 3px #f2f2f5; }
 .ld-bar i { display: block; height: 100%; width: 0; background: #8b5cf6; }
 .ld-box small { font-family: "Space Grotesk"; font-size: 13px; color: #c4b5fd; letter-spacing: .1em; }

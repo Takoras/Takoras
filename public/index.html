@@ -4,6 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Takoras</title>
+<link rel="icon" type="image/png" href="img/logo.png">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=Space+Grotesk:wght@500;600;700&display=swap" rel="stylesheet">
@@ -13,7 +14,7 @@
   <div class="loader" id="loader">
     <canvas id="ld-bg"></canvas>
     <div class="ld-box">
-      <div class="logo"><span>T</span>TAKORAS</div>
+      <div class="logo"><img src="img/logo.png" alt="">TAKORAS</div>
       <div class="ld-bar"><i id="ld-fill"></i></div>
       <small id="ld-pct">0 %</small>
     </div>
@@ -38,7 +39,7 @@
         document.getElementById('ld-pct').textContent = pct + ' %';
         raf = requestAnimationFrame(draw);
       })();
-      const assets = ['img/jetons/takoras.png', 'img/jetons/mystere.png', 'img/jetons/template.png'];
+      const assets = ['img/logo.png', 'img/jetons/takoras.png', 'img/jetons/mystere.png', 'img/jetons/template.png'];
       let done = 0;
       const total = assets.length + 1;
       const tick = () => { done++; target = done / total * 100; };
@@ -55,7 +56,7 @@
   </script>
   <nav class="nav">
     <div class="wrap nav-in">
-      <a class="logo" href="/"><span>T</span>TAKORAS</a>
+      <a class="logo" href="/"><img src="img/logo.png" alt="">TAKORAS</a>
       <div class="links">
         <a class="on" href="#">Pull</a>
         <a href="#">Collection</a>
