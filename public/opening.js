@@ -19,6 +19,9 @@ const SERIES = {
     { name: 'Abysse', odds: 25000, glow: '#2563eb' },
     { name: 'Éternité', odds: 50000, glow: '#facc15' },
     { name: 'Takoras Prime', odds: 100000, glow: '#f0abfc' },
+    { name: 'Singularité', odds: 250000, glow: '#e2e8f0' },
+    { name: 'Paradoxe', odds: 500000, glow: '#fb7185' },
+    { name: 'Takoras Ω', odds: 1000000, glow: '#c084fc' },
   ],
 };
 const SKIP = 1 / 5; // environ 1 clic sur 5 saute discrètement une étape
@@ -27,7 +30,9 @@ const SKIP = 1 / 5; // environ 1 clic sur 5 saute discrètement une étape
 const TIERS = [[10, '200, 200, 210'], [50, '74, 222, 128'], [200, '56, 189, 248'], [1000, '167, 139, 250'], [5000, '251, 191, 36'], [25000, '244, 114, 182'], [Infinity, '240, 240, 255']];
 const FAST = 60;   // en dessous de 1/60 : retournement direct, pas de pause
 const RARE = 1000; // à partir de 1/1000 : zoom plus fort et révélation plus spectaculaire
-const tierOf = v => TIERS.find(([max]) => v < max)[1];
+// Pendant le compteur : pas de couleur, juste du blanc de plus en plus lumineux
+const tierOf = () => '235, 235, 255';
+const MYTHIC = 100000, GOD = 1000000; // mise en scène spéciale à partir de 1/100 000, et encore plus pour 1/1 000 000
 const hexRGB = h => [1, 3, 5].map(i => parseInt(h.slice(i, i + 2), 16)).join(', ');
 const jetonHTML = (j, size) =>
   `<img class="jeton" src="${TEMPLATE}" alt="${j.name}" style="width:${size}px;height:${size}px;filter:drop-shadow(0 0 ${Math.max(4, size / 8)}px ${j.glow})">`;
@@ -71,8 +76,16 @@ function coin3D(src, alt, style = '') {
   return `<img class="face" src="${src}" alt="${alt}" style="${style}">${edge}<img class="back" src="${src}" alt="" style="transform:translateZ(${-(DEPTH + 1) * 2}px) rotateY(180deg)">`;
 }
 function setGlareMask(src) {
-  const g = opCoin.querySelector('.glare');
-  if (g) g.style.webkitMaskImage = g.style.maskImage = `url(${src})`;
+  opCoin.querySelectorAll('.glare, .shine').forEach(g => { g.style.webkitMaskImage = g.style.maskImage = `url(${src})`; });
+}
+// Onde de choc qui part du jeton
+function wave() {
+  const r = opCoin.getBoundingClientRect(), w = document.createElement('div');
+  w.className = 'op-wave';
+  w.style.cssText = `left:${r.left + r.width / 2}px;top:${r.top + r.height / 2}px;width:${r.width}px;height:${r.width}px`;
+  opening.appendChild(w);
+  w.animate([{ transform: 'translate(-50%,-50%) scale(.6)', opacity: 1 }, { transform: 'translate(-50%,-50%) scale(9)', opacity: 0 }],
+    { duration: 1000, easing: 'cubic-bezier(.1,.7,.3,1)' }).finished.then(() => w.remove());
 }
 
 // Session d'ouverture (1 ou 10 pulls), sauvegardée dans le navigateur pour reprendre après un refresh
@@ -99,10 +112,10 @@ function startOpening() {
   $('op-price').textContent = (p.price * sess.total).toLocaleString('fr');
   $('op-odds').textContent = '1/' + c.shown.toLocaleString('fr');
   stopBg();
-  opening.classList.remove('hold', 'rare', 'revealed', 'recap', 'spinning');
+  opening.classList.remove('hold', 'rare', 'revealed', 'recap', 'spinning', 'mythic', 'god', 'cinema');
   setTier(c.shown);
   opCoin.className = 'op-coin';
-  opCoin.innerHTML = `<div class="zoom"><div class="tilt3d"><div class="spin">${coin3D(MYSTERE, 'Jeton mystère')}</div><i class="glare"></i></div></div>`;
+  opCoin.innerHTML = `<div class="zoom"><div class="tilt3d"><div class="spin">${coin3D(MYSTERE, 'Jeton mystère')}</div><i class="glare"></i><i class="shine"></i>${'<b class="tw"></b>'.repeat(7)}</div></div>`;
   setGlareMask(MYSTERE);
   if (c.phase === 'count' && c.shown === 1) spawn(); // le « ? » arrive en grossissant
   $('op-hint').textContent = 'Clique sur le jeton';
@@ -121,7 +134,7 @@ function setTier(v) {
   if (v < 2500 && bg.mode === 'hold') { stopBg(); bg.mode = ''; }
   opening.classList.toggle('t1000', v >= 1000);
   opening.classList.toggle('t2500', v >= 2500);
-  opCoin.style.setProperty('--boost', v >= 1000 ? Math.min(1, .5 + Math.log10(v / 1000) * .7) : 0);
+  opCoin.style.setProperty('--boost', v >= 50 ? Math.min(1.6, Math.log10(v / 50) * .4) : 0); // le halo grandit avec la rareté
 }
 
 // Le compteur roule vite vers la nouvelle valeur ; un nouveau clic reprend là où il en est
@@ -170,12 +183,12 @@ function burst(n = 5) {
 function effects(v) {
   if (v >= 500) shake(v >= 2500 ? 1.4 : 1);
   if (v >= 5000 && !run.flashed) { run.flashed = true; flash(); } // une seule fois par ouverture
-  burst(v >= 1000 ? 9 : v >= 200 ? 6 : 4);
+  burst(v >= 100000 ? 16 : v >= 10000 ? 12 : v >= 1000 ? 9 : v >= 200 ? 6 : 4);
 }
 
 // Fiche du jeton (stats provisoires : plus il est rare, plus elles sont hautes)
 function fillInfo(j) {
-  const lvl = Math.log10(j.odds) / 5; // 0 → 1 pour 1/1 → 1/100 000
+  const lvl = Math.log10(j.odds) / 6; // 0 → 1 pour 1/1 → 1/1 000 000
   const stat = (n, base) => { const v = Math.round(base * (.35 + lvl * .65) * (.85 + Math.random() * .3)); return [n, v, Math.min(100, v / base * 100)]; };
   $('op-name').textContent = j.name;
   $('op-rarity').textContent = '1/' + j.odds.toLocaleString('fr');
@@ -192,6 +205,7 @@ function hold(restored) {
   sess.cur.phase = 'hold'; save();
   opening.classList.add('hold');
   opening.classList.toggle('rare', r.result.odds >= RARE);
+  opening.classList.toggle('cinema', r.result.odds >= MYTHIC); // bandes noires façon film + battement de cœur
   opCoin.classList.remove('hit');
   if (!restored) flash(.18, 260); // mini flash : le compteur ne montera plus
   $('op-hint').textContent = 'Clique pour révéler';
@@ -203,7 +217,7 @@ function hold(restored) {
 // Plus le jeton est rare, plus le fond est chargé : bandes → rayons + poussière → étoiles + reflets.
 const bg = { canvas: null, ctx: null, raf: 0, level: 0, rgb: [255, 255, 255], dust: [], stars: [] };
 const PX = 6; // taille d'un « pixel » du fond à l'écran
-function bgLevel(odds) { return odds >= 10000 ? 3 : odds >= RARE ? 2 : odds >= FAST ? 1 : 0; }
+function bgLevel(odds) { return odds >= GOD ? 5 : odds >= MYTHIC ? 4 : odds >= 10000 ? 3 : odds >= RARE ? 2 : odds >= FAST ? 1 : 0; }
 
 function startBg(j, mode = 'reveal') {
   bg.mode = mode;
@@ -217,8 +231,8 @@ function startBg(j, mode = 'reveal') {
   bg.level = bgLevel(j.odds);
   bg.rgb = hexRGB(j.glow).split(', ').map(Number);
   const W = bg.canvas.width, H = bg.canvas.height;
-  bg.dust = Array.from({ length: [0, 0, 26, 50][bg.level] }, () => ({ x: Math.random() * W, y: Math.random() * H, v: .04 + Math.random() * .1, a: Math.random() }));
-  bg.stars = Array.from({ length: bg.level >= 3 ? 40 : 0 }, () => ({ x: Math.random() * W | 0, y: Math.random() * H | 0, p: Math.random() * 6 }));
+  bg.dust = Array.from({ length: [0, 0, 26, 50, 80, 120][bg.level] }, () => ({ x: Math.random() * W, y: Math.random() * H, v: .04 + Math.random() * .1, a: Math.random() }));
+  bg.stars = Array.from({ length: [0, 0, 0, 40, 55, 75][bg.level] }, () => ({ x: Math.random() * W | 0, y: Math.random() * H | 0, p: Math.random() * 6 }));
   cancelAnimationFrame(bg.raf);
   const t0 = performance.now();
   const loop = t => { drawBg((t - t0) / 1000); bg.raf = requestAnimationFrame(loop); };
@@ -228,7 +242,8 @@ function stopBg() { cancelAnimationFrame(bg.raf); bg.mode = ''; }
 
 function drawBg(t) {
   const { ctx, level } = bg, W = bg.canvas.width, H = bg.canvas.height, [r, g, b] = bg.rgb;
-  const col = a => `rgba(${r},${g},${b},${a})`;
+  // 1/1 000 000 : les couleurs défilent en arc-en-ciel
+  const col = level >= 5 ? a => `hsla(${(t * 50) % 360},90%,72%,${a})` : a => `rgba(${r},${g},${b},${a})`;
   ctx.fillStyle = 'rgb(35,32,52)';
   ctx.fillRect(0, 0, W, H);
 
@@ -237,10 +252,10 @@ function drawBg(t) {
 
   // Rayons de lumière qui tournent lentement (à partir de 1/1000)
   if (level >= 2) {
-    const n = 12, R = Math.hypot(W, H), turn = t * .08;
+    const n = level >= 4 ? 16 : 12, R = Math.hypot(W, H), turn = t * (level >= 4 ? .14 : .08);
     for (let i = 0; i < n; i++) {
       const a0 = turn + i / n * Math.PI * 2, a1 = a0 + Math.PI / n * .55;
-      ctx.fillStyle = col(level >= 3 ? .10 + .05 * Math.sin(t * 2 + i) : .08);
+      ctx.fillStyle = col(level >= 4 ? .13 + .07 * Math.sin(t * 3 + i) : level >= 3 ? .10 + .05 * Math.sin(t * 2 + i) : .08);
       ctx.beginPath();
       ctx.moveTo(cx, cy);
       ctx.lineTo(cx + Math.cos(a0) * R, cy + Math.sin(a0) * R);
@@ -276,6 +291,26 @@ function drawBg(t) {
     ctx.fillRect(d.x | 0, d.y | 0, 1, 1);
   });
 
+  // Mythique (1/100 000+) : anneaux de pixels en orbite, ondes de choc ; 1/1 000 000 : éclairs en plus
+  if (level >= 4 && bg.mode !== 'hold') {
+    const R0 = c.width / PX * .78;
+    [[1, 22, .9], ...(level >= 5 ? [[-1.4, 14, 1.25]] : [])].forEach(([dir, n, k]) => {
+      for (let i = 0; i < n; i++) {
+        const a = t * .9 * dir + i / n * Math.PI * 2, R = R0 * k + Math.sin(t * 3 + i) * 1.5;
+        ctx.fillStyle = i % 3 ? col(.9) : 'rgba(255,255,255,.95)';
+        ctx.fillRect(cx + Math.cos(a) * R | 0, cy + Math.sin(a) * R * .92 | 0, i % 4 ? 1 : 2, i % 4 ? 1 : 2);
+      }
+    });
+    const period = level >= 5 ? 1.2 : 1.8, ph = (t % period) / period;
+    ctx.strokeStyle = col(.8 * (1 - ph)); ctx.lineWidth = 1;
+    ctx.beginPath(); ctx.arc(cx, cy, R0 + ph * W * .55, 0, Math.PI * 2); ctx.stroke();
+    if (level >= 5 && (t % 1.4) < .12) {
+      let x = cx + (Math.random() - .5) * W * .6, y = 0;
+      ctx.fillStyle = 'rgba(255,255,255,.95)';
+      while (y < cy - R0) { const nx = x + (Math.random() - .5) * 6; for (let k = 0; k < 4; k++) ctx.fillRect((x + (nx - x) * k / 4) | 0, (y + k) | 0, 1, 1); x = nx; y += 4; }
+    }
+  }
+
   // Étoiles qui scintillent en croix (à partir de 1/10 000)
   bg.stars.forEach(s => {
     const k = Math.max(0, Math.sin(t * 1.6 + s.p));
@@ -300,7 +335,8 @@ function reveal(restored) {
   setGlareMask(TEMPLATE);
   // Le jeton se retourne très vite puis ralentit longtemps (plus il est rare, plus ça dure)
   if (!restored) {
-    const turns = j.odds >= RARE ? 6 : j.odds >= FAST ? 4 : 3, ms = j.odds >= RARE ? 3200 : j.odds >= FAST ? 2400 : 1600;
+    const turns = j.odds >= GOD ? 10 : j.odds >= MYTHIC ? 8 : j.odds >= RARE ? 6 : j.odds >= FAST ? 4 : 3;
+    const ms = j.odds >= GOD ? 5200 : j.odds >= MYTHIC ? 4200 : j.odds >= RARE ? 3200 : j.odds >= FAST ? 2400 : 1600;
     spin.animate([{ transform: 'rotateY(0)' }, { transform: `rotateY(${turns * 360}deg)` }], { duration: ms, easing: 'cubic-bezier(.05, .9, .1, 1)' });
     // Impossible de passer à la suite tant que le jeton tourne
     r.spinEnd = performance.now() + ms;
@@ -309,6 +345,10 @@ function reveal(restored) {
   }
   fillInfo(j);
   opening.classList.toggle('rare', j.odds >= RARE);
+  opening.classList.toggle('mythic', j.odds >= MYTHIC); // jeton animé : halo qui pulse, reflet qui passe, étincelles
+  opening.classList.toggle('god', j.odds >= GOD);       // + couleurs arc-en-ciel
+  opening.classList.toggle('cinema', j.odds >= GOD);
+  opening.style.setProperty('--jg', j.glow);
   opening.classList.add('revealed');
   updateActions();
   r.revealedAt = performance.now();
@@ -316,9 +356,17 @@ function reveal(restored) {
   sess.cur.phase = 'revealed';
   sess.results.push(j.name);
   save();
-  burst(j.odds >= RARE ? 14 : 8);
-  if (j.odds >= RARE) flash(.3, 350);
-  setTimeout(() => { if (run === r) shake(j.odds >= RARE ? .8 : .45); }, 300); // impact à l'arrivée
+  if (j.odds >= MYTHIC) {
+    flash(j.odds >= GOD ? .85 : .65, 900);
+    shake(1.8);
+    wave(); if (j.odds >= GOD) setTimeout(wave, 180);
+    burst(j.odds >= GOD ? 40 : 28);
+    setTimeout(() => { if (run === r) { shake(1); burst(16); } }, 350);
+  } else {
+    burst(j.odds >= RARE ? 14 : 8);
+    if (j.odds >= RARE) flash(.3, 350);
+    setTimeout(() => { if (run === r) shake(j.odds >= RARE ? .8 : .45); }, 300); // impact à l'arrivée
+  }
   addToHistory(j);
 }
 
@@ -398,7 +446,7 @@ document.querySelectorAll('.pull-btn').forEach(b => b.addEventListener('click', 
 $('op-next').addEventListener('click', next);
 // Pendant un ×10 : un clic n'importe où sur l'écran passe au jeton suivant
 opening.addEventListener('click', e => {
-  if (e.target.closest('button, select, .debug') || $('op-next').hidden || !opening.classList.contains('revealed')) return;
+  if (e.target.closest?.('button, select, .debug') || $('op-next').hidden || !opening.classList.contains('revealed')) return;
   next();
 });
 $('op-recap').addEventListener('click', showRecap);

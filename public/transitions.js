@@ -114,7 +114,7 @@ addEventListener('keydown', e => { if (e.key === 'Escape' && canClose()) closeOp
 $('debug-close').addEventListener('click', () => { $('debug').hidden = true; });
 let typed = '';
 addEventListener('keydown', e => {
-  if (e.key.length !== 1 || e.target.closest('input, textarea, select')) return;
+  if (e.key.length !== 1 || e.target.closest?.('input, textarea, select')) return;
   typed = (typed + e.key.toLowerCase()).slice(-5);
   if (typed === 'debug') { $('debug').hidden = !$('debug').hidden; renderDebug(); typed = ''; }
 });
