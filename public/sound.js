@@ -52,6 +52,26 @@ const sfx = (() => {
     src.start(t); src.stop(t + dur);
   }
 
+  // Chœur angélique : accord majeur de voix douces avec vibrato, plus une cloche aiguë
+  function choir(f, k) {
+    if (!ok()) return;
+    const t = now(), root = f / 2;
+    [1, 1.25, 1.5, 2, 2.5].forEach((r, i) => {
+      const o = ctx.createOscillator(), g = ctx.createGain(), lfo = ctx.createOscillator(), lg = ctx.createGain();
+      o.type = i % 2 ? 'sine' : 'triangle';
+      o.frequency.value = root * r * (1 + (Math.random() - .5) * .006); // léger désaccord = effet chorale
+      lfo.frequency.value = 5 + Math.random(); lg.gain.value = root * r * .012;
+      lfo.connect(lg).connect(o.frequency);
+      g.gain.setValueAtTime(0, t);
+      g.gain.linearRampToValueAtTime(.045 * k, t + .09);
+      g.gain.exponentialRampToValueAtTime(.0001, t + 1.3);
+      o.connect(g).connect(master);
+      o.start(t); lfo.start(t); o.stop(t + 1.35); lfo.stop(t + 1.35);
+    });
+    tone(f * 4, { vol: .05 * k, dur: 1.1, attack: .01 }); // cloche
+    noise({ dur: 1, vol: .04 * k, from: 5000, to: 11000, type: 'highpass' }); // souffle céleste
+  }
+
   // Gamme majeure pentatonique : tout sonne « juste » et joyeux
   const note = n => 523.25 * 2 ** ([0, 2, 4, 7, 9][((n % 5) + 5) % 5] / 12 + Math.floor(n / 5));
   let lastHover = 0;
@@ -80,12 +100,15 @@ const sfx = (() => {
     whooshOut() { noise({ dur: .45, vol: .18, from: 3500, to: 250 }); },
     spawn() { tone(660, { to: 990, type: 'triangle', vol: .1, dur: .18 }); },
 
-    // Clic du compteur : plus la chance affichée est rare, plus la note monte
+    // Clic du compteur : part très grave (1/2) et monte à chaque palier, jusqu'à l'aigu pour 1/1 000 000.
+    // À partir de 1/10 000, un chœur « angélique » s'ajoute, de plus en plus fort.
     tick(v) {
-      const step = Math.round(Math.log10(Math.max(1, v)) * 3.3);
-      tone(note(step), { type: 'triangle', vol: .16, dur: .14 });
-      tone(note(step) * 2, { vol: .05, dur: .08 });
+      const L = Math.log10(Math.max(2, v)), f = 45 * 2 ** (L * 10 / 12); // 1/2 ≈ 55 Hz → 1/1 000 000 ≈ 1 400 Hz
+      tone(f, { type: 'triangle', vol: .22, dur: .18 });
+      tone(f * 2, { vol: .07, dur: .1 });
+      if (f < 160) tone(f, { type: 'sine', vol: .25, dur: .22 }); // un peu de corps dans le grave
       if (v >= 500) noise({ dur: .08, vol: .08, from: 2000, to: 6000, type: 'highpass' });
+      if (v >= 10000) choir(f, Math.min(1, (L - 4) / 2 + .35));
     },
     hold() { tone(110, { to: 45, vol: .5, dur: .35 }); noise({ dur: .25, vol: .1, from: 800, to: 120, type: 'lowpass' }); },
     heartbeat() { tone(70, { to: 40, vol: .45, dur: .18 }); tone(70, { to: 40, vol: .35, dur: .18, delay: .22 }); },
