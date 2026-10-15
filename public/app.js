@@ -11,7 +11,7 @@ const COLORS = {
 
 const hoursFromNow = h => Date.now() + h * 3600e3;
 const PULLS = [
-  { group: 'Permanents', name: 'Takoras', color: 'takoras', price: 100, img: 'img/jeton-takoras.png' },
+  { group: 'Permanents', name: 'Takoras', color: 'takoras', price: 100, img: 'img/jetons/takoras.png' },
   { group: 'Permanents', name: 'Feu', color: 'feu', price: 150 },
   { group: 'Permanents', name: 'Eau', color: 'eau', price: 150 },
   { group: 'Permanents', name: 'Terre', color: 'terre', price: 150 },
