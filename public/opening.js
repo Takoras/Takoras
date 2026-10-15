@@ -15,12 +15,18 @@ const SERIES = {
     { name: 'Améthyste', odds: 1000, glow: '#a855f7' },
     { name: 'Aurore', odds: 2500, glow: '#ec4899' },
     { name: 'Néant', odds: 5000, glow: '#6366f1' },
+    { name: 'Comète', odds: 10000, glow: '#22d3ee' },
+    { name: 'Abysse', odds: 25000, glow: '#2563eb' },
+    { name: 'Éternité', odds: 50000, glow: '#facc15' },
+    { name: 'Takoras Prime', odds: 100000, glow: '#f0abfc' },
   ],
 };
 const SKIP = 1 / 5; // environ 1 clic sur 5 saute discrètement une étape
 
 // Couleur du compteur selon la rareté atteinte
-const TIERS = [[10, '200, 200, 210'], [50, '74, 222, 128'], [200, '56, 189, 248'], [1000, '167, 139, 250'], [5000, '251, 191, 36'], [Infinity, '244, 114, 182']];
+const TIERS = [[10, '200, 200, 210'], [50, '74, 222, 128'], [200, '56, 189, 248'], [1000, '167, 139, 250'], [5000, '251, 191, 36'], [25000, '244, 114, 182'], [Infinity, '240, 240, 255']];
+const FAST = 60;   // en dessous de 1/60 : retournement direct, pas de pause
+const RARE = 1000; // à partir de 1/1000 : zoom plus fort et révélation plus spectaculaire
 const tierOf = v => TIERS.find(([max]) => v < max)[1];
 const hexRGB = h => [1, 3, 5].map(i => parseInt(h.slice(i, i + 2), 16)).join(', ');
 const jetonHTML = (j, size) =>
@@ -56,15 +62,16 @@ function startOpening() {
   const result = draw(SERIES[p.name] || SERIES.Takoras);
   run = { result, queue: steps(result.odds), shown: 1, done: false };
   $('op-tag').textContent = 'Pull ' + p.name;
+  $('op-odds').classList.remove('bump');
   $('op-price').textContent = p.price;
   $('op-odds').textContent = '1/1';
   setTier(1);
+  opening.classList.remove('hold', 'rare', 'revealed', 'fancy');
   opCoin.className = 'op-coin';
   opCoin.style.setProperty('--boost', 0);
-  opCoin.innerHTML = '<div class="spin"><img src="img/jetons/mystere.png" alt="Jeton mystère"></div>';
+  opCoin.innerHTML = '<div class="zoom"><div class="spin"><img src="img/jetons/mystere.png" alt="Jeton mystère"></div></div>';
   $('op-hint').textContent = 'Clique sur le jeton';
-  $('op-name').textContent = '';
-  $('op-actions').hidden = true;
+  $('op-stats').innerHTML = '';
 }
 
 function setTier(v) {
@@ -95,7 +102,9 @@ function shake(power = 1) {
 
 // Flash blanc doux (à partir de 1/5000)
 function flash() {
+  opening.querySelectorAll('.op-flash').forEach(f => f.remove());
   const f = document.createElement('div');
+  f.className = 'op-flash';
   f.style.cssText = 'position:absolute;inset:0;background:#fff;pointer-events:none';
   opening.appendChild(f);
   f.animate([{ opacity: .45 }, { opacity: 0 }], { duration: 500, easing: 'ease-out' }).finished.then(() => f.remove());
@@ -117,27 +126,65 @@ function burst(n = 5) {
 // Effets selon le palier atteint par le clic
 function effects(v) {
   if (v >= 500) shake(v >= 2500 ? 1.4 : 1);
-  if (v >= 5000) flash();
+  if (v >= 5000 && !run.flashed) { run.flashed = true; flash(); } // une seule fois par ouverture
   burst(v >= 1000 ? 9 : v >= 200 ? 6 : 4);
 }
 
-function reveal() {
-  const r = run, j = r.result, size = opCoin.getBoundingClientRect().width;
+// Fiche du jeton (stats provisoires : plus il est rare, plus elles sont hautes)
+function fillInfo(j) {
+  const lvl = Math.log10(j.odds) / 5; // 0 → 1 pour 1/1 → 1/100 000
+  const stat = (n, base) => { const v = Math.round(base * (.35 + lvl * .65) * (.85 + Math.random() * .3)); return [n, v, Math.min(100, v / base * 100)]; };
+  $('op-name').textContent = j.name;
+  $('op-rarity').textContent = '1/' + j.odds.toLocaleString('fr');
+  $('op-stats').innerHTML = [stat('PV', 500), stat('Attaque', 120), stat('Défense', 120), stat('Vitesse', 100)]
+    .map(([n, v, w]) => `<div class="stat"><span class="muted">${n}</span><div class="bar"><i data-w="${w}"></i></div><b>${v}</b></div>`).join('');
+  requestAnimationFrame(() => requestAnimationFrame(() => $('op-stats').querySelectorAll('i').forEach(i => { i.style.width = i.dataset.w + '%'; })));
+}
+
+// Pause finale : le haut disparaît, zoom sur le jeton qui tremble, on clique pour révéler
+function hold() {
+  const r = run;
+  r.holding = true;
+  opening.classList.add('hold');
+  opening.classList.toggle('rare', r.result.odds >= RARE);
   opCoin.classList.remove('hit');
-  opCoin.classList.add('flip', 'done');
-  setTimeout(() => {
+  $('op-hint').textContent = 'Clique pour révéler';
+  setTimeout(() => { if (run === r) r.canReveal = true; }, 450); // évite de révéler par accident en spammant
+}
+
+// Révélation : le jeton tourne en se penchant, la face change à mi-chemin, puis il glisse à gauche et la fiche arrive
+async function reveal(fast) {
+  const r = run, j = r.result;
+  r.done = true;
+  const spin = opCoin.querySelector('.spin'), rare = j.odds >= RARE;
+  opening.classList.remove('hold');
+  opCoin.classList.add('done');
+  $('op-hint').textContent = '';
+  const swap = () => {
     if (run !== r) return;
     opening.style.setProperty('--tier', hexRGB(j.glow));
-    opCoin.querySelector('.spin').innerHTML = jetonHTML(j, size);
-    burst(12);
-  }, 200);
-  setTimeout(() => {
-    if (run !== r) return;
-    $('op-name').textContent = j.name;
-    $('op-hint').textContent = 'Ajouté à ta collection';
-    $('op-actions').hidden = false;
-    addToHistory(j);
-  }, 380);
+    spin.innerHTML = `<img src="${TEMPLATE}" alt="${j.name}" style="filter:drop-shadow(0 0 18px ${j.glow})">`;
+  };
+  if (fast) {
+    await spin.animate([{ transform: 'rotateY(0)' }, { transform: 'rotateY(90deg)' }], { duration: 110, easing: 'ease-in' }).finished;
+    swap();
+    await spin.animate([{ transform: 'rotateY(-90deg)' }, { transform: 'rotateY(0)' }], { duration: 150, easing: 'ease-out' }).finished;
+  } else {
+    await spin.animate([{ transform: 'rotateZ(0) rotateY(0)' }, { transform: 'rotateZ(-8deg) rotateY(90deg)' }], { duration: rare ? 420 : 300, easing: 'ease-in' }).finished;
+    swap();
+    if (rare) { flash(); shake(1.2); }
+    burst(rare ? 18 : 10);
+    await spin.animate([
+      { transform: 'rotateZ(-8deg) rotateY(90deg) scale(1)' },
+      { transform: 'rotateZ(-6deg) rotateY(360deg) scale(1.12)', offset: .75 },
+      { transform: 'rotateZ(-6deg) rotateY(360deg) scale(1)' },
+    ], { duration: rare ? 900 : 650, easing: 'cubic-bezier(.2,.7,.3,1)', fill: 'forwards' }).finished;
+  }
+  if (run !== r) return;
+  fillInfo(j);
+  opening.classList.toggle('fancy', j.odds >= FAST);
+  opening.classList.add('revealed');
+  addToHistory(j);
 }
 
 function addToHistory(j) {
@@ -150,6 +197,8 @@ function addToHistory(j) {
 
 function tap() {
   if (!run || run.done) return;
+  if (run.holding) { if (run.canReveal) reveal(false); return; }
+  if (!run.queue.length) return; // entre le dernier palier et la pause
   const next = run.queue.shift();
   countTo(run.shown, next);
   run.shown = next;
@@ -157,7 +206,10 @@ function tap() {
   opCoin.classList.remove('hit'); void opCoin.offsetWidth; opCoin.classList.add('hit');
   effects(next);
   $('op-hint').textContent = '';
-  if (!run.queue.length) { run.done = true; setTimeout(reveal, 260); }
+  if (!run.queue.length) {
+    if (run.result.odds < FAST) { run.done = true; setTimeout(() => reveal(true), 120); }
+    else setTimeout(hold, 200);
+  }
 }
 
 opCoin.addEventListener('pointerdown', e => { e.preventDefault(); tap(); }); // pointerdown = réagit dès l'appui, idéal pour spammer
