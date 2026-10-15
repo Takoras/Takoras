@@ -331,7 +331,7 @@ function reveal(restored) {
   opening.style.setProperty('--tier', hexRGB(j.glow));
   startBg(j);
   const spin = opCoin.querySelector('.spin');
-  spin.innerHTML = coin3D(TEMPLATE, j.name, `filter:drop-shadow(0 0 18px ${j.glow})`);
+  spin.innerHTML = coin3D(TEMPLATE, j.name); // pas d'ombre sur l'image (elle serait coupée en carré en 3D) : le halo est derrière
   setGlareMask(TEMPLATE);
   // Le jeton se retourne très vite puis ralentit longtemps (plus il est rare, plus ça dure)
   if (!restored) {
@@ -350,6 +350,7 @@ function reveal(restored) {
   opening.classList.toggle('cinema', j.odds >= GOD);
   opening.style.setProperty('--jg', j.glow);
   opening.classList.add('revealed');
+  opCoin.style.setProperty('--boost', j.odds >= MYTHIC ? 1.6 : j.odds >= RARE ? 1 : .5);
   updateActions();
   r.revealedAt = performance.now();
   if (restored) return;
