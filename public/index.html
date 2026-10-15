@@ -1,0 +1,173 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Takoras</title>
+<meta name="description" content="Takoras — bientôt en ligne.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=Space+Grotesk:wght@600;700&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #0d0d12;
+    --surface: #16161e;
+    --surface-2: #1e1e28;
+    --border: #2a2a36;
+    --text: #f2f2f5;
+    --muted: #9a9aab;
+    --accent: #8b5cf6;
+    --accent-2: #f97316;
+    --radius: 18px;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: Inter, system-ui, sans-serif;
+    line-height: 1.5;
+  }
+  a { color: inherit; text-decoration: none; }
+  .wrap { max-width: 1200px; margin: 0 auto; padding: 0 16px; }
+
+  /* Navigation */
+  nav {
+    position: sticky; top: 0; z-index: 10;
+    background: rgba(13, 13, 18, .8);
+    backdrop-filter: blur(12px);
+    border-bottom: 1px solid var(--border);
+  }
+  nav .wrap { display: flex; align-items: center; gap: 28px; height: 64px; }
+  .logo { display: flex; align-items: center; gap: 10px; font-family: "Space Grotesk"; font-weight: 700; font-size: 20px; letter-spacing: .04em; }
+  .logo span {
+    width: 34px; height: 34px; border-radius: 10px;
+    background: linear-gradient(135deg, var(--accent), var(--accent-2));
+    display: grid; place-items: center; font-size: 16px;
+  }
+  .links { display: flex; gap: 22px; font-size: 14px; color: var(--muted); }
+  .links a:hover, .links a.active { color: var(--text); }
+  .nav-cta { margin-left: auto; }
+  .btn {
+    display: inline-flex; align-items: center; gap: 8px;
+    padding: 12px 22px; border-radius: 999px;
+    font-weight: 600; font-size: 15px;
+    transition: transform .15s, background .15s;
+  }
+  .btn:hover { transform: translateY(-1px); }
+  .btn-primary { background: var(--accent); color: #fff; }
+  .btn-ghost { border: 1px solid var(--border); background: var(--surface); }
+
+  /* Hero */
+  .hero {
+    margin-top: 28px;
+    border: 1px solid var(--border);
+    border-radius: 24px;
+    padding: 64px 48px;
+    background:
+      radial-gradient(600px 300px at 85% 30%, rgba(139, 92, 246, .35), transparent 70%),
+      radial-gradient(400px 260px at 70% 90%, rgba(249, 115, 22, .2), transparent 70%),
+      var(--surface);
+    display: grid; grid-template-columns: 1.2fr 1fr; gap: 40px; align-items: center;
+    overflow: hidden;
+  }
+  .eyebrow { color: var(--accent); font-size: 12px; font-weight: 600; letter-spacing: .16em; text-transform: uppercase; }
+  h1 { font-family: "Space Grotesk"; font-size: clamp(44px, 7vw, 84px); line-height: .95; margin: 14px 0 18px; }
+  .hero p { color: var(--muted); max-width: 440px; margin-bottom: 28px; }
+  .hero-actions { display: flex; gap: 12px; flex-wrap: wrap; }
+  .cards { position: relative; height: 280px; }
+  .card {
+    position: absolute; width: 170px; height: 240px; border-radius: 16px;
+    border: 2px solid rgba(255, 255, 255, .15);
+    box-shadow: 0 20px 50px rgba(0, 0, 0, .5);
+    display: flex; align-items: flex-end; padding: 14px; font-weight: 600; font-size: 14px;
+  }
+  .card:nth-child(1) { left: 0; top: 30px; transform: rotate(-9deg); background: linear-gradient(160deg, #3b2a6b, #1a1530); }
+  .card:nth-child(2) { left: 26%; top: 0; z-index: 2; background: linear-gradient(160deg, #8b5cf6, #3b1e7a); }
+  .card:nth-child(3) { left: 52%; top: 30px; transform: rotate(9deg); background: linear-gradient(160deg, #f97316, #6b2a0c); }
+
+  /* Steps */
+  .steps { display: grid; grid-template-columns: repeat(3, 1fr); gap: 32px; padding: 56px 0; border-bottom: 1px solid var(--border); }
+  .steps b { font-family: "Space Grotesk"; font-size: 34px; color: var(--accent-2); }
+  .steps h3 { font-size: 17px; margin: 6px 0; }
+  .steps p { color: var(--muted); font-size: 14px; }
+
+  /* Grid */
+  section { padding: 56px 0; }
+  .section-head { display: flex; align-items: end; justify-content: space-between; margin-bottom: 24px; }
+  h2 { font-family: "Space Grotesk"; font-size: 32px; }
+  .section-head a { color: var(--accent); font-size: 14px; font-weight: 500; }
+  .grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); gap: 16px; }
+  .tile {
+    background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius);
+    padding: 20px; transition: border-color .15s, transform .15s;
+  }
+  .tile:hover { border-color: var(--accent); transform: translateY(-3px); }
+  .tile .thumb { height: 120px; border-radius: 12px; margin-bottom: 14px; background: var(--surface-2); display: grid; place-items: center; font-size: 36px; }
+  .tile h4 { font-size: 16px; }
+  .tile p { color: var(--muted); font-size: 13px; }
+
+  footer { border-top: 1px solid var(--border); padding: 32px 0; color: var(--muted); font-size: 13px; text-align: center; }
+
+  @media (max-width: 800px) {
+    .links { display: none; }
+    .hero { grid-template-columns: 1fr; padding: 40px 24px; }
+    .cards { height: 250px; }
+    .steps { grid-template-columns: 1fr; gap: 24px; }
+  }
+</style>
+</head>
+<body>
+  <nav>
+    <div class="wrap">
+      <a class="logo" href="/"><span>T</span>TAKORAS</a>
+      <div class="links">
+        <a class="active" href="#">Accueil</a>
+        <a href="#explorer">Explorer</a>
+        <a href="#">Classement</a>
+        <a href="#">Plus</a>
+      </div>
+      <a class="btn btn-primary nav-cta" href="#">Connexion</a>
+    </div>
+  </nav>
+
+  <main class="wrap">
+    <div class="hero">
+      <div>
+        <div class="eyebrow">Bientôt disponible</div>
+        <h1>Takoras</h1>
+        <p>Le site arrive très bientôt. Reste connecté, il y aura du nouveau ici.</p>
+        <div class="hero-actions">
+          <a class="btn btn-primary" href="#explorer">Découvrir</a>
+          <a class="btn btn-ghost" href="#">En savoir plus</a>
+        </div>
+      </div>
+      <div class="cards">
+        <div class="card">Bientôt</div>
+        <div class="card">Takoras</div>
+        <div class="card">Nouveau</div>
+      </div>
+    </div>
+
+    <div class="steps">
+      <div><b>01</b><h3>Crée ton compte</h3><p>Inscris-toi en quelques secondes.</p></div>
+      <div><b>02</b><h3>Explore</h3><p>Découvre tout ce que Takoras propose.</p></div>
+      <div><b>03</b><h3>Progresse</h3><p>Grimpe dans le classement.</p></div>
+    </div>
+
+    <section id="explorer">
+      <div class="section-head">
+        <h2>Explorer</h2>
+        <a href="#">Tout voir →</a>
+      </div>
+      <div class="grid">
+        <div class="tile"><div class="thumb">🔥</div><h4>Populaire</h4><p>Bientôt disponible</p></div>
+        <div class="tile"><div class="thumb">✨</div><h4>Nouveautés</h4><p>Bientôt disponible</p></div>
+        <div class="tile"><div class="thumb">🏆</div><h4>Classement</h4><p>Bientôt disponible</p></div>
+        <div class="tile"><div class="thumb">🎁</div><h4>Récompenses</h4><p>Bientôt disponible</p></div>
+      </div>
+    </section>
+  </main>
+
+  <footer>© 2026 Takoras</footer>
+</body>
+</html>
