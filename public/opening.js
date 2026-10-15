@@ -374,6 +374,7 @@ function reveal(restored) {
 // Boutons sous la fiche : Suivant (pendant un ×10), Récap (à la fin d'un ×10), ou Pull encore / Retour
 function updateActions() {
   const last = sess.idx >= sess.total - 1, multi = sess.total > 1;
+  if (typeof ecoDecorate === 'function') setTimeout(ecoDecorate);
   $('op-next').hidden = last;
   $('op-next').innerHTML = `Suivant · ${sess.idx + 2}/${sess.total}`;
   $('op-recap').hidden = !(last && multi);
@@ -400,7 +401,9 @@ function showRecap() {
   startBg(best);
   $('op-recap-grid').innerHTML = list.map((j, i) =>
     `<div class="rc${j === best ? ' best' : ''}" style="--g:${hexRGB(j.glow)};animation-delay:${i * 45}ms">${j === best ? '<span class="rc-tag">Meilleur tirage</span>' : ''}${jetonHTML(j, 72)}<b>${j.name}</b><small>1/${j.odds.toLocaleString('fr')}</small></div>`).join('');
-  $('op-recap-price').textContent = (PULLS[sess.pull].price * 10).toLocaleString('fr');
+  $('op-recap-tag').textContent = `Récap · ${sess.total} pulls`;
+  $('op-recap-title').textContent = `Tes ${sess.total} jetons`;
+  if (typeof ecoDecorate === 'function') ecoDecorate();
   opening.classList.remove('revealed', 'hold');
   opening.classList.add('recap');
 }
@@ -443,7 +446,6 @@ addEventListener('keydown', e => {
 });
 
 function buy(n) { closeOpening(); startSession(n); runTransition(); }
-document.querySelectorAll('.pull-btn').forEach(b => b.addEventListener('click', () => buy(+b.dataset.n || 1)));
 $('op-next').addEventListener('click', next);
 // Pendant un ×10 : un clic n'importe où sur l'écran passe au jeton suivant
 opening.addEventListener('click', e => {
@@ -451,9 +453,9 @@ opening.addEventListener('click', e => {
   next();
 });
 $('op-recap').addEventListener('click', showRecap);
-$('op-again').addEventListener('click', () => buy(1));
+$('op-again').addEventListener('click', () => openPulls(1));
 $('op-back').addEventListener('click', leave);
-$('op-recap-again').addEventListener('click', () => buy(10));
+$('op-recap-again').addEventListener('click', () => openPulls('all'));
 $('op-recap-back').addEventListener('click', leave);
 
 // Retour à l'accueil : tout s'envole hors de l'écran, les bandes noires repartent, puis l'accueil revient en douceur

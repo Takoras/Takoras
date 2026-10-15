@@ -11,7 +11,7 @@ const COLORS = {
 
 const hoursFromNow = h => Date.now() + h * 3600e3;
 const PULLS = [
-  { group: 'Permanents', name: 'Takoras', color: 'takoras', price: 100, img: 'img/jetons/takoras.png' },
+  { group: 'Permanents', name: 'Takoras', color: 'takoras', price: 100, free: true, img: 'img/jetons/takoras.png' },
   { group: 'Permanents', name: 'Feu', color: 'feu', price: 150 },
   { group: 'Permanents', name: 'Eau', color: 'eau', price: 150 },
   { group: 'Permanents', name: 'Terre', color: 'terre', price: 150 },
@@ -34,7 +34,7 @@ function renderTypes() {
   PULLS.forEach((p, i) => {
     if (p.group !== last) { html += `<div class="group">${p.group}</div>`; last = p.group; }
     const badge = p.ends ? '<span class="badge lim">Limité</span>' : p.weekend ? '<span class="badge we">Sam–Dim</span>' : '';
-    html += `<button class="type${i === current ? ' on' : ''}" data-i="${i}" style="${coinStyle(p.color)}">${coin(p.color, 30)}<div><b>${p.name}</b><small>${p.price} ◆</small></div>${badge}</button>`;
+    html += `<button class="type${i === current ? ' on' : ''}" data-i="${i}" style="${coinStyle(p.color)}">${coin(p.color, 30)}<div><b>${p.name}</b><small>${p.free ? 'Gratuit · se recharge' : p.price + ' ◆'}</small></div>${badge}</button>`;
   });
   $('types').innerHTML = html;
 }
@@ -52,8 +52,8 @@ function select(i) {
   });
   $('name').textContent = 'Pull ' + p.name;
   $('tag').textContent = p.ends ? 'Limité' : p.weekend ? 'Week-end' : 'Permanent';
-  $('p1').textContent = p.price;
-  $('p10').textContent = (p.price * 10).toLocaleString('fr');
+  if ($('p1')) $('p1').textContent = p.price;
+  if ($('p10')) $('p10').textContent = (p.price * 10).toLocaleString('fr');
   renderTypes();
   tick();
 }

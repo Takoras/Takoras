@@ -44,7 +44,7 @@
         <a href="#classement">Classement</a>
         <a href="#">Boutique</a>
       </div>
-      <div class="bal"><i class="mini-coin"></i><b>12 450</b></div>
+      <div class="bal"><i class="mini-coin"></i><b id="bal">0</b></div>
     </div>
   </nav>
 
@@ -65,7 +65,7 @@
         <div class="eyebrow" id="tag">Permanent</div>
         <h1 id="name">Pull Takoras</h1>
         <p class="timer" id="timer"></p>
-        <div class="actions">
+        <div class="actions" id="actions">
           <button class="btn primary pull-btn" data-n="1">Pull ×1 · <span id="p1">100</span> ◆</button>
           <button class="btn ghost pull-btn" data-n="10">Pull ×10 · <span id="p10">1 000</span> ◆</button>
         </div>
@@ -131,8 +131,8 @@
       </div>
     </div>
     <div class="op-recap-view">
-      <div class="eyebrow">Récap · Pull ×10</div>
-      <h2 class="op-name">Tes 10 jetons</h2>
+      <div class="eyebrow" id="op-recap-tag">Récap</div>
+      <h2 class="op-name" id="op-recap-title">Tes jetons</h2>
       <div class="op-recap-grid" id="op-recap-grid"></div>
       <div class="op-actions">
         <button class="btn primary" id="op-recap-again">Pull ×10 encore · <span id="op-recap-price">1 000</span> ◆</button>
@@ -150,11 +150,20 @@
     <select id="dbg-force"></select>
     <div class="dbg-sec">Tester un effet</div>
     <div class="dbg-row" id="dbg-fx"></div>
-    <button class="btn primary dbg-go" id="dbg-open">Ouvrir un pull</button>
+    <div class="dbg-sec">Argent</div>
+    <div class="dbg-row" id="dbg-coins">
+      <button data-c="1000">+1 000</button><button data-c="10000">+10 000</button><button data-c="100000">+100 000</button><button data-c="-1000">−1 000</button><button data-c="0">Mettre à 0</button>
+    </div>
+    <div class="dbg-sec">Pulls Takoras</div>
+    <div class="dbg-row" id="dbg-stock">
+      <button data-s="add">+1 pull</button><button data-s="fill">Remplir</button><button data-s="empty">Vider</button><button data-s="soon">Recharge dans 5 s</button><button data-s="reset">Stock max → 5</button>
+    </div>
+    <button class="btn primary dbg-go" id="dbg-open">Ouvrir un pull (sans stock)</button>
   </div>
 
   <script src="app.js"></script>
   <script src="transitions.js"></script>
   <script src="opening.js"></script>
+  <script src="economy.js"></script>
 </body>
 </html>
