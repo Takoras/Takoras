@@ -41,7 +41,7 @@ function openPulls(n) {
   if (!isTakoras()) return buy(n === 'all' ? 10 : n);
   regen();
   const count = n === 'all' ? eco.stock : Math.min(1, eco.stock);
-  if (!count) return;
+  if (!count) return sfx.deny();
   takePulls(count);
   buy(count);
 }
@@ -50,6 +50,7 @@ function upgrade() {
   if (eco.max >= TOP_MAX || eco.coins < upgradeCost(eco.max + 1)) return;
   eco.coins -= upgradeCost(eco.max + 1);
   eco.max++;
+  sfx.upgrade();
   saveEco();
   render();
 }
@@ -65,7 +66,7 @@ function renderActions() {
   const full = eco.stock >= eco.max, cost = upgradeCost(eco.max + 1);
   box.innerHTML = `
     <div class="stock">
-      <div class="pips">${Array.from({ length: eco.max }, (_, i) => `<i class="${i < eco.stock ? 'on' : ''}"></i>`).join('')}</div>
+      <div class="pips">${Array.from({ length: eco.max }, (_, i) => `<img src="img/jetons/takoras.png" alt="" class="${i < eco.stock ? 'on' : ''}">`).join('')}</div>
       <span><b id="stock-n">${eco.stock}</b>/${eco.max} pulls · <span id="stock-next">${full ? 'stock plein' : '+1 dans ' + mmss(nextIn())}</span></span>
     </div>
     <div class="row-btns">
@@ -103,7 +104,7 @@ function render() {
 setInterval(() => {
   const before = eco.stock;
   regen();
-  if (eco.stock !== before) return render();
+  if (eco.stock !== before) { if (eco.stock > before) sfx.regen(); return render(); }
   const el = $('stock-next');
   if (el) el.textContent = eco.stock >= eco.max ? 'stock plein' : '+1 dans ' + mmss(nextIn());
   if (opening.classList.contains('on') && !eco.stock) ecoDecorate();

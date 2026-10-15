@@ -22,7 +22,7 @@ const SERIES = {
     { name: 'Takoras Prime', odds: 100000, glow: '#f0abfc' },
     { name: 'Zénith', odds: 250000, glow: '#e2e8f0' },
     { name: 'Oblivion', odds: 500000, glow: '#fb7185' },
-    { name: 'Takoras Ω', odds: 1000000, glow: '#c084fc' },
+    { name: 'Takoras Ω', odds: 1000000, glow: '#ffffff' },
   ],
 };
 const SKIP = 1 / 5; // environ 1 clic sur 5 saute discrètement une étape
@@ -66,6 +66,7 @@ const MYSTERE = 'img/jetons/mystere.png';
 
 // Le « ? » apparaît tout petit et grossit en douceur
 function spawn() {
+  sfx.spawn();
   opCoin.animate([{ transform: 'scale(0)', opacity: 0 }, { transform: 'scale(1)', opacity: 1 }], { duration: 520, easing: 'cubic-bezier(.16, 1, .3, 1)' });
 }
 // Jeton en volume : la face devant, quelques copies assombries derrière pour la tranche, et un dos.
@@ -208,7 +209,10 @@ function hold(restored) {
   opening.classList.toggle('rare', r.result.odds >= RARE);
   opening.classList.toggle('cinema', r.result.odds >= MYTHIC); // bandes noires façon film + battement de cœur
   opCoin.classList.remove('hit');
-  if (!restored) flash(.18, 260); // mini flash : le compteur ne montera plus
+  if (!restored) { flash(.18, 260); sfx.hold(); } // mini flash : le compteur ne montera plus
+  if (r.result.odds >= MYTHIC) { // battement de cœur sonore, calé sur la vignette
+    r.hb = setInterval(() => { if (run !== r || r.done) clearInterval(r.hb); else sfx.heartbeat(); }, 1100);
+  }
   $('op-hint').textContent = 'Clique pour révéler';
   setTimeout(() => { if (run === r) r.canReveal = true; }, 450); // évite de révéler par accident en spammant
 }
@@ -243,8 +247,7 @@ function stopBg() { cancelAnimationFrame(bg.raf); bg.mode = ''; }
 
 function drawBg(t) {
   const { ctx, level } = bg, W = bg.canvas.width, H = bg.canvas.height, [r, g, b] = bg.rgb;
-  // 1/1 000 000 : les couleurs défilent en arc-en-ciel
-  const col = level >= 5 ? a => `hsla(${(t * 50) % 360},90%,72%,${a})` : a => `rgba(${r},${g},${b},${a})`;
+  const col = a => `rgba(${r},${g},${b},${a})`;
   ctx.fillStyle = 'rgb(35,32,52)';
   ctx.fillRect(0, 0, W, H);
 
@@ -267,7 +270,7 @@ function drawBg(t) {
 
   // Bandes en escalier qui glissent doucement (l'escalier vient de l'agrandissement sans lissage)
   const slope = -.1, thick = Math.max(10, H * .09);
-  const bands = level === 0 ? [[.2, .35]] : level >= 3 ? [[.16, 1], [.86, 1], [.5, .25], [.03, .3]] : [[.18, 1], [.84, 1]];
+  const bands = level === 0 ? [[.2, .35]] : level >= 5 ? [[.16, .5], [.86, .5], [.5, .16], [.03, .2]] : level >= 3 ? [[.16, 1], [.86, 1], [.5, .25], [.03, .3]] : [[.18, 1], [.84, 1]];
   if (bg.mode !== 'hold') bands.forEach(([pos, alpha], k) => {
     const shift = Math.sin(t * .35 + k) * 3;
     const y0 = H * pos + shift - slope * W / 2;
@@ -276,7 +279,7 @@ function drawBg(t) {
     ctx.moveTo(0, y0); ctx.lineTo(W, y0 + slope * W); ctx.lineTo(W, y0 + slope * W + thick); ctx.lineTo(0, y0 + thick);
     ctx.fill();
     // Reflet blanc qui parcourt la bande (à partir de 1/10 000)
-    if (level >= 3 && alpha === 1) {
+    if (level >= 3 && alpha >= .5) {
       const x = ((t * 40 + k * W / 2) % (W + 60)) - 30;
       ctx.fillStyle = 'rgba(255,255,255,.55)';
       ctx.beginPath();
@@ -292,7 +295,7 @@ function drawBg(t) {
     ctx.fillRect(d.x | 0, d.y | 0, 1, 1);
   });
 
-  // Mythique (1/100 000+) : anneaux de pixels en orbite, ondes de choc ; 1/1 000 000 : éclairs en plus
+  // Mythique (1/100 000+) : anneaux de pixels en orbite, ondes de choc ; 1/1 000 000 : deux anneaux, tout en blanc
   if (level >= 4 && bg.mode !== 'hold') {
     const R0 = c.width / PX * .78;
     [[1, 22, .9], ...(level >= 5 ? [[-1.4, 14, 1.25]] : [])].forEach(([dir, n, k]) => {
@@ -305,11 +308,6 @@ function drawBg(t) {
     const period = level >= 5 ? 1.2 : 1.8, ph = (t % period) / period;
     ctx.strokeStyle = col(.8 * (1 - ph)); ctx.lineWidth = 1;
     ctx.beginPath(); ctx.arc(cx, cy, R0 + ph * W * .55, 0, Math.PI * 2); ctx.stroke();
-    if (level >= 5 && (t % 1.4) < .12) {
-      let x = cx + (Math.random() - .5) * W * .6, y = 0;
-      ctx.fillStyle = 'rgba(255,255,255,.95)';
-      while (y < cy - R0) { const nx = x + (Math.random() - .5) * 6; for (let k = 0; k < 4; k++) ctx.fillRect((x + (nx - x) * k / 4) | 0, (y + k) | 0, 1, 1); x = nx; y += 4; }
-    }
   }
 
   // Étoiles qui scintillent en croix (à partir de 1/10 000)
@@ -358,6 +356,8 @@ function reveal(restored) {
   sess.cur.phase = 'revealed';
   sess.results.push(j.name);
   save();
+  sfx.reveal(j.odds);
+  if (j.odds >= MYTHIC) sfx.impact();
   if (j.odds >= MYTHIC) {
     flash(j.odds >= GOD ? .85 : .65, 900);
     shake(1.8);
@@ -370,6 +370,27 @@ function reveal(restored) {
     setTimeout(() => { if (run === r) shake(j.odds >= RARE ? .8 : .45); }, 300); // impact à l'arrivée
   }
   addToHistory(j);
+}
+
+// 1/1 000 000 : mini cinématique. Écran noir d'un coup, montée sonore, une ligne de lumière qui s'étire, puis l'explosion blanche
+async function cinematic() {
+  const r = run;
+  r.done = true;
+  clearInterval(r.hb);
+  const black = document.createElement('div');
+  black.className = 'op-black';
+  black.innerHTML = '<div class="cine-line"></div><div class="cine-text">1 / 1 000 000</div>';
+  opening.appendChild(black);
+  const D = 2000;
+  sfx.riser(D / 1000);
+  black.querySelector('.cine-line').animate([{ width: '0', opacity: .3 }, { width: '70vw', opacity: 1 }], { duration: D, easing: 'cubic-bezier(.7, 0, .9, .4)', fill: 'forwards' });
+  black.querySelector('.cine-text').animate([{ opacity: 0, letterSpacing: '.2em' }, { opacity: 1, letterSpacing: '.9em' }], { duration: D, easing: 'ease-in', fill: 'forwards' });
+  black.animate([{ transform: 'none' }, { transform: 'scale(1.04)' }], { duration: D, easing: 'ease-in', fill: 'forwards' });
+  await done(D);
+  if (run !== r) return black.remove();
+  black.remove();
+  flash(1, 1200);
+  reveal();
 }
 
 // Boutons sous la fiche : Suivant (pendant un ×10), Récap (à la fin d'un ×10), ou Pull encore / Retour
@@ -385,6 +406,7 @@ const spinning = () => run && performance.now() < (run.spinEnd || 0);
 function next() {
   if (!sess || sess.idx >= sess.total - 1 || !opening.classList.contains('revealed') || spinning()) return;
   sess.idx++;
+  sfx.next();
   sess.cur = null;
   save();
   startOpening();
@@ -422,11 +444,12 @@ function addToHistory(j) {
 
 function tap() {
   if (!run || run.done) return;
-  if (run.holding) { if (run.canReveal) reveal(); return; }
+  if (run.holding) { if (run.canReveal) (run.result.odds >= GOD ? cinematic() : reveal()); return; }
   if (!run.queue.length) return; // entre le dernier palier et la pause
   const next = run.queue.shift();
   countTo(run.shown, next);
   run.shown = next;
+  sfx.tick(next);
   sess.cur.queue = run.queue; sess.cur.shown = next; save();
   setTier(next);
   opCoin.classList.remove('hit'); void opCoin.offsetWidth; opCoin.classList.add('hit');
@@ -464,6 +487,7 @@ let leaving = false;
 async function leave() {
   if (leaving || !opening.classList.contains('on') || !canClose()) return;
   leaving = true;
+  sfx.whooshOut();
   const out = 'cubic-bezier(.6, 0, .85, .2)', anims = [];
   // N'anime que ce qui est visible, en partant de son opacité actuelle (sinon un élément caché réapparaîtrait)
   const fly = (el, kf, opt) => {

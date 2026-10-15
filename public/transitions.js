@@ -95,6 +95,7 @@ let busy = false;
 async function runTransition() {
   if (busy) return;
   busy = true;
+  sfx.whoosh();
   const t0 = performance.now();
   try {
     // Filet de sécurité : si le navigateur ne joue pas l'animation (onglet en arrière-plan…), on ouvre quand même
