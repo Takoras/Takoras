@@ -81,6 +81,7 @@ function showOpening(fade = 0) {
 function closeOpening() {
   document.querySelectorAll('.dust').forEach(l => l.remove());
   if (typeof stopBg === 'function') stopBg();
+  if (typeof endSession === 'function') endSession();
   document.documentElement.classList.remove('lock');
   opening.classList.remove('on');
   opening.setAttribute('aria-hidden', 'true');
@@ -105,10 +106,9 @@ async function runTransition() {
   }
 }
 
-document.querySelectorAll('.pull-btn').forEach(b => b.addEventListener('click', () => runTransition()));
 $('op-back').addEventListener('click', closeOpening);
-['wheel', 'touchmove'].forEach(t => opening.addEventListener(t, e => e.preventDefault(), { passive: false })); // pas de défilement derrière
-addEventListener('keydown', e => { if (e.key === 'Escape') closeOpening(); });
+['wheel', 'touchmove'].forEach(t => opening.addEventListener(t, e => { if (!opening.classList.contains('recap')) e.preventDefault(); }, { passive: false })); // pas de défilement derrière
+addEventListener('keydown', e => { if (e.key === 'Escape' && canClose()) closeOpening(); });
 
 // Menu debug : taper « debug » n'importe où sur la page (le contenu est géré dans opening.js)
 $('debug-close').addEventListener('click', () => { $('debug').hidden = true; });

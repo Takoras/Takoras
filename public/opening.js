@@ -57,21 +57,38 @@ function steps(X) {
 let run = null;
 const opCoin = $('op-coin');
 
+// Session d'ouverture (1 ou 10 pulls), sauvegardée dans le navigateur pour reprendre après un refresh
+const SAVE_KEY = 'takoras-session';
+let sess = null;
+function save() { try { sess ? localStorage.setItem(SAVE_KEY, JSON.stringify(sess)) : localStorage.removeItem(SAVE_KEY); } catch {} }
+function startSession(n) { sess = { pull: current, total: n, idx: 0, results: [], cur: null }; save(); }
+function endSession() { sess = null; save(); }
+const seriesOf = () => SERIES[PULLS[sess.pull].name] || SERIES.Takoras;
+const findJeton = name => seriesOf().find(j => j.name === name);
+
+// Prépare le jeton « ? » courant. Sans état sauvegardé, on tire un nouveau jeton.
 function startOpening() {
-  const p = PULLS[current];
-  const result = draw(SERIES[p.name] || SERIES.Takoras);
-  run = { result, queue: steps(result.odds), shown: 1, done: false };
-  $('op-tag').textContent = 'Pull ' + p.name;
+  if (!sess) startSession(1);
+  if (!sess.cur) {
+    const result = draw(seriesOf());
+    sess.cur = { name: result.name, queue: steps(result.odds), shown: 1, phase: 'count' };
+    save();
+  }
+  const c = sess.cur, p = PULLS[sess.pull];
+  run = { result: findJeton(c.name), queue: c.queue, shown: c.shown, done: false };
+  $('op-tag').textContent = 'Pull ' + p.name + (sess.total > 1 ? ` · ${sess.idx + 1}/${sess.total}` : '');
   $('op-odds').classList.remove('bump');
-  $('op-price').textContent = p.price;
-  $('op-odds').textContent = '1/1';
-  setTier(1);
-  opening.classList.remove('hold', 'rare', 'revealed');
+  $('op-price').textContent = (p.price * sess.total).toLocaleString('fr');
+  $('op-odds').textContent = '1/' + c.shown.toLocaleString('fr');
+  stopBg();
+  opening.classList.remove('hold', 'rare', 'revealed', 'recap');
+  setTier(c.shown);
   opCoin.className = 'op-coin';
-  opCoin.style.setProperty('--boost', 0);
   opCoin.innerHTML = '<div class="zoom"><div class="spin"><img src="img/jetons/mystere.png" alt="Jeton mystère"></div></div>';
   $('op-hint').textContent = 'Clique sur le jeton';
   $('op-stats').innerHTML = '';
+  if (c.phase === 'hold') hold(true);
+  if (c.phase === 'revealed') reveal(true);
 }
 
 function setTier(v) {
@@ -142,19 +159,21 @@ function fillInfo(j) {
   const stat = (n, base) => { const v = Math.round(base * (.35 + lvl * .65) * (.85 + Math.random() * .3)); return [n, v, Math.min(100, v / base * 100)]; };
   $('op-name').textContent = j.name;
   $('op-rarity').textContent = '1/' + j.odds.toLocaleString('fr');
-  $('op-stats').innerHTML = [stat('PV', 500), stat('Attaque', 120), stat('Défense', 120), stat('Vitesse', 100)]
+  sess.cur.stats ||= [stat('PV', 500), stat('Attaque', 120), stat('Défense', 120), stat('Vitesse', 100)];
+  $('op-stats').innerHTML = sess.cur.stats
     .map(([n, v, w]) => `<div class="stat"><span class="muted">${n}</span><div class="bar"><i data-w="${w}"></i></div><b>${v}</b></div>`).join('');
   requestAnimationFrame(() => requestAnimationFrame(() => $('op-stats').querySelectorAll('i').forEach(i => { i.style.width = i.dataset.w + '%'; })));
 }
 
 // Pause finale : le haut disparaît, zoom sur le jeton qui tremble, on clique pour révéler
-function hold() {
+function hold(restored) {
   const r = run;
   r.holding = true;
+  sess.cur.phase = 'hold'; save();
   opening.classList.add('hold');
   opening.classList.toggle('rare', r.result.odds >= RARE);
   opCoin.classList.remove('hit');
-  flash(.18, 260); // mini flash : le compteur ne montera plus
+  if (!restored) flash(.18, 260); // mini flash : le compteur ne montera plus
   $('op-hint').textContent = 'Clique pour révéler';
   setTimeout(() => { if (run === r) r.canReveal = true; }, 450); // évite de révéler par accident en spammant
 }
@@ -248,7 +267,7 @@ function drawBg(t) {
 }
 
 // Révélation : clic → la face change direct, le jeton part à gauche d'un coup sec, la fiche apparaît à droite
-function reveal() {
+function reveal(restored) {
   const r = run, j = r.result;
   r.done = true;
   opening.classList.remove('hold');
@@ -260,11 +279,51 @@ function reveal() {
   fillInfo(j);
   opening.classList.toggle('rare', j.odds >= RARE);
   opening.classList.add('revealed');
+  updateActions();
+  if (restored) return;
+  sess.cur.phase = 'revealed';
+  sess.results.push(j.name);
+  save();
   burst(j.odds >= RARE ? 14 : 8);
   if (j.odds >= RARE) flash(.3, 350);
   setTimeout(() => { if (run === r) shake(j.odds >= RARE ? .8 : .45); }, 300); // impact à l'arrivée
   addToHistory(j);
 }
+
+// Boutons sous la fiche : Suivant (pendant un ×10), Récap (à la fin d'un ×10), ou Pull encore / Retour
+function updateActions() {
+  const last = sess.idx >= sess.total - 1, multi = sess.total > 1;
+  $('op-next').hidden = last;
+  $('op-next').innerHTML = `Suivant · ${sess.idx + 2}/${sess.total}`;
+  $('op-recap').hidden = !(last && multi);
+  $('op-again').hidden = $('op-back').hidden = !(last && !multi);
+}
+function next() {
+  if (!sess || sess.idx >= sess.total - 1 || !opening.classList.contains('revealed')) return;
+  sess.idx++;
+  sess.cur = null;
+  save();
+  startOpening();
+  $('op-coin').animate([{ opacity: 0, transform: 'scale(.6)' }, { opacity: 1, transform: 'none' }], { duration: 220, easing: 'cubic-bezier(.2,1.3,.4,1)' });
+}
+
+// Récap des 10 jetons, le plus rare mis en avant
+function showRecap() {
+  sess.recap = true;
+  save();
+  stopBg();
+  const list = sess.results.map(findJeton), best = list.reduce((a, b) => (b.odds > a.odds ? b : a));
+  opening.style.setProperty('--tier', hexRGB(best.glow));
+  startBg(best);
+  $('op-recap-grid').innerHTML = list.map((j, i) =>
+    `<div class="rc${j === best ? ' best' : ''}" style="--g:${hexRGB(j.glow)};animation-delay:${i * 45}ms">${j === best ? '<span class="rc-tag">Meilleur tirage</span>' : ''}${jetonHTML(j, 72)}<b>${j.name}</b><small>1/${j.odds.toLocaleString('fr')}</small></div>`).join('');
+  $('op-recap-price').textContent = (PULLS[sess.pull].price * 10).toLocaleString('fr');
+  opening.classList.remove('revealed', 'hold');
+  opening.classList.add('recap');
+}
+
+// On ne peut quitter qu'à la fin (pour ne pas perdre les pulls achetés)
+function canClose() { return !sess || sess.recap || (sess.total === 1 && opening.classList.contains('revealed')); }
 
 function addToHistory(j) {
   const row = document.createElement('div');
@@ -281,6 +340,7 @@ function tap() {
   const next = run.queue.shift();
   countTo(run.shown, next);
   run.shown = next;
+  sess.cur.queue = run.queue; sess.cur.shown = next; save();
   setTier(next);
   opCoin.classList.remove('hit'); void opCoin.offsetWidth; opCoin.classList.add('hit');
   effects(next);
@@ -295,9 +355,17 @@ opCoin.addEventListener('pointerdown', e => { e.preventDefault(); tap(); }); // 
 addEventListener('keydown', e => {
   if (!opening.classList.contains('on') || (e.key !== ' ' && e.key !== 'Enter') || e.target.closest('button:not(#op-coin), select')) return;
   e.preventDefault();
+  if (opening.classList.contains('revealed')) { if (!$('op-next').hidden) next(); else if (!$('op-recap').hidden) showRecap(); return; }
   tap();
 });
-$('op-again').addEventListener('click', () => { closeOpening(); runTransition(); });
+
+function buy(n) { closeOpening(); startSession(n); runTransition(); }
+document.querySelectorAll('.pull-btn').forEach(b => b.addEventListener('click', () => buy(+b.dataset.n || 1)));
+$('op-next').addEventListener('click', next);
+$('op-recap').addEventListener('click', showRecap);
+$('op-again').addEventListener('click', () => buy(1));
+$('op-recap-again').addEventListener('click', () => buy(10));
+$('op-recap-back').addEventListener('click', () => closeOpening());
 
 // Menu debug
 const LUCKS = [1, 2, 5, 10, 100, 1000];
@@ -312,7 +380,19 @@ $('dbg-luck').addEventListener('click', e => { const b = e.target.closest('butto
 $('dbg-force').addEventListener('change', e => { debug.force = e.target.value; });
 $('dbg-fx').addEventListener('click', e => {
   const b = e.target.closest('button'); if (!b) return;
-  if (!opening.classList.contains('on')) { startOpening(); opening.classList.add('on'); }
+  if (!opening.classList.contains('on')) { startSession(1); showOpening(); }
   FX[+b.dataset.f][1]();
 });
-$('dbg-open').addEventListener('click', () => { closeOpening(); runTransition(); });
+$('dbg-open').addEventListener('click', () => buy(1));
+
+// Reprise après un refresh : on revient exactement où on en était
+(function restore() {
+  let saved = null;
+  try { saved = JSON.parse(localStorage.getItem(SAVE_KEY)); } catch {}
+  if (!saved || !PULLS[saved.pull] || (saved.cur && !(SERIES[PULLS[saved.pull].name] || SERIES.Takoras).some(j => j.name === saved.cur.name))) { endSession(); return; }
+  sess = saved;
+  select(sess.pull);
+  if (!sess.cur && !sess.recap) { endSession(); return; }
+  showOpening();
+  if (sess.recap) showRecap();
+})();
