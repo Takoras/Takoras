@@ -56,6 +56,16 @@ function steps(X) {
 
 let run = null;
 const opCoin = $('op-coin');
+const MYSTERE = 'img/jetons/mystere.png';
+
+// Le « ? » apparaît tout petit et grossit en douceur
+function spawn() {
+  opCoin.animate([{ transform: 'scale(0)', opacity: 0 }, { transform: 'scale(1)', opacity: 1 }], { duration: 520, easing: 'cubic-bezier(.16, 1, .3, 1)' });
+}
+function setGlareMask(src) {
+  const g = opCoin.querySelector('.glare');
+  if (g) g.style.webkitMaskImage = g.style.maskImage = `url(${src})`;
+}
 
 // Session d'ouverture (1 ou 10 pulls), sauvegardée dans le navigateur pour reprendre après un refresh
 const SAVE_KEY = 'takoras-session';
@@ -84,7 +94,9 @@ function startOpening() {
   opening.classList.remove('hold', 'rare', 'revealed', 'recap');
   setTier(c.shown);
   opCoin.className = 'op-coin';
-  opCoin.innerHTML = '<div class="zoom"><div class="spin"><img src="img/jetons/mystere.png" alt="Jeton mystère"></div></div>';
+  opCoin.innerHTML = `<div class="zoom"><div class="tilt3d"><div class="spin"><img src="${MYSTERE}" alt="Jeton mystère"></div><i class="glare"></i></div></div>`;
+  setGlareMask(MYSTERE);
+  if (c.phase === 'count' && c.shown === 1) spawn(); // le « ? » arrive en grossissant
   $('op-hint').textContent = 'Clique sur le jeton';
   $('op-stats').innerHTML = '';
   if (c.phase === 'hold') hold(true);
@@ -275,7 +287,14 @@ function reveal(restored) {
   $('op-hint').textContent = '';
   opening.style.setProperty('--tier', hexRGB(j.glow));
   startBg(j);
-  opCoin.querySelector('.spin').innerHTML = `<img src="${TEMPLATE}" alt="${j.name}" style="filter:drop-shadow(0 0 18px ${j.glow})">`;
+  const spin = opCoin.querySelector('.spin');
+  spin.innerHTML = `<img src="${TEMPLATE}" alt="${j.name}" style="filter:drop-shadow(0 0 18px ${j.glow})">`;
+  setGlareMask(TEMPLATE);
+  // Le jeton se retourne très vite puis ralentit longtemps (plus il est rare, plus ça dure)
+  if (!restored) {
+    const turns = j.odds >= RARE ? 6 : j.odds >= FAST ? 4 : 3, ms = j.odds >= RARE ? 3200 : j.odds >= FAST ? 2400 : 1600;
+    spin.animate([{ transform: 'rotateY(0)' }, { transform: `rotateY(${turns * 360}deg)` }], { duration: ms, easing: 'cubic-bezier(.05, .9, .1, 1)' });
+  }
   fillInfo(j);
   opening.classList.toggle('rare', j.odds >= RARE);
   opening.classList.add('revealed');
@@ -305,7 +324,7 @@ function next() {
   sess.cur = null;
   save();
   startOpening();
-  $('op-coin').animate([{ opacity: 0, transform: 'scale(.6)' }, { opacity: 1, transform: 'none' }], { duration: 220, easing: 'cubic-bezier(.2,1.3,.4,1)' });
+
 }
 
 // Récap des 10 jetons, le plus rare mis en avant
@@ -403,3 +422,37 @@ $('dbg-open').addEventListener('click', () => buy(1));
   showOpening();
   if (sess.recap) showRecap();
 })();
+
+// Hover : le jeton du pull penche vers la souris avec un reflet de lumière (comme sur l'accueil)
+(function tiltLoop() {
+  let over = false, mx = .5, my = .5;
+  const cur = { rx: 0, ry: 0, g: 0 };
+  opCoin.addEventListener('pointermove', e => {
+    const r = opCoin.getBoundingClientRect();
+    mx = (e.clientX - r.left) / r.width; my = (e.clientY - r.top) / r.height; over = true;
+  });
+  opCoin.addEventListener('pointerleave', () => { over = false; });
+  (function frame() {
+    const t = opCoin.querySelector('.tilt3d');
+    if (t && opening.classList.contains('on')) {
+      const tgt = over ? { rx: (.5 - my) * 40, ry: (mx - .5) * 40, g: 1 } : { rx: 0, ry: 0, g: 0 };
+      for (const k in cur) cur[k] += (tgt[k] - cur[k]) * (over ? .12 : .06);
+      t.style.transform = `rotateX(${cur.rx.toFixed(2)}deg) rotateY(${cur.ry.toFixed(2)}deg)`;
+      opCoin.style.setProperty('--mx', (mx * 100).toFixed(1) + '%');
+      opCoin.style.setProperty('--my', (my * 100).toFixed(1) + '%');
+      opCoin.style.setProperty('--g', cur.g.toFixed(3));
+    }
+    requestAnimationFrame(frame);
+  })();
+})();
+
+// Hover sur les jetons du récap
+$('op-recap-grid').addEventListener('pointermove', e => {
+  const card = e.target.closest('.rc'); if (!card) return;
+  const img = card.querySelector('img'), r = img.getBoundingClientRect();
+  const x = (e.clientX - r.left) / r.width - .5, y = (e.clientY - r.top) / r.height - .5;
+  img.style.transform = `perspective(400px) rotateX(${(-y * 36).toFixed(1)}deg) rotateY(${(x * 36).toFixed(1)}deg) scale(1.08)`;
+});
+$('op-recap-grid').addEventListener('pointerout', e => {
+  const card = e.target.closest('.rc'); if (card && !card.contains(e.relatedTarget)) card.querySelector('img').style.transform = '';
+});

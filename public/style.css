@@ -336,3 +336,10 @@ html.lock, html.lock body { overflow: hidden; }
 
 /* Récap sur petit écran : on peut faire défiler */
 @media (max-height: 760px), (max-width: 640px) { .opening.recap { justify-content: flex-start; overflow-y: auto; padding: 32px 0; } }
+
+/* Jeton du pull : couche d'inclinaison + reflet */
+.op-coin .tilt3d { position: relative; width: 100%; height: 100%; transform-style: preserve-3d; }
+.op-coin .glare { position: absolute; inset: 0; pointer-events: none; opacity: var(--g, 0); mix-blend-mode: screen;
+  background: radial-gradient(circle at var(--mx, 50%) var(--my, 50%), rgba(255, 255, 255, .55), rgba(255, 255, 255, .1) 30%, transparent 55%);
+  -webkit-mask-size: 100% 100%; mask-size: 100% 100%; }
+.rc img { transition: transform .35s cubic-bezier(.2, .8, .3, 1); }
