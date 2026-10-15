@@ -491,3 +491,19 @@ html.lock, html.lock body { overflow: hidden; }
 }
 .nav-in #mute, .nav-in .bal, .nav-in .acc-btn { margin-left: -22px; }
 @media (max-width: 640px) { .nav-in #mute, .nav-in .bal, .nav-in .acc-btn { margin-left: 0; } }
+
+/* Panel admin */
+.debug.admin { width: 360px; max-height: calc(100vh - 32px); }
+.adm-in, .debug select { width: 100%; padding: 8px 10px; border-radius: 8px; background: #1a1a24; color: var(--text); border: 1px solid var(--border); font: inherit; font-size: 13px; }
+.adm-list { max-height: 190px; overflow: auto; margin-top: 6px; display: flex; flex-direction: column; gap: 4px; }
+.adm-p { display: grid; grid-template-columns: 1fr auto; gap: 2px 8px; padding: 7px 10px; border-radius: 8px; text-align: left; background: var(--surface); border: 1px solid transparent; font-size: 12px; }
+.adm-p:hover { background: var(--surface-2); }
+.adm-p.on { border-color: rgba(139, 92, 246, .6); background: rgba(139, 92, 246, .14); }
+.adm-p b { font-size: 13px; } .adm-p small { color: var(--muted); grid-column: 1 / -1; }
+.adm-sel { margin-top: 10px; padding: 10px; border-radius: 10px; border: 1px solid var(--border); display: flex; flex-direction: column; gap: 8px; }
+.adm-row { display: flex; gap: 6px; margin-top: 6px; }
+.adm-row .adm-in { min-width: 0; }
+.adm-row button, .adm-danger { flex: none; padding: 8px 12px; border-radius: 8px; background: var(--accent); font-size: 12px; font-weight: 600; }
+.adm-danger { width: 100%; margin-top: 8px; background: rgba(239, 68, 68, .15); color: #fca5a5; border: 1px solid rgba(239, 68, 68, .35); }
+.adm-msg { font-size: 12px; color: #86efac; min-height: 16px; margin: 6px 0 0; }
+.adm-msg.err { color: #fca5a5; }

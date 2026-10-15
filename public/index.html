@@ -42,6 +42,7 @@
         <a class="on" href="#" data-i18n="nav_home">Accueil</a>
         <a href="#classement" data-i18n="nav_board">Classement</a>
       </div>
+      <button class="mute admin-btn" id="open-admin" hidden aria-label="Panel admin"><svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg></button>
       <button class="mute" id="open-settings" aria-label="Paramètres"><svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.7 1.7 0 0 0 .3 1.8l.1.1a2 2 0 1 1-2.8 2.8l-.1-.1a1.7 1.7 0 0 0-1.8-.3 1.7 1.7 0 0 0-1 1.5V21a2 2 0 1 1-4 0v-.1a1.7 1.7 0 0 0-1.1-1.5 1.7 1.7 0 0 0-1.8.3l-.1.1a2 2 0 1 1-2.8-2.8l.1-.1a1.7 1.7 0 0 0 .3-1.8 1.7 1.7 0 0 0-1.5-1H3a2 2 0 1 1 0-4h.1a1.7 1.7 0 0 0 1.5-1.1 1.7 1.7 0 0 0-.3-1.8l-.1-.1a2 2 0 1 1 2.8-2.8l.1.1a1.7 1.7 0 0 0 1.8.3H9a1.7 1.7 0 0 0 1-1.5V3a2 2 0 1 1 4 0v.1a1.7 1.7 0 0 0 1 1.5 1.7 1.7 0 0 0 1.8-.3l.1-.1a2 2 0 1 1 2.8 2.8l-.1.1a1.7 1.7 0 0 0-.3 1.8V9a1.7 1.7 0 0 0 1.5 1H21a2 2 0 1 1 0 4h-.1a1.7 1.7 0 0 0-1.5 1z"/></svg></button>
       <button class="mute" id="mute"></button>
       <div class="bal"><i class="mini-coin"></i><b id="bal">0</b></div>
@@ -143,23 +144,29 @@
   </div>
   <div class="fx" id="fx"></div>
 
-  <div class="debug" id="debug" hidden>
-    <div class="debug-head"><b>Debug</b><button id="debug-close" aria-label="Fermer">✕</button></div>
-    <div class="dbg-sec">Luck</div>
+  <div class="debug admin" id="debug" hidden>
+    <div class="debug-head"><b>Panel admin</b><button id="debug-close" aria-label="Fermer">✕</button></div>
+
+    <div class="dbg-sec">Joueurs</div>
+    <input class="adm-in" id="adm-search" placeholder="Chercher un pseudo…" autocomplete="off">
+    <div class="adm-list" id="adm-list"></div>
+    <div class="adm-sel" id="adm-sel" hidden>
+      <b id="adm-sel-name"></b>
+      <div class="adm-row"><input class="adm-in" id="adm-coins" type="number" placeholder="◆ (ex. 1000 ou -500)"><input class="adm-in" id="adm-pulls" type="number" placeholder="Pulls"><button id="adm-give">Donner</button></div>
+      <div class="adm-row"><select id="adm-jeton"></select><button id="adm-give-jeton">Donner le jeton</button></div>
+      <button class="adm-danger" id="adm-reset">Remettre ce joueur à zéro</button>
+    </div>
+
+    <div class="dbg-sec">Tout le monde</div>
+    <div class="adm-row"><input class="adm-in" id="adm-all-coins" type="number" placeholder="◆"><input class="adm-in" id="adm-all-pulls" type="number" placeholder="Pulls"><button id="adm-give-all">Donner à tous</button></div>
+    <button class="adm-danger" id="adm-reset-all">Remettre TOUS les joueurs à zéro</button>
+    <p class="adm-msg" id="adm-msg"></p>
+
+    <div class="dbg-sec">Tests (ton compte)</div>
     <div class="dbg-row" id="dbg-luck"></div>
-    <div class="dbg-sec">Jeton forcé</div>
     <select id="dbg-force"></select>
-    <div class="dbg-sec">Tester un effet</div>
     <div class="dbg-row" id="dbg-fx"></div>
-    <div class="dbg-sec">Argent</div>
-    <div class="dbg-row" id="dbg-coins">
-      <button data-c="1000">+1 000</button><button data-c="10000">+10 000</button><button data-c="100000">+100 000</button><button data-c="-1000">−1 000</button><button data-c="0">Mettre à 0</button>
-    </div>
-    <div class="dbg-sec">Pulls Takoras</div>
-    <div class="dbg-row" id="dbg-stock">
-      <button data-s="add">+1 pull</button><button data-s="fill">Remplir</button><button data-s="empty">Vider</button><button data-s="soon">Recharge dans 5 s</button><button data-s="reset">Stock max → 5</button>
-    </div>
-    <button class="btn primary dbg-go" id="dbg-open">Ouvrir un pull (sans stock)</button>
+    <button class="btn primary dbg-go" id="dbg-open">Ouvrir un pull de test (sans stock, non enregistré)</button>
   </div>
 
   <div class="settings" id="settings">
@@ -184,5 +191,6 @@
   <script src="transitions.js"></script>
   <script src="opening.js"></script>
   <script src="economy.js"></script>
+  <script src="admin.js"></script>
 </body>
 </html>

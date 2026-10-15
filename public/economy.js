@@ -1,7 +1,8 @@
 // Économie : argent (◆) et stock de pulls Takoras qui se recharge tout seul.
 // On ne peut pas acheter de pull Takoras : on en gagne 1 toutes les 5 min, jusqu'au stock max.
 // Le stock max (5 au départ) s'améliore jusqu'à 10 avec de l'argent, et chaque niveau coûte 3× plus cher.
-// Tout est sauvegardé dans le navigateur en attendant les comptes (Supabase).
+// L'argent, le stock et les tirages sont gérés par le serveur (Supabase) : impossible de tricher depuis le navigateur.
+// Ici on garde juste une copie pour l'affichage et le compte à rebours.
 
 const ECO_KEY = 'takoras-eco';
 const REGEN = 5 * 60 * 1000, BASE_MAX = 5, TOP_MAX = 10;
@@ -27,34 +28,44 @@ const mmss = ms => { const s = Math.ceil(ms / 1000); return `${String(Math.floor
 const fmt = n => n.toLocaleString(LOCALE());
 const isTakoras = () => PULLS[current].name === 'Takoras';
 
-// Prend des pulls dans le stock ; si on était plein, la recharge démarre maintenant
-function takePulls(n) {
-  regen();
-  if (eco.stock >= eco.max) eco.last = Date.now();
-  eco.stock -= n;
-  saveEco();
+// Copie l'état renvoyé par le serveur
+function applyState(st) {
+  if (!st) return;
+  eco.coins = st.coins; eco.stock = st.stock; eco.max = st.max;
+  eco.last = Date.now() - (REGEN / 1000 - st.next_in) * 1000;
+  ACC.isAdmin = !!st.admin;
+  if (typeof renderAdminBtn === 'function') renderAdminBtn();
   render();
 }
+async function ecoSync() {
+  if (!ACC.user) return;
+  const { data, error } = await sb.rpc('eco_state');
+  if (!error) applyState(data);
+}
 
-// Ouvre 1 pull ou tout le stock (pour les autres pulls, l'ancien fonctionnement reste)
-function openPulls(n) {
-  if (!requireAccount()) return;
+// Ouvre 1 pull ou tout le stock : le serveur retire les pulls et tire les jetons, on joue juste l'animation
+let opening_busy = false;
+async function openPulls(n) {
+  if (!requireAccount() || opening_busy) return;
   if (!isTakoras()) return buy(n === 'all' ? 10 : n);
   regen();
   const count = n === 'all' ? eco.stock : Math.min(1, eco.stock);
   if (!count) return sfx.deny();
-  takePulls(count);
-  buy(count);
+  opening_busy = true;
+  const { data, error } = await sb.rpc('take_pulls', { n: count, force: ACC.isAdmin ? debug.force || null : null, luck: ACC.isAdmin ? debug.luck : 1 });
+  opening_busy = false;
+  if (error) { sfx.deny(); return ecoSync(); }
+  applyState(data.state);
+  buy(data.results.length, data.results);
 }
 
-function upgrade() {
+async function upgrade() {
   if (!requireAccount()) return;
   if (eco.max >= TOP_MAX || eco.coins < upgradeCost(eco.max + 1)) return;
-  eco.coins -= upgradeCost(eco.max + 1);
-  eco.max++;
+  const { data, error } = await sb.rpc('upgrade_stock');
+  if (error) { sfx.deny(); return ecoSync(); }
   sfx.upgrade();
-  saveEco();
-  render();
+  applyState(data);
 }
 
 // Boutons de l'accueil : stock + Ouvrir 1 / Tout ouvrir + amélioration (Takoras), ou l'ancien achat (autres pulls)
@@ -107,7 +118,7 @@ function render() {
 setInterval(() => {
   const before = eco.stock;
   regen();
-  if (eco.stock !== before) { if (eco.stock > before) sfx.regen(); return render(); }
+  if (eco.stock !== before) { if (eco.stock > before) sfx.regen(); render(); return ecoSync(); } // on confirme avec le serveur
   const el = $('stock-next');
   if (el) el.textContent = eco.stock >= eco.max ? t('stock_full') : t('plus1_in', { t: mmss(nextIn()) });
   if (opening.classList.contains('on') && !eco.stock) ecoDecorate();
@@ -116,24 +127,6 @@ setInterval(() => {
 // Quand on change de pull, on redessine les boutons
 const selectBase = select;
 select = function (i) { selectBase(i); renderActions(); };
-
-// Menu debug : argent et stock
-$('dbg-coins').addEventListener('click', e => {
-  const b = e.target.closest('button'); if (!b) return;
-  const v = +b.dataset.c;
-  eco.coins = v === 0 ? 0 : Math.max(0, eco.coins + v);
-  saveEco(); render();
-});
-$('dbg-stock').addEventListener('click', e => {
-  const b = e.target.closest('button'); if (!b) return;
-  const a = b.dataset.s;
-  if (a === 'add') eco.stock = Math.min(eco.max, eco.stock + 1);
-  if (a === 'fill') eco.stock = eco.max;
-  if (a === 'empty') { eco.stock = 0; eco.last = Date.now(); }
-  if (a === 'soon') { if (eco.stock >= eco.max) eco.stock = eco.max - 1; eco.last = Date.now() - REGEN + 5000; }
-  if (a === 'reset') { eco.max = BASE_MAX; eco.stock = Math.min(eco.stock, BASE_MAX); }
-  saveEco(); render();
-});
 
 regen();
 render();

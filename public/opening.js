@@ -97,7 +97,7 @@ function wave() {
 const SAVE_KEY = 'takoras-session';
 let sess = null;
 function save() { try { sess ? localStorage.setItem(SAVE_KEY, JSON.stringify(sess)) : localStorage.removeItem(SAVE_KEY); } catch {} }
-function startSession(n) { sess = { pull: current, total: n, idx: 0, results: [], cur: null }; save(); }
+function startSession(n, plan = null) { sess = { pull: current, total: n, idx: 0, results: [], cur: null, plan }; save(); }
 function endSession() { sess = null; save(); }
 const seriesOf = () => SERIES[PULLS[sess.pull].name] || SERIES.Takoras;
 const findJeton = name => seriesOf().find(j => j.name === name);
@@ -106,7 +106,8 @@ const findJeton = name => seriesOf().find(j => j.name === name);
 function startOpening() {
   if (!sess) startSession(1);
   if (!sess.cur) {
-    const result = draw(seriesOf());
+    // Jeton tiré par le serveur (plan) ; sinon tirage local (tests admin « sans stock »)
+    const result = (sess.plan && findJeton(sess.plan[sess.idx])) || draw(seriesOf());
     sess.cur = { name: result.name, queue: steps(result.odds), shown: 1, phase: 'count' };
     save();
   }
@@ -475,7 +476,7 @@ addEventListener('keydown', e => {
   tap();
 });
 
-function buy(n) { closeOpening(); startSession(n); runTransition(); }
+function buy(n, plan = null) { closeOpening(); startSession(n, plan); runTransition(); }
 $('op-next').addEventListener('click', next);
 // Pendant un ×10 : un clic n'importe où sur l'écran passe au jeton suivant
 opening.addEventListener('click', e => {

@@ -121,5 +121,5 @@ let typed = '';
 addEventListener('keydown', e => {
   if (e.key.length !== 1 || e.target.closest?.('input, textarea, select')) return;
   typed = (typed + e.key.toLowerCase()).slice(-5);
-  if (typed === 'debug') { $('debug').hidden = !$('debug').hidden; renderDebug(); typed = ''; }
+  if (typed === 'debug' && ACC.isAdmin) { $('debug').hidden = !$('debug').hidden; renderDebug(); typed = ''; } // réservé aux admins
 });

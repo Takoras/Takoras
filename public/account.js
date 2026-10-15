@@ -38,6 +38,7 @@ async function loadAccount(user) {
   renderAccBtn();
   if (typeof renderHist === 'function') { renderHist(); renderBoard(); }
   if (typeof renderActions === 'function') renderActions(); // boutons de pull : « Se connecter » ou « Ouvrir »
+  if (user && typeof ecoSync === 'function') ecoSync(); else { ACC.isAdmin = false; if (typeof renderAdminBtn === 'function') renderAdminBtn(); }
 }
 
 // Appelé à chaque jeton révélé. Renvoie true si le tirage part en ligne (sinon historique local).
@@ -45,10 +46,7 @@ function accRecordPull(j, serie) {
   if (!ACC.user) return false;
   ACC.hist.unshift({ name: j.name, odds: j.odds, glow: j.glow, img: j.img || 'img/jetons/template.png', ts: Date.now() });
   ACC.hist = ACC.hist.slice(0, 30);
-  sb.from('pulls').insert({ serie, jeton: j.name, odds: j.odds }).then(({ error }) => {
-    if (error) console.warn('Tirage non enregistré', error.message);
-    else { renderLive(); boardSoon(); }
-  });
+  renderLive(); boardSoon(); // déjà enregistré par le serveur au moment du tirage
   return true;
 }
 let boardTimer;
