@@ -73,12 +73,15 @@ let choice = 0;
 function showOpening(fade = 0) {
   if (opening.classList.contains('on')) return;
   startOpening();
+  document.documentElement.classList.add('lock'); // la page derrière ne défile plus
   opening.classList.add('on');
   opening.setAttribute('aria-hidden', 'false');
   if (fade) opening.animate([{ opacity: 0 }, { opacity: 1 }], { duration: fade });
 }
 function closeOpening() {
   document.querySelectorAll('.dust').forEach(l => l.remove());
+  if (typeof stopBg === 'function') stopBg();
+  document.documentElement.classList.remove('lock');
   opening.classList.remove('on');
   opening.setAttribute('aria-hidden', 'true');
   $('coin').style.visibility = '';
@@ -104,6 +107,7 @@ async function runTransition() {
 
 document.querySelectorAll('.pull-btn').forEach(b => b.addEventListener('click', () => runTransition()));
 $('op-back').addEventListener('click', closeOpening);
+['wheel', 'touchmove'].forEach(t => opening.addEventListener(t, e => e.preventDefault(), { passive: false })); // pas de défilement derrière
 addEventListener('keydown', e => { if (e.key === 'Escape') closeOpening(); });
 
 // Menu debug : taper « debug » n'importe où sur la page (le contenu est géré dans opening.js)

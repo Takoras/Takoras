@@ -199,13 +199,15 @@ button { font: inherit; color: inherit; border: 0; background: none; cursor: poi
 .opening.t2500 .op-rays { opacity: 1; }
 .opening.revealed .op-rays { opacity: 0; }
 
-/* Fond de la révélation : bandes pixel floues qui dérivent lentement */
-.op-bg { position: absolute !important; inset: -10%; opacity: 0; pointer-events: none; background: rgb(35, 32, 52) center / cover no-repeat;
-  filter: blur(5px); transition: opacity .25s ease-out; animation: drift 11s ease-in-out infinite alternate; }
-.opening.revealed .op-bg { opacity: 1; }
+/* Fond de la révélation : pixel art dessiné en direct, qui dérive très lentement */
+.op-bg { position: absolute !important; inset: -3%; opacity: 0; pointer-events: none; background: rgb(35, 32, 52);
+  transition: opacity .25s ease-out; animation: drift 11s ease-in-out infinite alternate; }
+.op-bg canvas { width: 100%; height: 100%; display: block; image-rendering: pixelated; }
+.opening.revealed .op-bg, .opening.t2500 .op-bg { opacity: 1; }
+.op-rays { display: none; }
 @keyframes drift {
-  0% { transform: translate(-1.2%, .6%) rotate(-.5deg) scale(1.02); }
-  100% { transform: translate(1.2%, -.6%) rotate(.5deg) scale(1.05); }
+  0% { transform: translate(-.6%, .4%) rotate(-.3deg); }
+  100% { transform: translate(.6%, -.4%) rotate(.3deg); }
 }
 
 /* Jamais statique : tout le contenu flotte très lentement */
@@ -251,7 +253,7 @@ button { font: inherit; color: inherit; border: 0; background: none; cursor: poi
 .opening.revealed .op-info { opacity: 1; transform: none; pointer-events: auto; }
 .op-name { font-family: "Space Grotesk"; font-size: 44px; line-height: 1; margin: 8px 0 6px; }
 .op-rarity { font-family: "Space Grotesk"; font-weight: 700; font-size: 22px; color: rgb(var(--tier)); margin-bottom: 18px; }
-.op-stats { display: flex; flex-direction: column; gap: 10px; padding: 16px; border-radius: 16px; background: var(--surface); border: 1px solid var(--border); }
+.op-stats { display: flex; flex-direction: column; gap: 10px; padding: 16px; border-radius: 16px; background: rgba(20, 18, 30, .8); border: 1px solid var(--border); }
 .stat { display: grid; grid-template-columns: 70px 1fr 36px; align-items: center; gap: 10px; font-size: 13px; }
 .stat .bar { height: 6px; border-radius: 3px; background: rgba(255, 255, 255, .08); overflow: hidden; }
 .stat .bar i { display: block; height: 100%; width: 0; border-radius: 3px; background: rgb(var(--tier)); transition: width .6s cubic-bezier(.2, .8, .3, 1) .35s; }
@@ -301,3 +303,6 @@ button { font: inherit; color: inherit; border: 0; background: none; cursor: poi
 .op-hint { transition: opacity .3s, transform .7s var(--ease); }
 .opening.hold .op-hint { transform: translateY(30px); }
 .opening.hold.rare .op-hint { transform: translateY(54px); }
+
+/* Pendant une ouverture, la page derrière ne défile plus */
+html.lock, html.lock body { overflow: hidden; }

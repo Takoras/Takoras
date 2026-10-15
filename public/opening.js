@@ -76,6 +76,12 @@ function startOpening() {
 
 function setTier(v) {
   opening.style.setProperty('--tier', tierOf(v));
+  // Dès 1/2500 pendant le compteur : rayons pixel + poussière derrière le jeton
+  if (v >= 2500 && bg.mode !== 'hold' && !opening.classList.contains('revealed')) {
+    const [r, g, b] = tierOf(v).split(', ').map(Number);
+    startBg({ odds: RARE, glow: '#' + [r, g, b].map(n => n.toString(16).padStart(2, '0')).join('') }, 'hold');
+  }
+  if (v < 2500 && bg.mode === 'hold') { stopBg(); bg.mode = ''; }
   opening.classList.toggle('t1000', v >= 1000);
   opening.classList.toggle('t2500', v >= 2500);
   opCoin.style.setProperty('--boost', v >= 1000 ? Math.min(1, .5 + Math.log10(v / 1000) * .7) : 0);
@@ -154,20 +160,91 @@ function hold() {
 }
 
 // Révélation : le jeton tourne en se penchant, la face change à mi-chemin, puis il glisse à gauche et la fiche arrive
-// Fond de la révélation : deux bandes en escalier façon pixel art, à la couleur du jeton
-function stripes(color) {
-  const W = 2000, H = 1267, step = 70, rise = 7, thick = 100;
-  const band = (x0, y0) => {
-    const top = [], bottom = [];
-    for (let x = x0; x < W + step; x += step) {
-      const y = y0 - Math.floor((x - x0) / step) * rise;
-      top.push(`${x},${y} ${x + step},${y}`);
-      bottom.unshift(`${x + step},${y + thick} ${x},${y + thick}`);
+// Fond de la révélation, dessiné en pixel art en direct sur un petit canvas agrandi sans lissage.
+// Plus le jeton est rare, plus le fond est chargé : bandes → rayons + poussière → étoiles + reflets.
+const bg = { canvas: null, ctx: null, raf: 0, level: 0, rgb: [255, 255, 255], dust: [], stars: [] };
+const PX = 6; // taille d'un « pixel » du fond à l'écran
+function bgLevel(odds) { return odds >= 10000 ? 3 : odds >= RARE ? 2 : odds >= FAST ? 1 : 0; }
+
+function startBg(j, mode = 'reveal') {
+  bg.mode = mode;
+  if (!bg.canvas) {
+    bg.canvas = document.createElement('canvas');
+    $('op-bg').appendChild(bg.canvas);
+    bg.ctx = bg.canvas.getContext('2d');
+  }
+  bg.canvas.width = Math.ceil(innerWidth / PX);
+  bg.canvas.height = Math.ceil(innerHeight / PX);
+  bg.level = bgLevel(j.odds);
+  bg.rgb = hexRGB(j.glow).split(', ').map(Number);
+  const W = bg.canvas.width, H = bg.canvas.height;
+  bg.dust = Array.from({ length: [0, 0, 26, 50][bg.level] }, () => ({ x: Math.random() * W, y: Math.random() * H, v: .04 + Math.random() * .1, a: Math.random() }));
+  bg.stars = Array.from({ length: bg.level >= 3 ? 40 : 0 }, () => ({ x: Math.random() * W | 0, y: Math.random() * H | 0, p: Math.random() * 6 }));
+  cancelAnimationFrame(bg.raf);
+  const t0 = performance.now();
+  const loop = t => { drawBg((t - t0) / 1000); bg.raf = requestAnimationFrame(loop); };
+  bg.raf = requestAnimationFrame(loop);
+}
+function stopBg() { cancelAnimationFrame(bg.raf); bg.mode = ''; }
+
+function drawBg(t) {
+  const { ctx, level } = bg, W = bg.canvas.width, H = bg.canvas.height, [r, g, b] = bg.rgb;
+  const col = a => `rgba(${r},${g},${b},${a})`;
+  ctx.fillStyle = 'rgb(35,32,52)';
+  ctx.fillRect(0, 0, W, H);
+
+  // Centre des rayons : le jeton (il est à gauche une fois révélé)
+  const c = opCoin.getBoundingClientRect(), cx = (c.left + c.width / 2) / PX, cy = (c.top + c.height / 2) / PX;
+
+  // Rayons de lumière qui tournent lentement (à partir de 1/1000)
+  if (level >= 2) {
+    const n = 12, R = Math.hypot(W, H), turn = t * .08;
+    for (let i = 0; i < n; i++) {
+      const a0 = turn + i / n * Math.PI * 2, a1 = a0 + Math.PI / n * .55;
+      ctx.fillStyle = col(level >= 3 ? .10 + .05 * Math.sin(t * 2 + i) : .08);
+      ctx.beginPath();
+      ctx.moveTo(cx, cy);
+      ctx.lineTo(cx + Math.cos(a0) * R, cy + Math.sin(a0) * R);
+      ctx.lineTo(cx + Math.cos(a1) * R, cy + Math.sin(a1) * R);
+      ctx.fill();
     }
-    return `<polygon points="${top.join(' ')} ${bottom.join(' ')}" fill="${color}"/>`;
-  };
-  const svg = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 ${W} ${H}" preserveAspectRatio="xMidYMid slice" shape-rendering="crispEdges">${band(-100, 300)}${band(250, 1180)}</svg>`;
-  return `url("data:image/svg+xml,${encodeURIComponent(svg)}")`;
+  }
+
+  // Bandes en escalier qui glissent doucement (l'escalier vient de l'agrandissement sans lissage)
+  const slope = -.1, thick = Math.max(10, H * .09);
+  const bands = level === 0 ? [[.2, .35]] : level >= 3 ? [[.16, 1], [.86, 1], [.5, .25], [.03, .3]] : [[.18, 1], [.84, 1]];
+  if (bg.mode !== 'hold') bands.forEach(([pos, alpha], k) => {
+    const shift = Math.sin(t * .35 + k) * 3;
+    const y0 = H * pos + shift - slope * W / 2;
+    ctx.fillStyle = col(alpha * (level === 0 ? 1 : .95));
+    ctx.beginPath();
+    ctx.moveTo(0, y0); ctx.lineTo(W, y0 + slope * W); ctx.lineTo(W, y0 + slope * W + thick); ctx.lineTo(0, y0 + thick);
+    ctx.fill();
+    // Reflet blanc qui parcourt la bande (à partir de 1/10 000)
+    if (level >= 3 && alpha === 1) {
+      const x = ((t * 40 + k * W / 2) % (W + 60)) - 30;
+      ctx.fillStyle = 'rgba(255,255,255,.55)';
+      ctx.beginPath();
+      ctx.moveTo(x, y0 + slope * x); ctx.lineTo(x + 8, y0 + slope * (x + 8)); ctx.lineTo(x + 2, y0 + slope * (x + 2) + thick); ctx.lineTo(x - 6, y0 + slope * (x - 6) + thick);
+      ctx.fill();
+    }
+  });
+
+  // Poussière de pixels qui monte (à partir de 1/1000)
+  bg.dust.forEach(d => {
+    d.y -= d.v; if (d.y < -2) { d.y = H + 2; d.x = Math.random() * W; }
+    ctx.fillStyle = col(.35 + .35 * Math.sin(t * 2 + d.a * 6));
+    ctx.fillRect(d.x | 0, d.y | 0, 1, 1);
+  });
+
+  // Étoiles qui scintillent en croix (à partir de 1/10 000)
+  bg.stars.forEach(s => {
+    const k = Math.max(0, Math.sin(t * 1.6 + s.p));
+    if (k < .3) return;
+    ctx.fillStyle = `rgba(255,255,255,${k})`;
+    ctx.fillRect(s.x, s.y, 1, 1);
+    if (k > .85) { ctx.fillRect(s.x - 1, s.y, 3, 1); ctx.fillRect(s.x, s.y - 1, 1, 3); }
+  });
 }
 
 // Révélation : clic → la face change direct, le jeton part à gauche d'un coup sec, la fiche apparaît à droite
@@ -178,7 +255,7 @@ function reveal() {
   opCoin.classList.add('done');
   $('op-hint').textContent = '';
   opening.style.setProperty('--tier', hexRGB(j.glow));
-  $('op-bg').style.backgroundImage = stripes(j.glow);
+  startBg(j);
   opCoin.querySelector('.spin').innerHTML = `<img src="${TEMPLATE}" alt="${j.name}" style="filter:drop-shadow(0 0 18px ${j.glow})">`;
   fillInfo(j);
   opening.classList.toggle('rare', j.odds >= RARE);
