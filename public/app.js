@@ -53,18 +53,33 @@ function select(i) {
   renderTypes();
   tick();
 }
-// Le jeton regarde la souris + reflet de lumière
+// Le jeton regarde la souris + reflet de lumière (tout est lissé image par image)
 const hero = $('coin');
+const still = matchMedia('(prefers-reduced-motion: reduce)').matches;
+let over = false, mx = .5, my = .5;
+const cur = { rx: 0, ry: 0, s: 1, g: 0 };
 hero.addEventListener('pointermove', e => {
   const r = hero.getBoundingClientRect();
-  const x = (e.clientX - r.left) / r.width, y = (e.clientY - r.top) / r.height;
-  hero.classList.add('touch');
-  hero.style.setProperty('--ry', ((x - .5) * 40).toFixed(1) + 'deg');
-  hero.style.setProperty('--rx', ((.5 - y) * 40).toFixed(1) + 'deg');
-  hero.style.setProperty('--mx', (x * 100).toFixed(0) + '%');
-  hero.style.setProperty('--my', (y * 100).toFixed(0) + '%');
+  mx = (e.clientX - r.left) / r.width; my = (e.clientY - r.top) / r.height; over = true;
 });
-hero.addEventListener('pointerleave', () => hero.classList.remove('touch'));
+hero.addEventListener('pointerleave', () => { over = false; });
+function frame(t) {
+  const tilt = hero.querySelector('.tilt');
+  if (tilt) {
+    const wave = still ? 0 : Math.cos(t / 16000 * Math.PI * 2);
+    const tgt = over
+      ? { rx: (.5 - my) * 40, ry: (mx - .5) * 40, s: 1.05, g: 1 }
+      : { rx: 6 * wave, ry: -22 * wave, s: 1, g: 0 };
+    const k = over ? .12 : .05;
+    for (const key in cur) cur[key] += (tgt[key] - cur[key]) * k;
+    tilt.style.transform = `rotateX(${cur.rx.toFixed(2)}deg) rotateY(${cur.ry.toFixed(2)}deg) scale(${cur.s.toFixed(3)})`;
+    hero.style.setProperty('--mx', (mx * 100).toFixed(1) + '%');
+    hero.style.setProperty('--my', (my * 100).toFixed(1) + '%');
+    hero.style.setProperty('--g', cur.g.toFixed(3));
+  }
+  requestAnimationFrame(frame);
+}
+requestAnimationFrame(frame);
 
 $('types').addEventListener('click', e => { const b = e.target.closest('.type'); if (b) select(+b.dataset.i); });
 
