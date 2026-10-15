@@ -181,9 +181,10 @@ function burst(n = 5) {
   for (let i = 0; i < n; i++) {
     const s = document.createElement('i'), a = Math.random() * Math.PI * 2, d = r.width * (.55 + Math.random() * .3);
     s.className = 'op-spark';
-    s.style.cssText = `left:${x}px;top:${y}px;background:${col}`;
+    s.style.cssText = `left:${x}px;top:${y}px;${sparkStyle(col)}`;
     opening.appendChild(s);
-    s.animate([{ transform: 'translate(-50%,-50%)', opacity: 1 }, { transform: `translate(calc(-50% + ${Math.cos(a) * d}px), calc(-50% + ${Math.sin(a) * d}px)) scale(.3)`, opacity: 0 }],
+    const spin = (Math.random() < .5 ? -1 : 1) * 90; // elles tournent un peu en volant
+    s.animate([{ transform: 'translate(-50%,-50%) scale(1)', opacity: 1 }, { transform: `translate(calc(-50% + ${Math.cos(a) * d}px), calc(-50% + ${Math.sin(a) * d}px)) rotate(${spin}deg) scale(.4)`, opacity: 0 }],
       { duration: 380, easing: 'cubic-bezier(.2,.7,.3,1)' }).finished.then(() => s.remove());
   }
 }

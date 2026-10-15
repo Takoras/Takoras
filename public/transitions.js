@@ -32,9 +32,9 @@ function sparks(n = 12) {
   const o = center(), tints = [css('--hi'), css('--mid')];
   for (let i = 0; i < n; i++) {
     const s = 5 + Math.random() * 6, a = Math.random() * Math.PI * 2, r = o.r * (1.2 + Math.random() * 1.4);
-    el(`left:${o.x - s / 2}px;top:${o.y - s / 2}px;width:${s}px;height:${s}px;background:${tints[i % 2]};z-index:2`).animate([
+    el(`left:${o.x - s / 2}px;top:${o.y - s / 2}px;${sparkStyle(tints[i % 2])};z-index:2`).animate([
       { transform: 'translate(0,0) scale(1)', opacity: 1 },
-      { transform: `translate(${Math.cos(a) * r}px,${Math.sin(a) * r}px) scale(.3)`, opacity: 0 },
+      { transform: `translate(${Math.cos(a) * r}px,${Math.sin(a) * r}px) rotate(${(i % 2 ? 1 : -1) * 90}deg) scale(.4)`, opacity: 0 },
     ], { duration: 380 + Math.random() * 80, easing: 'cubic-bezier(.2,.7,.3,1)', fill: 'forwards' });
   }
 }
