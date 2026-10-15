@@ -182,3 +182,33 @@ button { font: inherit; color: inherit; border: 0; background: none; cursor: poi
 @media (prefers-reduced-motion: reduce) {
   *, *::before { animation: none !important; }
 }
+
+/* Écran d'ouverture (provisoire) */
+.opening { position: fixed; inset: 0; z-index: 50; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 10px; text-align: center;
+  background: var(--bg); visibility: hidden; opacity: 0; }
+.opening.on { visibility: visible; opacity: 1; }
+.op-glow { position: absolute; left: 50%; top: 45%; width: 700px; aspect-ratio: 1; translate: -50% -50%; border-radius: 50%; background: radial-gradient(closest-side, rgba(var(--glow), .35), transparent); pointer-events: none; }
+.op-coin { position: relative; width: 200px; height: 200px; margin-bottom: 16px; animation: bob 5s ease-in-out infinite; }
+.op-coin img { width: 100%; height: 100%; image-rendering: pixelated; }
+.op-coin .coin { --s: 200px; }
+.op-title { position: relative; font-family: "Space Grotesk"; font-size: 44px; }
+.opening .btn { margin-top: 18px; position: relative; }
+
+/* Couche des transitions */
+.fx { position: fixed; inset: 0; z-index: 60; pointer-events: none; overflow: hidden; }
+.fx > * { position: absolute; }
+
+/* Menu debug */
+.debug { position: fixed; right: 16px; bottom: 16px; z-index: 70; width: 280px; max-width: calc(100vw - 32px); max-height: calc(100vh - 32px); overflow: auto;
+  padding: 14px; border-radius: 16px; background: rgba(20, 20, 28, .95); border: 1px solid var(--border); backdrop-filter: blur(12px); box-shadow: 0 20px 60px rgba(0, 0, 0, .5); font-size: 13px; }
+.debug[hidden] { display: none; }
+.debug-head { display: flex; justify-content: space-between; align-items: center; margin-bottom: 4px; }
+.debug-head b { font-family: "Space Grotesk"; font-size: 15px; }
+.debug-head button { width: 28px; height: 28px; border-radius: 8px; color: var(--muted); }
+.debug-head button:hover { background: var(--surface-2); color: var(--text); }
+.debug .muted { font-size: 12px; margin-bottom: 10px; }
+.dbg { width: 100%; display: flex; align-items: center; gap: 10px; padding: 8px 10px; border-radius: 10px; text-align: left; border: 1px solid transparent; }
+.dbg:hover { background: var(--surface-2); }
+.dbg.on { border-color: rgba(139, 92, 246, .6); background: rgba(139, 92, 246, .14); }
+.dbg b { width: 20px; font-family: "Space Grotesk"; color: var(--muted); }
+.dbg small { display: block; color: var(--muted); font-size: 11px; }
