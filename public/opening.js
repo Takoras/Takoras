@@ -337,9 +337,9 @@ function reveal(restored) {
     const turns = j.odds >= GOD ? 10 : j.odds >= MYTHIC ? 8 : j.odds >= RARE ? 6 : j.odds >= FAST ? 4 : 3;
     const ms = j.odds >= GOD ? 5200 : j.odds >= MYTHIC ? 4200 : j.odds >= RARE ? 3200 : j.odds >= FAST ? 2400 : 1600;
     spin.animate([{ transform: 'rotateY(0)' }, { transform: `rotateY(${turns * 360}deg)` }], { duration: ms, easing: 'cubic-bezier(.05, .9, .1, 1)' });
-    // On ne peut pas passer à la suite tout de suite : 1 s max pour les jetons communs,
+    // On ne peut pas passer à la suite tout de suite : 0,5 s max pour les jetons communs,
     // toute la rotation pour les vrais rares (1/1000 et plus)
-    const lock = j.odds >= RARE ? ms : Math.min(ms, 1000);
+    const lock = j.odds >= RARE ? ms : Math.min(ms, 500);
     r.spinEnd = performance.now() + lock;
     opening.classList.add('spinning');
     setTimeout(() => { if (run === r) opening.classList.remove('spinning'); }, lock);
