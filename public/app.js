@@ -43,7 +43,9 @@ function select(i) {
   const p = PULLS[i];
   document.documentElement.style.cssText = coinStyle(p.color);
   $('coin').classList.toggle('has-img', !!p.img);
-  $('coin').innerHTML = p.img ? `<img src="${p.img}" alt="Jeton ${p.name}">` : '<span>T</span>';
+  $('coin').innerHTML = p.img
+    ? `<div class="tilt"><img src="${p.img}" alt="Jeton ${p.name}"><i class="glare" style="-webkit-mask-image:url(${p.img});mask-image:url(${p.img})"></i></div>`
+    : '<span>T</span>';
   $('name').textContent = 'Pull ' + p.name;
   $('tag').textContent = p.ends ? 'Limité' : p.weekend ? 'Week-end' : 'Permanent';
   $('p1').textContent = p.price;
@@ -51,6 +53,19 @@ function select(i) {
   renderTypes();
   tick();
 }
+// Le jeton regarde la souris + reflet de lumière
+const hero = $('coin');
+hero.addEventListener('pointermove', e => {
+  const r = hero.getBoundingClientRect();
+  const x = (e.clientX - r.left) / r.width, y = (e.clientY - r.top) / r.height;
+  hero.classList.add('touch');
+  hero.style.setProperty('--ry', ((x - .5) * 40).toFixed(1) + 'deg');
+  hero.style.setProperty('--rx', ((.5 - y) * 40).toFixed(1) + 'deg');
+  hero.style.setProperty('--mx', (x * 100).toFixed(0) + '%');
+  hero.style.setProperty('--my', (y * 100).toFixed(0) + '%');
+});
+hero.addEventListener('pointerleave', () => hero.classList.remove('touch'));
+
 $('types').addEventListener('click', e => { const b = e.target.closest('.type'); if (b) select(+b.dataset.i); });
 
 function tick() {
