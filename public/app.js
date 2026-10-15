@@ -53,7 +53,6 @@ function select(i) {
   $('name').textContent = 'Pull ' + p.name;
   $('tag').textContent = p.ends ? 'Limité' : p.weekend ? 'Week-end' : 'Permanent';
   $('p1').textContent = p.price;
-  $('p10').textContent = (p.price * 9).toLocaleString('fr');
   renderTypes();
   tick();
 }

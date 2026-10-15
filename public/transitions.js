@@ -73,8 +73,7 @@ try { choice = Math.min(+localStorage.getItem('takoras-pixel') || 0, TRANSITIONS
 
 function showOpening(fade = 0) {
   if (opening.classList.contains('on')) return;
-  const p = PULLS[current];
-  $('op-coin').innerHTML = p.img ? `<img src="${p.img}" alt="">` : coin(p.color, 200);
+  startOpening();
   opening.classList.add('on');
   opening.setAttribute('aria-hidden', 'false');
   if (fade) opening.animate([{ opacity: 0 }, { opacity: 1 }], { duration: fade });
@@ -87,10 +86,9 @@ function closeOpening() {
 }
 
 let busy = false;
-async function runTransition(n) {
+async function runTransition() {
   if (busy) return;
   busy = true;
-  $('op-tag').textContent = `Pull ${PULLS[current].name} ×${n}`;
   const t0 = performance.now();
   try {
     // Filet de sécurité : si le navigateur ne joue pas l'animation (onglet en arrière-plan…), on ouvre quand même
@@ -105,7 +103,7 @@ async function runTransition(n) {
   }
 }
 
-document.querySelectorAll('.pull-btn').forEach(b => b.addEventListener('click', () => runTransition(+b.dataset.n)));
+document.querySelectorAll('.pull-btn').forEach(b => b.addEventListener('click', () => runTransition()));
 $('op-back').addEventListener('click', closeOpening);
 addEventListener('keydown', e => { if (e.key === 'Escape') closeOpening(); });
 

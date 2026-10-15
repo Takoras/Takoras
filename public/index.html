@@ -41,8 +41,7 @@
         <h1 id="name">Pull Takoras</h1>
         <p class="timer" id="timer"></p>
         <div class="actions">
-          <button class="btn primary pull-btn" data-n="1">Pull ×1 · <span id="p1">100</span> ◆</button>
-          <button class="btn ghost pull-btn" data-n="10">Pull ×10 · <span id="p10">900</span> ◆</button>
+          <button class="btn primary pull-btn">Pull · <span id="p1">100</span> ◆</button>
         </div>
       </div>
 
@@ -78,11 +77,15 @@
 
   <div class="opening" id="opening" aria-hidden="true">
     <div class="op-glow"></div>
-    <div class="op-coin" id="op-coin"></div>
-    <div class="eyebrow" id="op-tag">Pull ×1</div>
-    <h2 class="op-title">Ouverture…</h2>
-    <p class="muted">Ici viendra l'animation d'ouverture.</p>
-    <button class="btn ghost" id="op-back">Retour</button>
+    <div class="eyebrow" id="op-tag">Pull Takoras</div>
+    <div class="op-odds" id="op-odds">1/1</div>
+    <button class="op-coin" id="op-coin" aria-label="Cliquer pour faire monter la chance"></button>
+    <p class="op-hint" id="op-hint">Clique sur le jeton</p>
+    <h2 class="op-title" id="op-name"></h2>
+    <div class="op-actions" id="op-actions" hidden>
+      <button class="btn primary" id="op-again">Pull encore · <span id="op-price">100</span> ◆</button>
+      <button class="btn ghost" id="op-back">Retour</button>
+    </div>
   </div>
   <div class="fx" id="fx"></div>
 
@@ -94,5 +97,6 @@
 
   <script src="app.js"></script>
   <script src="transitions.js"></script>
+  <script src="opening.js"></script>
 </body>
 </html>
