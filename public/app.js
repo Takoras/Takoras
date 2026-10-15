@@ -1,5 +1,6 @@
 // Données d'exemple : à remplacer par Supabase plus tard
 const COLORS = {
+  takoras: ['#c7d8ff', '#8ea8f7', '#2a2f6b', '120, 140, 240'],
   violet: ['#ddd6fe', '#8b5cf6', '#3b1a7a', '139, 92, 246'],
   feu:    ['#fed7aa', '#f97316', '#7c2d12', '249, 115, 22'],
   eau:    ['#bae6fd', '#0ea5e9', '#0c4a6e', '14, 165, 233'],
@@ -10,7 +11,7 @@ const COLORS = {
 
 const hoursFromNow = h => Date.now() + h * 3600e3;
 const PULLS = [
-  { group: 'Permanents', name: 'Classique', color: 'violet', price: 100 },
+  { group: 'Permanents', name: 'Takoras', color: 'takoras', price: 100, img: 'img/jeton-takoras.png' },
   { group: 'Permanents', name: 'Feu', color: 'feu', price: 150 },
   { group: 'Permanents', name: 'Eau', color: 'eau', price: 150 },
   { group: 'Permanents', name: 'Terre', color: 'terre', price: 150 },
@@ -20,7 +21,10 @@ const PULLS = [
 ];
 
 const coinStyle = c => { const [hi, mid, lo, g] = COLORS[c]; return `--hi:${hi};--mid:${mid};--lo:${lo};--glow:${g}`; };
-const coin = (c, s, t = '') => `<i class="coin" style="${coinStyle(c)};--s:${s}px">${t}</i>`;
+const IMGS = Object.fromEntries(PULLS.filter(p => p.img).map(p => [p.color, p.img]));
+const coin = (c, s, t = '') => IMGS[c]
+  ? `<img class="coin-img" src="${IMGS[c]}" alt="" style="--glow:${COLORS[c][3]};width:${s}px;height:${s}px">`
+  : `<i class="coin" style="${coinStyle(c)};--s:${s}px">${t}</i>`;
 const $ = id => document.getElementById(id);
 
 // Types de pull
@@ -38,6 +42,8 @@ function select(i) {
   current = i;
   const p = PULLS[i];
   document.documentElement.style.cssText = coinStyle(p.color);
+  $('coin').classList.toggle('has-img', !!p.img);
+  $('coin').innerHTML = p.img ? `<img src="${p.img}" alt="Jeton ${p.name}">` : '<span>T</span>';
   $('name').textContent = 'Pull ' + p.name;
   $('tag').textContent = p.ends ? 'Limité' : p.weekend ? 'Week-end' : 'Permanent';
   $('p1').textContent = p.price;
@@ -62,7 +68,7 @@ function tick() {
 setInterval(tick, 1000);
 
 // Historique perso
-const HIST = [['Classique', 'violet', 1, 2], ['Feu', 'feu', 10, 7], ['Classique', 'violet', 1, 15], ['Eau', 'eau', 1, 42], ['Éclipse', 'rose', 10, 60], ['Classique', 'violet', 1, 120]];
+const HIST = [['Takoras', 'takoras', 1, 2], ['Feu', 'feu', 10, 7], ['Takoras', 'takoras', 1, 15], ['Eau', 'eau', 1, 42], ['Éclipse', 'rose', 10, 60], ['Takoras', 'takoras', 1, 120]];
 $('hist').innerHTML = HIST.map(([n, c, x, m]) =>
   `<div class="h-row">${coin(c, 26)}<div>Pull ${n} ×${x}<small>il y a ${m < 60 ? m + ' min' : Math.round(m / 60) + ' h'}</small></div><span class="muted">?</span></div>`).join('');
 
