@@ -66,7 +66,7 @@ function startOpening() {
   $('op-price').textContent = p.price;
   $('op-odds').textContent = '1/1';
   setTier(1);
-  opening.classList.remove('hold', 'rare', 'revealed', 'fancy');
+  opening.classList.remove('hold', 'rare', 'revealed');
   opCoin.className = 'op-coin';
   opCoin.style.setProperty('--boost', 0);
   opCoin.innerHTML = '<div class="zoom"><div class="spin"><img src="img/jetons/mystere.png" alt="Jeton mystère"></div></div>';
@@ -101,13 +101,13 @@ function shake(power = 1) {
 }
 
 // Flash blanc doux (à partir de 1/5000)
-function flash() {
+function flash(power = .45, ms = 500) {
   opening.querySelectorAll('.op-flash').forEach(f => f.remove());
   const f = document.createElement('div');
   f.className = 'op-flash';
   f.style.cssText = 'position:absolute;inset:0;background:#fff;pointer-events:none';
   opening.appendChild(f);
-  f.animate([{ opacity: .45 }, { opacity: 0 }], { duration: 500, easing: 'ease-out' }).finished.then(() => f.remove());
+  f.animate([{ opacity: power }, { opacity: 0 }], { duration: ms, easing: 'ease-out' }).finished.then(() => f.remove());
 }
 
 function burst(n = 5) {
@@ -148,42 +148,44 @@ function hold() {
   opening.classList.add('hold');
   opening.classList.toggle('rare', r.result.odds >= RARE);
   opCoin.classList.remove('hit');
+  flash(.18, 260); // mini flash : le compteur ne montera plus
   $('op-hint').textContent = 'Clique pour révéler';
   setTimeout(() => { if (run === r) r.canReveal = true; }, 450); // évite de révéler par accident en spammant
 }
 
 // Révélation : le jeton tourne en se penchant, la face change à mi-chemin, puis il glisse à gauche et la fiche arrive
-async function reveal(fast) {
+// Fond de la révélation : deux bandes en escalier façon pixel art, à la couleur du jeton
+function stripes(color) {
+  const W = 2000, H = 1267, step = 70, rise = 7, thick = 100;
+  const band = (x0, y0) => {
+    const top = [], bottom = [];
+    for (let x = x0; x < W + step; x += step) {
+      const y = y0 - Math.floor((x - x0) / step) * rise;
+      top.push(`${x},${y} ${x + step},${y}`);
+      bottom.unshift(`${x + step},${y + thick} ${x},${y + thick}`);
+    }
+    return `<polygon points="${top.join(' ')} ${bottom.join(' ')}" fill="${color}"/>`;
+  };
+  const svg = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 ${W} ${H}" preserveAspectRatio="xMidYMid slice" shape-rendering="crispEdges">${band(-100, 300)}${band(250, 1180)}</svg>`;
+  return `url("data:image/svg+xml,${encodeURIComponent(svg)}")`;
+}
+
+// Révélation : clic → la face change direct, le jeton part à gauche d'un coup sec, la fiche apparaît à droite
+function reveal() {
   const r = run, j = r.result;
   r.done = true;
-  const spin = opCoin.querySelector('.spin'), rare = j.odds >= RARE;
   opening.classList.remove('hold');
   opCoin.classList.add('done');
   $('op-hint').textContent = '';
-  const swap = () => {
-    if (run !== r) return;
-    opening.style.setProperty('--tier', hexRGB(j.glow));
-    spin.innerHTML = `<img src="${TEMPLATE}" alt="${j.name}" style="filter:drop-shadow(0 0 18px ${j.glow})">`;
-  };
-  if (fast) {
-    await spin.animate([{ transform: 'rotateY(0)' }, { transform: 'rotateY(90deg)' }], { duration: 110, easing: 'ease-in' }).finished;
-    swap();
-    await spin.animate([{ transform: 'rotateY(-90deg)' }, { transform: 'rotateY(0)' }], { duration: 150, easing: 'ease-out' }).finished;
-  } else {
-    await spin.animate([{ transform: 'rotateZ(0) rotateY(0)' }, { transform: 'rotateZ(-8deg) rotateY(90deg)' }], { duration: rare ? 420 : 300, easing: 'ease-in' }).finished;
-    swap();
-    if (rare) { flash(); shake(1.2); }
-    burst(rare ? 18 : 10);
-    await spin.animate([
-      { transform: 'rotateZ(-8deg) rotateY(90deg) scale(1)' },
-      { transform: 'rotateZ(-6deg) rotateY(360deg) scale(1.12)', offset: .75 },
-      { transform: 'rotateZ(-6deg) rotateY(360deg) scale(1)' },
-    ], { duration: rare ? 900 : 650, easing: 'cubic-bezier(.2,.7,.3,1)', fill: 'forwards' }).finished;
-  }
-  if (run !== r) return;
+  opening.style.setProperty('--tier', hexRGB(j.glow));
+  $('op-bg').style.backgroundImage = stripes(j.glow);
+  opCoin.querySelector('.spin').innerHTML = `<img src="${TEMPLATE}" alt="${j.name}" style="filter:drop-shadow(0 0 18px ${j.glow})">`;
   fillInfo(j);
-  opening.classList.toggle('fancy', j.odds >= FAST);
+  opening.classList.toggle('rare', j.odds >= RARE);
   opening.classList.add('revealed');
+  burst(j.odds >= RARE ? 14 : 8);
+  if (j.odds >= RARE) flash(.3, 350);
+  setTimeout(() => { if (run === r) shake(j.odds >= RARE ? .8 : .45); }, 300); // impact à l'arrivée
   addToHistory(j);
 }
 
@@ -197,7 +199,7 @@ function addToHistory(j) {
 
 function tap() {
   if (!run || run.done) return;
-  if (run.holding) { if (run.canReveal) reveal(false); return; }
+  if (run.holding) { if (run.canReveal) reveal(); return; }
   if (!run.queue.length) return; // entre le dernier palier et la pause
   const next = run.queue.shift();
   countTo(run.shown, next);
@@ -207,7 +209,7 @@ function tap() {
   effects(next);
   $('op-hint').textContent = '';
   if (!run.queue.length) {
-    if (run.result.odds < FAST) { run.done = true; setTimeout(() => reveal(true), 120); }
+    if (run.result.odds < FAST) { run.done = true; setTimeout(reveal, 120); }
     else setTimeout(hold, 200);
   }
 }
