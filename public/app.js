@@ -46,6 +46,10 @@ function select(i) {
   $('coin').innerHTML = p.img
     ? `<div class="tilt"><img src="${p.img}" alt="Jeton ${p.name}"><i class="glare" style="-webkit-mask-image:url(${p.img});mask-image:url(${p.img})"></i></div>`
     : '<span>T</span>';
+  document.querySelectorAll('.float').forEach(f => {
+    f.classList.toggle('has-img', !!p.img);
+    f.innerHTML = p.img ? `<img src="${p.img}" alt="">` : '';
+  });
   $('name').textContent = 'Pull ' + p.name;
   $('tag').textContent = p.ends ? 'Limité' : p.weekend ? 'Week-end' : 'Permanent';
   $('p1').textContent = p.price;
