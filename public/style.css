@@ -507,3 +507,11 @@ html.lock, html.lock body { overflow: hidden; }
 .adm-danger { width: 100%; margin-top: 8px; background: rgba(239, 68, 68, .15); color: #fca5a5; border: 1px solid rgba(239, 68, 68, .35); }
 .adm-msg { font-size: 12px; color: #86efac; min-height: 16px; margin: 6px 0 0; }
 .adm-msg.err { color: #fca5a5; }
+
+/* Connexion Discord / Google */
+.acc-oauth { width: 100%; display: flex; align-items: center; justify-content: center; gap: 10px; margin-top: 10px; padding: 13px; }
+.acc-oauth.discord { background: #5865f2; }
+.acc-oauth.google { background: #fff; color: #1f1f1f; }
+
+/* Bouton admin caché tant que le compte n'est pas admin */
+.mute[hidden] { display: none; }
