@@ -11,16 +11,17 @@ function origin() {
 }
 const far = o => Math.hypot(Math.max(o.x, innerWidth - o.x), Math.max(o.y, innerHeight - o.y));
 
-// Transition « Pixels · Onde » : de petits pixels naissent en vague depuis le jeton et grossissent
-// jusqu'à couvrir l'écran, l'ouverture apparaît dessous, puis ils rapetissent et disparaissent.
+// Transition « Pixels » : de petits pixels naissent sur les bords et grossissent vers le jeton
+// jusqu'à couvrir l'écran, l'ouverture apparaît dessous, puis ils s'effacent depuis le centre :
+// vite au centre, de plus en plus lentement vers les bords.
 const css = v => getComputedStyle(document.documentElement).getPropertyValue(v).trim();
 
 function grid(cols) {
   const w = Math.ceil(innerWidth / cols), rows = Math.ceil(innerHeight / w);
-  const tints = [css('--hi'), css('--mid'), css('--lo')];
+  const color = css('--mid');
   const cells = [];
   for (let y = 0; y < rows; y++) for (let x = 0; x < cols; x++) {
-    const d = el(`left:${x * w}px;top:${y * w}px;width:${w + 1}px;height:${w + 1}px;transform:scale(0);background:${tints[Math.floor(Math.random() * 3)]}`);
+    const d = el(`left:${x * w}px;top:${y * w}px;width:${w + 1}px;height:${w + 1}px;transform:scale(0);background:${color}`);
     cells.push({ d, cx: x * w + w / 2, cy: y * w + w / 2 });
   }
   return cells;
@@ -38,22 +39,23 @@ function sparks(n = 12) {
   }
 }
 
-const GROW = 80, SPREAD = 120; // 80 + 120 = 200 ms par phase
 async function onde() {
   sparks();
   const o = origin(), R = far(o);
   const cells = grid(innerWidth < 640 ? 10 : 18);
-  const delay = c => Math.min(1, Math.hypot(c.cx - o.x, c.cy - o.y) / R) * SPREAD;
+  const d = c => Math.min(1, Math.hypot(c.cx - o.x, c.cy - o.y) / R); // 0 = jeton, 1 = bord
+  // Entrée : des bords vers le centre (170 ms max)
   await Promise.all(cells.map(c => c.d.animate([{ transform: 'scale(0)' }, { transform: 'scale(1)' }],
-    { duration: GROW, delay: delay(c), easing: 'ease-out', fill: 'forwards' }).finished));
+    { duration: 60, delay: (1 - d(c)) * 110, easing: 'ease-out', fill: 'forwards' }).finished));
   showOpening();
+  // Sortie : du centre vers les bords, rapide au centre puis de plus en plus lent (250 ms max)
   await Promise.all(cells.map(c => c.d.animate([{ transform: 'scale(1)' }, { transform: 'scale(0)' }],
-    { duration: GROW, delay: delay(c), easing: 'ease-in', fill: 'forwards' }).finished));
+    { duration: 50 + d(c) * 110, delay: d(c) * 90, easing: 'cubic-bezier(.3,0,.2,1)', fill: 'forwards' }).finished));
   return 0;
 }
 
 const TRANSITIONS = [
-  ['Pixels · Onde', 'Petits pixels qui grossissent en vague depuis le jeton', onde],
+  ['Pixels', 'Des bords vers le jeton, puis s\'efface du centre vers les bords', onde],
 ];
 
 let choice = 0;
