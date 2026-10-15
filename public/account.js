@@ -29,15 +29,18 @@ async function loadAccount(user) {
   ACC.hist = [];
   if (user) {
     const [{ data: prof }, { data: rows }] = await Promise.all([
-      sb.from('profiles').select('pseudo').eq('id', user.id).maybeSingle(),
+      sb.from('profiles').select('pseudo, avatar').eq('id', user.id).maybeSingle(),
       sb.from('pulls').select('serie, jeton, odds, created_at').order('created_at', { ascending: false }).limit(30),
     ]);
     ACC.pseudo = prof?.pseudo || null; // null = pseudo pas encore choisi
+    ACC.avatar = prof?.avatar || 'discord';
+    ACC.discord_avatar = user.user_metadata?.avatar_url || null;
     ACC.hist = (rows || []).map(rowToHist);
   }
   renderAccBtn();
   if (typeof renderHist === 'function') { renderHist(); renderBoard(); }
   if (typeof renderActions === 'function') renderActions(); // boutons de pull : « Se connecter » ou « Ouvrir »
+  if (typeof route === 'function' && location.hash) route(); // la page ouverte se met à jour avec le compte
   if (user && typeof ecoSync === 'function') ecoSync(); else { ACC.isAdmin = false; if (typeof renderAdminBtn === 'function') renderAdminBtn(); }
 }
 
@@ -57,8 +60,9 @@ function renderAccBtn() {
   const b = document.getElementById('open-account');
   b.classList.toggle('in', !!ACC.user);
   const ps = ACC.pseudo || '?';
+  const pp = typeof avatarHTML === 'function' ? avatarHTML({ avatar: ACC.avatar, discord_avatar: ACC.discord_avatar, pseudo: ps }, 26) : `<span class="av">${esc(ps[0].toUpperCase())}</span>`;
   b.innerHTML = ACC.user
-    ? `<span class="av">${esc(ps[0].toUpperCase())}</span><span class="acc-name">${esc(ps)}</span>`
+    ? `${pp}<span class="acc-name">${esc(ps)}</span>`
     : `<span>${t('login')}</span>`;
 }
 const esc = s => String(s).replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' })[c]);
@@ -84,6 +88,7 @@ const esc = s => String(s).replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;'
     me: () => [t('acc_my_account'), `
       <div class="acc-me"><span class="av">${esc((ACC.pseudo || '?')[0].toUpperCase())}</span><div><b>${esc(ACC.pseudo || '?')}</b><small class="muted">${esc(ACC.user.email || '')}</small></div></div>
       <p class="muted acc-p">${t('acc_me_p')}</p>
+      <a class="btn primary acc-prof" href="#profil">${t('my_profile')}</a>
       <button class="btn ghost acc-out">${t('logout')}</button>`],
   };
 
@@ -120,6 +125,7 @@ const esc = s => String(s).replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;'
       if (error) fail('err_generic');
       return;
     }
+    if (e.target.closest('.acc-prof')) panel.classList.remove('on');
     if (e.target.closest('.acc-out')) { await sb.auth.signOut(); panel.classList.remove('on'); }
   });
   document.getElementById('open-account').addEventListener('click', () => {

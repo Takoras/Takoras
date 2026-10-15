@@ -39,19 +39,21 @@
     <div class="wrap nav-in">
       <a class="logo" href="/"><img src="img/logo.png" alt="">TAKORAS</a>
       <div class="links">
-        <a class="on" href="#" data-i18n="nav_home">Accueil</a>
-        <a href="#classement" data-i18n="nav_board">Classement</a>
+        <a href="#" data-page="home" data-i18n="nav_home">Accueil</a>
+        <a href="#inventaire" data-page="inv" data-i18n="nav_inv">Inventaire</a>
+        <a href="#boutique" data-page="shop" data-i18n="nav_shop">Boutique</a>
+        <a href="#classement" data-page="board" data-i18n="nav_board">Classement</a>
       </div>
       <button class="mute admin-btn" id="open-admin" hidden aria-label="Panel admin"><svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg></button>
       <button class="mute" id="open-settings" aria-label="Paramètres"><svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.7 1.7 0 0 0 .3 1.8l.1.1a2 2 0 1 1-2.8 2.8l-.1-.1a1.7 1.7 0 0 0-1.8-.3 1.7 1.7 0 0 0-1 1.5V21a2 2 0 1 1-4 0v-.1a1.7 1.7 0 0 0-1.1-1.5 1.7 1.7 0 0 0-1.8.3l-.1.1a2 2 0 1 1-2.8-2.8l.1-.1a1.7 1.7 0 0 0 .3-1.8 1.7 1.7 0 0 0-1.5-1H3a2 2 0 1 1 0-4h.1a1.7 1.7 0 0 0 1.5-1.1 1.7 1.7 0 0 0-.3-1.8l-.1-.1a2 2 0 1 1 2.8-2.8l.1.1a1.7 1.7 0 0 0 1.8.3H9a1.7 1.7 0 0 0 1-1.5V3a2 2 0 1 1 4 0v.1a1.7 1.7 0 0 0 1 1.5 1.7 1.7 0 0 0 1.8-.3l.1-.1a2 2 0 1 1 2.8 2.8l-.1.1a1.7 1.7 0 0 0-.3 1.8V9a1.7 1.7 0 0 0 1.5 1H21a2 2 0 1 1 0 4h-.1a1.7 1.7 0 0 0-1.5 1z"/></svg></button>
       <button class="mute" id="mute"></button>
-      <div class="bal"><i class="mini-coin"></i><b id="bal">0</b></div>
+      <div class="bal"><img class="piece" src="img/piece.png" alt=""><b id="bal">0</b></div>
       <button class="acc-btn" id="open-account"></button>
     </div>
   </nav>
 
   <main>
-    <section class="wrap stage">
+    <section class="wrap stage home-sec">
       <aside class="panel types">
         <div class="panel-head"><b data-i18n="pulls">Pulls</b></div>
         <div id="types"></div>
@@ -79,12 +81,12 @@
       </aside>
     </section>
 
-    <section class="wrap live">
+    <section class="wrap live home-sec">
       <div class="live-head"><span class="dot"></span><b data-i18n="live">En direct</b></div>
       <div class="ticker"><div class="track" id="live"></div></div>
     </section>
 
-    <section class="wrap board" id="classement">
+    <section class="wrap board home-sec" id="classement">
       <div class="board-head">
         <div>
           <div class="eyebrow" data-i18n="board_tag">Classement</div>
@@ -99,7 +101,14 @@
       <div class="podium" id="podium"></div>
       <div class="list" id="list"></div>
     </section>
+    <!-- Pages (affichées à la place de l'accueil) -->
+    <section class="wrap page" id="page-inv" hidden></section>
+    <section class="wrap page" id="page-shop" hidden></section>
+    <section class="wrap page" id="page-profile" hidden></section>
   </main>
+
+  <!-- Fenêtre d'aperçu d'un jeton -->
+  <div class="modal" id="jeton-modal"><div class="modal-card jm-card" id="jm-card"></div></div>
 
   <footer class="wrap foot">© 2026 Takoras</footer>
 
@@ -144,29 +153,40 @@
   </div>
   <div class="fx" id="fx"></div>
 
-  <div class="debug admin" id="debug" hidden>
-    <div class="debug-head"><b>Panel admin</b><button id="debug-close" aria-label="Fermer">✕</button></div>
-
-    <div class="dbg-sec">Joueurs</div>
-    <input class="adm-in" id="adm-search" placeholder="Chercher un pseudo…" autocomplete="off">
-    <div class="adm-list" id="adm-list"></div>
-    <div class="adm-sel" id="adm-sel" hidden>
-      <b id="adm-sel-name"></b>
-      <div class="adm-row"><input class="adm-in" id="adm-coins" type="number" placeholder="◆ (ex. 1000 ou -500)"><input class="adm-in" id="adm-pulls" type="number" placeholder="Pulls"><button id="adm-give">Donner</button></div>
-      <div class="adm-row"><select id="adm-jeton"></select><button id="adm-give-jeton">Donner le jeton</button></div>
-      <button class="adm-danger" id="adm-reset">Remettre ce joueur à zéro</button>
+  <div class="debug admin2" id="debug" hidden>
+    <div class="ad-head">
+      <b>🛡️ Panel admin</b>
+      <div class="ad-tabs" id="ad-tabs"><button data-tab="players" class="on">Joueurs</button><button data-tab="global">Global</button><button data-tab="tests">Tests</button></div>
+      <button class="set-close" id="debug-close" aria-label="Fermer">✕</button>
     </div>
-
-    <div class="dbg-sec">Tout le monde</div>
-    <div class="adm-row"><input class="adm-in" id="adm-all-coins" type="number" placeholder="◆"><input class="adm-in" id="adm-all-pulls" type="number" placeholder="Pulls"><button id="adm-give-all">Donner à tous</button></div>
-    <button class="adm-danger" id="adm-reset-all">Remettre TOUS les joueurs à zéro</button>
+    <div class="ad-body">
+      <div class="ad-tab" data-tab="players">
+        <div class="ad-left">
+          <input class="adm-in" id="adm-search" placeholder="Chercher un pseudo…" autocomplete="off">
+          <div class="ad-table" id="adm-list"></div>
+        </div>
+        <div class="ad-right" id="adm-detail"><p class="muted center">Choisis un joueur à gauche</p></div>
+      </div>
+      <div class="ad-tab" data-tab="global" hidden>
+        <div class="ad-stats" id="adm-stats"></div>
+        <div class="ad-box">
+          <h4>Donner à tous les joueurs</h4>
+          <div class="adm-row"><input class="adm-in" id="adm-all-coins" type="number" placeholder="Pièces"><input class="adm-in" id="adm-all-pulls" type="number" placeholder="Pulls"><button id="adm-give-all">Donner à tous</button></div>
+        </div>
+        <div class="ad-box danger">
+          <h4>Zone dangereuse</h4>
+          <p class="muted small">Efface les tirages, les pièces, le stock, les effets et les achats de TOUS les joueurs.</p>
+          <button class="adm-danger" id="adm-reset-all">Remettre tous les joueurs à zéro</button>
+        </div>
+      </div>
+      <div class="ad-tab" data-tab="tests" hidden>
+        <div class="ad-box"><h4>Luck (ton compte)</h4><div class="dbg-row" id="dbg-luck"></div></div>
+        <div class="ad-box"><h4>Jeton forcé (ton compte)</h4><select id="dbg-force"></select></div>
+        <div class="ad-box"><h4>Tester un effet</h4><div class="dbg-row" id="dbg-fx"></div></div>
+        <button class="btn primary dbg-go" id="dbg-open">Ouvrir un pull de test (sans stock, non enregistré)</button>
+      </div>
+    </div>
     <p class="adm-msg" id="adm-msg"></p>
-
-    <div class="dbg-sec">Tests (ton compte)</div>
-    <div class="dbg-row" id="dbg-luck"></div>
-    <select id="dbg-force"></select>
-    <div class="dbg-row" id="dbg-fx"></div>
-    <button class="btn primary dbg-go" id="dbg-open">Ouvrir un pull de test (sans stock, non enregistré)</button>
   </div>
 
   <div class="settings" id="settings">
@@ -191,6 +211,10 @@
   <script src="transitions.js"></script>
   <script src="opening.js"></script>
   <script src="economy.js"></script>
+  <script src="ui.js"></script>
+  <script src="inventory.js"></script>
+  <script src="shop.js"></script>
+  <script src="profile.js"></script>
   <script src="admin.js"></script>
 </body>
 </html>

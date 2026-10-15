@@ -16,14 +16,14 @@ const saveEco = () => { try { localStorage.setItem(ECO_KEY, JSON.stringify(eco))
 function regen() {
   const now = Date.now();
   if (eco.stock >= eco.max) { eco.last = now; return; }
-  const gained = Math.floor((now - eco.last) / REGEN);
+  const gained = Math.floor((now - eco.last) / (eco.step || REGEN));
   if (gained > 0) {
     eco.stock = Math.min(eco.max, eco.stock + gained);
-    eco.last = eco.stock >= eco.max ? now : eco.last + gained * REGEN;
+    eco.last = eco.stock >= eco.max ? now : eco.last + gained * (eco.step || REGEN);
     saveEco();
   }
 }
-const nextIn = () => Math.max(0, REGEN - (Date.now() - eco.last));
+const nextIn = () => Math.max(0, (eco.step || REGEN) - (Date.now() - eco.last));
 const mmss = ms => { const s = Math.ceil(ms / 1000); return `${String(Math.floor(s / 60)).padStart(2, '0')}:${String(s % 60).padStart(2, '0')}`; };
 const fmt = n => n.toLocaleString(LOCALE());
 const isTakoras = () => PULLS[current].name === 'Takoras';
@@ -32,7 +32,9 @@ const isTakoras = () => PULLS[current].name === 'Takoras';
 function applyState(st) {
   if (!st) return;
   eco.coins = st.coins; eco.stock = st.stock; eco.max = st.max;
-  eco.last = Date.now() - (REGEN / 1000 - st.next_in) * 1000;
+  eco.step = (st.step || 300) * 1000;
+  eco.last = Date.now() - (eco.step / 1000 - st.next_in) * 1000;
+  eco.luck_mult = +st.luck_mult || 1; eco.luck_left = st.luck_left || 0; eco.fast_left = st.fast_left || 0; eco.synced = Date.now();
   ACC.isAdmin = !!st.admin;
   if (typeof renderAdminBtn === 'function') renderAdminBtn();
   render();
@@ -88,8 +90,9 @@ function renderActions() {
       <button class="btn ghost" data-open="all" ${eco.stock > 1 ? '' : 'disabled'}>${t('open_all', { n: eco.stock })}</button>
     </div>
     ${eco.max < TOP_MAX
-      ? `<button class="btn upgrade" data-up ${eco.coins >= cost ? '' : 'disabled'}>${t('stock_max', { a: eco.max, b: eco.max + 1 })} · ${fmt(cost)} ◆</button>`
-      : `<span class="muted small">${t('stock_top')}</span>`}`;
+      ? `<button class="btn upgrade" data-up ${eco.coins >= cost ? '' : 'disabled'}>${t('stock_max', { a: eco.max, b: eco.max + 1 })} · ${money(cost)}</button>`
+      : `<span class="muted small">${t('stock_top')}</span>`}
+    ${typeof effectsHTML === 'function' ? `<div class="fx-row">${effectsHTML()}</div>` : ''}`;
 }
 $('actions').addEventListener('click', e => {
   const b = e.target.closest('button'); if (!b || b.disabled) return;
@@ -110,6 +113,7 @@ function ecoDecorate() {
 
 function render() {
   $('bal').textContent = fmt(eco.coins);
+  const sb2 = document.querySelector('.shop-bal'); if (sb2 && ACC.user) sb2.innerHTML = money(eco.coins);
   renderActions();
   if (opening.classList.contains('on')) ecoDecorate();
 }
