@@ -75,8 +75,7 @@ const esc = s => String(s).replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;'
   const VIEWS = {
     login: () => [t('login'), `
       <p class="muted acc-p">${t('acc_oauth_p')}</p>
-      <button type="button" class="btn acc-oauth discord" data-oauth="discord">${DISCORD}${t('acc_with', { p: 'Discord' })}</button>
-      <button type="button" class="btn acc-oauth google" data-oauth="google">${GOOGLE}${t('acc_with', { p: 'Google' })}</button>`],
+      <button type="button" class="btn acc-oauth discord" data-oauth="discord">${DISCORD}${t('acc_with', { p: 'Discord' })}</button>`],  // Google : désactivé pour l'instant (remettre le bouton data-oauth="google" pour le réactiver)
     pseudo: () => [t('acc_choose_pseudo'), `
       <p class="muted acc-p">${t('acc_choose_pseudo_p')}</p>
       <label class="acc-field"><span>${t('acc_pseudo')}</span><input name="pseudo" type="text" required maxlength="16" autocomplete="nickname"></label>
