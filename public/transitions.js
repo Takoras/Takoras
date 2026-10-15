@@ -11,71 +11,49 @@ function origin() {
 }
 const far = o => Math.hypot(Math.max(o.x, innerWidth - o.x), Math.max(o.y, innerHeight - o.y));
 
-// Transition « Pixels » : 6 versions. La grille couvre l'écran, l'ouverture apparaît dessous, puis la grille s'efface.
+// Transition « Pixels · Onde » : de petits pixels naissent en vague depuis le jeton et grossissent
+// jusqu'à couvrir l'écran, l'ouverture apparaît dessous, puis ils rapetissent et disparaissent.
 const css = v => getComputedStyle(document.documentElement).getPropertyValue(v).trim();
 
 function grid(cols) {
   const w = Math.ceil(innerWidth / cols), rows = Math.ceil(innerHeight / w);
-  const hi = css('--hi'), mid = css('--mid'), lo = css('--lo'), g = glowRGB();
+  const tints = [css('--hi'), css('--mid'), css('--lo')];
   const cells = [];
   for (let y = 0; y < rows; y++) for (let x = 0; x < cols; x++) {
-    // Chaque pixel : dégradé + biseau clair/sombre façon pixel art + halo
-    const d = el(`left:${x * w}px;top:${y * w}px;width:${w + 1}px;height:${w + 1}px;opacity:0;
-      background:linear-gradient(135deg, ${hi}, ${mid} 55%, ${lo});
-      box-shadow:0 0 ${w * .35}px rgba(${g},.75), inset ${w * .08}px ${w * .08}px 0 rgba(255,255,255,.35), inset -${w * .08}px -${w * .08}px 0 rgba(0,0,0,.3)`);
-    cells.push({ d, x, y, cx: x * w + w / 2, cy: y * w + w / 2 });
+    const d = el(`left:${x * w}px;top:${y * w}px;width:${w + 1}px;height:${w + 1}px;transform:scale(0);background:${tints[Math.floor(Math.random() * 3)]}`);
+    cells.push({ d, cx: x * w + w / 2, cy: y * w + w / 2 });
   }
-  return { cells, cols, rows, w };
+  return cells;
 }
 
-// Petites étincelles carrées qui jaillissent du jeton (volontairement peu nombreuses)
+// Petits carrés qui jaillissent du jeton (peu nombreux, sans glow)
 function sparks(n = 12) {
-  const o = origin(), hi = css('--hi'), g = glowRGB();
+  const o = origin(), tints = [css('--hi'), css('--mid')];
   for (let i = 0; i < n; i++) {
     const s = 5 + Math.random() * 6, a = Math.random() * Math.PI * 2, r = o.r * (1.2 + Math.random() * 1.4);
-    const p = el(`left:${o.x - s / 2}px;top:${o.y - s / 2}px;width:${s}px;height:${s}px;background:${hi};box-shadow:0 0 ${s * 2}px rgba(${g},.9);z-index:2`);
-    p.animate([
+    el(`left:${o.x - s / 2}px;top:${o.y - s / 2}px;width:${s}px;height:${s}px;background:${tints[i % 2]};z-index:2`).animate([
       { transform: 'translate(0,0) scale(1)', opacity: 1 },
-      { transform: `translate(${Math.cos(a) * r}px,${Math.sin(a) * r}px) scale(.3) rotate(${Math.random() * 180}deg)`, opacity: 0 },
+      { transform: `translate(${Math.cos(a) * r}px,${Math.sin(a) * r}px) scale(.3)`, opacity: 0 },
     ], { duration: 380 + Math.random() * 80, easing: 'cubic-bezier(.2,.7,.3,1)', fill: 'forwards' });
   }
 }
 
-const IN = 70, OUT = 70, SPREAD = 130; // 70 + 130 = 200 ms par phase
-// order(c, G) renvoie 0..1 : le moment où le pixel apparaît dans la vague
-async function pixels(order, { pop = false, flash = false, fall = false, outOrder } = {}) {
+const GROW = 80, SPREAD = 120; // 80 + 120 = 200 ms par phase
+async function onde() {
   sparks();
-  if (flash) el('inset:0;background:#fff;z-index:3').animate([{ opacity: 0 }, { opacity: .35 }, { opacity: 0 }], { duration: 220, fill: 'forwards' });
-  const G = grid(innerWidth < 640 ? 8 : 14);
-  const inKF = fall
-    ? c => [{ opacity: 0, transform: `translateY(-${G.w * 1.5}px)` }, { opacity: 1, transform: 'none' }]
-    : pop
-      ? () => [{ opacity: 0, transform: 'scale(0)' }, { opacity: 1, transform: 'scale(1.15)', offset: .7 }, { opacity: 1, transform: 'scale(1)' }]
-      : flash
-        ? () => [{ opacity: 0, transform: 'scale(1.4)' }, { opacity: 1, transform: 'scale(1)' }]
-        : () => [{ opacity: 0, transform: 'scale(.4)' }, { opacity: 1, transform: 'scale(1)' }];
-  await Promise.all(G.cells.map(c => c.d.animate(inKF(c), { duration: IN, delay: order(c, G) * SPREAD, easing: 'ease-out', fill: 'forwards' }).finished));
+  const o = origin(), R = far(o);
+  const cells = grid(innerWidth < 640 ? 10 : 18);
+  const delay = c => Math.min(1, Math.hypot(c.cx - o.x, c.cy - o.y) / R) * SPREAD;
+  await Promise.all(cells.map(c => c.d.animate([{ transform: 'scale(0)' }, { transform: 'scale(1)' }],
+    { duration: GROW, delay: delay(c), easing: 'ease-out', fill: 'forwards' }).finished));
   showOpening();
-  const out = outOrder || order;
-  await Promise.all(G.cells.map(c => c.d.animate([{ opacity: 1, transform: 'scale(1)' }, { opacity: 0, transform: 'scale(.3)' }],
-    { duration: OUT, delay: out(c, G) * SPREAD, easing: 'ease-in', fill: 'forwards' }).finished));
+  await Promise.all(cells.map(c => c.d.animate([{ transform: 'scale(1)' }, { transform: 'scale(0)' }],
+    { duration: GROW, delay: delay(c), easing: 'ease-in', fill: 'forwards' }).finished));
   return 0;
 }
 
-const dist = (c, G) => { const o = origin(), d = Math.hypot(c.cx - o.x, c.cy - o.y); return Math.min(1, d / far(o)); };
 const TRANSITIONS = [
-  ['Onde', 'Les pixels s\'allument en vague depuis le jeton, puis s\'éteignent dans le même sens',
-    () => pixels(dist)],
-  ['Pluie', 'Les pixels tombent colonne par colonne, façon Tetris',
-    () => pixels((c, G) => (c.y / G.rows) * .6 + Math.random() * .4, { fall: true })],
-  ['Spirale', 'Les pixels tournent autour du jeton en s\'allumant',
-    () => pixels((c, G) => { const o = origin(); const a = (Math.atan2(c.cy - o.y, c.cx - o.x) + Math.PI) / (Math.PI * 2); return (a * .7 + dist(c, G) * .3); })],
-  ['Scintillement', 'Les pixels s\'allument au hasard avec un éclat blanc',
-    () => pixels(() => Math.random(), { flash: true })],
-  ['Diagonale pop', 'Les pixels sautent en diagonale avec un petit rebond',
-    () => pixels((c, G) => (c.x + c.y) / (G.cols + G.rows), { pop: true })],
-  ['Implosion', 'Les pixels arrivent des bords vers le jeton, puis explosent vers l\'extérieur',
-    () => pixels((c, G) => 1 - dist(c, G), { pop: true, outOrder: dist })],
+  ['Pixels · Onde', 'Petits pixels qui grossissent en vague depuis le jeton', onde],
 ];
 
 let choice = 0;
