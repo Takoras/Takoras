@@ -110,7 +110,7 @@ function startOpening() {
   run = { result: findJeton(c.name), queue: c.queue, shown: c.shown, done: false };
   $('op-tag').textContent = 'Pull ' + p.name + (sess.total > 1 ? ` · ${sess.idx + 1}/${sess.total}` : '');
   $('op-odds').classList.remove('bump');
-  $('op-price').textContent = (p.price * sess.total).toLocaleString('fr');
+  if ($('op-price')) $('op-price').textContent = (p.price * sess.total).toLocaleString('fr'); // ce bouton peut être réécrit par l'économie
   $('op-odds').textContent = '1/' + c.shown.toLocaleString('fr');
   stopBg();
   opening.classList.remove('hold', 'rare', 'revealed', 'recap', 'spinning', 'mythic', 'god', 'cinema');
