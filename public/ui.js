@@ -102,8 +102,8 @@ const ICONS = { // icônes dessinées pixel par pixel
   potion1: () => '<img class="pix potion" src="img/potions/chance-1-3.png" alt="">', // tes potions dessinées
   potion2: () => '<img class="pix potion" src="img/potions/chance-2.png" alt="">',
   potion3: () => '<img class="pix potion" src="img/potions/chance-5.png" alt="">',
-  hourglass: () => pixelArt(HOURGLASS, { k: '#e2e8f0', w: '#94a3b8', S: '#fbbf24' }, 7),
-  instant: () => '<img class="pix" src="img/jetons/takoras.png" alt="" style="width:44px;height:44px">',
+  hourglass: () => '<img class="pix potion" src="img/objets/sablier.png" alt="">',   // tes dessins
+  instant: () => '<img class="pix potion" src="img/objets/recharge.png" alt="">',
 };
 
 // ---------- Bannières de profil en pixel art (dessinées sur un petit canvas agrandi)
