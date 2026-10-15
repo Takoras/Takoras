@@ -46,6 +46,7 @@ async function renderInventory() {
           <select class="adm-in" id="inv-sort">${['rarity', 'count', 'recent', 'name'].map(k => `<option value="${k}">${t('sort_' + k)}</option>`).join('')}</select>
         </div>
       </div>
+      <div class="inv-items" id="inv-items"></div>
       <div class="inv-grid" id="inv-grid"></div>
       <div class="sell-bar" id="sell-bar">
         <div class="sb-left"><b id="sb-n"></b><span id="sb-v"></span></div>
@@ -63,10 +64,18 @@ async function renderInventory() {
     $('inv-mode').addEventListener('click', () => { INV.selecting = !INV.selecting; if (!INV.selecting) INV.sel.clear(); drawInventory(); });
     $('inv-grid').addEventListener('click', onCardClick);
     $('sell-bar').addEventListener('click', onBarClick);
+    $('inv-items').addEventListener('click', async e => {
+      const b = e.target.closest('[data-use]'); if (!b) return;
+      b.disabled = true;
+      const { data, error } = await sb.rpc('use_item', { p_item: b.dataset.use });
+      if (error) { sfx.deny(); toast(errText(error), true); } else { applyState(data); sfx.upgrade(); toast(t('item_used')); }
+      drawItems();
+    });
   }
   $('inv-grid').innerHTML = `<p class="muted">…</p>`;
   if (!(await loadInventory())) return;
   drawInventory();
+  drawItems();
 }
 
 function drawInventory() {
@@ -156,4 +165,14 @@ async function sellIds(ids) {
   applyState(data.state);
   sfx.upgrade();
   toast(t('sold', { n: data.sold }) + ` · +${money(data.coins)}`);
+}
+
+// Objets (potions, sablier, recharge) : achetés en boutique, utilisés ici quand tu veux
+async function drawItems() {
+  const { data } = await sb.rpc('my_items');
+  const box = $('inv-items'); if (!box) return;
+  box.innerHTML = (data || []).length ? `<h3 class="prof-h">${t('items')}</h3><div class="items-row">${data.map(it => {
+    const [name, desc] = itemText({ id: it.item, kind: it.kind, data: it.data });
+    return `<div class="it-card"><div class="si-icon">${(ICONS[it.item] || ICONS.instant)()}</div><b>${name} <span class="ic-n">×${it.qty}</span></b><p class="muted">${desc}</p><button class="btn primary sm" data-use="${it.item}">${t('use')}</button></div>`;
+  }).join('')}</div><h3 class="prof-h">${t('nav_inv')}</h3>` : '';
 }

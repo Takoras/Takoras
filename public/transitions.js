@@ -121,5 +121,5 @@ let typed = '';
 addEventListener('keydown', e => {
   if (e.key.length !== 1 || e.target.closest?.('input, textarea, select')) return;
   typed = (typed + e.key.toLowerCase()).slice(-5);
-  if (typed === 'debug' && ACC.isAdmin) { $('debug').hidden = !$('debug').hidden; renderDebug(); typed = ''; } // réservé aux admins
+  if (typed === 'debug' && ACC.isAdmin) { typed = ''; toggleAdmin(); } // réservé aux admins : même chose que le bouclier
 });

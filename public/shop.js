@@ -54,7 +54,7 @@ async function renderShop() {
     if (error) { sfx.deny(); toast(errText(error), true); return renderShop(); }
     applyState(data);
     sfx.upgrade();
-    toast(t('bought', { n: itemText(it)[0] }));
+    toast(t('bought', { n: itemText(it)[0] }) + (it.kind === 'banner' ? '' : ' → ' + t('nav_inv')));
     renderShop();
   };
   clearInterval(shopTimer);

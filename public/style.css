@@ -766,3 +766,7 @@ img.banner-cv { object-fit: cover; }
 /* La croix de la fenêtre ne chevauche plus la rareté */
 .jm-card { padding-top: 54px; }
 .jm-close { top: 12px; right: 12px; }
+
+.items-row { display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 12px; margin-bottom: 26px; }
+.it-card { display: flex; flex-direction: column; gap: 6px; padding: 16px; border-radius: 16px; background: var(--surface); border: 1px solid var(--border); }
+.it-card .ic-n { position: static; } .it-card p { font-size: 13px; flex: 1; }

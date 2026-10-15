@@ -138,10 +138,14 @@ $('adm-reset-all').addEventListener('click', async () => {
   admMsg(`${data} joueurs remis à zéro`); admStats(); ecoSync(); if (ACC.user) loadAccount(ACC.user);
 });
 
-$('open-admin').addEventListener('click', () => {
+// Ouvrir / fermer le panel (bouclier ou « debug ») : on recharge toujours la liste et les stats
+function toggleAdmin() {
   $('debug').hidden = !$('debug').hidden;
-  if (!$('debug').hidden) { admLoad(); if (admSel) admDetail(); }
-});
+  if ($('debug').hidden) return;
+  admLoad(); admStats(); renderDebug();
+  if (admSel) admDetail();
+}
+$('open-admin').addEventListener('click', toggleAdmin);
 
 renderAdminBtn();
 
