@@ -1,4 +1,3 @@
-// Données d'exemple : à remplacer par Supabase plus tard
 const COLORS = {
   takoras: ['#c7d8ff', '#8ea8f7', '#2a2f6b', '120, 140, 240'],
   violet: ['#ddd6fe', '#8b5cf6', '#3b1a7a', '139, 92, 246'],
@@ -107,7 +106,10 @@ function ago(ts) {
   if (m < 1) return t('just_now');
   return t('ago', { n: m < 60 ? m + ' min' : m < 1440 ? Math.floor(m / 60) + ' h' : Math.floor(m / 1440) + ' j' });
 }
-function loadHist() { try { return JSON.parse(localStorage.getItem('takoras-hist')) || []; } catch { return []; } }
+// Connecté : tes tirages en ligne (account.js). Sinon : ceux gardés dans le navigateur.
+function loadLocalHist() { try { return JSON.parse(localStorage.getItem('takoras-hist')) || []; } catch { return []; } }
+const loadHist = () => (typeof ACC !== 'undefined' && ACC.user ? ACC.hist : loadLocalHist());
+const esc2 = s => String(s).replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' })[c]);
 function renderHist() {
   const h = loadHist();
   $('hist').innerHTML = h.length
@@ -117,22 +119,57 @@ function renderHist() {
 }
 setInterval(renderHist, 60000);
 
-// En direct : pour l'instant seulement tes propres tirages (les autres joueurs arriveront avec les comptes)
-function renderLive() {
-  const h = loadHist().slice(0, 12);
-  const item = e => `<div class="lv"><span class="av">${t('you')[0]}</span><span><b>${t('you')}</b> <span class="muted">${t('got')}</span> ${e.name}</span><img class="jeton" src="${e.img}" alt="" style="width:24px;height:24px"></div>`;
+// En direct : les derniers tirages de tous les joueurs (Supabase) + tes tirages locaux si tu n'as pas de compte
+let liveRows = [];
+async function fetchLive() {
+  if (typeof sb === 'undefined' || !sb) return;
+  const { data, error } = await sb.rpc('live_feed', { n: 20 });
+  if (!error) { liveRows = data.map(rowToHist); drawLive(); }
+}
+function renderLive() { drawLive(); fetchLive(); }
+function drawLive() {
+  const mine = typeof ACC !== 'undefined' && ACC.user;
+  const local = mine ? [] : loadLocalHist().slice(0, 12);
+  const h = [...liveRows, ...local].sort((a, b) => b.ts - a.ts).slice(0, 20);
+  const item = e => {
+    const me = !e.pseudo || (mine && e.pseudo === ACC.pseudo), who = me ? t('you') : esc2(e.pseudo);
+    return `<div class="lv"><span class="av">${who[0].toUpperCase()}</span><span><b>${who}</b> <span class="muted">${t('got')}</span> ${e.name} <span class="muted">· 1/${e.odds.toLocaleString(LOCALE())}</span></span><img class="jeton" src="${e.img}" alt="" style="width:24px;height:24px;filter:drop-shadow(0 0 4px ${e.glow})"></div>`;
+  };
   $('live').innerHTML = h.length ? h.map(item).join('').repeat(h.length >= 6 ? 2 : 1) : `<span class="muted live-empty">${t('live_empty')}</span>`;
   $('live').classList.toggle('still', h.length < 6);
 }
+setInterval(fetchLive, 15000);
 
-// Classement : vide tant qu'il n'y a pas de vrais comptes
-const KINDS = ['k_pulls', 'k_gain', 'k_tokens', 'k_collec'];
-let kind = 0, period = 'week';
-function renderBoard() {
-  $('kinds').innerHTML = KINDS.map((k, i) => `<button class="chip${i === kind ? ' on' : ''}" data-k="${i}">${t(k)}</button>`).join('');
-  $('podium').innerHTML = '';
-  $('list').innerHTML = `<p class="empty board-empty">${t('board_empty')}</p>`;
+// Classement (Supabase) : podium top 3 + liste
+const KINDS = [['k_pulls', 'pulls'], ['k_gain', 'gain'], ['k_tokens', 'tokens'], ['k_collec', 'collec']];
+let kind = 0, period = 'week', boardReq = 0;
+function weekStart() { const d = new Date(); d.setHours(0, 0, 0, 0); d.setDate(d.getDate() - (d.getDay() + 6) % 7); return d.toISOString(); }
+function boardVal(r) {
+  const n = Number(r.value).toLocaleString(LOCALE()), id = KINDS[kind][1];
+  if (id === 'gain') {
+    const j = rowToHist({ serie: 'Takoras', jeton: r.jeton, odds: r.odds, created_at: 0 });
+    return `<span class="gain"><img class="jeton" src="${j.img}" alt="" style="filter:drop-shadow(0 0 4px ${j.glow})">${esc2(r.jeton)} · 1/${n}</span>`;
+  }
+  if (id === 'collec') return t('u_collec', { n, t: SERIES.Takoras.length });
+  return t(id === 'pulls' ? 'u_pulls' : 'u_tokens', { n });
 }
+async function renderBoard() {
+  $('kinds').innerHTML = KINDS.map(([k], i) => `<button class="chip${i === kind ? ' on' : ''}" data-k="${i}">${t(k)}</button>`).join('');
+  if (typeof sb === 'undefined' || !sb) return;
+  const req = ++boardReq;
+  const { data, error } = await sb.rpc('leaderboard', { kind: KINDS[kind][1], since: period === 'week' ? weekStart() : null, n: 50 });
+  if (req !== boardReq) return; // une réponse plus récente arrive
+  const r = error ? [] : data;
+  const me = p => typeof ACC !== 'undefined' && ACC.user && p.pseudo === ACC.pseudo;
+  const name = p => esc2(p.pseudo) + (me(p) ? ` <span class="muted">(${t('you_tag')})</span>` : '');
+  $('podium').innerHTML = r.length ? [[1, 'p2'], [0, 'p1'], [2, 'p3']].map(([i, c]) => r[i]
+    ? `<div class="pod ${c}"><span class="av">${esc2(r[i].pseudo[0].toUpperCase())}</span><b>${name(r[i])}</b><small>${boardVal(r[i])}</small><div class="step">${i + 1}</div></div>`
+    : '<div></div>').join('') : '';
+  $('list').innerHTML = r.length
+    ? r.slice(3).map((p, i) => `<div class="li${me(p) ? ' me' : ''}"><span class="rank">${i + 4}</span><span class="av">${esc2(p.pseudo[0].toUpperCase())}</span><span>${name(p)}</span><span class="val">${boardVal(p)}</span></div>`).join('')
+    : `<p class="empty board-empty">${t('board_empty')}</p>`;
+}
+setInterval(renderBoard, 60000);
 $('kinds').addEventListener('click', e => { const b = e.target.closest('.chip'); if (b) { kind = +b.dataset.k; renderBoard(); } });
 $('period').addEventListener('click', e => {
   const b = e.target.closest('button'); if (!b) return;

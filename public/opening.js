@@ -439,7 +439,9 @@ function showRecap() {
 function canClose() { return !sess || sess.recap || (sess.total === 1 && opening.classList.contains('revealed')); }
 
 function addToHistory(j) {
-  const h = loadHist();
+  const serie = SERIES[PULLS[sess.pull].name] ? PULLS[sess.pull].name : 'Takoras';
+  if (accRecordPull(j, serie)) return renderHist(); // connecté : enregistré en ligne
+  const h = loadLocalHist();
   h.unshift({ name: j.name, odds: j.odds, glow: j.glow, img: texOf(j), ts: Date.now() });
   try { localStorage.setItem('takoras-hist', JSON.stringify(h.slice(0, 30))); } catch {}
   renderHist();

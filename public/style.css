@@ -457,3 +457,37 @@ html.lock, html.lock body { overflow: hidden; }
 .set-row small { font-size: 12px; }
 .set-seg { align-self: flex-start; }
 .set-row input[type=range] { width: 100%; accent-color: var(--accent); }
+
+/* Compte */
+.acc-btn { display: flex; align-items: center; gap: 8px; height: 38px; padding: 0 16px; border-radius: 99px; font-size: 14px; font-weight: 600; background: var(--accent); color: #fff; white-space: nowrap; transition: transform .15s; }
+.acc-btn:hover { transform: translateY(-1px); }
+.acc-btn.in { padding: 0 14px 0 5px; background: var(--surface); border: 1px solid var(--border); font-weight: 500; }
+.acc-btn .av { width: 28px; height: 28px; background: linear-gradient(135deg, #6d28d9, #a78bfa); }
+.acc-name { max-width: 110px; overflow: hidden; text-overflow: ellipsis; }
+.acc-form { display: flex; flex-direction: column; gap: 12px; padding-top: 14px; border-top: 1px solid var(--border); }
+.acc-field { display: flex; flex-direction: column; gap: 6px; font-size: 13px; font-weight: 600; }
+.acc-field input { padding: 12px 14px; border-radius: 12px; background: var(--surface-2); border: 1px solid var(--border); color: var(--text); font: inherit; font-weight: 400; font-size: 15px; outline: none; transition: border-color .15s; }
+.acc-field input:focus { border-color: rgba(139, 92, 246, .7); }
+.acc-code { letter-spacing: .4em; font-family: "Space Grotesk" !important; font-size: 22px !important; text-align: center; }
+.acc-hint { margin-top: -6px; font-size: 12px; }
+.acc-p { font-size: 14px; }
+.acc-p b { color: var(--text); }
+.acc-form .btn { margin-top: 4px; background: var(--accent); }
+.acc-links { display: flex; justify-content: space-between; gap: 10px; flex-wrap: wrap; font-size: 13px; }
+.acc-links a { color: #a78bfa; cursor: pointer; }
+.acc-links a:hover { text-decoration: underline; }
+.acc-msg { font-size: 13px; color: #fb7185; min-height: 1px; }
+.acc-msg.ok { color: #4ade80; }
+.acc-me { display: flex; align-items: center; gap: 14px; }
+.acc-me .av { width: 52px; height: 52px; font-size: 20px; background: linear-gradient(135deg, #6d28d9, #a78bfa); }
+.acc-me div { display: flex; flex-direction: column; }
+.acc-me b { font-size: 17px; }
+.pod .gain, .li .gain { display: inline-flex; align-items: center; gap: 6px; }
+.li .gain .jeton, .pod .gain .jeton { width: 20px; height: 20px; image-rendering: pixelated; }
+@media (max-width: 640px) {
+  .nav-in { gap: 10px; }
+  .acc-name { display: none; }
+  .acc-btn.in { padding: 0 5px; }
+}
+.nav-in #mute, .nav-in .bal, .nav-in .acc-btn { margin-left: -22px; }
+@media (max-width: 640px) { .nav-in #mute, .nav-in .bal, .nav-in .acc-btn { margin-left: 0; } }
