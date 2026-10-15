@@ -413,3 +413,12 @@ html.lock, html.lock body { overflow: hidden; }
 .btn:disabled { opacity: .4; cursor: not-allowed; transform: none !important; }
 .btn.upgrade { padding: 9px 18px; font-size: 13px; background: var(--surface); border: 1px dashed rgba(255, 255, 255, .2); }
 .small { font-size: 13px; }
+
+/* Le jeton de l'ouverture pile au centre de l'écran : le compteur et le texte d'aide ne le poussent plus */
+.opening { --coin: clamp(180px, 26vw, 240px); }
+.op-coin { width: var(--coin); }
+.op-top { position: absolute !important; left: 0; right: 0; bottom: calc(50% + var(--coin) / 2 + 30px); }
+.op-top .op-odds { margin: 6px 0 0; }
+.op-coin-col { position: relative; }
+.op-hint { position: absolute; top: 100%; left: 50%; translate: -50% 0; white-space: nowrap; }
+.opening.recap .op-top { display: none; }

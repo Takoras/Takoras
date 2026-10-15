@@ -29,7 +29,7 @@ function grid(cols) {
 
 // Petits carrés qui jaillissent du jeton (peu nombreux, sans glow)
 function sparks(n = 12) {
-  const o = origin(), tints = [css('--hi'), css('--mid')];
+  const o = center(), tints = [css('--hi'), css('--mid')];
   for (let i = 0; i < n; i++) {
     const s = 5 + Math.random() * 6, a = Math.random() * Math.PI * 2, r = o.r * (1.2 + Math.random() * 1.4);
     el(`left:${o.x - s / 2}px;top:${o.y - s / 2}px;width:${s}px;height:${s}px;background:${tints[i % 2]};z-index:2`).animate([
@@ -39,9 +39,12 @@ function sparks(n = 12) {
   }
 }
 
+// Centre exact de l'écran : la transition part du milieu, là où le jeton de l'ouverture apparaît
+const center = () => ({ x: innerWidth / 2, y: innerHeight / 2, r: Math.min(120, innerWidth * .13) });
+
 async function onde() {
   sparks();
-  const o = origin(), R = far(o);
+  const o = center(), R = far(o);
   const cells = grid(innerWidth < 640 ? 10 : 18);
   const d = c => Math.min(1, Math.hypot(c.cx - o.x, c.cy - o.y) / R); // 0 = jeton, 1 = bord
   // Entrée : des bords vers le centre (170 ms max)
