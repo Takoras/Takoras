@@ -106,9 +106,8 @@ async function runTransition() {
   }
 }
 
-$('op-back').addEventListener('click', closeOpening);
 ['wheel', 'touchmove'].forEach(t => opening.addEventListener(t, e => { if (!opening.classList.contains('recap')) e.preventDefault(); }, { passive: false })); // pas de défilement derrière
-addEventListener('keydown', e => { if (e.key === 'Escape' && canClose()) closeOpening(); });
+addEventListener('keydown', e => { if (e.key === 'Escape') leave(); });
 
 // Menu debug : taper « debug » n'importe où sur la page (le contenu est géré dans opening.js)
 $('debug-close').addEventListener('click', () => { $('debug').hidden = true; });

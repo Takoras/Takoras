@@ -452,8 +452,46 @@ opening.addEventListener('click', e => {
 });
 $('op-recap').addEventListener('click', showRecap);
 $('op-again').addEventListener('click', () => buy(1));
+$('op-back').addEventListener('click', leave);
 $('op-recap-again').addEventListener('click', () => buy(10));
-$('op-recap-back').addEventListener('click', () => closeOpening());
+$('op-recap-back').addEventListener('click', leave);
+
+// Retour à l'accueil : tout s'envole hors de l'écran, les bandes noires repartent, puis l'accueil revient en douceur
+let leaving = false;
+async function leave() {
+  if (leaving || !opening.classList.contains('on') || !canClose()) return;
+  leaving = true;
+  const out = 'cubic-bezier(.6, 0, .85, .2)', anims = [];
+  // N'anime que ce qui est visible, en partant de son opacité actuelle (sinon un élément caché réapparaîtrait)
+  const fly = (el, kf, opt) => {
+    if (!el || el.offsetParent === null) return;
+    const o = +getComputedStyle(el).opacity;
+    if (o === 0) return;
+    kf[0] = { ...kf[0], opacity: o };
+    anims.push(el.animate(kf, { fill: 'forwards', easing: out, ...opt }));
+  };
+  opening.classList.add('leaving');
+  opening.classList.remove('cinema');
+  fly(opening.querySelector('.op-coin-col'), [{ transform: getComputedStyle(opening.querySelector('.op-coin-col')).transform }, { transform: 'translate(-70vw, 8vh) rotate(-35deg)', opacity: 0 }], { duration: 520 });
+  fly($('op-info'), [{ transform: 'none', opacity: 1 }, { transform: 'translateX(60vw)', opacity: 0 }], { duration: 480, delay: 40 });
+  fly(opening.querySelector('.op-top'), [{ opacity: 1 }, { transform: 'translateY(-14vh)', opacity: 0 }], { duration: 400 });
+  opening.querySelectorAll('.rc').forEach((c, i) =>
+    fly(c, [{ transform: 'none', opacity: 1 }, { transform: `translate(${(i % 5 - 2) * 18}vw, ${i < 5 ? -60 : 60}vh) rotate(${(i % 2 ? 1 : -1) * 25}deg)`, opacity: 0 }], { duration: 520, delay: i * 25 }));
+  fly(opening.querySelector('.op-recap-view h2'), [{ opacity: 1 }, { transform: 'translateY(-10vh)', opacity: 0 }], { duration: 400 });
+  opening.querySelectorAll('.op-recap-view .eyebrow, .op-recap-view .op-actions').forEach(el => fly(el, [{ opacity: 1 }, { opacity: 0, transform: 'translateY(20px)' }], { duration: 300 }));
+  ['.op-bg', '.op-glow', '.op-vignette'].forEach(q => fly(opening.querySelector(q), [{ opacity: getComputedStyle(opening.querySelector(q)).opacity }, { opacity: 0 }], { duration: 600, easing: 'ease-in', delay: 120 }));
+  await done(560);
+  // L'écran d'ouverture s'efface et l'accueil revient avec un léger zoom
+  await Promise.all([
+    opening.animate([{ opacity: 1 }, { opacity: 0 }], { duration: 260, easing: 'ease-out', fill: 'forwards' }).finished,
+    document.querySelector('main').animate([{ opacity: .3, transform: 'scale(.96)' }, { opacity: 1, transform: 'none' }], { duration: 520, easing: 'cubic-bezier(.16, 1, .3, 1)' }).finished,
+  ]);
+  closeOpening();
+  opening.getAnimations().forEach(a => a.cancel());
+  anims.forEach(a => a.cancel());
+  opening.classList.remove('leaving');
+  leaving = false;
+}
 
 // Menu debug
 const LUCKS = [1, 2, 5, 10, 100, 1000];
