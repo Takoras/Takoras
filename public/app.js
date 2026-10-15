@@ -11,12 +11,6 @@ const COLORS = {
 const hoursFromNow = h => Date.now() + h * 3600e3;
 const PULLS = [
   { group: t('grp_perm'), name: 'Takoras', color: 'takoras', price: 100, free: true, img: 'img/jetons/takoras.png' },
-  { group: t('grp_perm'), name: 'Feu', color: 'feu', price: 150 },
-  { group: t('grp_perm'), name: 'Eau', color: 'eau', price: 150 },
-  { group: t('grp_perm'), name: 'Terre', color: 'terre', price: 150 },
-  { group: t('grp_lim'), name: 'Éclipse', color: 'rose', price: 250, ends: hoursFromNow(31.4) },
-  { group: t('grp_lim'), name: 'Nova', color: 'foudre', price: 300, ends: hoursFromNow(5.2) },
-  { group: t('grp_we'), name: 'Week-end', color: 'foudre', price: 200, weekend: true },
 ];
 
 const coinStyle = c => { const [hi, mid, lo, g] = COLORS[c]; return `--hi:${hi};--mid:${mid};--lo:${lo};--glow:${g}`; };
