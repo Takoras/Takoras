@@ -114,16 +114,12 @@ function onCardClick(e) {
       ${x.free.length ? `<button class="btn primary" data-a="sell1">${t('sell_one')} · +${money(sellValue(x.odds))}</button>` : ''}
       ${x.free.length > 1 ? `<button class="btn ghost" data-a="selldupes">${t('sell_dupes', { n: x.ids.length - 1 })}</button>` : ''}
       <button class="btn ghost" data-a="lock">${allLocked ? '🔓 ' + t('unlock') : '🔒 ' + t('lock')}</button>
-      <button class="btn ghost" data-a="pp">${t('set_pp')}</button>
-      <button class="btn ghost" data-a="show">${t('to_showcase')}</button>
     </div>`);
   $('jm-card').onclick = async ev => {
     const a = ev.target.closest('[data-a]')?.dataset.a; if (!a) return;
     if (a === 'sell1') await sellIds([x.free[0]]);
     if (a === 'selldupes') await sellIds(x.free.slice(0, x.ids.length - 1));
     if (a === 'lock') { await sb.rpc('lock_pulls', { ids: x.ids, p_locked: !allLocked }); toast(allLocked ? t('unlocked') : t('locked_ok')); }
-    if (a === 'pp') await updateMyProfile({ avatar: x.name }) && toast(t('pp_done'));
-    if (a === 'show') await addToShowcase(x.ids[0]);
     jm.classList.remove('on');
     if (!$('page-inv').hidden) { await loadInventory(); drawInventory(); }
   };

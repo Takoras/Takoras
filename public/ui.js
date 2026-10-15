@@ -88,10 +88,8 @@ function drawBanner(canvas, id) {
 }
 const bannerCanvas = id => { const c = document.createElement('canvas'); c.className = 'banner-cv'; drawBanner(c, id); return c; };
 
-// ---------- Photo de profil : Discord ou un jeton
+// ---------- Photo de profil : pour l'instant l'initiale (les photos à choisir arriveront plus tard, jamais d'image Discord)
 function avatarHTML(p, size = 64) {
-  if (p.avatar && p.avatar !== 'discord') return `<img class="pp jeton-pp" src="${texOf(jetonOf(p.avatar))}" alt="" style="width:${size}px;height:${size}px">`;
-  if (p.discord_avatar) return `<img class="pp" src="${p.discord_avatar}" alt="" style="width:${size}px;height:${size}px">`;
   return `<span class="pp av" style="width:${size}px;height:${size}px;font-size:${size / 2.4}px">${esc((p.pseudo || '?')[0].toUpperCase())}</span>`;
 }
 
@@ -100,7 +98,7 @@ const jm = $('jeton-modal');
 function openJeton(name, extra = '') {
   const j = jetonOf(name), s = statsOf(j.name, j.odds);
   jm.style.setProperty('--g', hexRGB(j.glow));
-  $('jm-card').onclick = null; $('jm-card').oninput = null;
+  $('jm-card').onclick = null; $('jm-card').oninput = null; $('jm-card').onchange = null;
   $('jm-card').innerHTML = `
     <button class="set-close jm-close" aria-label="${t('close')}">✕</button>
     <div class="jm-coin"><img src="${texOf(j)}" alt=""></div>
@@ -116,10 +114,15 @@ function openJeton(name, extra = '') {
   jm.classList.add('on');
 }
 jm.addEventListener('click', e => { if (e.target === jm || e.target.closest('.jm-close')) jm.classList.remove('on'); });
+// Le jeton penche seulement quand la souris est dessus, puis revient doucement
 jm.addEventListener('pointermove', e => {
-  const c = jm.querySelector('.jm-coin'); if (!c) return;
+  const c = e.target.closest('.jm-coin'); if (!c) return;
   const r = c.getBoundingClientRect(), x = (e.clientX - r.left) / r.width - .5, y = (e.clientY - r.top) / r.height - .5;
-  c.style.transform = `perspective(600px) rotateX(${(-y * 30).toFixed(1)}deg) rotateY(${(x * 30).toFixed(1)}deg)`;
+  c.style.transform = `perspective(600px) rotateX(${(-y * 30).toFixed(1)}deg) rotateY(${(x * 30).toFixed(1)}deg) scale(1.04)`;
+});
+jm.addEventListener('pointerout', e => {
+  const c = e.target.closest('.jm-coin');
+  if (c && !c.contains(e.relatedTarget)) c.style.transform = '';
 });
 addEventListener('keydown', e => { if (e.key === 'Escape') jm.classList.remove('on'); });
 

@@ -690,3 +690,65 @@ a.btn { display: inline-flex; justify-content: center; }
 .sc.empty { background: var(--surface); }
 .si-price { white-space: nowrap; }
 .si-foot { gap: 8px; flex-wrap: wrap; }
+
+/* ===================== Interface agrandie + nouveautés profil ===================== */
+.nav-in { height: 74px; gap: 26px; }
+.logo { font-size: 22px; } .logo img { width: 40px; height: 40px; }
+.links { font-size: 16px; gap: 26px; }
+.bal { font-size: 16px; padding: 9px 16px; } .bal .piece { width: 22px; height: 22px; }
+.mute { width: 44px; height: 44px; } .mute svg { width: 21px; height: 21px; }
+.acc-btn { font-size: 15px; padding: 6px 14px 6px 6px; }
+.panel { padding: 20px; } .panel-head b { font-size: 18px; }
+.type b { font-size: 16px; } .type small { font-size: 13px; } .type .coin, .type .coin-img { --s: 36px; width: 36px; height: 36px; }
+.h-row { font-size: 15px; } .h-row small { font-size: 13px; }
+.btn { font-size: 16px; padding: 15px 26px; }
+.btn.sm { font-size: 14px; padding: 9px 16px; }
+.chip { font-size: 15px; padding: 10px 18px; }
+.stock { font-size: 15px; } .pips img { width: 28px; height: 28px; }
+.page { font-size: 16px; }
+.page-title { font-size: clamp(32px, 4.5vw, 46px); }
+.eyebrow { font-size: 13px; }
+.inv-grid { grid-template-columns: repeat(auto-fill, minmax(180px, 1fr)); gap: 14px; }
+.ic { padding: 20px 12px 14px; } .ic img { width: 96px; height: 96px; } .ic b { font-size: 16px; } .ic small { font-size: 13px; }
+.ic-n { font-size: 15px; }
+.adm-in { font-size: 15px; padding: 10px 12px; }
+.sb-left { font-size: 16px; }
+.si { padding: 22px; } .si b { font-size: 18px; } .si p { font-size: 14px; } .si-price { font-size: 20px; } .si-icon { height: 96px; }
+.prof-stats b { font-size: 24px; } .prof-stats span { font-size: 13px; }
+.prof-id h2 { font-size: 36px; } .prof-id p { font-size: 16px; }
+.prof-h { font-size: 22px; } .prof-h small { font-size: 13px; font-weight: 400; margin-left: 6px; }
+.sc b { font-size: 15px; } .sc small { font-size: 13px; }
+.sc.can { cursor: pointer; } .sc.can:hover { border-color: rgba(139, 92, 246, .6); color: #c4b5fd; }
+.op-stats .stat { font-size: 14px; }
+.toast { font-size: 15px; }
+.ad-table table { font-size: 14px; } .ad-box h4 { font-size: 15px; }
+.debug .dbg-row button, .adm-quick button { font-size: 13px; }
+
+/* Avatar par défaut (initiale) */
+.pp.av { display: grid; place-items: center; font-family: "Space Grotesk"; font-weight: 700; color: #fff; background: linear-gradient(135deg, #8b5cf6, #f97316); border-radius: 50%; }
+.prof-pp .pp.av { border-radius: 26px; border: 4px solid var(--bg); }
+.acc-btn .pp { margin-right: 8px; }
+
+/* Bannière absente */
+.prof-banner.none { display: grid; place-items: center; background: repeating-linear-gradient(135deg, #15141d 0 14px, #18171f 14px 28px); }
+
+/* Zone privée en bas du profil */
+.prof-private { margin-top: 30px; padding: 20px; border-radius: 18px; border: 1px dashed rgba(139, 92, 246, .45); background: rgba(139, 92, 246, .05); display: flex; flex-direction: column; gap: 10px; }
+.pv-row { display: flex; justify-content: space-between; align-items: center; gap: 10px; padding: 10px 0; border-bottom: 1px solid var(--border); font-size: 15px; }
+.pv-row span { color: var(--muted); }
+.prof-private > .btn { align-self: flex-start; margin-top: 6px; }
+
+/* Fenêtre de choix pour la vitrine */
+.pk-wrap { width: 100%; display: flex; flex-direction: column; gap: 12px; }
+.pk-wrap h2 { font-family: "Space Grotesk"; font-size: 26px; }
+.pk-tools { display: flex; gap: 8px; } .pk-tools input { flex: 1; }
+.pk-list { display: grid; grid-template-columns: repeat(auto-fill, minmax(120px, 1fr)); gap: 10px; max-height: 52vh; overflow: auto; padding: 2px; }
+.pk { display: flex; flex-direction: column; align-items: center; gap: 4px; padding: 12px 6px; border-radius: 14px; text-align: center;
+  background: radial-gradient(80px 60px at 50% 30%, rgba(var(--g), .16), transparent 70%), var(--surface); border: 1px solid var(--border); }
+.pk:hover { border-color: rgba(var(--g), .7); transform: translateY(-2px); }
+.pk img { width: 64px; height: 64px; image-rendering: pixelated; }
+.pk b { font-size: 14px; } .pk small { font-size: 12px; color: var(--muted); }
+.pk.off { opacity: .35; }
+.pe-b.none { display: grid; place-items: center; font-size: 13px; color: var(--muted); background: var(--surface); }
+.jm-coin { cursor: grab; }
+@media (max-width: 1000px) { .nav-in { gap: 14px; } .links { gap: 14px; font-size: 15px; } .acc-name { display: none; } .logo { font-size: 18px; } }

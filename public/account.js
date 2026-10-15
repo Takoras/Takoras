@@ -33,8 +33,7 @@ async function loadAccount(user) {
       sb.from('pulls').select('serie, jeton, odds, created_at').order('created_at', { ascending: false }).limit(30),
     ]);
     ACC.pseudo = prof?.pseudo || null; // null = pseudo pas encore choisi
-    ACC.avatar = prof?.avatar || 'discord';
-    ACC.discord_avatar = user.user_metadata?.avatar_url || null;
+    ACC.avatar = prof?.avatar || 'default';
     ACC.hist = (rows || []).map(rowToHist);
   }
   renderAccBtn();
@@ -60,7 +59,7 @@ function renderAccBtn() {
   const b = document.getElementById('open-account');
   b.classList.toggle('in', !!ACC.user);
   const ps = ACC.pseudo || '?';
-  const pp = typeof avatarHTML === 'function' ? avatarHTML({ avatar: ACC.avatar, discord_avatar: ACC.discord_avatar, pseudo: ps }, 26) : `<span class="av">${esc(ps[0].toUpperCase())}</span>`;
+  const pp = typeof avatarHTML === 'function' ? avatarHTML({ avatar: ACC.avatar, pseudo: ps }, 28) : `<span class="av">${esc(ps[0].toUpperCase())}</span>`;
   b.innerHTML = ACC.user
     ? `${pp}<span class="acc-name">${esc(ps)}</span>`
     : `<span>${t('login')}</span>`;
@@ -130,6 +129,7 @@ const esc = s => String(s).replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;'
   });
   document.getElementById('open-account').addEventListener('click', () => {
     if (!sb) return;
+    if (ACC.user && ACC.pseudo) { location.hash = '#profil'; return route(); } // connecté : direct sur ton profil
     msg = ''; view = !ACC.user ? 'login' : ACC.pseudo ? 'me' : 'pseudo';
     panel.classList.add('on');
     render();
