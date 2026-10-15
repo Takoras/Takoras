@@ -194,12 +194,13 @@ button { font: inherit; color: inherit; border: 0; background: none; cursor: poi
   color: rgb(var(--tier, 242, 242, 245)); text-shadow: 0 0 40px rgba(var(--tier, 139, 92, 246), .5); margin: 6px 0 22px; transition: color .3s; }
 .op-odds.bump { animation: bump .18s ease-out; }
 @keyframes bump { 40% { transform: scale(1.12); } }
-.op-coin { width: clamp(180px, 26vw, 240px); aspect-ratio: 1; perspective: 700px; cursor: pointer; animation: bob 5s ease-in-out infinite; -webkit-tap-highlight-color: transparent; }
-.op-coin img, .op-coin .coin { width: 100%; height: 100%; display: block; image-rendering: pixelated; }
+.op-coin { position: relative; width: clamp(180px, 26vw, 240px); aspect-ratio: 1; perspective: 700px; cursor: pointer; animation: bob 5s ease-in-out infinite; -webkit-tap-highlight-color: transparent; }
+.op-coin img { width: 100%; height: 100%; display: block; image-rendering: pixelated; pointer-events: none; }
+.jeton { image-rendering: pixelated; flex: none; }
 .op-coin .coin { --s: 100%; font-size: 64px; }
 .op-coin .spin { width: 100%; height: 100%; transition: transform .12s; }
 .op-coin:active .spin { transform: scale(.94); }
-.op-coin.hit .spin { animation: hit .2s ease-out; }
+.op-coin.hit .spin { animation: hit .14s ease-out; }
 @keyframes hit { 30% { transform: scale(.9) rotate(-4deg); } 70% { transform: scale(1.04) rotate(2deg); } }
 .op-coin.flip .spin { animation: flip .5s cubic-bezier(.3, 0, .2, 1); }
 @keyframes flip { 0% { transform: rotateY(0) scale(1); } 50% { transform: rotateY(90deg) scale(1.15); } 100% { transform: rotateY(0) scale(1); } }
@@ -208,6 +209,16 @@ button { font: inherit; color: inherit; border: 0; background: none; cursor: poi
 .op-title { font-family: "Space Grotesk"; font-size: 40px; min-height: 0; }
 .op-actions { display: flex; gap: 10px; margin-top: 14px; flex-wrap: wrap; justify-content: center; }
 .op-actions[hidden] { display: none; }
+.op-coin { --boost: 0; }
+.op-coin::before { content: ""; position: absolute; inset: -35%; border-radius: 50%; z-index: -1; pointer-events: none;
+  background: radial-gradient(closest-side, rgba(var(--tier), calc(.25 + var(--boost) * .45)), transparent); transition: background .3s; }
+.op-vignette, .op-rays { position: absolute !important; inset: 0; pointer-events: none; opacity: 0; transition: opacity .6s ease; }
+.op-vignette { background: radial-gradient(ellipse at center, transparent 45%, rgba(0, 0, 0, .75) 100%); }
+.op-rays { left: 50%; top: 50%; inset: auto; width: 160vmax; height: 160vmax; translate: -50% -50%;
+  background: repeating-conic-gradient(from 0deg, rgba(var(--tier), .10) 0 6deg, transparent 6deg 18deg);
+  -webkit-mask: radial-gradient(closest-side, #000, transparent 70%); mask: radial-gradient(closest-side, #000, transparent 70%); animation: spin 40s linear infinite; }
+.opening.t1000 .op-vignette { opacity: 1; }
+.opening.t2500 .op-rays { opacity: 1; }
 .op-spark { position: fixed !important; width: 6px; height: 6px; pointer-events: none; z-index: 55; }
 
 /* Couche des transitions */
@@ -223,6 +234,13 @@ button { font: inherit; color: inherit; border: 0; background: none; cursor: poi
 .debug-head button { width: 28px; height: 28px; border-radius: 8px; color: var(--muted); }
 .debug-head button:hover { background: var(--surface-2); color: var(--text); }
 .debug .muted { font-size: 12px; margin-bottom: 10px; }
+.dbg-sec { font-size: 11px; font-weight: 600; letter-spacing: .12em; text-transform: uppercase; color: var(--muted); margin: 14px 0 6px; }
+.dbg-row { display: flex; flex-wrap: wrap; gap: 6px; }
+.dbg-row button { padding: 6px 10px; border-radius: 8px; background: var(--surface); border: 1px solid var(--border); font-size: 12px; }
+.dbg-row button:hover { background: var(--surface-2); }
+.dbg-row button.on { border-color: rgba(139, 92, 246, .6); background: rgba(139, 92, 246, .2); }
+.debug select { width: 100%; padding: 8px; border-radius: 8px; background: #1a1a24; color: var(--text); border: 1px solid var(--border); font: inherit; }
+.dbg-go { width: 100%; margin-top: 16px; padding: 10px; font-size: 13px; }
 .dbg { width: 100%; display: flex; align-items: center; gap: 10px; padding: 8px 10px; border-radius: 10px; text-align: left; border: 1px solid transparent; }
 .dbg:hover { background: var(--surface-2); }
 .dbg.on { border-color: rgba(139, 92, 246, .6); background: rgba(139, 92, 246, .14); }

@@ -76,7 +76,9 @@
   <footer class="wrap foot">© 2026 Takoras</footer>
 
   <div class="opening" id="opening" aria-hidden="true">
+    <div class="op-rays"></div>
     <div class="op-glow"></div>
+    <div class="op-vignette"></div>
     <div class="eyebrow" id="op-tag">Pull Takoras</div>
     <div class="op-odds" id="op-odds">1/1</div>
     <button class="op-coin" id="op-coin" aria-label="Cliquer pour faire monter la chance"></button>
@@ -90,9 +92,14 @@
   <div class="fx" id="fx"></div>
 
   <div class="debug" id="debug" hidden>
-    <div class="debug-head"><b>Debug · transition Pixels</b><button id="debug-close" aria-label="Fermer">✕</button></div>
-    <p class="muted">Choisis une transition puis clique sur Pull.</p>
-    <div id="debug-list"></div>
+    <div class="debug-head"><b>Debug</b><button id="debug-close" aria-label="Fermer">✕</button></div>
+    <div class="dbg-sec">Luck</div>
+    <div class="dbg-row" id="dbg-luck"></div>
+    <div class="dbg-sec">Jeton forcé</div>
+    <select id="dbg-force"></select>
+    <div class="dbg-sec">Tester un effet</div>
+    <div class="dbg-row" id="dbg-fx"></div>
+    <button class="btn primary dbg-go" id="dbg-open">Ouvrir un pull</button>
   </div>
 
   <script src="app.js"></script>

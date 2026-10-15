@@ -69,7 +69,6 @@ const TRANSITIONS = [
 ];
 
 let choice = 0;
-try { choice = Math.min(+localStorage.getItem('takoras-pixel') || 0, TRANSITIONS.length - 1); } catch {}
 
 function showOpening(fade = 0) {
   if (opening.classList.contains('on')) return;
@@ -107,21 +106,11 @@ document.querySelectorAll('.pull-btn').forEach(b => b.addEventListener('click', 
 $('op-back').addEventListener('click', closeOpening);
 addEventListener('keydown', e => { if (e.key === 'Escape') closeOpening(); });
 
-// Menu debug : taper « debug » n'importe où sur la page
-function renderDebug() {
-  $('debug-list').innerHTML = TRANSITIONS.map(([t, d], i) =>
-    `<button class="dbg${i === choice ? ' on' : ''}" data-i="${i}"><b>${i + 1}</b><span>${t}<small>${d}</small></span></button>`).join('');
-}
-$('debug-list').addEventListener('click', e => {
-  const b = e.target.closest('.dbg'); if (!b) return;
-  choice = +b.dataset.i;
-  try { localStorage.setItem('takoras-pixel', choice); } catch {}
-  renderDebug();
-});
+// Menu debug : taper « debug » n'importe où sur la page (le contenu est géré dans opening.js)
 $('debug-close').addEventListener('click', () => { $('debug').hidden = true; });
 let typed = '';
 addEventListener('keydown', e => {
-  if (e.key.length !== 1 || e.target.closest('input, textarea')) return;
+  if (e.key.length !== 1 || e.target.closest('input, textarea, select')) return;
   typed = (typed + e.key.toLowerCase()).slice(-5);
   if (typed === 'debug') { $('debug').hidden = !$('debug').hidden; renderDebug(); typed = ''; }
 });

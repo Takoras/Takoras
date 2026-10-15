@@ -1,34 +1,42 @@
 // Ouverture d'un pull : le jeton « ? » et le compteur de chance qui monte à chaque clic (1/1 → 1/X).
-// Le résultat est tiré dès l'ouverture ; les clics ne font que le révéler petit à petit.
+// Le résultat est tiré dès l'ouverture ; les clics ne font que le révéler. On peut spammer pour aller vite.
 
-// Jetons de la série Takoras — PROVISOIRES (noms, chances et couleurs à remplacer par les vrais dessins)
+// Jetons de la série Takoras — PROVISOIRES : même texture (template), seule la couleur du glow change.
+const TEMPLATE = 'img/jetons/template.png';
 const SERIES = {
   Takoras: [
-    { name: 'Poussière', odds: 2, c: ['#e5e7eb', '#9ca3af', '#374151'] },
-    { name: 'Galet', odds: 4, c: ['#e7e5e4', '#a8a29e', '#44403c'] },
-    { name: 'Bronze', odds: 10, c: ['#fed7aa', '#c2703d', '#5c2a0e'] },
-    { name: 'Argent', odds: 25, c: ['#f8fafc', '#cbd5e1', '#475569'] },
-    { name: 'Or', odds: 60, c: ['#fef3c7', '#f59e0b', '#78350f'] },
-    { name: 'Saphir', odds: 150, c: ['#bae6fd', '#0ea5e9', '#0c4a6e'] },
-    { name: 'Rubis', odds: 400, c: ['#fecaca', '#e11d48', '#4c0519'] },
-    { name: 'Améthyste', odds: 1000, c: ['#e9d5ff', '#a855f7', '#3b0764'] },
-    { name: 'Aurore', odds: 2500, c: ['#fbcfe8', '#ec4899', '#500724'] },
-    { name: 'Néant', odds: 5000, c: ['#c7d2fe', '#312e81', '#020617'] },
+    { name: 'Poussière', odds: 2, glow: '#9ca3af' },
+    { name: 'Galet', odds: 4, glow: '#a8a29e' },
+    { name: 'Bronze', odds: 10, glow: '#c2703d' },
+    { name: 'Argent', odds: 25, glow: '#cbd5e1' },
+    { name: 'Or', odds: 60, glow: '#f59e0b' },
+    { name: 'Saphir', odds: 150, glow: '#0ea5e9' },
+    { name: 'Rubis', odds: 400, glow: '#e11d48' },
+    { name: 'Améthyste', odds: 1000, glow: '#a855f7' },
+    { name: 'Aurore', odds: 2500, glow: '#ec4899' },
+    { name: 'Néant', odds: 5000, glow: '#6366f1' },
   ],
 };
+const SKIP = 1 / 5; // environ 1 clic sur 5 saute discrètement une étape
 
 // Couleur du compteur selon la rareté atteinte
 const TIERS = [[10, '200, 200, 210'], [50, '74, 222, 128'], [200, '56, 189, 248'], [1000, '167, 139, 250'], [5000, '251, 191, 36'], [Infinity, '244, 114, 182']];
 const tierOf = v => TIERS.find(([max]) => v < max)[1];
+const hexRGB = h => [1, 3, 5].map(i => parseInt(h.slice(i, i + 2), 16)).join(', ');
+const jetonHTML = (j, size) =>
+  `<img class="jeton" src="${TEMPLATE}" alt="${j.name}" style="width:${size}px;height:${size}px;filter:drop-shadow(0 0 ${Math.max(4, size / 8)}px ${j.glow})">`;
 
-// Tirage façon « 1 chance sur X » : on teste du plus rare au plus commun
+// Réglages de test (menu debug)
+const debug = { luck: 1, force: '' };
+
+// Tirage « 1 chance sur X », du plus rare au plus commun. La luck multiplie chaque chance.
 function draw(list) {
+  if (debug.force) return list.find(j => j.name === debug.force);
   const byRarity = [...list].sort((a, b) => b.odds - a.odds);
-  return byRarity.find(j => Math.random() < 1 / j.odds) || byRarity[byRarity.length - 1];
+  return byRarity.find(j => Math.random() < debug.luck / j.odds) || byRarity[byRarity.length - 1];
 }
 
-// Les valeurs affichées à chaque clic : monte doucement puis accélère (8 à 15 clics pour les jetons rares).
-// 1 clic sur 10 environ saute discrètement une étape, juste pour casser la monotonie (n'influe pas sur le résultat).
+// Valeurs affichées à chaque clic : monte doucement puis accélère (8 à 15 clics pour les jetons rares).
 function steps(X) {
   if (X <= 1) return [];
   const n = Math.min(X - 1, Math.min(15, Math.round(4 + Math.log2(X) * .9)));
@@ -37,13 +45,10 @@ function steps(X) {
     const v = i === n ? X : Math.round(1 + (X - 1) * (i / n) ** 2.2 * (.9 + Math.random() * .2));
     out.push(Math.min(X, Math.max(v, (out[out.length - 1] || 1) + 1)));
   }
-  return out.filter((v, i) => i === out.length - 1 || i === 0 || Math.random() > .1);
+  return out.filter((v, i) => i === out.length - 1 || i === 0 || Math.random() > SKIP);
 }
 
-const jetonHTML = (j, size) => `<i class="coin" style="--hi:${j.c[0]};--mid:${j.c[1]};--lo:${j.c[2]};--glow:${hexRGB(j.c[1])};--s:${size}px"></i>`;
-const hexRGB = h => [1, 3, 5].map(i => parseInt(h.slice(i, i + 2), 16)).join(', ');
-
-let run = null; // { result, queue, shown, done }
+let run = null;
 const opCoin = $('op-coin');
 
 function startOpening() {
@@ -53,23 +58,47 @@ function startOpening() {
   $('op-tag').textContent = 'Pull ' + p.name;
   $('op-price').textContent = p.price;
   $('op-odds').textContent = '1/1';
-  opening.style.setProperty('--tier', tierOf(1));
+  setTier(1);
   opCoin.className = 'op-coin';
+  opCoin.style.setProperty('--boost', 0);
   opCoin.innerHTML = '<div class="spin"><img src="img/jetons/mystere.png" alt="Jeton mystère"></div>';
   $('op-hint').textContent = 'Clique sur le jeton';
   $('op-name').textContent = '';
   $('op-actions').hidden = true;
 }
 
-function countTo(from, to, ms = 160) {
-  const t0 = performance.now(), el = $('op-odds');
+function setTier(v) {
+  opening.style.setProperty('--tier', tierOf(v));
+  opening.classList.toggle('t1000', v >= 1000);
+  opening.classList.toggle('t2500', v >= 2500);
+  opCoin.style.setProperty('--boost', v >= 1000 ? Math.min(1, .5 + Math.log10(v / 1000) * .7) : 0);
+}
+
+// Le compteur roule vite vers la nouvelle valeur ; un nouveau clic reprend là où il en est
+let countAnim = 0;
+function countTo(from, to, ms = 110) {
+  const t0 = performance.now(), el = $('op-odds'), id = ++countAnim;
   el.classList.remove('bump'); void el.offsetWidth; el.classList.add('bump');
   (function step(t) {
+    if (id !== countAnim) return;
     const k = Math.min(1, (t - t0) / ms);
     el.textContent = '1/' + Math.round(from + (to - from) * k).toLocaleString('fr');
     if (k < 1) requestAnimationFrame(step);
   })(t0);
-  opening.style.setProperty('--tier', tierOf(to));
+}
+
+// Tremblement très rapide qui s'amortit (à partir de 1/500)
+function shake(power = 1) {
+  const a = 9 * power, f = [1, -.8, .6, -.45, .3, -.18, .08, 0];
+  opening.animate(f.map((k, i) => ({ transform: `translate(${a * k}px, ${a * k * (i % 2 ? .6 : -.6)}px)` })), { duration: 260, easing: 'ease-in' });
+}
+
+// Flash blanc doux (à partir de 1/5000)
+function flash() {
+  const f = document.createElement('div');
+  f.style.cssText = 'position:absolute;inset:0;background:#fff;pointer-events:none';
+  opening.appendChild(f);
+  f.animate([{ opacity: .45 }, { opacity: 0 }], { duration: 500, easing: 'ease-out' }).finished.then(() => f.remove());
 }
 
 function burst(n = 5) {
@@ -81,24 +110,34 @@ function burst(n = 5) {
     s.style.cssText = `left:${x}px;top:${y}px;background:${col}`;
     opening.appendChild(s);
     s.animate([{ transform: 'translate(-50%,-50%)', opacity: 1 }, { transform: `translate(calc(-50% + ${Math.cos(a) * d}px), calc(-50% + ${Math.sin(a) * d}px)) scale(.3)`, opacity: 0 }],
-      { duration: 420, easing: 'cubic-bezier(.2,.7,.3,1)' }).finished.then(() => s.remove());
+      { duration: 380, easing: 'cubic-bezier(.2,.7,.3,1)' }).finished.then(() => s.remove());
   }
 }
 
+// Effets selon le palier atteint par le clic
+function effects(v) {
+  if (v >= 500) shake(v >= 2500 ? 1.4 : 1);
+  if (v >= 5000) flash();
+  burst(v >= 1000 ? 9 : v >= 200 ? 6 : 4);
+}
+
 function reveal() {
-  run.done = true;
-  const r = run;
-  const j = run.result, size = opCoin.getBoundingClientRect().width;
+  const r = run, j = r.result, size = opCoin.getBoundingClientRect().width;
   opCoin.classList.remove('hit');
   opCoin.classList.add('flip', 'done');
-  setTimeout(() => { opCoin.querySelector('.spin').innerHTML = jetonHTML(j, size); burst(12); }, 250);
   setTimeout(() => {
-    if (run !== r) return; // l'ouverture a été fermée entre-temps
+    if (run !== r) return;
+    opening.style.setProperty('--tier', hexRGB(j.glow));
+    opCoin.querySelector('.spin').innerHTML = jetonHTML(j, size);
+    burst(12);
+  }, 200);
+  setTimeout(() => {
+    if (run !== r) return;
     $('op-name').textContent = j.name;
     $('op-hint').textContent = 'Ajouté à ta collection';
     $('op-actions').hidden = false;
     addToHistory(j);
-  }, 500);
+  }, 380);
 }
 
 function addToHistory(j) {
@@ -111,20 +150,38 @@ function addToHistory(j) {
 
 function tap() {
   if (!run || run.done) return;
-  if (!run.queue.length) return reveal();
   const next = run.queue.shift();
   countTo(run.shown, next);
   run.shown = next;
+  setTier(next);
   opCoin.classList.remove('hit'); void opCoin.offsetWidth; opCoin.classList.add('hit');
-  burst(next >= 200 ? 7 : 4);
+  effects(next);
   $('op-hint').textContent = '';
-  if (!run.queue.length) { run.done = true; setTimeout(reveal, 450); }
+  if (!run.queue.length) { run.done = true; setTimeout(reveal, 260); }
 }
 
-opCoin.addEventListener('click', tap);
+opCoin.addEventListener('pointerdown', e => { e.preventDefault(); tap(); }); // pointerdown = réagit dès l'appui, idéal pour spammer
 addEventListener('keydown', e => {
-  if (!opening.classList.contains('on') || (e.key !== ' ' && e.key !== 'Enter') || e.target.closest('button:not(#op-coin)')) return;
+  if (!opening.classList.contains('on') || (e.key !== ' ' && e.key !== 'Enter') || e.target.closest('button:not(#op-coin), select')) return;
   e.preventDefault();
   tap();
 });
 $('op-again').addEventListener('click', () => { closeOpening(); runTransition(); });
+
+// Menu debug
+const LUCKS = [1, 2, 5, 10, 100, 1000];
+const FX = [['Shake', () => shake()], ['Vignette', () => opening.classList.toggle('t1000')], ['Rayons', () => opening.classList.toggle('t2500')], ['Flash', flash]];
+function renderDebug() {
+  $('dbg-luck').innerHTML = LUCKS.map(l => `<button class="${l === debug.luck ? 'on' : ''}" data-l="${l}">×${l}</button>`).join('');
+  $('dbg-force').innerHTML = '<option value="">Aléatoire</option>' + SERIES.Takoras.map(j =>
+    `<option value="${j.name}"${j.name === debug.force ? ' selected' : ''}>${j.name} · 1/${j.odds.toLocaleString('fr')}</option>`).join('');
+  $('dbg-fx').innerHTML = FX.map(([n], i) => `<button data-f="${i}">${n}</button>`).join('');
+}
+$('dbg-luck').addEventListener('click', e => { const b = e.target.closest('button'); if (b) { debug.luck = +b.dataset.l; renderDebug(); } });
+$('dbg-force').addEventListener('change', e => { debug.force = e.target.value; });
+$('dbg-fx').addEventListener('click', e => {
+  const b = e.target.closest('button'); if (!b) return;
+  if (!opening.classList.contains('on')) { startOpening(); opening.classList.add('on'); }
+  FX[+b.dataset.f][1]();
+});
+$('dbg-open').addEventListener('click', () => { closeOpening(); runTransition(); });
