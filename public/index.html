@@ -4,6 +4,56 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Takoras</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=Space+Grotesk:wght@600;700&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #0d0d12;
+    --surface: #16161e;
+    --surface-2: #1e1e28;
+    --border: #2a2a36;
+    --text: #f2f2f5;
+    --muted: #9a9aab;
+    --accent: #8b5cf6;
+    --accent-2: #f97316;
+    --radius: 18px;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    min-height: 100vh;
+    background:
+      radial-gradient(700px 400px at 85% -10%, rgba(139, 92, 246, .18), transparent 70%),
+      radial-gradient(500px 300px at 0% 110%, rgba(249, 115, 22, .1), transparent 70%),
+      var(--bg);
+    color: var(--text);
+    font-family: Inter, system-ui, sans-serif;
+    line-height: 1.5;
+  }
+  a { color: inherit; text-decoration: none; }
+  .wrap { max-width: 1200px; margin: 0 auto; padding: 0 16px; }
+
+  nav {
+    position: sticky; top: 0; z-index: 10;
+    background: rgba(13, 13, 18, .75);
+    backdrop-filter: blur(12px);
+    border-bottom: 1px solid var(--border);
+  }
+  nav .wrap { display: flex; align-items: center; height: 64px; }
+  .logo { display: flex; align-items: center; gap: 10px; font-family: "Space Grotesk"; font-weight: 700; font-size: 20px; letter-spacing: .04em; }
+  .logo span {
+    width: 34px; height: 34px; border-radius: 10px;
+    background: linear-gradient(135deg, var(--accent), var(--accent-2));
+    display: grid; place-items: center; font-size: 16px;
+  }
+</style>
 </head>
-<body></body>
+<body>
+  <nav>
+    <div class="wrap">
+      <a class="logo" href="/"><span>T</span>TAKORAS</a>
+    </div>
+  </nav>
+  <main class="wrap"></main>
+</body>
 </html>
