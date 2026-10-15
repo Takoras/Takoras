@@ -119,7 +119,7 @@ function editProfile() {
         <h4>${t('pe_bio')} <small class="muted" id="pe-count">${st.bio.length}/120</small></h4>
         <textarea class="adm-in pe-bio" id="pe-bio" maxlength="120" rows="2">${esc(st.bio)}</textarea>
         <h4>${t('pe_banner')}</h4>
-        ${(p.banners || []).length ? `<div class="pe-banners"><button class="pe-b none${!st.banner ? ' on' : ''}" data-b="">${t('none')}</button>${p.banners.map(b => `<button class="pe-b${b === st.banner ? ' on' : ''}" data-b="${b}" title="${t('bn_' + b)}"></button>`).join('')}</div>`
+        ${(p.banners || []).length ? `<div class="pe-banners"><button class="pe-b none${!st.banner ? ' on' : ''}" data-b="">${t('none')}</button>${p.banners.map(b => `<button class="pe-b${b === st.banner ? ' on' : ''}" data-b="${b}" title="${bannerName(b)}"></button>`).join('')}</div>`
           : `<p class="muted small">${t('no_banner_owned')}</p>`}
         <h4>${t('pe_pp')}</h4>
         <p class="muted small">${t('pp_soon')}</p>

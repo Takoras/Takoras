@@ -139,6 +139,7 @@ function drawBanner(canvas, id) {
   }
 }
 // Bannières dessinées par toi (images). Les anciennes bannières en code restent en secours.
+const bannerName = id => { const k = 'bn_' + id, n = t(k); return n === k ? id.charAt(0).toUpperCase() + id.slice(1) : n; };
 const BANNER_IMG = { plaine: 'img/bannieres/plaine.png', doodle: 'img/bannieres/doodle.png' };
 const bannerCanvas = id => {
   if (BANNER_IMG[id]) { const i = new Image(); i.className = 'banner-cv'; i.src = BANNER_IMG[id]; i.alt = ''; return i; }

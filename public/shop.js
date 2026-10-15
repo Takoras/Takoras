@@ -11,7 +11,7 @@ function itemText(it) {
   if (it.kind === 'potion') return [t('it_potion', { m: String(it.data.mult).replace('.', SETTINGS.lang === 'fr' ? ',' : '.') }), t('it_potion_d', { m: it.data.mult, n: it.data.rolls })];
   if (it.kind === 'instant') return [t('it_instant'), t('it_instant_d')];
   if (it.kind === 'hourglass') return [t('it_hourglass'), t('it_hourglass_d', { n: it.data.minutes })];
-  return [t('it_banner', { n: t('bn_' + it.id.slice(2)) }), t('it_banner_d')];
+  return [t('it_banner', { n: bannerName(it.id.slice(2)) }), t('it_banner_d')];
 }
 const hms = s => [Math.floor(s / 3600), Math.floor(s / 60) % 60, s % 60].map(n => String(n).padStart(2, '0')).join(':');
 
