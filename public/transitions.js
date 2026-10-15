@@ -48,14 +48,24 @@ async function onde() {
   await Promise.all(cells.map(c => c.d.animate([{ transform: 'scale(0)' }, { transform: 'scale(1)' }],
     { duration: 60, delay: (1 - d(c)) * 110, easing: 'ease-out', fill: 'forwards' }).finished));
   showOpening();
-  // Sortie : du centre vers les bords, rapide au centre puis de plus en plus lent (250 ms max)
-  await Promise.all(cells.map(c => c.d.animate([{ transform: 'scale(1)' }, { transform: 'scale(0)' }],
-    { duration: 50 + d(c) * 110, delay: d(c) * 90, easing: 'cubic-bezier(.3,0,.2,1)', fill: 'forwards' }).finished));
+  // Sortie : désintégration. Les pixels passent sur une couche à part (qui se nettoie seule)
+  // pour que l'ouverture soit déjà utilisable : instantané au centre, jusqu'à ~3 s sur les bords.
+  const layer = document.createElement('div');
+  layer.className = 'fx dust';
+  document.body.appendChild(layer);
+  cells.forEach(c => layer.appendChild(c.d));
+  Promise.all(cells.map(c => {
+    const k = d(c), r = Math.random();
+    return c.d.animate([
+      { opacity: 1, transform: 'translate(0,0) scale(1)' },
+      { opacity: 0, transform: `translate(${(r - .5) * 16 * k}px,${-r * 24 * k}px) scale(${.5 + r * .3})` },
+    ], { duration: 120 + k ** 1.5 * 1400 + r * 300 * k, delay: k * k * 900 + Math.random() * 250 * k, easing: 'ease-out', fill: 'forwards' }).finished;
+  })).finally(() => layer.remove());
   return 0;
 }
 
 const TRANSITIONS = [
-  ['Pixels', 'Des bords vers le jeton, puis s\'efface du centre vers les bords', onde],
+  ['Pixels', 'Des bords vers le jeton, puis se désintègre du centre vers les bords', onde],
 ];
 
 let choice = 0;
@@ -70,6 +80,7 @@ function showOpening(fade = 0) {
   if (fade) opening.animate([{ opacity: 0 }, { opacity: 1 }], { duration: fade });
 }
 function closeOpening() {
+  document.querySelectorAll('.dust').forEach(l => l.remove());
   opening.classList.remove('on');
   opening.setAttribute('aria-hidden', 'true');
   $('coin').style.visibility = '';
