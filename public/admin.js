@@ -27,7 +27,7 @@ $('adm-list').addEventListener('click', e => {
   admSel = { id: b.dataset.id, pseudo: b.dataset.pseudo };
   $('adm-sel').hidden = false;
   $('adm-sel-name').textContent = admSel.pseudo;
-  $('adm-jeton').innerHTML = SERIES.Takoras.map(j => `<option>${j.name}</option>`).join('');
+  $('adm-jeton').innerHTML = SERIES.Takoras.map(j => `<option value="${j.name}">${jn(j.name)}</option>`).join('');
   admLoad();
 });
 

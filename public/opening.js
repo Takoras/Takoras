@@ -199,7 +199,7 @@ function effects(v) {
 function fillInfo(j) {
   const lvl = Math.log10(j.odds) / 6; // 0 → 1 pour 1/1 → 1/1 000 000
   const stat = (k, base) => { const v = Math.round(base * (.35 + lvl * .65) * (.85 + Math.random() * .3)); return [k, v, Math.min(100, v / base * 100)]; };
-  $('op-name').textContent = j.name;
+  $('op-name').textContent = jn(j.name);
   $('op-rarity').textContent = '1/' + j.odds.toLocaleString(LOCALE());
   sess.cur.stats ||= [stat('s_hp', 500), stat('s_atk', 120), stat('s_def', 120), stat('s_spd', 100)];
   $('op-stats').innerHTML = sess.cur.stats
@@ -428,7 +428,7 @@ function showRecap() {
   opening.style.setProperty('--tier', hexRGB(best.glow));
   startBg(best);
   $('op-recap-grid').innerHTML = list.map((j, i) =>
-    `<div class="rc${j === best ? ' best' : ''}" style="--g:${hexRGB(j.glow)};animation-delay:${i * 45}ms">${j === best ? `<span class="rc-tag">${t('best')}</span>` : ''}${jetonHTML(j, 72)}<b>${j.name}</b><small>1/${j.odds.toLocaleString(LOCALE())}</small></div>`).join('');
+    `<div class="rc${j === best ? ' best' : ''}" style="--g:${hexRGB(j.glow)};animation-delay:${i * 45}ms">${j === best ? `<span class="rc-tag">${t('best')}</span>` : ''}${jetonHTML(j, 72)}<b>${jn(j.name)}</b><small>1/${j.odds.toLocaleString(LOCALE())}</small></div>`).join('');
   $('op-recap-tag').textContent = t('recap_tag', { n: sess.total });
   $('op-recap-title').textContent = t('recap_title', { n: sess.total });
   if (typeof ecoDecorate === 'function') ecoDecorate();
@@ -533,7 +533,7 @@ const FX = [['Shake', () => shake()], ['Vignette', () => opening.classList.toggl
 function renderDebug() {
   $('dbg-luck').innerHTML = LUCKS.map(l => `<button class="${l === debug.luck ? 'on' : ''}" data-l="${l}">×${l}</button>`).join('');
   $('dbg-force').innerHTML = '<option value="">Aléatoire</option>' + SERIES.Takoras.map(j =>
-    `<option value="${j.name}"${j.name === debug.force ? ' selected' : ''}>${j.name} · 1/${j.odds.toLocaleString(LOCALE())}</option>`).join('');
+    `<option value="${j.name}"${j.name === debug.force ? ' selected' : ''}>${jn(j.name)} · 1/${j.odds.toLocaleString(LOCALE())}</option>`).join('');
   $('dbg-fx').innerHTML = FX.map(([n], i) => `<button data-f="${i}">${n}</button>`).join('');
 }
 $('dbg-luck').addEventListener('click', e => { const b = e.target.closest('button'); if (b) { debug.luck = +b.dataset.l; renderDebug(); } });

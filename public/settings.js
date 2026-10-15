@@ -69,6 +69,10 @@ const I18N = {
     u_pulls: '{n} pulls', u_tokens: '{n} tokens', u_collec: '{n} / {t} tokens', you_tag: 'you',
   },
 };
+// Nom affiché d'un jeton (les noms de la base restent en français, on ne traduit que l'affichage)
+const JETON_EN = { 'Givre': 'Frost', 'Rouillé': 'Rusty', 'Carmin': 'Crimson', 'Zénith': 'Zenith' };
+const jn = name => (SETTINGS.lang === 'en' && JETON_EN[name]) || name;
+
 function t(key, vars = {}) {
   let s = (I18N[SETTINGS.lang] || I18N.fr)[key] ?? I18N.fr[key] ?? key;
   for (const k in vars) s = s.replace('{' + k + '}', vars[k]);
