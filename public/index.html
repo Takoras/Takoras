@@ -6,54 +6,74 @@
 <title>Takoras</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=Space+Grotesk:wght@600;700&display=swap" rel="stylesheet">
-<style>
-  :root {
-    --bg: #0d0d12;
-    --surface: #16161e;
-    --surface-2: #1e1e28;
-    --border: #2a2a36;
-    --text: #f2f2f5;
-    --muted: #9a9aab;
-    --accent: #8b5cf6;
-    --accent-2: #f97316;
-    --radius: 18px;
-  }
-  * { box-sizing: border-box; margin: 0; padding: 0; }
-  body {
-    min-height: 100vh;
-    background:
-      radial-gradient(700px 400px at 85% -10%, rgba(139, 92, 246, .18), transparent 70%),
-      radial-gradient(500px 300px at 0% 110%, rgba(249, 115, 22, .1), transparent 70%),
-      var(--bg);
-    color: var(--text);
-    font-family: Inter, system-ui, sans-serif;
-    line-height: 1.5;
-  }
-  a { color: inherit; text-decoration: none; }
-  .wrap { max-width: 1200px; margin: 0 auto; padding: 0 16px; }
-
-  nav {
-    position: sticky; top: 0; z-index: 10;
-    background: rgba(13, 13, 18, .75);
-    backdrop-filter: blur(12px);
-    border-bottom: 1px solid var(--border);
-  }
-  nav .wrap { display: flex; align-items: center; height: 64px; }
-  .logo { display: flex; align-items: center; gap: 10px; font-family: "Space Grotesk"; font-weight: 700; font-size: 20px; letter-spacing: .04em; }
-  .logo span {
-    width: 34px; height: 34px; border-radius: 10px;
-    background: linear-gradient(135deg, var(--accent), var(--accent-2));
-    display: grid; place-items: center; font-size: 16px;
-  }
-</style>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=Space+Grotesk:wght@500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="style.css">
 </head>
 <body>
-  <nav>
-    <div class="wrap">
+  <nav class="nav">
+    <div class="wrap nav-in">
       <a class="logo" href="/"><span>T</span>TAKORAS</a>
+      <div class="links">
+        <a class="on" href="#">Pull</a>
+        <a href="#">Collection</a>
+        <a href="#classement">Classement</a>
+        <a href="#">Boutique</a>
+      </div>
+      <div class="bal"><i class="mini-coin"></i><b>12 450</b></div>
     </div>
   </nav>
-  <main class="wrap"></main>
+
+  <main>
+    <section class="wrap stage">
+      <aside class="panel types">
+        <div class="panel-head"><b>Pulls</b></div>
+        <div id="types"></div>
+      </aside>
+
+      <div class="center">
+        <div class="orbit"></div>
+        <div class="glow" id="glow"></div>
+        <div class="float f1"></div><div class="float f2"></div><div class="float f3"></div><div class="float f4"></div>
+        <div class="hero-coin" id="coin"><span>T</span></div>
+        <div class="eyebrow" id="tag">Permanent</div>
+        <h1 id="name">Pull Classique</h1>
+        <p class="timer" id="timer"></p>
+        <div class="actions">
+          <button class="btn primary">Pull ×1 · <span id="p1">100</span> ◆</button>
+          <button class="btn ghost">Pull ×10 · <span id="p10">900</span> ◆</button>
+        </div>
+      </div>
+
+      <aside class="panel">
+        <div class="panel-head"><b>Mon historique</b><a href="#">Tout voir</a></div>
+        <div id="hist"></div>
+      </aside>
+    </section>
+
+    <section class="wrap live">
+      <div class="live-head"><span class="dot"></span><b>En direct</b></div>
+      <div class="ticker"><div class="track" id="live"></div></div>
+    </section>
+
+    <section class="wrap board" id="classement">
+      <div class="board-head">
+        <div>
+          <div class="eyebrow">Classement</div>
+          <h2>Les meilleurs joueurs</h2>
+        </div>
+        <div class="seg" id="period">
+          <button class="on" data-p="week">Cette semaine</button>
+          <button data-p="all">Depuis toujours</button>
+        </div>
+      </div>
+      <div class="chips" id="kinds"></div>
+      <div class="podium" id="podium"></div>
+      <div class="list" id="list"></div>
+    </section>
+  </main>
+
+  <footer class="wrap foot">© 2026 Takoras</footer>
+
+  <script src="app.js"></script>
 </body>
 </html>
