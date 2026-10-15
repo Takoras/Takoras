@@ -11,13 +11,13 @@ const COLORS = {
 
 const hoursFromNow = h => Date.now() + h * 3600e3;
 const PULLS = [
-  { group: 'Permanents', name: 'Takoras', color: 'takoras', price: 100, free: true, img: 'img/jetons/takoras.png' },
-  { group: 'Permanents', name: 'Feu', color: 'feu', price: 150 },
-  { group: 'Permanents', name: 'Eau', color: 'eau', price: 150 },
-  { group: 'Permanents', name: 'Terre', color: 'terre', price: 150 },
-  { group: 'Limités', name: 'Éclipse', color: 'rose', price: 250, ends: hoursFromNow(31.4) },
-  { group: 'Limités', name: 'Nova', color: 'foudre', price: 300, ends: hoursFromNow(5.2) },
-  { group: 'Week-end', name: 'Week-end', color: 'foudre', price: 200, weekend: true },
+  { group: t('grp_perm'), name: 'Takoras', color: 'takoras', price: 100, free: true, img: 'img/jetons/takoras.png' },
+  { group: t('grp_perm'), name: 'Feu', color: 'feu', price: 150 },
+  { group: t('grp_perm'), name: 'Eau', color: 'eau', price: 150 },
+  { group: t('grp_perm'), name: 'Terre', color: 'terre', price: 150 },
+  { group: t('grp_lim'), name: 'Éclipse', color: 'rose', price: 250, ends: hoursFromNow(31.4) },
+  { group: t('grp_lim'), name: 'Nova', color: 'foudre', price: 300, ends: hoursFromNow(5.2) },
+  { group: t('grp_we'), name: 'Week-end', color: 'foudre', price: 200, weekend: true },
 ];
 
 const coinStyle = c => { const [hi, mid, lo, g] = COLORS[c]; return `--hi:${hi};--mid:${mid};--lo:${lo};--glow:${g}`; };
@@ -33,8 +33,8 @@ function renderTypes() {
   let html = '', last = '';
   PULLS.forEach((p, i) => {
     if (p.group !== last) { html += `<div class="group">${p.group}</div>`; last = p.group; }
-    const badge = p.ends ? '<span class="badge lim">Limité</span>' : p.weekend ? '<span class="badge we">Sam–Dim</span>' : '';
-    html += `<button class="type${i === current ? ' on' : ''}" data-i="${i}" style="${coinStyle(p.color)}">${coin(p.color, 30)}<div><b>${p.name}</b><small>${p.free ? 'Gratuit · se recharge' : p.price + ' ◆'}</small></div>${badge}</button>`;
+    const badge = p.ends ? `<span class="badge lim">${t('limited')}</span>` : p.weekend ? `<span class="badge we">${t('sat_sun')}</span>` : '';
+    html += `<button class="type${i === current ? ' on' : ''}" data-i="${i}" style="${coinStyle(p.color)}">${coin(p.color, 30)}<div><b>${p.name}</b><small>${p.free ? t('free') : p.price + ' ◆'}</small></div>${badge}</button>`;
   });
   $('types').innerHTML = html;
 }
@@ -50,10 +50,10 @@ function select(i) {
     f.classList.toggle('has-img', !!p.img);
     f.innerHTML = p.img ? `<img src="${p.img}" alt="">` : '';
   });
-  $('name').textContent = 'Pull ' + p.name;
-  $('tag').textContent = p.ends ? 'Limité' : p.weekend ? 'Week-end' : 'Permanent';
+  $('name').textContent = t('pull') + ' ' + p.name;
+  $('tag').textContent = p.ends ? t('limited') : p.weekend ? t('grp_we') : t('permanent');
   if ($('p1')) $('p1').textContent = p.price;
-  if ($('p10')) $('p10').textContent = (p.price * 10).toLocaleString('fr');
+  if ($('p10')) $('p10').textContent = (p.price * 10).toLocaleString(LOCALE());
   renderTypes();
   tick();
 }
@@ -92,48 +92,46 @@ function tick() {
   if (p.ends) {
     const s = Math.max(0, Math.floor((p.ends - Date.now()) / 1000));
     const f = n => String(n).padStart(2, '0');
-    $('timer').innerHTML = `Se termine dans <b>${f(Math.floor(s / 3600))}:${f(Math.floor(s / 60) % 60)}:${f(s % 60)}</b>`;
+    $('timer').innerHTML = `${t('ends_in')} <b>${f(Math.floor(s / 3600))}:${f(Math.floor(s / 60) % 60)}:${f(s % 60)}</b>`;
   } else if (p.weekend) {
-    $('timer').textContent = 'Disponible seulement le samedi et le dimanche';
+    $('timer').textContent = t('weekend_only');
   } else {
-    $('timer').textContent = 'Toujours disponible';
+    $('timer').textContent = t('always');
   }
 }
 setInterval(tick, 1000);
 
-// Historique perso
-const HIST = [['Takoras', 'takoras', 1, 2], ['Feu', 'feu', 10, 7], ['Takoras', 'takoras', 1, 15], ['Eau', 'eau', 1, 42], ['Éclipse', 'rose', 10, 60], ['Takoras', 'takoras', 1, 120]];
-$('hist').innerHTML = HIST.map(([n, c, x, m]) =>
-  `<div class="h-row">${coin(c, 26)}<div>Pull ${n} ×${x}<small>il y a ${m < 60 ? m + ' min' : Math.round(m / 60) + ' h'}</small></div><span class="muted">?</span></div>`).join('');
-
-// En direct
-const NAMES = ['Ryo', 'Kenji', 'Mika', 'Asc', 'Lenn', 'Nova', 'Pharysse', 'Ratek', 'Yuna', 'Sora', 'Kaito', 'Hina'];
-const LIVE = NAMES.map((n, i) => { const p = PULLS[i % PULLS.length]; return `<div class="lv"><span class="av">${n[0]}</span><span><b>${n}</b> <span class="muted">a pull</span> ${p.name}</span>${coin(p.color, 24)}</div>`; }).join('');
-$('live').innerHTML = LIVE + LIVE;
-
-// Classement
-const KINDS = [
-  { id: 'pulls', label: 'Pulls ouverts', unit: 'pulls' },
-  { id: 'gain', label: 'Meilleur gain', unit: '◆' },
-  { id: 'jetons', label: 'Jetons totaux', unit: '◆' },
-  { id: 'collec', label: 'Collection', unit: 'objets' },
-];
-const PLAYERS = ['Pharysse', 'Ratek', 'Shutain', 'Mika', 'Kenji', 'Yuna', 'Sora', 'Lenn', 'Asc', 'Kaito'];
-let kind = 0, period = 'week';
-const seed = (a, b) => { let x = Math.sin(a * 97 + b * 13) * 1e4; return x - Math.floor(x); };
-function rows() {
-  const base = { pulls: 900, gain: 12000, jetons: 380000, collec: 140 }[KINDS[kind].id] * (period === 'all' ? 9 : 1);
-  return PLAYERS.map((n, i) => ({ n, v: Math.round(base * (1 - i * .08) * (.9 + seed(i, kind + (period === 'all' ? 7 : 0)) * .1)) }))
-    .sort((a, b) => b.v - a.v);
+// Historique perso : tes vrais pulls, gardés dans le navigateur
+function ago(ts) {
+  const m = Math.floor((Date.now() - ts) / 60000);
+  if (m < 1) return t('just_now');
+  return t('ago', { n: m < 60 ? m + ' min' : m < 1440 ? Math.floor(m / 60) + ' h' : Math.floor(m / 1440) + ' j' });
 }
+function loadHist() { try { return JSON.parse(localStorage.getItem('takoras-hist')) || []; } catch { return []; } }
+function renderHist() {
+  const h = loadHist();
+  $('hist').innerHTML = h.length
+    ? h.slice(0, 6).map(e => `<div class="h-row"><img class="jeton" src="${e.img}" alt="" style="width:26px;height:26px;filter:drop-shadow(0 0 4px ${e.glow})"><div>${e.name}<small>${ago(e.ts)}</small></div><span class="muted">1/${e.odds.toLocaleString(LOCALE())}</span></div>`).join('')
+    : `<p class="empty">${t('hist_empty')}</p>`;
+  renderLive();
+}
+setInterval(renderHist, 60000);
+
+// En direct : pour l'instant seulement tes propres tirages (les autres joueurs arriveront avec les comptes)
+function renderLive() {
+  const h = loadHist().slice(0, 12);
+  const item = e => `<div class="lv"><span class="av">${t('you')[0]}</span><span><b>${t('you')}</b> <span class="muted">${t('got')}</span> ${e.name}</span><img class="jeton" src="${e.img}" alt="" style="width:24px;height:24px"></div>`;
+  $('live').innerHTML = h.length ? h.map(item).join('').repeat(h.length >= 6 ? 2 : 1) : `<span class="muted live-empty">${t('live_empty')}</span>`;
+  $('live').classList.toggle('still', h.length < 6);
+}
+
+// Classement : vide tant qu'il n'y a pas de vrais comptes
+const KINDS = ['k_pulls', 'k_gain', 'k_tokens', 'k_collec'];
+let kind = 0, period = 'week';
 function renderBoard() {
-  $('kinds').innerHTML = KINDS.map((k, i) => `<button class="chip${i === kind ? ' on' : ''}" data-k="${i}">${k.label}</button>`).join('');
-  const r = rows(), u = KINDS[kind].unit, fmt = v => v.toLocaleString('fr') + ' ' + u;
-  $('podium').innerHTML = [[1, 'p2'], [0, 'p1'], [2, 'p3']].map(([i, c]) =>
-    `<div class="pod ${c}"><span class="av">${r[i].n[0]}</span><b>${r[i].n}</b><small>${fmt(r[i].v)}</small><div class="step">${i + 1}</div></div>`).join('');
-  $('list').innerHTML = r.slice(3).map((p, i) =>
-    `<div class="li"><span class="rank">${i + 4}</span><span class="av">${p.n[0]}</span><span>${p.n}</span><span class="val">${fmt(p.v)}</span></div>`).join('')
-    + `<div class="li me"><span class="rank">42</span><span class="av">T</span><span>Toi</span><span class="val">${fmt(Math.round(r[9].v * .3))}</span></div>`;
+  $('kinds').innerHTML = KINDS.map((k, i) => `<button class="chip${i === kind ? ' on' : ''}" data-k="${i}">${t(k)}</button>`).join('');
+  $('podium').innerHTML = '';
+  $('list').innerHTML = `<p class="empty board-empty">${t('board_empty')}</p>`;
 }
 $('kinds').addEventListener('click', e => { const b = e.target.closest('.chip'); if (b) { kind = +b.dataset.k; renderBoard(); } });
 $('period').addEventListener('click', e => {
@@ -145,3 +143,4 @@ $('period').addEventListener('click', e => {
 
 select(0);
 renderBoard();
+renderHist();

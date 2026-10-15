@@ -57,7 +57,10 @@ function steps(X) {
     const v = i === n ? X : Math.round(1 + (X - 1) * (i / n) ** 2.2 * (.9 + Math.random() * .2));
     out.push(Math.min(X, Math.max(v, (out[out.length - 1] || 1) + 1)));
   }
-  return out.filter((v, i) => i === out.length - 1 || i === 0 || Math.random() > SKIP);
+  const kept = out.filter((v, i) => i === out.length - 1 || i === 0 || Math.random() > SKIP);
+  if (SETTINGS.speed === 'instant') return [X];
+  if (SETTINGS.speed === 'rapide') return kept.filter((v, i) => i % 2 === 1 || i === kept.length - 1);
+  return kept;
 }
 
 let run = null;
@@ -109,10 +112,10 @@ function startOpening() {
   }
   const c = sess.cur, p = PULLS[sess.pull];
   run = { result: findJeton(c.name), queue: c.queue, shown: c.shown, done: false };
-  $('op-tag').textContent = 'Pull ' + p.name + (sess.total > 1 ? ` · ${sess.idx + 1}/${sess.total}` : '');
+  $('op-tag').textContent = t('pull') + ' ' + p.name + (sess.total > 1 ? ` · ${sess.idx + 1}/${sess.total}` : '');
   $('op-odds').classList.remove('bump');
-  if ($('op-price')) $('op-price').textContent = (p.price * sess.total).toLocaleString('fr'); // ce bouton peut être réécrit par l'économie
-  $('op-odds').textContent = '1/' + c.shown.toLocaleString('fr');
+  if ($('op-price')) $('op-price').textContent = (p.price * sess.total).toLocaleString(LOCALE()); // ce bouton peut être réécrit par l'économie
+  $('op-odds').textContent = '1/' + c.shown.toLocaleString(LOCALE());
   stopBg();
   opening.classList.remove('hold', 'rare', 'revealed', 'recap', 'spinning', 'mythic', 'god', 'cinema');
   setTier(c.shown);
@@ -120,7 +123,7 @@ function startOpening() {
   opCoin.innerHTML = `<div class="zoom"><div class="tilt3d"><div class="spin">${coin3D(MYSTERE, 'Jeton mystère')}</div><i class="glare"></i><i class="shine"></i>${'<b class="tw"></b>'.repeat(7)}</div></div>`;
   setGlareMask(MYSTERE);
   if (c.phase === 'count' && c.shown === 1) spawn(); // le « ? » arrive en grossissant
-  $('op-hint').textContent = 'Clique sur le jeton';
+  $('op-hint').textContent = t('click_coin');
   $('op-stats').innerHTML = '';
   if (c.phase === 'hold') hold(true);
   if (c.phase === 'revealed') reveal(true);
@@ -147,19 +150,21 @@ function countTo(from, to, ms = 110) {
   (function step(t) {
     if (id !== countAnim) return;
     const k = Math.min(1, (t - t0) / ms);
-    el.textContent = '1/' + Math.round(from + (to - from) * k).toLocaleString('fr');
+    el.textContent = '1/' + Math.round(from + (to - from) * k).toLocaleString(LOCALE());
     if (k < 1) requestAnimationFrame(step);
   })(t0);
 }
 
 // Tremblement très rapide qui s'amortit (à partir de 1/500)
 function shake(power = 1) {
+  if (reducedFx()) return;
   const a = 9 * power, f = [1, -.8, .6, -.45, .3, -.18, .08, 0];
   opening.animate(f.map((k, i) => ({ transform: `translate(${a * k}px, ${a * k * (i % 2 ? .6 : -.6)}px)` })), { duration: 260, easing: 'ease-in' });
 }
 
 // Flash blanc doux (à partir de 1/5000)
 function flash(power = .45, ms = 500) {
+  if (reducedFx()) power *= .3;
   opening.querySelectorAll('.op-flash').forEach(f => f.remove());
   const f = document.createElement('div');
   f.className = 'op-flash';
@@ -169,6 +174,7 @@ function flash(power = .45, ms = 500) {
 }
 
 function burst(n = 5) {
+  if (reducedFx()) n = Math.ceil(n / 4);
   const r = opCoin.getBoundingClientRect(), x = r.left + r.width / 2, y = r.top + r.height / 2;
   const col = `rgb(${getComputedStyle(opening).getPropertyValue('--tier')})`;
   for (let i = 0; i < n; i++) {
@@ -191,12 +197,12 @@ function effects(v) {
 // Fiche du jeton (stats provisoires : plus il est rare, plus elles sont hautes)
 function fillInfo(j) {
   const lvl = Math.log10(j.odds) / 6; // 0 → 1 pour 1/1 → 1/1 000 000
-  const stat = (n, base) => { const v = Math.round(base * (.35 + lvl * .65) * (.85 + Math.random() * .3)); return [n, v, Math.min(100, v / base * 100)]; };
+  const stat = (k, base) => { const v = Math.round(base * (.35 + lvl * .65) * (.85 + Math.random() * .3)); return [k, v, Math.min(100, v / base * 100)]; };
   $('op-name').textContent = j.name;
-  $('op-rarity').textContent = '1/' + j.odds.toLocaleString('fr');
-  sess.cur.stats ||= [stat('PV', 500), stat('Attaque', 120), stat('Défense', 120), stat('Vitesse', 100)];
+  $('op-rarity').textContent = '1/' + j.odds.toLocaleString(LOCALE());
+  sess.cur.stats ||= [stat('s_hp', 500), stat('s_atk', 120), stat('s_def', 120), stat('s_spd', 100)];
   $('op-stats').innerHTML = sess.cur.stats
-    .map(([n, v, w]) => `<div class="stat"><span class="muted">${n}</span><div class="bar"><i data-w="${w}"></i></div><b>${v}</b></div>`).join('');
+    .map(([k, v, w]) => `<div class="stat"><span class="muted">${t(k)}</span><div class="bar"><i data-w="${w}"></i></div><b>${v}</b></div>`).join('');
   requestAnimationFrame(() => requestAnimationFrame(() => $('op-stats').querySelectorAll('i').forEach(i => { i.style.width = i.dataset.w + '%'; })));
 }
 
@@ -213,8 +219,8 @@ function hold(restored) {
   if (r.result.odds >= MYTHIC) { // battement de cœur sonore, calé sur la vignette
     r.hb = setInterval(() => { if (run !== r || r.done) clearInterval(r.hb); else sfx.heartbeat(); }, 1100);
   }
-  $('op-hint').textContent = 'Clique pour révéler';
-  setTimeout(() => { if (run === r) r.canReveal = true; }, 450); // évite de révéler par accident en spammant
+  $('op-hint').textContent = t('click_reveal');
+  setTimeout(() => { if (run === r) r.canReveal = true; }, 450 * Math.max(.5, speed())); // évite de révéler par accident en spammant
 }
 
 // Révélation : le jeton tourne en se penchant, la face change à mi-chemin, puis il glisse à gauche et la fiche arrive
@@ -335,7 +341,7 @@ function reveal(restored) {
   // Le jeton se retourne très vite puis ralentit longtemps (plus il est rare, plus ça dure)
   if (!restored) {
     const turns = j.odds >= GOD ? 10 : j.odds >= MYTHIC ? 8 : j.odds >= RARE ? 6 : j.odds >= FAST ? 4 : 3;
-    const ms = j.odds >= GOD ? 5200 : j.odds >= MYTHIC ? 4200 : j.odds >= RARE ? 3200 : j.odds >= FAST ? 2400 : 1600;
+    const ms = Math.max(350, (j.odds >= GOD ? 5200 : j.odds >= MYTHIC ? 4200 : j.odds >= RARE ? 3200 : j.odds >= FAST ? 2400 : 1600) * (speed() || .2));
     spin.animate([{ transform: 'rotateY(0)' }, { transform: `rotateY(${turns * 360}deg)` }], { duration: ms, easing: 'cubic-bezier(.05, .9, .1, 1)' });
     // On ne peut pas passer à la suite tout de suite : 0,5 s max pour les jetons communs,
     // toute la rotation pour les vrais rares (1/1000 et plus)
@@ -396,7 +402,7 @@ function updateActions() {
   const last = sess.idx >= sess.total - 1, multi = sess.total > 1;
   if (typeof ecoDecorate === 'function') setTimeout(ecoDecorate);
   $('op-next').hidden = last;
-  $('op-next').innerHTML = `Suivant · ${sess.idx + 2}/${sess.total}`;
+  $('op-next').innerHTML = t('next', { a: sess.idx + 2, b: sess.total });
   $('op-recap').hidden = !(last && multi);
   $('op-again').hidden = $('op-back').hidden = !(last && !multi);
 }
@@ -421,9 +427,9 @@ function showRecap() {
   opening.style.setProperty('--tier', hexRGB(best.glow));
   startBg(best);
   $('op-recap-grid').innerHTML = list.map((j, i) =>
-    `<div class="rc${j === best ? ' best' : ''}" style="--g:${hexRGB(j.glow)};animation-delay:${i * 45}ms">${j === best ? '<span class="rc-tag">Meilleur tirage</span>' : ''}${jetonHTML(j, 72)}<b>${j.name}</b><small>1/${j.odds.toLocaleString('fr')}</small></div>`).join('');
-  $('op-recap-tag').textContent = `Récap · ${sess.total} pulls`;
-  $('op-recap-title').textContent = `Tes ${sess.total} jetons`;
+    `<div class="rc${j === best ? ' best' : ''}" style="--g:${hexRGB(j.glow)};animation-delay:${i * 45}ms">${j === best ? `<span class="rc-tag">${t('best')}</span>` : ''}${jetonHTML(j, 72)}<b>${j.name}</b><small>1/${j.odds.toLocaleString(LOCALE())}</small></div>`).join('');
+  $('op-recap-tag').textContent = t('recap_tag', { n: sess.total });
+  $('op-recap-title').textContent = t('recap_title', { n: sess.total });
   if (typeof ecoDecorate === 'function') ecoDecorate();
   opening.classList.remove('revealed', 'hold');
   opening.classList.add('recap');
@@ -433,11 +439,10 @@ function showRecap() {
 function canClose() { return !sess || sess.recap || (sess.total === 1 && opening.classList.contains('revealed')); }
 
 function addToHistory(j) {
-  const row = document.createElement('div');
-  row.className = 'h-row';
-  row.innerHTML = `${jetonHTML(j, 26)}<div>${j.name}<small>à l'instant</small></div><span class="muted">1/${j.odds.toLocaleString('fr')}</span>`;
-  $('hist').prepend(row);
-  while ($('hist').children.length > 6) $('hist').lastElementChild.remove();
+  const h = loadHist();
+  h.unshift({ name: j.name, odds: j.odds, glow: j.glow, img: texOf(j), ts: Date.now() });
+  try { localStorage.setItem('takoras-hist', JSON.stringify(h.slice(0, 30))); } catch {}
+  renderHist();
 }
 
 function tap() {
@@ -454,7 +459,8 @@ function tap() {
   effects(next);
   $('op-hint').textContent = '';
   if (!run.queue.length) {
-    if (run.result.odds < FAST) { run.done = true; setTimeout(reveal, 120); }
+    // En instantané (ou pour les communs), on révèle directement, sans pause ni cinématique
+    if (run.result.odds < FAST || SETTINGS.speed === 'instant') { run.done = true; setTimeout(reveal, 120); }
     else setTimeout(hold, 200);
   }
 }
@@ -524,7 +530,7 @@ const FX = [['Shake', () => shake()], ['Vignette', () => opening.classList.toggl
 function renderDebug() {
   $('dbg-luck').innerHTML = LUCKS.map(l => `<button class="${l === debug.luck ? 'on' : ''}" data-l="${l}">×${l}</button>`).join('');
   $('dbg-force').innerHTML = '<option value="">Aléatoire</option>' + SERIES.Takoras.map(j =>
-    `<option value="${j.name}"${j.name === debug.force ? ' selected' : ''}>${j.name} · 1/${j.odds.toLocaleString('fr')}</option>`).join('');
+    `<option value="${j.name}"${j.name === debug.force ? ' selected' : ''}>${j.name} · 1/${j.odds.toLocaleString(LOCALE())}</option>`).join('');
   $('dbg-fx').innerHTML = FX.map(([n], i) => `<button data-f="${i}">${n}</button>`).join('');
 }
 $('dbg-luck').addEventListener('click', e => { const b = e.target.closest('button'); if (b) { debug.luck = +b.dataset.l; renderDebug(); } });

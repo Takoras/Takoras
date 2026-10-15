@@ -24,7 +24,7 @@ function regen() {
 }
 const nextIn = () => Math.max(0, REGEN - (Date.now() - eco.last));
 const mmss = ms => { const s = Math.ceil(ms / 1000); return `${String(Math.floor(s / 60)).padStart(2, '0')}:${String(s % 60).padStart(2, '0')}`; };
-const fmt = n => n.toLocaleString('fr');
+const fmt = n => n.toLocaleString(LOCALE());
 const isTakoras = () => PULLS[current].name === 'Takoras';
 
 // Prend des pulls dans le stock ; si on était plein, la recharge démarre maintenant
@@ -67,15 +67,15 @@ function renderActions() {
   box.innerHTML = `
     <div class="stock">
       <div class="pips">${Array.from({ length: eco.max }, (_, i) => `<img src="img/jetons/takoras.png" alt="" class="${i < eco.stock ? 'on' : ''}">`).join('')}</div>
-      <span><b id="stock-n">${eco.stock}</b>/${eco.max} pulls · <span id="stock-next">${full ? 'stock plein' : '+1 dans ' + mmss(nextIn())}</span></span>
+      <span><b id="stock-n">${eco.stock}</b>/${eco.max} ${t('pulls_word')} · <span id="stock-next">${full ? t('stock_full') : t('plus1_in', { t: mmss(nextIn()) })}</span></span>
     </div>
     <div class="row-btns">
-      <button class="btn primary" data-open="1" ${eco.stock ? '' : 'disabled'}>Ouvrir 1</button>
-      <button class="btn ghost" data-open="all" ${eco.stock > 1 ? '' : 'disabled'}>Tout ouvrir (${eco.stock})</button>
+      <button class="btn primary" data-open="1" ${eco.stock ? '' : 'disabled'}>${t('open1')}</button>
+      <button class="btn ghost" data-open="all" ${eco.stock > 1 ? '' : 'disabled'}>${t('open_all', { n: eco.stock })}</button>
     </div>
     ${eco.max < TOP_MAX
-      ? `<button class="btn upgrade" data-up ${eco.coins >= cost ? '' : 'disabled'}>Stock max ${eco.max} → ${eco.max + 1} · ${fmt(cost)} ◆</button>`
-      : '<span class="muted small">Stock max atteint (10)</span>'}`;
+      ? `<button class="btn upgrade" data-up ${eco.coins >= cost ? '' : 'disabled'}>${t('stock_max', { a: eco.max, b: eco.max + 1 })} · ${fmt(cost)} ◆</button>`
+      : `<span class="muted small">${t('stock_top')}</span>`}`;
 }
 $('actions').addEventListener('click', e => {
   const b = e.target.closest('button'); if (!b || b.disabled) return;
@@ -89,9 +89,9 @@ function ecoDecorate() {
   regen();
   const again = $('op-again'), all = $('op-recap-again');
   again.disabled = !eco.stock;
-  again.textContent = eco.stock ? `Ouvrir encore · reste ${eco.stock}` : `Plus de pull · +1 dans ${mmss(nextIn())}`;
+  again.textContent = eco.stock ? t('open_again', { n: eco.stock }) : t('no_pull', { t: mmss(nextIn()) });
   all.disabled = !eco.stock;
-  all.textContent = eco.stock ? `Tout ouvrir (${eco.stock})` : `Plus de pull · +1 dans ${mmss(nextIn())}`;
+  all.textContent = eco.stock ? t('open_all', { n: eco.stock }) : t('no_pull', { t: mmss(nextIn()) });
 }
 
 function render() {
@@ -106,7 +106,7 @@ setInterval(() => {
   regen();
   if (eco.stock !== before) { if (eco.stock > before) sfx.regen(); return render(); }
   const el = $('stock-next');
-  if (el) el.textContent = eco.stock >= eco.max ? 'stock plein' : '+1 dans ' + mmss(nextIn());
+  if (el) el.textContent = eco.stock >= eco.max ? t('stock_full') : t('plus1_in', { t: mmss(nextIn()) });
   if (opening.classList.contains('on') && !eco.stock) ecoDecorate();
 }, 1000);
 

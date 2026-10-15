@@ -96,6 +96,7 @@ let busy = false;
 async function runTransition() {
   if (busy) return;
   busy = true;
+  if (SETTINGS.speed === 'instant') { showOpening(); busy = false; return; } // pas de transition en instantané
   sfx.corrupt();
   const t0 = performance.now();
   try {

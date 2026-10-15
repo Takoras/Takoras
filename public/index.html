@@ -39,11 +39,10 @@
     <div class="wrap nav-in">
       <a class="logo" href="/"><img src="img/logo.png" alt="">TAKORAS</a>
       <div class="links">
-        <a class="on" href="#">Pull</a>
-        <a href="#">Collection</a>
-        <a href="#classement">Classement</a>
-        <a href="#">Boutique</a>
+        <a class="on" href="#" data-i18n="nav_home">Accueil</a>
+        <a href="#classement" data-i18n="nav_board">Classement</a>
       </div>
+      <button class="mute" id="open-settings" aria-label="Paramètres"><svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.7 1.7 0 0 0 .3 1.8l.1.1a2 2 0 1 1-2.8 2.8l-.1-.1a1.7 1.7 0 0 0-1.8-.3 1.7 1.7 0 0 0-1 1.5V21a2 2 0 1 1-4 0v-.1a1.7 1.7 0 0 0-1.1-1.5 1.7 1.7 0 0 0-1.8.3l-.1.1a2 2 0 1 1-2.8-2.8l.1-.1a1.7 1.7 0 0 0 .3-1.8 1.7 1.7 0 0 0-1.5-1H3a2 2 0 1 1 0-4h.1a1.7 1.7 0 0 0 1.5-1.1 1.7 1.7 0 0 0-.3-1.8l-.1-.1a2 2 0 1 1 2.8-2.8l.1.1a1.7 1.7 0 0 0 1.8.3H9a1.7 1.7 0 0 0 1-1.5V3a2 2 0 1 1 4 0v.1a1.7 1.7 0 0 0 1 1.5 1.7 1.7 0 0 0 1.8-.3l.1-.1a2 2 0 1 1 2.8 2.8l-.1.1a1.7 1.7 0 0 0-.3 1.8V9a1.7 1.7 0 0 0 1.5 1H21a2 2 0 1 1 0 4h-.1a1.7 1.7 0 0 0-1.5 1z"/></svg></button>
       <button class="mute" id="mute"></button>
       <div class="bal"><i class="mini-coin"></i><b id="bal">0</b></div>
     </div>
@@ -52,7 +51,7 @@
   <main>
     <section class="wrap stage">
       <aside class="panel types">
-        <div class="panel-head"><b>Pulls</b></div>
+        <div class="panel-head"><b data-i18n="pulls">Pulls</b></div>
         <div id="types"></div>
       </aside>
 
@@ -73,25 +72,25 @@
       </div>
 
       <aside class="panel">
-        <div class="panel-head"><b>Mon historique</b><a href="#">Tout voir</a></div>
+        <div class="panel-head"><b data-i18n="history">Mon historique</b></div>
         <div id="hist"></div>
       </aside>
     </section>
 
     <section class="wrap live">
-      <div class="live-head"><span class="dot"></span><b>En direct</b></div>
+      <div class="live-head"><span class="dot"></span><b data-i18n="live">En direct</b></div>
       <div class="ticker"><div class="track" id="live"></div></div>
     </section>
 
     <section class="wrap board" id="classement">
       <div class="board-head">
         <div>
-          <div class="eyebrow">Classement</div>
-          <h2>Les meilleurs joueurs</h2>
+          <div class="eyebrow" data-i18n="board_tag">Classement</div>
+          <h2 data-i18n="board_title">Les meilleurs joueurs</h2>
         </div>
         <div class="seg" id="period">
-          <button class="on" data-p="week">Cette semaine</button>
-          <button data-p="all">Depuis toujours</button>
+          <button class="on" data-p="week" data-i18n="week">Cette semaine</button>
+          <button data-p="all" data-i18n="all_time">Depuis toujours</button>
         </div>
       </div>
       <div class="chips" id="kinds"></div>
@@ -118,16 +117,16 @@
         <p class="op-hint" id="op-hint">Clique sur le jeton</p>
       </div>
       <div class="op-info" id="op-info">
-        <div class="eyebrow">Série Takoras</div>
+        <div class="eyebrow" data-i18n="series">Série Takoras</div>
         <h2 class="op-name" id="op-name"></h2>
         <div class="op-rarity" id="op-rarity"></div>
         <div class="op-stats" id="op-stats"></div>
-        <p class="op-note">Statistiques provisoires · combats bientôt</p>
+        <p class="op-note" data-i18n="stats_note">Statistiques provisoires · combats bientôt</p>
         <div class="op-actions">
           <button class="btn primary" id="op-next" hidden>Suivant</button>
-          <button class="btn primary" id="op-recap" hidden>Voir le récap</button>
+          <button class="btn primary" id="op-recap" hidden data-i18n="see_recap">Voir le récap</button>
           <button class="btn primary" id="op-again">Pull encore · <span id="op-price">100</span> ◆</button>
-          <button class="btn ghost" id="op-back">Retour</button>
+          <button class="btn ghost" id="op-back" data-i18n="back">Retour</button>
         </div>
       </div>
     </div>
@@ -137,7 +136,7 @@
       <div class="op-recap-grid" id="op-recap-grid"></div>
       <div class="op-actions">
         <button class="btn primary" id="op-recap-again">Pull ×10 encore · <span id="op-recap-price">1 000</span> ◆</button>
-        <button class="btn ghost" id="op-recap-back">Retour</button>
+        <button class="btn ghost" id="op-recap-back" data-i18n="back">Retour</button>
       </div>
     </div>
   </div>
@@ -162,6 +161,14 @@
     <button class="btn primary dbg-go" id="dbg-open">Ouvrir un pull (sans stock)</button>
   </div>
 
+  <div class="settings" id="settings">
+    <div class="set-card">
+      <div class="set-head"><b class="set-title">Paramètres</b><button class="set-close" aria-label="Fermer">✕</button></div>
+      <div class="set-body"></div>
+    </div>
+  </div>
+
+  <script src="settings.js"></script>
   <script src="sound.js"></script>
   <script src="app.js"></script>
   <script src="transitions.js"></script>

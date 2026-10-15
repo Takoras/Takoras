@@ -10,7 +10,7 @@ const sfx = (() => {
     if (ctx) return ctx.state === 'suspended' && ctx.resume();
     ctx = new (window.AudioContext || window.webkitAudioContext)();
     master = ctx.createGain();
-    master.gain.value = muted ? 0 : .5;
+    master.gain.value = muted ? 0 : .7 * (SETTINGS.volume / 100);
     // Petit compresseur pour que les sons forts ne saturent pas
     const comp = ctx.createDynamicsCompressor();
     master.connect(comp).connect(ctx.destination);
@@ -77,7 +77,8 @@ const sfx = (() => {
   let lastHover = 0;
 
   return {
-    setMuted(m) { muted = m; try { localStorage.setItem('takoras-muted', m ? '1' : '0'); } catch {} if (master) master.gain.value = m ? 0 : .5; },
+    setMuted(m) { muted = m; try { localStorage.setItem('takoras-muted', m ? '1' : '0'); } catch {} if (master) master.gain.value = m ? 0 : .7 * (SETTINGS.volume / 100); },
+    setVolume(v) { if (master && !muted) master.gain.value = .7 * v; },
     get muted() { return muted; },
 
     click() { tone(1100, { to: 1500, type: 'square', vol: .06, dur: .05 }); },
@@ -146,7 +147,7 @@ const sfx = (() => {
     b.innerHTML = sfx.muted
       ? '<svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2"><path d="M11 5 6 9H2v6h4l5 4z"/><path d="m23 9-6 6M17 9l6 6"/></svg>'
       : '<svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2"><path d="M11 5 6 9H2v6h4l5 4z"/><path d="M15.5 8.5a5 5 0 0 1 0 7M19 5a10 10 0 0 1 0 14"/></svg>';
-    b.setAttribute('aria-label', sfx.muted ? 'Activer le son' : 'Couper le son');
+    b.setAttribute('aria-label', sfx.muted ? t('unmute') : t('mute'));
   };
   b.addEventListener('click', () => { sfx.setMuted(!sfx.muted); draw(); if (!sfx.muted) sfx.click(); });
   draw();
