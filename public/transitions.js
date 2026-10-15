@@ -11,94 +11,75 @@ function origin() {
 }
 const far = o => Math.hypot(Math.max(o.x, innerWidth - o.x), Math.max(o.y, innerHeight - o.y));
 
-// Chaque transition couvre l'écran, l'écran d'ouverture apparaît dessous, puis la couche disparaît.
+// Transition « Pixels » : 6 versions. La grille couvre l'écran, l'ouverture apparaît dessous, puis la grille s'efface.
+const css = v => getComputedStyle(document.documentElement).getPropertyValue(v).trim();
+
+function grid(cols) {
+  const w = Math.ceil(innerWidth / cols), rows = Math.ceil(innerHeight / w);
+  const hi = css('--hi'), mid = css('--mid'), lo = css('--lo'), g = glowRGB();
+  const cells = [];
+  for (let y = 0; y < rows; y++) for (let x = 0; x < cols; x++) {
+    // Chaque pixel : dégradé + biseau clair/sombre façon pixel art + halo
+    const d = el(`left:${x * w}px;top:${y * w}px;width:${w + 1}px;height:${w + 1}px;opacity:0;
+      background:linear-gradient(135deg, ${hi}, ${mid} 55%, ${lo});
+      box-shadow:0 0 ${w * .35}px rgba(${g},.75), inset ${w * .08}px ${w * .08}px 0 rgba(255,255,255,.35), inset -${w * .08}px -${w * .08}px 0 rgba(0,0,0,.3)`);
+    cells.push({ d, x, y, cx: x * w + w / 2, cy: y * w + w / 2 });
+  }
+  return { cells, cols, rows, w };
+}
+
+// Petites étincelles carrées qui jaillissent du jeton (volontairement peu nombreuses)
+function sparks(n = 12) {
+  const o = origin(), hi = css('--hi'), g = glowRGB();
+  for (let i = 0; i < n; i++) {
+    const s = 5 + Math.random() * 6, a = Math.random() * Math.PI * 2, r = o.r * (1.2 + Math.random() * 1.4);
+    const p = el(`left:${o.x - s / 2}px;top:${o.y - s / 2}px;width:${s}px;height:${s}px;background:${hi};box-shadow:0 0 ${s * 2}px rgba(${g},.9);z-index:2`);
+    p.animate([
+      { transform: 'translate(0,0) scale(1)', opacity: 1 },
+      { transform: `translate(${Math.cos(a) * r}px,${Math.sin(a) * r}px) scale(.3) rotate(${Math.random() * 180}deg)`, opacity: 0 },
+    ], { duration: 380 + Math.random() * 80, easing: 'cubic-bezier(.2,.7,.3,1)', fill: 'forwards' });
+  }
+}
+
+const IN = 70, OUT = 70, SPREAD = 130; // 70 + 130 = 200 ms par phase
+// order(c, G) renvoie 0..1 : le moment où le pixel apparaît dans la vague
+async function pixels(order, { pop = false, flash = false, fall = false, outOrder } = {}) {
+  sparks();
+  if (flash) el('inset:0;background:#fff;z-index:3').animate([{ opacity: 0 }, { opacity: .35 }, { opacity: 0 }], { duration: 220, fill: 'forwards' });
+  const G = grid(innerWidth < 640 ? 8 : 14);
+  const inKF = fall
+    ? c => [{ opacity: 0, transform: `translateY(-${G.w * 1.5}px)` }, { opacity: 1, transform: 'none' }]
+    : pop
+      ? () => [{ opacity: 0, transform: 'scale(0)' }, { opacity: 1, transform: 'scale(1.15)', offset: .7 }, { opacity: 1, transform: 'scale(1)' }]
+      : flash
+        ? () => [{ opacity: 0, transform: 'scale(1.4)' }, { opacity: 1, transform: 'scale(1)' }]
+        : () => [{ opacity: 0, transform: 'scale(.4)' }, { opacity: 1, transform: 'scale(1)' }];
+  await Promise.all(G.cells.map(c => c.d.animate(inKF(c), { duration: IN, delay: order(c, G) * SPREAD, easing: 'ease-out', fill: 'forwards' }).finished));
+  showOpening();
+  const out = outOrder || order;
+  await Promise.all(G.cells.map(c => c.d.animate([{ opacity: 1, transform: 'scale(1)' }, { opacity: 0, transform: 'scale(.3)' }],
+    { duration: OUT, delay: out(c, G) * SPREAD, easing: 'ease-in', fill: 'forwards' }).finished));
+  return 0;
+}
+
+const dist = (c, G) => { const o = origin(), d = Math.hypot(c.cx - o.x, c.cy - o.y); return Math.min(1, d / far(o)); };
 const TRANSITIONS = [
-  ['Zoom dans le jeton', 'Le jeton fonce vers toi et remplit l\'écran', async () => {
-    const o = origin(), img = $('coin').querySelector('img');
-    const c = el(`left:${o.x - o.r}px;top:${o.y - o.r}px;width:${o.r * 2}px;height:${o.r * 2}px;border-radius:50%;background:rgb(${glowRGB()})`,
-      img ? `<img src="${img.src}" style="width:100%;height:100%;image-rendering:pixelated">` : '');
-    if (img) c.style.background = 'none';
-    const s = far(o) / o.r * 1.4;
-    await c.animate([{ transform: 'scale(1)' }, { transform: `scale(${s})` }], { duration: 280, easing: 'cubic-bezier(.6,0,.9,.4)', fill: 'forwards' }).finished;
-    return 160;
-  }],
-  ['Flash blanc', 'Un éclair blanc très rapide', async () => {
-    const f = el('inset:0;background:#fff;opacity:0');
-    await f.animate([{ opacity: 0 }, { opacity: 1 }], { duration: 120, easing: 'ease-in', fill: 'forwards' }).finished;
-    return 320;
-  }],
-  ['Iris', 'Un cercle de couleur s\'ouvre depuis le jeton', async () => {
-    const o = origin(), R = far(o);
-    const c = el(`inset:0;background:radial-gradient(circle at ${o.x}px ${o.y}px, rgb(${glowRGB()}), #0d0d12 ${R}px)`);
-    await c.animate([{ clipPath: `circle(0px at ${o.x}px ${o.y}px)` }, { clipPath: `circle(${R}px at ${o.x}px ${o.y}px)` }], { duration: 260, easing: 'cubic-bezier(.7,0,.3,1)', fill: 'forwards' }).finished;
-    return 180;
-  }],
-  ['Rideau', 'Deux panneaux se ferment au centre puis s\'ouvrent', async () => {
-    const col = `rgb(${glowRGB()})`;
-    const l = el(`left:0;top:0;bottom:0;width:50%;background:${col}`), r = el(`right:0;top:0;bottom:0;width:50%;background:${col}`);
-    const o = { duration: 220, easing: 'cubic-bezier(.7,0,.3,1)', fill: 'forwards' };
-    await Promise.all([l.animate([{ transform: 'translateX(-100%)' }, { transform: 'none' }], o).finished, r.animate([{ transform: 'translateX(100%)' }, { transform: 'none' }], o).finished]);
-    showOpening();
-    await Promise.all([l.animate([{ transform: 'none' }, { transform: 'translateX(-100%)' }], o).finished, r.animate([{ transform: 'none' }, { transform: 'translateX(100%)' }], o).finished]);
-    return 0;
-  }],
-  ['Balayage diagonal', 'Une bande en biais traverse l\'écran', async () => {
-    const b = el(`top:-50%;left:-50%;width:200%;height:200%;background:linear-gradient(90deg, transparent 0 20%, #fff 20% 22%, rgb(${glowRGB()}) 22% 78%, #fff 78% 80%, transparent 80%);transform:rotate(-20deg)`);
-    const a = b.animate([{ translate: '-100% 0' }, { translate: '0 0' }, { translate: '100% 0' }], { duration: 460, easing: 'cubic-bezier(.7,0,.3,1)', fill: 'forwards' });
-    await done(230); showOpening(); await a.finished;
-    return 0;
-  }],
-  ['Pixels', 'L\'écran se remplit de gros pixels (clin d\'œil au pixel art)', async () => {
-    const n = 12, w = innerWidth / n, rows = Math.ceil(innerHeight / w), col = `rgb(${glowRGB()})`;
-    const cells = [];
-    for (let y = 0; y < rows; y++) for (let x = 0; x < n; x++) cells.push(el(`left:${x * w}px;top:${y * w}px;width:${w + 1}px;height:${w + 1}px;background:${col};opacity:0`));
-    await Promise.all(cells.map(c => c.animate([{ opacity: 0 }, { opacity: 1 }], { duration: 60, delay: Math.random() * 150, fill: 'forwards' }).finished));
-    showOpening();
-    await Promise.all(cells.map(c => c.animate([{ opacity: 1 }, { opacity: 0 }], { duration: 60, delay: Math.random() * 150, fill: 'forwards' }).finished));
-    return 0;
-  }],
-  ['Onde de choc', 'Un anneau part du jeton et l\'écran tremble', async () => {
-    const o = origin(), R = far(o) * 2.2;
-    const ring = el(`left:${o.x - R / 2}px;top:${o.y - R / 2}px;width:${R}px;height:${R}px;border-radius:50%;border:${R * .2}px solid rgb(${glowRGB()});box-shadow:0 0 80px rgb(${glowRGB()}) inset`);
-    document.body.animate([{ transform: 'none' }, { transform: 'translate(6px,-4px)' }, { transform: 'translate(-6px,3px)' }, { transform: 'translate(4px,2px)' }, { transform: 'none' }], { duration: 200 });
-    await ring.animate([{ transform: 'scale(0)', borderWidth: '2px' }, { transform: 'scale(1)', borderWidth: `${R * .5}px` }], { duration: 270, easing: 'cubic-bezier(.3,.7,.4,1)', fill: 'forwards' }).finished;
-    return 180;
-  }],
-  ['Flou + zoom', 'La page se floute et avance, l\'ouverture apparaît en fondu', async () => {
-    const page = document.querySelector('main');
-    const a = page.animate([{ filter: 'blur(0)', transform: 'scale(1)' }, { filter: 'blur(14px)', transform: 'scale(1.12)' }], { duration: 230, easing: 'ease-in', fill: 'forwards' });
-    await a.finished;
-    showOpening(220);
-    await done(220); a.cancel();
-    return 0;
-  }],
-  ['Bandes', 'Des bandes horizontales glissent une à une', async () => {
-    const n = 7, h = innerHeight / n, col = `rgb(${glowRGB()})`;
-    const bars = Array.from({ length: n }, (_, i) => el(`left:0;right:0;top:${i * h}px;height:${h + 1}px;background:${col}`));
-    await Promise.all(bars.map((b, i) => b.animate([{ transform: `translateX(${i % 2 ? '' : '-'}100%)` }, { transform: 'none' }], { duration: 140, delay: i * 14, easing: 'cubic-bezier(.7,0,.3,1)', fill: 'forwards' }).finished));
-    showOpening();
-    await Promise.all(bars.map((b, i) => b.animate([{ transform: 'none' }, { transform: `translateX(${i % 2 ? '-' : ''}100%)` }], { duration: 140, delay: i * 14, easing: 'cubic-bezier(.7,0,.3,1)', fill: 'forwards' }).finished));
-    return 0;
-  }],
-  ['Pièce lancée', 'Le jeton fait un flip rapide et grossit avant de s\'ouvrir', async () => {
-    const o = origin(), img = $('coin').querySelector('img');
-    const c = el(`left:${o.x - o.r}px;top:${o.y - o.r}px;width:${o.r * 2}px;height:${o.r * 2}px`,
-      img ? `<img src="${img.src}" style="width:100%;height:100%;image-rendering:pixelated">` : `<i class="coin" style="--s:${o.r * 2}px"></i>`);
-    $('coin').style.visibility = 'hidden';
-    const back = el(`inset:0;background:radial-gradient(circle at ${o.x}px ${o.y}px, rgba(${glowRGB()},.9), #0d0d12 70%);opacity:0`);
-    fx.appendChild(c);
-    back.animate([{ opacity: 0 }, { opacity: 1 }], { duration: 300, fill: 'forwards' });
-    await c.animate([
-      { transform: 'perspective(600px) rotateY(0) scale(1)' },
-      { transform: 'perspective(600px) rotateY(360deg) scale(1.6) translateY(-30px)', offset: .6 },
-      { transform: 'perspective(600px) rotateY(540deg) scale(1.3)' },
-    ], { duration: 340, easing: 'cubic-bezier(.4,0,.2,1)', fill: 'forwards' }).finished;
-    return 110;
-  }],
+  ['Onde', 'Les pixels s\'allument en vague depuis le jeton, puis s\'éteignent dans le même sens',
+    () => pixels(dist)],
+  ['Pluie', 'Les pixels tombent colonne par colonne, façon Tetris',
+    () => pixels((c, G) => (c.y / G.rows) * .6 + Math.random() * .4, { fall: true })],
+  ['Spirale', 'Les pixels tournent autour du jeton en s\'allumant',
+    () => pixels((c, G) => { const o = origin(); const a = (Math.atan2(c.cy - o.y, c.cx - o.x) + Math.PI) / (Math.PI * 2); return (a * .7 + dist(c, G) * .3); })],
+  ['Scintillement', 'Les pixels s\'allument au hasard avec un éclat blanc',
+    () => pixels(() => Math.random(), { flash: true })],
+  ['Diagonale pop', 'Les pixels sautent en diagonale avec un petit rebond',
+    () => pixels((c, G) => (c.x + c.y) / (G.cols + G.rows), { pop: true })],
+  ['Implosion', 'Les pixels arrivent des bords vers le jeton, puis explosent vers l\'extérieur',
+    () => pixels((c, G) => 1 - dist(c, G), { pop: true, outOrder: dist })],
 ];
 
 let choice = 0;
-try { choice = Math.min(+localStorage.getItem('takoras-transition') || 0, TRANSITIONS.length - 1); } catch {}
+try { choice = Math.min(+localStorage.getItem('takoras-pixel') || 0, TRANSITIONS.length - 1); } catch {}
 
 function showOpening(fade = 0) {
   if (opening.classList.contains('on')) return;
@@ -145,7 +126,7 @@ function renderDebug() {
 $('debug-list').addEventListener('click', e => {
   const b = e.target.closest('.dbg'); if (!b) return;
   choice = +b.dataset.i;
-  try { localStorage.setItem('takoras-transition', choice); } catch {}
+  try { localStorage.setItem('takoras-pixel', choice); } catch {}
   renderDebug();
 });
 $('debug-close').addEventListener('click', () => { $('debug').hidden = true; });
