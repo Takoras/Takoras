@@ -343,3 +343,14 @@ html.lock, html.lock body { overflow: hidden; }
   background: radial-gradient(circle at var(--mx, 50%) var(--my, 50%), rgba(255, 255, 255, .55), rgba(255, 255, 255, .1) 30%, transparent 55%);
   -webkit-mask-size: 100% 100%; mask-size: 100% 100%; }
 .rc img { transition: transform .35s cubic-bezier(.2, .8, .3, 1); }
+
+/* Jeton en volume */
+.op-coin .zoom { perspective: 800px; }
+.op-coin .spin { position: relative; }
+.op-coin .spin img.face { position: relative; }
+.op-coin .spin img.edge, .op-coin .spin img.back { position: absolute; inset: 0; filter: brightness(.45) saturate(.8); }
+.op-coin .spin img.back { filter: brightness(.7); }
+
+/* Pendant la rotation finale : les boutons attendent */
+.opening.spinning .op-actions { opacity: .35; pointer-events: none; transition: opacity .3s; }
+.op-actions { transition: opacity .3s; }

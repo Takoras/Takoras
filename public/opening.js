@@ -62,6 +62,14 @@ const MYSTERE = 'img/jetons/mystere.png';
 function spawn() {
   opCoin.animate([{ transform: 'scale(0)', opacity: 0 }, { transform: 'scale(1)', opacity: 1 }], { duration: 520, easing: 'cubic-bezier(.16, 1, .3, 1)' });
 }
+// Jeton en volume : la face devant, quelques copies assombries derrière pour la tranche, et un dos.
+// Ce ne sont que des images empilées en 3D (pas de calcul), donc ça ne fait pas ramer le navigateur.
+const DEPTH = 8; // nombre de couches de la tranche
+function coin3D(src, alt, style = '') {
+  let edge = '';
+  for (let i = 1; i <= DEPTH; i++) edge += `<img class="edge" src="${src}" alt="" style="transform:translateZ(${-i * 2}px)">`;
+  return `<img class="face" src="${src}" alt="${alt}" style="${style}">${edge}<img class="back" src="${src}" alt="" style="transform:translateZ(${-(DEPTH + 1) * 2}px) rotateY(180deg)">`;
+}
 function setGlareMask(src) {
   const g = opCoin.querySelector('.glare');
   if (g) g.style.webkitMaskImage = g.style.maskImage = `url(${src})`;
@@ -91,10 +99,10 @@ function startOpening() {
   $('op-price').textContent = (p.price * sess.total).toLocaleString('fr');
   $('op-odds').textContent = '1/' + c.shown.toLocaleString('fr');
   stopBg();
-  opening.classList.remove('hold', 'rare', 'revealed', 'recap');
+  opening.classList.remove('hold', 'rare', 'revealed', 'recap', 'spinning');
   setTier(c.shown);
   opCoin.className = 'op-coin';
-  opCoin.innerHTML = `<div class="zoom"><div class="tilt3d"><div class="spin"><img src="${MYSTERE}" alt="Jeton mystère"></div><i class="glare"></i></div></div>`;
+  opCoin.innerHTML = `<div class="zoom"><div class="tilt3d"><div class="spin">${coin3D(MYSTERE, 'Jeton mystère')}</div><i class="glare"></i></div></div>`;
   setGlareMask(MYSTERE);
   if (c.phase === 'count' && c.shown === 1) spawn(); // le « ? » arrive en grossissant
   $('op-hint').textContent = 'Clique sur le jeton';
@@ -288,12 +296,16 @@ function reveal(restored) {
   opening.style.setProperty('--tier', hexRGB(j.glow));
   startBg(j);
   const spin = opCoin.querySelector('.spin');
-  spin.innerHTML = `<img src="${TEMPLATE}" alt="${j.name}" style="filter:drop-shadow(0 0 18px ${j.glow})">`;
+  spin.innerHTML = coin3D(TEMPLATE, j.name, `filter:drop-shadow(0 0 18px ${j.glow})`);
   setGlareMask(TEMPLATE);
   // Le jeton se retourne très vite puis ralentit longtemps (plus il est rare, plus ça dure)
   if (!restored) {
     const turns = j.odds >= RARE ? 6 : j.odds >= FAST ? 4 : 3, ms = j.odds >= RARE ? 3200 : j.odds >= FAST ? 2400 : 1600;
     spin.animate([{ transform: 'rotateY(0)' }, { transform: `rotateY(${turns * 360}deg)` }], { duration: ms, easing: 'cubic-bezier(.05, .9, .1, 1)' });
+    // Impossible de passer à la suite tant que le jeton tourne
+    r.spinEnd = performance.now() + ms;
+    opening.classList.add('spinning');
+    setTimeout(() => { if (run === r) opening.classList.remove('spinning'); }, ms);
   }
   fillInfo(j);
   opening.classList.toggle('rare', j.odds >= RARE);
@@ -318,8 +330,9 @@ function updateActions() {
   $('op-recap').hidden = !(last && multi);
   $('op-again').hidden = $('op-back').hidden = !(last && !multi);
 }
+const spinning = () => run && performance.now() < (run.spinEnd || 0);
 function next() {
-  if (!sess || sess.idx >= sess.total - 1 || !opening.classList.contains('revealed')) return;
+  if (!sess || sess.idx >= sess.total - 1 || !opening.classList.contains('revealed') || spinning()) return;
   sess.idx++;
   sess.cur = null;
   save();
@@ -329,6 +342,7 @@ function next() {
 
 // Récap des 10 jetons, le plus rare mis en avant
 function showRecap() {
+  if (spinning()) return;
   sess.recap = true;
   save();
   stopBg();
@@ -385,7 +399,6 @@ $('op-next').addEventListener('click', next);
 // Pendant un ×10 : un clic n'importe où sur l'écran passe au jeton suivant
 opening.addEventListener('click', e => {
   if (e.target.closest('button, select, .debug') || $('op-next').hidden || !opening.classList.contains('revealed')) return;
-  if (performance.now() - (run.revealedAt || 0) < 350) return; // évite de sauter le jeton avec le clic qui l'a révélé
   next();
 });
 $('op-recap').addEventListener('click', showRecap);
