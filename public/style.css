@@ -326,15 +326,13 @@ html.lock, html.lock body { overflow: hidden; }
 @media (max-width: 640px) { .op-recap-grid { grid-template-columns: repeat(2, 1fr); } .rc img { width: 56px !important; height: 56px !important; } }
 
 /* Écran de chargement */
-.loader { position: fixed; inset: 0; z-index: 200; display: grid; place-items: center; background: rgb(35, 32, 52); transition: opacity .5s ease; }
+.loader { position: fixed; inset: 0; z-index: 200; display: grid; place-items: center; background: var(--bg); transition: opacity .5s ease; }
 .loader.out { opacity: 0; pointer-events: none; }
-.loader canvas { position: absolute; inset: 0; width: 100%; height: 100%; image-rendering: pixelated; }
-.ld-box { position: relative; display: flex; flex-direction: column; align-items: center; gap: 14px; }
-.ld-box .logo { font-size: 26px; }
-.ld-box .logo img { width: 44px; height: 44px; }
-.ld-bar { width: 240px; height: 18px; padding: 3px; background: #0d0d12; box-shadow: 0 0 0 3px #f2f2f5; }
-.ld-bar i { display: block; height: 100%; width: 0; background: #8b5cf6; }
-.ld-box small { font-family: "Space Grotesk"; font-size: 13px; color: #c4b5fd; letter-spacing: .1em; }
+.ld-box { display: flex; flex-direction: column; align-items: center; gap: 18px; }
+.ld-box .logo { font-size: 24px; }
+.ld-box .logo img { width: 40px; height: 40px; }
+.ld-bar { width: 200px; height: 4px; border-radius: 2px; background: rgba(255, 255, 255, .08); overflow: hidden; }
+.ld-bar i { display: block; height: 100%; width: 0; background: var(--accent); transition: width .25s ease-out; }
 
 /* Récap sur petit écran : on peut faire défiler */
 @media (max-height: 760px), (max-width: 640px) { .opening.recap { justify-content: flex-start; overflow-y: auto; padding: 32px 0; } }

@@ -280,6 +280,7 @@ function reveal(restored) {
   opening.classList.toggle('rare', j.odds >= RARE);
   opening.classList.add('revealed');
   updateActions();
+  r.revealedAt = performance.now();
   if (restored) return;
   sess.cur.phase = 'revealed';
   sess.results.push(j.name);
@@ -353,7 +354,7 @@ function tap() {
 
 opCoin.addEventListener('pointerdown', e => { e.preventDefault(); tap(); }); // pointerdown = réagit dès l'appui, idéal pour spammer
 addEventListener('keydown', e => {
-  if (!opening.classList.contains('on') || (e.key !== ' ' && e.key !== 'Enter') || e.target.closest('button:not(#op-coin), select')) return;
+  if (!opening.classList.contains('on') || (e.key !== ' ' && e.key !== 'Enter') || e.target.closest?.('select, .debug') || (e.key === 'Enter' && e.target.closest?.('button:not(#op-coin)'))) return;
   e.preventDefault();
   if (opening.classList.contains('revealed')) { if (!$('op-next').hidden) next(); else if (!$('op-recap').hidden) showRecap(); return; }
   tap();
@@ -362,6 +363,12 @@ addEventListener('keydown', e => {
 function buy(n) { closeOpening(); startSession(n); runTransition(); }
 document.querySelectorAll('.pull-btn').forEach(b => b.addEventListener('click', () => buy(+b.dataset.n || 1)));
 $('op-next').addEventListener('click', next);
+// Pendant un ×10 : un clic n'importe où sur l'écran passe au jeton suivant
+opening.addEventListener('click', e => {
+  if (e.target.closest('button, select, .debug') || $('op-next').hidden || !opening.classList.contains('revealed')) return;
+  if (performance.now() - (run.revealedAt || 0) < 350) return; // évite de sauter le jeton avec le clic qui l'a révélé
+  next();
+});
 $('op-recap').addEventListener('click', showRecap);
 $('op-again').addEventListener('click', () => buy(1));
 $('op-recap-again').addEventListener('click', () => buy(10));
