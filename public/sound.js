@@ -63,6 +63,20 @@ const sfx = (() => {
     click() { tone(1100, { to: 1500, type: 'square', vol: .06, dur: .05 }); },
     hover() { const t = performance.now(); if (t - lastHover < 70) return; lastHover = t; tone(1800, { vol: .025, dur: .03 }); },
     whoosh() { noise({ dur: .38, vol: .22, from: 300, to: 4000 }); tone(220, { to: 660, type: 'triangle', vol: .08, dur: .3 }); },
+    // Transition pixel : bips carrés aléatoires et grésillements qui « meurent » (corruption)…
+    corrupt() {
+      for (let i = 0; i < 14; i++) {
+        const k = 1 - i / 14, f = [180, 260, 390, 520, 780, 1040, 1560, 2080, 3120][Math.floor(Math.random() * 9)];
+        tone(f * (.9 + Math.random() * .2), { to: f * (Math.random() < .5 ? .5 : 1.5), type: 'square', vol: .07 * k + .01, dur: .03, delay: i * .028 + Math.random() * .01 });
+        if (i % 3 === 0) noise({ dur: .03, vol: .12 * k, from: 1500 + Math.random() * 4000, to: 800, type: 'bandpass', q: 6, delay: i * .028 });
+      }
+      tone(900, { to: 60, type: 'sawtooth', vol: .05, dur: .4 }); // le signal qui meurt
+    },
+    // …puis tout s'évapore : un souffle aigu qui monte et disparaît, avec quelques scintillements
+    evaporate() {
+      noise({ dur: 1.6, vol: .07, from: 2500, to: 12000, type: 'highpass', delay: .05 });
+      for (let i = 0; i < 6; i++) tone(2400 + Math.random() * 2400, { vol: .02, dur: .12, delay: .15 + i * .2 + Math.random() * .1 });
+    },
     whooshOut() { noise({ dur: .45, vol: .18, from: 3500, to: 250 }); },
     spawn() { tone(660, { to: 990, type: 'triangle', vol: .1, dur: .18 }); },
 

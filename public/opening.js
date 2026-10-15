@@ -7,8 +7,8 @@ const texOf = j => j.img || TEMPLATE;
 const SERIES = {
   Takoras: [
     { name: 'Mobu', odds: 2, glow: '#8fb3c4', img: 'img/jetons/serie-takoras/mobu.png' },
-    { name: 'Pikko', odds: 4, glow: '#a8a29e' },
-    { name: 'Rouillé', odds: 10, glow: '#c2703d' },
+    { name: 'Pikko', odds: 4, glow: '#f0a3b0', img: 'img/jetons/serie-takoras/pikko.png' },
+    { name: 'Rouillé', odds: 10, glow: '#d2603a', img: 'img/jetons/serie-takoras/rouille.png' },
     { name: 'Givre', odds: 25, glow: '#cbd5e1' },
     { name: 'Soléo', odds: 60, glow: '#f59e0b' },
     { name: 'Azura', odds: 150, glow: '#0ea5e9' },
@@ -379,17 +379,13 @@ async function cinematic() {
   clearInterval(r.hb);
   const black = document.createElement('div');
   black.className = 'op-black';
-  black.innerHTML = '<div class="cine-line"></div><div class="cine-text">1 / 1 000 000</div>';
-  opening.appendChild(black);
-  const D = 2000;
+  opening.appendChild(black); // coupure au noir instantanée, sans rien d'autre
+  const D = 1800;
   sfx.riser(D / 1000);
-  black.querySelector('.cine-line').animate([{ width: '0', opacity: .3 }, { width: '70vw', opacity: 1 }], { duration: D, easing: 'cubic-bezier(.7, 0, .9, .4)', fill: 'forwards' });
-  black.querySelector('.cine-text').animate([{ opacity: 0, letterSpacing: '.2em' }, { opacity: 1, letterSpacing: '.9em' }], { duration: D, easing: 'ease-in', fill: 'forwards' });
-  black.animate([{ transform: 'none' }, { transform: 'scale(1.04)' }], { duration: D, easing: 'ease-in', fill: 'forwards' });
   await done(D);
   if (run !== r) return black.remove();
   black.remove();
-  flash(1, 1200);
+  flash(1, 1300);
   reveal();
 }
 

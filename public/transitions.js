@@ -51,6 +51,7 @@ async function onde() {
   await Promise.all(cells.map(c => c.d.animate([{ transform: 'scale(0)' }, { transform: 'scale(1)' }],
     { duration: 60, delay: (1 - d(c)) * 110, easing: 'ease-out', fill: 'forwards' }).finished));
   showOpening();
+  sfx.evaporate();
   // Sortie : désintégration. Les pixels passent sur une couche à part (qui se nettoie seule)
   // pour que l'ouverture soit déjà utilisable : instantané au centre, jusqu'à ~3 s sur les bords.
   const layer = document.createElement('div');
@@ -95,7 +96,7 @@ let busy = false;
 async function runTransition() {
   if (busy) return;
   busy = true;
-  sfx.whoosh();
+  sfx.corrupt();
   const t0 = performance.now();
   try {
     // Filet de sécurité : si le navigateur ne joue pas l'animation (onglet en arrière-plan…), on ouvre quand même
