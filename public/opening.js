@@ -2,10 +2,11 @@
 // Le résultat est tiré dès l'ouverture ; les clics ne font que le révéler. On peut spammer pour aller vite.
 
 // Jetons de la série Takoras — PROVISOIRES : même texture (template), seule la couleur du glow change.
-const TEMPLATE = 'img/jetons/template.png';
+const TEMPLATE = 'img/jetons/template.png'; // texture par défaut tant qu'un jeton n'a pas son dessin
+const texOf = j => j.img || TEMPLATE;
 const SERIES = {
   Takoras: [
-    { name: 'Mobu', odds: 2, glow: '#9ca3af' },
+    { name: 'Mobu', odds: 2, glow: '#8fb3c4', img: 'img/jetons/serie-takoras/mobu.png' },
     { name: 'Pikko', odds: 4, glow: '#a8a29e' },
     { name: 'Rouillé', odds: 10, glow: '#c2703d' },
     { name: 'Givre', odds: 25, glow: '#cbd5e1' },
@@ -35,7 +36,7 @@ const tierOf = () => '235, 235, 255';
 const MYTHIC = 100000, GOD = 1000000; // mise en scène spéciale à partir de 1/100 000, et encore plus pour 1/1 000 000
 const hexRGB = h => [1, 3, 5].map(i => parseInt(h.slice(i, i + 2), 16)).join(', ');
 const jetonHTML = (j, size) =>
-  `<img class="jeton" src="${TEMPLATE}" alt="${j.name}" style="width:${size}px;height:${size}px;filter:drop-shadow(0 0 ${Math.max(4, size / 8)}px ${j.glow})">`;
+  `<img class="jeton" src="${texOf(j)}" alt="${j.name}" style="width:${size}px;height:${size}px;filter:drop-shadow(0 0 ${Math.max(4, size / 8)}px ${j.glow})">`;
 
 // Réglages de test (menu debug)
 const debug = { luck: 1, force: '' };
@@ -331,8 +332,8 @@ function reveal(restored) {
   opening.style.setProperty('--tier', hexRGB(j.glow));
   startBg(j);
   const spin = opCoin.querySelector('.spin');
-  spin.innerHTML = coin3D(TEMPLATE, j.name); // pas d'ombre sur l'image (elle serait coupée en carré en 3D) : le halo est derrière
-  setGlareMask(TEMPLATE);
+  spin.innerHTML = coin3D(texOf(j), j.name); // pas d'ombre sur l'image (elle serait coupée en carré en 3D) : le halo est derrière
+  setGlareMask(texOf(j));
   // Le jeton se retourne très vite puis ralentit longtemps (plus il est rare, plus ça dure)
   if (!restored) {
     const turns = j.odds >= GOD ? 10 : j.odds >= MYTHIC ? 8 : j.odds >= RARE ? 6 : j.odds >= FAST ? 4 : 3;
