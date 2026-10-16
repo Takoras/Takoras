@@ -19,6 +19,7 @@ function admTab(name) {
   if (name === 'tests') renderDebug();
   if (name === 'shop') adsLoad();
   if (name === 'ann') adaLoad();
+  if (name === 'codes') adcLoad();
 }
 $('ad-tabs').addEventListener('click', e => { const b = e.target.closest('button'); if (b) admTab(b.dataset.tab); });
 
@@ -280,6 +281,73 @@ $('ada-list').addEventListener('click', async e => {
   if (error) return admMsg(error.message, true);
   admMsg('Annonce supprimée'); adaLoad();
 });
+
+// ---------- Codes promo : créer, modifier, activer / désactiver, supprimer
+const ADC = { items: [], list: [] };
+const adcName = id => (ITEMS.find(([k]) => k === id) || [id, id])[1];
+function adcDrawItems() {
+  $('adc-items').innerHTML = ADC.items.map((x, i) => `<span class="adc-it">${adcName(x.item)} ×${x.qty}<button data-rmit="${i}">✕</button></span>`).join('') || '<p class="muted small">Aucun objet</p>';
+}
+function adcForm(c = null) {
+  $('adc-title').textContent = c ? `Modifier ${c.code}` : 'Nouveau code';
+  $('adc-code').value = c?.code || ''; $('adc-code').disabled = !!c;
+  $('adc-coins').value = c?.coins || ''; $('adc-pulls').value = c?.pulls || ''; $('adc-max').value = c?.max_uses || '';
+  $('adc-exp').value = c?.expires_at ? new Date(Date.parse(c.expires_at) - new Date().getTimezoneOffset() * 60000).toISOString().slice(0, 16) : '';
+  ADC.items = c ? [...c.items] : [];
+  adcDrawItems();
+}
+async function adcLoad() {
+  $('adc-item').innerHTML = ITEMS.map(([id, l]) => `<option value="${id}">${l}</option>`).join('');
+  const { data, error } = await sb.rpc('admin_codes');
+  if (error) return admMsg(error.message, true);
+  ADC.list = data || [];
+  const now = Date.now();
+  $('adc-list').innerHTML = ADC.list.length ? `<table><thead><tr><th>Code</th><th>Récompense</th><th>Utilisé</th><th>Expire</th><th>Actif</th><th></th></tr></thead><tbody>${ADC.list.map(c => {
+    const gone = (c.expires_at && Date.parse(c.expires_at) < now) || (c.max_uses && c.uses >= c.max_uses);
+    const rew = [c.coins ? fmt(c.coins) + ' 🪙' : '', c.pulls ? c.pulls + ' pulls' : '', ...c.items.map(x => adcName(x.item) + (x.qty > 1 ? ' ×' + x.qty : ''))].filter(Boolean).join(' · ') || '—';
+    return `<tr class="${!c.active || gone ? 'off' : ''}"><td><b class="adc-code">${esc(c.code)}</b></td><td>${rew}</td><td>${c.uses}${c.max_uses ? '/' + c.max_uses : ''}</td>
+      <td>${c.expires_at ? new Date(c.expires_at).toLocaleString(LOCALE(), { day: '2-digit', month: '2-digit', hour: '2-digit', minute: '2-digit' }) + (gone && c.expires_at && Date.parse(c.expires_at) < now ? ' (expiré)' : '') : '—'}</td>
+      <td><label class="ads-sw"><input type="checkbox" data-act="${esc(c.code)}" ${c.active ? 'checked' : ''}></label></td>
+      <td class="adc-btns"><button data-copy="${esc(c.code)}" title="Copier">📋</button><button data-edit="${esc(c.code)}" title="Modifier">✏️</button><button data-del="${esc(c.code)}" title="Supprimer">🗑</button></td></tr>`;
+  }).join('')}</tbody></table>` : '<p class="muted center">Aucun code pour l’instant</p>';
+}
+$('adc-rand').addEventListener('click', () => { $('adc-code').value = Array.from({ length: 8 }, () => 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789'[Math.floor(Math.random() * 32)]).join(''); });
+$('adc-add').addEventListener('click', () => {
+  const item = $('adc-item').value, qty = Math.max(1, Math.trunc(+$('adc-qty').value || 1));
+  const ex = ADC.items.find(x => x.item === item);
+  if (ex) ex.qty += qty; else ADC.items.push({ item, qty });
+  adcDrawItems();
+});
+$('adc-items').addEventListener('click', e => { const b = e.target.closest('[data-rmit]'); if (b) { ADC.items.splice(+b.dataset.rmit, 1); adcDrawItems(); } });
+$('adc-reset').addEventListener('click', () => adcForm());
+$('adc-save').addEventListener('click', async () => {
+  const code = $('adc-code').value.trim().toUpperCase(), coins = Math.trunc(+$('adc-coins').value || 0), pulls = Math.trunc(+$('adc-pulls').value || 0);
+  if (!coins && !pulls && !ADC.items.length) return admMsg('Mets au moins une récompense', true);
+  const exp = $('adc-exp').value ? new Date($('adc-exp').value).toISOString() : null;
+  const { error } = await sb.rpc('admin_code_save', { p_code: code, p_coins: coins, p_pulls: pulls, p_items: ADC.items, p_max: Math.trunc(+$('adc-max').value || 0), p_expires: exp });
+  if (error) return admMsg(errText(error) === t('err_generic') ? error.message : errText(error), true);
+  admMsg(`Code ${code} enregistré`); adcForm(); adcLoad();
+});
+$('adc-list').addEventListener('click', async e => {
+  const cp = e.target.closest('[data-copy]');
+  if (cp) { try { await navigator.clipboard.writeText(cp.dataset.copy); admMsg('Code copié'); } catch { admMsg(cp.dataset.copy); } return; }
+  const ed2 = e.target.closest('[data-edit]');
+  if (ed2) return adcForm(ADC.list.find(c => c.code === ed2.dataset.edit));
+  const del = e.target.closest('[data-del]');
+  if (del) {
+    if (!confirm(`Supprimer le code ${del.dataset.del} ?`)) return;
+    const { error } = await sb.rpc('admin_code_delete', { p_code: del.dataset.del });
+    if (error) return admMsg(error.message, true);
+    admMsg('Code supprimé'); adcLoad();
+  }
+});
+$('adc-list').addEventListener('change', async e => {
+  const a = e.target.closest('[data-act]'); if (!a) return;
+  const { error } = await sb.rpc('admin_code_toggle', { p_code: a.dataset.act, p_active: a.checked });
+  if (error) return admMsg(error.message, true);
+  admMsg(`${a.dataset.act} ${a.checked ? 'activé' : 'désactivé'}`); adcLoad();
+});
+adcForm();
 
 // Ouvrir / fermer le panel (bouclier ou « debug ») : on recharge toujours la liste et les stats
 function toggleAdmin() {

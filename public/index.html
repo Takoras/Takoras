@@ -8,7 +8,7 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=Cinzel:wght@600;700&family=Cinzel+Decorative:wght@700&family=Space+Grotesk:wght@500;600;700&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="style.css?v=20261016v">
+<link rel="stylesheet" href="style.css?v=20261016w">
 </head>
 <body>
   <!-- Effet « doodle » : 3 légères déformations (turbulence) qui s'enchaînent pour faire vivre les pixel arts -->
@@ -191,7 +191,7 @@
   <div class="debug admin2" id="debug" hidden>
     <div class="ad-head">
       <b>🛡️ Panel admin</b>
-      <div class="ad-tabs" id="ad-tabs"><button data-tab="players" class="on">Joueurs</button><button data-tab="global">Global</button><button data-tab="shop">Boutique</button><button data-tab="ann">Annonces</button><button data-tab="tests">Tests</button></div>
+      <div class="ad-tabs" id="ad-tabs"><button data-tab="players" class="on">Joueurs</button><button data-tab="global">Global</button><button data-tab="shop">Boutique</button><button data-tab="ann">Annonces</button><button data-tab="codes">Codes</button><button data-tab="tests">Tests</button></div>
       <button class="set-close" id="debug-close" aria-label="Fermer">✕</button>
     </div>
     <div class="ad-body">
@@ -227,6 +227,23 @@
         </div>
         <div class="ad-box"><h4>Annonces envoyées</h4><div id="ada-list"></div></div>
       </div>
+      <div class="ad-tab" data-tab="codes" hidden>
+        <div class="ad-box">
+          <h4 id="adc-title">Nouveau code</h4>
+          <div class="adc-grid">
+            <label>Code<div class="adm-row"><input class="adm-in" id="adc-code" maxlength="24" placeholder="BIENVENUE" autocomplete="off"><button id="adc-rand" title="Code au hasard">🎲</button></div></label>
+            <label>Pièces<input class="adm-in" id="adc-coins" type="number" min="0" placeholder="0"></label>
+            <label>Pulls<input class="adm-in" id="adc-pulls" type="number" min="0" placeholder="0"></label>
+            <label>Utilisations max <small class="muted">(vide = illimité)</small><input class="adm-in" id="adc-max" type="number" min="1" placeholder="∞"></label>
+            <label>Expire le <small class="muted">(vide = jamais)</small><input class="adm-in" id="adc-exp" type="datetime-local"></label>
+          </div>
+          <h4>Objets</h4>
+          <div class="adc-items" id="adc-items"></div>
+          <div class="adm-row"><select class="adm-in" id="adc-item"></select><input class="adm-in" id="adc-qty" type="number" min="1" value="1" style="max-width:80px"><button id="adc-add">+ Ajouter</button></div>
+          <div class="adm-quick"><button id="adc-save" class="adc-save">💾 Enregistrer le code</button><button id="adc-reset">Vider le formulaire</button></div>
+        </div>
+        <div class="ad-box"><h4>Codes existants</h4><div class="ad-table" id="adc-list"></div></div>
+      </div>
       <div class="ad-tab" data-tab="tests" hidden>
         <div class="ad-box"><h4>Luck (ton compte)</h4><div class="dbg-row" id="dbg-luck"></div></div>
         <div class="ad-box"><h4>Jeton forcé (ton compte)</h4><select id="dbg-force"></select></div>
@@ -251,22 +268,22 @@
     </div>
   </div>
 
-  <script src="settings.js?v=20261016v"></script>
+  <script src="settings.js?v=20261016w"></script>
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.4/dist/umd/supabase.js"></script>
-  <script src="account.js?v=20261016v"></script>
-  <script src="sound.js?v=20261016v"></script>
-  <script src="app.js?v=20261016v"></script>
-  <script src="transitions.js?v=20261016v"></script>
-  <script src="opening.js?v=20261016v"></script>
-  <script src="economy.js?v=20261016v"></script>
-  <script src="ui.js?v=20261016v"></script>
-  <script src="motion.js?v=20261016v"></script>
-  <script src="inventory.js?v=20261016v"></script>
-  <script src="shop.js?v=20261016v"></script>
-  <script src="info.js?v=20261016v"></script>
-  <script src="profile.js?v=20261016v"></script>
-  <script src="social.js?v=20261016v"></script>
-  <script src="combat.js?v=20261016v"></script>
-  <script src="admin.js?v=20261016v"></script>
+  <script src="account.js?v=20261016w"></script>
+  <script src="sound.js?v=20261016w"></script>
+  <script src="app.js?v=20261016w"></script>
+  <script src="transitions.js?v=20261016w"></script>
+  <script src="opening.js?v=20261016w"></script>
+  <script src="economy.js?v=20261016w"></script>
+  <script src="ui.js?v=20261016w"></script>
+  <script src="motion.js?v=20261016w"></script>
+  <script src="inventory.js?v=20261016w"></script>
+  <script src="shop.js?v=20261016w"></script>
+  <script src="info.js?v=20261016w"></script>
+  <script src="profile.js?v=20261016w"></script>
+  <script src="social.js?v=20261016w"></script>
+  <script src="combat.js?v=20261016w"></script>
+  <script src="admin.js?v=20261016w"></script>
 </body>
 </html>

@@ -72,8 +72,14 @@ async function renderShop() {
         <h3 class="shop-h">${ico} ${t(label)} <small class="muted">${t('in_stock', { n: list.filter(it => !it.owned && it.stock - it.bought > 0).length, m: list.length })}</small></h3>
         <div class="shop-grid">${list.map(cardHTML).join('')}</div>
       </section>` : '').join('')}
-    ${ACC.user ? '' : `<p class="muted center">${t('acc_need')}</p>`}`;
+    ${ACC.user ? `
+      <section class="promo">
+        <div><h3 class="shop-h">🎁 ${t('promo_title')}</h3><p class="muted small">${t('promo_hint')}</p></div>
+        <form class="promo-form" id="promo-form"><input class="adm-in" id="promo-in" maxlength="24" placeholder="${t('promo_ph')}" autocomplete="off" spellcheck="false"><button class="btn primary">${t('promo_use')}</button></form>
+      </section>` : `<p class="muted center">${t('acc_need')}</p>`}`;
   moPlay(snap, page, '.si');
+  const pf = $('promo-form');
+  if (pf) pf.onsubmit = redeemPromo;
   page.onclick = async e => {
     const c = e.target.closest('[data-cat]');
     if (c) { shopCat = c.dataset.cat; sfx.click(); return renderShop(); }
@@ -108,4 +114,34 @@ async function renderShop() {
     if (ACC.user) $('shop-fx').innerHTML = effectsHTML();
     if (left === 0) renderShop();
   }, 1000);
+}
+
+// Code promo : pièces, pulls et/ou objets, 1 fois par joueur
+async function redeemPromo(e) {
+  e.preventDefault();
+  const inp = $('promo-in'), code = inp.value.trim().toUpperCase(), btn = e.target.querySelector('button');
+  if (!code) return;
+  btn.disabled = true;
+  const { data, error } = await sb.rpc('redeem_code', { p_code: code });
+  btn.disabled = false;
+  if (error) {
+    sfx.deny();
+    inp.animate([{ transform: 'translateX(0)' }, { transform: 'translateX(-8px)' }, { transform: 'translateX(8px)' }, { transform: 'translateX(0)' }], { duration: 300 });
+    return toast(errText(error), true);
+  }
+  applyState(data.state);
+  sfx.upgrade();
+  const got = [];
+  if (+data.coins) got.push(money(data.coins));
+  if (+data.pulls) got.push(`${data.pulls} ${t('pulls_word')}`);
+  (data.items || []).forEach(x => {
+    const it = SHOP?.items?.find(i => i.id === x.item);
+    got.push(`${x.qty > 1 ? x.qty + '× ' : ''}${it ? itemText(it)[0] : x.item.startsWith('b_') ? t('it_banner', { n: bannerName(x.item.slice(2)) }) : x.item}`);
+  });
+  toast('🎁 ' + t('promo_ok') + (got.length ? ' : ' + got.join(' · ') : ''));
+  // petite pluie de pièces qui sort du champ
+  const coin = document.querySelector('.nav .bal img'), r = inp.getBoundingClientRect();
+  for (let i = 0; i < 3; i++) setTimeout(() => moDissolve(coin, { left: r.left + r.width * (.2 + i * .3) - 20, top: r.top - 10, width: 40, height: 40 }, .8), i * 120);
+  inp.value = '';
+  if (data.items?.length) renderShop();
 }
