@@ -1,11 +1,11 @@
 // Économie : argent (◆) et stock de pulls Takoras qui se recharge tout seul.
-// On ne peut pas acheter de pull Takoras : on en gagne 1 toutes les 5 min, jusqu'au stock max.
+// On ne peut pas acheter de pull Takoras : on en gagne 1 toutes les 3 min, jusqu'au stock max.
 // Le stock max (5 au départ) s'améliore jusqu'à 10 avec de l'argent, et chaque niveau coûte 3× plus cher.
 // L'argent, le stock et les tirages sont gérés par le serveur (Supabase) : impossible de tricher depuis le navigateur.
 // Ici on garde juste une copie pour l'affichage et le compte à rebours.
 
 const ECO_KEY = 'takoras-eco';
-const REGEN = 5 * 60 * 1000, BASE_MAX = 5, TOP_MAX = 10;
+const REGEN = 3 * 60 * 1000, BASE_MAX = 5, TOP_MAX = 10;
 const upgradeCost = target => 1000 * 3 ** (target - BASE_MAX - 1); // 6 = 1 000, 7 = 3 000, 8 = 9 000, 9 = 27 000, 10 = 81 000
 
 let eco = { coins: 0, stock: BASE_MAX, max: BASE_MAX, last: Date.now() };
@@ -32,7 +32,7 @@ const isTakoras = () => PULLS[current].name === 'Takoras';
 function applyState(st) {
   if (!st) return;
   eco.coins = st.coins; eco.stock = st.stock; eco.max = st.max;
-  eco.step = (st.step || 300) * 1000;
+  eco.step = (st.step || 180) * 1000;
   eco.last = Date.now() - (eco.step / 1000 - st.next_in) * 1000;
   eco.luck_mult = +st.luck_mult || 1; eco.luck_left = st.luck_left || 0; eco.fast_left = st.fast_left || 0; eco.synced = Date.now();
   ACC.isAdmin = !!st.admin;
