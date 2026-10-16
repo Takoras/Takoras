@@ -36,6 +36,7 @@ function applyState(st) {
   eco.last = Date.now() - (eco.step / 1000 - st.next_in) * 1000;
   eco.potions = st.potions || []; eco.luck = +st.luck || 1; eco.fast_left = st.fast_left || 0; eco.synced = Date.now();
   ACC.isAdmin = !!st.admin;
+  const bb = $('ban-bar'); bb.hidden = !st.banned; bb.textContent = st.banned ? '⛔ ' + t('banned_bar') : '';
   if (typeof renderAdminBtn === 'function') renderAdminBtn();
   render();
 }

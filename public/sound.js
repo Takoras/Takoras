@@ -136,6 +136,10 @@ const sfx = (() => {
     next() { tone(784, { type: 'square', vol: .05, dur: .06 }); tone(1175, { type: 'square', vol: .05, dur: .08, delay: .06 }); },
     regen() { tone(1047, { vol: .1, dur: .15 }); tone(1568, { vol: .1, dur: .25, delay: .09 }); },
     upgrade() { [0, 2, 4, 5, 7].forEach((n, i) => tone(note(n), { type: 'square', vol: .06, dur: .18, delay: i * .07 })); },
+    // Annonce de l'admin : fanfare en carré + grosse caisse
+    announce() { tone(70, { to: 40, vol: .5, dur: .5 }); [0, 4, 7, 12, 7, 12].forEach((n, i) => tone(note(n), { type: 'square', vol: .07, dur: i === 5 ? .5 : .14, delay: .05 + i * .11 })); },
+    // Message d'un ami : petit « pop » à deux notes
+    message() { tone(880, { type: 'triangle', vol: .12, dur: .08 }); tone(1320, { type: 'triangle', vol: .12, dur: .14, delay: .07 }); },
     deny() { tone(220, { to: 160, type: 'square', vol: .06, dur: .14 }); },
   };
 })();

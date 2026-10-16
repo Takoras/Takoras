@@ -8,7 +8,7 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=Space+Grotesk:wght@500;600;700&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="style.css?v=20261016h">
+<link rel="stylesheet" href="style.css?v=20261016i">
 </head>
 <body>
   <!-- Effet « doodle » : 3 légères déformations (turbulence) qui s'enchaînent pour faire vivre les pixel arts -->
@@ -51,15 +51,19 @@
         <a href="#inventaire" data-page="inv" data-i18n="nav_inv">Inventaire</a>
         <a href="#boutique" data-page="shop" data-i18n="nav_shop">Boutique</a>
         <a href="#classement" data-page="board" data-i18n="nav_board">Classement</a>
+        <a href="#amis" data-page="friends"><span data-i18n="nav_friends">Amis</span><i class="nbadge" id="fr-badge" hidden></i></a>
         <span class="nav-ink"></span>
       </div>
       <button class="mute admin-btn" id="open-admin" hidden aria-label="Panel admin"><svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg></button>
+      <button class="mute" id="open-notifs" aria-label="Annonces"><svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 8a6 6 0 0 0-12 0c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.7 21a2 2 0 0 1-3.4 0"/></svg><i class="nbadge" id="bell-badge" hidden></i></button>
       <button class="mute" id="open-settings" aria-label="Paramètres"><svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.7 1.7 0 0 0 .3 1.8l.1.1a2 2 0 1 1-2.8 2.8l-.1-.1a1.7 1.7 0 0 0-1.8-.3 1.7 1.7 0 0 0-1 1.5V21a2 2 0 1 1-4 0v-.1a1.7 1.7 0 0 0-1.1-1.5 1.7 1.7 0 0 0-1.8.3l-.1.1a2 2 0 1 1-2.8-2.8l.1-.1a1.7 1.7 0 0 0 .3-1.8 1.7 1.7 0 0 0-1.5-1H3a2 2 0 1 1 0-4h.1a1.7 1.7 0 0 0 1.5-1.1 1.7 1.7 0 0 0-.3-1.8l-.1-.1a2 2 0 1 1 2.8-2.8l.1.1a1.7 1.7 0 0 0 1.8.3H9a1.7 1.7 0 0 0 1-1.5V3a2 2 0 1 1 4 0v.1a1.7 1.7 0 0 0 1 1.5 1.7 1.7 0 0 0 1.8-.3l.1-.1a2 2 0 1 1 2.8 2.8l-.1.1a1.7 1.7 0 0 0-.3 1.8V9a1.7 1.7 0 0 0 1.5 1H21a2 2 0 1 1 0 4h-.1a1.7 1.7 0 0 0-1.5 1z"/></svg></button>
       <button class="mute" id="mute"></button>
       <div class="bal"><img class="piece" src="img/piece.png" alt=""><b id="bal">0</b></div>
       <button class="acc-btn" id="open-account"></button>
     </div>
   </nav>
+  <div class="ann-bar" id="ann-bar" hidden></div>
+  <div class="ban-bar" id="ban-bar" hidden></div>
 
   <main>
     <section class="wrap stage home-sec">
@@ -114,6 +118,7 @@
     <section class="wrap page" id="page-inv" hidden></section>
     <section class="wrap page" id="page-shop" hidden></section>
     <section class="wrap page" id="page-profile" hidden></section>
+    <section class="wrap page" id="page-friends" hidden></section>
   </main>
 
   <!-- Fenêtre d'aperçu d'un jeton -->
@@ -161,11 +166,15 @@
     </div>
   </div>
   <div class="fx" id="fx"></div>
+  <div class="ann-full" id="ann-full" hidden></div>
+  <button class="chat-fab" id="chat-fab" hidden aria-label="Chat"><svg viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg><i class="nbadge" id="chat-fab-badge" hidden></i></button>
+  <div class="chat-dock" id="chat-dock" hidden></div>
+  <div class="chat-notifs" id="chat-notifs"></div>
 
   <div class="debug admin2" id="debug" hidden>
     <div class="ad-head">
       <b>🛡️ Panel admin</b>
-      <div class="ad-tabs" id="ad-tabs"><button data-tab="players" class="on">Joueurs</button><button data-tab="global">Global</button><button data-tab="tests">Tests</button></div>
+      <div class="ad-tabs" id="ad-tabs"><button data-tab="players" class="on">Joueurs</button><button data-tab="global">Global</button><button data-tab="shop">Boutique</button><button data-tab="ann">Annonces</button><button data-tab="tests">Tests</button></div>
       <button class="set-close" id="debug-close" aria-label="Fermer">✕</button>
     </div>
     <div class="ad-body">
@@ -187,6 +196,19 @@
           <p class="muted small">Efface les tirages, les pièces, le stock, les effets et les achats de TOUS les joueurs.</p>
           <button class="adm-danger" id="adm-reset-all">Remettre tous les joueurs à zéro</button>
         </div>
+      </div>
+      <div class="ad-tab" data-tab="shop" hidden>
+        <div class="ad-shop-head"><p class="muted">Prix, stock de la période actuelle et objets en vente. Nouveau stock auto dans <b id="ads-reset">—</b></p><button class="btn primary sm" id="ads-reroll">🎲 Nouveau stock maintenant</button></div>
+        <div class="ad-table" id="ads-list"></div>
+      </div>
+      <div class="ad-tab" data-tab="ann" hidden>
+        <div class="ad-box">
+          <h4>Nouvelle annonce <small class="muted" id="ada-count">0/500</small></h4>
+          <textarea class="adm-in" id="ada-body" maxlength="500" rows="3" placeholder="Ton message pour tout le site…"></textarea>
+          <div class="ada-opts"><label><input type="checkbox" id="ada-full" checked> Plein écran (en direct, avec son)</label><label><input type="checkbox" id="ada-banner" checked> Bandeau en haut du site</label></div>
+          <button class="btn primary" id="ada-send">📢 Envoyer à tout le monde</button>
+        </div>
+        <div class="ad-box"><h4>Annonces envoyées</h4><div id="ada-list"></div></div>
       </div>
       <div class="ad-tab" data-tab="tests" hidden>
         <div class="ad-box"><h4>Luck (ton compte)</h4><div class="dbg-row" id="dbg-luck"></div></div>
@@ -212,19 +234,20 @@
     </div>
   </div>
 
-  <script src="settings.js?v=20261016h"></script>
+  <script src="settings.js?v=20261016i"></script>
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.4/dist/umd/supabase.js"></script>
-  <script src="account.js?v=20261016h"></script>
-  <script src="sound.js?v=20261016h"></script>
-  <script src="app.js?v=20261016h"></script>
-  <script src="transitions.js?v=20261016h"></script>
-  <script src="opening.js?v=20261016h"></script>
-  <script src="economy.js?v=20261016h"></script>
-  <script src="ui.js?v=20261016h"></script>
-  <script src="inventory.js?v=20261016h"></script>
-  <script src="shop.js?v=20261016h"></script>
-  <script src="info.js?v=20261016h"></script>
-  <script src="profile.js?v=20261016h"></script>
-  <script src="admin.js?v=20261016h"></script>
+  <script src="account.js?v=20261016i"></script>
+  <script src="sound.js?v=20261016i"></script>
+  <script src="app.js?v=20261016i"></script>
+  <script src="transitions.js?v=20261016i"></script>
+  <script src="opening.js?v=20261016i"></script>
+  <script src="economy.js?v=20261016i"></script>
+  <script src="ui.js?v=20261016i"></script>
+  <script src="inventory.js?v=20261016i"></script>
+  <script src="shop.js?v=20261016i"></script>
+  <script src="info.js?v=20261016i"></script>
+  <script src="profile.js?v=20261016i"></script>
+  <script src="social.js?v=20261016i"></script>
+  <script src="admin.js?v=20261016i"></script>
 </body>
 </html>

@@ -40,6 +40,7 @@ async function loadAccount(user) {
   if (typeof renderHist === 'function') { renderHist(); renderBoard(); }
   if (typeof renderActions === 'function') renderActions(); // boutons de pull : « Se connecter » ou « Ouvrir »
   if (typeof route === 'function' && location.hash) route(); // la page ouverte se met à jour avec le compte
+  if (typeof startSocial === 'function') startSocial(); // amis + chat en direct
   if (user && typeof ecoSync === 'function') ecoSync(); else { ACC.isAdmin = false; if (typeof renderAdminBtn === 'function') renderAdminBtn(); }
 }
 

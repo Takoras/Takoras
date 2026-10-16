@@ -20,20 +20,20 @@ const jetonOf = name => SERIES.Takoras.find(j => j.name === name) || { name, odd
 
 // ---------- Navigation entre pages : #inventaire, #boutique, #profil/Pseudo, #classement
 // Transition : les éléments de la page actuelle partent vers le haut en fondu, ceux de la nouvelle arrivent du bas un par un.
-const PAGES = { inv: 'page-inv', shop: 'page-shop', profile: 'page-profile' };
+const PAGES = { inv: 'page-inv', shop: 'page-shop', profile: 'page-profile', friends: 'page-friends' };
 let routeTok = 0, routeKey = null;
 const EASE_OUT = 'cubic-bezier(.6, 0, .85, .2)', EASE_IN = 'cubic-bezier(.16, 1, .3, 1)';
 
 // Les blocs à animer d'une page (et les cartes de ses grilles, pour un effet en cascade)
 function pieces(page) {
   if (page === 'home') return [...document.querySelectorAll('.home-sec')];
-  const root = $(PAGES[page]), top = root.querySelector('.prof') || root;
+  const root = $(PAGES[page]), top = root.querySelector('.prof, .fr-page') || root;
   const list = [...top.children].filter(el => !el.classList.contains('sell-bar'));
   return list;
 }
 function cards(page) {
   if (page === 'home') return [];
-  return [...$(PAGES[page]).querySelectorAll('.ic, .si, .sc')].slice(0, 30);
+  return [...$(PAGES[page]).querySelectorAll('.ic, .si, .sc, .fr')].slice(0, 30);
 }
 function nav(page, p) {
   const key = p === 'classement' ? 'board' : page;
@@ -46,7 +46,7 @@ async function route() {
   const tok = ++routeTok;
   const h = decodeURIComponent(location.hash.slice(1));
   const [p, arg] = h.split('/');
-  const page = p === 'inventaire' ? 'inv' : p === 'boutique' ? 'shop' : p === 'profil' ? 'profile' : 'home';
+  const page = p === 'inventaire' ? 'inv' : p === 'boutique' ? 'shop' : p === 'profil' ? 'profile' : p === 'amis' ? 'friends' : 'home';
   const key = page + '/' + (page === 'profile' ? (arg || ACC.pseudo || '') : '');
   const from = routeKey ? routeKey.split('/')[0] : null;
   const animate = routeKey !== null && routeKey !== key && !reducedFx();
@@ -68,7 +68,7 @@ async function route() {
   document.querySelectorAll('.home-sec').forEach(s => { s.hidden = page !== 'home'; });
   Object.entries(PAGES).forEach(([k, id]) => { $(id).hidden = k !== page; });
   if (page !== 'home' || from !== 'home') scrollTo({ top: 0 });
-  const ready = page === 'inv' ? renderInventory() : page === 'shop' ? renderShop() : page === 'profile' ? renderProfile(arg || ACC.pseudo) : null;
+  const ready = page === 'inv' ? renderInventory() : page === 'shop' ? renderShop() : page === 'profile' ? renderProfile(arg || ACC.pseudo) : page === 'friends' ? renderFriends() : null;
   if (page === 'home' && p === 'classement') setTimeout(() => $('classement').scrollIntoView({ behavior: 'smooth' }), animate ? 250 : 0);
 
   // 3. Elle arrive : les blocs montent un par un, puis les cartes en cascade
@@ -198,5 +198,6 @@ function toast(text, bad = false) {
   setTimeout(() => d.remove(), 3100);
 }
 // Messages d'erreur du serveur → texte
-const ERR = { not_enough_coins: 'err_coins', limit_reached: 'err_limit', potion_active: 'err_potion', stock_full: 'err_stock_full', owned: 'err_owned', not_in_shop: 'err_shop' };
+const ERR = { not_enough_coins: 'err_coins', limit_reached: 'err_limit', potion_active: 'err_potion', stock_full: 'err_stock_full', owned: 'err_owned', not_in_shop: 'err_shop',
+  banned: 'err_banned', not_friends: 'err_not_friends', slow_down: 'err_slow', unknown_player: 'err_unknown', self: 'err_self', pseudo_taken: 'err_pseudo_taken', bad_pseudo: 'err_pseudo' };
 const errText = e => t(Object.entries(ERR).find(([k]) => e?.message?.includes(k))?.[1] || 'err_generic');

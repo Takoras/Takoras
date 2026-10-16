@@ -29,7 +29,7 @@ async function renderProfile(pseudo) {
       <div class="prof-head">
         <div class="prof-pp">${avatarHTML(p, 104)}</div>
         <div class="prof-id"><h2>${esc(p.pseudo)}</h2><p class="muted">${p.bio ? esc(p.bio) : mine ? t('bio_empty_me') : ''}</p></div>
-        ${mine ? `<button class="btn ghost" id="prof-edit">✏️ ${t('edit_profile')}</button>` : ''}
+        ${mine ? `<button class="btn ghost" id="prof-edit">✏️ ${t('edit_profile')}</button>` : '<div class="prof-fr" id="prof-fr"></div>'}
       </div>
       <div class="prof-stats">
         <div><b>${fmt(p.pulls)}</b><span>${t('st_pulls')}</span></div>
@@ -59,6 +59,7 @@ async function renderProfile(pseudo) {
     if (mine) return pickShowcase(+el.dataset.slot);
     if (el.dataset.n) openJeton(el.dataset.n);
   }));
+  if (!mine) friendButton(p.pseudo, $('prof-fr'));
   if (mine) {
     $('prof-edit').addEventListener('click', () => editProfile());
     $('pv-settings').addEventListener('click', () => $('open-settings').click());
