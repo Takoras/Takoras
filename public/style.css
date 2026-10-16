@@ -840,3 +840,10 @@ img.banner-cv { object-fit: cover; }
 }
 html.reduce-fx .ic img, html.reduce-fx .sc img, html.reduce-fx .si-icon img, html.reduce-fx .pk img, html.reduce-fx .jm-coin img,
 html.reduce-fx .hero-coin.has-img img, html.reduce-fx .si-banner, html.reduce-fx .prof-banner img, html.reduce-fx .info-table img { animation: none; }
+
+/* Doodle aussi sur le jeton de l'ouverture (face et dos ; la tranche reste fixe pour ne pas casser la 3D) */
+.op-coin .spin img.face, .op-coin .spin img.back { --df: saturate(1); filter: var(--df); animation: doodle .9s steps(1) infinite; }
+.op-coin .spin img.back { --df: saturate(1); }
+.opening.mythic .op-coin .spin img.face { --df: brightness(1.12); animation: doodle .9s steps(1) infinite; }
+.opening.god .op-coin .spin img.face { --df: brightness(1.2) contrast(1.05); animation: doodle .9s steps(1) infinite; }
+html.reduce-fx .op-coin .spin img.face, html.reduce-fx .op-coin .spin img.back { animation: none; }
