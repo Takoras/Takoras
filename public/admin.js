@@ -92,8 +92,8 @@ async function admDetail() {
       <div class="ad-box"><h4>Derniers tirages</h4><div class="ad-recent">${p.recent.map(r => `<div><span>${jnH(r.jeton)} <small class="muted">1/${fmt(r.odds)}</small></span><small class="muted">${new Date(r.at).toLocaleString(LOCALE(), { day: '2-digit', month: '2-digit', hour: '2-digit', minute: '2-digit' })}${r.sold ? ' · vendu' : ''}</small></div>`).join('') || '<p class="muted">Aucun</p>'}</div></div>
     </div>
     <button class="adm-danger" id="adm-reset">Remettre ${esc(p.pseudo || 'ce joueur')} à zéro</button>`;
-  $('ad-banner').appendChild(bannerCanvas(p.banner));
   admSelP = p;
+  if (p.banner) $('ad-banner').appendChild(bannerCanvas(p.banner)); // pas de bannière = fond vide (sinon ça plantait)
   admColl();
 }
 
@@ -116,7 +116,7 @@ async function admCollOp(name, op) {
   let error;
   if (op === 'rm1' || op === 'rmall') {
     const pick = op === 'rm1' ? [[...all].sort((a, b) => (a.locked + a.showcased) - (b.locked + b.showcased))[0]] : all;
-    if (op === 'rmall' && !confirm(`Retirer les ${all.length} ${jn(name)} de ${admSelP.pseudo} ?`)) return;
+    if (op === 'rmall' && !await ask(`Retirer les ${all.length} ${jn(name)} de ${admSelP.pseudo} ?`, { danger: true })) return;
     ({ error } = await sb.rpc('admin_remove_pulls', { target: admSel, ids: pick.map(x => x.id) }));
   } else ({ error } = await sb.rpc('admin_lock_pulls', { target: admSel, ids: all.map(x => x.id), p_locked: op === 'lock' }));
   if (error) return admMsg(error.message, true);
@@ -171,13 +171,13 @@ $('adm-detail').addEventListener('click', async e => {
   }
   if (e.target.closest('#adm-ban')) {
     const ban = !admSelP.banned;
-    if (ban && !confirm(`Bannir ${admSelP.pseudo} ? Il ne pourra plus ouvrir, acheter, vendre ni écrire.`)) return;
+    if (ban && !await ask(`Bannir ${admSelP.pseudo} ? Il ne pourra plus ouvrir, acheter, vendre ni écrire.`, { danger: true })) return;
     const { error } = await sb.rpc('admin_ban', { target: admSel, p_ban: ban });
     if (error) return admMsg(error.message, true);
     admMsg(`${admSelP.pseudo} ${ban ? 'banni' : 'débanni'}`); return admAfter();
   }
   if (e.target.closest('#adm-clear-sc')) {
-    if (!confirm(`Vider la vitrine et la bio de ${admSelP.pseudo} ?`)) return;
+    if (!await ask(`Vider la vitrine et la bio de ${admSelP.pseudo} ?`)) return;
     const { error } = await sb.rpc('admin_clear_showcase', { target: admSel });
     if (error) return admMsg(error.message, true);
     admMsg('Vitrine et bio vidées'); return admAfter();
@@ -191,13 +191,13 @@ $('adm-detail').addEventListener('click', async e => {
   }
   const clear = e.target.closest('#adm-items-clear');
   if (clear || e.target.closest('#adm-items-save')) {
-    if (clear && !confirm(`Vider tous les objets de ${admSelP.pseudo} ?`)) return;
+    if (clear && !await ask(`Vider tous les objets de ${admSelP.pseudo} ?`, { danger: true })) return;
     const qs = [...document.querySelectorAll('[data-q]')].map(i => [i.dataset.q, clear ? 0 : Math.max(0, Math.trunc(+i.value || 0))]);
     for (const [it, q] of qs) { const { error } = await sb.rpc('admin_set_items', { target: admSel, p_item: it, p_qty: q }); if (error) return admMsg(error.message, true); }
     admMsg(clear ? 'Objets vidés' : 'Objets enregistrés'); return admAfter();
   }
   if (e.target.closest('#adm-reset')) {
-    if (!confirm(`Remettre ${admSelP.pseudo} à zéro ? (tirages, pièces, stock, effets effacés)`)) return;
+    if (!await ask(`Remettre ${admSelP.pseudo} à zéro ? (tirages, pièces, stock, effets effacés)`, { danger: true })) return;
     const { error } = await sb.rpc('admin_reset', { target: admSel });
     if (error) return admMsg(error.message, true);
     admMsg(`${admSelP.pseudo} remis à zéro`); return admAfter();
@@ -215,13 +215,13 @@ async function admStats() {
 $('adm-give-all').addEventListener('click', async () => {
   const c = Math.trunc(+$('adm-all-coins').value || 0), p = Math.trunc(+$('adm-all-pulls').value || 0);
   if (!c && !p) return admMsg('Mets un nombre de pièces ou de pulls', true);
-  if (!confirm(`Donner ${c} pièces et ${p} pulls à TOUS les joueurs ?`)) return;
+  if (!await ask(`Donner ${c} pièces et ${p} pulls à TOUS les joueurs ?`)) return;
   const { data, error } = await sb.rpc('admin_give', { target: null, p_coins: c, p_pulls: p });
   if (error) return admMsg(error.message, true);
   admMsg(`Donné à ${data} joueurs`); admStats(); ecoSync();
 });
 $('adm-reset-all').addEventListener('click', async () => {
-  if (prompt('Tape RESET pour remettre TOUS les joueurs à zéro :') !== 'RESET') return admMsg('Annulé');
+  if (!await ask('Remettre TOUS les joueurs à zéro ? Tape RESET pour confirmer.', { typed: 'RESET', danger: true })) return admMsg('Annulé');
   const { data, error } = await sb.rpc('admin_reset', { target: null });
   if (error) return admMsg(error.message, true);
   admMsg(`${data} joueurs remis à zéro`); admStats(); ecoSync(); if (ACC.user) loadAccount(ACC.user);
@@ -253,7 +253,7 @@ $('ads-list').addEventListener('click', async e => {
   admMsg(`${tr.dataset.it} mis à jour`); adsLoad(); if (!$('page-shop').hidden) renderShop();
 });
 $('ads-reroll').addEventListener('click', async () => {
-  if (!confirm('Tirer un nouveau stock maintenant ? (les achats de la période sont remis à zéro pour tout le monde)')) return;
+  if (!await ask('Tirer un nouveau stock maintenant ? (les achats de la période sont remis à zéro pour tout le monde)')) return;
   const { error } = await sb.rpc('admin_shop_reroll');
   if (error) return admMsg(error.message, true);
   admMsg('Nouveau stock tiré'); adsLoad(); if (!$('page-shop').hidden) renderShop();
@@ -276,7 +276,7 @@ $('ada-send').addEventListener('click', async () => {
 });
 $('ada-list').addEventListener('click', async e => {
   const b = e.target.closest('[data-delann]'); if (!b) return;
-  if (!confirm('Supprimer cette annonce ?')) return;
+  if (!await ask('Supprimer cette annonce ?', { danger: true })) return;
   const { error } = await sb.rpc('admin_delete_announcement', { p_id: +b.dataset.delann });
   if (error) return admMsg(error.message, true);
   admMsg('Annonce supprimée'); adaLoad();
@@ -335,7 +335,7 @@ $('adc-list').addEventListener('click', async e => {
   if (ed2) return adcForm(ADC.list.find(c => c.code === ed2.dataset.edit));
   const del = e.target.closest('[data-del]');
   if (del) {
-    if (!confirm(`Supprimer le code ${del.dataset.del} ?`)) return;
+    if (!await ask(`Supprimer le code ${del.dataset.del} ?`, { danger: true })) return;
     const { error } = await sb.rpc('admin_code_delete', { p_code: del.dataset.del });
     if (error) return admMsg(error.message, true);
     admMsg('Code supprimé'); adcLoad();

@@ -536,7 +536,7 @@ $('battle').addEventListener('click', e => {
   if (!BT) return;
   if (e.target.closest('#bt-again')) { $('bt-end').hidden = true; return startBattle(BT.teams[0].map(u => jetonOf(u.name))); }
   if (e.target.closest('#bt-menu')) { $('bt-end').hidden = true; return closeBattle(); }
-  if (e.target.closest('#bt-quit')) { if (BT.over || confirm(ct('quit_q'))) { BT.over = true; closeBattle(); } return; }
+  if (e.target.closest('#bt-quit')) { if (BT.over) closeBattle(); else ask(ct('quit_q'), { danger: true }).then(ok => { if (ok && BT) { BT.over = true; closeBattle(); } }); return; }
   const u = e.target.closest('.bu');
   if (u) {
     const side = +u.dataset.side, i = +u.dataset.i, me = BT.turn === 0 && !BT.busy && !BT.over;

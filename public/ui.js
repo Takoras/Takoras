@@ -8,7 +8,7 @@ const sellValue = odds => Math.max(1, Math.round(odds * .5)); // même règle qu
 // ---------- Rareté et puissance (stables : un même jeton a toujours les mêmes stats)
 const TIER_NAMES = [[60, 'r_common'], [1000, 'r_rare'], [10000, 'r_epic'], [100000, 'r_legend'], [Infinity, 'r_myth']];
 const tierKey = odds => TIER_NAMES.find(([m]) => odds < m)[1];
-const strHash = s => [...s].reduce((h, c) => (h * 31 + c.charCodeAt(0)) >>> 0, 7);
+const strHash = s => [...String(s ?? "")].reduce((h, c) => (h * 31 + c.charCodeAt(0)) >>> 0, 7);
 // Stats de combat : les rares sont un peu plus forts, mais pas trop (la capacité et le pile ou face comptent plus)
 const STAT_MAX = { s_hp: 140, s_atk: 30, s_def: 10, s_spd: 20 };
 function statsOf(name, odds) {
@@ -202,6 +202,27 @@ function toast(text, bad = false) {
   setTimeout(() => d.classList.add('out'), 2600);
   setTimeout(() => d.remove(), 3100);
 }
+// Fenêtre de confirmation du site (les confirm() / prompt() du navigateur sont bloqués dans certains navigateurs,
+// ex. celui intégré à Discord, ou si on a coché « empêcher cette page de créer d'autres boîtes de dialogue »)
+// typed : le joueur doit taper ce mot pour valider (actions très dangereuses)
+function ask(text, { ok = t('confirm_ok'), danger = false, typed = '' } = {}) {
+  return new Promise(res => {
+    const o = document.createElement('div');
+    o.className = 'askbox';
+    o.innerHTML = `<div class="ask-card${danger ? ' danger' : ''}"><p>${esc(text)}</p>
+      ${typed ? `<input class="adm-in" id="ask-in" placeholder="${esc(typed)}" autocomplete="off">` : ''}
+      <div class="ask-btns"><button class="btn ghost" data-a="0">${t('cancel')}</button><button class="btn primary" data-a="1" ${typed ? 'disabled' : ''}>${esc(ok)}</button></div></div>`;
+    document.body.appendChild(o);
+    requestAnimationFrame(() => o.classList.add('on'));
+    const inp = o.querySelector('#ask-in'), go = o.querySelector('[data-a="1"]');
+    if (inp) { inp.focus(); inp.oninput = () => { go.disabled = inp.value.trim() !== typed; }; } else go.focus();
+    const done = v => { o.classList.remove('on'); setTimeout(() => o.remove(), 200); removeEventListener('keydown', key, true); res(v); };
+    const key = e => { if (e.key === 'Escape') { e.stopPropagation(); done(false); } if (e.key === 'Enter' && !go.disabled) { e.preventDefault(); done(true); } };
+    addEventListener('keydown', key, true);
+    o.addEventListener('click', e => { const b = e.target.closest('[data-a]'); if (b && !b.disabled) done(b.dataset.a === '1'); else if (e.target === o) done(false); });
+  });
+}
+
 // Messages d'erreur du serveur → texte
 const ERR = { not_enough_coins: 'err_coins', limit_reached: 'err_limit', potion_active: 'err_potion', stock_full: 'err_stock_full', owned: 'err_owned', not_in_shop: 'err_shop',
   banned: 'err_banned', not_friends: 'err_not_friends', slow_down: 'err_slow', unknown_player: 'err_unknown', self: 'err_self', pseudo_taken: 'err_pseudo_taken', bad_pseudo: 'err_pseudo', pseudo_cooldown: 'err_pseudo_cd',

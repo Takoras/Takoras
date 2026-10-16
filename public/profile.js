@@ -147,7 +147,7 @@ function editProfile() {
       // nouveau pseudo : on confirme (il ne pourra plus changer avant 30 jours)
       let name = ACC.pseudo;
       if (canRename && st.pseudo !== p.pseudo) {
-        if (!confirm(t(p.pseudo_free ? 'pseudo_confirm_free' : 'pseudo_confirm', { n: st.pseudo }))) return;
+        if (!await ask(t(p.pseudo_free ? 'pseudo_confirm_free' : 'pseudo_confirm', { n: st.pseudo }))) return;
         const { error } = await sb.rpc('change_pseudo', { p: st.pseudo });
         if (error) { sfx.deny(); return toast(errText(error), true); }
         name = ACC.pseudo = st.pseudo; renderAccBtn();

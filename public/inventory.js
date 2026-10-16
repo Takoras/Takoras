@@ -164,7 +164,7 @@ async function onBarClick(e) {
 // Vente : pas de confirmation, sauf si ça contient un jeton rare (1/1000 et plus)
 async function sellIds(ids) {
   const rows = INV.rows.filter(r => ids.includes(r.id));
-  if (rows.some(r => r.odds >= 1000) && !confirm(t('sell_rare_confirm', { n: rows.length, v: fmt(rows.reduce((s, r) => s + sellValue(r.odds), 0)) }))) return;
+  if (rows.some(r => r.odds >= 1000) && !await ask(t('sell_rare_confirm', { n: rows.length, v: fmt(rows.reduce((s, r) => s + sellValue(r.odds), 0)) }))) return;
   const { data, error } = await sb.rpc('sell_pulls', { ids });
   if (error) return toast(errText(error), true);
   applyState(data.state);

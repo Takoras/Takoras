@@ -166,7 +166,7 @@ $('page-friends').addEventListener('click', async e => {
   if (b.dataset.ref) await friendRespond(b.dataset.ref, false);
   if (b.dataset.rm) {
     const f = friendOf(b.dataset.rm);
-    if (!confirm(t('fr_remove_q', { n: f?.pseudo || '' }))) return;
+    if (!await ask(t('fr_remove_q', { n: f?.pseudo || '' }))) return;
     await sb.rpc('friend_remove', { p_other: b.dataset.rm });
     if (FR.open === b.dataset.rm) closeChat();
     loadFriends();
