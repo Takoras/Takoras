@@ -80,6 +80,27 @@ function coin3D(src, alt, style = '') {
   for (let i = 1; i <= DEPTH; i++) edge += `<img class="edge" src="${src}" alt="" style="transform:translateZ(${-i * 2}px)">`;
   return `<img class="face" src="${src}" alt="${alt}" style="${style}">${edge}<img class="back" src="${src}" alt="" style="transform:translateZ(${-(DEPTH + 1) * 2}px) rotateY(180deg)">`;
 }
+// Jeton transparent / pas rond (ex. Astra) : l'épaisseur empilée se verrait à travers les trous du dessin.
+// On mesure la part du disque réellement remplie ; en dessous de 97 %, pas de tranche.
+const SOLID = {};
+function solidCoin(src) {
+  if (src in SOLID) return Promise.resolve(SOLID[src]);
+  return new Promise(res => {
+    const im = new Image();
+    im.onload = () => {
+      try {
+        const n = 32, c = document.createElement('canvas'); c.width = c.height = n;
+        const x = c.getContext('2d'); x.drawImage(im, 0, 0, n, n);
+        const d = x.getImageData(0, 0, n, n).data; let inD = 0, full = 0;
+        for (let y = 0; y < n; y++) for (let i = 0; i < n; i++) { const dx = i - n / 2 + .5, dy = y - n / 2 + .5; if (dx * dx + dy * dy > (n / 2 - 2) ** 2) continue; inD++; if (d[(y * n + i) * 4 + 3] > 200) full++; }
+        res(SOLID[src] = full / inD > .97);
+      } catch { res(SOLID[src] = true); }
+    };
+    im.onerror = () => res(true);
+    im.src = src;
+  });
+}
+function trimEdges(spin, src) { solidCoin(src).then(ok => { if (!ok) spin.querySelectorAll('img.edge').forEach(e => e.remove()); }); }
 function setGlareMask(src) {
   opCoin.querySelectorAll('.glare, .shine').forEach(g => { g.style.webkitMaskImage = g.style.maskImage = `url(${src})`; });
 }
@@ -341,6 +362,7 @@ function reveal(restored, quiet = false) {
   startBg(j);
   const spin = opCoin.querySelector('.spin');
   spin.innerHTML = coin3D(texOf(j), j.name); // pas d'ombre sur l'image (elle serait coupée en carré en 3D) : le halo est derrière
+  trimEdges(spin, texOf(j));
   setGlareMask(texOf(j));
   // Le jeton se retourne très vite puis ralentit longtemps (plus il est rare, plus ça dure)
   if (!restored) {

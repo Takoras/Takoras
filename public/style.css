@@ -1537,3 +1537,6 @@ html.lock .chat-fab, html.lock .tabbar { display: none !important; }
 .cine-skip { position: absolute; left: 50%; bottom: calc(24px + env(safe-area-inset-bottom)); translate: -50% 0; font-size: 12px; letter-spacing: .14em; text-transform: uppercase;
   color: rgba(255, 255, 255, .45); opacity: 0; transition: opacity .4s; pointer-events: none; }
 .cine-skip.on { opacity: 1; }
+
+/* Jetons transparents (ex. Astra) : on ne voit jamais le dos en miroir à travers la face, ni l'inverse */
+.op-coin .spin img.face, .op-coin .spin img.back { backface-visibility: hidden; -webkit-backface-visibility: hidden; }
