@@ -832,7 +832,7 @@ img.banner-cv { object-fit: cover; }
 .si.out .si-icon img { --df: var(--tint, saturate(1)) grayscale(.85) brightness(.7); }
 .it-card .si-icon img, .pk img, .jm-coin img, .hero-coin.has-img img, .si-banner, .prof-banner img, .info-table img { --df: var(--tint, saturate(1)); }
 .ic img, .sc img, .si-icon img, .it-card .si-icon img, .pk img, .jm-coin img, .hero-coin.has-img img, .si-banner, .prof-banner img, .info-table img {
-  filter: var(--df); animation: doodle .54s steps(1) infinite; }
+  filter: var(--df); animation: doodle .9s steps(1) infinite; }
 @keyframes doodle {
   0% { filter: url(#dd0) var(--df); }
   33% { filter: url(#dd1) var(--df); }
