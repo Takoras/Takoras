@@ -225,6 +225,6 @@ function ask(text, { ok = t('confirm_ok'), danger = false, typed = '' } = {}) {
 
 // Messages d'erreur du serveur → texte
 const ERR = { not_enough_coins: 'err_coins', limit_reached: 'err_limit', potion_active: 'err_potion', stock_full: 'err_stock_full', owned: 'err_owned', not_in_shop: 'err_shop',
-  banned: 'err_banned', not_friends: 'err_not_friends', slow_down: 'err_slow', unknown_player: 'err_unknown', self: 'err_self', pseudo_taken: 'err_pseudo_taken', bad_pseudo: 'err_pseudo', pseudo_cooldown: 'err_pseudo_cd',
+  banned: 'err_banned', not_friends: 'err_not_friends', slow_down: 'err_slow', unknown_player: 'err_unknown', self: 'err_self', pseudo_taken: 'err_pseudo_taken', bad_pseudo: 'err_pseudo', pseudo_cooldown: 'err_pseudo_cd', deck_incomplete: 'err_deck', busy: 'err_busy', invite_expired: 'err_inv_exp', not_your_turn: 'err_turn',
   code_invalid: 'err_code_invalid', code_expired: 'err_code_expired', code_used_up: 'err_code_used_up', code_already: 'err_code_already', bad_code: 'err_bad_code' };
 const errText = e => t(Object.entries(ERR).find(([k]) => e?.message?.includes(k))?.[1] || 'err_generic');

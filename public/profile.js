@@ -44,7 +44,7 @@ async function renderProfile(pseudo) {
         const j = jetonOf(s.jeton);
         return `<div class="sc" data-slot="${i}" data-key="${i}:${s.id}" data-n="${esc(s.jeton)}" style="--g:${hexRGB(j.glow)}"><img src="${texOf(j)}" alt=""><b>${jnH(s.jeton)}</b><small>1/${fmt(s.odds)}</small></div>`;
       }).join('')}</div>
-      <p class="muted small">${t('joined', { d: new Date(p.joined).toLocaleDateString(LOCALE()) })}</p>
+      <p class="muted small">${t('joined', { d: new Date(p.joined).toLocaleDateString(LOCALE()) })}${(p.wins || p.losses) ? ' · ' + t('battles_rec', { w: p.wins || 0, l: p.losses || 0 }) : ''}</p>
       ${mine ? `
       <div class="prof-private">
         <h3 class="prof-h">🔒 ${t('private_zone')} <small class="muted">${t('private_hint')}</small></h3>

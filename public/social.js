@@ -156,11 +156,12 @@ function drawFriends() {
   body.innerHTML = `
     ${inc.length ? `<h3 class="shop-h">📨 ${t('fr_requests')} <small class="muted">${inc.length}</small></h3><div class="fr-list">${inc.map(f => row(f, `<button class="btn primary sm" data-acc="${f.id}">✓ ${t('fr_accept')}</button><button class="btn ghost sm" data-ref="${f.id}">✕</button>`)).join('')}</div>` : ''}
     <h3 class="shop-h">👥 ${t('fr_list')} <small class="muted">${ok.length}</small></h3>
-    <div class="fr-list">${ok.map(f => row(f, `<button class="btn primary sm" data-chat="${f.id}">💬 ${t('fr_chat')}</button><button class="btn ghost sm" data-rm="${f.id}" title="${t('fr_remove')}">✕</button>`)).join('') || `<p class="muted fr-empty">${t('fr_empty')}</p>`}</div>
+    <div class="fr-list">${ok.map(f => row(f, `<button class="btn ghost sm" data-duel="${f.id}" title="${t('fr_duel')}">⚔️</button><button class="btn primary sm" data-chat="${f.id}">💬 ${t('fr_chat')}</button><button class="btn ghost sm" data-rm="${f.id}" title="${t('fr_remove')}">✕</button>`)).join('') || `<p class="muted fr-empty">${t('fr_empty')}</p>`}</div>
     ${out.length ? `<h3 class="shop-h">⏳ ${t('fr_pending')} <small class="muted">${out.length}</small></h3><div class="fr-list">${out.map(f => row(f, `<button class="btn ghost sm" data-ref="${f.id}">${t('cancel')}</button>`)).join('')}</div>` : ''}`;
 }
 $('page-friends').addEventListener('click', async e => {
-  const b = e.target.closest('[data-acc],[data-ref],[data-rm],[data-chat]'); if (!b) return;
+  const b = e.target.closest('[data-acc],[data-ref],[data-rm],[data-chat],[data-duel]'); if (!b) return;
+  if (b.dataset.duel) return duelInvite(b.dataset.duel);
   if (b.dataset.chat) return openChat(b.dataset.chat);
   if (b.dataset.acc) await friendRespond(b.dataset.acc, true);
   if (b.dataset.ref) await friendRespond(b.dataset.ref, false);
@@ -198,7 +199,7 @@ async function friendButton(pseudo, box) {
     add: `<button class="btn primary" data-f="add">➕ ${t('fr_add')}</button>`,
     sent: `<button class="btn ghost" disabled>⏳ ${t('fr_sent')}</button>`,
     accept: `<button class="btn primary" data-f="accept">✓ ${t('fr_accept')}</button>`,
-    chat: `<button class="btn primary" data-f="chat">💬 ${t('fr_chat')}</button>`,
+    chat: `<button class="btn ghost" data-f="duel">⚔️ ${t('fr_duel')}</button><button class="btn primary" data-f="chat">💬 ${t('fr_chat')}</button>`,
   }[st];
   box.onclick = async e => {
     const b = e.target.closest('[data-f]'); if (!b) return;
@@ -206,6 +207,7 @@ async function friendButton(pseudo, box) {
     if (b.dataset.f === 'add') await friendRequest(pseudo);
     if (b.dataset.f === 'accept') await friendRespond(s.id, true);
     if (b.dataset.f === 'chat') { await loadFriends(); return openChat(s.id); }
+    if (b.dataset.f === 'duel') { b.disabled = false; return duelInvite(s.id); }
     friendButton(pseudo, box);
   };
 }
@@ -324,5 +326,6 @@ function startSocial() {
     })
     .subscribe();
   loadFriends();
+  if (typeof duelSub === 'function') duelSub(); // défis de combat en direct
 }
 if (ACC.user) startSocial();
