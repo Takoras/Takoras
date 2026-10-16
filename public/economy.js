@@ -34,7 +34,7 @@ function applyState(st) {
   eco.coins = st.coins; eco.stock = st.stock; eco.max = st.max;
   eco.step = (st.step || 180) * 1000;
   eco.last = Date.now() - (eco.step / 1000 - st.next_in) * 1000;
-  eco.luck_mult = +st.luck_mult || 1; eco.luck_left = st.luck_left || 0; eco.fast_left = st.fast_left || 0; eco.synced = Date.now();
+  eco.potions = st.potions || []; eco.luck = +st.luck || 1; eco.fast_left = st.fast_left || 0; eco.synced = Date.now();
   ACC.isAdmin = !!st.admin;
   if (typeof renderAdminBtn === 'function') renderAdminBtn();
   render();
@@ -73,7 +73,8 @@ async function upgrade() {
 // Boutons de l'accueil : stock + Ouvrir 1 / Tout ouvrir + amélioration (Takoras), ou l'ancien achat (autres pulls)
 function renderActions() {
   const box = $('actions');
-  if (!ACC.user) { box.innerHTML = `<button class="btn primary" data-open="1">${t('acc_login_to_open')}</button>`; return; }
+  const info = `<button class="link-btn" data-info>ℹ️ ${t('odds_info')}</button>`;
+  if (!ACC.user) { box.innerHTML = `<button class="btn primary" data-open="1">${t('acc_login_to_open')}</button>${info}`; return; }
   if (!isTakoras()) {
     const p = PULLS[current];
     box.innerHTML = `<button class="btn primary" data-open="1">Pull ×1 · ${fmt(p.price)} ◆</button><button class="btn ghost" data-open="10">Pull ×10 · ${fmt(p.price * 10)} ◆</button>`;
@@ -92,7 +93,8 @@ function renderActions() {
     ${eco.max < TOP_MAX
       ? `<button class="btn upgrade" data-up ${eco.coins >= cost ? '' : 'disabled'}>${t('stock_max', { a: eco.max, b: eco.max + 1 })} · ${money(cost)}</button>`
       : `<span class="muted small">${t('stock_top')}</span>`}
-    ${typeof effectsHTML === 'function' ? `<div class="fx-row">${effectsHTML()}</div>` : ''}`;
+    ${typeof effectsHTML === 'function' ? `<div class="fx-row">${effectsHTML()}</div>` : ''}
+    ${info}`;
 }
 $('actions').addEventListener('click', e => {
   const b = e.target.closest('button'); if (!b || b.disabled) return;

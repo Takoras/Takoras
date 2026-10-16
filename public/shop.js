@@ -13,12 +13,17 @@ function itemText(it) {
   if (it.kind === 'hourglass') return [t('it_hourglass'), t('it_hourglass_d', { n: it.data.minutes })];
   return [t('it_banner', { n: bannerName(it.id.slice(2)) }), t('it_banner_d')];
 }
+const dec = n => String(Math.round(n * 100) / 100).replace('.', SETTINGS.lang === 'fr' ? ',' : '.');
 const hms = s => [Math.floor(s / 3600), Math.floor(s / 60) % 60, s % 60].map(n => String(n).padStart(2, '0')).join(':');
 
 // Effets actifs (potion, sablier) : affichés dans la boutique et sous le stock de l'accueil
 function effectsHTML() {
   const e = [];
-  if (eco.luck_left > 0) e.push(`<span class="fx-chip">🧪 ${t('fx_luck', { m: String(eco.luck_mult).replace('.', ','), n: eco.luck_left })}</span>`);
+  // Potions cumulées : la chance totale, puis le détail de chaque potion et ses pulls restants
+  if ((eco.potions || []).length) {
+    e.push(`<span class="fx-chip total">🍀 ${t('fx_total', { m: dec(eco.luck) })}</span>`);
+    eco.potions.forEach(p => e.push(`<span class="fx-chip">🧪 ${t('fx_luck', { m: dec(p.m), n: p.n })}</span>`));
+  }
   if (eco.fast_left > 0) e.push(`<span class="fx-chip">⏳ ${t('fx_fast', { t: hms(Math.max(0, Math.round(eco.fast_left - (Date.now() - eco.synced) / 1000))) })}</span>`);
   return e.join('');
 }
@@ -32,7 +37,7 @@ async function renderShop() {
     <div class="page-head">
       <div><div class="eyebrow">${t('nav_shop')}</div><h2 class="page-title">${t('shop_title')}</h2>
       <p class="muted">${t('shop_reset')} <b id="shop-reset"></b></p></div>
-      <div class="shop-bal">${ACC.user ? money(eco.coins) : ''}</div>
+      <div class="shop-right"><button class="btn ghost sm" data-info>ℹ️ ${t('odds_info')}</button><div class="shop-bal">${ACC.user ? money(eco.coins) : ''}</div></div>
     </div>
     <div class="fx-row" id="shop-fx">${ACC.user ? effectsHTML() : ''}</div>
     <div class="shop-grid">${SHOP.items.map(it => {

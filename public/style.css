@@ -770,3 +770,25 @@ img.banner-cv { object-fit: cover; }
 .items-row { display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 12px; margin-bottom: 26px; }
 .it-card { display: flex; flex-direction: column; gap: 6px; padding: 16px; border-radius: 16px; background: var(--surface); border: 1px solid var(--border); }
 .it-card .ic-n { position: static; } .it-card p { font-size: 13px; flex: 1; }
+
+/* Probas & infos */
+.link-btn { font-size: 14px; color: #c4b5fd; text-decoration: underline; text-underline-offset: 3px; padding: 4px; }
+.link-btn:hover { color: #fff; }
+.shop-right { display: flex; align-items: center; gap: 14px; }
+.fx-chip.total { background: rgba(250, 204, 21, .14); border-color: rgba(250, 204, 21, .5); font-weight: 600; }
+.info { width: 100%; display: flex; flex-direction: column; gap: 14px; }
+.info h2 { font-family: "Space Grotesk"; font-size: 28px; }
+.info h3 { font-family: "Space Grotesk"; font-size: 20px; margin-top: 6px; }
+.info-luck { display: flex; flex-wrap: wrap; gap: 6px; align-items: center; }
+.info-luck .muted { margin-right: 4px; font-size: 14px; }
+.info-luck .chip { padding: 7px 12px; font-size: 13px; }
+.info-table { max-height: 46vh; overflow: auto; border-radius: 14px; border: 1px solid var(--border); }
+.info-table table { width: 100%; border-collapse: collapse; font-size: 14px; }
+.info-table th { position: sticky; top: 0; background: #1b1a26; text-align: left; padding: 10px; font-size: 12px; color: var(--muted); }
+.info-table td { padding: 8px 10px; border-top: 1px solid var(--border); white-space: nowrap; }
+.info-table td:first-child { display: flex; align-items: center; gap: 8px; }
+.info-table img { width: 26px; height: 26px; image-rendering: pixelated; }
+.info-rules { display: grid; grid-template-columns: repeat(auto-fill, minmax(260px, 1fr)); gap: 10px; }
+.info-rules div { padding: 12px 14px; border-radius: 14px; background: var(--surface); border: 1px solid var(--border); }
+.info-rules b { font-size: 15px; } .info-rules p { font-size: 13px; margin-top: 4px; line-height: 1.5; }
+.modal-card:has(.info) { width: min(900px, 100%); }

@@ -57,7 +57,7 @@ async function admDetail() {
       <div class="ad-mini">
         <div><b>${money(p.coins)}</b><span>pièces</span></div>
         <div><b>${p.stock}/${p.stock_max}</b><span>pulls</span></div>
-        <div><b>${p.luck_left ? '×' + p.luck_mult + ' · ' + p.luck_left : '—'}</b><span>potion</span></div>
+        <div><b>${(p.potions || []).length ? '×' + (+p.luck).toFixed(1) + ' · ' + p.potions.map(x => '×' + x.m + '(' + x.n + ')').join(' ') : '—'}</b><span>potions</span></div>
         <div><b>${fast ? new Date(p.fast_until).toLocaleTimeString(LOCALE(), { hour: '2-digit', minute: '2-digit' }) : '—'}</b><span>sablier jusqu'à</span></div>
       </div>
     </div>
