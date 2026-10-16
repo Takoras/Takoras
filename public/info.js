@@ -8,7 +8,7 @@ const INFO = {
     rules: [
       ['🎲 Le tirage', 'Le jeu teste les jetons du plus rare au plus commun : Takoras Ω a 1 chance sur 1 000 000, s’il ne tombe pas on teste le suivant, etc. Si rien ne tombe, tu as Mobu. Le jeton est tiré par le serveur dès que tu ouvres : cliquer plus ou moins vite ne change rien.'],
       ['🍀 La chance', 'La chance multiplie la probabilité de chaque jeton. Avec ×2, Takoras Ω passe à 1 chance sur 500 000. Les communs baissent un peu, puisque les rares tombent plus souvent.'],
-      ['🧪 Les potions se cumulent', 'Chaque potion ajoute son bonus : ×1,3 = +0,3, ×2 = +1, ×5 = +4. Donc ×2 + ×1,3 = ×2,3, et ×2 + ×1,3 + ×5 = ×6,3. Chaque potion compte ses pulls de son côté : quand elle n’en a plus, son bonus disparaît.'],
+      ['🧪 Les potions se cumulent', 'Chaque potion ajoute son bonus : ×1,3 = +0,3, ×2 = +1, ×5 = +4. Donc ×2 + ×1,3 = ×2,3, et ×2 + ×1,3 + ×5 = ×6,3. Boire une potion que tu as déjà rallonge sa durée (deux ×2 = ×2 pendant 6 pulls) au lieu d’ajouter son bonus. Chaque potion compte ses pulls de son côté. La chance totale est plafonnée à ×500.'],
       ['⏳ Recharge', 'Tu gagnes 1 pull toutes les 3 min jusqu’à ton stock max (5 au départ). Le sablier double la vitesse (1 pull toutes les 1 min 30) ; plusieurs sabliers rallongent la durée.'],
       ['⚡ Recharge éclair', 'Donne +1 pull tout de suite, si ton stock n’est pas plein.'],
       ['📦 Stock max', 'Améliorable de 5 à 10 : 1 000, 3 000, 9 000, 27 000 puis 81 000 pièces.'],
@@ -23,7 +23,7 @@ const INFO = {
     rules: [
       ['🎲 The roll', 'The game checks tokens from rarest to most common: Takoras Ω has a 1 in 1,000,000 chance, if it misses the next one is checked, and so on. If nothing hits, you get Mobu. The token is rolled by the server as soon as you open: clicking faster or slower changes nothing.'],
       ['🍀 Luck', 'Luck multiplies every token’s chance. With ×2, Takoras Ω becomes 1 in 500,000. Commons drop a little since rares hit more often.'],
-      ['🧪 Potions stack', 'Each potion adds its bonus: ×1.3 = +0.3, ×2 = +1, ×5 = +4. So ×2 + ×1.3 = ×2.3, and ×2 + ×1.3 + ×5 = ×6.3. Each potion counts its own pulls: when it runs out, its bonus is gone.'],
+      ['🧪 Potions stack', 'Each potion adds its bonus: ×1.3 = +0.3, ×2 = +1, ×5 = +4. So ×2 + ×1.3 = ×2.3, and ×2 + ×1.3 + ×5 = ×6.3. Drinking a potion you already have extends its duration (two ×2 = ×2 for 6 pulls) instead of adding its bonus. Each potion counts its own pulls. Total luck is capped at ×500.'],
       ['⏳ Recharge', 'You get 1 pull every 3 min up to your max stock (5 at first). The hourglass doubles the speed (1 pull every 1 min 30); several hourglasses extend the duration.'],
       ['⚡ Instant refill', 'Gives +1 pull right away, if your stock isn’t full.'],
       ['📦 Max stock', 'Upgradable from 5 to 10: 1,000, 3,000, 9,000, 27,000 then 81,000 coins.'],
@@ -37,7 +37,7 @@ const INFO = {
 function realOdds(luck) {
   const list = [...SERIES.Takoras].sort((a, b) => b.odds - a.odds);
   let rest = 1;
-  const out = list.map(j => { const p = rest * Math.min(1, luck / j.odds); rest -= p; return { j, p }; });
+  const out = list.map(j => { const p = rest * Math.min(1, Math.min(500, luck) / j.odds); rest -= p; return { j, p }; });
   out[out.length - 1].p += rest;
   return out.reverse();
 }
