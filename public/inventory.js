@@ -8,8 +8,9 @@ async function loadInventory() {
   INV.rows = data;
   const g = {};
   data.forEach(r => {
-    const x = g[r.jeton] ||= { name: r.jeton, odds: r.odds, ids: [], free: [], last: 0 };
-    x.ids.push(r.id); if (!r.locked) x.free.push(r.id);
+    const x = g[r.jeton] ||= { name: r.jeton, odds: r.odds, ids: [], free: [], shown: 0, last: 0 };
+    x.ids.push(r.id); if (!r.locked && !r.showcased) x.free.push(r.id); // en vitrine = protégé de la vente
+    if (r.showcased) x.shown++;
     x.last = Math.max(x.last, Date.parse(r.created_at));
   });
   INV.groups = Object.values(g);
@@ -89,7 +90,7 @@ function drawInventory() {
     const j = jetonOf(x.name), q = INV.sel.get(x.name) || 0, locked = !x.free.length, s = statsOf(j.name, j.odds);
     return `<div class="ic${q ? ' sel' : ''}${locked ? ' locked' : ''}" data-n="${esc(x.name)}" style="--g:${hexRGB(j.glow)}">
       ${x.ids.length > 1 ? `<span class="ic-n">×${x.ids.length}</span>` : ''}
-      ${locked ? '<span class="ic-lock" title="🔒">🔒</span>' : ''}
+      ${x.shown ? `<span class="ic-lock" title="${t('in_showcase')}">📌</span>` : locked ? '<span class="ic-lock" title="🔒">🔒</span>' : ''}
       <img src="${texOf(j)}" alt="">
       <b>${esc(jn(x.name))}</b>
       <small><span class="t-${tierKey(x.odds)}">1/${fmt(x.odds)}</span> · ⚡${fmt(s.power)}</small>
@@ -118,7 +119,7 @@ function onCardClick(e) {
   // Hors sélection : aperçu du jeton avec ses actions
   const allLocked = !x.free.length;
   openJeton(x.name, `
-    <p class="muted">${t('inv_have', { n: x.ids.length })}</p>
+    <p class="muted">${t('inv_have', { n: x.ids.length })}${x.shown ? ' · 📌 ' + t('shown_n', { n: x.shown }) : ''}</p>
     <div class="jm-actions">
       ${x.free.length ? `<button class="btn primary" data-a="sell1">${t('sell_one')} · +${money(sellValue(x.odds))}</button>` : ''}
       ${x.free.length > 1 ? `<button class="btn ghost" data-a="selldupes">${t('sell_dupes', { n: x.ids.length - 1 })}</button>` : ''}

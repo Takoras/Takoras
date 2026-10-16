@@ -7,7 +7,7 @@ let PROF = null; // profil affiché
 
 async function saveProfile(part) {
   const p = PROF;
-  const body = { p_avatar: p.avatar, p_banner: p.banner, p_bio: p.bio, p_showcase: p.showcase.map(s => s.id), ...part };
+  const body = { p_avatar: p.avatar, p_banner: p.banner, p_bio: p.bio, p_showcase: p.showcase.map(s => (s ? s.id : null)), ...part };
   const { error } = await sb.rpc('update_profile', body);
   if (error) { toast(errText(error), true); return false; }
   return true;
@@ -16,8 +16,10 @@ async function saveProfile(part) {
 async function renderProfile(pseudo) {
   const page = $('page-profile');
   if (!pseudo) { page.innerHTML = `<div class="page-empty"><p class="muted">${t('acc_need')}</p><button class="btn primary" onclick="openAccount('login')">${t('login')}</button></div>`; return; }
-  page.innerHTML = '<p class="muted">…</p>';
-  const p = PROF = await getProfile(pseudo);
+  const same = PROF && PROF.pseudo === pseudo && page.querySelector('.prof');
+  if (!same) page.innerHTML = '<p class="muted">…</p>'; // seulement au premier affichage : sinon on garde l'ancien jusqu'au nouveau
+  const p = await getProfile(pseudo);
+  PROF = p;
   if (!p) { page.innerHTML = `<div class="page-empty"><p class="muted">${t('profile_404')}</p></div>`; return; }
   const mine = ACC.pseudo && p.pseudo === ACC.pseudo;
   const best = p.best ? SERIES.Takoras.find(j => j.odds === p.best) : null;
@@ -73,7 +75,7 @@ async function pickShowcase(slot) {
   jm.style.setProperty('--g', '139, 92, 246');
   card.onclick = card.oninput = null;
   const draw = () => {
-    const used = new Set(PROF.showcase.map(s => s.id));
+    const used = new Set(PROF.showcase.filter(Boolean).map(s => s.id));
     let l = INV.groups.filter(x => jn(x.name).toLowerCase().includes(st.q));
     l.sort(st.sort === 'name' ? (a, b) => jn(a.name).localeCompare(jn(b.name)) : (a, b) => b.odds - a.odds);
     card.querySelector('.pk-list').innerHTML = l.map(x => {
@@ -97,10 +99,9 @@ async function pickShowcase(slot) {
     const b = e.target.closest('.pk'), rm = e.target.closest('#pk-remove');
     if (!b && !rm) return;
     if (b && !b.dataset.id) return toast(t('already_showcase'));
-    const ids = PROF.showcase.map(s => s.id);
-    if (rm) ids.splice(slot, 1);
-    else if (slot < ids.length) ids[slot] = +b.dataset.id;
-    else ids.push(+b.dataset.id);
+    // 5 cases fixes : le jeton va exactement dans la case choisie
+    const ids = Array.from({ length: 5 }, (_, i) => (PROF.showcase[i] ? PROF.showcase[i].id : null));
+    ids[slot] = rm ? null : +b.dataset.id;
     if (await saveProfile({ p_showcase: ids })) { jm.classList.remove('on'); sfx.click(); renderProfile(ACC.pseudo); }
   };
 }
