@@ -42,7 +42,7 @@ function cardHTML(it) {
     : left > 0 ? `<span class="si-stock">${t('stock_n', { n: left })}</span>` : `<span class="si-stock none">${t('sold_out')}</span>`;
   const btn = it.owned ? `<button class="btn ghost si-btn" disabled>✓ ${t('owned')}</button>`
     : out ? `<button class="btn ghost si-btn" disabled>${t('back_in')} <b class="si-timer">${hms(shopLeft())}</b></button>`
-    : `<button class="btn primary si-btn${ACC.user && eco.coins < it.price ? ' poor' : ''}" data-buy="${it.id}" ${ACC.user ? '' : 'disabled'}>${t('buy')} · ${changed ? `<s>${fmt(it.base_price)}</s> ` : ''}${money(it.price)}</button>${ACC.user && eco.coins < it.price ? `<small class="si-miss">${t('missing', { n: fmt(it.price - eco.coins) })}</small>` : ''}`;
+    : `<button class="btn primary si-btn${ACC.user && eco.coins < it.price ? ' poor' : ''}" data-buy="${it.id}" ${ACC.user ? '' : 'disabled'}>${t('buy')} · ${changed ? `<s>${fmt(it.base_price)}</s> ` : ''}${money(it.price)}</button>`;
   return `<div class="si${out ? ' out' : ''}${it.kind === 'potion' && it.data.mult >= 10 ? ' epic' : ''}" data-id="${it.id}" style="--g:${glowOf(it)}">
     ${status}
     ${changed ? `<span class="si-deal${pct > 0 ? ' up' : ''}">${pct > 0 ? '+' : ''}${pct}%</span>` : ''}
@@ -93,7 +93,7 @@ async function renderShop() {
     if (it.kind === 'banner') it.owned = true;
     card.outerHTML = cardHTML(it);
     page.querySelector(`.si[data-id="${it.id}"]`)?.animate([{ transform: 'scale(1)' }, { transform: 'scale(1.05)' }, { transform: 'scale(1)' }], { duration: 320, easing: 'cubic-bezier(.2,1.4,.4,1)' });
-    page.querySelectorAll('.si-btn[data-buy]').forEach(x => { const i = SHOP.items.find(y => y.id === x.dataset.buy); if (i && (eco.coins < i.price) !== x.classList.contains('poor')) x.closest('.si').outerHTML = cardHTML(i); });
+    page.querySelectorAll('.si-btn.poor, .si-btn[data-buy]').forEach(x => { const i = SHOP.items.find(y => y.id === x.dataset.buy); if (i) x.classList.toggle('poor', eco.coins < i.price); });
   };
   clearInterval(shopTimer);
   shopTimer = setInterval(() => {
