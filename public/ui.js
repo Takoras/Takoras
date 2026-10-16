@@ -40,6 +40,9 @@ function cards(page) {
 function nav(page, p) {
   const key = p === 'classement' ? 'board' : page;
   document.querySelectorAll('.links a').forEach(a => a.classList.toggle('on', a.dataset.page === key));
+  // barre d'onglets du téléphone : classement / profil / combat sont dans « Plus »
+  const tab = ['board', 'profile', 'combat'].includes(key) ? 'more' : key;
+  document.querySelectorAll('.tabbar [data-page]').forEach(a => a.classList.toggle('on', a.dataset.page === tab));
   const on = document.querySelector('.links a.on'), ink = document.querySelector('.nav-ink');
   if (on && ink) { ink.style.width = on.offsetWidth + 'px'; ink.style.transform = `translateX(${on.offsetLeft}px)`; ink.style.opacity = 1; }
 }
