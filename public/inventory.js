@@ -8,7 +8,9 @@ async function loadInventory() {
   INV.rows = data;
   const g = {};
   data.forEach(r => {
-    const x = g[r.jeton] ||= { name: r.jeton, odds: r.odds, ids: [], free: [], shown: 0, last: 0 };
+    // une carte par jeton ET par variante (un Mobu Doré est rangé à part du Mobu normal)
+    const key = r.jeton + (r.variant ? '|' + r.variant : '');
+    const x = g[key] ||= { key, name: r.jeton, variant: r.variant || '', odds: r.odds, ids: [], free: [], shown: 0, last: 0 };
     x.ids.push(r.id); if (!r.locked && !r.showcased && !r.in_deck) x.free.push(r.id); // en vitrine ou dans le deck = protégé de la vente
     if (r.showcased) x.shown++;
     if (r.in_deck) x.deck = (x.deck || 0) + 1;
@@ -21,13 +23,13 @@ async function loadInventory() {
 
 function visibleGroups() {
   let l = INV.groups.filter(x => (INV.tier === 'all' || tierKey(x.odds) === INV.tier) && jn(x.name).toLowerCase().includes(INV.q));
-  const by = { rarity: (a, b) => b.odds - a.odds, count: (a, b) => b.ids.length - a.ids.length || b.odds - a.odds, name: (a, b) => jn(a.name).localeCompare(jn(b.name)), recent: (a, b) => b.last - a.last };
+  const by = { rarity: (a, b) => vOdds(b.odds, b.variant) - vOdds(a.odds, a.variant), count: (a, b) => b.ids.length - a.ids.length || b.odds - a.odds, name: (a, b) => jn(a.name).localeCompare(jn(b.name)), recent: (a, b) => b.last - a.last };
   return l.sort(by[INV.sort]);
 }
 
 function selTotals() {
   let n = 0, v = 0, rare = false;
-  for (const [k, q] of INV.sel) { const x = INV.groups.find(g => g.name === k); n += q; v += q * sellValue(x.odds); if (x.odds >= 1000) rare = true; }
+  for (const [k, q] of INV.sel) { const x = INV.groups.find(g => g.key === k); n += q; v += q * sellValue(x.odds, x.variant); if (vOdds(x.odds, x.variant) >= 1000) rare = true; }
   return { n, v, rare };
 }
 
@@ -83,18 +85,19 @@ async function renderInventory() {
 // mode 'sell' : les jetons partis se dissolvent en pixels (sinon ils s'effacent simplement, ex. filtre)
 function drawInventory(mode = '') {
   const snap = moSnap($('inv-grid'), '.ic');
-  const total = INV.rows.length, value = INV.rows.reduce((s, r) => s + sellValue(r.odds), 0);
+  const total = INV.rows.length, value = INV.rows.reduce((s, r) => s + sellValue(r.odds, r.variant), 0);
   $('inv-sum').innerHTML = `${t('inv_count', { n: fmt(total), k: INV.groups.length })} · ${t('inv_value')} ${money(value)}`;
   document.querySelectorAll('#inv-tiers .chip').forEach(b => b.classList.toggle('on', b.dataset.t === INV.tier));
   $('inv-mode').textContent = INV.selecting ? t('inv_done') : t('inv_select');
   $('inv-mode').classList.toggle('primary', INV.selecting);
   const list = visibleGroups();
   $('inv-grid').innerHTML = list.length ? list.map(x => {
-    const j = jetonOf(x.name), q = INV.sel.get(x.name) || 0, locked = !x.free.length, s = statsOf(j.name, j.odds);
-    return `<div class="ic${q ? ' sel' : ''}${locked ? ' locked' : ''}" data-n="${esc(x.name)}" data-key="${esc(x.name)}" data-sig="${x.ids.length}|${locked}|${x.deck || 0}|${x.shown}" style="--g:${hexRGB(j.glow)}">
+    const j = jetonOf(x.name), q = INV.sel.get(x.key) || 0, locked = !x.free.length, s = statsOf(j.name, j.odds);
+    return `<div class="ic${q ? ' sel' : ''}${locked ? ' locked' : ''}" data-n="${esc(x.key)}" data-key="${esc(x.key)}" data-sig="${x.ids.length}|${locked}|${x.deck || 0}|${x.shown}" style="--g:${hexRGB(j.glow)}">
       ${x.ids.length > 1 ? `<span class="ic-n">×${x.ids.length}</span>` : ''}
       ${x.deck ? `<span class="ic-lock" title="${t('in_deck')}">⚔️</span>` : x.shown ? `<span class="ic-lock" title="${t('in_showcase')}">📌</span>` : locked ? '<span class="ic-lock" title="🔒">🔒</span>' : ''}
-      <img src="${texOf(j)}" alt="">
+      ${x.variant ? `<span class="ic-v">${vTag(x.variant)}</span>` : ''}
+      <img class="${vCls(x.variant)}" src="${texOf(j)}" alt="">
       <b>${jnH(x.name)}</b>
       <small><span class="t-${tierKey(x.odds)}">1/${fmt(x.odds)}</span> · ⚡${fmt(s.power)}</small>
       ${INV.selecting && x.free.length ? `<div class="ic-step"><button data-d="-1">−</button><span>${q}/${x.free.length}</span><button data-d="1">+</button></div>` : ''}
@@ -110,13 +113,13 @@ function drawInventory(mode = '') {
 
 function onCardClick(e) {
   const card = e.target.closest('.ic'); if (!card) return;
-  const x = INV.groups.find(g => g.name === card.dataset.n);
+  const x = INV.groups.find(g => g.key === card.dataset.n);
   const step = e.target.closest('[data-d]');
   if (INV.selecting) {
     if (!x.free.length) return toast(t('inv_locked'), true);
-    const cur = INV.sel.get(x.name) || 0;
+    const cur = INV.sel.get(x.key) || 0;
     const next = step ? Math.max(0, Math.min(x.free.length, cur + +step.dataset.d)) : (cur ? 0 : x.free.length);
-    next ? INV.sel.set(x.name, next) : INV.sel.delete(x.name);
+    next ? INV.sel.set(x.key, next) : INV.sel.delete(x.key);
     sfx.click();
     return drawInventory();
   }
@@ -125,10 +128,10 @@ function onCardClick(e) {
   openJeton(x.name, `
     <p class="muted">${t('inv_have', { n: x.ids.length })}${x.shown ? ' · 📌 ' + t('shown_n', { n: x.shown }) : ''}</p>
     <div class="jm-actions">
-      ${x.free.length ? `<button class="btn primary" data-a="sell1">${t('sell_one')} · +${money(sellValue(x.odds))}</button>` : ''}
+      ${x.free.length ? `<button class="btn primary" data-a="sell1">${t('sell_one')} · +${money(sellValue(x.odds, x.variant))}</button>` : ''}
       ${x.free.length > 1 ? `<button class="btn ghost" data-a="selldupes">${t('sell_dupes', { n: x.ids.length - 1 })}</button>` : ''}
       <button class="btn ghost" data-a="lock">${allLocked ? '🔓 ' + t('unlock') : '🔒 ' + t('lock')}</button>
-    </div>`);
+    </div>`, x.variant);
   $('jm-card').onclick = async ev => {
     const a = ev.target.closest('[data-a]')?.dataset.a; if (!a) return;
     if (a === 'sell1') await sellIds([x.free[0]]);
@@ -145,7 +148,7 @@ async function onBarClick(e) {
     INV.sel.clear();
     if (q !== 'none') INV.groups.forEach(x => {
       const n = q === 'all' ? x.free.length : q === 'dupes' ? Math.min(x.free.length, x.ids.length - 1) : x.odds < 60 ? x.free.length : 0;
-      if (n > 0) INV.sel.set(x.name, n);
+      if (n > 0) INV.sel.set(x.key, n);
     });
     sfx.click();
     return drawInventory();
@@ -154,7 +157,7 @@ async function onBarClick(e) {
     const { n } = selTotals();
     if (!n) return;
     const ids = [];
-    for (const [k, q] of INV.sel) ids.push(...INV.groups.find(g => g.name === k).free.slice(0, q));
+    for (const [k, q] of INV.sel) ids.push(...INV.groups.find(g => g.key === k).free.slice(0, q));
     await sellIds(ids);
     INV.sel.clear(); INV.selecting = false;
     await loadInventory(); drawInventory('sell');
@@ -164,7 +167,7 @@ async function onBarClick(e) {
 // Vente : pas de confirmation, sauf si ça contient un jeton rare (1/1000 et plus)
 async function sellIds(ids) {
   const rows = INV.rows.filter(r => ids.includes(r.id));
-  if (rows.some(r => r.odds >= 1000) && !await ask(t('sell_rare_confirm', { n: rows.length, v: fmt(rows.reduce((s, r) => s + sellValue(r.odds), 0)) }))) return;
+  if (rows.some(r => vOdds(r.odds, r.variant) >= 1000) && !await ask(t('sell_rare_confirm', { n: rows.length, v: fmt(rows.reduce((s, r) => s + sellValue(r.odds, r.variant), 0)) }))) return;
   const { data, error } = await sb.rpc('sell_pulls', { ids });
   if (error) return toast(errText(error), true);
   applyState(data.state);

@@ -107,7 +107,7 @@ const esc2 = s => String(s).replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;
 function renderHist() {
   const h = loadHist();
   $('hist').innerHTML = h.length
-    ? h.slice(0, 6).map(e => `<div class="h-row"><img class="jeton" src="${e.img}" alt="" style="width:26px;height:26px;filter:drop-shadow(0 0 4px ${e.glow})"><div>${jnH(e.name)}<small>${ago(e.ts)}</small></div><span class="muted">1/${e.odds.toLocaleString(LOCALE())}</span></div>`).join('')
+    ? h.slice(0, 6).map(e => `<div class="h-row"><img class="jeton${vCls(e.variant)}" src="${e.img}" alt="" style="width:26px;height:26px;filter:drop-shadow(0 0 4px ${e.glow})"><div>${jnH(e.name)}${vTag(e.variant)}<small>${ago(e.ts)}</small></div><span class="muted">1/${e.odds.toLocaleString(LOCALE())}</span></div>`).join('')
     : `<p class="empty">${t('hist_empty')}</p>`;
   renderLive();
 }
@@ -128,7 +128,7 @@ function drawLive() {
   const item = e => {
     const me = !e.pseudo || (mine && e.pseudo === ACC.pseudo), who = me ? t('you') : esc2(e.pseudo);
     const whoL = me || !e.pseudo ? who : `<a class="plink" href="#profil/${encodeURIComponent(e.pseudo)}">${who}</a>`;
-    return `<div class="lv">${me ? avatarHTML({ pseudo: ACC.pseudo || who, avatar: ACC.avatar }, 28) : avatarHTML({ pseudo: e.pseudo }, 28)}<span><b>${whoL}</b> <span class="muted">${t('got')}</span> ${jnH(e.name)} <span class="muted">· 1/${e.odds.toLocaleString(LOCALE())}</span></span><img class="jeton" src="${e.img}" alt="" style="width:24px;height:24px;filter:drop-shadow(0 0 4px ${e.glow})"></div>`;
+    return `<div class="lv">${me ? avatarHTML({ pseudo: ACC.pseudo || who, avatar: ACC.avatar }, 28) : avatarHTML({ pseudo: e.pseudo }, 28)}<span><b>${whoL}</b> <span class="muted">${t('got')}</span> ${jnH(e.name)}${vTag(e.variant)} <span class="muted">· 1/${e.odds.toLocaleString(LOCALE())}</span></span><img class="jeton${vCls(e.variant)}" src="${e.img}" alt="" style="width:24px;height:24px;filter:drop-shadow(0 0 4px ${e.glow})"></div>`;
   };
   $('live').innerHTML = h.length ? h.map(item).join('').repeat(h.length >= 6 ? 2 : 1) : `<span class="muted live-empty">${t('live_empty')}</span>`;
   $('live').classList.toggle('still', h.length < 6);

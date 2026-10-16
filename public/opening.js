@@ -35,8 +35,8 @@ const RARE = 1000; // à partir de 1/1000 : zoom plus fort et révélation plus 
 const tierOf = () => '235, 235, 255';
 const MYTHIC = 100000, GOD = 1000000; // mise en scène spéciale à partir de 1/100 000, et encore plus pour 1/1 000 000
 const hexRGB = h => [1, 3, 5].map(i => parseInt(h.slice(i, i + 2), 16)).join(', ');
-const jetonHTML = (j, size) =>
-  `<img class="jeton" src="${texOf(j)}" alt="${j.name}" style="width:${size}px;height:${size}px;filter:drop-shadow(0 0 ${Math.max(4, size / 8)}px ${j.glow})">`;
+const jetonHTML = (j, size, v = '') =>
+  `<img class="jeton${vCls(v)}" src="${texOf(j)}" alt="${j.name}" style="width:${size}px;height:${size}px;filter:drop-shadow(0 0 ${Math.max(4, size / 8)}px ${j.glow})">`;
 
 // Réglages de test (menu debug)
 const debug = { luck: 1, force: '' };
@@ -97,7 +97,7 @@ function wave() {
 const SAVE_KEY = 'takoras-session';
 let sess = null;
 function save() { try { sess ? localStorage.setItem(SAVE_KEY, JSON.stringify(sess)) : localStorage.removeItem(SAVE_KEY); } catch {} }
-function startSession(n, plan = null) { sess = { pull: current, total: n, idx: 0, results: [], cur: null, plan }; save(); }
+function startSession(n, plan = null, vars = null) { sess = { pull: current, total: n, idx: 0, results: [], rvars: [], cur: null, plan, vars }; save(); }
 function endSession() { sess = null; save(); }
 const seriesOf = () => SERIES[PULLS[sess.pull].name] || SERIES.Takoras;
 const findJeton = name => seriesOf().find(j => j.name === name);
@@ -108,17 +108,17 @@ function startOpening() {
   if (!sess.cur) {
     // Jeton tiré par le serveur (plan) ; sinon tirage local (tests admin « sans stock »)
     const result = (sess.plan && findJeton(sess.plan[sess.idx])) || draw(seriesOf());
-    sess.cur = { name: result.name, queue: steps(result.odds), shown: 1, phase: 'count' };
+    sess.cur = { name: result.name, variant: (sess.vars || [])[sess.idx] || '', queue: steps(result.odds), shown: 1, phase: 'count' };
     save();
   }
   const c = sess.cur, p = PULLS[sess.pull];
-  run = { result: findJeton(c.name), queue: c.queue, shown: c.shown, done: false };
+  run = { result: findJeton(c.name), variant: c.variant || '', queue: c.queue, shown: c.shown, done: false };
   $('op-tag').textContent = t('pull') + ' ' + p.name + (sess.total > 1 ? ` · ${sess.idx + 1}/${sess.total}` : '');
   $('op-odds').classList.remove('bump');
   if ($('op-price')) $('op-price').textContent = (p.price * sess.total).toLocaleString(LOCALE()); // ce bouton peut être réécrit par l'économie
   $('op-odds').textContent = '1/' + c.shown.toLocaleString(LOCALE());
   stopBg();
-  opening.classList.remove('hold', 'rare', 'revealed', 'recap', 'spinning', 'mythic', 'god', 'cinema');
+  opening.classList.remove('hold', 'rare', 'revealed', 'recap', 'spinning', 'mythic', 'god', 'cinema', 'v-gold', 'v-glitch', 'v-prism');
   setTier(c.shown);
   opCoin.className = 'op-coin';
   opCoin.innerHTML = `<div class="zoom"><div class="tilt3d"><div class="spin">${coin3D(MYSTERE, 'Jeton mystère')}</div><i class="glare"></i><i class="shine"></i>${'<b class="tw"></b>'.repeat(7)}</div></div>`;
@@ -197,11 +197,11 @@ function effects(v) {
 }
 
 // Fiche du jeton (stats provisoires : plus il est rare, plus elles sont hautes)
-function fillInfo(j) {
+function fillInfo(j, variant = '') {
   const lvl = Math.log10(j.odds) / 6; // 0 → 1 pour 1/1 → 1/1 000 000
   const stat = (k, base) => { const v = Math.round(base * (.35 + lvl * .65) * (.85 + Math.random() * .3)); return [k, v, Math.min(100, v / base * 100)]; };
-  $('op-name').innerHTML = jnH(j.name);
-  $('op-rarity').textContent = '1/' + j.odds.toLocaleString(LOCALE());
+  $('op-name').innerHTML = jnH(j.name) + vTag(variant);
+  $('op-rarity').innerHTML = '1/' + j.odds.toLocaleString(LOCALE()) + (variant ? ` <small>× ${t('v_' + variant)} 1/${fmt(VARIANTS[variant].odds)}</small>` : '');
   // Mêmes stats que dans l'inventaire (stables pour un même jeton)
   const S = statsOf(j.name, j.odds);
   sess.cur.stats = ['s_hp', 's_atk', 's_def', 's_spd'].map(k => [k, S[k], Math.min(100, S[k] / STAT_MAX[k] * 100)]);
@@ -354,7 +354,8 @@ function reveal(restored, quiet = false) {
     opening.classList.add('spinning');
     setTimeout(() => { if (run === r) opening.classList.remove('spinning'); }, lock);
   }
-  fillInfo(j);
+  fillInfo(j, r.variant);
+  if (r.variant) opening.classList.add('v-' + r.variant);
   opening.classList.toggle('rare', j.odds >= RARE);
   opening.classList.toggle('mythic', j.odds >= MYTHIC); // jeton animé : halo qui pulse, reflet qui passe, étincelles
   opening.classList.toggle('god', j.odds >= GOD);       // + couleurs arc-en-ciel
@@ -366,7 +367,7 @@ function reveal(restored, quiet = false) {
   r.revealedAt = performance.now();
   if (restored) return;
   sess.cur.phase = 'revealed';
-  sess.results.push(j.name);
+  sess.results.push(j.name); (sess.rvars ||= []).push(r.variant || '');
   save();
   if (!quiet) { sfx.reveal(j.odds); if (j.odds >= MYTHIC) sfx.impact(); } // après une cinématique, sa musique a déjà fait la révélation
   if (j.odds >= MYTHIC) {
@@ -380,7 +381,19 @@ function reveal(restored, quiet = false) {
     if (j.odds >= RARE) flash(.3, 350);
     setTimeout(() => { if (run === r) shake(j.odds >= RARE ? .8 : .45); }, 300); // impact à l'arrivée
   }
-  addToHistory(j);
+  addToHistory(j, r.variant);
+  if (r.variant) setTimeout(() => { if (run === r) variantFx(r.variant); }, 650); // jeton spécial : deuxième effet
+}
+
+// Variante (Doré, Glitch, Prisme) : bandeau qui claque, flash et étincelles à sa couleur, petit jingle
+function variantFx(v) {
+  const d = document.createElement('div');
+  d.className = 'v-pop v-' + v;
+  d.innerHTML = `<b>${t('v_' + v)}</b><small>1/${fmt(VARIANTS[v].odds)} · ×${VARIANTS[v].mult}</small>`;
+  opening.appendChild(d);
+  setTimeout(() => d.remove(), 2200);
+  flash(.35, 500); burst(v === 'prism' ? 40 : 24); shake(v === 'gold' ? .5 : 1);
+  sfx.upgrade(); if (v !== 'gold') setTimeout(() => sfx.reveal(v === 'prism' ? 100000 : 5000), 120);
 }
 
 // 1/1000 et plus : cinématique propre au jeton (cinema.js), puis la fiche normale prend le relais
@@ -436,11 +449,11 @@ function showRecap() {
   sess.recap = true;
   save();
   stopBg();
-  const list = sess.results.map(findJeton), best = list.reduce((a, b) => (b.odds > a.odds ? b : a));
+  const list = sess.results.map(findJeton), vars = sess.rvars || [], best = list.reduce((a, b) => (b.odds > a.odds ? b : a));
   opening.style.setProperty('--tier', hexRGB(best.glow));
   startBg(best);
   $('op-recap-grid').innerHTML = list.map((j, i) =>
-    `<div class="rc${j === best ? ' best' : ''}" style="--g:${hexRGB(j.glow)};animation-delay:${i * 45}ms">${j === best ? `<span class="rc-tag">${t('best')}</span>` : ''}${jetonHTML(j, 72)}<b>${jnH(j.name)}</b><small>1/${j.odds.toLocaleString(LOCALE())}</small></div>`).join('');
+    `<div class="rc${j === best ? ' best' : ''}" style="--g:${hexRGB(j.glow)};animation-delay:${i * 45}ms">${j === best ? `<span class="rc-tag">${t('best')}</span>` : ''}${jetonHTML(j, 72, vars[i])}<b>${jnH(j.name)}${vTag(vars[i])}</b><small>1/${j.odds.toLocaleString(LOCALE())}</small></div>`).join('');
   $('op-recap-tag').textContent = t('recap_tag', { n: sess.total });
   $('op-recap-title').textContent = t('recap_title', { n: sess.total });
   if (typeof ecoDecorate === 'function') ecoDecorate();
@@ -451,9 +464,9 @@ function showRecap() {
 // On ne peut quitter qu'à la fin (pour ne pas perdre les pulls achetés)
 function canClose() { return !sess || sess.recap || (sess.total === 1 && opening.classList.contains('revealed')); }
 
-function addToHistory(j) {
+function addToHistory(j, variant = '') {
   const serie = SERIES[PULLS[sess.pull].name] ? PULLS[sess.pull].name : 'Takoras';
-  if (accRecordPull(j, serie)) return renderHist(); // connecté : enregistré en ligne
+  if (accRecordPull({ ...j, variant }, serie)) return renderHist(); // connecté : enregistré en ligne
   const h = loadLocalHist();
   h.unshift({ name: j.name, odds: j.odds, glow: j.glow, img: texOf(j), ts: Date.now() });
   try { localStorage.setItem('takoras-hist', JSON.stringify(h.slice(0, 30))); } catch {}
@@ -488,7 +501,7 @@ addEventListener('keydown', e => {
   tap();
 });
 
-function buy(n, plan = null) { closeOpening(); startSession(n, plan); runTransition(); }
+function buy(n, plan = null, vars = null) { closeOpening(); startSession(n, plan, vars); runTransition(); }
 $('op-next').addEventListener('click', next);
 // Pendant un ×10 : un clic n'importe où sur l'écran passe au jeton suivant
 opening.addEventListener('click', e => {
@@ -546,10 +559,12 @@ function renderDebug() {
   $('dbg-luck').innerHTML = LUCKS.map(l => `<button class="${l === debug.luck ? 'on' : ''}" data-l="${l}">×${l}</button>`).join('');
   $('dbg-force').innerHTML = '<option value="">Aléatoire</option>' + SERIES.Takoras.map(j =>
     `<option value="${j.name}"${j.name === debug.force ? ' selected' : ''}>${jn(j.name)} · 1/${j.odds.toLocaleString(LOCALE())}</option>`).join('');
+  $('dbg-var').innerHTML = [['', 'Au hasard'], ['none', 'Aucune'], ['gold', 'Doré'], ['glitch', 'Glitch'], ['prism', 'Prisme']].map(([v, l]) => `<option value="${v}"${v === (debug.variant || '') ? ' selected' : ''}>${l}</option>`).join('');
   $('dbg-fx').innerHTML = FX.map(([n], i) => `<button data-f="${i}">${n}</button>`).join('');
 }
 $('dbg-luck').addEventListener('click', e => { const b = e.target.closest('button'); if (b) { debug.luck = +b.dataset.l; renderDebug(); } });
 $('dbg-force').addEventListener('change', e => { debug.force = e.target.value; });
+$('dbg-var').addEventListener('change', e => { debug.variant = e.target.value; });
 $('dbg-fx').addEventListener('click', e => {
   const b = e.target.closest('button'); if (!b) return;
   if (!opening.classList.contains('on')) { startSession(1); showOpening(); }

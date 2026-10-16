@@ -1561,3 +1561,66 @@ html.lock .chat-fab, html.lock .tabbar { display: none !important; }
 .si-pp { width: 76px; height: 76px; border-radius: 18px; image-rendering: pixelated; box-shadow: 0 8px 24px -8px rgba(var(--g), .8); }
 /* Bouton « Annuler » des fenêtres : il ferme comme la croix mais reste à sa place */
 .btn.jm-close { position: static !important; }
+
+/* ===================== Variantes : Doré, Glitch, Prisme ===================== */
+.vtag { display: inline-block; margin-left: 6px; padding: 2px 8px; border-radius: 99px; font-family: "Inter", sans-serif; font-size: 11px; font-weight: 800; letter-spacing: .06em;
+  text-transform: uppercase; vertical-align: middle; line-height: 1.5; white-space: nowrap; -webkit-text-fill-color: currentColor; }
+.vtag.v-gold { color: #3b2400; background: linear-gradient(135deg, #fef08a, #f59e0b 60%, #fde68a); box-shadow: 0 0 12px -2px rgba(250, 204, 21, .8); }
+.vtag.v-glitch { color: #fff; background: #0f172a; border: 1px solid #22d3ee; text-shadow: -1px 0 #ff2a6d, 1px 0 #22d3ee; animation: vGlitchTag 1.2s steps(1) infinite; }
+.vtag.v-prism { color: #1a0b2e; background: linear-gradient(90deg, #fca5a5, #fde68a, #86efac, #93c5fd, #c4b5fd, #f0abfc, #fca5a5); background-size: 300% 100%; animation: vPrismBg 3s linear infinite; }
+@keyframes vGlitchTag { 0%, 100% { transform: none; } 30% { transform: translateX(1px) skewX(-6deg); } 60% { transform: translateX(-1px); } }
+@keyframes vPrismBg { to { background-position: 300% 0; } }
+
+/* L'image du jeton prend l'effet de sa variante (en gardant l'effet doodle) */
+img.v-gold, .opening.v-gold .op-coin .spin img.face, .opening.v-gold .op-coin .spin img.back { animation: vGold .9s steps(1) infinite !important; }
+@keyframes vGold {
+  0% { filter: url(#dd0) sepia(1) saturate(2.6) hue-rotate(-12deg) brightness(1.1) drop-shadow(0 0 8px rgba(250, 204, 21, .85)); }
+  33% { filter: url(#dd1) sepia(1) saturate(2.6) hue-rotate(-12deg) brightness(1.18) drop-shadow(0 0 10px rgba(250, 204, 21, .95)); }
+  66% { filter: url(#dd2) sepia(1) saturate(2.6) hue-rotate(-12deg) brightness(1.1) drop-shadow(0 0 8px rgba(250, 204, 21, .85)); }
+}
+img.v-glitch, .opening.v-glitch .op-coin .spin img.face, .opening.v-glitch .op-coin .spin img.back { animation: vGlitch .6s steps(1) infinite !important; }
+@keyframes vGlitch {
+  0% { filter: url(#dd0) drop-shadow(-3px 0 0 rgba(255, 42, 109, .85)) drop-shadow(3px 0 0 rgba(34, 211, 238, .85)); }
+  25% { filter: url(#dd1) drop-shadow(2px 1px 0 rgba(255, 42, 109, .85)) drop-shadow(-2px 0 0 rgba(34, 211, 238, .85)) hue-rotate(25deg); }
+  50% { filter: url(#dd2) drop-shadow(-1px 0 0 rgba(255, 42, 109, .85)) drop-shadow(4px -1px 0 rgba(34, 211, 238, .85)) contrast(1.35); }
+  75% { filter: url(#dd0) drop-shadow(3px 0 0 rgba(255, 42, 109, .85)) drop-shadow(-3px 0 0 rgba(34, 211, 238, .85)) saturate(1.6); }
+}
+img.v-prism, .opening.v-prism .op-coin .spin img.face, .opening.v-prism .op-coin .spin img.back { animation: vPrism 2.4s linear infinite !important; }
+@keyframes vPrism {
+  0% { filter: saturate(1.7) hue-rotate(0deg) drop-shadow(0 0 10px rgba(240, 171, 252, .8)); }
+  50% { filter: saturate(1.7) hue-rotate(180deg) drop-shadow(0 0 14px rgba(147, 197, 253, .9)); }
+  100% { filter: saturate(1.7) hue-rotate(360deg) drop-shadow(0 0 10px rgba(240, 171, 252, .8)); }
+}
+html.reduce-fx img.v-glitch, html.reduce-fx img.v-prism { animation-duration: 6s !important; }
+.ic-v, .sc-v { position: absolute; top: 8px; left: 6px; z-index: 2; } .ic-v .vtag, .sc-v .vtag { margin: 0; font-size: 9px; padding: 1px 6px; }
+.ic:has(.v-gold) { border-color: rgba(250, 204, 21, .5); } .ic:has(.v-glitch) { border-color: rgba(34, 211, 238, .5); } .ic:has(.v-prism) { border-color: rgba(240, 171, 252, .6); }
+
+/* Ouverture : bandeau qui claque quand le jeton est une variante */
+.v-pop { position: absolute; left: 50%; top: 16%; translate: -50% 0; z-index: 30; display: flex; flex-direction: column; align-items: center; gap: 2px; pointer-events: none;
+  padding: 12px 30px; border-radius: 18px; animation: vPop 2.2s cubic-bezier(.2, 1.4, .4, 1) forwards; }
+.v-pop b { font-family: "Space Grotesk"; font-size: clamp(30px, 6vw, 52px); font-weight: 800; letter-spacing: .12em; text-transform: uppercase; }
+.v-pop small { font-weight: 700; letter-spacing: .1em; opacity: .85; }
+.v-pop.v-gold { color: #3b2400; background: linear-gradient(135deg, #fef08a, #f59e0b 60%, #fde68a); box-shadow: 0 0 60px rgba(250, 204, 21, .7); }
+.v-pop.v-glitch { color: #fff; background: #0b1020; border: 2px solid #22d3ee; text-shadow: -3px 0 #ff2a6d, 3px 0 #22d3ee; box-shadow: 0 0 60px rgba(34, 211, 238, .6); }
+.v-pop.v-prism { color: #1a0b2e; background: linear-gradient(90deg, #fca5a5, #fde68a, #86efac, #93c5fd, #c4b5fd, #f0abfc, #fca5a5); background-size: 300% 100%; animation: vPop 2.2s cubic-bezier(.2, 1.4, .4, 1) forwards, vPrismBg 1.5s linear infinite; box-shadow: 0 0 80px rgba(240, 171, 252, .8); }
+@keyframes vPop { 0% { opacity: 0; transform: scale(2.2) rotate(-6deg); } 12% { opacity: 1; transform: scale(1) rotate(-3deg); } 80% { opacity: 1; transform: scale(1) rotate(-3deg); } 100% { opacity: 0; transform: scale(.9) translateY(-20px) rotate(-3deg); } }
+.op-rarity small, #op-rarity small { font-size: .6em; opacity: .8; }
+
+/* Quêtes du jour (accueil) */
+.quests { display: flex; flex-direction: column; gap: 8px; margin-bottom: 18px; padding-bottom: 16px; border-bottom: 1px solid var(--border); }
+.q-head { display: flex; justify-content: space-between; align-items: baseline; gap: 8px; margin-bottom: 2px; }
+.q-head b { font-family: "Space Grotesk"; }
+.q-head small { font-size: 11px; font-variant-numeric: tabular-nums; }
+.q { position: relative; display: flex; flex-direction: column; gap: 6px; padding: 10px 12px; border-radius: 12px; background: rgba(255, 255, 255, .03); border: 1px solid var(--border); transition: border-color .3s, background .3s; }
+.q.ok:not(.claimed) { border-color: rgba(134, 239, 172, .5); background: rgba(34, 197, 94, .08); animation: qGlow 1.6s ease-in-out infinite; }
+@keyframes qGlow { 50% { box-shadow: 0 0 18px -4px rgba(134, 239, 172, .6); } }
+.q.claimed { opacity: .55; }
+.q-top { display: flex; justify-content: space-between; gap: 8px; font-size: 13px; }
+.q-rew { flex: none; font-weight: 700; font-size: 12px; color: #fde68a; display: inline-flex; align-items: center; gap: 4px; }
+.q-rew .piece { width: 14px; height: 14px; }
+.q-bar { position: relative; height: 14px; border-radius: 99px; background: rgba(255, 255, 255, .06); overflow: hidden; }
+.q-bar i { position: absolute; inset: 0 auto 0 0; border-radius: 99px; background: linear-gradient(90deg, #8b5cf6, #f97316); transition: width .6s cubic-bezier(.2, .9, .3, 1); }
+.q.ok .q-bar i { background: linear-gradient(90deg, #22c55e, #86efac); }
+.q-bar b { position: absolute; inset: 0; display: grid; place-items: center; font-size: 10px; font-weight: 700; text-shadow: 0 1px 2px #000; }
+.q-claim { align-self: flex-start; padding: 6px 14px !important; }
+.q-check { position: absolute; top: 8px; right: 10px; color: #86efac; font-weight: 800; }

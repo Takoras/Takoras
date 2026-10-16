@@ -20,7 +20,7 @@ function requireAccount() {
 // Ligne de la base → entrée d'historique (même forme que l'historique local)
 function rowToHist(r) {
   const j = (typeof SERIES !== 'undefined' && (SERIES[r.serie] || []).find(x => x.name === r.jeton)) || {};
-  return { name: r.jeton, odds: r.odds, glow: j.glow || '#ffffff', img: j.img || 'img/jetons/template.png', ts: Date.parse(r.created_at), pseudo: r.pseudo };
+  return { name: r.jeton, odds: r.odds, glow: j.glow || '#ffffff', img: j.img || 'img/jetons/template.png', ts: Date.parse(r.created_at), pseudo: r.pseudo, variant: r.variant || '' };
 }
 
 async function loadAccount(user) {
@@ -30,7 +30,7 @@ async function loadAccount(user) {
   if (user) {
     const [{ data: prof }, { data: rows }] = await Promise.all([
       sb.from('profiles').select('pseudo, avatar').eq('id', user.id).maybeSingle(),
-      sb.from('pulls').select('serie, jeton, odds, created_at').order('created_at', { ascending: false }).limit(30),
+      sb.from('pulls').select('serie, jeton, odds, variant, created_at').order('created_at', { ascending: false }).limit(30),
     ]);
     ACC.pseudo = prof?.pseudo || null; // null = pseudo pas encore choisi
     ACC.avatar = prof?.avatar || 'default';
@@ -47,7 +47,7 @@ async function loadAccount(user) {
 // Appelé à chaque jeton révélé. Renvoie true si le tirage part en ligne (sinon historique local).
 function accRecordPull(j, serie) {
   if (!ACC.user) return false;
-  ACC.hist.unshift({ name: j.name, odds: j.odds, glow: j.glow, img: j.img || 'img/jetons/template.png', ts: Date.now() });
+  ACC.hist.unshift({ name: j.name, odds: j.odds, glow: j.glow, img: j.img || 'img/jetons/template.png', ts: Date.now(), variant: j.variant || '' });
   ACC.hist = ACC.hist.slice(0, 30);
   renderLive(); boardSoon(); // déjà enregistré par le serveur au moment du tirage
   return true;

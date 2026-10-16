@@ -9,7 +9,7 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=Cinzel:wght@600;700&family=Cinzel+Decorative:wght@700&family=Space+Grotesk:wght@500;600;700&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="style.css?v=20261017j">
+<link rel="stylesheet" href="style.css?v=20261017k">
 </head>
 <body>
   <!-- Effet « doodle » : 3 légères déformations (turbulence) qui s'enchaînent pour faire vivre les pixel arts -->
@@ -91,6 +91,7 @@
       </div>
 
       <aside class="panel">
+        <div class="quests" id="quests" hidden></div>
         <div class="panel-head"><b data-i18n="history">Mon historique</b></div>
         <div id="hist"></div>
       </aside>
@@ -248,6 +249,7 @@
       <div class="mp-tab" data-tab="tests" hidden>
         <div class="mp-box"><h4>Luck (ton compte)</h4><div class="dbg-row" id="dbg-luck"></div></div>
         <div class="mp-box"><h4>Jeton forcé (ton compte)</h4><select id="dbg-force"></select></div>
+        <div class="mp-box"><h4>Variante forcée (ton compte)</h4><select id="dbg-var"></select></div>
         <div class="mp-box"><h4>Tester un effet</h4><div class="dbg-row" id="dbg-fx"></div></div>
         <button class="btn primary dbg-go" id="dbg-open">Ouvrir un pull de test (sans stock, non enregistré)</button>
       </div>
@@ -269,25 +271,26 @@
     </div>
   </div>
 
-  <script src="settings.js?v=20261017j"></script>
+  <script src="settings.js?v=20261017k"></script>
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.4/dist/umd/supabase.js"></script>
-  <script src="account.js?v=20261017j"></script>
-  <script src="sound.js?v=20261017j"></script>
-  <script src="app.js?v=20261017j"></script>
-  <script src="cinema.js?v=20261017j"></script>
-  <script src="transitions.js?v=20261017j"></script>
-  <script src="opening.js?v=20261017j"></script>
-  <script src="economy.js?v=20261017j"></script>
-  <script src="ui.js?v=20261017j"></script>
-  <script src="motion.js?v=20261017j"></script>
-  <script src="inventory.js?v=20261017j"></script>
-  <script src="shop.js?v=20261017j"></script>
-  <script src="info.js?v=20261017j"></script>
-  <script src="profile.js?v=20261017j"></script>
-  <script src="social.js?v=20261017j"></script>
-  <script src="battle-engine.js?v=20261017j"></script>
-  <script src="combat.js?v=20261017j"></script>
-  <script src="admin.js?v=20261017j"></script>
-  <script src="mobile.js?v=20261017j"></script>
+  <script src="account.js?v=20261017k"></script>
+  <script src="sound.js?v=20261017k"></script>
+  <script src="app.js?v=20261017k"></script>
+  <script src="cinema.js?v=20261017k"></script>
+  <script src="transitions.js?v=20261017k"></script>
+  <script src="opening.js?v=20261017k"></script>
+  <script src="economy.js?v=20261017k"></script>
+  <script src="ui.js?v=20261017k"></script>
+  <script src="motion.js?v=20261017k"></script>
+  <script src="inventory.js?v=20261017k"></script>
+  <script src="shop.js?v=20261017k"></script>
+  <script src="info.js?v=20261017k"></script>
+  <script src="profile.js?v=20261017k"></script>
+  <script src="social.js?v=20261017k"></script>
+  <script src="battle-engine.js?v=20261017k"></script>
+  <script src="combat.js?v=20261017k"></script>
+  <script src="quests.js?v=20261017k"></script>
+  <script src="admin.js?v=20261017k"></script>
+  <script src="mobile.js?v=20261017k"></script>
 </body>
 </html>

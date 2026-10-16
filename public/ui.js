@@ -3,7 +3,12 @@
 // ---------- Pièce (la monnaie)
 const PIECE = '<img class="piece" src="img/piece.png" alt="◆">';
 const money = n => `${fmt(n)} ${PIECE}`;
-const sellValue = odds => Math.max(1, Math.round(odds * .5)); // même règle que le serveur
+// Variantes : n'importe quel jeton peut sortir Doré (1/20), Glitch (1/200) ou Prisme (1/2000) — revente ×3, ×10, ×50
+const VARIANTS = { gold: { odds: 20, mult: 3, col: '250, 204, 21' }, glitch: { odds: 200, mult: 10, col: '34, 211, 238' }, prism: { odds: 2000, mult: 50, col: '240, 171, 252' } };
+const vTag = v => (VARIANTS[v] ? `<span class="vtag v-${v}">${t('v_' + v)}</span>` : '');
+const vCls = v => (VARIANTS[v] ? ' v-' + v : '');
+const vOdds = (odds, v) => odds * (VARIANTS[v]?.odds || 1); // rareté totale (jeton × variante)
+const sellValue = (odds, v) => Math.max(1, Math.round(odds * .5)) * (VARIANTS[v]?.mult || 1); // même règle que le serveur
 
 // ---------- Rareté et puissance (stables : un même jeton a toujours les mêmes stats)
 const TIER_NAMES = [[60, 'r_common'], [1000, 'r_rare'], [10000, 'r_epic'], [100000, 'r_legend'], [Infinity, 'r_myth']];
@@ -186,20 +191,20 @@ new MutationObserver(hydrateAvatars).observe(document.body, { childList: true, s
 
 // ---------- Aperçu d'un jeton (fenêtre) : grand jeton qui penche, rareté, valeur, puissance et stats
 const jm = $('jeton-modal');
-function openJeton(name, extra = '') {
+function openJeton(name, extra = '', variant = '') {
   const j = jetonOf(name), s = statsOf(j.name, j.odds);
   jm.style.setProperty('--g', hexRGB(j.glow));
   $('jm-card').onclick = null; $('jm-card').oninput = null; $('jm-card').onchange = null;
   $('jm-card').innerHTML = `
     <button class="set-close jm-close" aria-label="${t('close')}">✕</button>
-    <div class="jm-coin"><img src="${texOf(j)}" alt=""></div>
+    <div class="jm-coin"><img class="${vCls(variant)}" src="${texOf(j)}" alt=""></div>
     <div class="jm-info">
       <span class="tier t-${tierKey(j.odds)}">${t(tierKey(j.odds))}</span>
-      <h2>${jnH(j.name)}</h2>
-      <div class="jm-odds">1/${fmt(j.odds)}</div>
+      <h2>${jnH(j.name)} ${vTag(variant)}</h2>
+      <div class="jm-odds">1/${fmt(j.odds)}${variant ? ` <small class="muted">× ${t('v_' + variant)} 1/${fmt(VARIANTS[variant].odds)} = 1/${fmt(vOdds(j.odds, variant))}</small>` : ''}</div>
       <div class="jm-power">${t('power')} <b>${fmt(s.power)}</b></div>
       <div class="op-stats">${['s_hp', 's_atk', 's_def', 's_spd'].map(k => `<div class="stat"><span class="muted">${t(k)}</span><div class="bar"><i style="width:${Math.min(100, s[k] / STAT_MAX[k] * 100)}%"></i></div><b>${s[k]}</b></div>`).join('')}</div>
-      <div class="jm-val">${t('sell_value')} : ${money(sellValue(j.odds))}</div>
+      <div class="jm-val">${t('sell_value')} : ${money(sellValue(j.odds, variant))}</div>
       ${extra}
     </div>`;
   jm.classList.add('on');
@@ -249,6 +254,6 @@ function ask(text, { ok = t('confirm_ok'), danger = false, typed = '' } = {}) {
 
 // Messages d'erreur du serveur → texte
 const ERR = { not_enough_coins: 'err_coins', limit_reached: 'err_limit', potion_active: 'err_potion', stock_full: 'err_stock_full', owned: 'err_owned', not_in_shop: 'err_shop',
-  banned: 'err_banned', not_friends: 'err_not_friends', slow_down: 'err_slow', unknown_player: 'err_unknown', self: 'err_self', pseudo_taken: 'err_pseudo_taken', bad_pseudo: 'err_pseudo', pseudo_cooldown: 'err_pseudo_cd', deck_incomplete: 'err_deck', busy: 'err_busy', invite_expired: 'err_inv_exp', not_your_turn: 'err_turn',
+  banned: 'err_banned', not_friends: 'err_not_friends', slow_down: 'err_slow', unknown_player: 'err_unknown', self: 'err_self', pseudo_taken: 'err_pseudo_taken', bad_pseudo: 'err_pseudo', pseudo_cooldown: 'err_pseudo_cd', deck_incomplete: 'err_deck', quest_not_done: 'err_quest', busy: 'err_busy', invite_expired: 'err_inv_exp', not_your_turn: 'err_turn',
   code_invalid: 'err_code_invalid', code_expired: 'err_code_expired', code_used_up: 'err_code_used_up', code_already: 'err_code_already', bad_code: 'err_bad_code' };
 const errText = e => t(Object.entries(ERR).find(([k]) => e?.message?.includes(k))?.[1] || 'err_generic');

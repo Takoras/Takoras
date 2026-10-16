@@ -36,6 +36,7 @@ function applyState(st) {
   eco.last = Date.now() - (eco.step / 1000 - st.next_in) * 1000;
   eco.potions = st.potions || []; eco.luck = +st.luck || 1; eco.fast_left = st.fast_left || 0; eco.synced = Date.now();
   ACC.isAdmin = !!st.admin;
+  if (typeof questsSoon === 'function') questsSoon(); // les quêtes avancent après chaque action
   const bb = $('ban-bar'); bb.hidden = !st.banned; bb.textContent = st.banned ? '⛔ ' + t('banned_bar') : '';
   if (typeof renderAdminBtn === 'function') renderAdminBtn();
   render();
@@ -55,11 +56,11 @@ async function openPulls(n) {
   const count = n === 'all' ? eco.stock : Math.min(1, eco.stock);
   if (!count) return sfx.deny();
   opening_busy = true;
-  const { data, error } = await sb.rpc('take_pulls', { n: count, force: ACC.isAdmin ? debug.force || null : null, luck: ACC.isAdmin ? debug.luck : 1 });
+  const { data, error } = await sb.rpc('take_pulls', { n: count, force: ACC.isAdmin ? debug.force || null : null, luck: ACC.isAdmin ? debug.luck : 1, p_variant: ACC.isAdmin ? debug.variant || null : null });
   opening_busy = false;
   if (error) { sfx.deny(); return ecoSync(); }
   applyState(data.state);
-  buy(data.results.length, data.results);
+  buy(data.results.length, data.results, data.variants || null);
 }
 
 async function upgrade() {
