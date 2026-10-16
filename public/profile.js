@@ -28,7 +28,7 @@ async function renderProfile(pseudo) {
       <div class="prof-banner${p.banner ? '' : ' none'}" id="prof-banner">${p.banner ? '' : mine ? `<span class="muted">${t('no_banner')}</span>` : ''}</div>
       <div class="prof-head">
         <div class="prof-pp">${avatarHTML(p, 104)}</div>
-        <div class="prof-id"><h2>${esc(p.pseudo)}</h2><p class="muted">${p.bio ? esc(p.bio) : mine ? t('bio_empty_me') : ''}</p></div>
+        <div class="prof-id"><h2>${esc(p.pseudo)} <small class="prof-num">#${String(p.num).padStart(6, '0')}</small></h2><p class="muted">${p.bio ? esc(p.bio) : mine ? t('bio_empty_me') : ''}</p></div>
         ${mine ? `<button class="btn ghost" id="prof-edit">✏️ ${t('edit_profile')}</button>` : '<div class="prof-fr" id="prof-fr"></div>'}
       </div>
       <div class="prof-stats">
@@ -109,7 +109,8 @@ async function pickShowcase(slot) {
 
 // Modifier le profil : bio, et bannière parmi celles achetées. Les photos de profil arrivent bientôt.
 function editProfile() {
-  const p = PROF, st = { banner: p.banner, bio: p.bio };
+  const p = PROF, st = { banner: p.banner, bio: p.bio, pseudo: p.pseudo };
+  const canRename = p.pseudo_free || !p.pseudo_next;
   const card = $('jm-card');
   jm.style.setProperty('--g', '139, 92, 246');
   card.onclick = card.oninput = card.onchange = null;
@@ -118,6 +119,8 @@ function editProfile() {
       <button class="set-close jm-close" aria-label="${t('close')}">✕</button>
       <div class="pe">
         <h2>${t('edit_profile')}</h2>
+        <h4>${t('acc_pseudo')} <small class="muted">${p.pseudo_free ? t('pseudo_free') : canRename ? t('pseudo_month') : t('pseudo_next', { d: new Date(p.pseudo_next).toLocaleDateString(LOCALE()) })}</small></h4>
+        <input class="adm-in pe-pseudo" id="pe-pseudo" maxlength="16" value="${esc(st.pseudo)}" ${canRename ? '' : 'disabled'} autocomplete="off">
         <h4>${t('pe_bio')} <small class="muted" id="pe-count">${st.bio.length}/120</small></h4>
         <textarea class="adm-in pe-bio" id="pe-bio" maxlength="120" rows="2">${esc(st.bio)}</textarea>
         <h4>${t('pe_banner')}</h4>
@@ -131,12 +134,23 @@ function editProfile() {
   };
   draw();
   jm.classList.add('on');
-  card.oninput = e => { if (e.target.id === 'pe-bio') { st.bio = e.target.value; $('pe-count').textContent = st.bio.length + '/120'; } };
+  card.oninput = e => { if (e.target.id === 'pe-pseudo') st.pseudo = e.target.value.trim(); if (e.target.id === 'pe-bio') { st.bio = e.target.value; $('pe-count').textContent = st.bio.length + '/120'; } };
   card.onclick = async e => {
     const b = e.target.closest('[data-b]');
     if (b) { st.banner = b.dataset.b || null; return draw(); }
     if (e.target.closest('#pe-save')) {
-      if (await saveProfile({ p_banner: st.banner, p_bio: st.bio.trim() })) { jm.classList.remove('on'); sfx.upgrade(); toast(t('profile_saved')); renderProfile(ACC.pseudo); }
+      // nouveau pseudo : on confirme (il ne pourra plus changer avant 30 jours)
+      let name = ACC.pseudo;
+      if (canRename && st.pseudo !== p.pseudo) {
+        if (!confirm(t(p.pseudo_free ? 'pseudo_confirm_free' : 'pseudo_confirm', { n: st.pseudo }))) return;
+        const { error } = await sb.rpc('change_pseudo', { p: st.pseudo });
+        if (error) { sfx.deny(); return toast(errText(error), true); }
+        name = ACC.pseudo = st.pseudo; renderAccBtn();
+      }
+      if (await saveProfile({ p_banner: st.banner, p_bio: st.bio.trim() })) {
+        jm.classList.remove('on'); sfx.upgrade(); toast(t('profile_saved'));
+        if (name !== p.pseudo) location.hash = '#profil/' + encodeURIComponent(name); else renderProfile(name);
+      }
     }
   };
 }
