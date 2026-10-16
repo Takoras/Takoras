@@ -1231,3 +1231,14 @@ html.reduce-fx .goth { animation: none; }
 }
 .bu-hp { overflow: visible; }
 .bu-hp s { border-radius: 0 99px 99px 0; }
+
+/* Doodle aussi en combat : les filtres d'état (choisi, gelé, visé) passent par --df pour se cumuler avec la déformation */
+.bu-img { --df: drop-shadow(0 0 14px rgba(var(--g), .55)); }
+.bu.sel .bu-img { --df: drop-shadow(0 0 22px rgba(var(--g), .95)) brightness(1.1); }
+.foes .bu.can:not(.tgt):hover .bu-img { --df: drop-shadow(0 0 18px rgba(248, 113, 113, .8)); }
+.bu.frozen .bu-img { --df: drop-shadow(0 0 16px rgba(125, 211, 252, .9)) grayscale(1) sepia(1) hue-rotate(165deg) saturate(2.2) brightness(1.15); }
+.cb-coin img { --df: drop-shadow(0 0 14px rgba(var(--g), .6)); }
+.bi-head img, .bt-abil img { --df: drop-shadow(0 0 10px rgba(var(--g), .6)); }
+.bt-end-row img, .cb-cx img { --df: saturate(1); }
+.bu-img, .cb-coin img, .bi-head img, .bt-abil img, .bt-end-row img { filter: var(--df); animation: doodle .9s steps(1) infinite; }
+html.reduce-fx .bu-img, html.reduce-fx .cb-coin img, html.reduce-fx .bi-head img, html.reduce-fx .bt-abil img, html.reduce-fx .bt-end-row img { animation: none; }
