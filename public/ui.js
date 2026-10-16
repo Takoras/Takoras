@@ -166,7 +166,7 @@ function openJeton(name, extra = '') {
     <div class="jm-coin"><img src="${texOf(j)}" alt=""></div>
     <div class="jm-info">
       <span class="tier t-${tierKey(j.odds)}">${t(tierKey(j.odds))}</span>
-      <h2>${esc(jn(j.name))}</h2>
+      <h2>${jnH(j.name)}</h2>
       <div class="jm-odds">1/${fmt(j.odds)}</div>
       <div class="jm-power">${t('power')} <b>${fmt(s.power)}</b></div>
       <div class="op-stats">${['s_hp', 's_atk', 's_def', 's_spd'].map(k => `<div class="stat"><span class="muted">${t(k)}</span><div class="bar"><i style="width:${Math.min(100, s[k] / { s_hp: 500, s_atk: 120, s_def: 120, s_spd: 100 }[k] * 100)}%"></i></div><b>${s[k]}</b></div>`).join('')}</div>

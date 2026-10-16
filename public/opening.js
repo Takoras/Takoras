@@ -19,10 +19,10 @@ const SERIES = {
     { name: 'Astra', odds: 10000, glow: '#22d3ee' },
     { name: 'Kraïos', odds: 25000, glow: '#2563eb' },
     { name: 'Chronos', odds: 50000, glow: '#facc15' },
-    { name: 'Takoras Prime', odds: 100000, glow: '#f0abfc' },
+    { name: 'Néphéris', odds: 100000, glow: '#f0abfc' },
     { name: 'Zénith', odds: 250000, glow: '#e2e8f0' },
     { name: 'Oblivion', odds: 500000, glow: '#fb7185' },
-    { name: 'Takoras Ω', odds: 1000000, glow: '#ffffff' },
+    { name: 'Takoras', odds: 1000000, glow: '#ffffff' },
   ],
 };
 const SKIP = 1 / 5; // environ 1 clic sur 5 saute discrètement une étape
@@ -200,7 +200,7 @@ function effects(v) {
 function fillInfo(j) {
   const lvl = Math.log10(j.odds) / 6; // 0 → 1 pour 1/1 → 1/1 000 000
   const stat = (k, base) => { const v = Math.round(base * (.35 + lvl * .65) * (.85 + Math.random() * .3)); return [k, v, Math.min(100, v / base * 100)]; };
-  $('op-name').textContent = jn(j.name);
+  $('op-name').innerHTML = jnH(j.name);
   $('op-rarity').textContent = '1/' + j.odds.toLocaleString(LOCALE());
   // Mêmes stats que dans l'inventaire (stables pour un même jeton)
   const S = statsOf(j.name, j.odds);
@@ -431,7 +431,7 @@ function showRecap() {
   opening.style.setProperty('--tier', hexRGB(best.glow));
   startBg(best);
   $('op-recap-grid').innerHTML = list.map((j, i) =>
-    `<div class="rc${j === best ? ' best' : ''}" style="--g:${hexRGB(j.glow)};animation-delay:${i * 45}ms">${j === best ? `<span class="rc-tag">${t('best')}</span>` : ''}${jetonHTML(j, 72)}<b>${jn(j.name)}</b><small>1/${j.odds.toLocaleString(LOCALE())}</small></div>`).join('');
+    `<div class="rc${j === best ? ' best' : ''}" style="--g:${hexRGB(j.glow)};animation-delay:${i * 45}ms">${j === best ? `<span class="rc-tag">${t('best')}</span>` : ''}${jetonHTML(j, 72)}<b>${jnH(j.name)}</b><small>1/${j.odds.toLocaleString(LOCALE())}</small></div>`).join('');
   $('op-recap-tag').textContent = t('recap_tag', { n: sess.total });
   $('op-recap-title').textContent = t('recap_title', { n: sess.total });
   if (typeof ecoDecorate === 'function') ecoDecorate();

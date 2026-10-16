@@ -92,7 +92,7 @@ function drawInventory() {
       ${x.ids.length > 1 ? `<span class="ic-n">×${x.ids.length}</span>` : ''}
       ${x.shown ? `<span class="ic-lock" title="${t('in_showcase')}">📌</span>` : locked ? '<span class="ic-lock" title="🔒">🔒</span>' : ''}
       <img src="${texOf(j)}" alt="">
-      <b>${esc(jn(x.name))}</b>
+      <b>${jnH(x.name)}</b>
       <small><span class="t-${tierKey(x.odds)}">1/${fmt(x.odds)}</span> · ⚡${fmt(s.power)}</small>
       ${INV.selecting && x.free.length ? `<div class="ic-step"><button data-d="-1">−</button><span>${q}/${x.free.length}</span><button data-d="1">+</button></div>` : ''}
     </div>`;

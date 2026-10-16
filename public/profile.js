@@ -33,7 +33,7 @@ async function renderProfile(pseudo) {
       </div>
       <div class="prof-stats">
         <div><b>${fmt(p.pulls)}</b><span>${t('st_pulls')}</span></div>
-        <div><b>${best ? esc(jn(best.name)) : '—'}</b><span>${t('st_best')}${p.best ? ' · 1/' + fmt(p.best) : ''}</span></div>
+        <div><b>${best ? jnH(best.name) : '—'}</b><span>${t('st_best')}${p.best ? ' · 1/' + fmt(p.best) : ''}</span></div>
         <div><b>${p.collection}/${N_JETONS()}</b><span>${t('st_collec')}</span></div>
         <div><b>${fmt(p.owned)}</b><span>${t('st_owned')}</span></div>
       </div>
@@ -42,7 +42,7 @@ async function renderProfile(pseudo) {
         const s = p.showcase[i];
         if (!s) return `<div class="sc empty${mine ? ' can' : ''}" data-slot="${i}">${mine ? '+' : ''}</div>`;
         const j = jetonOf(s.jeton);
-        return `<div class="sc" data-slot="${i}" data-n="${esc(s.jeton)}" style="--g:${hexRGB(j.glow)}"><img src="${texOf(j)}" alt=""><b>${esc(jn(s.jeton))}</b><small>1/${fmt(s.odds)}</small></div>`;
+        return `<div class="sc" data-slot="${i}" data-n="${esc(s.jeton)}" style="--g:${hexRGB(j.glow)}"><img src="${texOf(j)}" alt=""><b>${jnH(s.jeton)}</b><small>1/${fmt(s.odds)}</small></div>`;
       }).join('')}</div>
       <p class="muted small">${t('joined', { d: new Date(p.joined).toLocaleDateString(LOCALE()) })}</p>
       ${mine ? `
@@ -81,7 +81,7 @@ async function pickShowcase(slot) {
     l.sort(st.sort === 'name' ? (a, b) => jn(a.name).localeCompare(jn(b.name)) : (a, b) => b.odds - a.odds);
     card.querySelector('.pk-list').innerHTML = l.map(x => {
       const j = jetonOf(x.name), id = x.ids.find(i => !used.has(i));
-      return `<button class="pk${id ? '' : ' off'}" data-id="${id || ''}" style="--g:${hexRGB(j.glow)}"><img src="${texOf(j)}" alt=""><b>${esc(jn(x.name))}</b><small>1/${fmt(x.odds)}${x.ids.length > 1 ? ' · ×' + x.ids.length : ''}</small></button>`;
+      return `<button class="pk${id ? '' : ' off'}" data-id="${id || ''}" style="--g:${hexRGB(j.glow)}"><img src="${texOf(j)}" alt=""><b>${jnH(x.name)}</b><small>1/${fmt(x.odds)}${x.ids.length > 1 ? ' · ×' + x.ids.length : ''}</small></button>`;
     }).join('') || `<p class="muted">${t('inv_empty')}</p>`;
   };
   card.innerHTML = `

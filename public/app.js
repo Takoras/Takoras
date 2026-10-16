@@ -107,7 +107,7 @@ const esc2 = s => String(s).replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;
 function renderHist() {
   const h = loadHist();
   $('hist').innerHTML = h.length
-    ? h.slice(0, 6).map(e => `<div class="h-row"><img class="jeton" src="${e.img}" alt="" style="width:26px;height:26px;filter:drop-shadow(0 0 4px ${e.glow})"><div>${jn(e.name)}<small>${ago(e.ts)}</small></div><span class="muted">1/${e.odds.toLocaleString(LOCALE())}</span></div>`).join('')
+    ? h.slice(0, 6).map(e => `<div class="h-row"><img class="jeton" src="${e.img}" alt="" style="width:26px;height:26px;filter:drop-shadow(0 0 4px ${e.glow})"><div>${jnH(e.name)}<small>${ago(e.ts)}</small></div><span class="muted">1/${e.odds.toLocaleString(LOCALE())}</span></div>`).join('')
     : `<p class="empty">${t('hist_empty')}</p>`;
   renderLive();
 }
@@ -128,7 +128,7 @@ function drawLive() {
   const item = e => {
     const me = !e.pseudo || (mine && e.pseudo === ACC.pseudo), who = me ? t('you') : esc2(e.pseudo);
     const whoL = me || !e.pseudo ? who : `<a class="plink" href="#profil/${encodeURIComponent(e.pseudo)}">${who}</a>`;
-    return `<div class="lv"><span class="av">${who[0].toUpperCase()}</span><span><b>${whoL}</b> <span class="muted">${t('got')}</span> ${jn(e.name)} <span class="muted">· 1/${e.odds.toLocaleString(LOCALE())}</span></span><img class="jeton" src="${e.img}" alt="" style="width:24px;height:24px;filter:drop-shadow(0 0 4px ${e.glow})"></div>`;
+    return `<div class="lv"><span class="av">${who[0].toUpperCase()}</span><span><b>${whoL}</b> <span class="muted">${t('got')}</span> ${jnH(e.name)} <span class="muted">· 1/${e.odds.toLocaleString(LOCALE())}</span></span><img class="jeton" src="${e.img}" alt="" style="width:24px;height:24px;filter:drop-shadow(0 0 4px ${e.glow})"></div>`;
   };
   $('live').innerHTML = h.length ? h.map(item).join('').repeat(h.length >= 6 ? 2 : 1) : `<span class="muted live-empty">${t('live_empty')}</span>`;
   $('live').classList.toggle('still', h.length < 6);
@@ -143,7 +143,7 @@ function boardVal(r) {
   const n = Number(r.value).toLocaleString(LOCALE()), id = KINDS[kind][1];
   if (id === 'gain') {
     const j = rowToHist({ serie: 'Takoras', jeton: r.jeton, odds: r.odds, created_at: 0 });
-    return `<span class="gain"><img class="jeton" src="${j.img}" alt="" style="filter:drop-shadow(0 0 4px ${j.glow})">${esc2(jn(r.jeton))} · 1/${n}</span>`;
+    return `<span class="gain"><img class="jeton" src="${j.img}" alt="" style="filter:drop-shadow(0 0 4px ${j.glow})">${jnH(r.jeton)} · 1/${n}</span>`;
   }
   if (id === 'collec') return t('u_collec', { n, t: SERIES.Takoras.length });
   return t(id === 'pulls' ? 'u_pulls' : 'u_tokens', { n });

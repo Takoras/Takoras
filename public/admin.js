@@ -68,7 +68,7 @@ async function admDetail() {
       <div class="adm-quick"><button data-c="1000">+1 000</button><button data-c="10000">+10 000</button><button data-c="100000">+100 000</button><button data-p="5">+5 pulls</button><button data-p="10">+10 pulls</button></div>
     </div>
     <div class="ad-box"><h4>Donner un jeton</h4>
-      <div class="ad-jetons">${SERIES.Takoras.map(j => `<button data-j="${esc(j.name)}" title="${esc(jn(j.name))} · 1/${fmt(j.odds)}" style="--g:${hexRGB(j.glow)}"><img src="${texOf(j)}" alt=""><small>${esc(jn(j.name))}</small></button>`).join('')}</div>
+      <div class="ad-jetons">${SERIES.Takoras.map(j => `<button data-j="${esc(j.name)}" title="${jnH(j.name)} · 1/${fmt(j.odds)}" style="--g:${hexRGB(j.glow)}"><img src="${texOf(j)}" alt=""><small>${jnH(j.name)}</small></button>`).join('')}</div>
     </div>
     <div class="ad-box"><h4>Donner un objet</h4><div class="adm-quick">${ITEMS.map(([id, l]) => `<button data-it="${id}">${l}</button>`).join('')}</div></div>
     <div class="ad-box mod"><h4>Modération ${p.banned ? '<span class="ad-banned">⛔ banni</span>' : ''}</h4>
@@ -86,7 +86,7 @@ async function admDetail() {
       <div class="adm-quick"><button id="adm-items-save">Enregistrer les quantités</button><button class="red" id="adm-items-clear">Vider tous ses objets</button></div>
     </div>
     <div>
-      <div class="ad-box"><h4>Derniers tirages</h4><div class="ad-recent">${p.recent.map(r => `<div><span>${esc(jn(r.jeton))} <small class="muted">1/${fmt(r.odds)}</small></span><small class="muted">${new Date(r.at).toLocaleString(LOCALE(), { day: '2-digit', month: '2-digit', hour: '2-digit', minute: '2-digit' })}${r.sold ? ' · vendu' : ''}</small></div>`).join('') || '<p class="muted">Aucun</p>'}</div></div>
+      <div class="ad-box"><h4>Derniers tirages</h4><div class="ad-recent">${p.recent.map(r => `<div><span>${jnH(r.jeton)} <small class="muted">1/${fmt(r.odds)}</small></span><small class="muted">${new Date(r.at).toLocaleString(LOCALE(), { day: '2-digit', month: '2-digit', hour: '2-digit', minute: '2-digit' })}${r.sold ? ' · vendu' : ''}</small></div>`).join('') || '<p class="muted">Aucun</p>'}</div></div>
     </div>
     <button class="adm-danger" id="adm-reset">Remettre ${esc(p.pseudo || 'ce joueur')} à zéro</button>`;
   $('ad-banner').appendChild(bannerCanvas(p.banner));
@@ -103,7 +103,7 @@ async function admColl() {
   const g = {};
   data.forEach(x => { (g[x.jeton] ||= { jeton: x.jeton, odds: x.odds, all: [], locked: 0, sc: 0 }); g[x.jeton].all.push(x); if (x.locked) g[x.jeton].locked++; if (x.showcased) g[x.jeton].sc++; });
   const list = Object.values(g).sort((a, b) => b.odds - a.odds);
-  $('adm-coll').innerHTML = list.map(x => `<div class="ad-cr" data-g="${esc(x.jeton)}"><img src="${texOf(jetonOf(x.jeton))}" alt=""><span><b>${esc(jn(x.jeton))}</b> <small class="muted">1/${fmt(x.odds)}</small></span>
+  $('adm-coll').innerHTML = list.map(x => `<div class="ad-cr" data-g="${esc(x.jeton)}"><img src="${texOf(jetonOf(x.jeton))}" alt=""><span><b>${jnH(x.jeton)}</b> <small class="muted">1/${fmt(x.odds)}</small></span>
     <span class="ad-cn">×${x.all.length}${x.locked ? ` · 🔒${x.locked}` : ''}${x.sc ? ` · 📌${x.sc}` : ''}</span>
     <button data-op="rm1" title="Retirer 1">−1</button><button data-op="rmall" class="red" title="Tout retirer">Tout retirer</button>
     <button data-op="${x.locked === x.all.length ? 'unlock' : 'lock'}">${x.locked === x.all.length ? '🔓' : '🔒'}</button></div>`).join('') || '<p class="muted">Aucun jeton</p>';
