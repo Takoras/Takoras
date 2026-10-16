@@ -995,6 +995,21 @@ html.reduce-fx .op-coin .spin img.face, html.reduce-fx .op-coin .spin img.back {
 .prof-id h2 { text-shadow: 0 2px 4px rgba(0, 0, 0, .85), 0 0 18px rgba(0, 0, 0, .6); }
 .prof-num { text-shadow: 0 1px 3px rgba(0, 0, 0, .9); }
 
-/* Jeton ultime « Takoras » : police gothique blanche et lumineuse */
-.goth { font-family: "UnifrakturMaguntia", serif; font-weight: 400; letter-spacing: .02em; color: #fff; text-shadow: 0 0 10px rgba(255, 255, 255, .55), 0 0 2px rgba(255, 255, 255, .9); }
-.op-name .goth, #op-name .goth, .jm-info h2 .goth { font-size: 1.15em; }
+/* Jeton ultime « Takoras » : lettres angéliques (Cinzel), halo blanc doux, et de temps en temps
+   un petit glitch : la police change une fraction de seconde avec un léger décalage doré / bleu ciel */
+.goth { display: inline-block; font-family: "Cinzel", serif; font-weight: 700; letter-spacing: .08em; color: #fff;
+  text-shadow: 0 0 8px rgba(255, 255, 255, .7), 0 0 22px rgba(254, 240, 200, .45); animation: angel 5.5s infinite; }
+@keyframes angel {
+  0%, 86%, 100% { font-family: "Cinzel", serif; transform: none; opacity: 1; filter: none;
+    text-shadow: 0 0 8px rgba(255, 255, 255, .7), 0 0 22px rgba(254, 240, 200, .45); }
+  88% { font-family: "Cinzel Decorative", serif; transform: translateX(1px) skewX(-4deg); opacity: .85;
+    text-shadow: -2px 0 rgba(253, 224, 71, .7), 2px 0 rgba(125, 211, 252, .7), 0 0 14px rgba(255, 255, 255, .8); }
+  90% { font-family: "Cinzel", serif; transform: translateX(-1px); opacity: 1;
+    text-shadow: 2px 0 rgba(253, 224, 71, .5), -2px 0 rgba(125, 211, 252, .5), 0 0 18px rgba(255, 255, 255, .9); }
+  92% { font-family: "Cinzel Decorative", serif; transform: skewX(3deg); filter: blur(.4px) brightness(1.3);
+    text-shadow: 0 0 6px #fff, 0 0 26px rgba(254, 240, 200, .8); }
+  94% { font-family: "Cinzel", serif; transform: none; filter: none;
+    text-shadow: 0 0 10px rgba(255, 255, 255, .9), 0 0 30px rgba(254, 240, 200, .6); }
+}
+html.reduce-fx .goth { animation: none; }
+.op-name .goth, #op-name .goth, .jm-info h2 .goth { font-size: .95em; }
