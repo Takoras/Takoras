@@ -973,3 +973,13 @@ html.reduce-fx .op-coin .spin img.face, html.reduce-fx .op-coin .spin img.back {
 .ads-ic { width: 60px; } .ads-ic .pix, .ads-ic img { max-width: 44px; max-height: 44px; width: auto !important; height: auto !important; image-rendering: pixelated; }
 .ads-ic .si-banner { max-width: 56px; border-radius: 4px; }
 .ads-sw input { width: 18px; height: 18px; accent-color: var(--accent); }
+
+/* Prix modifié par l'admin */
+.si-deal { position: absolute; top: 12px; left: 12px; padding: 3px 9px; border-radius: 99px; font-size: 12px; font-weight: 700; background: #16a34a; color: #fff; box-shadow: 0 0 18px -2px rgba(34, 197, 94, .8); animation: annPulse 1.4s ease-in-out infinite; }
+.si-deal.up { background: #dc2626; box-shadow: 0 0 18px -2px rgba(239, 68, 68, .8); }
+.si-btn s { opacity: .6; font-weight: 500; margin-right: 2px; }
+.price-notif.down { border-color: rgba(34, 197, 94, .6); } .price-notif.up { border-color: rgba(249, 115, 22, .6); }
+.price-notif p b { color: var(--text); } .price-notif p s { opacity: .7; }
+.pn-ic { width: 44px; height: 44px; flex: none; display: grid; place-items: center; }
+.pn-ic .pix, .pn-ic img { max-width: 40px; max-height: 40px; width: auto !important; height: auto !important; image-rendering: pixelated; }
+.ads-tmp { color: #fdba74; }

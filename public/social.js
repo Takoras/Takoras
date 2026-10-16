@@ -89,6 +89,24 @@ sb.channel('annonces')
   .subscribe();
 loadAnnouncements();
 
+// Prix changé par l'admin (seulement pour la boutique actuelle) : notif chez tout le monde, clic = boutique
+sb.channel('prix')
+  .on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'price_changes' }, async ({ new: c }) => {
+    const { data } = await sb.rpc('shop_today');
+    const it = data?.items?.find(x => x.id === c.item);
+    if (!$('page-shop').hidden) renderShop();
+    if (!it) return;
+    sfx.message();
+    const down = c.new_price < c.old_price, n = document.createElement('button');
+    n.className = 'chat-notif price-notif' + (down ? ' down' : ' up');
+    n.innerHTML = `<div class="pn-ic">${itemIcon(it)}</div><div><b>💰 ${t(down ? 'price_down' : 'price_up')}</b><p>${esc(itemText(it)[0])} : <s>${fmt(c.old_price)}</s> → <b>${money(c.new_price)}</b></p></div>`;
+    n.onclick = () => { n.remove(); location.hash = '#boutique'; };
+    $('chat-notifs').appendChild(n);
+    setTimeout(() => n.classList.add('out'), 7000);
+    setTimeout(() => n.remove(), 7400);
+  })
+  .subscribe();
+
 // =====================================================================
 // Amis et chat
 // =====================================================================

@@ -36,14 +36,16 @@ function effectsHTML() {
 const shopLeft = () => Math.max(0, SHOP.reset_in - Math.round((Date.now() - SHOP.loaded) / 1000));
 
 function cardHTML(it) {
+  const changed = it.base_price != null && it.price !== it.base_price, pct = changed ? Math.round((it.price / it.base_price - 1) * 100) : 0;
   const [name, desc] = itemText(it), left = Math.max(0, it.stock - it.bought), out = it.owned || left <= 0;
   const status = it.owned ? `<span class="si-stock ok">✓ ${t('unlocked_b')}</span>`
     : left > 0 ? `<span class="si-stock">${t('stock_n', { n: left })}</span>` : `<span class="si-stock none">${t('sold_out')}</span>`;
   const btn = it.owned ? `<button class="btn ghost si-btn" disabled>✓ ${t('owned')}</button>`
     : out ? `<button class="btn ghost si-btn" disabled>${t('back_in')} <b class="si-timer">${hms(shopLeft())}</b></button>`
-    : `<button class="btn primary si-btn${ACC.user && eco.coins < it.price ? ' poor' : ''}" data-buy="${it.id}" ${ACC.user ? '' : 'disabled'}>${t('buy')} · ${money(it.price)}</button>`;
+    : `<button class="btn primary si-btn${ACC.user && eco.coins < it.price ? ' poor' : ''}" data-buy="${it.id}" ${ACC.user ? '' : 'disabled'}>${t('buy')} · ${changed ? `<s>${fmt(it.base_price)}</s> ` : ''}${money(it.price)}</button>`;
   return `<div class="si${out ? ' out' : ''}${it.kind === 'potion' && it.data.mult >= 10 ? ' epic' : ''}" data-id="${it.id}" style="--g:${glowOf(it)}">
     ${status}
+    ${changed ? `<span class="si-deal${pct > 0 ? ' up' : ''}">${pct > 0 ? '+' : ''}${pct}%</span>` : ''}
     <div class="si-icon">${itemIcon(it)}</div>
     <b>${name}</b><p class="muted">${desc}</p>
     ${btn}

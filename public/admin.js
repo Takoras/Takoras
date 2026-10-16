@@ -232,7 +232,7 @@ async function adsLoad() {
   const name = it => itemText(it)[0];
   $('ads-list').innerHTML = `<table><thead><tr><th></th><th>Objet</th><th>Prix</th><th>Stock (cette période)</th><th>Vendus</th><th>En vente</th><th></th></tr></thead><tbody>${
     data.map(it => `<tr data-it="${it.id}" class="${it.active ? '' : 'off'}"><td class="ads-ic">${itemIcon(it)}</td><td><b>${esc(name(it))}</b><br><small class="muted">${it.id}</small></td>
-      <td><input class="adm-in" type="number" min="0" data-f="price" value="${it.price}"></td>
+      <td><input class="adm-in" type="number" min="0" data-f="price" value="${it.price}"><br><small class="muted">normal : ${fmt(it.base_price)}${it.price !== it.base_price ? ' · <b class="ads-tmp">modifié</b>' : ''}</small></td>
       <td><input class="adm-in" type="number" min="0" data-f="stock" value="${it.stock}"></td>
       <td>${it.sold}</td>
       <td><label class="ads-sw"><input type="checkbox" data-f="active" ${it.active ? 'checked' : ''}><span></span></label></td>
