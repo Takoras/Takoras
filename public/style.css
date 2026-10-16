@@ -1528,3 +1528,12 @@ html.lock .chat-fab, html.lock .tabbar { display: none !important; }
 .cb-fr b { flex: 1; }
 .cb-need { margin-top: -6px; margin-bottom: 14px; color: #fca5a5; }
 @media (max-width: 760px) { .cb-modes { grid-template-columns: 1fr; } .bt-vs span { display: none; } .page-head:has(.cb-record) { flex-wrap: wrap; } }
+
+/* Cinématique des jetons rares : plein écran au-dessus de l'ouverture, en gros pixels */
+.cine { position: fixed; inset: 0; z-index: 95; background: #000; overflow: hidden; cursor: pointer; transition: opacity .6s; }
+.cine.out { opacity: 0; pointer-events: none; }
+.cine-cv { position: absolute; inset: -2%; width: 104%; height: 104%; image-rendering: pixelated; }
+.cine-flash { position: absolute; inset: 0; opacity: 0; pointer-events: none; }
+.cine-skip { position: absolute; left: 50%; bottom: calc(24px + env(safe-area-inset-bottom)); translate: -50% 0; font-size: 12px; letter-spacing: .14em; text-transform: uppercase;
+  color: rgba(255, 255, 255, .45); opacity: 0; transition: opacity .4s; pointer-events: none; }
+.cine-skip.on { opacity: 1; }

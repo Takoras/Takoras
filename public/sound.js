@@ -1,19 +1,31 @@
 // Sons du site, tous fabriqués en direct avec la Web Audio API (aucun fichier à charger).
-// Le son démarre au premier clic (les navigateurs l'exigent) et se coupe avec le bouton du haut.
+// Style lo-fi doux : sons ronds et graves (piano électrique, marimba feutré), tout passe dans un filtre
+// qui coupe les aigus + une petite réverbération chaude. Le son démarre au premier clic (les navigateurs l'exigent).
 
 const sfx = (() => {
-  let ctx = null, master = null;
+  let ctx = null, master = null, bus = null;
   let muted = false;
   try { muted = localStorage.getItem('takoras-muted') === '1'; } catch {}
+  const vol = () => (muted ? 0 : .8 * (SETTINGS.volume / 100));
 
+  // Réverbération : une « salle » fabriquée avec du bruit qui s'éteint doucement
+  function room(sec = 2.2) {
+    const len = Math.ceil(ctx.sampleRate * sec), ir = ctx.createBuffer(2, len, ctx.sampleRate);
+    for (let ch = 0; ch < 2; ch++) { const d = ir.getChannelData(ch); for (let i = 0; i < len; i++) d[i] = (Math.random() * 2 - 1) * Math.pow(1 - i / len, 3); }
+    const c = ctx.createConvolver(); c.buffer = ir; return c;
+  }
   function init() {
     if (ctx) return ctx.state === 'suspended' && ctx.resume();
     ctx = new (window.AudioContext || window.webkitAudioContext)();
-    master = ctx.createGain();
-    master.gain.value = muted ? 0 : .7 * (SETTINGS.volume / 100);
-    // Petit compresseur pour que les sons forts ne saturent pas
-    const comp = ctx.createDynamicsCompressor();
-    master.connect(comp).connect(ctx.destination);
+    master = ctx.createGain(); master.gain.value = vol();
+    // bus → coupe-aigus chaud → (sec + réverb) → compresseur doux → sortie
+    bus = ctx.createGain();
+    const warm = ctx.createBiquadFilter(); warm.type = 'lowpass'; warm.frequency.value = 3600; warm.Q.value = .5;
+    const verb = room(), wet = ctx.createGain(); wet.gain.value = .22;
+    const comp = ctx.createDynamicsCompressor(); comp.threshold.value = -18; comp.ratio.value = 3;
+    bus.connect(warm);
+    warm.connect(comp); warm.connect(verb).connect(wet).connect(comp);
+    comp.connect(master).connect(ctx.destination);
   }
   addEventListener('pointerdown', init, { capture: true });
   addEventListener('keydown', init, { capture: true });
@@ -21,126 +33,115 @@ const sfx = (() => {
   const ok = () => ctx && !muted;
   const now = () => ctx.currentTime;
 
-  // Une note : fréquence (avec glissé optionnel), forme d'onde, volume, durée, délai
-  function tone(f, { to, type = 'sine', vol = .2, dur = .12, delay = 0, attack = .005 } = {}) {
-    if (!ok()) return;
-    const t = now() + delay, o = ctx.createOscillator(), g = ctx.createGain();
-    o.type = type;
-    o.frequency.setValueAtTime(f, t);
-    if (to) o.frequency.exponentialRampToValueAtTime(to, t + dur);
-    g.gain.setValueAtTime(0, t);
-    g.gain.linearRampToValueAtTime(vol, t + attack);
+  // Enveloppe douce : petite attaque, longue extinction
+  function env(g, t, peak, attack, dur) {
+    g.gain.setValueAtTime(.0001, t);
+    g.gain.linearRampToValueAtTime(peak, t + attack);
     g.gain.exponentialRampToValueAtTime(.0001, t + dur);
-    o.connect(g).connect(master);
-    o.start(t); o.stop(t + dur + .05);
   }
-
-  // Souffle filtré (whoosh, impacts, riser)
-  function noise({ dur = .3, vol = .2, from = 400, to = 3000, type = 'bandpass', q = 1, delay = 0, rise = false } = {}) {
+  function osc(type, f, t, dur, peak, attack = .01, out = bus, glide) {
+    const o = ctx.createOscillator(), g = ctx.createGain();
+    o.type = type; o.frequency.setValueAtTime(f, t);
+    if (glide) o.frequency.exponentialRampToValueAtTime(glide, t + dur);
+    env(g, t, peak, attack, dur);
+    o.connect(g).connect(out); o.start(t); o.stop(t + dur + .05);
+    return o;
+  }
+  // Piano électrique : fondamentale + une harmonique qui s'éteint vite, léger trémolo
+  function ep(f, { vol = .12, dur = .9, delay = 0 } = {}) {
     if (!ok()) return;
-    const t = now() + delay, len = Math.ceil(ctx.sampleRate * dur), buf = ctx.createBuffer(1, len, ctx.sampleRate);
-    const d = buf.getChannelData(0);
+    const t = now() + delay;
+    osc('sine', f, t, dur, vol, .008);
+    osc('sine', f * 2, t, dur * .35, vol * .28, .004);
+    osc('triangle', f * 1.003, t, dur * .8, vol * .25, .01);
+  }
+  // Marimba feutré : très court, boisé
+  function mar(f, { vol = .1, dur = .35, delay = 0 } = {}) {
+    if (!ok()) return;
+    const t = now() + delay;
+    osc('sine', f, t, dur, vol, .003);
+    osc('sine', f * 3.9, t, dur * .18, vol * .18, .002);
+  }
+  // Coup sourd (grave qui descend)
+  function thump(f = 90, { vol = .35, dur = .35, delay = 0, to } = {}) {
+    if (!ok()) return;
+    osc('sine', f, now() + delay, dur, vol, .004, bus, to || f * .5);
+  }
+  // Souffle filtré, toujours dans le grave / médium
+  function air({ dur = .4, vol = .1, from = 300, to = 1400, delay = 0, rise = false, q = .7 } = {}) {
+    if (!ok()) return;
+    const t = now() + delay, len = Math.ceil(ctx.sampleRate * dur), buf = ctx.createBuffer(1, len, ctx.sampleRate), d = buf.getChannelData(0);
     for (let i = 0; i < len; i++) d[i] = Math.random() * 2 - 1;
     const src = ctx.createBufferSource(), f = ctx.createBiquadFilter(), g = ctx.createGain();
-    src.buffer = buf;
-    f.type = type; f.Q.value = q;
-    f.frequency.setValueAtTime(from, t);
-    f.frequency.exponentialRampToValueAtTime(to, t + dur);
-    if (rise) { g.gain.setValueAtTime(.0001, t); g.gain.exponentialRampToValueAtTime(vol, t + dur * .95); g.gain.linearRampToValueAtTime(0, t + dur); }
+    src.buffer = buf; f.type = 'lowpass'; f.Q.value = q;
+    f.frequency.setValueAtTime(from, t); f.frequency.exponentialRampToValueAtTime(to, t + dur);
+    if (rise) { g.gain.setValueAtTime(.0001, t); g.gain.exponentialRampToValueAtTime(vol, t + dur * .92); g.gain.linearRampToValueAtTime(0, t + dur); }
     else { g.gain.setValueAtTime(vol, t); g.gain.exponentialRampToValueAtTime(.0001, t + dur); }
-    src.connect(f).connect(g).connect(master);
-    src.start(t); src.stop(t + dur);
+    src.connect(f).connect(g).connect(bus); src.start(t); src.stop(t + dur);
   }
-
-  // Chœur angélique : accord majeur de voix douces avec vibrato, plus une cloche aiguë
-  function choir(f, k) {
+  // Nappe chaude (accord tenu, s'ouvre doucement)
+  function pad(freqs, { vol = .05, dur = 1.6, delay = 0 } = {}) {
     if (!ok()) return;
-    const t = now(), root = f / 2;
-    [1, 1.25, 1.5, 2, 2.5].forEach((r, i) => {
-      const o = ctx.createOscillator(), g = ctx.createGain(), lfo = ctx.createOscillator(), lg = ctx.createGain();
-      o.type = i % 2 ? 'sine' : 'triangle';
-      o.frequency.value = root * r * (1 + (Math.random() - .5) * .006); // léger désaccord = effet chorale
-      lfo.frequency.value = 5 + Math.random(); lg.gain.value = root * r * .012;
-      lfo.connect(lg).connect(o.frequency);
-      g.gain.setValueAtTime(0, t);
-      g.gain.linearRampToValueAtTime(.045 * k, t + .09);
-      g.gain.exponentialRampToValueAtTime(.0001, t + 1.3);
-      o.connect(g).connect(master);
-      o.start(t); lfo.start(t); o.stop(t + 1.35); lfo.stop(t + 1.35);
-    });
-    tone(f * 4, { vol: .05 * k, dur: 1.1, attack: .01 }); // cloche
-    noise({ dur: 1, vol: .04 * k, from: 5000, to: 11000, type: 'highpass' }); // souffle céleste
+    const t = now() + delay, f = ctx.createBiquadFilter();
+    f.type = 'lowpass'; f.frequency.setValueAtTime(400, t); f.frequency.linearRampToValueAtTime(1600, t + dur * .5); f.connect(bus);
+    freqs.forEach(fr => [-4, 4].forEach(c => { const o = osc('triangle', fr, t, dur, vol, dur * .35, f); o.detune.value = c; }));
   }
 
-  // Gamme majeure pentatonique : tout sonne « juste » et joyeux
-  const note = n => 523.25 * 2 ** ([0, 2, 4, 7, 9][((n % 5) + 5) % 5] / 12 + Math.floor(n / 5));
+  // Gamme pentatonique majeure à partir de do grave (rien ne dépasse ~1 kHz)
+  const NOTE = n => 196 * 2 ** ([0, 2, 4, 7, 9][((n % 5) + 5) % 5] / 12 + Math.floor(n / 5));
   let lastHover = 0;
 
   return {
-    setMuted(m) { muted = m; try { localStorage.setItem('takoras-muted', m ? '1' : '0'); } catch {} if (master) master.gain.value = m ? 0 : .7 * (SETTINGS.volume / 100); },
-    setVolume(v) { if (master && !muted) master.gain.value = .7 * v; },
+    // Pour les cinématiques : accès au son du site (même volume, même filtre)
+    audio() { init(); return { ctx, out: bus, ok: ok() }; },
+    setMuted(m) { muted = m; try { localStorage.setItem('takoras-muted', m ? '1' : '0'); } catch {} if (master) master.gain.value = vol(); },
+    setVolume(v) { if (master && !muted) master.gain.value = .8 * v; },
     get muted() { return muted; },
 
-    click() { tone(1100, { to: 1500, type: 'square', vol: .06, dur: .05 }); },
-    hover() { const t = performance.now(); if (t - lastHover < 70) return; lastHover = t; tone(1800, { vol: .025, dur: .03 }); },
-    whoosh() { noise({ dur: .38, vol: .22, from: 300, to: 4000 }); tone(220, { to: 660, type: 'triangle', vol: .08, dur: .3 }); },
-    // Transition pixel : bips carrés aléatoires et grésillements qui « meurent » (corruption)…
+    click() { mar(NOTE(3 + Math.floor(Math.random() * 2)), { vol: .08, dur: .22 }); },
+    hover() { const t = performance.now(); if (t - lastHover < 90) return; lastHover = t; mar(NOTE(5), { vol: .022, dur: .12 }); },
+    whoosh() { air({ dur: .45, vol: .14, from: 180, to: 1300 }); ep(NOTE(2), { vol: .05, dur: .5 }); },
+    whooshOut() { air({ dur: .45, vol: .12, from: 1300, to: 160 }); },
+    // Transition pixel : petit arpège lo-fi qui descend + crépitement de vinyle
     corrupt() {
-      for (let i = 0; i < 14; i++) {
-        const k = 1 - i / 14, f = [180, 260, 390, 520, 780, 1040, 1560, 2080, 3120][Math.floor(Math.random() * 9)];
-        tone(f * (.9 + Math.random() * .2), { to: f * (Math.random() < .5 ? .5 : 1.5), type: 'square', vol: .07 * k + .01, dur: .03, delay: i * .028 + Math.random() * .01 });
-        if (i % 3 === 0) noise({ dur: .03, vol: .12 * k, from: 1500 + Math.random() * 4000, to: 800, type: 'bandpass', q: 6, delay: i * .028 });
-      }
-      tone(900, { to: 60, type: 'sawtooth', vol: .05, dur: .4 }); // le signal qui meurt
+      [7, 5, 4, 2, 0].forEach((n, i) => ep(NOTE(n), { vol: .07, dur: .4, delay: i * .06 }));
+      for (let i = 0; i < 8; i++) air({ dur: .03, vol: .06, from: 900, to: 500, delay: Math.random() * .4 });
+      thump(80, { vol: .2, dur: .5, delay: .3 });
     },
-    // …puis tout s'évapore : un souffle aigu qui monte et disparaît, avec quelques scintillements
+    // …puis tout s'évapore : souffle doux qui monte, quelques notes rondes
     evaporate() {
-      noise({ dur: 1.6, vol: .07, from: 2500, to: 12000, type: 'highpass', delay: .05 });
-      for (let i = 0; i < 6; i++) tone(2400 + Math.random() * 2400, { vol: .02, dur: .12, delay: .15 + i * .2 + Math.random() * .1 });
+      air({ dur: 1.4, vol: .06, from: 250, to: 2200, rise: true });
+      [4, 7, 9].forEach((n, i) => ep(NOTE(n), { vol: .04, dur: .8, delay: .25 + i * .22 }));
     },
-    whooshOut() { noise({ dur: .45, vol: .18, from: 3500, to: 250 }); },
-    spawn() { tone(660, { to: 990, type: 'triangle', vol: .1, dur: .18 }); },
+    spawn() { ep(NOTE(4), { vol: .08, dur: .5 }); },
 
-    // Clic du compteur : part très grave (1/2) et monte à chaque palier, jusqu'à l'aigu pour 1/1 000 000.
-    // À partir de 1/10 000, un chœur « angélique » s'ajoute, de plus en plus fort.
+    // Clic du compteur : grave pour les communs, monte doucement avec la rareté (plafonné, jamais strident)
     tick(v) {
-      const L = Math.log10(Math.max(2, v)), f = 45 * 2 ** (L * 10 / 12); // 1/2 ≈ 55 Hz → 1/1 000 000 ≈ 1 400 Hz
-      tone(f, { type: 'triangle', vol: .22, dur: .18 });
-      tone(f * 2, { vol: .07, dur: .1 });
-      if (f < 160) tone(f, { type: 'sine', vol: .25, dur: .22 }); // un peu de corps dans le grave
-      if (v >= 500) noise({ dur: .08, vol: .08, from: 2000, to: 6000, type: 'highpass' });
-      if (v >= 10000) choir(f, Math.min(1, (L - 4) / 2 + .35));
+      const L = Math.log10(Math.max(2, v)), n = Math.round(L * 2.2);   // 1/2 → note 1 … 1/1 000 000 → note 13
+      thump(70 + L * 12, { vol: .22, dur: .25 });
+      mar(NOTE(n), { vol: .12, dur: .3 });
+      if (v >= 10000) pad([NOTE(n) / 2, NOTE(n + 2) / 2, NOTE(n + 4) / 2], { vol: .02 + Math.min(.04, (L - 4) * .015), dur: 1.2 });
     },
-    hold() { tone(110, { to: 45, vol: .5, dur: .35 }); noise({ dur: .25, vol: .1, from: 800, to: 120, type: 'lowpass' }); },
-    heartbeat() { tone(70, { to: 40, vol: .45, dur: .18 }); tone(70, { to: 40, vol: .35, dur: .18, delay: .22 }); },
+    hold() { thump(100, { vol: .4, dur: .45, to: 45 }); air({ dur: .3, vol: .06, from: 600, to: 120 }); },
+    heartbeat() { thump(62, { vol: .4, dur: .2, to: 40 }); thump(62, { vol: .3, dur: .2, to: 40, delay: .22 }); },
 
-    // Révélation : un arpège, plus long et plus brillant selon la rareté
+    // Révélation : arpège de piano électrique, plus long selon la rareté, avec une nappe pour les rares
     reveal(odds) {
       const lvl = Math.min(7, Math.floor(Math.log10(odds) * 1.2));
-      for (let i = 0; i <= 2 + lvl; i++) {
-        tone(note(i * 2), { type: 'triangle', vol: .13, dur: .35, delay: i * .055 });
-        tone(note(i * 2) * 2, { vol: .04, dur: .25, delay: i * .055 });
-      }
-      if (odds >= 1000) noise({ dur: .9, vol: .07, from: 6000, to: 12000, type: 'highpass', delay: .1 });
+      for (let i = 0; i <= 2 + lvl; i++) ep(NOTE(i * 2), { vol: .09, dur: .9, delay: i * .07 });
+      if (odds >= 1000) pad([NOTE(0), NOTE(2), NOTE(4), NOTE(5)], { vol: .035, dur: 2.2 });
     },
-    impact() { tone(140, { to: 35, vol: .8, dur: .7 }); noise({ dur: .6, vol: .3, from: 1500, to: 80, type: 'lowpass' }); },
-    riser(dur = 1.8) {
-      if (!ok()) return;
-      noise({ dur, vol: .35, from: 200, to: 9000, type: 'bandpass', q: 2, rise: true });
-      const t = now(), o = ctx.createOscillator(), g = ctx.createGain();
-      o.type = 'sawtooth';
-      o.frequency.setValueAtTime(80, t); o.frequency.exponentialRampToValueAtTime(1400, t + dur);
-      g.gain.setValueAtTime(.0001, t); g.gain.exponentialRampToValueAtTime(.12, t + dur * .95); g.gain.linearRampToValueAtTime(0, t + dur);
-      o.connect(g).connect(master); o.start(t); o.stop(t + dur + .05);
-    },
-    next() { tone(784, { type: 'square', vol: .05, dur: .06 }); tone(1175, { type: 'square', vol: .05, dur: .08, delay: .06 }); },
-    regen() { tone(1047, { vol: .1, dur: .15 }); tone(1568, { vol: .1, dur: .25, delay: .09 }); },
-    upgrade() { [0, 2, 4, 5, 7].forEach((n, i) => tone(note(n), { type: 'square', vol: .06, dur: .18, delay: i * .07 })); },
-    // Annonce de l'admin : fanfare en carré + grosse caisse
-    announce() { tone(70, { to: 40, vol: .5, dur: .5 }); [0, 4, 7, 12, 7, 12].forEach((n, i) => tone(note(n), { type: 'square', vol: .07, dur: i === 5 ? .5 : .14, delay: .05 + i * .11 })); },
-    // Message d'un ami : petit « pop » à deux notes
-    message() { tone(880, { type: 'triangle', vol: .12, dur: .08 }); tone(1320, { type: 'triangle', vol: .12, dur: .14, delay: .07 }); },
-    deny() { tone(220, { to: 160, type: 'square', vol: .06, dur: .14 }); },
+    impact() { thump(120, { vol: .6, dur: .8, to: 32 }); air({ dur: .7, vol: .14, from: 900, to: 90 }); },
+    riser(dur = 1.8) { air({ dur, vol: .16, from: 120, to: 2600, rise: true, q: 2 }); if (ok()) osc('triangle', 55, now(), dur, .06, dur * .9, bus, 330); },
+    next() { ep(NOTE(4), { vol: .07, dur: .4 }); ep(NOTE(6), { vol: .07, dur: .5, delay: .07 }); },
+    regen() { ep(NOTE(5), { vol: .08, dur: .6 }); ep(NOTE(7), { vol: .07, dur: .8, delay: .1 }); },
+    upgrade() { [0, 2, 4, 5].forEach((n, i) => ep(NOTE(n + 3), { vol: .08, dur: .7, delay: i * .08 })); },
+    // Annonce de l'admin : accord chaud + coup sourd
+    announce() { thump(70, { vol: .4, dur: .6 }); [0, 2, 4, 7].forEach((n, i) => ep(NOTE(n + 2), { vol: .08, dur: 1.2, delay: .06 + i * .12 })); pad([NOTE(0), NOTE(2), NOTE(4)], { vol: .04, dur: 2 }); },
+    // Message d'un ami : petit « ploc » à deux notes
+    message() { mar(NOTE(5), { vol: .1, dur: .3 }); mar(NOTE(7), { vol: .1, dur: .4, delay: .08 }); },
+    // Refus : « bonk » grave et mat
+    deny() { mar(110, { vol: .12, dur: .25 }); mar(104, { vol: .08, dur: .25, delay: .06 }); },
   };
 })();
 

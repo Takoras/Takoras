@@ -331,7 +331,7 @@ function drawBg(t) {
 }
 
 // Révélation : clic → la face change direct, le jeton part à gauche d'un coup sec, la fiche apparaît à droite
-function reveal(restored) {
+function reveal(restored, quiet = false) {
   const r = run, j = r.result;
   r.done = true;
   opening.classList.remove('hold');
@@ -368,8 +368,7 @@ function reveal(restored) {
   sess.cur.phase = 'revealed';
   sess.results.push(j.name);
   save();
-  sfx.reveal(j.odds);
-  if (j.odds >= MYTHIC) sfx.impact();
+  if (!quiet) { sfx.reveal(j.odds); if (j.odds >= MYTHIC) sfx.impact(); } // après une cinématique, sa musique a déjà fait la révélation
   if (j.odds >= MYTHIC) {
     flash(j.odds >= GOD ? .85 : .65, 900);
     shake(1.8);
@@ -384,7 +383,17 @@ function reveal(restored) {
   addToHistory(j);
 }
 
-// 1/1 000 000 : mini cinématique. Écran noir d'un coup, montée sonore, une ligne de lumière qui s'étire, puis l'explosion blanche
+// 1/1000 et plus : cinématique propre au jeton (cinema.js), puis la fiche normale prend le relais
+async function cine() {
+  const r = run;
+  r.done = true;
+  clearInterval(r.hb);
+  await CINE.play(r.result);
+  if (run !== r) return;
+  reveal(false, true);
+}
+
+// (ancienne) 1/1 000 000 : mini cinématique. Écran noir d'un coup, montée sonore, une ligne de lumière qui s'étire, puis l'explosion blanche
 async function cinematic() {
   const r = run;
   r.done = true;
@@ -453,7 +462,7 @@ function addToHistory(j) {
 
 function tap() {
   if (!run || run.done) return;
-  if (run.holding) { if (run.canReveal) (run.result.odds >= GOD ? cinematic() : reveal()); return; }
+  if (run.holding) { if (run.canReveal) (run.result.odds >= RARE && SETTINGS.speed !== 'instant' ? cine() : reveal()); return; }
   if (!run.queue.length) return; // entre le dernier palier et la pause
   const next = run.queue.shift();
   countTo(run.shown, next);
