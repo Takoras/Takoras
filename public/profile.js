@@ -88,7 +88,7 @@ async function pickShowcase(slot) {
     <button class="set-close jm-close" aria-label="${t('close')}">✕</button>
     <div class="pk-wrap">
       <h2>${t('pick_title', { n: slot + 1 })}</h2>
-      <div class="pk-tools"><input class="adm-in" id="pk-q" placeholder="${t('search')}"><select class="adm-in" id="pk-sort"><option value="rarity">${t('sort_rarity')}</option><option value="name">${t('sort_name')}</option></select></div>
+      <div class="pk-tools"><input class="mpx-in" id="pk-q" placeholder="${t('search')}"><select class="mpx-in" id="pk-sort"><option value="rarity">${t('sort_rarity')}</option><option value="name">${t('sort_name')}</option></select></div>
       <div class="pk-list"></div>
       ${cur ? `<button class="btn ghost" id="pk-remove">${t('pick_remove')}</button>` : ''}
     </div>`;
@@ -125,9 +125,9 @@ function editProfile() {
       <div class="pe">
         <h2>${t('edit_profile')}</h2>
         <h4>${t('acc_pseudo')} <small class="muted">${p.pseudo_free ? t('pseudo_free') : canRename ? t('pseudo_month') : t('pseudo_next', { d: new Date(p.pseudo_next).toLocaleDateString(LOCALE()) })}</small></h4>
-        <input class="adm-in pe-pseudo" id="pe-pseudo" maxlength="16" value="${esc(st.pseudo)}" ${canRename ? '' : 'disabled'} autocomplete="off">
+        <input class="mpx-in pe-pseudo" id="pe-pseudo" maxlength="16" value="${esc(st.pseudo)}" ${canRename ? '' : 'disabled'} autocomplete="off">
         <h4>${t('pe_bio')} <small class="muted" id="pe-count">${st.bio.length}/120</small></h4>
-        <textarea class="adm-in pe-bio" id="pe-bio" maxlength="120" rows="2">${esc(st.bio)}</textarea>
+        <textarea class="mpx-in pe-bio" id="pe-bio" maxlength="120" rows="2">${esc(st.bio)}</textarea>
         <h4>${t('pe_banner')}</h4>
         ${(p.banners || []).length ? `<div class="pe-banners"><button class="pe-b none${!st.banner ? ' on' : ''}" data-b="">${t('none')}</button>${p.banners.map(b => `<button class="pe-b${b === st.banner ? ' on' : ''}" data-b="${b}" title="${bannerName(b)}"></button>`).join('')}</div>`
           : `<p class="muted small">${t('no_banner_owned')}</p>`}

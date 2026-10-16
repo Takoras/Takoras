@@ -73,12 +73,12 @@ async function renderShop() {
         <div class="shop-grid">${list.map(cardHTML).join('')}</div>
       </section>` : '').join('')}
     ${ACC.user ? `
-      <section class="promo">
+      <section class="redeem">
         <div><h3 class="shop-h">🎁 ${t('promo_title')}</h3><p class="muted small">${t('promo_hint')}</p></div>
-        <form class="promo-form" id="promo-form"><input class="adm-in" id="promo-in" maxlength="24" placeholder="${t('promo_ph')}" autocomplete="off" spellcheck="false"><button class="btn primary">${t('promo_use')}</button></form>
+        <form class="redeem-form" id="redeem-form"><input class="mpx-in" id="redeem-in" maxlength="24" placeholder="${t('promo_ph')}" autocomplete="off" spellcheck="false"><button class="btn primary">${t('promo_use')}</button></form>
       </section>` : `<p class="muted center">${t('acc_need')}</p>`}`;
   moPlay(snap, page, '.si');
-  const pf = $('promo-form');
+  const pf = $('redeem-form');
   if (pf) pf.onsubmit = redeemPromo;
   page.onclick = async e => {
     const c = e.target.closest('[data-cat]');
@@ -119,7 +119,7 @@ async function renderShop() {
 // Code promo : pièces, pulls et/ou objets, 1 fois par joueur
 async function redeemPromo(e) {
   e.preventDefault();
-  const inp = $('promo-in'), code = inp.value.trim().toUpperCase(), btn = e.target.querySelector('button');
+  const inp = $('redeem-in'), code = inp.value.trim().toUpperCase(), btn = e.target.querySelector('button');
   if (!code) return;
   btn.disabled = true;
   const { data, error } = await sb.rpc('redeem_code', { p_code: code });

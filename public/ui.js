@@ -210,7 +210,7 @@ function ask(text, { ok = t('confirm_ok'), danger = false, typed = '' } = {}) {
     const o = document.createElement('div');
     o.className = 'askbox';
     o.innerHTML = `<div class="ask-card${danger ? ' danger' : ''}"><p>${esc(text)}</p>
-      ${typed ? `<input class="adm-in" id="ask-in" placeholder="${esc(typed)}" autocomplete="off">` : ''}
+      ${typed ? `<input class="mpx-in" id="ask-in" placeholder="${esc(typed)}" autocomplete="off">` : ''}
       <div class="ask-btns"><button class="btn ghost" data-a="0">${t('cancel')}</button><button class="btn primary" data-a="1" ${typed ? 'disabled' : ''}>${esc(ok)}</button></div></div>`;
     document.body.appendChild(o);
     requestAnimationFrame(() => o.classList.add('on'));

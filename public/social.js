@@ -137,7 +137,7 @@ async function renderFriends() {
   if (!page.querySelector('.fr-page')) page.innerHTML = `
     <div class="fr-page">
       <div class="page-head"><div><div class="eyebrow">${t('nav_friends')}</div><h2 class="page-title">${t('fr_title')}</h2></div></div>
-      <form class="fr-add" id="fr-add"><input class="adm-in" id="fr-pseudo" placeholder="${t('fr_add_ph')}" maxlength="16" autocomplete="off"><button class="btn primary">➕ ${t('fr_add')}</button></form>
+      <form class="fr-add" id="fr-add"><input class="mpx-in" id="fr-pseudo" placeholder="${t('fr_add_ph')}" maxlength="16" autocomplete="off"><button class="btn primary">➕ ${t('fr_add')}</button></form>
       <div id="fr-body"></div>
     </div>`;
   await loadFriends();

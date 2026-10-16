@@ -44,8 +44,8 @@ async function renderInventory() {
       <div class="inv-tools">
         <div class="chips" id="inv-tiers">${['all', 'r_common', 'r_rare', 'r_epic', 'r_legend', 'r_myth'].map(k => `<button class="chip" data-t="${k}">${t(k === 'all' ? 'all' : k)}</button>`).join('')}</div>
         <div class="inv-right">
-          <input class="adm-in inv-search" id="inv-q" placeholder="${t('search')}">
-          <select class="adm-in" id="inv-sort">${['rarity', 'count', 'recent', 'name'].map(k => `<option value="${k}">${t('sort_' + k)}</option>`).join('')}</select>
+          <input class="mpx-in inv-search" id="inv-q" placeholder="${t('search')}">
+          <select class="mpx-in" id="inv-sort">${['rarity', 'count', 'recent', 'name'].map(k => `<option value="${k}">${t('sort_' + k)}</option>`).join('')}</select>
         </div>
       </div>
       <div class="inv-items" id="inv-items"></div>

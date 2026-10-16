@@ -9,7 +9,7 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=Cinzel:wght@600;700&family=Cinzel+Decorative:wght@700&family=Space+Grotesk:wght@500;600;700&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="style.css?v=20261017c">
+<link rel="stylesheet" href="style.css?v=20261017d">
 </head>
 <body>
   <!-- Effet « doodle » : 3 légères déformations (turbulence) qui s'enchaînent pour faire vivre les pixel arts -->
@@ -190,69 +190,69 @@
   <div class="chat-notifs" id="chat-notifs"></div>
 
   <div class="debug admin2" id="debug" hidden>
-    <div class="ad-head">
+    <div class="mp-head">
       <b>🛡️ Panel admin</b>
-      <div class="ad-tabs" id="ad-tabs"><button data-tab="players" class="on">Joueurs</button><button data-tab="global">Global</button><button data-tab="shop">Boutique</button><button data-tab="ann">Annonces</button><button data-tab="codes">Codes</button><button data-tab="tests">Tests</button></div>
+      <div class="mp-tabs" id="mp-tabs"><button data-tab="players" class="on">Joueurs</button><button data-tab="global">Global</button><button data-tab="shop">Boutique</button><button data-tab="ann">Annonces</button><button data-tab="codes">Codes</button><button data-tab="tests">Tests</button></div>
       <button class="set-close" id="debug-close" aria-label="Fermer">✕</button>
     </div>
-    <div class="ad-body">
-      <div class="ad-tab" data-tab="players">
-        <div class="ad-left">
-          <input class="adm-in" id="adm-search" placeholder="Chercher un pseudo…" autocomplete="off">
-          <div class="ad-table" id="adm-list"></div>
+    <div class="mp-body">
+      <div class="mp-tab" data-tab="players">
+        <div class="mp-left">
+          <input class="mpx-in" id="mpx-search" placeholder="Chercher un pseudo…" autocomplete="off">
+          <div class="mp-table" id="mpx-list"></div>
         </div>
-        <div class="ad-right" id="adm-detail"><p class="muted center">Choisis un joueur à gauche</p></div>
+        <div class="mp-right" id="mpx-detail"><p class="muted center">Choisis un joueur à gauche</p></div>
       </div>
-      <div class="ad-tab" data-tab="global" hidden>
-        <div class="ad-stats" id="adm-stats"></div>
-        <div class="ad-box">
+      <div class="mp-tab" data-tab="global" hidden>
+        <div class="mp-stats" id="mpx-stats"></div>
+        <div class="mp-box">
           <h4>Donner à tous les joueurs</h4>
-          <div class="adm-row"><input class="adm-in" id="adm-all-coins" type="number" placeholder="Pièces"><input class="adm-in" id="adm-all-pulls" type="number" placeholder="Pulls"><button id="adm-give-all">Donner à tous</button></div>
+          <div class="mpx-row"><input class="mpx-in" id="mpx-all-coins" type="number" placeholder="Pièces"><input class="mpx-in" id="mpx-all-pulls" type="number" placeholder="Pulls"><button id="mpx-give-all">Donner à tous</button></div>
         </div>
-        <div class="ad-box danger">
+        <div class="mp-box danger">
           <h4>Zone dangereuse</h4>
           <p class="muted small">Efface les tirages, les pièces, le stock, les effets et les achats de TOUS les joueurs.</p>
-          <button class="adm-danger" id="adm-reset-all">Remettre tous les joueurs à zéro</button>
+          <button class="mpx-danger" id="mpx-reset-all">Remettre tous les joueurs à zéro</button>
         </div>
       </div>
-      <div class="ad-tab" data-tab="shop" hidden>
-        <div class="ad-shop-head"><p class="muted">Prix et stock changés = seulement pour la boutique actuelle (les joueurs reçoivent une notif). Retour à la normale au prochain stock, dans <b id="ads-reset">—</b></p><button class="btn primary sm" id="ads-reroll">🎲 Nouveau stock maintenant</button></div>
-        <div class="ad-table" id="ads-list"></div>
+      <div class="mp-tab" data-tab="shop" hidden>
+        <div class="mp-shop-head"><p class="muted">Prix et stock changés = seulement pour la boutique actuelle (les joueurs reçoivent une notif). Retour à la normale au prochain stock, dans <b id="mpshop-reset">—</b></p><button class="btn primary sm" id="mpshop-reroll">🎲 Nouveau stock maintenant</button></div>
+        <div class="mp-table" id="mpshop-list"></div>
       </div>
-      <div class="ad-tab" data-tab="ann" hidden>
-        <div class="ad-box">
-          <h4>Nouvelle annonce <small class="muted" id="ada-count">0/500</small></h4>
-          <textarea class="adm-in" id="ada-body" maxlength="500" rows="3" placeholder="Ton message pour tout le site…"></textarea>
-          <div class="ada-opts"><label><input type="checkbox" id="ada-full" checked> Plein écran (en direct, avec son)</label><label><input type="checkbox" id="ada-banner" checked> Bandeau en haut du site</label></div>
-          <button class="btn primary" id="ada-send">📢 Envoyer à tout le monde</button>
+      <div class="mp-tab" data-tab="ann" hidden>
+        <div class="mp-box">
+          <h4>Nouvelle annonce <small class="muted" id="mpann-count">0/500</small></h4>
+          <textarea class="mpx-in" id="mpann-body" maxlength="500" rows="3" placeholder="Ton message pour tout le site…"></textarea>
+          <div class="mpann-opts"><label><input type="checkbox" id="mpann-full" checked> Plein écran (en direct, avec son)</label><label><input type="checkbox" id="mpann-banner" checked> Bandeau en haut du site</label></div>
+          <button class="btn primary" id="mpann-send">📢 Envoyer à tout le monde</button>
         </div>
-        <div class="ad-box"><h4>Annonces envoyées</h4><div id="ada-list"></div></div>
+        <div class="mp-box"><h4>Annonces envoyées</h4><div id="mpann-list"></div></div>
       </div>
-      <div class="ad-tab" data-tab="codes" hidden>
-        <div class="ad-box">
-          <h4 id="adc-title">Nouveau code</h4>
-          <div class="adc-grid">
-            <label>Code<div class="adm-row"><input class="adm-in" id="adc-code" maxlength="24" placeholder="BIENVENUE" autocomplete="off"><button id="adc-rand" title="Code au hasard">🎲</button></div></label>
-            <label>Pièces<input class="adm-in" id="adc-coins" type="number" min="0" placeholder="0"></label>
-            <label>Pulls<input class="adm-in" id="adc-pulls" type="number" min="0" placeholder="0"></label>
-            <label>Utilisations max <small class="muted">(vide = illimité)</small><input class="adm-in" id="adc-max" type="number" min="1" placeholder="∞"></label>
-            <label>Expire le <small class="muted">(vide = jamais)</small><input class="adm-in" id="adc-exp" type="datetime-local"></label>
+      <div class="mp-tab" data-tab="codes" hidden>
+        <div class="mp-box">
+          <h4 id="mpcode-title">Nouveau code</h4>
+          <div class="mpcode-grid">
+            <label>Code<div class="mpx-row"><input class="mpx-in" id="mpcode-code" maxlength="24" placeholder="BIENVENUE" autocomplete="off"><button id="mpcode-rand" title="Code au hasard">🎲</button></div></label>
+            <label>Pièces<input class="mpx-in" id="mpcode-coins" type="number" min="0" placeholder="0"></label>
+            <label>Pulls<input class="mpx-in" id="mpcode-pulls" type="number" min="0" placeholder="0"></label>
+            <label>Utilisations max <small class="muted">(vide = illimité)</small><input class="mpx-in" id="mpcode-max" type="number" min="1" placeholder="∞"></label>
+            <label>Expire le <small class="muted">(vide = jamais)</small><input class="mpx-in" id="mpcode-exp" type="datetime-local"></label>
           </div>
           <h4>Objets</h4>
-          <div class="adc-items" id="adc-items"></div>
-          <div class="adm-row"><select class="adm-in" id="adc-item"></select><input class="adm-in" id="adc-qty" type="number" min="1" value="1" style="max-width:80px"><button id="adc-add">+ Ajouter</button></div>
-          <div class="adm-quick"><button id="adc-save" class="adc-save">💾 Enregistrer le code</button><button id="adc-reset">Vider le formulaire</button></div>
+          <div class="mpcode-items" id="mpcode-items"></div>
+          <div class="mpx-row"><select class="mpx-in" id="mpcode-item"></select><input class="mpx-in" id="mpcode-qty" type="number" min="1" value="1" style="max-width:80px"><button id="mpcode-add">+ Ajouter</button></div>
+          <div class="mpx-quick"><button id="mpcode-save" class="mpcode-save">💾 Enregistrer le code</button><button id="mpcode-reset">Vider le formulaire</button></div>
         </div>
-        <div class="ad-box"><h4>Codes existants</h4><div class="ad-table" id="adc-list"></div></div>
+        <div class="mp-box"><h4>Codes existants</h4><div class="mp-table" id="mpcode-list"></div></div>
       </div>
-      <div class="ad-tab" data-tab="tests" hidden>
-        <div class="ad-box"><h4>Luck (ton compte)</h4><div class="dbg-row" id="dbg-luck"></div></div>
-        <div class="ad-box"><h4>Jeton forcé (ton compte)</h4><select id="dbg-force"></select></div>
-        <div class="ad-box"><h4>Tester un effet</h4><div class="dbg-row" id="dbg-fx"></div></div>
+      <div class="mp-tab" data-tab="tests" hidden>
+        <div class="mp-box"><h4>Luck (ton compte)</h4><div class="dbg-row" id="dbg-luck"></div></div>
+        <div class="mp-box"><h4>Jeton forcé (ton compte)</h4><select id="dbg-force"></select></div>
+        <div class="mp-box"><h4>Tester un effet</h4><div class="dbg-row" id="dbg-fx"></div></div>
         <button class="btn primary dbg-go" id="dbg-open">Ouvrir un pull de test (sans stock, non enregistré)</button>
       </div>
     </div>
-    <p class="adm-msg" id="adm-msg"></p>
+    <p class="mpx-msg" id="mpx-msg"></p>
   </div>
 
   <div class="settings" id="settings">
@@ -269,25 +269,25 @@
     </div>
   </div>
 
-  <script src="settings.js?v=20261017c"></script>
+  <script src="settings.js?v=20261017d"></script>
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.4/dist/umd/supabase.js"></script>
-  <script src="account.js?v=20261017c"></script>
-  <script src="sound.js?v=20261017c"></script>
-  <script src="app.js?v=20261017c"></script>
-  <script src="cinema.js?v=20261017c"></script>
-  <script src="transitions.js?v=20261017c"></script>
-  <script src="opening.js?v=20261017c"></script>
-  <script src="economy.js?v=20261017c"></script>
-  <script src="ui.js?v=20261017c"></script>
-  <script src="motion.js?v=20261017c"></script>
-  <script src="inventory.js?v=20261017c"></script>
-  <script src="shop.js?v=20261017c"></script>
-  <script src="info.js?v=20261017c"></script>
-  <script src="profile.js?v=20261017c"></script>
-  <script src="social.js?v=20261017c"></script>
-  <script src="battle-engine.js?v=20261017c"></script>
-  <script src="combat.js?v=20261017c"></script>
-  <script src="admin.js?v=20261017c"></script>
-  <script src="mobile.js?v=20261017c"></script>
+  <script src="account.js?v=20261017d"></script>
+  <script src="sound.js?v=20261017d"></script>
+  <script src="app.js?v=20261017d"></script>
+  <script src="cinema.js?v=20261017d"></script>
+  <script src="transitions.js?v=20261017d"></script>
+  <script src="opening.js?v=20261017d"></script>
+  <script src="economy.js?v=20261017d"></script>
+  <script src="ui.js?v=20261017d"></script>
+  <script src="motion.js?v=20261017d"></script>
+  <script src="inventory.js?v=20261017d"></script>
+  <script src="shop.js?v=20261017d"></script>
+  <script src="info.js?v=20261017d"></script>
+  <script src="profile.js?v=20261017d"></script>
+  <script src="social.js?v=20261017d"></script>
+  <script src="battle-engine.js?v=20261017d"></script>
+  <script src="combat.js?v=20261017d"></script>
+  <script src="admin.js?v=20261017d"></script>
+  <script src="mobile.js?v=20261017d"></script>
 </body>
 </html>

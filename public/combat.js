@@ -742,9 +742,9 @@ async function renderCombat() {
           <button class="btn ghost cb-fight" id="cb-fight" ${full ? '' : 'disabled'}>${ct('fight_bot')}</button>
         </div>
       </section>
-      ${ACC.isAdmin ? `<section class="ad-box cb-debug">
+      ${ACC.isAdmin ? `<section class="mp-box cb-debug">
         <h4>🛠️ ${ct('debug')}</h4>
-        <div class="cb-dbg-row"><span>${ct('bot_deck')}</span>${DBG.botDeck.map((n, i) => `<select class="adm-in" data-bot="${i}"><option value="">🎲 ${ct('random')}</option>${SERIES.Takoras.map(j => `<option value="${esc(j.name)}"${n === j.name ? ' selected' : ''}>${esc(jn(j.name))} · 1/${fmt(j.odds)}</option>`).join('')}</select>`).join('')}</div>
+        <div class="cb-dbg-row"><span>${ct('bot_deck')}</span>${DBG.botDeck.map((n, i) => `<select class="mpx-in" data-bot="${i}"><option value="">🎲 ${ct('random')}</option>${SERIES.Takoras.map(j => `<option value="${esc(j.name)}"${n === j.name ? ' selected' : ''}>${esc(jn(j.name))} · 1/${fmt(j.odds)}</option>`).join('')}</select>`).join('')}</div>
         <div class="cb-dbg-row"><span>${ct('rig')}</span><div class="seg">${['n', 'c', 'm'].map(k => `<button data-rig="${k}" class="${DBG.rig === k ? 'on' : ''}">${ct('rig_' + k)}</button>`).join('')}</div></div>
       </section>` : ''}
     </div>`;
@@ -775,7 +775,7 @@ async function pickDeck(slot) {
     <button class="set-close jm-close" aria-label="${t('close')}">✕</button>
     <div class="pk-wrap">
       <h2>${ct('pick_title', { n: slot + 1 })}</h2>
-      <div class="pk-tools"><input class="adm-in" id="pk-q" placeholder="${t('search')}"></div>
+      <div class="pk-tools"><input class="mpx-in" id="pk-q" placeholder="${t('search')}"></div>
       <div class="pk-list"></div>
       ${DECK[slot] ? `<button class="btn ghost" id="pk-remove">${ct('pick_remove')}</button>` : ''}
     </div>`;
