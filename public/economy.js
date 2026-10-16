@@ -94,7 +94,7 @@ function renderActions() {
     ${eco.max < TOP_MAX
       ? `<button class="btn upgrade" data-up ${eco.coins >= cost ? '' : 'disabled'}>${t('stock_max', { a: eco.max, b: eco.max + 1 })} · ${money(cost)}</button>`
       : `<span class="muted small">${t('stock_top')}</span>`}
-    ${typeof effectsHTML === 'function' ? `<div class="fx-row">${effectsHTML()}</div>` : ''}
+    ${typeof effectsHTML === 'function' ? `<div class="fx-row" id="home-fx">${effectsHTML()}</div>` : ''}
     ${info}`;
 }
 $('actions').addEventListener('click', e => {
@@ -128,6 +128,12 @@ setInterval(() => {
   if (eco.stock !== before) { if (eco.stock > before) sfx.regen(); render(); return ecoSync(); } // on confirme avec le serveur
   const el = $('stock-next');
   if (el) el.textContent = eco.stock >= eco.max ? t('stock_full') : t('plus1_in', { t: mmss(nextIn()) });
+  // effets en cours (sablier) : le temps restant défile en direct, et on resynchronise quand il se termine
+  const fx = $('home-fx');
+  if (fx && eco.fast_left > 0) {
+    fx.innerHTML = effectsHTML();
+    if ((Date.now() - eco.synced) / 1000 >= eco.fast_left) { eco.fast_left = 0; ecoSync(); }
+  }
   if (opening.classList.contains('on') && !eco.stock) ecoDecorate();
 }, 1000);
 
