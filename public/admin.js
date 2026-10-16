@@ -46,7 +46,7 @@ let admT;
 $('mpx-search').addEventListener('input', () => { clearTimeout(admT); admT = setTimeout(admLoad, 250); });
 
 // ---------- Fiche d'un joueur
-const ITEMS = [['potion1', '🧪 Potion ×1,3 (5)'], ['potion2', '🧪 Potion ×2 (3)'], ['potion3', '🧪 Potion ×5 (1)'], ['potion10', '🧪 Potion ×10'], ['potion25', '🧪 Potion ×25'], ['potion50', '🧪 Potion ×50'], ['potion100', '🧪 Potion ×100'], ['instant', '⚡ Recharge éclair'], ['hourglass', '⏳ Sablier 1 h'],
+const ITEMS = [['potion1', '🧪 Potion ×1,3 (5)'], ['potion2', '🧪 Potion ×2 (3)'], ['potion3', '🧪 Potion ×5 (1)'], ['potion10', '🧪 Potion ×10'], ['potion25', '🧪 Potion ×25'], ['potion50', '🧪 Potion ×50'], ['potion100', '🧪 Potion ×100'], ['instant', '⚡ Recharge éclair'], ['hourglass', '⏳ Sablier 1 h'], ['a_etoile', '✨ Photo animée Étoile'],
   ...Object.keys(BANNER_IMG).map(b => ['b_' + b, '🎨 Bannière ' + bannerName(b)])];
 async function admDetail() {
   const box = $('mpx-detail');

@@ -1540,3 +1540,24 @@ html.lock .chat-fab, html.lock .tabbar { display: none !important; }
 
 /* Jetons transparents (ex. Astra) : on ne voit jamais le dos en miroir à travers la face, ni l'inverse */
 .op-coin .spin img.face, .op-coin .spin img.back { backface-visibility: hidden; -webkit-backface-visibility: hidden; }
+
+/* Photos de profil en image (pixel art, GIF animé possible) */
+.av.has-img { background: none !important; overflow: hidden; padding: 0; }
+.av.has-img img { width: 100%; height: 100%; object-fit: cover; image-rendering: pixelated; display: block; }
+.pod .av { border-radius: 50%; }
+.prof-pp .av.has-img { border-radius: 26px; }
+.pod .av { width: 64px !important; height: 64px !important; } .pod.p1 .av { width: 84px !important; height: 84px !important; }
+@media (max-width: 640px) { .pod .av, .pod.p1 .av { width: 48px !important; height: 48px !important; } }
+
+/* Choix de la photo de profil */
+.pe-pps { display: flex; flex-wrap: wrap; gap: 10px; margin-bottom: 6px; }
+.pe-pp { position: relative; width: 64px; height: 64px; border-radius: 16px; overflow: hidden; border: 2px solid var(--border); background: linear-gradient(135deg, #8b5cf6, #f97316); transition: transform .15s, border-color .15s; }
+.pe-pp img { width: 100%; height: 100%; object-fit: cover; image-rendering: pixelated; display: block; }
+.pe-pp span { display: grid; place-items: center; height: 100%; font-family: "Space Grotesk"; font-weight: 700; font-size: 26px; color: #fff; }
+.pe-pp:hover { transform: translateY(-2px); }
+.pe-pp.on { border-color: #fff; box-shadow: 0 0 0 3px rgba(139, 92, 246, .7); }
+.pe-pp.locked img { filter: grayscale(.8) brightness(.5); }
+.pe-pp i { position: absolute; inset: 0; display: grid; place-items: center; font-style: normal; font-size: 20px; }
+.si-pp { width: 76px; height: 76px; border-radius: 18px; image-rendering: pixelated; box-shadow: 0 8px 24px -8px rgba(var(--g), .8); }
+/* Bouton « Annuler » des fenêtres : il ferme comme la croix mais reste à sa place */
+.btn.jm-close { position: static !important; }

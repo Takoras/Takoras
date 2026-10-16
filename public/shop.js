@@ -3,13 +3,14 @@
 
 let SHOP = null, shopTimer, shopCat = 'all';
 const CATS = [['potion', 'cat_potions', '🧪'], ['util', 'cat_utils', '⚙️'], ['banner', 'cat_cosm', '🎨']];
-const catOf = it => (it.kind === 'potion' ? 'potion' : it.kind === 'banner' ? 'banner' : 'util');
+const catOf = it => (it.kind === 'potion' ? 'potion' : it.kind === 'banner' || it.kind === 'avatar' ? 'banner' : 'util');
 
 // Couleur de chaque potion (sert au halo de la carte)
 const POTION_GLOW = { 1.3: '134, 239, 172', 2: '196, 181, 253', 5: '251, 191, 36', 10: '103, 232, 249', 25: '244, 114, 182', 50: '251, 146, 60', 100: '255, 255, 255' };
 const glowOf = it => it.kind === 'potion' ? POTION_GLOW[it.data.mult] || '139, 92, 246' : it.kind === 'banner' ? '249, 115, 22' : '139, 92, 246';
 
 function itemIcon(it) {
+  if (it.kind === 'avatar') return `<img class="si-pp" src="${AVATARS[it.id.slice(2)] || ''}" alt="">`;
   if (it.kind === 'banner') { const id = it.id.slice(2); return BANNER_IMG[id] ? `<img class="si-banner" src="${BANNER_IMG[id]}" alt="">` : (() => { const c = bannerCanvas(id); return `<img class="si-banner" src="${c.toDataURL()}" alt="">`; })(); }
   return (ICONS[it.id] || ICONS.instant)();
 }
@@ -17,6 +18,7 @@ function itemText(it) {
   if (it.kind === 'potion') return [t('it_potion', { m: dec(it.data.mult) }), t('it_potion_d', { m: dec(it.data.mult), n: it.data.rolls })];
   if (it.kind === 'instant') return [t('it_instant'), t('it_instant_d')];
   if (it.kind === 'hourglass') return [t('it_hourglass'), t('it_hourglass_d', { n: it.data.minutes })];
+  if (it.kind === 'avatar') return [t('it_pp', { n: t('pp_' + it.id.slice(2)) }), t('it_pp_d')];
   return [t('it_banner', { n: bannerName(it.id.slice(2)) }), t('it_banner_d')];
 }
 const dec = n => String(Math.round(n * 100) / 100).replace('.', SETTINGS.lang === 'fr' ? ',' : '.');
@@ -95,12 +97,12 @@ async function renderShop() {
     if (error) { sfx.deny(); toast(errText(error), true); return renderShop(); }
     applyState(data);
     sfx.upgrade();
-    toast(t('bought', { n: itemText(it)[0] }) + (it.kind === 'banner' ? '' : ' → ' + t('nav_inv')));
+    toast(t('bought', { n: itemText(it)[0] }) + (it.kind === 'banner' ? '' : it.kind === 'avatar' ? ' → ' + t('edit_profile') : ' → ' + t('nav_inv')));
     // la carte se met à jour (stock) avec un petit « pop »
     // l'objet « sort » de la carte en pixels vers ton inventaire
     const ic = card.querySelector('.si-icon img'); if (ic) moDissolve(ic, ic.getBoundingClientRect(), .4);
     it.bought++;
-    if (it.kind === 'banner') it.owned = true;
+    if (it.kind === 'banner' || it.kind === 'avatar') it.owned = true;
     card.outerHTML = cardHTML(it);
     page.querySelector(`.si[data-id="${it.id}"]`)?.animate([{ transform: 'scale(1)' }, { transform: 'scale(1.05)' }, { transform: 'scale(1)' }], { duration: 320, easing: 'cubic-bezier(.2,1.4,.4,1)' });
     page.querySelectorAll('.si-btn.poor, .si-btn[data-buy]').forEach(x => { const i = SHOP.items.find(y => y.id === x.dataset.buy); if (i) x.classList.toggle('poor', eco.coins < i.price); });

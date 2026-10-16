@@ -128,7 +128,7 @@ function drawLive() {
   const item = e => {
     const me = !e.pseudo || (mine && e.pseudo === ACC.pseudo), who = me ? t('you') : esc2(e.pseudo);
     const whoL = me || !e.pseudo ? who : `<a class="plink" href="#profil/${encodeURIComponent(e.pseudo)}">${who}</a>`;
-    return `<div class="lv"><span class="av">${who[0].toUpperCase()}</span><span><b>${whoL}</b> <span class="muted">${t('got')}</span> ${jnH(e.name)} <span class="muted">· 1/${e.odds.toLocaleString(LOCALE())}</span></span><img class="jeton" src="${e.img}" alt="" style="width:24px;height:24px;filter:drop-shadow(0 0 4px ${e.glow})"></div>`;
+    return `<div class="lv">${me ? avatarHTML({ pseudo: ACC.pseudo || who, avatar: ACC.avatar }, 28) : avatarHTML({ pseudo: e.pseudo }, 28)}<span><b>${whoL}</b> <span class="muted">${t('got')}</span> ${jnH(e.name)} <span class="muted">· 1/${e.odds.toLocaleString(LOCALE())}</span></span><img class="jeton" src="${e.img}" alt="" style="width:24px;height:24px;filter:drop-shadow(0 0 4px ${e.glow})"></div>`;
   };
   $('live').innerHTML = h.length ? h.map(item).join('').repeat(h.length >= 6 ? 2 : 1) : `<span class="muted live-empty">${t('live_empty')}</span>`;
   $('live').classList.toggle('still', h.length < 6);
@@ -158,10 +158,10 @@ async function renderBoard() {
   const me = p => typeof ACC !== 'undefined' && ACC.user && p.pseudo === ACC.pseudo;
   const name = p => `<a class="plink" href="#profil/${encodeURIComponent(p.pseudo)}">${esc2(p.pseudo)}</a>` + (me(p) ? ` <span class="muted">(${t('you_tag')})</span>` : '');
   $('podium').innerHTML = r.length ? [[1, 'p2'], [0, 'p1'], [2, 'p3']].map(([i, c]) => r[i]
-    ? `<div class="pod ${c}"><span class="av">${esc2(r[i].pseudo[0].toUpperCase())}</span><b>${name(r[i])}</b><small>${boardVal(r[i])}</small><div class="step">${i + 1}</div></div>`
+    ? `<div class="pod ${c}">${avatarHTML({ pseudo: r[i].pseudo }, i === 0 ? 84 : 64)}<b>${name(r[i])}</b><small>${boardVal(r[i])}</small><div class="step">${i + 1}</div></div>`
     : '<div></div>').join('') : '';
   $('list').innerHTML = r.length
-    ? r.slice(3).map((p, i) => `<div class="li${me(p) ? ' me' : ''}"><span class="rank">${i + 4}</span><span class="av">${esc2(p.pseudo[0].toUpperCase())}</span><span>${name(p)}</span><span class="val">${boardVal(p)}</span></div>`).join('')
+    ? r.slice(3).map((p, i) => `<div class="li${me(p) ? ' me' : ''}"><span class="rank">${i + 4}</span>${avatarHTML({ pseudo: p.pseudo }, 28)}<span>${name(p)}</span><span class="val">${boardVal(p)}</span></div>`).join('')
     : `<p class="empty board-empty">${t('board_empty')}</p>`;
 }
 setInterval(renderBoard, 60000);

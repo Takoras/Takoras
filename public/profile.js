@@ -114,7 +114,7 @@ async function pickShowcase(slot) {
 
 // Modifier le profil : bio, et bannière parmi celles achetées. Les photos de profil arrivent bientôt.
 function editProfile() {
-  const p = PROF, st = { banner: p.banner, bio: p.bio, pseudo: p.pseudo };
+  const p = PROF, st = { banner: p.banner, bio: p.bio, pseudo: p.pseudo, avatar: p.avatar || 'default' };
   const canRename = p.pseudo_free || !p.pseudo_next;
   const card = $('jm-card');
   jm.style.setProperty('--g', '139, 92, 246');
@@ -132,7 +132,10 @@ function editProfile() {
         ${(p.banners || []).length ? `<div class="pe-banners"><button class="pe-b none${!st.banner ? ' on' : ''}" data-b="">${t('none')}</button>${p.banners.map(b => `<button class="pe-b${b === st.banner ? ' on' : ''}" data-b="${b}" title="${bannerName(b)}"></button>`).join('')}</div>`
           : `<p class="muted small">${t('no_banner_owned')}</p>`}
         <h4>${t('pe_pp')}</h4>
-        <p class="muted small">${t('pp_soon')}</p>
+        <div class="pe-pps">${['default', ...FREE_PP, ...Object.keys(AVATARS).filter(a => !FREE_PP.includes(a))].map(a => {
+          const owned = a === 'default' || FREE_PP.includes(a) || (p.avatars || []).includes(a);
+          return `<button class="pe-pp${st.avatar === a ? ' on' : ''}${owned ? '' : ' locked'}" data-pp="${a}" title="${owned ? '' : t('pp_shop')}">${a === 'default' ? `<span>${esc((p.pseudo || '?')[0].toUpperCase())}</span>` : `<img src="${AVATARS[a]}" alt="">`}${owned ? '' : '<i>🔒</i>'}</button>`;
+        }).join('')}</div>
         <div class="jm-actions"><button class="btn primary" id="pe-save">${t('save')}</button><button class="btn ghost jm-close">${t('cancel')}</button></div>
       </div>`;
     card.querySelectorAll('.pe-b[data-b]:not(.none)').forEach(b => b.appendChild(bannerCanvas(b.dataset.b)));
@@ -143,6 +146,11 @@ function editProfile() {
   card.onclick = async e => {
     const b = e.target.closest('[data-b]');
     if (b) { st.banner = b.dataset.b || null; return draw(); }
+    const pp = e.target.closest('.pe-pp');
+    if (pp) {
+      if (pp.classList.contains('locked')) { jm.classList.remove('on'); location.hash = '#boutique'; return toast(t('pp_shop')); }
+      st.avatar = pp.dataset.pp; sfx.click(); return draw();
+    }
     if (e.target.closest('#pe-save')) {
       // nouveau pseudo : on confirme (il ne pourra plus changer avant 30 jours)
       let name = ACC.pseudo;
@@ -152,7 +160,8 @@ function editProfile() {
         if (error) { sfx.deny(); return toast(errText(error), true); }
         name = ACC.pseudo = st.pseudo; renderAccBtn();
       }
-      if (await saveProfile({ p_banner: st.banner, p_bio: st.bio.trim() })) {
+      if (await saveProfile({ p_banner: st.banner, p_bio: st.bio.trim(), p_avatar: st.avatar })) {
+        ACC.avatar = st.avatar; renderAccBtn();
         jm.classList.remove('on'); sfx.upgrade(); toast(t('profile_saved'));
         if (name !== p.pseudo) location.hash = '#profil/' + encodeURIComponent(name); else renderProfile(name);
       }

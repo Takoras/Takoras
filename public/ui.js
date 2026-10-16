@@ -155,10 +155,34 @@ const bannerCanvas = id => {
   const c = document.createElement('canvas'); c.className = 'banner-cv'; drawBanner(c, id); return c;
 };
 
-// ---------- Photo de profil : pour l'instant l'initiale (les photos à choisir arriveront plus tard, jamais d'image Discord)
+// ---------- Photo de profil : 3 gratuites, d'autres en boutique (jamais d'image Discord). Sans photo : l'initiale.
+const AVATARS = { bleu: 'img/pp/bleu.png', rouge: 'img/pp/rouge.png', vert: 'img/pp/vert.png', etoile: 'img/pp/etoile.gif' };
+const FREE_PP = ['bleu', 'rouge', 'vert'];
+const AV_CACHE = {}; // pseudo → photo (pour le classement, le live, les amis… qui ne la donnent pas)
 function avatarHTML(p, size = 64) {
-  return `<span class="pp av" style="width:${size}px;height:${size}px;font-size:${size / 2.4}px">${esc((p.pseudo || '?')[0].toUpperCase())}</span>`;
+  const av = (p.avatar && p.avatar !== 'default') ? p.avatar : AV_CACHE[p.pseudo];
+  const st = `width:${size}px;height:${size}px;font-size:${size / 2.4}px`;
+  if (AVATARS[av]) return `<span class="pp av has-img" style="${st}"><img src="${AVATARS[av]}" alt=""></span>`;
+  return `<span class="pp av" data-pp="${esc(p.pseudo || '')}" style="${st}">${esc((p.pseudo || '?')[0].toUpperCase())}</span>`;
 }
+// Les initiales affichées (data-pp) sont remplacées par la photo du joueur s'il en a une (une seule requête pour tous)
+const hydrateAvatars = (() => {
+  let timer, asked = new Set();
+  const apply = () => document.querySelectorAll('.av[data-pp]').forEach(el => {
+    const a = AV_CACHE[el.dataset.pp];
+    if (AVATARS[a]) { el.classList.add('has-img'); el.innerHTML = `<img src="${AVATARS[a]}" alt="">`; el.removeAttribute('data-pp'); }
+  });
+  return () => { clearTimeout(timer); timer = setTimeout(async () => {
+    const need = [...new Set([...document.querySelectorAll('.av[data-pp]')].map(e => e.dataset.pp))].filter(p => p && !asked.has(p));
+    apply();
+    if (!need.length) return;
+    need.forEach(p => asked.add(p));
+    const { data } = await sb.rpc('avatars_of', { p: need });
+    (data || []).forEach(r => { AV_CACHE[r.pseudo] = r.avatar; });
+    apply();
+  }, 120); };
+})();
+new MutationObserver(hydrateAvatars).observe(document.body, { childList: true, subtree: true });
 
 // ---------- Aperçu d'un jeton (fenêtre) : grand jeton qui penche, rareté, valeur, puissance et stats
 const jm = $('jeton-modal');
