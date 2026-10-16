@@ -80,7 +80,9 @@ async function renderInventory() {
   drawItems();
 }
 
-function drawInventory() {
+// mode 'sell' : les jetons partis se dissolvent en pixels (sinon ils s'effacent simplement, ex. filtre)
+function drawInventory(mode = '') {
+  const snap = moSnap($('inv-grid'), '.ic');
   const total = INV.rows.length, value = INV.rows.reduce((s, r) => s + sellValue(r.odds), 0);
   $('inv-sum').innerHTML = `${t('inv_count', { n: fmt(total), k: INV.groups.length })} · ${t('inv_value')} ${money(value)}`;
   document.querySelectorAll('#inv-tiers .chip').forEach(b => b.classList.toggle('on', b.dataset.t === INV.tier));
@@ -89,7 +91,7 @@ function drawInventory() {
   const list = visibleGroups();
   $('inv-grid').innerHTML = list.length ? list.map(x => {
     const j = jetonOf(x.name), q = INV.sel.get(x.name) || 0, locked = !x.free.length, s = statsOf(j.name, j.odds);
-    return `<div class="ic${q ? ' sel' : ''}${locked ? ' locked' : ''}" data-n="${esc(x.name)}" style="--g:${hexRGB(j.glow)}">
+    return `<div class="ic${q ? ' sel' : ''}${locked ? ' locked' : ''}" data-n="${esc(x.name)}" data-key="${esc(x.name)}" data-sig="${x.ids.length}|${locked}|${x.deck || 0}|${x.shown}" style="--g:${hexRGB(j.glow)}">
       ${x.ids.length > 1 ? `<span class="ic-n">×${x.ids.length}</span>` : ''}
       ${x.deck ? `<span class="ic-lock" title="${t('in_deck')}">⚔️</span>` : x.shown ? `<span class="ic-lock" title="${t('in_showcase')}">📌</span>` : locked ? '<span class="ic-lock" title="🔒">🔒</span>' : ''}
       <img src="${texOf(j)}" alt="">
@@ -103,6 +105,7 @@ function drawInventory() {
   $('sb-n').textContent = t('sel_n', { n });
   $('sb-v').innerHTML = n ? ` · +${money(v)}` : '';
   $('sb-sell').disabled = !n;
+  moPlay(snap, $('inv-grid'), '.ic', { dissolve: mode === 'sell' });
 }
 
 function onCardClick(e) {
@@ -132,7 +135,7 @@ function onCardClick(e) {
     if (a === 'selldupes') await sellIds(x.free.slice(0, x.ids.length - 1));
     if (a === 'lock') { await sb.rpc('lock_pulls', { ids: x.ids, p_locked: !allLocked }); toast(allLocked ? t('unlocked') : t('locked_ok')); }
     jm.classList.remove('on');
-    if (!$('page-inv').hidden) { await loadInventory(); drawInventory(); }
+    if (!$('page-inv').hidden) { await loadInventory(); drawInventory(a === 'lock' ? '' : 'sell'); }
   };
 }
 
@@ -153,8 +156,8 @@ async function onBarClick(e) {
     const ids = [];
     for (const [k, q] of INV.sel) ids.push(...INV.groups.find(g => g.name === k).free.slice(0, q));
     await sellIds(ids);
-    INV.sel.clear();
-    await loadInventory(); drawInventory();
+    INV.sel.clear(); INV.selecting = false;
+    await loadInventory(); drawInventory('sell');
   }
 }
 
@@ -173,8 +176,10 @@ async function sellIds(ids) {
 async function drawItems() {
   const { data } = await sb.rpc('my_items');
   const box = $('inv-items'); if (!box) return;
+  const snap = moSnap(box, '.it-card');
   box.innerHTML = (data || []).length ? `<h3 class="prof-h">${t('items')}</h3><div class="items-row">${data.map(it => {
     const [name, desc] = itemText({ id: it.item, kind: it.kind, data: it.data });
-    return `<div class="it-card"><div class="si-icon">${(ICONS[it.item] || ICONS.instant)()}</div><b>${name} <span class="ic-n">×${it.qty}</span></b><p class="muted">${desc}</p><button class="btn primary sm" data-use="${it.item}">${t('use')}</button></div>`;
+    return `<div class="it-card" data-key="${it.item}" data-sig="${it.qty}"><div class="si-icon">${(ICONS[it.item] || ICONS.instant)()}</div><b>${name} <span class="ic-n">×${it.qty}</span></b><p class="muted">${desc}</p><button class="btn primary sm" data-use="${it.item}">${t('use')}</button></div>`;
   }).join('')}</div><h3 class="prof-h">${t('nav_inv')}</h3>` : '';
+  moPlay(snap, box, '.it-card', { dissolve: true });
 }

@@ -40,9 +40,9 @@ async function renderProfile(pseudo) {
       <h3 class="prof-h">${t('showcase')} ${mine ? `<small class="muted">${t('showcase_click')}</small>` : ''}</h3>
       <div class="showcase">${Array.from({ length: 5 }, (_, i) => {
         const s = p.showcase[i];
-        if (!s) return `<div class="sc empty${mine ? ' can' : ''}" data-slot="${i}">${mine ? '+' : ''}</div>`;
+        if (!s) return `<div class="sc empty${mine ? ' can' : ''}" data-slot="${i}" data-key="${i}:e">${mine ? '+' : ''}</div>`;
         const j = jetonOf(s.jeton);
-        return `<div class="sc" data-slot="${i}" data-n="${esc(s.jeton)}" style="--g:${hexRGB(j.glow)}"><img src="${texOf(j)}" alt=""><b>${jnH(s.jeton)}</b><small>1/${fmt(s.odds)}</small></div>`;
+        return `<div class="sc" data-slot="${i}" data-key="${i}:${s.id}" data-n="${esc(s.jeton)}" style="--g:${hexRGB(j.glow)}"><img src="${texOf(j)}" alt=""><b>${jnH(s.jeton)}</b><small>1/${fmt(s.odds)}</small></div>`;
       }).join('')}</div>
       <p class="muted small">${t('joined', { d: new Date(p.joined).toLocaleDateString(LOCALE()) })}</p>
       ${mine ? `
@@ -103,7 +103,12 @@ async function pickShowcase(slot) {
     // 5 cases fixes : le jeton va exactement dans la case choisie
     const ids = Array.from({ length: 5 }, (_, i) => (PROF.showcase[i] ? PROF.showcase[i].id : null));
     ids[slot] = rm ? null : +b.dataset.id;
-    if (await saveProfile({ p_showcase: ids })) { jm.classList.remove('on'); sfx.click(); renderProfile(ACC.pseudo); }
+    if (await saveProfile({ p_showcase: ids })) {
+      jm.classList.remove('on'); sfx.click();
+      const snap = moSnap($('page-profile'), '.sc');
+      await renderProfile(ACC.pseudo);
+      moPlay(snap, $('page-profile'), '.sc', { dissolve: true });
+    }
   };
 }
 

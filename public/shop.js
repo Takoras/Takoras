@@ -43,7 +43,7 @@ function cardHTML(it) {
   const btn = it.owned ? `<button class="btn ghost si-btn" disabled>✓ ${t('owned')}</button>`
     : out ? `<button class="btn ghost si-btn" disabled>${t('back_in')} <b class="si-timer">${hms(shopLeft())}</b></button>`
     : `<button class="btn primary si-btn${ACC.user && eco.coins < it.price ? ' poor' : ''}" data-buy="${it.id}" ${ACC.user ? '' : 'disabled'}>${t('buy')} · ${changed ? `<s>${fmt(it.base_price)}</s> ` : ''}${money(it.price)}</button>`;
-  return `<div class="si${out ? ' out' : ''}${it.kind === 'potion' && it.data.mult >= 10 ? ' epic' : ''}" data-id="${it.id}" style="--g:${glowOf(it)}">
+  return `<div class="si${out ? ' out' : ''}${it.kind === 'potion' && it.data.mult >= 10 ? ' epic' : ''}" data-id="${it.id}" data-key="${it.id}" data-sig="${left}|${it.owned}|${it.price}" style="--g:${glowOf(it)}">
     ${status}
     ${changed ? `<span class="si-deal${pct > 0 ? ' up' : ''}">${pct > 0 ? '+' : ''}${pct}%</span>` : ''}
     <div class="si-icon">${itemIcon(it)}</div>
@@ -57,6 +57,7 @@ async function renderShop() {
   const { data, error } = await sb.rpc('shop_today');
   if (error) { page.innerHTML = `<p class="muted">${t('err_generic')}</p>`; return; }
   SHOP = data; SHOP.loaded = Date.now();
+  const snap = moSnap(page, '.si');
   const groups = CATS.map(([k, label, ico]) => [k, label, ico, SHOP.items.filter(it => catOf(it) === k)]);
   page.innerHTML = `
     <div class="page-head">
@@ -72,6 +73,7 @@ async function renderShop() {
         <div class="shop-grid">${list.map(cardHTML).join('')}</div>
       </section>` : '').join('')}
     ${ACC.user ? '' : `<p class="muted center">${t('acc_need')}</p>`}`;
+  moPlay(snap, page, '.si');
   page.onclick = async e => {
     const c = e.target.closest('[data-cat]');
     if (c) { shopCat = c.dataset.cat; sfx.click(); return renderShop(); }
@@ -89,6 +91,8 @@ async function renderShop() {
     sfx.upgrade();
     toast(t('bought', { n: itemText(it)[0] }) + (it.kind === 'banner' ? '' : ' → ' + t('nav_inv')));
     // la carte se met à jour (stock) avec un petit « pop »
+    // l'objet « sort » de la carte en pixels vers ton inventaire
+    const ic = card.querySelector('.si-icon img'); if (ic) moDissolve(ic, ic.getBoundingClientRect(), .4);
     it.bought++;
     if (it.kind === 'banner') it.owned = true;
     card.outerHTML = cardHTML(it);

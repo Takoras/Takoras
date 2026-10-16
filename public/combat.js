@@ -571,8 +571,9 @@ async function loadDeck() {
 async function saveDeck() {
   const { error } = await sb.rpc('set_deck', { ids: DECK.map(d => d?.id).filter(Boolean) });
   if (error) toast(errText(error), true);
-  await loadDeck();
-  renderCombat();
+  const snap = moSnap($('page-combat'), '.cb-slot');
+  await renderCombat();
+  moPlay(snap, $('page-combat'), '.cb-slot', { dissolve: true });
 }
 
 async function renderCombat() {
@@ -587,9 +588,9 @@ async function renderCombat() {
         <h3 class="shop-h">🃏 ${ct('deck')} <small class="muted">${DECK.filter(Boolean).length}/3</small></h3>
         <p class="muted small">${ct('deck_hint')}</p>
         <div class="cb-slots">${DECK.map((d, i) => {
-          if (!d) return `<button class="cb-slot empty" data-slot="${i}"><span>+</span><small>${ct('slot_empty')}</small></button>`;
+          if (!d) return `<button class="cb-slot empty" data-slot="${i}" data-key="${i}:e"><span>+</span><small>${ct('slot_empty')}</small></button>`;
           const j = jetonOf(d.jeton), s = statsOf(j.name, j.odds), A = abilOf(j.name), [an, ad] = abilText(j.name);
-          return `<button class="cb-slot" data-slot="${i}" style="--g:${hexRGB(j.glow)}">
+          return `<button class="cb-slot" data-slot="${i}" data-key="${i}:${d.id}" style="--g:${hexRGB(j.glow)}">
             <div class="cb-coin"><img src="${texOf(j)}" alt=""></div><b>${jnH(j.name)}</b><small class="t-${tierKey(j.odds)}">1/${fmt(j.odds)}</small>
             <div class="cb-stats"><span><i>${ct('hp')}</i>${s.s_hp}</span><span><i>${ct('atk')}</i>${s.s_atk}</span><span><i>${ct('def')}</i>${s.s_def}</span><span><i>${ct('spd')}</i>${s.s_spd}</span></div>
             <div class="cb-abil"><b>${esc(an)}</b><p>${esc(ad)}</p><small class="muted">${ct('cd', { n: A.cd })}</small></div>

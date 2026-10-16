@@ -1242,3 +1242,7 @@ html.reduce-fx .goth { animation: none; }
 .bt-end-row img, .cb-cx img { --df: saturate(1); }
 .bu-img, .cb-coin img, .bi-head img, .bt-abil img, .bt-end-row img { filter: var(--df); animation: doodle .9s steps(1) infinite; }
 html.reduce-fx .bu-img, html.reduce-fx .cb-coin img, html.reduce-fx .bi-head img, html.reduce-fx .bt-abil img, html.reduce-fx .bt-end-row img { animation: none; }
+
+/* Calque des particules des animations de listes */
+.mo-fx { position: fixed; inset: 0; width: 100vw; height: 100vh; pointer-events: none; z-index: 300; image-rendering: pixelated; }
+.mo-ghost { transition: none !important; }
