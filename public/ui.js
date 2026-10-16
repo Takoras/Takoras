@@ -102,10 +102,10 @@ const ICONS = { // icônes dessinées pixel par pixel
   potion1: () => '<img class="pix potion" src="img/potions/chance-1-3.png" alt="">', // tes potions dessinées
   potion2: () => '<img class="pix potion" src="img/potions/chance-2.png" alt="">',
   potion3: () => '<img class="pix potion" src="img/potions/chance-5.png" alt="">',
-  potion10: () => '<img class="pix potion" src="img/potions/chance-5.png" alt="" style="filter:hue-rotate(150deg) saturate(1.6)">',
-  potion25: () => '<img class="pix potion" src="img/potions/chance-5.png" alt="" style="filter:hue-rotate(290deg) saturate(1.8)">',
-  potion50: () => '<img class="pix potion" src="img/potions/chance-5.png" alt="" style="filter:hue-rotate(-20deg) saturate(2.2)">',
-  potion100: () => '<img class="pix potion" src="img/potions/chance-5.png" alt="" style="filter:grayscale(1) brightness(1.6) drop-shadow(0 0 6px #fff)">',
+  potion10: () => '<img class="pix potion" src="img/potions/chance-5.png" alt="" style="--tint:hue-rotate(150deg) saturate(1.6)">',
+  potion25: () => '<img class="pix potion" src="img/potions/chance-5.png" alt="" style="--tint:hue-rotate(290deg) saturate(1.8)">',
+  potion50: () => '<img class="pix potion" src="img/potions/chance-5.png" alt="" style="--tint:hue-rotate(-20deg) saturate(2.2)">',
+  potion100: () => '<img class="pix potion" src="img/potions/chance-5.png" alt="" style="--tint:grayscale(1) brightness(1.6)">',
   hourglass: () => '<img class="pix potion" src="img/objets/sablier.png" alt="">',   // tes dessins
   instant: () => '<img class="pix potion" src="img/objets/recharge.png" alt="">',
 };

@@ -824,3 +824,19 @@ img.banner-cv { object-fit: cover; }
 .info-table th { z-index: 2; }
 .info-table td .piece { vertical-align: -.25em; }
 @media (max-width: 860px) { .logo { font-size: 0; gap: 0; } .links { gap: 12px; font-size: 14px; } }
+
+/* ===== Effet doodle : tes pixel arts « vivent » un peu (déformation minuscule qui change ~6 fois par seconde) ===== */
+.ic img { --df: drop-shadow(0 0 10px rgba(var(--g), .55)); }
+.sc img { --df: drop-shadow(0 0 10px rgba(var(--g), .5)); }
+.si .si-icon img { --df: var(--tint, saturate(1)) drop-shadow(0 6px 14px rgba(var(--g), .45)); }
+.si.out .si-icon img { --df: var(--tint, saturate(1)) grayscale(.85) brightness(.7); }
+.it-card .si-icon img, .pk img, .jm-coin img, .hero-coin.has-img img, .si-banner, .prof-banner img, .info-table img { --df: var(--tint, saturate(1)); }
+.ic img, .sc img, .si-icon img, .it-card .si-icon img, .pk img, .jm-coin img, .hero-coin.has-img img, .si-banner, .prof-banner img, .info-table img {
+  filter: var(--df); animation: doodle .54s steps(1) infinite; }
+@keyframes doodle {
+  0% { filter: url(#dd0) var(--df); }
+  33% { filter: url(#dd1) var(--df); }
+  66% { filter: url(#dd2) var(--df); }
+}
+html.reduce-fx .ic img, html.reduce-fx .sc img, html.reduce-fx .si-icon img, html.reduce-fx .pk img, html.reduce-fx .jm-coin img,
+html.reduce-fx .hero-coin.has-img img, html.reduce-fx .si-banner, html.reduce-fx .prof-banner img, html.reduce-fx .info-table img { animation: none; }

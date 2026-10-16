@@ -8,9 +8,17 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=Space+Grotesk:wght@500;600;700&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="style.css?v=20261016e">
+<link rel="stylesheet" href="style.css?v=20261016f">
 </head>
 <body>
+  <!-- Effet « doodle » : 3 légères déformations (turbulence) qui s'enchaînent pour faire vivre les pixel arts -->
+  <svg width="0" height="0" style="position:absolute" aria-hidden="true">
+    <defs>
+      <filter id="dd0" x="-6%" y="-6%" width="112%" height="112%"><feTurbulence type="fractalNoise" baseFrequency="0.04" numOctaves="2" seed="3"/><feDisplacementMap in="SourceGraphic" scale="2" xChannelSelector="R" yChannelSelector="G"/></filter>
+      <filter id="dd1" x="-6%" y="-6%" width="112%" height="112%"><feTurbulence type="fractalNoise" baseFrequency="0.04" numOctaves="2" seed="17"/><feDisplacementMap in="SourceGraphic" scale="2" xChannelSelector="R" yChannelSelector="G"/></filter>
+      <filter id="dd2" x="-6%" y="-6%" width="112%" height="112%"><feTurbulence type="fractalNoise" baseFrequency="0.04" numOctaves="2" seed="41"/><feDisplacementMap in="SourceGraphic" scale="2" xChannelSelector="R" yChannelSelector="G"/></filter>
+    </defs>
+  </svg>
   <div class="loader" id="loader">
     <div class="ld-box">
       <div class="logo"><img src="img/logo.png" alt="">TAKORAS</div>
@@ -204,19 +212,19 @@
     </div>
   </div>
 
-  <script src="settings.js?v=20261016e"></script>
+  <script src="settings.js?v=20261016f"></script>
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.4/dist/umd/supabase.js"></script>
-  <script src="account.js?v=20261016e"></script>
-  <script src="sound.js?v=20261016e"></script>
-  <script src="app.js?v=20261016e"></script>
-  <script src="transitions.js?v=20261016e"></script>
-  <script src="opening.js?v=20261016e"></script>
-  <script src="economy.js?v=20261016e"></script>
-  <script src="ui.js?v=20261016e"></script>
-  <script src="inventory.js?v=20261016e"></script>
-  <script src="shop.js?v=20261016e"></script>
-  <script src="info.js?v=20261016e"></script>
-  <script src="profile.js?v=20261016e"></script>
-  <script src="admin.js?v=20261016e"></script>
+  <script src="account.js?v=20261016f"></script>
+  <script src="sound.js?v=20261016f"></script>
+  <script src="app.js?v=20261016f"></script>
+  <script src="transitions.js?v=20261016f"></script>
+  <script src="opening.js?v=20261016f"></script>
+  <script src="economy.js?v=20261016f"></script>
+  <script src="ui.js?v=20261016f"></script>
+  <script src="inventory.js?v=20261016f"></script>
+  <script src="shop.js?v=20261016f"></script>
+  <script src="info.js?v=20261016f"></script>
+  <script src="profile.js?v=20261016f"></script>
+  <script src="admin.js?v=20261016f"></script>
 </body>
 </html>
