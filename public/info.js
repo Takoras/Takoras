@@ -13,7 +13,7 @@ const INFO = {
       ['⚡ Recharge éclair', 'Donne +1 pull tout de suite, si ton stock n’est pas plein.'],
       ['📦 Stock max', 'Améliorable de 5 à 10 : 1 000, 3 000, 9 000, 27 000 puis 81 000 pièces.'],
       ['🪙 Revente', 'Un jeton se revend la moitié de sa rareté : 1/2 → 1 pièce, 1/1 000 → 500, 1/1 000 000 → 500 000. Les jetons verrouillés ne peuvent pas être vendus.'],
-      ['🛒 Boutique', 'Elle change chaque jour à minuit (heure du serveur) et c’est la même pour tout le monde. Chaque objet a une limite d’achat par jour. Les objets achetés vont dans ton inventaire ; tu les utilises quand tu veux.'],
+      ['🛒 Boutique', 'Tous les objets sont en vente, mais le stock change toutes les 5 h (le même pour tout le monde, chacun peut acheter jusqu’au stock affiché). Toujours au moins 5 potions ×1,3 et 2 ×2 ; les grosses potions (×10, ×25, ×50, ×100) n’apparaissent que de temps en temps. Les objets achetés vont dans ton inventaire ; tu les utilises quand tu veux.'],
     ],
   },
   en: {
@@ -28,7 +28,7 @@ const INFO = {
       ['⚡ Instant refill', 'Gives +1 pull right away, if your stock isn’t full.'],
       ['📦 Max stock', 'Upgradable from 5 to 10: 1,000, 3,000, 9,000, 27,000 then 81,000 coins.'],
       ['🪙 Selling', 'A token sells for half its rarity: 1/2 → 1 coin, 1/1,000 → 500, 1/1,000,000 → 500,000. Locked tokens can’t be sold.'],
-      ['🛒 Shop', 'It changes every day at midnight (server time) and is the same for everyone. Each item has a daily purchase limit. Bought items go to your inventory; use them whenever you want.'],
+      ['🛒 Shop', 'Every item is on sale, but stock changes every 5 h (same for everyone, each player can buy up to the stock shown). Always at least 5 ×1.3 potions and 2 ×2; big potions (×10, ×25, ×50, ×100) only show up now and then. Bought items go to your inventory; use them whenever you want.'],
     ],
   },
 };
@@ -46,7 +46,7 @@ const pct = p => (p * 100 >= 1 ? (p * 100).toFixed(1) : (p * 100).toPrecision(2)
 function openInfo() {
   const T = INFO[SETTINGS.lang] || INFO.fr;
   const mine = ACC.user ? (eco.luck || 1) : 1;
-  const choices = [...new Set([1, 1.3, 2, 2.3, 5, 6.3, +mine.toFixed(2)])].sort((a, b) => a - b);
+  const choices = [...new Set([1, 1.3, 2, 5, 10, 25, 100, 500, +mine.toFixed(2)])].sort((a, b) => a - b);
   let luck = mine;
   const card = $('jm-card');
   jm.style.setProperty('--g', '139, 92, 246');
