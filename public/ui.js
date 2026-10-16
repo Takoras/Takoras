@@ -9,31 +9,33 @@ const sellValue = odds => Math.max(1, Math.round(odds * .5)); // même règle qu
 const TIER_NAMES = [[60, 'r_common'], [1000, 'r_rare'], [10000, 'r_epic'], [100000, 'r_legend'], [Infinity, 'r_myth']];
 const tierKey = odds => TIER_NAMES.find(([m]) => odds < m)[1];
 const strHash = s => [...s].reduce((h, c) => (h * 31 + c.charCodeAt(0)) >>> 0, 7);
+// Stats de combat : les rares sont un peu plus forts, mais pas trop (la capacité et le pile ou face comptent plus)
+const STAT_MAX = { s_hp: 140, s_atk: 30, s_def: 10, s_spd: 20 };
 function statsOf(name, odds) {
-  const lvl = Math.log10(odds) / 6, h = strHash(name);
-  const v = (i, base) => Math.round(base * (.35 + lvl * .65) * (.85 + ((h >> (i * 5)) % 31) / 100));
-  const s = { s_hp: v(0, 500), s_atk: v(1, 120), s_def: v(2, 120), s_spd: v(3, 100) };
-  s.power = Math.round(s.s_hp / 5 + s.s_atk + s.s_def + s.s_spd);
+  const lvl = Math.log10(Math.max(1, odds)) / 6, h = strHash(name);
+  const r = i => ((h >>> (i * 5)) % 31) / 30 - .5; // petite variation propre à chaque jeton (-0,5 à 0,5)
+  const s = { s_hp: Math.round(100 + 30 * lvl + 8 * r(0)), s_atk: Math.round(20 + 7 * lvl + 3 * r(1)), s_def: Math.round(4 + 4 * lvl + 2 * r(2)), s_spd: Math.round(10 + 7 * lvl + 4 * r(3)) };
+  s.power = Math.round(s.s_hp / 2 + s.s_atk * 3 + s.s_def * 5 + s.s_spd * 2);
   return s;
 }
 const jetonOf = name => SERIES.Takoras.find(j => j.name === name) || { name, odds: 1, glow: '#ffffff' };
 
 // ---------- Navigation entre pages : #inventaire, #boutique, #profil/Pseudo, #classement
 // Transition : les éléments de la page actuelle partent vers le haut en fondu, ceux de la nouvelle arrivent du bas un par un.
-const PAGES = { inv: 'page-inv', shop: 'page-shop', profile: 'page-profile', friends: 'page-friends' };
+const PAGES = { inv: 'page-inv', shop: 'page-shop', profile: 'page-profile', friends: 'page-friends', combat: 'page-combat' };
 let routeTok = 0, routeKey = null;
 const EASE_OUT = 'cubic-bezier(.6, 0, .85, .2)', EASE_IN = 'cubic-bezier(.16, 1, .3, 1)';
 
 // Les blocs à animer d'une page (et les cartes de ses grilles, pour un effet en cascade)
 function pieces(page) {
   if (page === 'home') return [...document.querySelectorAll('.home-sec')];
-  const root = $(PAGES[page]), top = root.querySelector('.prof, .fr-page') || root;
+  const root = $(PAGES[page]), top = root.querySelector('.prof, .fr-page, .cb-page') || root;
   const list = [...top.children].filter(el => !el.classList.contains('sell-bar'));
   return list;
 }
 function cards(page) {
   if (page === 'home') return [];
-  return [...$(PAGES[page]).querySelectorAll('.ic, .si, .sc, .fr')].slice(0, 30);
+  return [...$(PAGES[page]).querySelectorAll('.ic, .si, .sc, .fr, .cb-slot')].slice(0, 30);
 }
 function nav(page, p) {
   const key = p === 'classement' ? 'board' : page;
@@ -46,7 +48,7 @@ async function route() {
   const tok = ++routeTok;
   const h = decodeURIComponent(location.hash.slice(1));
   const [p, arg] = h.split('/');
-  const page = p === 'inventaire' ? 'inv' : p === 'boutique' ? 'shop' : p === 'profil' ? 'profile' : p === 'amis' ? 'friends' : 'home';
+  const page = p === 'inventaire' ? 'inv' : p === 'boutique' ? 'shop' : p === 'profil' ? 'profile' : p === 'amis' ? 'friends' : p === 'combat' ? 'combat' : 'home';
   const key = page + '/' + (page === 'profile' ? (arg || ACC.pseudo || '') : '');
   const from = routeKey ? routeKey.split('/')[0] : null;
   const animate = routeKey !== null && routeKey !== key && !reducedFx();
@@ -68,7 +70,7 @@ async function route() {
   document.querySelectorAll('.home-sec').forEach(s => { s.hidden = page !== 'home'; });
   Object.entries(PAGES).forEach(([k, id]) => { $(id).hidden = k !== page; });
   if (page !== 'home' || from !== 'home') scrollTo({ top: 0 });
-  const ready = page === 'inv' ? renderInventory() : page === 'shop' ? renderShop() : page === 'profile' ? renderProfile(arg || ACC.pseudo) : page === 'friends' ? renderFriends() : null;
+  const ready = page === 'inv' ? renderInventory() : page === 'shop' ? renderShop() : page === 'profile' ? renderProfile(arg || ACC.pseudo) : page === 'friends' ? renderFriends() : page === 'combat' ? renderCombat() : null;
   if (page === 'home' && p === 'classement') setTimeout(() => $('classement').scrollIntoView({ behavior: 'smooth' }), animate ? 250 : 0);
 
   // 3. Elle arrive : les blocs montent un par un, puis les cartes en cascade
@@ -169,7 +171,7 @@ function openJeton(name, extra = '') {
       <h2>${jnH(j.name)}</h2>
       <div class="jm-odds">1/${fmt(j.odds)}</div>
       <div class="jm-power">${t('power')} <b>${fmt(s.power)}</b></div>
-      <div class="op-stats">${['s_hp', 's_atk', 's_def', 's_spd'].map(k => `<div class="stat"><span class="muted">${t(k)}</span><div class="bar"><i style="width:${Math.min(100, s[k] / { s_hp: 500, s_atk: 120, s_def: 120, s_spd: 100 }[k] * 100)}%"></i></div><b>${s[k]}</b></div>`).join('')}</div>
+      <div class="op-stats">${['s_hp', 's_atk', 's_def', 's_spd'].map(k => `<div class="stat"><span class="muted">${t(k)}</span><div class="bar"><i style="width:${Math.min(100, s[k] / STAT_MAX[k] * 100)}%"></i></div><b>${s[k]}</b></div>`).join('')}</div>
       <div class="jm-val">${t('sell_value')} : ${money(sellValue(j.odds))}</div>
       ${extra}
     </div>`;

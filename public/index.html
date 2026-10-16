@@ -8,7 +8,7 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=Cinzel:wght@600;700&family=Cinzel+Decorative:wght@700&family=Space+Grotesk:wght@500;600;700&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="style.css?v=20261016p">
+<link rel="stylesheet" href="style.css?v=20261016q">
 </head>
 <body>
   <!-- Effet « doodle » : 3 légères déformations (turbulence) qui s'enchaînent pour faire vivre les pixel arts -->
@@ -51,6 +51,7 @@
         <a href="#inventaire" data-page="inv" data-i18n="nav_inv">Inventaire</a>
         <a href="#boutique" data-page="shop" data-i18n="nav_shop">Boutique</a>
         <a href="#classement" data-page="board" data-i18n="nav_board">Classement</a>
+        <a href="#combat" data-page="combat" id="nav-combat" hidden><span data-i18n="nav_combat">Combat</span></a>
         <a href="#amis" data-page="friends"><span data-i18n="nav_friends">Amis</span><i class="nbadge" id="fr-badge" hidden></i></a>
         <span class="nav-ink"></span>
       </div>
@@ -119,6 +120,7 @@
     <section class="wrap page" id="page-shop" hidden></section>
     <section class="wrap page" id="page-profile" hidden></section>
     <section class="wrap page" id="page-friends" hidden></section>
+    <section class="wrap page" id="page-combat" hidden></section>
   </main>
 
   <!-- Fenêtre d'aperçu d'un jeton -->
@@ -167,6 +169,20 @@
   </div>
   <div class="fx" id="fx"></div>
   <div class="ann-full" id="ann-full" hidden></div>
+  <div class="battle" id="battle" hidden>
+    <div class="bt-bg"></div>
+    <div class="bt-top"><button class="bt-ghost" id="bt-quit">✕</button><span class="bt-step" id="bt-step"></span><button class="bt-ghost" id="bt-logbtn">☰</button></div>
+    <div class="bt-row foes" id="bt-foes"></div>
+    <div class="bt-mid">
+      <div class="bt-coin-wrap"><div class="bt-coin" id="bt-coin"><img class="bt-face" src="img/jetons/takoras.png" alt=""><img class="bt-pile" src="img/piece.png" alt=""></div></div>
+      <div class="bt-flip" id="bt-flip"></div>
+      <div class="bt-banner" id="bt-banner"></div>
+    </div>
+    <div class="bt-row mine" id="bt-mine"></div>
+    <div class="bt-actions" id="bt-actions"></div>
+    <div class="bt-log" id="bt-log"></div>
+    <div class="bt-end" id="bt-end" hidden></div>
+  </div>
   <button class="chat-fab" id="chat-fab" hidden aria-label="Chat"><svg viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg><i class="nbadge" id="chat-fab-badge" hidden></i></button>
   <div class="chat-dock" id="chat-dock" hidden></div>
   <div class="chat-notifs" id="chat-notifs"></div>
@@ -234,20 +250,21 @@
     </div>
   </div>
 
-  <script src="settings.js?v=20261016p"></script>
+  <script src="settings.js?v=20261016q"></script>
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.4/dist/umd/supabase.js"></script>
-  <script src="account.js?v=20261016p"></script>
-  <script src="sound.js?v=20261016p"></script>
-  <script src="app.js?v=20261016p"></script>
-  <script src="transitions.js?v=20261016p"></script>
-  <script src="opening.js?v=20261016p"></script>
-  <script src="economy.js?v=20261016p"></script>
-  <script src="ui.js?v=20261016p"></script>
-  <script src="inventory.js?v=20261016p"></script>
-  <script src="shop.js?v=20261016p"></script>
-  <script src="info.js?v=20261016p"></script>
-  <script src="profile.js?v=20261016p"></script>
-  <script src="social.js?v=20261016p"></script>
-  <script src="admin.js?v=20261016p"></script>
+  <script src="account.js?v=20261016q"></script>
+  <script src="sound.js?v=20261016q"></script>
+  <script src="app.js?v=20261016q"></script>
+  <script src="transitions.js?v=20261016q"></script>
+  <script src="opening.js?v=20261016q"></script>
+  <script src="economy.js?v=20261016q"></script>
+  <script src="ui.js?v=20261016q"></script>
+  <script src="inventory.js?v=20261016q"></script>
+  <script src="shop.js?v=20261016q"></script>
+  <script src="info.js?v=20261016q"></script>
+  <script src="profile.js?v=20261016q"></script>
+  <script src="social.js?v=20261016q"></script>
+  <script src="combat.js?v=20261016q"></script>
+  <script src="admin.js?v=20261016q"></script>
 </body>
 </html>

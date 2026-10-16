@@ -7,6 +7,8 @@ const ago2 = d => new Date(d).toLocaleDateString(LOCALE());
 
 function renderAdminBtn() {
   $('open-admin').hidden = !ACC.isAdmin;
+  $('nav-combat').hidden = !ACC.isAdmin; // onglet Combat : admins seulement pour l'instant
+  if (ACC.isAdmin && !$('page-combat').hidden && !$('page-combat').querySelector('.cb-page')) renderCombat();
   if (!ACC.isAdmin) $('debug').hidden = true;
 }
 

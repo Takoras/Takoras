@@ -204,7 +204,7 @@ function fillInfo(j) {
   $('op-rarity').textContent = '1/' + j.odds.toLocaleString(LOCALE());
   // Mêmes stats que dans l'inventaire (stables pour un même jeton)
   const S = statsOf(j.name, j.odds);
-  sess.cur.stats = [['s_hp', 500], ['s_atk', 120], ['s_def', 120], ['s_spd', 100]].map(([k, base]) => [k, S[k], Math.min(100, S[k] / base * 100)]);
+  sess.cur.stats = ['s_hp', 's_atk', 's_def', 's_spd'].map(k => [k, S[k], Math.min(100, S[k] / STAT_MAX[k] * 100)]);
   $('op-stats').innerHTML = sess.cur.stats
     .map(([k, v, w]) => `<div class="stat"><span class="muted">${t(k)}</span><div class="bar"><i data-w="${w}"></i></div><b>${v}</b></div>`).join('');
   requestAnimationFrame(() => requestAnimationFrame(() => $('op-stats').querySelectorAll('i').forEach(i => { i.style.width = i.dataset.w + '%'; })));
