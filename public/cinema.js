@@ -27,7 +27,7 @@ const CINE = (() => {
     'Nyx':      { c: ['#020208', '#1e1b4b', '#5b5fd6', '#c7d2fe'], scene: ['stars', 'eclipse', 'tendrils'],   root: 146.8, scale: [0, 3, 5, 7, 10], chord: [0, 7, 10, 15],       bpm: 70,  voice: 'pad' },
     'Astra':    { c: ['#07061a', '#2e2a63', '#f2c98f', '#fff7e6'], scene: ['stars', 'meteors', 'bigstar'],    root: 164.8, scale: [0, 2, 4, 7, 9],  chord: [0, 4, 7, 14],        bpm: 112, voice: 'bell' },
     'Kraïos':   { c: ['#03040f', '#1e1b6b', '#4f46e5', '#c7d2fe'], scene: ['clouds', 'rain', 'lightning'],    root: 185,   scale: [0, 3, 5, 7, 10], chord: [0, 7, 12],           bpm: 128, voice: 'pluck', thunder: true },
-    'Koi':      { c: ['#03121c', '#0e4a6b', '#fb923c', '#fff7ed'], scene: ['water', 'bubbles', 'spiral'],    root: 196,   scale: [0, 2, 4, 7, 9],  chord: [0, 4, 7, 11, 14],    bpm: 96,  voice: 'bell' },
+    'Koi':      { c: ['#07040f', '#3b1d4a', '#ff5a3c', '#fff1ec'], scene: ['water', 'bubbles', 'spiral'],    root: 196,   scale: [0, 2, 4, 7, 9],  chord: [0, 4, 7, 11, 14],    bpm: 96,  voice: 'bell' },
     'Néphéris': { c: ['#12030f', '#86198f', '#f0abfc', '#fdf4ff'], scene: ['nebula', 'runes', 'spiral'],      root: 233.1, scale: [0, 3, 5, 7, 10], chord: [0, 3, 7, 10, 14],    bpm: 84,  voice: 'choir' },
     'Zénith':   { c: ['#0b1120', '#64748b', '#e2e8f0', '#ffffff'], scene: ['skyup', 'sunrays', 'feathers'],   root: 293.7, scale: [0, 2, 4, 7, 9],  chord: [0, 4, 7, 11, 14],    bpm: 96,  voice: 'choir' },
     'Oblivion': { c: ['#010001', '#4c0519', '#fb7185', '#ffe4e6'], scene: ['vortex', 'disk', 'glitch'],       root: 138.6, scale: [0, 1, 5, 7, 8],  chord: [0, 6, 12],           bpm: 64,  voice: 'pad', sub: true },

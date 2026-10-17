@@ -18,7 +18,7 @@ const SERIES = {
     { name: 'Nyx', odds: 5000, glow: '#5b5fd6', img: 'img/jetons/serie-takoras/nyx.png' },
     { name: 'Astra', odds: 10000, glow: '#f2c98f', img: 'img/jetons/serie-takoras/astra.png' },
     { name: 'Kraïos', odds: 25000, glow: '#4f46e5', img: 'img/jetons/serie-takoras/kraios.gif' },
-    { name: 'Koi', odds: 50000, glow: '#fb923c' },
+    { name: 'Koi', odds: 50000, glow: '#ff5a3c', img: 'img/jetons/serie-takoras/koi.png' },
     { name: 'Néphéris', odds: 100000, glow: '#f0abfc' },
     { name: 'Zénith', odds: 250000, glow: '#e2e8f0' },
     { name: 'Oblivion', odds: 500000, glow: '#fb7185' },
@@ -78,7 +78,8 @@ const DEPTH = 8; // nombre de couches de la tranche
 function coin3D(src, alt, style = '') {
   let edge = '';
   for (let i = 1; i <= DEPTH; i++) edge += `<img class="edge" src="${src}" alt="" style="transform:translateZ(${-i * 2}px)">`;
-  return `<img class="face" src="${src}" alt="${alt}" style="${style}">${edge}<img class="back" src="${src}" alt="" style="transform:translateZ(${-(DEPTH + 1) * 2}px) rotateY(180deg)">`;
+  // reflet et éclat posés sur la face : ils tournent avec le jeton
+  return `<img class="face" src="${src}" alt="${alt}" style="${style}"><i class="glare"></i><i class="shine"></i>${edge}<img class="back" src="${src}" alt="" style="transform:translateZ(${-(DEPTH + 1) * 2}px) rotateY(180deg)">`;
 }
 function setGlareMask(src) {
   opCoin.querySelectorAll('.glare, .shine').forEach(g => { g.style.webkitMaskImage = g.style.maskImage = `url(${src})`; });
@@ -121,7 +122,7 @@ function startOpening() {
   opening.classList.remove('hold', 'rare', 'revealed', 'recap', 'spinning', 'mythic', 'god', 'cinema', 'v-gold', 'v-celeste', 'v-ombre');
   setTier(c.shown);
   opCoin.className = 'op-coin';
-  opCoin.innerHTML = `<div class="zoom"><div class="tilt3d"><div class="spin">${coin3D(MYSTERE, 'Jeton mystère')}</div><i class="glare"></i><i class="shine"></i>${'<b class="tw"></b>'.repeat(7)}</div></div>`;
+  opCoin.innerHTML = `<div class="zoom"><div class="tilt3d"><div class="spin">${coin3D(MYSTERE, 'Jeton mystère')}</div>${'<b class="tw"></b>'.repeat(7)}</div></div>`;
   setGlareMask(MYSTERE);
   if (c.phase === 'count' && c.shown === 1) spawn(); // le « ? » arrive en grossissant
   $('op-hint').textContent = t('click_coin');

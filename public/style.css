@@ -1693,4 +1693,17 @@ img.sil { --df: brightness(0) drop-shadow(0 0 1px rgba(255, 255, 255, .5)) !impo
 /* Jeton de l'ouverture : il tourne autour du milieu de son épaisseur (sinon le dos passe devant les effets),
    et le reflet / l'éclat / les étincelles restent toujours devant le jeton */
 .op-coin .spin { transform-origin: 50% 50% -9px; }
-.op-coin .tilt3d > .glare, .op-coin .tilt3d > .shine, .op-coin .tilt3d > .tw { translate: 0 0 12px; }
+.op-coin .tilt3d > .tw { translate: 0 0 12px; }
+/* reflet et éclat collés sur la face du jeton (ils tournent avec lui, invisibles quand il est de dos) */
+.op-coin .spin > .glare, .op-coin .spin > .shine { transform: translateZ(1px); backface-visibility: hidden; -webkit-backface-visibility: hidden; }
+
+/* Profil : collection (bestiaire compact) */
+.pc-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(84px, 1fr)); gap: 8px; margin-bottom: 18px; }
+.pc { display: flex; flex-direction: column; align-items: center; gap: 4px; padding: 10px 4px 8px; border-radius: 14px; color: var(--text);
+  background: radial-gradient(70px 50px at 50% 30%, rgba(var(--g), .16), transparent 70%), var(--surface); border: 1px solid var(--border); transition: transform .15s, border-color .15s; }
+.pc:hover { transform: translateY(-2px); border-color: rgba(var(--g), .55); }
+.pc img { width: 52px; height: 52px; image-rendering: pixelated; --df: drop-shadow(0 0 6px rgba(var(--g), .5)); filter: var(--df); animation: doodle .9s steps(1) infinite; }
+.pc small { font-size: 10px; color: var(--muted); }
+.pc.unk { background: var(--surface); }
+.pc .bc-vars { gap: 3px; } .pc .v-dot { width: 6px; height: 6px; }
+@media (max-width: 760px) { .pc-grid { grid-template-columns: repeat(5, 1fr); gap: 5px; } .pc img { width: 40px; height: 40px; } }

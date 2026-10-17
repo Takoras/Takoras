@@ -44,6 +44,8 @@ async function renderProfile(pseudo) {
         const j = jetonOf(s.jeton);
         return `<div class="sc" data-slot="${i}" data-key="${i}:${s.id}" data-n="${esc(s.jeton)}" data-v="${s.variant || ''}" style="--g:${hexRGB(j.glow)}">${s.variant ? `<span class="sc-v">${vTag(s.variant)}</span>` : ''}<img class="${vCls(s.variant)}" src="${texOf(j)}" alt=""><b>${jnH(s.jeton)}</b><small>1/${fmt(s.odds)}</small></div>`;
       }).join('')}</div>
+      <h3 class="prof-h">📖 ${t('bestiary')} <small class="muted" id="pc-count"></small></h3>
+      <div class="pc-grid" id="pc-grid"></div>
       <p class="muted small">${t('joined', { d: new Date(p.joined).toLocaleDateString(LOCALE()) })}${(p.wins || p.losses) ? ' · ' + t('battles_rec', { w: p.wins || 0, l: p.losses || 0 }) : ''}</p>
       ${mine ? `
       <div class="prof-private">
@@ -55,6 +57,7 @@ async function renderProfile(pseudo) {
       </div>` : ''}
     </div>`;
   if (p.banner) $('prof-banner').appendChild(bannerCanvas(p.banner));
+  drawProfileCollection(p.pseudo);
   page.querySelectorAll('.sc').forEach(el => el.addEventListener('click', () => {
     if (mine) return pickShowcase(+el.dataset.slot);
     if (el.dataset.n) openJeton(el.dataset.n, '', el.dataset.v);
@@ -167,4 +170,21 @@ function editProfile() {
       }
     }
   };
+}
+
+// Collection d'un joueur sur son profil : tous les jetons du jeu, ceux qu'il a déjà eus en couleur (+ ses variantes)
+async function drawProfileCollection(pseudo) {
+  const { data } = await sb.rpc('collection_of', { p_pseudo: pseudo });
+  const grid = $('pc-grid'); if (!grid || PROF?.pseudo !== pseudo) return;
+  const got = new Map();
+  (data || []).forEach(r => { const c = got.get(r.jeton) || { total: 0, vars: new Set() }; c.total += +r.total; if (r.variant) c.vars.add(r.variant); got.set(r.jeton, c); });
+  const all = [...SERIES.Takoras].sort((a, b) => a.odds - b.odds);
+  $('pc-count').textContent = `${all.filter(j => got.has(j.name)).length}/${all.length}`;
+  grid.innerHTML = all.map(j => {
+    const c = got.get(j.name);
+    return `<button class="pc${c ? '' : ' unk'}" data-n="${esc(j.name)}" style="--g:${hexRGB(j.glow)}" title="${esc(jn(j.name))} · 1/${fmt(j.odds)}">
+      <img class="${c ? '' : 'sil'}" src="${texOf(j)}" alt=""><small>1/${fmt(j.odds)}</small>
+      <span class="bc-vars">${Object.keys(VARIANTS).map(v => `<i class="v-dot ${v}${c && c.vars.has(v) ? ' on' : ''}"></i>`).join('')}</span></button>`;
+  }).join('');
+  grid.onclick = e => { const b = e.target.closest('.pc'); if (!b) return; sfx.click(); openJeton(b.dataset.n, '', '', b.classList.contains('unk')); };
 }
