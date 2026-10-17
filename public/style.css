@@ -1671,13 +1671,22 @@ img.sil { --df: brightness(0) drop-shadow(0 0 1px rgba(255, 255, 255, .5)) !impo
 .ivt.v-ombre.on { border-color: rgba(168, 85, 247, .8); background: rgba(124, 58, 237, .15); }
 @media (max-width: 760px) { .inv-vtabs { display: grid; grid-template-columns: repeat(4, 1fr); gap: 6px; } .ivt { flex-direction: column; gap: 3px; padding: 8px 4px; font-size: 12px; } }
 
-/* Survol des jetons : juste un petit reflet doux qui suit la souris (discret) */
+/* Survol des jetons : petit reflet doux qui suit la souris + léger holographique (discret).
+   La couleur du holo suit la variante : arc-en-ciel pâle (normal), or, nacre (céleste), violet (ombre). */
 .glare, .op-coin .glare {
-  background: radial-gradient(circle at var(--mx, 50%) var(--my, 50%), rgba(255, 255, 255, .55), rgba(255, 255, 255, .12) 14%, transparent 24%) !important;
+  --h1: #ff9ecf; --h2: #ffe39a; --h3: #9dffd8; --h4: #9ccfff; --h5: #d3a8ff;
+  background:
+    radial-gradient(circle at var(--mx, 50%) var(--my, 50%), rgba(255, 255, 255, .5), rgba(255, 255, 255, .1) 14%, transparent 24%),
+    linear-gradient(115deg, transparent 20%, var(--h1) 32%, var(--h2) 41%, var(--h3) 50%, var(--h4) 59%, var(--h5) 68%, transparent 80%) !important;
+  background-size: 100% 100%, 280% 280% !important;
+  background-position: 0 0, var(--mx, 50%) var(--my, 50%) !important;
   mix-blend-mode: soft-light !important;
-  opacity: calc(var(--g, 0) * .8) !important;
+  opacity: calc(var(--g, 0) * .7) !important;
   transition: opacity .4s ease;
 }
+.glare.hv-gold, .opening.v-gold .op-coin .glare { --h1: #fff3c4; --h2: #ffd36b; --h3: #ffb938; --h4: #ffe9a3; --h5: #fff8de; }
+.glare.hv-celeste, .opening.v-celeste .op-coin .glare { --h1: #ffffff; --h2: #e6e9ff; --h3: #cfd8ff; --h4: #f2e8ff; --h5: #ffffff; }
+.glare.hv-ombre, .opening.v-ombre .op-coin .glare { --h1: #c084fc; --h2: #7c3aed; --h3: #a855f7; --h4: #6d28d9; --h5: #e9d5ff; }
 .jm-coin { position: relative; }
 .jm-coin .glare { position: absolute; inset: 15px; pointer-events: none; -webkit-mask-size: 100% 100%; mask-size: 100% 100%; }
 @media (max-width: 760px) { .jm-coin .glare { inset: 10px; } }

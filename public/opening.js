@@ -597,7 +597,7 @@ $('dbg-open').addEventListener('click', () => buy(1));
   (function frame() {
     const t = opCoin.querySelector('.tilt3d');
     if (t && opening.classList.contains('on')) {
-      const tgt = over ? { rx: (.5 - my) * 40, ry: (mx - .5) * 40, g: 1 } : { rx: 0, ry: 0, g: 0 };
+      const tgt = over ? { rx: (.5 - my) * 64, ry: (mx - .5) * 64, g: 1 } : { rx: 0, ry: 0, g: 0 };
       for (const k in cur) cur[k] += (tgt[k] - cur[k]) * (over ? .12 : .06);
       t.style.transform = `rotateX(${cur.rx.toFixed(2)}deg) rotateY(${cur.ry.toFixed(2)}deg)`;
       opCoin.style.setProperty('--mx', (mx * 100).toFixed(1) + '%');

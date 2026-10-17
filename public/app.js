@@ -65,7 +65,7 @@ function frame(t) {
   if (tilt) {
     const wave = still ? 0 : Math.cos(t / 16000 * Math.PI * 2);
     const tgt = over
-      ? { rx: (.5 - my) * 40, ry: (mx - .5) * 40, s: 1.05, g: 1 }
+      ? { rx: (.5 - my) * 64, ry: (mx - .5) * 64, s: 1.06, g: 1 }
       : { rx: 6 * wave, ry: -22 * wave, s: 1, g: 0 };
     const k = over ? .12 : .05;
     for (const key in cur) cur[key] += (tgt[key] - cur[key]) * k;
