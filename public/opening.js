@@ -18,7 +18,7 @@ const SERIES = {
     { name: 'Nyx', odds: 5000, glow: '#5b5fd6', img: 'img/jetons/serie-takoras/nyx.png' },
     { name: 'Astra', odds: 10000, glow: '#f2c98f', img: 'img/jetons/serie-takoras/astra.png' },
     { name: 'Kraïos', odds: 25000, glow: '#4f46e5', img: 'img/jetons/serie-takoras/kraios.gif' },
-    { name: 'Chronos', odds: 50000, glow: '#facc15' },
+    { name: 'Koi', odds: 50000, glow: '#fb923c' },
     { name: 'Néphéris', odds: 100000, glow: '#f0abfc' },
     { name: 'Zénith', odds: 250000, glow: '#e2e8f0' },
     { name: 'Oblivion', odds: 500000, glow: '#fb7185' },

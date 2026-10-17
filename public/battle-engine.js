@@ -14,7 +14,7 @@ const ENGINE = (() => {
     return { hp: Math.round(100 + 30 * lvl + 8 * r(0)), atk: Math.round(20 + 7 * lvl + 3 * r(1)), def: Math.round(4 + 4 * lvl + 2 * r(2)), spd: Math.round(10 + 7 * lvl + 4 * r(3)) };
   }
   // Recharge de chaque capacité (en tours)
-  const CD = { 'Mobu': 2, 'Pikko': 2, 'Rouillé': 3, 'Givre': 3, 'Soléo': 3, 'Azura': 3, 'Carmin': 2, 'Vyolis': 3, 'Lumis': 3, 'Nyx': 3, 'Astra': 3, 'Kraïos': 3, 'Chronos': 4, 'Néphéris': 3, 'Zénith': 3, 'Oblivion': 3, 'Takoras': 3 };
+  const CD = { 'Mobu': 2, 'Pikko': 2, 'Rouillé': 3, 'Givre': 3, 'Soléo': 3, 'Azura': 3, 'Carmin': 2, 'Vyolis': 3, 'Lumis': 3, 'Nyx': 3, 'Astra': 3, 'Kraïos': 3, 'Koi': 4, 'Néphéris': 3, 'Zénith': 3, 'Oblivion': 3, 'Takoras': 3 };
   const cdOf = name => CD[name] || 2;
 
   const alive = u => u && u.hp > 0;
@@ -64,7 +64,7 @@ const ENGINE = (() => {
     'Nyx': c => { c.me.dodge = true; },
     'Astra': c => { c.sure = true; c.critBoost = .5; },
     'Kraïos': c => { c.me.atk += 6; c.me.fury += 6; },
-    'Chronos': c => { c.allies.forEach(a => { if (a !== c.me) a.cd = 0; }); c.mult *= 1.25; },
+    'Koi': c => { c.allies.forEach(a => { if (a !== c.me) a.cd = 0; }); c.mult *= 1.25; },
     'Néphéris': c => { c.foe.curse = 3; },
     'Zénith': (c, st, ev) => c.allies.forEach(a => healOf(st, ev, a, 22)),
     'Oblivion': (c, st, ev) => hurt(st, ev, c.foe, 30, true),
