@@ -118,7 +118,7 @@ function startOpening() {
   if ($('op-price')) $('op-price').textContent = (p.price * sess.total).toLocaleString(LOCALE()); // ce bouton peut être réécrit par l'économie
   $('op-odds').textContent = '1/' + c.shown.toLocaleString(LOCALE());
   stopBg();
-  opening.classList.remove('hold', 'rare', 'revealed', 'recap', 'spinning', 'mythic', 'god', 'cinema', 'v-gold', 'v-glitch', 'v-prism');
+  opening.classList.remove('hold', 'rare', 'revealed', 'recap', 'spinning', 'mythic', 'god', 'cinema', 'v-gold', 'v-celeste', 'v-ombre');
   setTier(c.shown);
   opCoin.className = 'op-coin';
   opCoin.innerHTML = `<div class="zoom"><div class="tilt3d"><div class="spin">${coin3D(MYSTERE, 'Jeton mystère')}</div><i class="glare"></i><i class="shine"></i>${'<b class="tw"></b>'.repeat(7)}</div></div>`;
@@ -392,8 +392,8 @@ function variantFx(v) {
   d.innerHTML = `<b>${t('v_' + v)}</b><small>1/${fmt(VARIANTS[v].odds)} · ×${VARIANTS[v].mult}</small>`;
   opening.appendChild(d);
   setTimeout(() => d.remove(), 2200);
-  flash(.35, 500); burst(v === 'prism' ? 40 : 24); shake(v === 'gold' ? .5 : 1);
-  sfx.upgrade(); if (v !== 'gold') setTimeout(() => sfx.reveal(v === 'prism' ? 100000 : 5000), 120);
+  flash(.35, 500); burst(v === 'gold' ? 24 : 36); shake(v === 'gold' ? .5 : 1);
+  sfx.upgrade(); if (v !== 'gold') setTimeout(() => sfx.reveal(20000), 120);
 }
 
 // 1/1000 et plus : cinématique propre au jeton (cinema.js), puis la fiche normale prend le relais
@@ -559,7 +559,7 @@ function renderDebug() {
   $('dbg-luck').innerHTML = LUCKS.map(l => `<button class="${l === debug.luck ? 'on' : ''}" data-l="${l}">×${l}</button>`).join('');
   $('dbg-force').innerHTML = '<option value="">Aléatoire</option>' + SERIES.Takoras.map(j =>
     `<option value="${j.name}"${j.name === debug.force ? ' selected' : ''}>${jn(j.name)} · 1/${j.odds.toLocaleString(LOCALE())}</option>`).join('');
-  $('dbg-var').innerHTML = [['', 'Au hasard'], ['none', 'Aucune'], ['gold', 'Doré'], ['glitch', 'Glitch'], ['prism', 'Prisme']].map(([v, l]) => `<option value="${v}"${v === (debug.variant || '') ? ' selected' : ''}>${l}</option>`).join('');
+  $('dbg-var').innerHTML = [['', 'Au hasard'], ['none', 'Aucune'], ['gold', 'Doré'], ['celeste', 'Céleste'], ['ombre', 'Ombre']].map(([v, l]) => `<option value="${v}"${v === (debug.variant || '') ? ' selected' : ''}>${l}</option>`).join('');
   $('dbg-fx').innerHTML = FX.map(([n], i) => `<button data-f="${i}">${n}</button>`).join('');
 }
 $('dbg-luck').addEventListener('click', e => { const b = e.target.closest('button'); if (b) { debug.luck = +b.dataset.l; renderDebug(); } });

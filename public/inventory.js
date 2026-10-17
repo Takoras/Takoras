@@ -1,6 +1,6 @@
 // Inventaire : tes jetons (regroupés par type), filtres, tri, sélection multiple, revente, verrouillage, aperçu.
 
-const INV = { rows: [], groups: [], sel: new Map(), selecting: false, tier: 'all', sort: 'rarity', q: '' };
+const INV = { rows: [], groups: [], sel: new Map(), selecting: false, tier: 'all', sort: 'rarity', q: '', view: 'coll' }; // view : bestiaire (coll) ou mes jetons (mine)
 
 async function loadInventory() {
   const { data, error } = await sb.rpc('my_inventory');
@@ -43,6 +43,9 @@ async function renderInventory() {
         <div><div class="eyebrow">${t('nav_inv')}</div><h2 class="page-title">${t('inv_title')}</h2><p class="muted" id="inv-sum"></p></div>
         <button class="btn ghost" id="inv-mode">${t('inv_select')}</button>
       </div>
+      <div class="seg inv-tabs" id="inv-tabs"><button data-v="coll">📖 ${t('bestiary')}</button><button data-v="mine">🎒 ${t('my_tokens')}</button></div>
+      <div id="inv-coll"></div>
+      <div id="inv-mine">
       <div class="inv-tools">
         <div class="chips" id="inv-tiers">${['all', 'r_common', 'r_rare', 'r_epic', 'r_legend', 'r_myth'].map(k => `<button class="chip" data-t="${k}">${t(k === 'all' ? 'all' : k)}</button>`).join('')}</div>
         <div class="inv-right">
@@ -52,6 +55,7 @@ async function renderInventory() {
       </div>
       <div class="inv-items" id="inv-items"></div>
       <div class="inv-grid" id="inv-grid"></div>
+      </div>
       <div class="sell-bar" id="sell-bar">
         <div class="sb-left"><b id="sb-n"></b><span id="sb-v"></span></div>
         <div class="sb-btns">
@@ -67,6 +71,8 @@ async function renderInventory() {
     $('inv-sort').addEventListener('change', e => { INV.sort = e.target.value; drawInventory(); });
     $('inv-mode').addEventListener('click', () => { INV.selecting = !INV.selecting; if (!INV.selecting) INV.sel.clear(); drawInventory(); });
     $('inv-grid').addEventListener('click', onCardClick);
+    $('inv-tabs').addEventListener('click', e => { const b = e.target.closest('[data-v]'); if (!b || b.dataset.v === INV.view) return; INV.view = b.dataset.v; INV.selecting = false; INV.sel.clear(); sfx.click(); showInvView(); });
+    $('inv-coll').addEventListener('click', onCollClick);
     $('sell-bar').addEventListener('click', onBarClick);
     $('inv-items').addEventListener('click', async e => {
       const b = e.target.closest('[data-use]'); if (!b) return;
@@ -77,9 +83,57 @@ async function renderInventory() {
     });
   }
   $('inv-grid').innerHTML = `<p class="muted">…</p>`;
+  showInvView(false);
   if (!(await loadInventory())) return;
   drawInventory();
   drawItems();
+  drawCollection();
+}
+function showInvView(anim = true) {
+  const coll = INV.view === 'coll';
+  document.querySelectorAll('#inv-tabs button').forEach(b => b.classList.toggle('on', b.dataset.v === INV.view));
+  $('inv-coll').hidden = !coll; $('inv-mine').hidden = coll; $('inv-mode').hidden = coll;
+  if (coll) $('sell-bar').classList.remove('on');
+  if (anim && !reducedFx()) $(coll ? 'inv-coll' : 'inv-mine').animate([{ opacity: 0, transform: 'translateY(10px)' }, { opacity: 1, transform: 'none' }], { duration: 300, easing: 'cubic-bezier(.2, .9, .3, 1)' });
+  if (!coll) drawInventory();
+}
+
+// ---------- Bestiaire : tous les jetons du jeu, du plus commun au plus rare.
+// Ceux que tu as déjà eus (même vendus) en couleur, les autres en silhouette avec leur nom et leur rareté.
+const VKEYS = Object.keys(VARIANTS);
+let COLL = new Map();
+async function drawCollection() {
+  const box = $('inv-coll'); if (!box) return;
+  const { data } = await sb.rpc('my_collection');
+  COLL = new Map();
+  (data || []).forEach(r => { const c = COLL.get(r.jeton) || { total: 0, owned: 0, vars: new Set() }; c.total += +r.total; c.owned += +r.owned; if (r.variant) c.vars.add(r.variant); COLL.set(r.jeton, c); });
+  const all = [...SERIES.Takoras].sort((a, b) => a.odds - b.odds);
+  const found = all.filter(j => COLL.has(j.name)).length, vFound = [...COLL.values()].reduce((s, c) => s + c.vars.size, 0), vAll = all.length * VKEYS.length;
+  box.innerHTML = `
+    <div class="bst-head">
+      <div><b>${found}/${all.length}</b><span>${t('bst_found')}</span><div class="bst-bar"><i style="width:${found / all.length * 100}%"></i></div></div>
+      <div><b>${vFound}/${vAll}</b><span>${t('bst_variants')}</span><div class="bst-bar v"><i style="width:${vFound / vAll * 100}%"></i></div></div>
+    </div>
+    <div class="bst-grid">${all.map((j, i) => {
+      const c = COLL.get(j.name), has = !!c;
+      return `<button class="bc${has ? '' : ' unk'}" data-n="${esc(j.name)}" style="--g:${hexRGB(j.glow)}">
+        <span class="bc-num">#${String(i + 1).padStart(2, '0')}</span>
+        ${has && c.owned ? `<span class="bc-own">×${c.owned}</span>` : ''}
+        <img class="${has ? '' : 'sil'}" src="${texOf(j)}" alt="">
+        <b>${jnH(j.name)}</b>
+        <small class="t-${tierKey(j.odds)}">1/${fmt(j.odds)}</small>
+        <span class="bc-vars">${VKEYS.map(v => `<i class="v-dot ${v}${has && c.vars.has(v) ? ' on' : ''}" title="${t('v_' + v)}"></i>`).join('')}</span>
+      </button>`;
+    }).join('')}</div>`;
+}
+function onCollClick(e) {
+  const b = e.target.closest('.bc'); if (!b) return;
+  sfx.click();
+  const name = b.dataset.n, c = COLL.get(name);
+  if (!c) return openJeton(name, `<p class="muted bst-unk">🔒 ${t('bst_unknown')}</p>`, '', true);
+  openJeton(name, `
+    <p class="muted">${t('bst_got', { n: c.total })} · ${t('inv_have', { n: c.owned })}</p>
+    <div class="bst-vlist">${VKEYS.map(v => `<span class="${c.vars.has(v) ? 'on' : ''}">${c.vars.has(v) ? vTag(v) : `<i class="v-dot ${v}"></i> ${t('v_' + v)} · 1/${fmt(VARIANTS[v].odds)}`}</span>`).join('')}</div>`);
 }
 
 // mode 'sell' : les jetons partis se dissolvent en pixels (sinon ils s'effacent simplement, ex. filtre)
@@ -104,7 +158,7 @@ function drawInventory(mode = '') {
     </div>`;
   }).join('') : `<div class="page-empty"><p class="muted">${t('inv_empty')}</p><a class="btn primary" href="#">${t('nav_home')}</a></div>`;
   const { n, v } = selTotals();
-  $('sell-bar').classList.toggle('on', INV.selecting);
+  $('sell-bar').classList.toggle('on', INV.selecting && INV.view === 'mine');
   $('sb-n').textContent = t('sel_n', { n });
   $('sb-v').innerHTML = n ? ` · +${money(v)}` : '';
   $('sb-sell').disabled = !n;

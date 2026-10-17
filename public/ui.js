@@ -3,8 +3,8 @@
 // ---------- Pièce (la monnaie)
 const PIECE = '<img class="piece" src="img/piece.png" alt="◆">';
 const money = n => `${fmt(n)} ${PIECE}`;
-// Variantes : n'importe quel jeton peut sortir Doré (1/20), Glitch (1/200) ou Prisme (1/2000) — revente ×3, ×10, ×50
-const VARIANTS = { gold: { odds: 20, mult: 3, col: '250, 204, 21' }, glitch: { odds: 200, mult: 10, col: '34, 211, 238' }, prism: { odds: 2000, mult: 50, col: '240, 171, 252' } };
+// Variantes : n'importe quel jeton peut sortir Doré (1/20), Céleste (1/200) ou Ombre (1/200) — revente ×3, ×10, ×10
+const VARIANTS = { gold: { odds: 20, mult: 3, col: '250, 204, 21' }, celeste: { odds: 200, mult: 10, col: '224, 231, 255' }, ombre: { odds: 200, mult: 10, col: '168, 85, 247' } };
 const vTag = v => (VARIANTS[v] ? `<span class="vtag v-${v}">${t('v_' + v)}</span>` : '');
 const vCls = v => (VARIANTS[v] ? ' v-' + v : '');
 const vOdds = (odds, v) => odds * (VARIANTS[v]?.odds || 1); // rareté totale (jeton × variante)
@@ -191,13 +191,13 @@ new MutationObserver(hydrateAvatars).observe(document.body, { childList: true, s
 
 // ---------- Aperçu d'un jeton (fenêtre) : grand jeton qui penche, rareté, valeur, puissance et stats
 const jm = $('jeton-modal');
-function openJeton(name, extra = '', variant = '') {
+function openJeton(name, extra = '', variant = '', locked = false) {
   const j = jetonOf(name), s = statsOf(j.name, j.odds);
   jm.style.setProperty('--g', hexRGB(j.glow));
   $('jm-card').onclick = null; $('jm-card').oninput = null; $('jm-card').onchange = null;
   $('jm-card').innerHTML = `
     <button class="set-close jm-close" aria-label="${t('close')}">✕</button>
-    <div class="jm-coin"><img class="${vCls(variant)}" src="${texOf(j)}" alt=""></div>
+    <div class="jm-coin"><img class="${vCls(variant)}${locked ? ' sil' : ''}" src="${texOf(j)}" alt=""></div>
     <div class="jm-info">
       <span class="tier t-${tierKey(j.odds)}">${t(tierKey(j.odds))}</span>
       <h2>${jnH(j.name)} ${vTag(variant)}</h2>
