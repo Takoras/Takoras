@@ -120,44 +120,13 @@ const ICONS = { // icônes dessinées pixel par pixel
   instant: () => '<img class="pix potion" src="img/objets/recharge.png" alt="">',
 };
 
-// ---------- Bannières de profil en pixel art (dessinées sur un petit canvas agrandi)
-const BANNERS = {
-  nuit:   { bg: '#1c1830', a: '#8b5cf6', b: '#f97316', motif: 'bands' },
-  aurore: { bg: '#2a1530', a: '#f472b6', b: '#fbbf24', motif: 'bands' },
-  ocean:  { bg: '#0b2236', a: '#38bdf8', b: '#2dd4bf', motif: 'waves' },
-  braise: { bg: '#2a0f0a', a: '#f97316', b: '#ef4444', motif: 'embers' },
-  foret:  { bg: '#0d2016', a: '#4ade80', b: '#a3e635', motif: 'waves' },
-  neon:   { bg: '#0b0b18', a: '#22d3ee', b: '#e879f9', motif: 'grid' },
-  or:     { bg: '#241a06', a: '#facc15', b: '#fde68a', motif: 'bands' },
-  cosmos: { bg: '#070714', a: '#c4b5fd', b: '#ffffff', motif: 'stars' },
-};
-function drawBanner(canvas, id) {
-  const B = BANNERS[id] || BANNERS.nuit, W = canvas.width = 120, H = canvas.height = 30, x = canvas.getContext('2d');
-  let seed = strHash(id); const rnd = () => (seed = (seed * 1103515245 + 12345) >>> 0) / 4294967296;
-  x.fillStyle = B.bg; x.fillRect(0, 0, W, H);
-  if (B.motif === 'bands') {
-    [[4, B.a], [20, B.b]].forEach(([y0, c]) => { x.fillStyle = c; x.beginPath(); x.moveTo(0, y0 + 8); x.lineTo(W, y0 - 4); x.lineTo(W, y0 + 1); x.lineTo(0, y0 + 13); x.fill(); });
-  } else if (B.motif === 'waves') {
-    for (let i = 0; i < 3; i++) { x.fillStyle = i % 2 ? B.b : B.a; x.globalAlpha = .55 + i * .15; for (let px = 0; px < W; px++) x.fillRect(px, Math.round(8 + i * 7 + Math.sin(px / 9 + i * 2) * 3), 1, 2); }
-    x.globalAlpha = 1;
-  } else if (B.motif === 'embers') {
-    for (let i = 0; i < 60; i++) { x.fillStyle = rnd() < .5 ? B.a : B.b; x.globalAlpha = .4 + rnd() * .6; x.fillRect(rnd() * W | 0, rnd() * H | 0, 1, 1 + (rnd() < .3)); }
-    x.globalAlpha = 1; x.fillStyle = B.b; x.fillRect(0, H - 3, W, 3);
-  } else if (B.motif === 'grid') {
-    x.fillStyle = B.a; for (let px = 0; px < W; px += 8) x.fillRect(px, 15, 1, H);
-    for (let y = 15; y < H; y += 4) x.fillRect(0, y, W, 1);
-    x.fillStyle = B.b; x.fillRect(0, 14, W, 1); x.fillRect(W / 2 - 8, 4, 16, 8);
-  } else if (B.motif === 'stars') {
-    for (let i = 0; i < 70; i++) { x.fillStyle = rnd() < .7 ? B.b : B.a; x.globalAlpha = .3 + rnd() * .7; x.fillRect(rnd() * W | 0, rnd() * H | 0, 1, 1); }
-    x.globalAlpha = 1; x.fillStyle = B.a; x.fillRect(90, 8, 3, 1); x.fillRect(91, 7, 1, 3);
-  }
-}
-// Bannières dessinées par toi (images). Les anciennes bannières en code restent en secours.
+// ---------- Bannières de profil : uniquement les images dessinées par l'auteur
 const bannerName = id => { const k = 'bn_' + id, n = t(k); return n === k ? id.charAt(0).toUpperCase() + id.slice(1) : n; };
 const BANNER_IMG = { plaine: 'img/bannieres/plaine.png', doodle: 'img/bannieres/doodle.png' };
 const bannerCanvas = id => {
-  if (BANNER_IMG[id]) { const i = new Image(); i.className = 'banner-cv'; i.src = BANNER_IMG[id]; i.alt = ''; return i; }
-  const c = document.createElement('canvas'); c.className = 'banner-cv'; drawBanner(c, id); return c;
+  const i = new Image(); i.className = 'banner-cv'; i.alt = '';
+  if (BANNER_IMG[id]) i.src = BANNER_IMG[id]; else i.hidden = true; // bannière qui n'existe plus : rien
+  return i;
 };
 
 // ---------- Photo de profil : 3 gratuites, d'autres en boutique (jamais d'image Discord). Sans photo : l'initiale.

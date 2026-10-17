@@ -1,6 +1,6 @@
 // Inventaire : tes jetons (regroupés par type), filtres, tri, sélection multiple, revente, verrouillage, aperçu.
 
-const INV = { rows: [], groups: [], sel: new Map(), selecting: false, tier: 'all', sort: 'rarity', q: '', view: 'coll' }; // view : bestiaire (coll) ou mes jetons (mine)
+const INV = { rows: [], groups: [], sel: new Map(), selecting: false, tier: 'all', sort: 'rarity', q: '', view: 'coll', vtab: '' }; // vtab : onglet de variante ('' = normaux, sinon gold / celeste / ombre — valable pour toutes les séries) // view : bestiaire (coll) ou mes jetons (mine)
 
 async function loadInventory() {
   const { data, error } = await sb.rpc('my_inventory');
@@ -22,7 +22,7 @@ async function loadInventory() {
 }
 
 function visibleGroups() {
-  let l = INV.groups.filter(x => (INV.tier === 'all' || tierKey(x.odds) === INV.tier) && jn(x.name).toLowerCase().includes(INV.q));
+  let l = INV.groups.filter(x => (x.variant || '') === INV.vtab && (INV.tier === 'all' || tierKey(x.odds) === INV.tier) && jn(x.name).toLowerCase().includes(INV.q));
   const by = { rarity: (a, b) => vOdds(b.odds, b.variant) - vOdds(a.odds, a.variant), count: (a, b) => b.ids.length - a.ids.length || b.odds - a.odds, name: (a, b) => jn(a.name).localeCompare(jn(b.name)), recent: (a, b) => b.last - a.last };
   return l.sort(by[INV.sort]);
 }
@@ -46,6 +46,7 @@ async function renderInventory() {
       <div class="seg inv-tabs" id="inv-tabs"><button data-v="coll">📖 ${t('bestiary')}</button><button data-v="mine">🎒 ${t('my_tokens')}</button></div>
       <div id="inv-coll"></div>
       <div id="inv-mine">
+      <div class="inv-vtabs" id="inv-vtabs"></div>
       <div class="inv-tools">
         <div class="chips" id="inv-tiers">${['all', 'r_common', 'r_rare', 'r_epic', 'r_legend', 'r_myth'].map(k => `<button class="chip" data-t="${k}">${t(k === 'all' ? 'all' : k)}</button>`).join('')}</div>
         <div class="inv-right">
@@ -73,6 +74,7 @@ async function renderInventory() {
     $('inv-grid').addEventListener('click', onCardClick);
     $('inv-tabs').addEventListener('click', e => { const b = e.target.closest('[data-v]'); if (!b || b.dataset.v === INV.view) return; INV.view = b.dataset.v; INV.selecting = false; INV.sel.clear(); sfx.click(); showInvView(); });
     $('inv-coll').addEventListener('click', onCollClick);
+    $('inv-vtabs').addEventListener('click', e => { const b = e.target.closest('[data-vt]'); if (!b || b.dataset.vt === INV.vtab) return; INV.vtab = b.dataset.vt; INV.sel.clear(); sfx.click(); drawInventory(); });
     $('sell-bar').addEventListener('click', onBarClick);
     $('inv-items').addEventListener('click', async e => {
       const b = e.target.closest('[data-use]'); if (!b) return;
@@ -142,6 +144,10 @@ function drawInventory(mode = '') {
   const total = INV.rows.length, value = INV.rows.reduce((s, r) => s + sellValue(r.odds, r.variant), 0);
   $('inv-sum').innerHTML = `${t('inv_count', { n: fmt(total), k: INV.groups.length })} · ${t('inv_value')} ${money(value)}`;
   document.querySelectorAll('#inv-tiers .chip').forEach(b => b.classList.toggle('on', b.dataset.t === INV.tier));
+  // onglets Normaux / Doré / Céleste / Ombre, avec le nombre de jetons dans chacun
+  const cnt = v => INV.rows.filter(r => (r.variant || '') === v).length;
+  $('inv-vtabs').innerHTML = [['', t('v_none')], ...Object.keys(VARIANTS).map(v => [v, t('v_' + v)])].map(([v, l]) =>
+    `<button class="ivt${v ? ' v-' + v : ''}${INV.vtab === v ? ' on' : ''}" data-vt="${v}">${v ? `<i class="v-dot on ${v}"></i>` : ''}${l}<small>${cnt(v)}</small></button>`).join('');
   $('inv-mode').textContent = INV.selecting ? t('inv_done') : t('inv_select');
   $('inv-mode').classList.toggle('primary', INV.selecting);
   const list = visibleGroups();
@@ -200,7 +206,7 @@ async function onBarClick(e) {
   const q = e.target.closest('[data-q]')?.dataset.q;
   if (q) {
     INV.sel.clear();
-    if (q !== 'none') INV.groups.forEach(x => {
+    if (q !== 'none') visibleGroups().forEach(x => {
       const n = q === 'all' ? x.free.length : q === 'dupes' ? Math.min(x.free.length, x.ids.length - 1) : x.odds < 60 ? x.free.length : 0;
       if (n > 0) INV.sel.set(x.key, n);
     });

@@ -35,7 +35,7 @@
       <div class="sh-grid">
         ${tile('board', 'board', t('nav_board'))}
         ${ACC.user ? tile('profile', 'profile', t('my_profile')) : ''}
-        ${ACC.user ? tile('combat', 'combat', t('nav_combat')) : ''}
+        ${admin ? tile('combat', 'combat', t('nav_combat')) : ''}
         ${tile('notifs', 'bell', t('ann_hist'), bellN)}
         ${tile('settings', 'gear', t('settings'))}
         ${tile('mute', 'sound', sfx.muted ? t('unmute') : t('mute'))}

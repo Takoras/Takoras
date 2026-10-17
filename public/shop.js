@@ -11,7 +11,7 @@ const glowOf = it => it.kind === 'potion' ? POTION_GLOW[it.data.mult] || '139, 9
 
 function itemIcon(it) {
   if (it.kind === 'avatar') return `<img class="si-pp" src="${AVATARS[it.id.slice(2)] || ''}" alt="">`;
-  if (it.kind === 'banner') { const id = it.id.slice(2); return BANNER_IMG[id] ? `<img class="si-banner" src="${BANNER_IMG[id]}" alt="">` : (() => { const c = bannerCanvas(id); return `<img class="si-banner" src="${c.toDataURL()}" alt="">`; })(); }
+  if (it.kind === 'banner') return `<img class="si-banner" src="${BANNER_IMG[it.id.slice(2)] || ''}" alt="">`;
   return (ICONS[it.id] || ICONS.instant)();
 }
 function itemText(it) {

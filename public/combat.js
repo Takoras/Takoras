@@ -708,7 +708,7 @@ async function saveDeck() {
 
 async function renderCombat() {
   const page = $('page-combat');
-  if (!ACC.user) { page.innerHTML = `<div class="page-empty"><p class="muted">${t('acc_need')}</p><button class="btn primary" onclick="openAccount('login')">${t('login')}</button></div>`; return; }
+  if (!ACC.isAdmin) { page.innerHTML = `<div class="page-empty"><p class="muted">⚔️ ${t('soon_combat')}</p></div>`; return; } // fermé aux joueurs pour l'instant
   await Promise.all([loadDeck(), typeof loadFriends === 'function' ? loadFriends() : null]);
   const full = DECK.every(Boolean), friendsOk = (typeof FR !== 'undefined' ? FR.list : []).filter(f => f.status === 'accepted');
   const { data: me } = await sb.rpc('profile_public', { p_pseudo: ACC.pseudo || '' });
