@@ -1671,18 +1671,12 @@ img.sil { --df: brightness(0) drop-shadow(0 0 1px rgba(255, 255, 255, .5)) !impo
 .ivt.v-ombre.on { border-color: rgba(168, 85, 247, .8); background: rgba(124, 58, 237, .15); }
 @media (max-width: 760px) { .inv-vtabs { display: grid; grid-template-columns: repeat(4, 1fr); gap: 6px; } .ivt { flex-direction: column; gap: 3px; padding: 8px 4px; font-size: 12px; } }
 
-/* Reflet holographique au survol des jetons (accueil, ouverture, fiche) : bande arc-en-ciel + fines rayures
-   qui glissent selon la souris, découpées à la forme du dessin (masque) */
+/* Survol des jetons : juste un petit reflet doux qui suit la souris (discret) */
 .glare, .op-coin .glare {
-  background:
-    radial-gradient(circle at var(--mx, 50%) var(--my, 50%), rgba(255, 255, 255, .35), transparent 32%),
-    repeating-linear-gradient(115deg, rgba(255, 255, 255, .16) 0 2px, transparent 2px 7px),
-    linear-gradient(115deg, transparent 18%, #ff4fa3 30%, #ffd166 40%, #3dffb0 50%, #4db8ff 60%, #b26bff 70%, transparent 82%) !important;
-  background-size: 100% 100%, 100% 100%, 280% 280% !important;
-  background-position: 0 0, 0 0, var(--mx, 50%) var(--my, 50%) !important;
-  mix-blend-mode: overlay !important;
-  opacity: calc(var(--g, 0) * .95) !important;
-  transition: opacity .35s ease;
+  background: radial-gradient(circle at var(--mx, 50%) var(--my, 50%), rgba(255, 255, 255, .55), rgba(255, 255, 255, .12) 14%, transparent 24%) !important;
+  mix-blend-mode: soft-light !important;
+  opacity: calc(var(--g, 0) * .8) !important;
+  transition: opacity .4s ease;
 }
 .jm-coin { position: relative; }
 .jm-coin .glare { position: absolute; inset: 15px; pointer-events: none; -webkit-mask-size: 100% 100%; mask-size: 100% 100%; }
