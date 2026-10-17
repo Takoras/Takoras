@@ -26,7 +26,7 @@ const CINE = (() => {
     'Lumis':    { c: ['#16050f', '#9d174d', '#f39ad8', '#fff1f9'], scene: ['prism', 'rays', 'sparkles'],      root: 261.6, scale: [0, 2, 4, 7, 9],  chord: [0, 4, 7, 11],        bpm: 100, voice: 'ep' },
     'Nyx':      { c: ['#020208', '#1e1b4b', '#5b5fd6', '#c7d2fe'], scene: ['stars', 'eclipse', 'tendrils'],   root: 146.8, scale: [0, 3, 5, 7, 10], chord: [0, 7, 10, 15],       bpm: 70,  voice: 'pad' },
     'Astra':    { c: ['#07061a', '#2e2a63', '#f2c98f', '#fff7e6'], scene: ['stars', 'meteors', 'bigstar'],    root: 164.8, scale: [0, 2, 4, 7, 9],  chord: [0, 4, 7, 14],        bpm: 112, voice: 'bell' },
-    'Kraïos':   { c: ['#03060f', '#1e3a8a', '#3b82f6', '#dbeafe'], scene: ['clouds', 'rain', 'lightning'],    root: 185,   scale: [0, 3, 5, 7, 10], chord: [0, 7, 12],           bpm: 128, voice: 'pluck', thunder: true },
+    'Kraïos':   { c: ['#03040f', '#1e1b6b', '#4f46e5', '#c7d2fe'], scene: ['clouds', 'rain', 'lightning'],    root: 185,   scale: [0, 3, 5, 7, 10], chord: [0, 7, 12],           bpm: 128, voice: 'pluck', thunder: true },
     'Chronos':  { c: ['#0d0902', '#713f12', '#facc15', '#fef9c3'], scene: ['gears', 'hands', 'dust'],         root: 196,   scale: [0, 3, 7, 8, 11], chord: [0, 3, 7, 12],        bpm: 120, voice: 'mar', clock: true },
     'Néphéris': { c: ['#12030f', '#86198f', '#f0abfc', '#fdf4ff'], scene: ['nebula', 'runes', 'spiral'],      root: 233.1, scale: [0, 3, 5, 7, 10], chord: [0, 3, 7, 10, 14],    bpm: 84,  voice: 'choir' },
     'Zénith':   { c: ['#0b1120', '#64748b', '#e2e8f0', '#ffffff'], scene: ['skyup', 'sunrays', 'feathers'],   root: 293.7, scale: [0, 2, 4, 7, 9],  chord: [0, 4, 7, 11, 14],    bpm: 96,  voice: 'choir' },

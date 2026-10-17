@@ -22,7 +22,7 @@ async function renderProfile(pseudo) {
   PROF = p;
   if (!p) { page.innerHTML = `<div class="page-empty"><p class="muted">${t('profile_404')}</p></div>`; return; }
   const mine = ACC.pseudo && p.pseudo === ACC.pseudo;
-  const best = p.best ? SERIES.Takoras.find(j => j.odds === p.best) : null;
+  const bp = p.best_pull, best = bp ? jetonOf(bp.jeton) : null; // meilleur tirage en comptant la variante (1/400 Doré = 1/8 000)
   page.innerHTML = `
     <div class="prof">
       <div class="prof-banner${p.banner ? '' : ' none'}" id="prof-banner">${p.banner ? '' : mine ? `<span class="muted">${t('no_banner')}</span>` : ''}</div>
@@ -33,7 +33,7 @@ async function renderProfile(pseudo) {
       </div>
       <div class="prof-stats">
         <div><b>${fmt(p.pulls)}</b><span>${t('st_pulls')}</span></div>
-        <div><b>${best ? jnH(best.name) : '—'}</b><span>${t('st_best')}${p.best ? ' · 1/' + fmt(p.best) : ''}</span></div>
+        <div><b>${best ? jnH(best.name) + vTag(bp.variant) : '—'}</b><span>${t('st_best')}${bp ? ' · 1/' + fmt(bp.eff) : ''}</span></div>
         <div><b>${p.collection}/${N_JETONS()}</b><span>${t('st_collec')}</span></div>
         <div><b>${fmt(p.owned)}</b><span>${t('st_owned')}</span></div>
       </div>
