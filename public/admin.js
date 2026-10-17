@@ -20,6 +20,7 @@ function admTab(name) {
   if (name === 'shop') adsLoad();
   if (name === 'ann') adaLoad();
   if (name === 'codes') adcLoad();
+  if (name === 'fb') mpfbLoad();
 }
 $('mp-tabs').addEventListener('click', e => { const b = e.target.closest('button'); if (b) admTab(b.dataset.tab); });
 
@@ -349,11 +350,46 @@ $('mpcode-list').addEventListener('change', async e => {
 });
 adcForm();
 
+// ---------- Retours des joueurs (bêta) : bugs, idées, ajouts… marquer vu / fait, supprimer
+const MPFB = { list: [], filter: 'new' };
+const FB_ICO = { bug: '🐞', idea: '💡', add: '✨', other: '💬' };
+async function mpfbLoad() {
+  const { data, error } = await sb.rpc('admin_feedback');
+  if (error) return admMsg(error.message, true);
+  MPFB.list = data || [];
+  const n = MPFB.list.filter(f => f.status === 'new').length;
+  $('mpfb-badge').hidden = !n; $('mpfb-badge').textContent = n;
+  mpfbDraw();
+}
+function mpfbDraw() {
+  const F = [['new', '🆕 Nouveaux'], ['all', 'Tous'], ['bug', '🐞 Bugs'], ['idea', '💡 Idées'], ['add', '✨ Ajouts'], ['other', '💬 Autres'], ['done', '✅ Faits']];
+  $('mpfb-filter').innerHTML = F.map(([k, l]) => `<button class="chip${MPFB.filter === k ? ' on' : ''}" data-f="${k}">${l} <small class="muted">${MPFB.list.filter(f => mpfbMatch(f, k)).length}</small></button>`).join('');
+  const l = MPFB.list.filter(f => mpfbMatch(f, MPFB.filter));
+  $('mpfb-list').innerHTML = l.map(f => `<div class="mpfb ${f.status}" data-id="${f.id}">
+      <div class="mpfb-head"><span class="mpfb-kind k-${f.kind}">${FB_ICO[f.kind]} ${{ bug: 'Bug', idea: 'Idée', add: 'Ajout', other: 'Autre' }[f.kind]}</span>
+        <b>${esc(f.pseudo || '?')}</b><small class="muted">${new Date(f.created_at).toLocaleString(LOCALE(), { day: '2-digit', month: '2-digit', hour: '2-digit', minute: '2-digit' })} · ${esc(f.page || '')}</small>
+        <span class="mpfb-st">${f.status === 'new' ? '🆕' : f.status === 'seen' ? '👀 vu' : '✅ fait'}</span></div>
+      <p>${esc(f.body)}</p>
+      ${f.device ? `<small class="muted">${esc(f.device)}</small>` : ''}
+      <div class="mpx-quick">${f.status !== 'seen' ? '<button data-s="seen">👀 Vu</button>' : ''}${f.status !== 'done' ? '<button data-s="done">✅ Fait</button>' : '<button data-s="new">↩︎ Rouvrir</button>'}<button class="red" data-s="delete">🗑 Supprimer</button></div>
+    </div>`).join('') || '<p class="muted center">Aucun retour ici</p>';
+}
+const mpfbMatch = (f, k) => k === 'all' ? true : k === 'new' ? f.status === 'new' : k === 'done' ? f.status === 'done' : f.kind === k && f.status !== 'done';
+$('mpfb-filter').addEventListener('click', e => { const b = e.target.closest('[data-f]'); if (b) { MPFB.filter = b.dataset.f; mpfbDraw(); } });
+$('mpfb-list').addEventListener('click', async e => {
+  const b = e.target.closest('[data-s]'); if (!b) return;
+  const id = +b.closest('.mpfb').dataset.id, s = b.dataset.s;
+  if (s === 'delete' && !await ask('Supprimer ce retour ?', { danger: true })) return;
+  const { error } = await sb.rpc('admin_feedback_set', { p_id: id, p_status: s });
+  if (error) return admMsg(error.message, true);
+  mpfbLoad();
+});
+
 // Ouvrir / fermer le panel (bouclier ou « debug ») : on recharge toujours la liste et les stats
 function toggleAdmin() {
   $('debug').hidden = !$('debug').hidden;
   if ($('debug').hidden) return;
-  admLoad(); admStats(); renderDebug();
+  admLoad(); admStats(); renderDebug(); mpfbLoad();
   if (admSel) admDetail();
 }
 $('open-admin').addEventListener('click', toggleAdmin);

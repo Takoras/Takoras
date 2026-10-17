@@ -603,7 +603,7 @@ $('dbg-open').addEventListener('click', () => buy(1));
       t.style.transform = `rotateX(${cur.rx.toFixed(2)}deg) rotateY(${cur.ry.toFixed(2)}deg)`;
       opCoin.style.setProperty('--mx', (mx * 100).toFixed(1) + '%');
       opCoin.style.setProperty('--my', (my * 100).toFixed(1) + '%');
-      opCoin.style.setProperty('--g', cur.g.toFixed(3));
+      opCoin.style.setProperty('--gl', cur.g.toFixed(3)); // intensité du reflet
     }
     requestAnimationFrame(frame);
   })();

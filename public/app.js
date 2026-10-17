@@ -72,7 +72,7 @@ function frame(t) {
     tilt.style.transform = `rotateX(${cur.rx.toFixed(2)}deg) rotateY(${cur.ry.toFixed(2)}deg) scale(${cur.s.toFixed(3)})`;
     hero.style.setProperty('--mx', (mx * 100).toFixed(1) + '%');
     hero.style.setProperty('--my', (my * 100).toFixed(1) + '%');
-    hero.style.setProperty('--g', cur.g.toFixed(3));
+    hero.style.setProperty('--gl', cur.g.toFixed(3)); // intensité du reflet
   }
   requestAnimationFrame(frame);
 }
