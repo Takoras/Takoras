@@ -3,6 +3,8 @@
 const INFO = {
   fr: {
     title: 'Probas & infos', luck: 'Avec une chance de', yours: 'ta chance actuelle',
+    vtitle: 'Variantes', vintro: 'En plus du jeton, chaque pull a sa propre chance de sortir dans une version spéciale. Ça marche pour tous les jetons (même Mobu) et ce n’est pas changé par les potions.', vth: ['Variante', 'Chance', 'Revente', 'Aperçu'],
+    vdesc: { gold: 'Jeton tout en or qui brille', celeste: 'Blanc nacré, halo lumineux', ombre: 'Version nuit violette, contour qui pulse' },
     th: ['Jeton', 'Affiché', 'Chance réelle', 'En moyenne', 'Revente'], one_in: '1 sur {n}',
     how: 'Comment ça marche',
     rules: [
@@ -12,12 +14,19 @@ const INFO = {
       ['⏳ Recharge', 'Tu gagnes 1 pull toutes les 3 min jusqu’à ton stock max (5 au départ). Le sablier double la vitesse (1 pull toutes les 1 min 30) ; plusieurs sabliers rallongent la durée.'],
       ['⚡ Recharge éclair', 'Donne +1 pull tout de suite, si ton stock n’est pas plein.'],
       ['📦 Stock max', 'Améliorable de 5 à 10 : 1 000, 3 000, 9 000, 27 000 puis 81 000 pièces.'],
-      ['🪙 Revente', 'Un jeton se revend la moitié de sa rareté : 1/2 → 1 pièce, 1/1 000 → 500, 1/1 000 000 → 500 000. Les jetons verrouillés ne peuvent pas être vendus.'],
-      ['🛒 Boutique', 'Tous les objets sont en vente, mais le stock change toutes les 5 h (le même pour tout le monde, chacun peut acheter jusqu’au stock affiché). Toujours au moins 5 potions ×1,3 et 2 ×2 ; les grosses potions (×10, ×25, ×50, ×100) n’apparaissent que de temps en temps. Les objets achetés vont dans ton inventaire ; tu les utilises quand tu veux.'],
+      ['🪙 Revente', 'Un jeton se revend la moitié de sa rareté : 1/2 → 1 pièce, 1/1 000 → 500, 1/1 000 000 → 500 000. Les variantes multiplient ce prix (Doré ×3, Céleste et Ombre ×10). Les jetons verrouillés, en vitrine ou dans le deck ne peuvent pas être vendus.'],
+      ['✨ Variantes', 'Doré 1/20, Céleste 1/200, Ombre 1/200 : tiré à part pour chaque pull, sur n’importe quel jeton. Elles ont leur propre onglet dans « Mes jetons ».'],
+      ['🎯 Quêtes du jour', '3 petites missions par jour (ouvrir des pulls, vendre, acheter, obtenir un rare ou une variante…). Elles avancent toutes seules ; récupère la récompense sur l’accueil. Nouvelles quêtes chaque jour à minuit.'],
+      ['📖 Bestiaire', 'Dans l’inventaire : tous les jetons du jeu. Ceux que tu as déjà eus sont en couleur, les autres en silhouette. Les pastilles montrent les variantes trouvées.'],
+      ['🎁 Codes promo', 'En bas de la boutique : un code donne des pièces, des pulls ou des objets, une seule fois par joueur.'],
+      ['🛒 Boutique', 'Le stock change toutes les 5 h (le même pour tout le monde, chacun peut acheter jusqu’au stock affiché). Toujours au moins 5 potions ×1,3 et 2 ×2 ; les grosses potions (×10, ×25, ×50, ×100) n’apparaissent que de temps en temps. Les objets vont dans ton inventaire, tu les utilises quand tu veux. Les cosmétiques (bannières, photo de profil animée) sont à vie.'],
+      ['🎬 Cinématiques', 'À partir de 1/1 000, chaque jeton a sa propre mise en scène, plus longue pour les plus rares. Tu peux la passer après 2 secondes.'],
     ],
   },
   en: {
     title: 'Odds & info', luck: 'With a luck of', yours: 'your current luck',
+    vtitle: 'Variants', vintro: 'On top of the token, every pull has its own chance to come out in a special version. It works for every token (even Mobu) and isn’t changed by potions.', vth: ['Variant', 'Chance', 'Sell', 'Preview'],
+    vdesc: { gold: 'All-gold shining token', celeste: 'Pearly white, glowing halo', ombre: 'Purple night version, pulsing outline' },
     th: ['Token', 'Shown', 'Real chance', 'On average', 'Sell'], one_in: '1 in {n}',
     how: 'How it works',
     rules: [
@@ -27,8 +36,13 @@ const INFO = {
       ['⏳ Recharge', 'You get 1 pull every 3 min up to your max stock (5 at first). The hourglass doubles the speed (1 pull every 1 min 30); several hourglasses extend the duration.'],
       ['⚡ Instant refill', 'Gives +1 pull right away, if your stock isn’t full.'],
       ['📦 Max stock', 'Upgradable from 5 to 10: 1,000, 3,000, 9,000, 27,000 then 81,000 coins.'],
-      ['🪙 Selling', 'A token sells for half its rarity: 1/2 → 1 coin, 1/1,000 → 500, 1/1,000,000 → 500,000. Locked tokens can’t be sold.'],
-      ['🛒 Shop', 'Every item is on sale, but stock changes every 5 h (same for everyone, each player can buy up to the stock shown). Always at least 5 ×1.3 potions and 2 ×2; big potions (×10, ×25, ×50, ×100) only show up now and then. Bought items go to your inventory; use them whenever you want.'],
+      ['🪙 Selling', 'A token sells for half its rarity: 1/2 → 1 coin, 1/1,000 → 500, 1/1,000,000 → 500,000. Variants multiply that price (Golden ×3, Celestial and Shadow ×10). Locked, showcased or deck tokens can’t be sold.'],
+      ['✨ Variants', 'Golden 1/20, Celestial 1/200, Shadow 1/200: rolled separately on every pull, on any token. They have their own tab in “My tokens”.'],
+      ['🎯 Daily quests', '3 small missions per day (open pulls, sell, buy, get a rare or a variant…). They progress on their own; claim the reward on the home page. New quests every day at midnight.'],
+      ['📖 Bestiary', 'In the inventory: every token in the game. The ones you already got are in color, the others are silhouettes. Dots show the variants you found.'],
+      ['🎁 Promo codes', 'At the bottom of the shop: a code gives coins, pulls or items, once per player.'],
+      ['🛒 Shop', 'Stock changes every 5 h (same for everyone, each player can buy up to the stock shown). Always at least 5 ×1.3 potions and 2 ×2; big potions (×10, ×25, ×50, ×100) only show up now and then. Items go to your inventory, use them whenever you want. Cosmetics (banners, animated profile picture) are forever.'],
+      ['🎬 Cinematics', 'From 1/1,000, every token has its own cinematic, longer for the rarest. You can skip it after 2 seconds.'],
     ],
   },
 };
@@ -59,6 +73,11 @@ function openInfo() {
         <div class="info-luck"><span class="muted">${T.luck}</span>${choices.map(c => `<button class="chip${c === luck ? ' on' : ''}" data-l="${c}">×${dec(c)}${c === +mine.toFixed(2) && mine > 1 ? ' · ' + T.yours : ''}</button>`).join('')}</div>
         <div class="info-table"><table><thead><tr>${T.th.map(h => `<th>${h}</th>`).join('')}</tr></thead><tbody>${
           realOdds(luck).map(({ j, p }) => `<tr><td><img src="${texOf(j)}" alt=""><span class="t-${tierKey(j.odds)}">${jnH(j.name)}</span></td><td>1/${fmt(j.odds)}</td><td><b>${pct(p)}</b></td><td class="muted">${T.one_in.replace('{n}', fmt(Math.max(1, Math.round(1 / p))))}</td><td>${money(sellValue(j.odds))}</td></tr>`).join('')
+        }</tbody></table></div>
+        <h3>✨ ${T.vtitle}</h3>
+        <p class="muted small">${T.vintro}</p>
+        <div class="info-table"><table><thead><tr>${T.vth.map(h => `<th>${h}</th>`).join('')}</tr></thead><tbody>${
+          Object.entries(VARIANTS).map(([v, x]) => `<tr><td>${vTag(v)}</td><td><b>1/${fmt(x.odds)}</b></td><td>×${x.mult}</td><td><img class="${vCls(v)}" src="${texOf(jetonOf('Pikko'))}" alt=""><span class="muted small">${T.vdesc[v]}</span></td></tr>`).join('')
         }</tbody></table></div>
         <h3>${T.how}</h3>
         <div class="info-rules">${T.rules.map(([h, p]) => `<div><b>${h}</b><p class="muted">${p}</p></div>`).join('')}</div>
