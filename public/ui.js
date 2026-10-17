@@ -166,7 +166,7 @@ function openJeton(name, extra = '', variant = '', locked = false) {
   $('jm-card').onclick = null; $('jm-card').oninput = null; $('jm-card').onchange = null;
   $('jm-card').innerHTML = `
     <button class="set-close jm-close" aria-label="${t('close')}">✕</button>
-    <div class="jm-coin"><img class="${vCls(variant)}${locked ? ' sil' : ''}" src="${texOf(j)}" alt=""></div>
+    <div class="jm-coin"><img class="${vCls(variant)}${locked ? ' sil' : ''}" src="${texOf(j)}" alt="">${locked ? '' : `<i class="glare" style="-webkit-mask-image:url(${texOf(j)});mask-image:url(${texOf(j)})"></i>`}</div>
     <div class="jm-info">
       <span class="tier t-${tierKey(j.odds)}">${t(tierKey(j.odds))}</span>
       <h2>${jnH(j.name)} ${vTag(variant)}</h2>
@@ -184,10 +184,11 @@ jm.addEventListener('pointermove', e => {
   const c = e.target.closest('.jm-coin'); if (!c) return;
   const r = c.getBoundingClientRect(), x = (e.clientX - r.left) / r.width - .5, y = (e.clientY - r.top) / r.height - .5;
   c.style.transform = `perspective(600px) rotateX(${(-y * 30).toFixed(1)}deg) rotateY(${(x * 30).toFixed(1)}deg) scale(1.04)`;
+  c.style.setProperty('--mx', ((x + .5) * 100).toFixed(1) + '%'); c.style.setProperty('--my', ((y + .5) * 100).toFixed(1) + '%'); c.style.setProperty('--g', 1);
 });
 jm.addEventListener('pointerout', e => {
   const c = e.target.closest('.jm-coin');
-  if (c && !c.contains(e.relatedTarget)) c.style.transform = '';
+  if (c && !c.contains(e.relatedTarget)) { c.style.transform = ''; c.style.setProperty('--g', 0); }
 });
 addEventListener('keydown', e => { if (e.key === 'Escape') jm.classList.remove('on'); });
 
