@@ -1671,15 +1671,14 @@ img.sil { --df: brightness(0) drop-shadow(0 0 1px rgba(255, 255, 255, .5)) !impo
 .ivt.v-ombre.on { border-color: rgba(168, 85, 247, .8); background: rgba(124, 58, 237, .15); }
 @media (max-width: 760px) { .inv-vtabs { display: grid; grid-template-columns: repeat(4, 1fr); gap: 6px; } .ivt { flex-direction: column; gap: 3px; padding: 8px 4px; font-size: 12px; } }
 
-/* Survol des jetons : petit reflet doux qui suit la souris + léger holographique (discret).
+/* Survol des jetons : léger reflet holographique qui suit la souris (discret).
    La couleur du holo suit la variante : arc-en-ciel pâle (normal), or, nacre (céleste), violet (ombre). */
 .glare, .op-coin .glare {
   --h1: #ff9ecf; --h2: #ffe39a; --h3: #9dffd8; --h4: #9ccfff; --h5: #d3a8ff;
   background:
-    radial-gradient(circle at var(--mx, 50%) var(--my, 50%), rgba(255, 255, 255, .5), rgba(255, 255, 255, .1) 14%, transparent 24%),
     linear-gradient(115deg, transparent 20%, var(--h1) 32%, var(--h2) 41%, var(--h3) 50%, var(--h4) 59%, var(--h5) 68%, transparent 80%) !important;
-  background-size: 100% 100%, 280% 280% !important;
-  background-position: 0 0, var(--mx, 50%) var(--my, 50%) !important;
+  background-size: 280% 280% !important;
+  background-position: var(--mx, 50%) var(--my, 50%) !important;
   mix-blend-mode: soft-light !important;
   opacity: calc(var(--g, 0) * .7) !important;
   transition: opacity .4s ease;
