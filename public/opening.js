@@ -130,7 +130,7 @@ function startOpening() {
   if (c.phase === 'hold') hold(true);
   if (c.phase === 'revealed') reveal(true);
   renderAuto();
-  if (sess.auto) setTimeout(autoRun, 40);
+  if (sess.auto) autoRun(); // tout de suite : on ne voit jamais le jeton mystère
 }
 
 function setTier(v) {
@@ -458,7 +458,7 @@ function renderAuto() {
   b.textContent = sess?.auto ? '⏸ ' + t('auto_stop') : '⏩ ' + t('auto_go');
 }
 // Mode turbo : environ 0,25 s par jeton, lignes de vitesse, compteur de combo, notes qui montent
-const AUTO_STEP = 230;
+const AUTO_STEP = 200;
 function autoRun() {
   if (!sess?.auto || !run || !opening.classList.contains('on')) return turbo(false);
   if (sess.recap) { sess.auto = false; turbo(false); return renderAuto(); }
@@ -483,6 +483,11 @@ function autoRun() {
 }
 let combo = 0;
 function turbo(on) {
+  if (on && !opening.classList.contains('turbo')) { // centre du flou radial = le jeton
+    const r = opCoin.getBoundingClientRect(), o = opening.getBoundingClientRect();
+    opening.style.setProperty('--cx', (r.left + r.width / 2 - o.left) + 'px');
+    opening.style.setProperty('--cy', (r.top + r.height / 2 - o.top) + 'px');
+  }
   opening.classList.toggle('turbo', on);
   if (!on) { combo = 0; const c = $('op-combo'); if (c) c.hidden = true; }
 }
@@ -497,7 +502,7 @@ function turboHit(j) {
   c.innerHTML = `<b>×${combo}</b><small>${jnH(j.name)}</small>`;
   c.classList.remove('pop'); void c.offsetWidth; c.classList.add('pop');
   const z = opCoin.querySelector('.zoom');
-  z?.animate([{ transform: 'scale(1.25) translateX(-30px)', filter: 'brightness(2)' }, { transform: 'scale(1)', filter: 'none' }], { duration: 200, easing: 'cubic-bezier(.2, .9, .3, 1)' });
+  z?.animate([{ transform: 'scale(1.35)', filter: 'blur(6px) brightness(2.2)' }, { transform: 'scale(.96)', filter: 'blur(0) brightness(1.2)', offset: .6 }, { transform: 'scale(1)', filter: 'none' }], { duration: 180, easing: 'cubic-bezier(.2, .9, .3, 1)' });
 }
 $('op-auto').addEventListener('click', e => {
   e.stopPropagation();

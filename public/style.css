@@ -1815,12 +1815,19 @@ body:has(.askbox) .fb-btn, body:has(.sheet.on) .fb-btn, body:has(.chat-dock:not(
 .opening.recap > .op-auto { display: none; }
 
 /* ===================== Mode turbo (Tout ouvrir d'un coup) ===================== */
-.opening.turbo::before { content: ""; position: absolute; inset: -10%; z-index: 1; pointer-events: none; opacity: .5;
-  background: repeating-linear-gradient(90deg, transparent 0 120px, rgba(255, 255, 255, .0) 120px, rgba(255, 255, 255, .16) 180px, transparent 240px),
-              repeating-linear-gradient(90deg, transparent 0 70px, rgba(var(--tier, 139, 92, 246), .25) 90px, transparent 110px);
-  background-size: 240px 3px, 110px 2px; animation: speedLines .18s linear infinite;
-  -webkit-mask: repeating-linear-gradient(0deg, #000 0 2px, transparent 2px 13px); mask: repeating-linear-gradient(0deg, #000 0 2px, transparent 2px 13px); }
-@keyframes speedLines { to { background-position: -240px 0, -110px 0; } }
+.opening.turbo::before, .opening.turbo::after { content: ""; position: absolute; inset: 0; pointer-events: none; }
+/* Flou radial : net au centre (le jeton), de plus en plus flou vers les bords */
+.opening.turbo::before { z-index: 1; -webkit-backdrop-filter: blur(10px) saturate(1.4); backdrop-filter: blur(10px) saturate(1.4);
+  -webkit-mask: radial-gradient(circle at var(--cx, 50%) var(--cy, 40%), transparent 16%, rgba(0, 0, 0, .5) 30%, #000 58%);
+  mask: radial-gradient(circle at var(--cx, 50%) var(--cy, 40%), transparent 16%, rgba(0, 0, 0, .5) 30%, #000 58%); }
+/* Traînées de zoom floues qui partent du jeton, à la couleur du dernier tiré */
+.opening.turbo::after { z-index: 1; opacity: .55; mix-blend-mode: screen; filter: blur(7px);
+  background: repeating-conic-gradient(from 0deg at var(--cx, 50%) var(--cy, 40%), rgba(var(--tier), .55) 0 1.2deg, transparent 1.2deg 9deg),
+              radial-gradient(circle at var(--cx, 50%) var(--cy, 40%), transparent 14%, rgba(var(--tier), .25) 40%, rgba(0, 0, 0, .55) 85%);
+  -webkit-mask: radial-gradient(circle at var(--cx, 50%) var(--cy, 40%), transparent 14%, #000 45%);
+  mask: radial-gradient(circle at var(--cx, 50%) var(--cy, 40%), transparent 14%, #000 45%);
+  transform-origin: var(--cx, 50%) var(--cy, 40%); animation: warp .2s ease-out infinite; }
+@keyframes warp { 0% { transform: scale(1) rotate(0); opacity: .7; } 100% { transform: scale(1.18) rotate(2deg); opacity: .35; } }
 .opening.turbo .op-info { transition: none !important; }
 .opening.turbo .op-coin::before { animation: turboGlow .23s ease-out infinite; }
 @keyframes turboGlow { 0% { opacity: 1; transform: scale(1.25); } 100% { opacity: .6; transform: scale(1); } }
@@ -1830,5 +1837,6 @@ body:has(.askbox) .fb-btn, body:has(.sheet.on) .fb-btn, body:has(.chat-dock:not(
 .op-combo small { font-size: 13px; font-weight: 600; color: rgb(var(--cg, 255, 255, 255)); letter-spacing: .06em; }
 .op-combo.pop b { animation: comboPop .22s cubic-bezier(.2, 1.6, .4, 1); }
 @keyframes comboPop { 0% { transform: scale(1.6) rotate(-6deg); } 100% { transform: none; } }
-html.reduce-fx .opening.turbo::before { display: none; }
+html.reduce-fx .opening.turbo::before, html.reduce-fx .opening.turbo::after { display: none; }
 .opening.turbo #op-next { visibility: hidden; }
+.opening.turbo .op-bg { opacity: .35; transition: opacity .2s; }
