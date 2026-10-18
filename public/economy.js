@@ -1,14 +1,13 @@
 // Économie : argent (◆) et stock de pulls Takoras qui se recharge tout seul.
 // On ne peut pas acheter de pull Takoras : on en gagne 1 toutes les 3 min, jusqu'au stock max.
-// Le stock max (5 au départ) s'améliore jusqu'à 50, par paliers de 5 (mêmes prix que le serveur : _upgrade_cost).
+// Le stock max (5 au départ) s'améliore de +1 à chaque fois jusqu'à 50 (même prix que le serveur : _upgrade_cost).
 // L'argent, le stock et les tirages sont gérés par le serveur (Supabase) : impossible de tricher depuis le navigateur.
 // Ici on garde juste une copie pour l'affichage et le compte à rebours.
 
 const ECO_KEY = 'takoras-eco';
 const REGEN = 3 * 60 * 1000, BASE_MAX = 5, TOP_MAX = 50;
-const UPG_COSTS = [1000, 3000, 6000, 10000, 15000, 22000, 30000, 40000, 50000]; // pour 10, 15, 20 … 50
-const nextMax = m => Math.min(TOP_MAX, Math.floor(m / 5) * 5 + 5);
-const upgradeCost = target => UPG_COSTS[Math.max(0, Math.min(8, target / 5 - 2))];
+const nextMax = m => Math.min(TOP_MAX, m + 1);
+const upgradeCost = target => Math.max(100, Math.round(100 * Math.max(1, target - BASE_MAX) ** 1.4 / 50) * 50); // 6 = 100 … 50 = 20 650
 
 let eco = { coins: 0, stock: BASE_MAX, max: BASE_MAX, last: Date.now() };
 try { eco = { ...eco, ...JSON.parse(localStorage.getItem(ECO_KEY)) }; } catch {}
@@ -93,10 +92,8 @@ function renderActions() {
   const full = eco.stock >= eco.max, cost = upgradeCost(nextMax(eco.max));
   box.innerHTML = `
     <div class="stock">
-      ${eco.max <= 10
-        ? `<div class="pips">${Array.from({ length: eco.max }, (_, i) => `<img src="img/jetons/takoras.png" alt="" class="${i < eco.stock ? 'on' : ''}">`).join('')}</div>`
-        : `<div class="stock-bar"><i style="width:${Math.min(100, eco.stock / eco.max * 100)}%"></i></div>`}
-      <span><b id="stock-n">${eco.stock}</b>/${eco.max} ${t('pulls_word')} · <span id="stock-next">${full ? t('stock_full') : t('plus1_in', { t: mmss(nextIn()) })}</span></span>
+      <div class="stock-count"><b id="stock-n">${eco.stock}</b><span>/${eco.max}</span></div>
+      <span>${t('pulls_word')} · <span id="stock-next">${full ? t('stock_full') : t('plus1_in', { t: mmss(nextIn()) })}</span></span>
     </div>
     <div class="row-btns">
       <button class="btn primary" data-open="1" ${eco.stock ? '' : 'disabled'}>${t('open1')}</button>

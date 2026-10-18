@@ -1908,3 +1908,7 @@ html.reduce-fx .opening.turbo::before { display: none; }
 @media (max-width: 760px) { .inv-tabs a { flex: 1; } }
 /* Icônes de la barre du bas : jamais écrasées */
 .tabbar svg { flex-shrink: 0; width: 22px; height: 22px; }
+/* Stock de pulls : juste le nombre, bien lisible (x/50) */
+.stock-count { font-family: "Space Grotesk"; line-height: 1; }
+.stock-count b { font-size: 30px; font-weight: 700; color: #fff; }
+.stock-count span { font-size: 18px; color: var(--muted); font-weight: 600; }
