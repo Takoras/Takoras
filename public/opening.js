@@ -129,6 +129,8 @@ function startOpening() {
   $('op-stats').innerHTML = '';
   if (c.phase === 'hold') hold(true);
   if (c.phase === 'revealed') reveal(true);
+  renderAuto();
+  if (sess.auto) setTimeout(autoRun, 250);
 }
 
 function setTier(v) {
@@ -426,6 +428,7 @@ async function cinematic() {
 
 // Boutons sous la fiche : Suivant (pendant un ×10), Récap (à la fin d'un ×10), ou Pull encore / Retour
 function updateActions() {
+  renderAuto();
   const last = sess.idx >= sess.total - 1, multi = sess.total > 1;
   if (typeof ecoDecorate === 'function') setTimeout(ecoDecorate);
   $('op-next').hidden = last;
@@ -443,6 +446,40 @@ function next() {
   startOpening();
 
 }
+
+// « Tout ouvrir d'un coup » (pendant un Tout ouvrir) : les jetons s'ouvrent tout seuls, un par un, très vite.
+// Ça s'arrête dès qu'un jeton est spécial (variante, ou 1/1000 et plus) : celui-là tu l'ouvres toi-même, avec toute la mise en scène.
+const isSpecial = (j, v) => !!v || j.odds >= RARE;
+function renderAuto() {
+  const b = $('op-auto'); if (!b) return;
+  const show = sess && sess.total > 1 && !sess.recap && (sess.idx < sess.total - 1 || !opening.classList.contains('revealed'));
+  b.hidden = !show;
+  b.classList.toggle('on', !!sess?.auto);
+  b.textContent = sess?.auto ? '⏸ ' + t('auto_stop') : '⏩ ' + t('auto_go');
+}
+function autoRun() {
+  if (!sess?.auto || !run || !opening.classList.contains('on')) return;
+  if (sess.recap) { sess.auto = false; return renderAuto(); }
+  if (!run.done) {
+    if (isSpecial(run.result, run.variant)) { // on s'arrête : à toi de jouer
+      sess.auto = false; save(); renderAuto();
+      sfx.hold(); toast('✨ ' + t('auto_special'));
+      return;
+    }
+    run.queue = []; run.done = true; clearInterval(run.hb);
+    reveal();
+    return setTimeout(autoRun, 700);
+  }
+  if (spinning()) return setTimeout(autoRun, 150);
+  if (sess.idx >= sess.total - 1) { sess.auto = false; save(); return showRecap(); }
+  next();
+}
+$('op-auto').addEventListener('click', e => {
+  e.stopPropagation();
+  if (!sess) return;
+  sess.auto = !sess.auto; save(); sfx.click(); renderAuto();
+  if (sess.auto) autoRun();
+});
 
 // Récap des 10 jetons, le plus rare mis en avant
 function showRecap() {

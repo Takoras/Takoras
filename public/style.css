@@ -1794,3 +1794,22 @@ html.lock .fb-btn { display: none; }
 .beta-thanks span { font-size: 18px; }
 .beta-thanks b { display: block; font-size: 13px; background: linear-gradient(90deg, #fde68a, #f9a8d4, #c4b5fd); -webkit-background-clip: text; background-clip: text; color: transparent; }
 .beta-thanks small { font-size: 12px; color: var(--muted); }
+
+/* Chevauchements : la croix des fenêtres ne passe plus sur le titre, les boutons flottants ne cachent plus le bas des pages */
+.modal-card h2, .pk-wrap h2, .pe h2, .info h2, .ann-hist h2, .pn-page h2 { padding-right: 44px; }
+main { padding-bottom: 90px; }
+@media (max-width: 760px) { main { padding-bottom: 76px; } }
+/* quand une barre ou une fenêtre est ouverte, les boutons flottants s'effacent */
+body:has(.sell-bar.on) .fb-btn, body:has(.sell-bar.on) .chat-fab,
+body:has(#jeton-modal.on) .fb-btn, body:has(#jeton-modal.on) .chat-fab,
+body:has(.settings.on) .fb-btn, body:has(.settings.on) .chat-fab,
+body:has(.askbox) .fb-btn, body:has(.sheet.on) .fb-btn, body:has(.chat-dock:not([hidden])) .fb-btn { opacity: 0; pointer-events: none; transform: translateY(12px); }
+.fb-btn, .chat-fab { transition: opacity .25s, transform .25s; }
+
+/* Ouverture : bouton « Tout ouvrir d'un coup » */
+.op-auto { margin-top: 10px; padding: 8px 16px; border-radius: 99px; font-size: 13px; font-weight: 700; color: var(--text); background: rgba(255, 255, 255, .07);
+  border: 1px solid rgba(255, 255, 255, .15); backdrop-filter: blur(8px); transition: all .2s; pointer-events: auto; }
+.op-auto:hover { background: rgba(255, 255, 255, .12); }
+.op-auto.on { background: linear-gradient(135deg, #8b5cf6, #f97316); border-color: transparent; color: #fff; animation: annPulse 1.2s ease-in-out infinite; }
+.opening > .op-auto { position: absolute; top: calc(22px + env(safe-area-inset-top)); left: 50%; translate: -50% 0; z-index: 6; margin: 0; }
+.opening.recap > .op-auto { display: none; }
