@@ -1811,8 +1811,11 @@ body:has(.askbox) .fb-btn, body:has(.sheet.on) .fb-btn, body:has(.chat-dock:not(
   border: 1px solid rgba(255, 255, 255, .15); backdrop-filter: blur(8px); transition: all .2s; pointer-events: auto; }
 .op-auto:hover { background: rgba(255, 255, 255, .12); }
 .op-auto.on { background: linear-gradient(135deg, #8b5cf6, #f97316); border-color: transparent; color: #fff; animation: annPulse 1.2s ease-in-out infinite; }
-.opening > .op-auto { position: absolute; top: calc(22px + env(safe-area-inset-top)); left: 50%; translate: -50% 0; z-index: 6; margin: 0; }
-.opening.recap > .op-auto { display: none; }
+.op-autobar { position: absolute; top: calc(22px + env(safe-area-inset-top)); left: 50%; translate: -50% 0; z-index: 8; display: flex; gap: 8px; }
+.op-autobar .op-auto { margin: 0; white-space: nowrap; }
+.op-skip { background: rgba(255, 255, 255, .04); color: var(--muted); }
+.op-skip:hover { color: var(--text); }
+.opening.recap .op-autobar { display: none; }
 
 /* ===================== Mode turbo (Tout ouvrir d'un coup) ===================== */
 .opening.turbo::before, .opening.turbo::after { content: ""; position: absolute; inset: 0; pointer-events: none; }
@@ -1871,3 +1874,19 @@ html.reduce-fx .opening.turbo::before { display: none; }
 .center > :not(.float):not(.coin-wrap) { position: relative; z-index: 1; }
 /* Toasts : largeur selon le texte (avant, left:50% les écrasait sur une demi-largeur d'écran) */
 .toast { width: max-content; max-width: min(460px, calc(100vw - 32px)); text-align: center; }
+/* Turbo : le jeton et sa fiche passent au-dessus du flou (certains téléphones ignorent le masque du flou et floutaient tout) */
+.opening.turbo .op-main { position: relative; z-index: 2; }
+@media (pointer: coarse) { .opening.turbo::before { display: none; } }
+/* Réglages de l'ouverture auto (sous les pulls, sur l'accueil) */
+.auto-cfg { margin-top: 14px; padding-top: 14px; border-top: 1px solid var(--border); display: flex; flex-direction: column; gap: 10px; }
+.auto-cfg h4 { font-family: "Space Grotesk"; font-size: 15px; display: flex; align-items: center; gap: 6px; }
+.auto-cfg p { font-size: 12.5px; color: var(--muted); }
+.ac-lbl { font-size: 12px; font-weight: 600; color: var(--muted); text-transform: uppercase; letter-spacing: .06em; }
+.ac-row { display: flex; flex-wrap: wrap; gap: 6px; }
+.ac-row button { padding: 6px 11px; border-radius: 99px; font-size: 12.5px; font-weight: 600; color: var(--muted); background: rgba(255, 255, 255, .05); border: 1px solid var(--border); transition: all .15s; }
+.ac-row button:hover { color: var(--text); }
+.ac-row button.on { color: #fff; background: rgba(139, 92, 246, .25); border-color: rgba(139, 92, 246, .7); }
+.ac-row button.v-gold.on { background: rgba(250, 204, 21, .18); border-color: rgba(250, 204, 21, .7); color: #fde68a; }
+.ac-row button.v-celeste.on { background: rgba(224, 231, 255, .14); border-color: rgba(224, 231, 255, .7); color: #e0e7ff; }
+.ac-row button.v-ombre.on { background: rgba(168, 85, 247, .2); border-color: rgba(168, 85, 247, .75); color: #e9d5ff; }
+.ac-hint { font-size: 11.5px !important; opacity: .8; }

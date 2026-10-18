@@ -449,14 +449,35 @@ function next() {
 
 // « Tout ouvrir d'un coup » (pendant un Tout ouvrir) : les jetons s'ouvrent tout seuls, un par un, très vite.
 // Ça s'arrête dès qu'un jeton est spécial (variante, ou 1/1000 et plus) : celui-là tu l'ouvres toi-même, avec toute la mise en scène.
-const isSpecial = (j, v) => !!v || j.odds >= RARE;
+// S'arrêter ? Selon les réglages du joueur (sous les pulls, sur l'accueil)
+const isSpecial = (j, v) => (v && (SETTINGS.autoVars || []).includes(v)) || j.odds >= (SETTINGS.autoMin || Infinity);
 function renderAuto() {
   const b = $('op-auto'); if (!b) return;
   const show = sess && sess.total > 1 && !sess.recap && (sess.idx < sess.total - 1 || !opening.classList.contains('revealed'));
   b.hidden = !show;
   b.classList.toggle('on', !!sess?.auto);
   b.textContent = sess?.auto ? '⏸ ' + t('auto_stop') : '⏩ ' + t('auto_go');
+  const s = $('op-skip');
+  s.hidden = !show;
+  s.textContent = '⏭ ' + t('auto_skip');
 }
+// « Tout passer » : les jetons sont déjà à toi (tirés par le serveur), on saute directement au récap pour pouvoir partir
+function skipAll() {
+  if (!sess || sess.recap || sess.total < 2) return;
+  sess.auto = false; turbo(false);
+  if (run) { run.done = true; run.queue = []; clearInterval(run.hb); run.spinEnd = 0; }
+  opening.classList.remove('spinning', 'hold');
+  for (let i = sess.results.length; i < sess.total; i++) {
+    const j = (sess.plan && findJeton(sess.plan[i])) || (i === sess.idx && sess.cur ? findJeton(sess.cur.name) : draw(seriesOf()));
+    const v = (sess.vars || [])[i] || '';
+    sess.results.push(j.name); (sess.rvars ||= []).push(v);
+    addToHistory(j, v);
+  }
+  sess.idx = sess.total - 1; sess.cur = null;
+  save(); sfx.whooshOut?.();
+  showRecap();
+}
+$('op-skip').addEventListener('click', e => { e.stopPropagation(); sfx.click(); skipAll(); });
 // Mode turbo : environ 0,25 s par jeton, lignes de vitesse, compteur de combo, notes qui montent
 const AUTO_STEP = 200;
 function autoRun() {
@@ -469,6 +490,7 @@ function autoRun() {
       return;
     }
     turbo(true);
+    preloadTokens();
     run.queue = []; run.done = true; clearInterval(run.hb);
     reveal(false, true); // révélation sans le son normal (le turbo a le sien)
     // pas de longue rotation : le jeton claque direct
@@ -480,6 +502,12 @@ function autoRun() {
   if (sess.idx >= sess.total - 1) { sess.auto = false; save(); turbo(false); return setTimeout(showRecap, 250); }
   sess.idx++; sess.cur = null; save();
   startOpening();
+}
+// Images des jetons décodées à l'avance : sinon, sur téléphone, le jeton n'a pas le temps de s'afficher à 0,2 s par pull
+let tokImgs = null;
+function preloadTokens() {
+  if (tokImgs) return;
+  tokImgs = SERIES.Takoras.map(j => { const i = new Image(); i.src = texOf(j); i.decode?.().catch(() => {}); return i; });
 }
 let combo = 0;
 function turbo(on) {
@@ -503,7 +531,8 @@ function turboHit(j) {
   c.innerHTML = `<b>×${combo}</b><small>${jnH(j.name)}</small>`;
   c.classList.remove('pop'); void c.offsetWidth; c.classList.add('pop');
   const z = opCoin.querySelector('.zoom');
-  z?.animate([{ transform: 'scale(1.35)', filter: 'blur(6px) brightness(2.2)' }, { transform: 'scale(.96)', filter: 'blur(0) brightness(1.2)', offset: .6 }, { transform: 'scale(1)', filter: 'none' }], { duration: 180, easing: 'cubic-bezier(.2, .9, .3, 1)' });
+  // petit coup de zoom, sans flash blanc : le jeton reste bien visible
+  z?.animate([{ transform: 'scale(1.18)', filter: 'brightness(1.35)' }, { transform: 'scale(.97)', offset: .55 }, { transform: 'scale(1)', filter: 'none' }], { duration: 150, easing: 'cubic-bezier(.2, .9, .3, 1)' });
 }
 $('op-auto').addEventListener('click', e => {
   e.stopPropagation();
@@ -687,3 +716,23 @@ $('op-recap-grid').addEventListener('pointermove', e => {
 $('op-recap-grid').addEventListener('pointerout', e => {
   const card = e.target.closest('.rc'); if (card && !card.contains(e.relatedTarget)) card.querySelector('img').style.transform = '';
 });
+
+// ---------- Réglages de « Tout ouvrir d'un coup » (sous les pulls, sur l'accueil) : sur quoi ça s'arrête
+const AC_MINS = [100, 500, 1000, 5000, 25000, 100000, 0]; // 0 = jamais
+function renderAutoCfg() {
+  const box = $('auto-cfg'); if (!box) return;
+  const min = SETTINGS.autoMin || 0, vars = SETTINGS.autoVars || [];
+  box.innerHTML = `<h4>⏩ ${t('ac_title')}</h4><p>${t('ac_sub')}</p>
+    <div class="ac-lbl">${t('ac_min')}</div>
+    <div class="ac-row" data-ac="min">${AC_MINS.map(m => `<button data-v="${m}" class="${m === min ? 'on' : ''}">${m ? '1/' + m.toLocaleString(LOCALE()) : t('ac_never')}</button>`).join('')}</div>
+    <div class="ac-lbl">${t('ac_vars')}</div>
+    <div class="ac-row" data-ac="vars">${Object.keys(VARIANTS).map(v => `<button data-v="${v}" class="v-${v}${vars.includes(v) ? ' on' : ''}">${t('v_' + v)} <small>1/${VARIANTS[v].odds}</small></button>`).join('')}</div>
+    ${!min && !vars.length ? `<p class="ac-hint">${t('ac_hint')}</p>` : ''}`;
+}
+$('auto-cfg')?.addEventListener('click', e => {
+  const b = e.target.closest('.ac-row button'); if (!b) return;
+  if (b.parentNode.dataset.ac === 'min') SETTINGS.autoMin = +b.dataset.v;
+  else { const v = b.dataset.v, l = SETTINGS.autoVars || []; SETTINGS.autoVars = l.includes(v) ? l.filter(x => x !== v) : [...l, v]; }
+  saveSettings(); sfx.click(); renderAutoCfg();
+});
+addEventListener('DOMContentLoaded', renderAutoCfg);
