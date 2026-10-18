@@ -676,6 +676,8 @@ $('dbg-open').addEventListener('click', () => buy(1));
 (function restore() {
   let saved = null;
   try { saved = JSON.parse(localStorage.getItem(SAVE_KEY)); } catch {}
+  // une ouverture géante (plus de 1000, avant la limite) bloquait le site : on l'oublie, les jetons sont déjà dans l'inventaire
+  if (saved?.total > 1000) { endSession(); return; }
   if (!saved || !PULLS[saved.pull] || (saved.cur && !(SERIES[PULLS[saved.pull].name] || SERIES.Takoras).some(j => j.name === saved.cur.name))) { endSession(); return; }
   sess = saved;
   if (!ACC.user && !(sb && localStorage.getItem('sb-joyskjoofihwhycyreyn-auth-token'))) { endSession(); return; } // pas connecté : rien à reprendre
