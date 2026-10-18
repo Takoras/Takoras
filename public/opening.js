@@ -4,6 +4,9 @@
 // Jetons de la série Takoras — PROVISOIRES : même texture (template), seule la couleur du glow change.
 const TEMPLATE = 'img/jetons/template.png'; // texture par défaut tant qu'un jeton n'a pas son dessin
 const texOf = j => j.img || TEMPLATE;
+// Taille de la grille du dessin (64×64 pour la plupart). Un dessin plus grand (Néphéris : 74×74) est affiché un peu plus grand
+// pour que ses pixels fassent la même taille que ceux des autres jetons.
+const texScale = j => (j?.grid || 64) / 64;
 const SERIES = {
   Takoras: [
     { name: 'Mobu', odds: 2, glow: '#8fb3c4', img: 'img/jetons/serie-takoras/mobu.png' },
@@ -19,7 +22,7 @@ const SERIES = {
     { name: 'Astra', odds: 10000, glow: '#f2c98f', img: 'img/jetons/serie-takoras/astra.png' },
     { name: 'Kraïos', odds: 25000, glow: '#4f46e5', img: 'img/jetons/serie-takoras/kraios.gif' },
     { name: 'Koi', odds: 50000, glow: '#ff5a3c', img: 'img/jetons/serie-takoras/koi.png' },
-    { name: 'Néphéris', odds: 100000, glow: '#f0abfc', img: 'img/jetons/serie-takoras/nepheris.gif' },
+    { name: 'Néphéris', odds: 100000, glow: '#f0abfc', img: 'img/jetons/serie-takoras/nepheris.gif', grid: 74 },
     { name: 'Zénith', odds: 250000, glow: '#e2e8f0' },
     { name: 'Oblivion', odds: 500000, glow: '#fb7185' },
     { name: 'Takoras', odds: 1000000, glow: '#ffffff' },
@@ -343,7 +346,8 @@ function reveal(restored, quiet = false) {
   opening.style.setProperty('--tier', hexRGB(j.glow));
   startBg(j);
   const spin = opCoin.querySelector('.spin');
-  spin.innerHTML = coin3D(texOf(j), j.name); // pas d'ombre sur l'image (elle serait coupée en carré en 3D) : le halo est derrière
+  spin.innerHTML = coin3D(texOf(j), j.name);
+  spin.style.scale = texScale(j) === 1 ? '' : texScale(j); // face, reflet et tranche ensemble // pas d'ombre sur l'image (elle serait coupée en carré en 3D) : le halo est derrière
   setGlareMask(texOf(j));
   // Le jeton se retourne très vite puis ralentit longtemps (plus il est rare, plus ça dure)
   if (!restored) {
@@ -740,3 +744,10 @@ $('auto-cfg')?.addEventListener('click', e => {
   saveSettings(); sfx.click(); renderAutoCfg();
 });
 addEventListener('DOMContentLoaded', renderAutoCfg);
+
+// Jetons dessinés sur une grille plus grande : on les agrandit partout (sauf dans le jeton 3D et la fiche, déjà agrandis en entier)
+(function gridCSS() {
+  const css = Object.values(SERIES).flat().filter(j => j.img && texScale(j) !== 1)
+    .map(j => `img[src$="${j.img.split('/').pop()}"]:not(.spin img):not(.jm-coin img){scale:${texScale(j)}}`).join('');
+  if (css) document.head.appendChild(Object.assign(document.createElement('style'), { textContent: css }));
+})();

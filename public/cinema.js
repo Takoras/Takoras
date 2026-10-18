@@ -213,8 +213,9 @@ const CINE = (() => {
       const cine = { flash: 0 };
       // le jeton : vraie image + silhouette (même dessin, rempli de la couleur sombre du thème)
       const img = new Image(); img.src = texOf(j);
-      const sil = document.createElement('canvas'); sil.width = sil.height = 64;
-      img.onload = () => { const s = sil.getContext('2d'); s.imageSmoothingEnabled = false; s.drawImage(img, 0, 0, 64, 64); s.globalCompositeOperation = 'source-in'; s.fillStyle = th.c[0]; s.fillRect(0, 0, 64, 64); };
+      const G = j.grid || 64, TS = G / 64; // dessin plus grand (74×74) : silhouette à sa vraie grille, affiché un peu plus grand
+      const sil = document.createElement('canvas'); sil.width = sil.height = G;
+      img.onload = () => { const s = sil.getContext('2d'); s.imageSmoothingEnabled = false; s.drawImage(img, 0, 0, G, G); s.globalCompositeOperation = 'source-in'; s.fillStyle = th.c[0]; s.fillRect(0, 0, G, G); };
       if (th.scene.includes('orbiters')) cine.orbit = SERIES.Takoras.filter(o => o.name !== j.name && o.img).map(o => { const im = new Image(); im.src = o.img; return im; });
       const mus = music(th, D);
       const t0 = performance.now();
@@ -251,7 +252,7 @@ const CINE = (() => {
           gr.addColorStop(0, rgba(th.c[2], .25 + .45 * k * beat)); gr.addColorStop(1, rgba(th.c[2], 0));
           x.fillStyle = gr; x.fillRect(0, 0, w, h);
           x.save(); x.translate(cx, cy); x.scale(Math.max(.06, Math.abs(sx)), 1);
-          x.drawImage(tense > .85 ? img : sil, -size / 2, -size / 2, size, size); // le dessin se devine juste avant l'explosion
+          x.drawImage(tense > .85 ? img : sil, -size * TS / 2, -size * TS / 2, size * TS, size * TS); // le dessin se devine juste avant l'explosion
           x.restore();
           // contour lumineux de la silhouette (petits pixels autour)
           for (let i = 0; i < 24 * k; i++) { const a = rnd(0, 7), r = size * .5 * (.95 + Math.random() * .1); px(x, cx + Math.cos(a) * r * Math.abs(sx), cy + Math.sin(a) * r, 1, rgba(th.c[3], .8)); }
@@ -264,7 +265,7 @@ const CINE = (() => {
           const gr = x.createRadialGradient(cx, cy, 0, cx, cy, size * 1.6); gr.addColorStop(0, rgba(th.c[2], .7)); gr.addColorStop(1, rgba(th.c[0], 0)); x.fillStyle = gr; x.fillRect(0, 0, w, h);
           x.strokeStyle = rgba(th.c[3], 1 - q); x.lineWidth = 2; x.beginPath(); x.arc(cx, cy, size * (.6 + q * 2.2), 0, 7); x.stroke();
           for (let i = 0; i < 60; i++) { const a = i / 60 * Math.PI * 2 + i, r = size * (.5 + q * 1.8 + (i % 5) * .08); px(x, cx + Math.cos(a) * r, cy + Math.sin(a) * r, 1, rgba(i % 2 ? th.c[2] : th.c[3], 1 - q)); }
-          x.drawImage(img, cx - size / 2, cy - size / 2, size, size);
+          x.drawImage(img, cx - size * TS / 2, cy - size * TS / 2, size * TS, size * TS);
         }
         // tremblement pendant la tension
         const sh = tense * (1 - suck) * 3;

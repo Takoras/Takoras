@@ -181,7 +181,7 @@ function openJeton(name, extra = '', variant = '', locked = false) {
   $('jm-card').onclick = null; $('jm-card').oninput = null; $('jm-card').onchange = null;
   $('jm-card').innerHTML = `
     <button class="set-close jm-close" aria-label="${t('close')}">✕</button>
-    <div class="jm-coin"><img class="${vCls(variant)}${locked ? ' sil' : ''}" src="${texOf(j)}" alt="">${locked ? '' : `<i class="glare${variant ? ' hv-' + variant : ''}" style="-webkit-mask-image:url(${texOf(j)});mask-image:url(${texOf(j)})"></i>`}</div>
+    <div class="jm-coin"${texScale(j) !== 1 ? ` style="scale:${texScale(j)}"` : ''}><img class="${vCls(variant)}${locked ? ' sil' : ''}" src="${texOf(j)}" alt="">${locked ? '' : `<i class="glare${variant ? ' hv-' + variant : ''}" style="-webkit-mask-image:url(${texOf(j)});mask-image:url(${texOf(j)})"></i>`}</div>
     <div class="jm-info">
       <span class="tier t-${tierKey(j.odds)}">${t(tierKey(j.odds))}</span>
       <h2>${jnH(j.name)} ${vTag(variant)}</h2>
