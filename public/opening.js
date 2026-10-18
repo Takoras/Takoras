@@ -556,9 +556,12 @@ function showRecap() {
   const list = sess.results.map(findJeton), vars = sess.rvars || [], best = list.reduce((a, b) => (b.odds > a.odds ? b : a));
   opening.style.setProperty('--tier', hexRGB(best.glow));
   startBg(best);
-  const bi = list.indexOf(best); // un seul « meilleur tirage », même s'il y en a plusieurs pareils
-  $('op-recap-grid').innerHTML = list.map((j, i) =>
-    `<div class="rc${i === bi ? ' best' : ''}" style="--g:${hexRGB(j.glow)};animation-delay:${Math.min(i, 20) * 45}ms">${i === bi ? `<span class="rc-tag">${t('best')}</span>` : ''}${jetonHTML(j, 72, vars[i])}<b>${jnH(j.name)}${vTag(vars[i])}</b><small>1/${j.odds.toLocaleString(LOCALE())}</small></div>`).join('');
+  // Les doublons sont regroupés en une seule carte « ×N », du plus rare au plus commun (50 pulls tiennent sur un écran)
+  const g = new Map();
+  list.forEach((j, i) => { const k = j.name + '|' + (vars[i] || ''); const x = g.get(k) || { j, v: vars[i] || '', n: 0 }; x.n++; g.set(k, x); });
+  const cards = [...g.values()].sort((a, b) => vOdds(b.j.odds, b.v) - vOdds(a.j.odds, a.v));
+  $('op-recap-grid').innerHTML = cards.map(({ j, v, n }, i) =>
+    `<div class="rc${i === 0 ? ' best' : ''}" style="--g:${hexRGB(j.glow)};animation-delay:${Math.min(i, 20) * 45}ms">${i === 0 ? `<span class="rc-tag">${t('best')}</span>` : ''}${n > 1 ? `<span class="rc-n">×${n}</span>` : ''}${jetonHTML(j, 72, v)}<b>${jnH(j.name)}${vTag(v)}</b><small>1/${vOdds(j.odds, v).toLocaleString(LOCALE())}</small></div>`).join('');
   $('op-recap-tag').textContent = t('recap_tag', { n: sess.total });
   $('op-recap-title').textContent = t('recap_title', { n: sess.total });
   if (typeof ecoDecorate === 'function') ecoDecorate();
@@ -618,6 +621,7 @@ $('op-again').addEventListener('click', () => openPulls(1));
 $('op-back').addEventListener('click', leave);
 $('op-recap-again').addEventListener('click', () => openPulls('all'));
 $('op-recap-back').addEventListener('click', leave);
+$('op-recap-x').addEventListener('click', e => { e.stopPropagation(); leave(); });
 
 // Retour à l'accueil : tout s'envole hors de l'écran, les bandes noires repartent, puis l'accueil revient en douceur
 let leaving = false;

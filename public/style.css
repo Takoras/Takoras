@@ -1969,3 +1969,10 @@ html.reduce-fx .opening.turbo::before { display: none; }
   .ts-row select { flex: 1 1 100%; min-width: 0; }
   .ts-row .ts-qty { flex: 1; }
 }
+
+/* Récap : nombre de doublons sur la carte, et croix pour fermer toujours visible en haut à droite */
+.rc-n { position: absolute; top: 6px; right: 8px; font-family: "Space Grotesk"; font-weight: 700; font-size: 13px; color: #c4b5fd; }
+.op-recap-x { display: none; position: fixed; top: calc(14px + env(safe-area-inset-top)); right: 14px; z-index: 9; width: 42px; height: 42px; border-radius: 50%;
+  font-size: 18px; color: #fff; background: rgba(20, 18, 30, .85); border: 1px solid rgba(255, 255, 255, .18); }
+.op-recap-x:hover { background: rgba(255, 255, 255, .14); }
+.opening.recap .op-recap-x { display: grid; place-items: center; }
