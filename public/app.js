@@ -62,8 +62,9 @@ hero.addEventListener('pointermove', e => {
 hero.addEventListener('pointerleave', () => { over = false; });
 function frame(t) {
   const tilt = hero.querySelector('.tilt');
-  if (tilt) {
-    const wave = still ? 0 : Math.cos(t / 16000 * Math.PI * 2);
+  // Rien à faire si le jeton n'est pas visible (autre page, ouverture en cours, onglet caché) : économise le processeur
+  if (tilt && hero.offsetParent && !document.getElementById('opening').classList.contains('on') && !document.hidden) {
+    const wave = still || reducedFx() ? 0 : Math.cos(t / 16000 * Math.PI * 2);
     const tgt = over
       ? { rx: (.5 - my) * 64, ry: (mx - .5) * 64, s: 1.06, g: 1 }
       : { rx: 6 * wave, ry: -22 * wave, s: 1, g: 0 };

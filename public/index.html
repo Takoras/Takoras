@@ -8,8 +8,8 @@
 <link rel="icon" type="image/png" href="img/logo.png">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=Cinzel:wght@600;700&family=Cinzel+Decorative:wght@700&family=Space+Grotesk:wght@500;600;700&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="style.css?v=20261018l">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=Cinzel:wght@700&family=Space+Grotesk:wght@500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="style.css?v=20261018m">
 </head>
 <body>
   <!-- Effet « doodle » : 3 légères déformations (turbulence) qui s'enchaînent pour faire vivre les pixel arts -->
@@ -37,7 +37,8 @@
       assets.forEach(src => { const i = new Image(); i.onload = i.onerror = tick; i.src = src; });
       addEventListener('load', () => (document.fonts ? document.fonts.ready : Promise.resolve()).then(tick));
       const wait = setInterval(() => {
-        if (done < total || performance.now() - t0 < 600) return;
+        // on attend les images (0,6 s minimum), mais jamais plus de 2,5 s même avec une connexion lente
+        if ((done < total && performance.now() - t0 < 2500) || performance.now() - t0 < 600) return;
         clearInterval(wait);
         const l = document.getElementById('loader');
         setTimeout(() => { l.classList.add('out'); setTimeout(() => l.remove(), 500); }, 250); // le temps que la barre finisse
@@ -295,28 +296,28 @@
     </div>
   </div>
 
-  <script src="settings.js?v=20261018l"></script>
+  <script src="settings.js?v=20261018m"></script>
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.4/dist/umd/supabase.js"></script>
-  <script src="account.js?v=20261018l"></script>
-  <script src="sound.js?v=20261018l"></script>
-  <script src="app.js?v=20261018l"></script>
-  <script src="cinema.js?v=20261018l"></script>
-  <script src="transitions.js?v=20261018l"></script>
-  <script src="opening.js?v=20261018l"></script>
-  <script src="economy.js?v=20261018l"></script>
-  <script src="ui.js?v=20261018l"></script>
-  <script src="motion.js?v=20261018l"></script>
-  <script src="inventory.js?v=20261018l"></script>
-  <script src="shop.js?v=20261018l"></script>
-  <script src="info.js?v=20261018l"></script>
-  <script src="profile.js?v=20261018l"></script>
-  <script src="social.js?v=20261018l"></script>
-  <script src="battle-engine.js?v=20261018l"></script>
-  <script src="combat.js?v=20261018l"></script>
-  <script src="quests.js?v=20261018l"></script>
-  <script src="beta.js?v=20261018l"></script>
-  <script src="feedback.js?v=20261018l"></script>
-  <script src="admin.js?v=20261018l"></script>
-  <script src="mobile.js?v=20261018l"></script>
+  <script src="account.js?v=20261018m"></script>
+  <script src="sound.js?v=20261018m"></script>
+  <script src="app.js?v=20261018m"></script>
+  <script src="cinema.js?v=20261018m"></script>
+  <script src="transitions.js?v=20261018m"></script>
+  <script src="opening.js?v=20261018m"></script>
+  <script src="economy.js?v=20261018m"></script>
+  <script src="ui.js?v=20261018m"></script>
+  <script src="motion.js?v=20261018m"></script>
+  <script src="inventory.js?v=20261018m"></script>
+  <script src="shop.js?v=20261018m"></script>
+  <script src="info.js?v=20261018m"></script>
+  <script src="profile.js?v=20261018m"></script>
+  <script src="social.js?v=20261018m"></script>
+  <script src="battle-engine.js?v=20261018m"></script>
+  <script src="combat.js?v=20261018m"></script>
+  <script src="quests.js?v=20261018m"></script>
+  <script src="beta.js?v=20261018m"></script>
+  <script src="feedback.js?v=20261018m"></script>
+  <script src="admin.js?v=20261018m"></script>
+  <script src="mobile.js?v=20261018m"></script>
 </body>
 </html>

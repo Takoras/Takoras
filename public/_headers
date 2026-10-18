@@ -1,0 +1,8 @@
+# Cache navigateur (Cloudflare). Les .js / .css sont appelés avec ?v=… (changé à chaque mise à jour) : on peut les garder 1 an.
+# Les images gardent leur nom quand on les redessine : 1 jour, puis mise à jour en arrière-plan.
+/*.js
+  Cache-Control: public, max-age=31536000, immutable
+/*.css
+  Cache-Control: public, max-age=31536000, immutable
+/img/*
+  Cache-Control: public, max-age=86400, stale-while-revalidate=604800
