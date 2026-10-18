@@ -459,10 +459,11 @@ function renderAuto() {
   b.textContent = sess?.auto ? '⏸ ' + t('auto_stop') : '⏩ ' + t('auto_go');
   const s = $('op-skip');
   s.hidden = !show;
-  s.textContent = '⏭ ' + t('auto_skip');
+  s.textContent = '✕ ' + t('auto_quit');
 }
-// « Tout passer » : les jetons sont déjà à toi (tirés par le serveur), on saute directement au récap pour pouvoir partir
-function skipAll() {
+// « Retour au menu » : on arrête d'ouvrir et on repart à l'accueil. Les jetons pas encore ouverts sont déjà à toi
+// (tirés par le serveur) : ils vont directement dans l'inventaire et l'historique.
+function quitAll() {
   if (!sess || sess.recap || sess.total < 2) return;
   sess.auto = false; turbo(false);
   if (run) { run.done = true; run.queue = []; clearInterval(run.hb); run.spinEnd = 0; }
@@ -473,11 +474,12 @@ function skipAll() {
     sess.results.push(j.name); (sess.rvars ||= []).push(v);
     addToHistory(j, v);
   }
-  sess.idx = sess.total - 1; sess.cur = null;
-  save(); sfx.whooshOut?.();
-  showRecap();
+  sess.idx = sess.total - 1; sess.cur = null; sess.recap = true; // fini : on a le droit de partir
+  save();
+  leave();
+  toast('🎒 ' + t('auto_quit_ok'));
 }
-$('op-skip').addEventListener('click', e => { e.stopPropagation(); sfx.click(); skipAll(); });
+$('op-skip').addEventListener('click', e => { e.stopPropagation(); quitAll(); });
 // Mode turbo : environ 0,25 s par jeton, lignes de vitesse, compteur de combo, notes qui montent
 const AUTO_STEP = 200;
 function autoRun() {
