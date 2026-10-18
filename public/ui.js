@@ -126,8 +126,8 @@ const bannerCanvas = id => {
 };
 
 // ---------- Photo de profil : 3 gratuites, d'autres en boutique (jamais d'image Discord). Sans photo : l'initiale.
-const AVATARS = { bleu: 'img/pp/bleu.png', rouge: 'img/pp/rouge.png', vert: 'img/pp/vert.png', etoile: 'img/pp/etoile.gif' };
-const FREE_PP = ['bleu', 'rouge', 'vert'];
+const AVATARS = { bleu: 'img/pp/bleu.png', rouge: 'img/pp/rouge.png', vert: 'img/pp/vert.png', yeux: 'img/pp/yeux.png', dunes: 'img/pp/dunes.png', etoile: 'img/pp/etoile.gif' };
+const FREE_PP = ['bleu', 'rouge', 'vert', 'yeux', 'dunes'];
 const AV_CACHE = {}; // pseudo → photo (pour le classement, le live, les amis… qui ne la donnent pas)
 function avatarHTML(p, size = 64) {
   const av = (p.avatar && p.avatar !== 'default') ? p.avatar : AV_CACHE[p.pseudo];

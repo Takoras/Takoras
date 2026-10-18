@@ -9,15 +9,15 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=Cinzel:wght@700&family=Space+Grotesk:wght@500;600;700&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="style.css?v=20261018q">
+<link rel="stylesheet" href="style.css?v=20261018r">
 </head>
 <body>
   <!-- Effet « doodle » : 3 légères déformations (turbulence) qui s'enchaînent pour faire vivre les pixel arts -->
   <svg width="0" height="0" style="position:absolute" aria-hidden="true">
     <defs>
-      <filter id="dd0" x="-6%" y="-6%" width="112%" height="112%"><feTurbulence type="fractalNoise" baseFrequency="0.04" numOctaves="2" seed="3"/><feDisplacementMap in="SourceGraphic" scale="2" xChannelSelector="R" yChannelSelector="G"/></filter>
-      <filter id="dd1" x="-6%" y="-6%" width="112%" height="112%"><feTurbulence type="fractalNoise" baseFrequency="0.04" numOctaves="2" seed="17"/><feDisplacementMap in="SourceGraphic" scale="2" xChannelSelector="R" yChannelSelector="G"/></filter>
-      <filter id="dd2" x="-6%" y="-6%" width="112%" height="112%"><feTurbulence type="fractalNoise" baseFrequency="0.04" numOctaves="2" seed="41"/><feDisplacementMap in="SourceGraphic" scale="2" xChannelSelector="R" yChannelSelector="G"/></filter>
+      <filter id="dd0" x="-6%" y="-6%" width="112%" height="112%"><feTurbulence type="fractalNoise" baseFrequency="0.04" numOctaves="2" seed="3"/><feDisplacementMap in="SourceGraphic" scale="3.5" xChannelSelector="R" yChannelSelector="G"/></filter>
+      <filter id="dd1" x="-6%" y="-6%" width="112%" height="112%"><feTurbulence type="fractalNoise" baseFrequency="0.04" numOctaves="2" seed="17"/><feDisplacementMap in="SourceGraphic" scale="3.5" xChannelSelector="R" yChannelSelector="G"/></filter>
+      <filter id="dd2" x="-6%" y="-6%" width="112%" height="112%"><feTurbulence type="fractalNoise" baseFrequency="0.04" numOctaves="2" seed="41"/><feDisplacementMap in="SourceGraphic" scale="3.5" xChannelSelector="R" yChannelSelector="G"/></filter>
     </defs>
   </svg>
   <div class="loader" id="loader">
@@ -30,7 +30,7 @@
     // Écran de chargement : barre qui suit le vrai chargement (0,6 s minimum), puis fondu
     (function () {
       const t0 = performance.now(), fill = document.getElementById('ld-fill');
-      const assets = ['img/logo.png', 'img/jetons/takoras.png', 'img/jetons/mystere.png', 'img/jetons/template.png', 'img/jetons/serie-takoras/mobu.png', 'img/jetons/serie-takoras/pikko.png', 'img/jetons/serie-takoras/rouille.png', 'img/jetons/serie-takoras/givre.png', 'img/jetons/serie-takoras/soleo.png', 'img/jetons/serie-takoras/azura.png', 'img/jetons/serie-takoras/carmin.png', 'img/jetons/serie-takoras/vyolis.png', 'img/jetons/serie-takoras/lumis.png', 'img/jetons/serie-takoras/nyx.png', 'img/jetons/serie-takoras/astra.png', 'img/jetons/serie-takoras/kraios.gif', 'img/jetons/serie-takoras/koi.png'];
+      const assets = ['img/logo.png', 'img/jetons/takoras.png', 'img/jetons/mystere.png', 'img/jetons/template.png', 'img/jetons/serie-takoras/mobu.png', 'img/jetons/serie-takoras/pikko.png', 'img/jetons/serie-takoras/rouille.png', 'img/jetons/serie-takoras/givre.png', 'img/jetons/serie-takoras/soleo.png', 'img/jetons/serie-takoras/azura.png', 'img/jetons/serie-takoras/carmin.png', 'img/jetons/serie-takoras/vyolis.png', 'img/jetons/serie-takoras/lumis.png', 'img/jetons/serie-takoras/nyx.png', 'img/jetons/serie-takoras/astra.png', 'img/jetons/serie-takoras/kraios.gif', 'img/jetons/serie-takoras/koi.png', 'img/jetons/serie-takoras/nepheris.gif'];
       let done = 0;
       const total = assets.length + 1;
       const tick = () => { done++; fill.style.width = done / total * 100 + '%'; };
@@ -297,28 +297,28 @@
     </div>
   </div>
 
-  <script src="settings.js?v=20261018q"></script>
+  <script src="settings.js?v=20261018r"></script>
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.4/dist/umd/supabase.js"></script>
-  <script src="account.js?v=20261018q"></script>
-  <script src="sound.js?v=20261018q"></script>
-  <script src="app.js?v=20261018q"></script>
-  <script src="cinema.js?v=20261018q"></script>
-  <script src="transitions.js?v=20261018q"></script>
-  <script src="opening.js?v=20261018q"></script>
-  <script src="economy.js?v=20261018q"></script>
-  <script src="ui.js?v=20261018q"></script>
-  <script src="motion.js?v=20261018q"></script>
-  <script src="inventory.js?v=20261018q"></script>
-  <script src="shop.js?v=20261018q"></script>
-  <script src="info.js?v=20261018q"></script>
-  <script src="profile.js?v=20261018q"></script>
-  <script src="social.js?v=20261018q"></script>
-  <script src="battle-engine.js?v=20261018q"></script>
-  <script src="combat.js?v=20261018q"></script>
-  <script src="quests.js?v=20261018q"></script>
-  <script src="beta.js?v=20261018q"></script>
-  <script src="feedback.js?v=20261018q"></script>
-  <script src="admin.js?v=20261018q"></script>
-  <script src="mobile.js?v=20261018q"></script>
+  <script src="account.js?v=20261018r"></script>
+  <script src="sound.js?v=20261018r"></script>
+  <script src="app.js?v=20261018r"></script>
+  <script src="cinema.js?v=20261018r"></script>
+  <script src="transitions.js?v=20261018r"></script>
+  <script src="opening.js?v=20261018r"></script>
+  <script src="economy.js?v=20261018r"></script>
+  <script src="ui.js?v=20261018r"></script>
+  <script src="motion.js?v=20261018r"></script>
+  <script src="inventory.js?v=20261018r"></script>
+  <script src="shop.js?v=20261018r"></script>
+  <script src="info.js?v=20261018r"></script>
+  <script src="profile.js?v=20261018r"></script>
+  <script src="social.js?v=20261018r"></script>
+  <script src="battle-engine.js?v=20261018r"></script>
+  <script src="combat.js?v=20261018r"></script>
+  <script src="quests.js?v=20261018r"></script>
+  <script src="beta.js?v=20261018r"></script>
+  <script src="feedback.js?v=20261018r"></script>
+  <script src="admin.js?v=20261018r"></script>
+  <script src="mobile.js?v=20261018r"></script>
 </body>
 </html>

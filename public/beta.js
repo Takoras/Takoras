@@ -34,7 +34,7 @@ async function openTester() {
       <button class="fb-x" aria-label="${t('close')}">✕</button>
       <h3>🧪 ${t('tester_menu')}</h3>
       <p class="muted small">${t('tester_sub')}</p>
-      <div class="ts-sec"><h4>🎟️ ${t('pulls')}</h4><div class="ts-row">${[5, 10, 50, 100].map(n => `<button data-pulls="${n}">+${n}</button>`).join('')}</div></div>
+      <div class="ts-sec"><h4>🎟️ ${t('pulls')}</h4><div class="ts-row">${[5, 10, 25, 50].map(n => `<button data-pulls="${n}">+${n}</button>`).join('')}</div></div>
       <div class="ts-sec"><h4>🪙 ${t('ts_coins')}</h4><div class="ts-row">${[10000, 100000, 1000000, 10000000].map(n => `<button data-coins="${n}">+${fmt(n)}</button>`).join('')}</div></div>
       <div class="ts-sec"><h4>🎁 ${t('items')}</h4><div class="ts-row">
         <select class="mpx-in" id="ts-item">${items.map(it => `<option value="${it.id}"${it.id === TEST.item ? ' selected' : ''}>${esc(itemText(it)[0])}</option>`).join('')}</select>

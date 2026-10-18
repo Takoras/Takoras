@@ -1890,3 +1890,6 @@ html.reduce-fx .opening.turbo::before { display: none; }
 .ac-row button.v-celeste.on { background: rgba(224, 231, 255, .14); border-color: rgba(224, 231, 255, .7); color: #e0e7ff; }
 .ac-row button.v-ombre.on { background: rgba(168, 85, 247, .2); border-color: rgba(168, 85, 247, .75); color: #e9d5ff; }
 .ac-hint { font-size: 11.5px !important; opacity: .8; }
+/* Stock de pulls au-delà de 10 : une barre au lieu des petits jetons */
+.stock-bar { width: min(260px, 70vw); height: 10px; border-radius: 99px; background: rgba(255, 255, 255, .08); border: 1px solid var(--border); overflow: hidden; }
+.stock-bar i { display: block; height: 100%; border-radius: inherit; background: linear-gradient(90deg, #8b5cf6, #c084fc); box-shadow: 0 0 10px rgba(139, 92, 246, .6); transition: width .4s; }

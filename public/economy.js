@@ -1,12 +1,14 @@
 // Économie : argent (◆) et stock de pulls Takoras qui se recharge tout seul.
 // On ne peut pas acheter de pull Takoras : on en gagne 1 toutes les 3 min, jusqu'au stock max.
-// Le stock max (5 au départ) s'améliore jusqu'à 10 avec de l'argent, et chaque niveau coûte 3× plus cher.
+// Le stock max (5 au départ) s'améliore jusqu'à 50, par paliers de 5 (mêmes prix que le serveur : _upgrade_cost).
 // L'argent, le stock et les tirages sont gérés par le serveur (Supabase) : impossible de tricher depuis le navigateur.
 // Ici on garde juste une copie pour l'affichage et le compte à rebours.
 
 const ECO_KEY = 'takoras-eco';
-const REGEN = 3 * 60 * 1000, BASE_MAX = 5, TOP_MAX = 10;
-const upgradeCost = target => 1000 * 3 ** (target - BASE_MAX - 1); // 6 = 1 000, 7 = 3 000, 8 = 9 000, 9 = 27 000, 10 = 81 000
+const REGEN = 3 * 60 * 1000, BASE_MAX = 5, TOP_MAX = 50;
+const UPG_COSTS = [1000, 3000, 6000, 10000, 15000, 22000, 30000, 40000, 50000]; // pour 10, 15, 20 … 50
+const nextMax = m => Math.min(TOP_MAX, Math.floor(m / 5) * 5 + 5);
+const upgradeCost = target => UPG_COSTS[Math.max(0, Math.min(8, target / 5 - 2))];
 
 let eco = { coins: 0, stock: BASE_MAX, max: BASE_MAX, last: Date.now() };
 try { eco = { ...eco, ...JSON.parse(localStorage.getItem(ECO_KEY)) }; } catch {}
@@ -53,8 +55,8 @@ async function ecoSync() {
 
 // Ouvre 1 pull ou tout le stock : le serveur retire les pulls et tire les jetons, on joue juste l'animation
 let opening_busy = false;
-// Pas plus de 1000 pulls d'un coup (au-delà, le navigateur sature) : le reste attend la prochaine ouverture
-const MAX_OPEN = 1000;
+// Pas plus de 50 pulls d'un coup (c'est aussi le stock max)
+const MAX_OPEN = 50;
 async function openPulls(n) {
   if (!requireAccount() || opening_busy) return;
   if (!isTakoras()) return buy(n === 'all' ? 10 : n);
@@ -71,7 +73,7 @@ async function openPulls(n) {
 
 async function upgrade() {
   if (!requireAccount()) return;
-  if (eco.max >= TOP_MAX || eco.coins < upgradeCost(eco.max + 1)) return;
+  if (eco.max >= TOP_MAX || eco.coins < upgradeCost(nextMax(eco.max))) return;
   const { data, error } = await sb.rpc('upgrade_stock');
   if (error) { sfx.deny(); return ecoSync(); }
   sfx.upgrade();
@@ -88,10 +90,12 @@ function renderActions() {
     box.innerHTML = `<button class="btn primary" data-open="1">Pull ×1 · ${fmt(p.price)} ◆</button><button class="btn ghost" data-open="10">Pull ×10 · ${fmt(p.price * 10)} ◆</button>`;
     return;
   }
-  const full = eco.stock >= eco.max, cost = upgradeCost(eco.max + 1);
+  const full = eco.stock >= eco.max, cost = upgradeCost(nextMax(eco.max));
   box.innerHTML = `
     <div class="stock">
-      <div class="pips">${Array.from({ length: eco.max }, (_, i) => `<img src="img/jetons/takoras.png" alt="" class="${i < eco.stock ? 'on' : ''}">`).join('')}</div>
+      ${eco.max <= 10
+        ? `<div class="pips">${Array.from({ length: eco.max }, (_, i) => `<img src="img/jetons/takoras.png" alt="" class="${i < eco.stock ? 'on' : ''}">`).join('')}</div>`
+        : `<div class="stock-bar"><i style="width:${Math.min(100, eco.stock / eco.max * 100)}%"></i></div>`}
       <span><b id="stock-n">${eco.stock}</b>/${eco.max} ${t('pulls_word')} · <span id="stock-next">${full ? t('stock_full') : t('plus1_in', { t: mmss(nextIn()) })}</span></span>
     </div>
     <div class="row-btns">
@@ -99,7 +103,7 @@ function renderActions() {
       <button class="btn ghost" data-open="all" ${eco.stock > 1 ? '' : 'disabled'}>${t('open_all', { n: Math.min(eco.stock, MAX_OPEN) })}</button>
     </div>
     ${eco.max < TOP_MAX
-      ? `<button class="btn upgrade" data-up ${eco.coins >= cost ? '' : 'disabled'}>${t('stock_max', { a: eco.max, b: eco.max + 1 })} · ${money(cost)}</button>`
+      ? `<button class="btn upgrade" data-up ${eco.coins >= cost ? '' : 'disabled'}>${t('stock_max', { a: eco.max, b: nextMax(eco.max) })} · ${money(cost)}</button>`
       : `<span class="muted small">${t('stock_top')}</span>`}
     ${typeof effectsHTML === 'function' ? `<div class="fx-row" id="home-fx">${effectsHTML()}</div>` : ''}
     ${info}`;
