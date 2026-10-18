@@ -1787,3 +1787,10 @@ html.lock .fb-btn { display: none; }
 .pn-pop-body { display: flex; flex-direction: column; gap: 10px; }
 @media (max-width: 760px) { .pn-page { width: 100%; } }
 @media (max-width: 760px) { .nav .logo { margin-right: 0 !important; } .beta-chip { margin-right: auto; } }
+
+/* Profil : petite mention « bêta testeur » (discrète, pour remercier) */
+.beta-thanks { display: inline-flex; align-items: center; gap: 10px; margin: 0 0 10px; padding: 8px 14px 8px 10px; border-radius: 12px;
+  background: linear-gradient(135deg, rgba(253, 230, 138, .07), rgba(249, 168, 212, .07) 55%, rgba(196, 181, 253, .07)); border: 1px solid rgba(249, 168, 212, .2); }
+.beta-thanks span { font-size: 18px; }
+.beta-thanks b { display: block; font-size: 13px; background: linear-gradient(90deg, #fde68a, #f9a8d4, #c4b5fd); -webkit-background-clip: text; background-clip: text; color: transparent; }
+.beta-thanks small { font-size: 12px; color: var(--muted); }

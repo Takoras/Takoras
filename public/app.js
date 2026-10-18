@@ -127,7 +127,7 @@ function drawLive() {
   const h = [...liveRows, ...local].sort((a, b) => b.ts - a.ts).slice(0, 20);
   const item = e => {
     const me = !e.pseudo || (mine && e.pseudo === ACC.pseudo), who = me ? t('you') : esc2(e.pseudo);
-    const whoL = me || !e.pseudo ? who : `<a class="plink" href="#profil/${encodeURIComponent(e.pseudo)}">${who}</a>${betaTag(e.pseudo)}`;
+    const whoL = me || !e.pseudo ? who : `<a class="plink" href="#profil/${encodeURIComponent(e.pseudo)}">${who}</a>`;
     return `<div class="lv">${me ? avatarHTML({ pseudo: ACC.pseudo || who, avatar: ACC.avatar }, 28) : avatarHTML({ pseudo: e.pseudo }, 28)}<span><b>${whoL}</b> <span class="muted">${t('got')}</span> ${jnH(e.name)}${vTag(e.variant)} <span class="muted">· 1/${e.odds.toLocaleString(LOCALE())}</span></span><img class="jeton${vCls(e.variant)}" src="${e.img}" alt="" style="width:24px;height:24px;filter:drop-shadow(0 0 4px ${e.glow})"></div>`;
   };
   $('live').innerHTML = h.length ? h.map(item).join('').repeat(h.length >= 6 ? 2 : 1) : `<span class="muted live-empty">${t('live_empty')}</span>`;
@@ -156,7 +156,7 @@ async function renderBoard() {
   if (req !== boardReq) return; // une réponse plus récente arrive
   const r = error ? [] : data;
   const me = p => typeof ACC !== 'undefined' && ACC.user && p.pseudo === ACC.pseudo;
-  const name = p => `<a class="plink" href="#profil/${encodeURIComponent(p.pseudo)}">${esc2(p.pseudo)}</a>${betaTag(p.pseudo)}` + (me(p) ? ` <span class="muted">(${t('you_tag')})</span>` : '');
+  const name = p => `<a class="plink" href="#profil/${encodeURIComponent(p.pseudo)}">${esc2(p.pseudo)}</a>` + (me(p) ? ` <span class="muted">(${t('you_tag')})</span>` : '');
   $('podium').innerHTML = r.length ? [[1, 'p2'], [0, 'p1'], [2, 'p3']].map(([i, c]) => r[i]
     ? `<div class="pod ${c}">${avatarHTML({ pseudo: r[i].pseudo }, i === 0 ? 84 : 64)}<b>${name(r[i])}</b><small>${boardVal(r[i])}</small><div class="step">${i + 1}</div></div>`
     : '<div></div>').join('') : '';

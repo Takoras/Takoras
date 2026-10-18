@@ -28,7 +28,7 @@ async function renderProfile(pseudo) {
       <div class="prof-banner${p.banner ? '' : ' none'}" id="prof-banner">${p.banner ? '' : mine ? `<span class="muted">${t('no_banner')}</span>` : ''}</div>
       <div class="prof-head">
         <div class="prof-pp">${avatarHTML(p, 104)}</div>
-        <div class="prof-id"><h2>${esc(p.pseudo)}${p.beta ? `<i class="bt-tag big" title="${t('beta_tester')}">β</i>` : ''} <small class="prof-num">#${String(p.num).padStart(6, '0')}</small></h2><p class="muted">${p.bio ? esc(p.bio) : mine ? t('bio_empty_me') : ''}</p></div>
+        <div class="prof-id"><h2>${esc(p.pseudo)} <small class="prof-num">#${String(p.num).padStart(6, '0')}</small></h2><p class="muted">${p.bio ? esc(p.bio) : mine ? t('bio_empty_me') : ''}</p></div>
         ${mine ? `<button class="btn ghost" id="prof-edit">✏️ ${t('edit_profile')}</button>` : '<div class="prof-fr" id="prof-fr"></div>'}
       </div>
       <div class="prof-stats">
@@ -46,6 +46,7 @@ async function renderProfile(pseudo) {
       }).join('')}</div>
       <h3 class="prof-h">📖 ${t('bestiary')} <small class="muted" id="pc-count"></small></h3>
       <div class="pc-grid" id="pc-grid"></div>
+      ${p.beta ? `<div class="beta-thanks"><span>🧪</span><div><b>${t('beta_tester')}</b><small>${t('beta_thanks')}</small></div></div>` : ''}
       <p class="muted small">${t('joined', { d: new Date(p.joined).toLocaleDateString(LOCALE()) })}${(p.wins || p.losses) ? ' · ' + t('battles_rec', { w: p.wins || 0, l: p.losses || 0 }) : ''}</p>
       ${mine ? `
       <div class="prof-private">
