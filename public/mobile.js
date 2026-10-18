@@ -24,7 +24,7 @@
 
   const bar = document.createElement('nav');
   bar.className = 'tabbar'; bar.id = 'tabbar';
-  bar.innerHTML = [['home', '#', 'nav_home'], ['bestiary', '#bestiaire', 'bestiary'], ['inv', '#inventaire', 'nav_inv'], ['shop', '#boutique', 'nav_shop'], ['friends', '#amis', 'nav_friends']]
+  bar.innerHTML = [['home', '#', 'nav_home'], ['inv', '#inventaire', 'nav_inv'], ['shop', '#boutique', 'nav_shop'], ['friends', '#amis', 'nav_friends']]
     .map(([k, h, l]) => `<a href="${h}" data-page="${k}">${svg(k)}<span data-i18n="${l}">${t(l)}</span>${k === 'friends' ? '<i class="nbadge" id="tb-fr" hidden></i>' : ''}</a>`).join('')
     + `<button id="tb-more" data-page="more">${svg('more')}<span data-i18n="more">${t('more')}</span><i class="nbadge" id="tb-more-b" hidden></i></button>`;
   document.body.appendChild(bar);

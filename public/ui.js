@@ -40,7 +40,7 @@ function cards(page) {
   return [...$(PAGES[page]).querySelectorAll('.ic, .si, .sc, .fr, .cb-slot, .pod, .li')].slice(0, 30);
 }
 function nav(page, p) {
-  const key = page;
+  const key = page === 'bestiary' ? 'inv' : page;
   document.querySelectorAll('.links a').forEach(a => a.classList.toggle('on', a.dataset.page === key));
   // barre d'onglets du téléphone : classement / profil / combat sont dans « Plus »
   const tab = ['board', 'profile', 'combat'].includes(key) ? 'more' : key;
@@ -53,7 +53,8 @@ async function route() {
   const tok = ++routeTok;
   const h = decodeURIComponent(location.hash.slice(1));
   const [p, arg] = h.split('/');
-  const page = p === 'bestiaire' ? 'bestiary' : p === 'inventaire' ? 'inv' : p === 'boutique' ? 'shop' : p === 'profil' ? 'profile' : p === 'amis' ? 'friends' : p === 'combat' ? 'combat' : p === 'classement' ? 'board' : 'home';
+  // Inventaire = un seul menu, deux onglets : #inventaire (jetons, le bestiaire) et #inventaire/objets
+  const page = p === 'bestiaire' || (p === 'inventaire' && arg !== 'objets') ? 'bestiary' : p === 'inventaire' ? 'inv' : p === 'boutique' ? 'shop' : p === 'profil' ? 'profile' : p === 'amis' ? 'friends' : p === 'combat' ? 'combat' : p === 'classement' ? 'board' : 'home';
   const key = page + '/' + (page === 'profile' ? (arg || ACC.pseudo || '') : '');
   const from = routeKey ? routeKey.split('/')[0] : null;
   const animate = routeKey !== null && routeKey !== key && !reducedFx();

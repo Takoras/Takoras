@@ -12,6 +12,9 @@ const gKey = (serie, name, v) => serie + '|' + name + '|' + (v || '');
 // Les collections qui existent (celles qui ont des jetons)
 const seriesList = () => Object.keys(SERIES).filter(s => SERIES[s]?.length);
 
+// Les deux onglets du menu Inventaire
+const invTabs = on => `<div class="seg inv-tabs"><a href="#inventaire" class="${on === 'tok' ? 'on' : ''}">📖 ${t('bestiary')}</a><a href="#inventaire/objets" class="${on === 'items' ? 'on' : ''}">🎒 ${t('items')}</a></div>`;
+
 async function loadInventory() {
   const { data, error } = await sb.rpc('my_inventory');
   if (error) return false;
@@ -58,8 +61,8 @@ async function renderInventory() {
   if (!page.dataset.ready) {
     page.dataset.ready = 1;
     page.innerHTML = `
-      <div class="page-head"><div><div class="eyebrow">${t('nav_inv')}</div><h2 class="page-title">${t('inv_items_title')}</h2><p class="muted">${t('inv_items_sub')}</p></div>
-        <a class="btn ghost" href="#bestiaire">📖 ${t('bestiary')}</a></div>
+      <div class="page-head"><div><div class="eyebrow">${t('nav_inv')}</div><h2 class="page-title">${t('inv_items_title')}</h2><p class="muted">${t('inv_items_sub')}</p></div></div>
+      ${invTabs('items')}
       <div class="inv-items" id="inv-items"></div>`;
     $('inv-items').addEventListener('click', async e => {
       const b = e.target.closest('[data-use]'); if (!b) return;
@@ -96,9 +99,10 @@ async function renderBestiary() {
     page.dataset.ready = 1;
     page.innerHTML = `
       <div class="page-head">
-        <div><div class="eyebrow">${t('bestiary')}</div><h2 class="page-title">${t('bst_title')}</h2><p class="muted" id="inv-sum"></p></div>
+        <div><div class="eyebrow">${t('nav_inv')}</div><h2 class="page-title">${t('bst_title')}</h2><p class="muted" id="inv-sum"></p></div>
         <button class="btn ghost" id="inv-mode">${t('inv_select')}</button>
       </div>
+      ${invTabs('tok')}
       <div class="seg inv-tabs" id="bst-series"></div>
       <div class="bst-head" id="bst-head"></div>
       <div class="inv-vtabs" id="inv-vtabs"></div>
