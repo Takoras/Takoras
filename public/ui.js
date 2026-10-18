@@ -158,6 +158,24 @@ const hydrateAvatars = (() => {
 })();
 new MutationObserver(hydrateAvatars).observe(document.body, { childList: true, subtree: true });
 
+// Badge β : les comptes créés pendant la bêta ont une petite marque à côté de leur pseudo (à vie)
+const BETA_CACHE = new Map(); // pseudo → true / false
+const betaTag = pseudo => pseudo ? `<i class="bt-tag" data-bt="${esc(pseudo)}"${BETA_CACHE.get(pseudo) ? '' : ' hidden'} title="${t('beta_tester')}">β</i>` : '';
+const hydrateBeta = (() => {
+  let timer;
+  const apply = () => document.querySelectorAll('.bt-tag[data-bt]').forEach(el => { el.hidden = !BETA_CACHE.get(el.dataset.bt); });
+  return () => { clearTimeout(timer); timer = setTimeout(async () => {
+    const need = [...new Set([...document.querySelectorAll('.bt-tag[data-bt]')].map(e => e.dataset.bt))].filter(p => p && !BETA_CACHE.has(p));
+    apply();
+    if (!need.length) return;
+    need.forEach(p => BETA_CACHE.set(p, false));
+    const { data } = await sb.rpc('beta_of', { p: need });
+    (data || []).forEach(r => BETA_CACHE.set(r.pseudo, true));
+    apply();
+  }, 150); };
+})();
+new MutationObserver(hydrateBeta).observe(document.body, { childList: true, subtree: true });
+
 // ---------- Aperçu d'un jeton (fenêtre) : grand jeton qui penche, rareté, valeur, puissance et stats
 const jm = $('jeton-modal');
 function openJeton(name, extra = '', variant = '', locked = false) {

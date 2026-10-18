@@ -21,6 +21,8 @@ function admTab(name) {
   if (name === 'ann') adaLoad();
   if (name === 'codes') adcLoad();
   if (name === 'fb') mpfbLoad();
+  if (name === 'pn') mppnLoad();
+  if (name === 'global') mpBetaDraw();
 }
 $('mp-tabs').addEventListener('click', e => { const b = e.target.closest('button'); if (b) admTab(b.dataset.tab); });
 
@@ -383,6 +385,56 @@ $('mpfb-list').addEventListener('click', async e => {
   const { error } = await sb.rpc('admin_feedback_set', { p_id: id, p_status: s });
   if (error) return admMsg(error.message, true);
   mpfbLoad();
+});
+
+// ---------- Bêta : ouverte / fermée
+async function mpBetaDraw() {
+  const { data } = await sb.from('site_settings').select('v').eq('k', 'beta').maybeSingle();
+  const on = data?.v === 'on';
+  $('mp-beta-toggle').textContent = on ? '✅ Bêta ouverte — la fermer' : '⛔ Bêta fermée — la rouvrir';
+  $('mp-beta-toggle').dataset.on = on ? '1' : '';
+}
+$('mp-beta-toggle').addEventListener('click', async () => {
+  const on = !!$('mp-beta-toggle').dataset.on;
+  if (on && !await ask('Fermer la bêta ? Les nouveaux comptes ne seront plus bêta testeurs et le menu testeur disparaît (le badge β reste).', { danger: true })) return;
+  const { error } = await sb.rpc('admin_set_beta', { p_on: !on });
+  if (error) return admMsg(error.message, true);
+  admMsg(on ? 'Bêta fermée' : 'Bêta rouverte'); mpBetaDraw(); if (typeof loadBetaState === 'function') loadBetaState(); ecoSync();
+});
+
+// ---------- Patch notes : écrire (une ligne par changement, + ~ ! -), modifier, supprimer
+const PN_MARK = { '+': 'new', '~': 'change', '!': 'fix', '-': 'removed' }, PN_BACK = { new: '+', change: '~', fix: '!', removed: '-' };
+let mppnEdit = null, mppnList = [];
+async function mppnLoad() {
+  const { data } = await sb.from('patchnotes').select('*').order('id', { ascending: false });
+  mppnList = data || [];
+  $('mppn-list').innerHTML = mppnList.map(n => `<div class="mp-mm"><small class="muted">${new Date(n.created_at).toLocaleDateString(LOCALE())} · ${(n.lines || []).length} lignes</small><p><b>${esc(n.title)}</b></p>
+    <div class="mpx-quick"><button data-pedit="${n.id}">✏️ Modifier</button><button class="red" data-pdel="${n.id}">🗑</button></div></div>`).join('') || '<p class="muted">Aucune</p>';
+}
+function mppnForm(n = null) {
+  mppnEdit = n?.id || null;
+  $('mppn-title').textContent = n ? 'Modifier la patch note' : 'Nouvelle patch note';
+  $('mppn-name').value = n?.title || '';
+  $('mppn-lines').value = n ? (n.lines || []).map(l => `${PN_BACK[l.t] || '+'} ${l.x}`).join('\n') : '';
+}
+$('mppn-reset').addEventListener('click', () => mppnForm());
+$('mppn-save').addEventListener('click', async () => {
+  const title = $('mppn-name').value.trim();
+  const lines = $('mppn-lines').value.split('\n').map(l => l.trim()).filter(Boolean).map(l => ({ t: PN_MARK[l[0]] || 'new', x: (PN_MARK[l[0]] ? l.slice(1) : l).trim() })).filter(l => l.x);
+  if (!title || !lines.length) return admMsg('Mets un titre et au moins une ligne', true);
+  const { error } = await sb.rpc('admin_patchnote_save', { p_id: mppnEdit, p_title: title, p_lines: lines });
+  if (error) return admMsg(error.message, true);
+  admMsg(mppnEdit ? 'Patch note modifiée' : 'Patch note publiée 📢 (popup chez les joueurs à leur prochaine visite)');
+  mppnForm(); mppnLoad(); if (typeof loadPatchnotes === 'function') loadPatchnotes();
+});
+$('mppn-list').addEventListener('click', async e => {
+  const ed2 = e.target.closest('[data-pedit]'); if (ed2) return mppnForm(mppnList.find(n => n.id === +ed2.dataset.pedit));
+  const d = e.target.closest('[data-pdel]');
+  if (d && await ask('Supprimer cette patch note ?', { danger: true })) {
+    const { error } = await sb.rpc('admin_patchnote_delete', { p_id: +d.dataset.pdel });
+    if (error) return admMsg(error.message, true);
+    admMsg('Patch note supprimée'); mppnLoad();
+  }
 });
 
 // Ouvrir / fermer le panel (bouclier ou « debug ») : on recharge toujours la liste et les stats

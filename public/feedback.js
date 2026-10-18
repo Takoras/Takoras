@@ -49,32 +49,5 @@ function openFeedback(kind = 'idea') {
   });
 }
 
-// Popup « site en bêta » : une seule fois par compte, peu après la connexion
-window.betaWelcome = function () {
-  if (!ACC.user || !ACC.pseudo) return;
-  const key = 'takoras-beta-' + ACC.user.id;
-  try { if (localStorage.getItem(key)) return; } catch { return; }
-  setTimeout(() => {
-    if (document.documentElement.classList.contains('lock') || document.querySelector('.askbox')) return; // pas pendant une ouverture
-    try { localStorage.setItem(key, '1'); } catch {}
-    const o = document.createElement('div');
-    o.className = 'askbox fb-box';
-    o.innerHTML = `<div class="ask-card fb-card beta">
-      <div class="beta-ico">🧪</div>
-      <h3>${t('beta_title')}</h3>
-      <p>${t('beta_text')}</p>
-      <div class="ask-btns"><button class="btn ghost" data-a="later">${t('beta_later')}</button><button class="btn primary" data-a="give">💡 ${t('fb_btn')}</button></div>
-    </div>`;
-    document.body.appendChild(o);
-    requestAnimationFrame(() => o.classList.add('on'));
-    sfx.message();
-    o.addEventListener('click', e => {
-      const a = e.target.closest('[data-a]')?.dataset.a;
-      if (!a && e.target !== o) return;
-      o.classList.remove('on'); setTimeout(() => o.remove(), 200);
-      if (a === 'give') openFeedback();
-      fbBtn.animate([{ transform: 'scale(1)' }, { transform: 'scale(1.15)' }, { transform: 'scale(1)' }], { duration: 500, iterations: 2 });
-    });
-  }, 2500);
-};
-if (ACC.user) betaWelcome();
+// (La popup « site en bêta » a été retirée : la bêta est indiquée à côté du logo, et les nouveautés arrivent par les patch notes.)
+window.betaWelcome = () => {};

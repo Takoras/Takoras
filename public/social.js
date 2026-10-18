@@ -152,7 +152,7 @@ async function renderFriends() {
 function drawFriends() {
   const body = $('fr-body'); if (!body) return;
   const inc = FR.list.filter(f => f.incoming), out = FR.list.filter(f => f.status === 'pending' && !f.incoming), ok = FR.list.filter(f => f.status === 'accepted');
-  const row = (f, actions) => `<div class="fr" data-id="${f.id}">${avatarHTML(f, 46)}<div class="fr-who"><a class="plink" href="#profil/${encodeURIComponent(f.pseudo)}">${esc(f.pseudo)}</a><small class="muted">${f.status === 'accepted' ? (f.last_at ? t('fr_last', { d: dateOf(f.last_at) }) : t('fr_no_msg')) : f.incoming ? t('fr_wants') : t('fr_sent')}</small></div>${+f.unread ? `<i class="nbadge">${f.unread}</i>` : ''}<div class="fr-act">${actions}</div></div>`;
+  const row = (f, actions) => `<div class="fr" data-id="${f.id}">${avatarHTML(f, 46)}<div class="fr-who"><a class="plink" href="#profil/${encodeURIComponent(f.pseudo)}">${esc(f.pseudo)}${betaTag(f.pseudo)}</a><small class="muted">${f.status === 'accepted' ? (f.last_at ? t('fr_last', { d: dateOf(f.last_at) }) : t('fr_no_msg')) : f.incoming ? t('fr_wants') : t('fr_sent')}</small></div>${+f.unread ? `<i class="nbadge">${f.unread}</i>` : ''}<div class="fr-act">${actions}</div></div>`;
   body.innerHTML = `
     ${inc.length ? `<h3 class="shop-h">📨 ${t('fr_requests')} <small class="muted">${inc.length}</small></h3><div class="fr-list">${inc.map(f => row(f, `<button class="btn primary sm" data-acc="${f.id}">✓ ${t('fr_accept')}</button><button class="btn ghost sm" data-ref="${f.id}">✕</button>`)).join('')}</div>` : ''}
     <h3 class="shop-h">👥 ${t('fr_list')} <small class="muted">${ok.length}</small></h3>

@@ -9,7 +9,7 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=Cinzel:wght@600;700&family=Cinzel+Decorative:wght@700&family=Space+Grotesk:wght@500;600;700&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="style.css?v=20261017y">
+<link rel="stylesheet" href="style.css?v=20261018c">
 </head>
 <body>
   <!-- Effet « doodle » : 3 légères déformations (turbulence) qui s'enchaînent pour faire vivre les pixel arts -->
@@ -47,6 +47,7 @@
   <nav class="nav">
     <div class="wrap nav-in">
       <a class="logo" href="/"><img src="img/logo.png" alt="">TAKORAS</a>
+      <button class="beta-chip" id="beta-chip" hidden title="Patch notes">bêta</button>
       <div class="links">
         <a href="#" data-page="home" data-i18n="nav_home">Accueil</a>
         <a href="#inventaire" data-page="inv" data-i18n="nav_inv">Inventaire</a>
@@ -193,7 +194,7 @@
   <div class="debug admin2" id="debug" hidden>
     <div class="mp-head">
       <b>🛡️ Panel admin</b>
-      <div class="mp-tabs" id="mp-tabs"><button data-tab="players" class="on">Joueurs</button><button data-tab="global">Global</button><button data-tab="shop">Boutique</button><button data-tab="ann">Annonces</button><button data-tab="codes">Codes</button><button data-tab="fb">Retours <i class="nbadge" id="mpfb-badge" hidden></i></button><button data-tab="tests">Tests</button></div>
+      <div class="mp-tabs" id="mp-tabs"><button data-tab="players" class="on">Joueurs</button><button data-tab="global">Global</button><button data-tab="shop">Boutique</button><button data-tab="ann">Annonces</button><button data-tab="codes">Codes</button><button data-tab="pn">Patch notes</button><button data-tab="fb">Retours <i class="nbadge" id="mpfb-badge" hidden></i></button><button data-tab="tests">Tests</button></div>
       <button class="set-close" id="debug-close" aria-label="Fermer">✕</button>
     </div>
     <div class="mp-body">
@@ -209,6 +210,11 @@
         <div class="mp-box">
           <h4>Donner à tous les joueurs</h4>
           <div class="mpx-row"><input class="mpx-in" id="mpx-all-coins" type="number" placeholder="Pièces"><input class="mpx-in" id="mpx-all-pulls" type="number" placeholder="Pulls"><button id="mpx-give-all">Donner à tous</button></div>
+        </div>
+        <div class="mp-box">
+          <h4>🧪 Bêta</h4>
+          <p class="muted small">Tant que la bêta est ouverte : « bêta » à côté du logo, tous les nouveaux comptes sont bêta testeurs (badge β à vie) et ont le menu testeur. En la fermant, le badge reste mais le menu testeur disparaît.</p>
+          <div class="mpx-quick"><button id="mp-beta-toggle">…</button></div>
         </div>
         <div class="mp-box danger">
           <h4>Zone dangereuse</h4>
@@ -246,6 +252,16 @@
         </div>
         <div class="mp-box"><h4>Codes existants</h4><div class="mp-table" id="mpcode-list"></div></div>
       </div>
+      <div class="mp-tab" data-tab="pn" hidden>
+        <div class="mp-box">
+          <h4 id="mppn-title">Nouvelle patch note</h4>
+          <input class="mpx-in" id="mppn-name" maxlength="80" placeholder="Titre (ex : Bêta 0.10 · Nouveaux jetons)">
+          <p class="muted small" style="margin:8px 0 4px">Une ligne par changement. Commence par <b>+</b> nouveau · <b>~</b> changé · <b>!</b> corrigé · <b>-</b> retiré</p>
+          <textarea class="mpx-in" id="mppn-lines" rows="9" placeholder="+ Nouveau jeton : Néphéris&#10;~ Les sons sont plus doux&#10;! La vente marchait pas chez certains&#10;- Combat retiré le temps de le refaire"></textarea>
+          <div class="mpx-quick"><button id="mppn-save" class="mpcode-save">📢 Publier (popup chez tout le monde)</button><button id="mppn-reset">Vider</button></div>
+        </div>
+        <div class="mp-box"><h4>Patch notes publiées</h4><div id="mppn-list"></div></div>
+      </div>
       <div class="mp-tab" data-tab="fb" hidden>
         <div class="chips mpfb-filter" id="mpfb-filter"></div>
         <div class="mpfb-list" id="mpfb-list"></div>
@@ -275,27 +291,28 @@
     </div>
   </div>
 
-  <script src="settings.js?v=20261017y"></script>
+  <script src="settings.js?v=20261018c"></script>
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.4/dist/umd/supabase.js"></script>
-  <script src="account.js?v=20261017y"></script>
-  <script src="sound.js?v=20261017y"></script>
-  <script src="app.js?v=20261017y"></script>
-  <script src="cinema.js?v=20261017y"></script>
-  <script src="transitions.js?v=20261017y"></script>
-  <script src="opening.js?v=20261017y"></script>
-  <script src="economy.js?v=20261017y"></script>
-  <script src="ui.js?v=20261017y"></script>
-  <script src="motion.js?v=20261017y"></script>
-  <script src="inventory.js?v=20261017y"></script>
-  <script src="shop.js?v=20261017y"></script>
-  <script src="info.js?v=20261017y"></script>
-  <script src="profile.js?v=20261017y"></script>
-  <script src="social.js?v=20261017y"></script>
-  <script src="battle-engine.js?v=20261017y"></script>
-  <script src="combat.js?v=20261017y"></script>
-  <script src="quests.js?v=20261017y"></script>
-  <script src="feedback.js?v=20261017y"></script>
-  <script src="admin.js?v=20261017y"></script>
-  <script src="mobile.js?v=20261017y"></script>
+  <script src="account.js?v=20261018c"></script>
+  <script src="sound.js?v=20261018c"></script>
+  <script src="app.js?v=20261018c"></script>
+  <script src="cinema.js?v=20261018c"></script>
+  <script src="transitions.js?v=20261018c"></script>
+  <script src="opening.js?v=20261018c"></script>
+  <script src="economy.js?v=20261018c"></script>
+  <script src="ui.js?v=20261018c"></script>
+  <script src="motion.js?v=20261018c"></script>
+  <script src="inventory.js?v=20261018c"></script>
+  <script src="shop.js?v=20261018c"></script>
+  <script src="info.js?v=20261018c"></script>
+  <script src="profile.js?v=20261018c"></script>
+  <script src="social.js?v=20261018c"></script>
+  <script src="battle-engine.js?v=20261018c"></script>
+  <script src="combat.js?v=20261018c"></script>
+  <script src="quests.js?v=20261018c"></script>
+  <script src="beta.js?v=20261018c"></script>
+  <script src="feedback.js?v=20261018c"></script>
+  <script src="admin.js?v=20261018c"></script>
+  <script src="mobile.js?v=20261018c"></script>
 </body>
 </html>

@@ -63,7 +63,7 @@ function renderAccBtn() {
   const ps = ACC.pseudo || '?';
   const pp = typeof avatarHTML === 'function' ? avatarHTML({ avatar: ACC.avatar, pseudo: ps }, 28) : `<span class="av">${esc(ps[0].toUpperCase())}</span>`;
   b.innerHTML = ACC.user
-    ? `${pp}<span class="acc-name">${esc(ps)}</span>`
+    ? `${pp}<span class="acc-name">${esc(ps)}${ACC.beta ? '<i class="bt-tag">β</i>' : ''}</span>`
     : `<span>${t('login')}</span>`;
 }
 const esc = s => String(s).replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' })[c]);
