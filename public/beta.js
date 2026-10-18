@@ -59,6 +59,7 @@ async function openTester() {
     if (error) { sfx.deny(); return toast(errText(error), true); }
     applyState(data); sfx.upgrade(); toast('🧪 ' + label);
     if (!$('page-inv').hidden && typeof renderInventory === 'function') renderInventory();
+    if (!$('page-bestiary').hidden && typeof renderBestiary === 'function') renderBestiary();
   };
   o.addEventListener('change', e => {
     if (e.target.id === 'ts-item') TEST.item = e.target.value;

@@ -1893,3 +1893,12 @@ html.reduce-fx .opening.turbo::before { display: none; }
 /* Stock de pulls au-delà de 10 : une barre au lieu des petits jetons */
 .stock-bar { width: min(260px, 70vw); height: 10px; border-radius: 99px; background: rgba(255, 255, 255, .08); border: 1px solid var(--border); overflow: hidden; }
 .stock-bar i { display: block; height: 100%; border-radius: inherit; background: linear-gradient(90deg, #8b5cf6, #c084fc); box-shadow: 0 0 10px rgba(139, 92, 246, .6); transition: width .4s; }
+/* ===================== Bestiaire (tous les jetons + vente) ===================== */
+.bst-grid2 .ic-lock { top: 26px; }
+.bst-grid2 .ic.unk { background: var(--surface); cursor: pointer; }
+.bst-grid2 .ic.unk b { color: var(--muted); }
+.bst-grid2 .ic.gone img { opacity: .4; filter: grayscale(.6) drop-shadow(0 0 6px rgba(var(--g), .3)); animation: none; }
+.bst-grid2 .ic.gone b, .bst-grid2 .ic.gone small { opacity: .6; }
+#bst-series { margin-bottom: 14px; }
+#bst-own.on { color: #fff; background: rgba(34, 197, 94, .18); border-color: rgba(34, 197, 94, .6); }
+@media (max-width: 760px) { .tabbar > * { min-width: 0; font-size: 10px !important; } .tabbar > * span { max-width: 100%; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; } }

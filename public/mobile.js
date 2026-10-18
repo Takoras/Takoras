@@ -7,6 +7,7 @@
     inv: '<rect x="4" y="7" width="16" height="13" rx="3"/><path d="M9 7V5a3 3 0 0 1 6 0v2"/><path d="M4 12h16"/>',
     shop: '<path d="M4 9h16l-1.5 11h-13z"/><path d="M8 9a4 4 0 0 1 8 0"/>',
     friends: '<circle cx="9" cy="8" r="3.5"/><path d="M2.5 20a6.5 6.5 0 0 1 13 0"/><circle cx="17.5" cy="9" r="2.5"/><path d="M17 14.5a5 5 0 0 1 4.5 5"/>',
+    bestiary: '<path d="M4 5a2 2 0 0 1 2-2h13v16H6a2 2 0 0 0-2 2z"/><path d="M4 19V5M8 7h7M8 11h5"/>',
     more: '<circle cx="5" cy="12" r="1.6"/><circle cx="12" cy="12" r="1.6"/><circle cx="19" cy="12" r="1.6"/>',
     board: '<path d="M8 21V11M16 21V7M12 21V3M4 21v-6M20 21v-9"/>',
     combat: '<path d="m14.5 17.5 6-6V4h-7.5l-6 6"/><path d="m13 19 6-6M3 21l5-5M9.5 14.5l-4 4"/>',
@@ -23,7 +24,7 @@
 
   const bar = document.createElement('nav');
   bar.className = 'tabbar'; bar.id = 'tabbar';
-  bar.innerHTML = [['home', '#', 'nav_home'], ['inv', '#inventaire', 'nav_inv'], ['shop', '#boutique', 'nav_shop'], ['friends', '#amis', 'nav_friends']]
+  bar.innerHTML = [['home', '#', 'nav_home'], ['bestiary', '#bestiaire', 'bestiary'], ['inv', '#inventaire', 'nav_inv'], ['shop', '#boutique', 'nav_shop'], ['friends', '#amis', 'nav_friends']]
     .map(([k, h, l]) => `<a href="${h}" data-page="${k}">${svg(k)}<span data-i18n="${l}">${t(l)}</span>${k === 'friends' ? '<i class="nbadge" id="tb-fr" hidden></i>' : ''}</a>`).join('')
     + `<button id="tb-more" data-page="more">${svg('more')}<span data-i18n="more">${t('more')}</span><i class="nbadge" id="tb-more-b" hidden></i></button>`;
   document.body.appendChild(bar);

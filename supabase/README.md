@@ -44,6 +44,11 @@ Chaque table et chaque fonction a une description dans Supabase (onglet Database
 Dans `profiles`, les colonnes `luck_mult`, `luck_left` et `fast_until` datent de l'ancien système de potions,
 remplacé par `potions`. On les garde pour l'instant.
 
+## Plusieurs collections
+
+Chaque jeton a une `serie` (Takoras aujourd'hui). `my_inventory`, `my_collection` et `collection_of` renvoient la série :
+le Bestiaire affiche un onglet par série dès qu'il y en a plus d'une (les séries viennent de `SERIES` dans `opening.js` et de la table `jetons`).
+
 ## Temps réel
 
 La publication `supabase_realtime` contient `announcements`, `messages`, `friendships`, `battles` et `price_changes`.
@@ -66,7 +71,7 @@ La publication `supabase_realtime` contient `announcements`, `messages`, `friend
 | `economy.js` | Pièces, stock, recharge, potions |
 | `ui.js` | Navigation entre pages + transitions, fiches jetons, modales, toasts |
 | `motion.js` | Animations (FLIP, dissolution en pixels) |
-| `inventory.js` | Inventaire + bestiaire |
+| `inventory.js` | Inventaire (objets) + Bestiaire (tous les jetons par collection, vente, verrouillage) |
 | `shop.js` | Boutique + codes promo |
 | `info.js` | Probas & infos |
 | `profile.js` | Profils |
