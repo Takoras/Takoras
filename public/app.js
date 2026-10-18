@@ -104,14 +104,17 @@ function ago(ts) {
 function loadLocalHist() { try { return JSON.parse(localStorage.getItem('takoras-hist')) || []; } catch { return []; } }
 const loadHist = () => (typeof ACC !== 'undefined' && ACC.user ? ACC.hist : loadLocalHist());
 const esc2 = s => String(s).replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' })[c]);
+// Tant que tous les scripts ne sont pas chargés (ui.js donne avatarHTML…), on attend : sinon l'accueil plantait au démarrage
+const whenReady = fn => document.readyState === 'loading' ? (addEventListener('DOMContentLoaded', fn, { once: true }), true) : false;
 function renderHist() {
+  if (whenReady(renderHist)) return;
   const h = loadHist();
   $('hist').innerHTML = h.length
     ? h.slice(0, 6).map(e => `<div class="h-row"><img class="jeton${vCls(e.variant)}" src="${e.img}" alt="" style="width:26px;height:26px;filter:drop-shadow(0 0 4px ${e.glow})"><div>${jnH(e.name)}${vTag(e.variant)}<small>${ago(e.ts)}</small></div><span class="muted">1/${e.odds.toLocaleString(LOCALE())}</span></div>`).join('')
     : `<p class="empty">${t('hist_empty')}</p>`;
   renderLive();
 }
-setInterval(renderHist, 60000);
+setInterval(() => { if (!document.hidden) renderHist(); }, 60000);
 
 // En direct : les derniers tirages de tous les joueurs (Supabase) + tes tirages locaux si tu n'as pas de compte
 let liveRows = [];
@@ -122,6 +125,7 @@ async function fetchLive() {
 }
 function renderLive() { drawLive(); fetchLive(); }
 function drawLive() {
+  if (whenReady(drawLive)) return;
   const mine = typeof ACC !== 'undefined' && ACC.user;
   const local = mine ? [] : loadLocalHist().slice(0, 12);
   const h = [...liveRows, ...local].sort((a, b) => b.ts - a.ts).slice(0, 20);
@@ -133,10 +137,10 @@ function drawLive() {
   $('live').innerHTML = h.length ? h.map(item).join('').repeat(h.length >= 6 ? 2 : 1) : `<span class="muted live-empty">${t('live_empty')}</span>`;
   $('live').classList.toggle('still', h.length < 6);
 }
-setInterval(fetchLive, 15000);
+setInterval(() => { if (!document.hidden && !$('live').closest('[hidden]')) fetchLive(); }, 15000);
 
 // Classement (Supabase) : podium top 3 + liste
-const KINDS = [['k_pulls', 'pulls'], ['k_gain', 'gain'], ['k_tokens', 'tokens'], ['k_collec', 'collec']];
+const KINDS = [['k_pulls', 'pulls'], ['k_gain', 'gain'], ['k_vars', 'variants'], ['k_collec', 'collec']];
 let kind = 0, period = 'week', boardReq = 0;
 function weekStart() { const d = new Date(); d.setHours(0, 0, 0, 0); d.setDate(d.getDate() - (d.getDay() + 6) % 7); return d.toISOString(); }
 function boardVal(r) {
@@ -146,7 +150,7 @@ function boardVal(r) {
     return `<span class="gain"><img class="jeton" src="${j.img}" alt="" style="filter:drop-shadow(0 0 4px ${j.glow})">${jnH(r.jeton)} · 1/${n}</span>`;
   }
   if (id === 'collec') return t('u_collec', { n, t: SERIES.Takoras.length });
-  return t(id === 'pulls' ? 'u_pulls' : 'u_tokens', { n });
+  return t(id === 'pulls' ? 'u_pulls' : 'u_vars', { n });
 }
 async function renderBoard() {
   $('kinds').innerHTML = KINDS.map(([k], i) => `<button class="chip${i === kind ? ' on' : ''}" data-k="${i}">${t(k)}</button>`).join('');
@@ -164,7 +168,7 @@ async function renderBoard() {
     ? r.slice(3).map((p, i) => `<div class="li${me(p) ? ' me' : ''}"><span class="rank">${i + 4}</span>${avatarHTML({ pseudo: p.pseudo }, 28)}<span>${name(p)}</span><span class="val">${boardVal(p)}</span></div>`).join('')
     : `<p class="empty board-empty">${t('board_empty')}</p>`;
 }
-setInterval(renderBoard, 60000);
+setInterval(() => { if (!document.hidden && !$('page-board').hidden) renderBoard(); }, 60000);
 $('kinds').addEventListener('click', e => { const b = e.target.closest('.chip'); if (b) { kind = +b.dataset.k; renderBoard(); } });
 $('period').addEventListener('click', e => {
   const b = e.target.closest('button'); if (!b) return;

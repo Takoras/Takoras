@@ -133,7 +133,7 @@ function renderFriendBadges() {
 // ---------- Page « Amis »
 async function renderFriends() {
   const page = $('page-friends');
-  if (!ACC.user) { page.innerHTML = `<div class="page-empty"><p class="muted">${t('acc_need')}</p><button class="btn primary" onclick="openAccount('login')">${t('login')}</button></div>`; return; }
+  if (!ACC.user) { page.innerHTML = `<div class="page-empty"><h2>${t('nav_friends')}</h2><p class="muted">${t('fr_need')}</p><button class="btn primary" onclick="openAccount('login')">${t('login')}</button></div>`; return; }
   if (!page.querySelector('.fr-page')) page.innerHTML = `
     <div class="fr-page">
       <div class="page-head"><div><div class="eyebrow">${t('nav_friends')}</div><h2 class="page-title">${t('fr_title')}</h2></div></div>

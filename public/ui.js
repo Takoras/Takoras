@@ -4,10 +4,7 @@
 const PIECE = '<img class="piece" src="img/piece.png" alt="◆">';
 const money = n => `${fmt(n)} ${PIECE}`;
 // Variantes : n'importe quel jeton peut sortir Doré (1/20), Céleste (1/200) ou Ombre (1/500) — revente ×3, ×10, ×25
-const VARIANTS = { gold: { odds: 20, mult: 3, col: '250, 204, 21' }, celeste: { odds: 200, mult: 10, col: '224, 231, 255' }, ombre: { odds: 500, mult: 25, col: '168, 85, 247' } };
-const vTag = v => (VARIANTS[v] ? `<span class="vtag v-${v}">${t('v_' + v)}</span>` : '');
-const vCls = v => (VARIANTS[v] ? ' v-' + v : '');
-const vOdds = (odds, v) => odds * (VARIANTS[v]?.odds || 1); // rareté totale (jeton × variante)
+// (VARIANTS, vTag, vCls, vOdds sont dans settings.js : app.js en a besoin avant que ce fichier soit chargé)
 const sellValue = (odds, v) => Math.max(1, Math.round(odds * .5)) * (VARIANTS[v]?.mult || 1); // même règle que le serveur
 
 // ---------- Rareté et puissance (stables : un même jeton a toujours les mêmes stats)
@@ -27,7 +24,7 @@ const jetonOf = name => SERIES.Takoras.find(j => j.name === name) || { name, odd
 
 // ---------- Navigation entre pages : #inventaire, #boutique, #profil/Pseudo, #classement
 // Transition : les éléments de la page actuelle partent vers le haut en fondu, ceux de la nouvelle arrivent du bas un par un.
-const PAGES = { inv: 'page-inv', shop: 'page-shop', profile: 'page-profile', friends: 'page-friends', combat: 'page-combat' };
+const PAGES = { inv: 'page-inv', shop: 'page-shop', profile: 'page-profile', friends: 'page-friends', combat: 'page-combat', board: 'page-board' };
 let routeTok = 0, routeKey = null;
 const EASE_OUT = 'cubic-bezier(.6, 0, .85, .2)', EASE_IN = 'cubic-bezier(.16, 1, .3, 1)';
 
@@ -40,10 +37,10 @@ function pieces(page) {
 }
 function cards(page) {
   if (page === 'home') return [];
-  return [...$(PAGES[page]).querySelectorAll('.ic, .si, .sc, .fr, .cb-slot')].slice(0, 30);
+  return [...$(PAGES[page]).querySelectorAll('.ic, .si, .sc, .fr, .cb-slot, .pod, .li')].slice(0, 30);
 }
 function nav(page, p) {
-  const key = p === 'classement' ? 'board' : page;
+  const key = page;
   document.querySelectorAll('.links a').forEach(a => a.classList.toggle('on', a.dataset.page === key));
   // barre d'onglets du téléphone : classement / profil / combat sont dans « Plus »
   const tab = ['board', 'profile', 'combat'].includes(key) ? 'more' : key;
@@ -56,7 +53,7 @@ async function route() {
   const tok = ++routeTok;
   const h = decodeURIComponent(location.hash.slice(1));
   const [p, arg] = h.split('/');
-  const page = p === 'inventaire' ? 'inv' : p === 'boutique' ? 'shop' : p === 'profil' ? 'profile' : p === 'amis' ? 'friends' : p === 'combat' ? 'combat' : 'home';
+  const page = p === 'inventaire' ? 'inv' : p === 'boutique' ? 'shop' : p === 'profil' ? 'profile' : p === 'amis' ? 'friends' : p === 'combat' ? 'combat' : p === 'classement' ? 'board' : 'home';
   const key = page + '/' + (page === 'profile' ? (arg || ACC.pseudo || '') : '');
   const from = routeKey ? routeKey.split('/')[0] : null;
   const animate = routeKey !== null && routeKey !== key && !reducedFx();
@@ -78,8 +75,7 @@ async function route() {
   document.querySelectorAll('.home-sec').forEach(s => { s.hidden = page !== 'home'; });
   Object.entries(PAGES).forEach(([k, id]) => { $(id).hidden = k !== page; });
   if (page !== 'home' || from !== 'home') scrollTo({ top: 0 });
-  const ready = page === 'inv' ? renderInventory() : page === 'shop' ? renderShop() : page === 'profile' ? renderProfile(arg || ACC.pseudo) : page === 'friends' ? renderFriends() : page === 'combat' ? renderCombat() : null;
-  if (page === 'home' && p === 'classement') setTimeout(() => $('classement').scrollIntoView({ behavior: 'smooth' }), animate ? 250 : 0);
+  const ready = page === 'inv' ? renderInventory() : page === 'shop' ? renderShop() : page === 'profile' ? renderProfile(arg || ACC.pseudo) : page === 'friends' ? renderFriends() : page === 'combat' ? renderCombat() : page === 'board' ? renderBoard() : null;
 
   // 3. Elle arrive : les blocs montent un par un, puis les cartes en cascade
   if (animate) {

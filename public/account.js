@@ -54,7 +54,7 @@ function accRecordPull(j, serie) {
   return true;
 }
 let boardTimer;
-const boardSoon = () => { clearTimeout(boardTimer); boardTimer = setTimeout(renderBoard, 1500); };
+const boardSoon = () => { clearTimeout(boardTimer); if (!$('page-board').hidden) boardTimer = setTimeout(renderBoard, 1500); };
 
 // Bouton dans la barre du haut
 function renderAccBtn() {

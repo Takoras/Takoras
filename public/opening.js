@@ -125,7 +125,7 @@ function startOpening() {
   opCoin.innerHTML = `<div class="zoom"><div class="tilt3d"><div class="spin">${coin3D(MYSTERE, 'Jeton mystère')}</div>${'<b class="tw"></b>'.repeat(7)}</div></div>`;
   setGlareMask(MYSTERE);
   if (c.phase === 'count' && c.shown === 1 && !sess.auto) spawn(); // le « ? » arrive en grossissant
-  $('op-hint').textContent = t('click_coin');
+  $('op-hint').textContent = t(matchMedia('(pointer: coarse)').matches ? 'tap_coin' : 'click_coin');
   $('op-stats').innerHTML = '';
   if (c.phase === 'hold') hold(true);
   if (c.phase === 'revealed') reveal(true);
@@ -487,6 +487,7 @@ function turbo(on) {
     const r = opCoin.getBoundingClientRect(), o = opening.getBoundingClientRect();
     opening.style.setProperty('--cx', (r.left + r.width / 2 - o.left) + 'px');
     opening.style.setProperty('--cy', (r.top + r.height / 2 - o.top) + 'px');
+    opening.style.setProperty('--coinr', (r.width / 2) + 'px');
   }
   opening.classList.toggle('turbo', on);
   if (!on) { combo = 0; const c = $('op-combo'); if (c) c.hidden = true; }

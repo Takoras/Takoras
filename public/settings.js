@@ -1,14 +1,30 @@
 // Paramètres du joueur (sauvegardés dans le navigateur) + traductions FR / EN.
 // Chargé en premier : les autres scripts utilisent SETTINGS et t().
 
-const SETTINGS = { speed: 'normal', lang: 'fr', volume: 70, fx: 'full' };
+const SETTINGS = { speed: 'normal', lang: 'fr', volume: 70, fx: 'auto' };
 try { Object.assign(SETTINGS, JSON.parse(localStorage.getItem('takoras-settings'))); } catch {}
 const saveSettings = () => { try { localStorage.setItem('takoras-settings', JSON.stringify(SETTINGS)); } catch {} };
 
 // Vitesse des ouvertures : facteur appliqué aux durées (rotation, blocage…)
 const SPEED = { normal: 1, rapide: .5, instant: 0 };
 const speed = () => SPEED[SETTINGS.speed] ?? 1;
-const reducedFx = () => SETTINGS.fx === 'reduced';
+// Effets « Auto » : allégés si l'ordi est lent (peu de cœurs / de mémoire, ou images par seconde trop basses au chargement)
+let LOWFX = false;
+try { LOWFX = localStorage.getItem('takoras-lowfx') === '1'; } catch {}
+if ((navigator.hardwareConcurrency || 8) <= 2 || (navigator.deviceMemory || 8) <= 2) LOWFX = true;
+const reducedFx = () => SETTINGS.fx === 'reduced' || (SETTINGS.fx === 'auto' && LOWFX);
+const applyFx = () => document.documentElement.classList.toggle('reduce-fx', reducedFx());
+// On mesure la fluidité pendant ~3 s après le chargement : sous ~40 images/s en moyenne, on passe en effets allégés (et on s'en souvient)
+addEventListener('load', () => setTimeout(() => {
+  if (document.hidden) return;
+  const ts = []; const t0 = performance.now();
+  (function f(t) { ts.push(t); if (t - t0 < 3000) requestAnimationFrame(f); else {
+    const d = ts.slice(1).map((x, i) => x - ts[i]).sort((a, b) => a - b), med = d[d.length >> 1] || 16, slow = d.filter(x => x > 40).length / (d.length || 1);
+    if (document.hidden) return;
+    const low = med > 24 || slow > .25;
+    if (low !== LOWFX && (low || !(navigator.hardwareConcurrency <= 2))) { LOWFX = low; try { localStorage.setItem('takoras-lowfx', low ? '1' : '0'); } catch {} applyFx(); }
+  } })(t0);
+}, 1500));
 const LOCALE = () => (SETTINGS.lang === 'en' ? 'en-US' : 'fr-FR');
 
 const I18N = {
@@ -19,15 +35,15 @@ const I18N = {
     hist_empty: 'Aucun pull pour l’instant', ago: 'il y a {n}', just_now: 'à l’instant', you: 'Toi', got: 'a eu',
     grp_perm: 'Permanents', grp_lim: 'Limités', grp_we: 'Week-end', free: 'Gratuit · se recharge', limited: 'Limité', permanent: 'Permanent', sat_sun: 'Sam–Dim',
     ends_in: 'Se termine dans', weekend_only: 'Disponible seulement le samedi et le dimanche', always: 'Toujours disponible', pull: 'Pull',
-    k_pulls: 'Pulls ouverts', k_gain: 'Meilleur gain', k_tokens: 'Jetons totaux', k_collec: 'Collection',
+    k_pulls: 'Pulls ouverts', k_gain: 'Meilleur gain', k_vars: 'Variantes', k_collec: 'Collection',
     stock_full: 'stock plein', plus1_in: '+1 dans {t}', pulls_word: 'pulls', open1: 'Ouvrir 1', open_all: 'Tout ouvrir ({n})',
     stock_max: 'Stock max {a} → {b}', stock_top: 'Stock max atteint (10)', open_again: 'Ouvrir encore · reste {n}', no_pull: 'Plus de pull · +1 dans {t}',
-    click_coin: 'Clique sur le jeton', click_reveal: 'Clique pour révéler', next: 'Suivant · {a}/{b}', see_recap: 'Voir le récap', back: 'Retour',
+    click_coin: 'Clique sur le jeton', tap_coin: 'Touche le jeton', click_reveal: 'Clique pour révéler', next: 'Suivant · {a}/{b}', see_recap: 'Voir le récap', back: 'Retour',
     series: 'Série Takoras', stats_note: 'Stats de combat', s_hp: 'PV', s_atk: 'Attaque', s_def: 'Défense', s_spd: 'Vitesse',
     recap_tag: 'Récap · {n} pulls', recap_title: 'Tes {n} jetons', best: 'Meilleur tirage',
     settings: 'Paramètres', set_speed: 'Vitesse des ouvertures', sp_normal: 'Normale', sp_fast: 'Rapide', sp_instant: 'Instantanée',
-    set_lang: 'Langue', set_sound: 'Son', set_volume: 'Volume', set_fx: 'Effets visuels', fx_full: 'Complets', fx_reduced: 'Réduits',
-    fx_hint: 'Moins de tremblements, de flashs et de particules',
+    set_lang: 'Langue', set_sound: 'Son', set_volume: 'Volume', set_fx: 'Effets visuels', fx_auto: 'Auto', fx_full: 'Complets', fx_reduced: 'Allégés',
+    fx_hint: 'Auto : allégés si ton appareil rame. Allégés = moins de flous, de tremblements et de particules, plus fluide sur les vieux PC',
     no_banner: 'Pas encore de bannière (bientôt en boutique)', showcase_click: 'clique sur une case pour choisir un jeton', private_zone: 'Ton compte', private_hint: 'visible seulement par toi', pv_login: 'Connexion', pv_email: 'Mail', open: 'Ouvrir', pick_title: 'Vitrine · case {n}', pick_remove: 'Vider cette case', none: 'Aucune', no_banner_owned: 'Tu n’as pas encore de bannière. Elles arriveront bientôt en boutique.', pp_soon: 'Les photos de profil arrivent bientôt.',
     nav_inv: 'Inventaire', nav_shop: 'Boutique', inv_title: 'Tes jetons', inv_select: 'Sélectionner', inv_done: 'Terminé', all: 'Tous', r_common: 'Commun', r_rare: 'Rare', r_epic: 'Épique', r_legend: 'Légendaire', r_myth: 'Mythique', search: 'Chercher…', sort_rarity: 'Rareté', sort_count: 'Quantité', sort_recent: 'Récents', sort_name: 'Nom', sel_dupes: 'Doublons', sel_common: 'Communs', sel_all: 'Tout', sel_none: 'Rien', sell: 'Vendre', sel_n: '{n} sélectionné(s)', inv_count: '{n} jetons · {k} différents', inv_value: 'valeur', inv_empty: 'Aucun jeton pour l’instant. Ouvre des pulls !', inv_locked: 'Ce jeton est verrouillé', inv_have: 'Tu en as {n}', sell_one: 'Vendre 1', sell_dupes: 'Vendre les doublons ({n})', lock: 'Verrouiller', unlock: 'Déverrouiller', set_pp: 'Mettre en photo', to_showcase: 'Mettre en vitrine', unlocked: 'Déverrouillé', locked_ok: 'Verrouillé : il ne sera pas vendu', pp_done: 'Photo de profil changée', sell_rare_confirm: 'Tu vas vendre {n} jetons dont des rares (1/1000+) pour {v} pièces. Sûr ?', sold: '{n} jeton(s) vendu(s)', power: 'Puissance', sell_value: 'Revente', shop_title: 'Boutique', shop_reset: 'Nouveau stock dans', owned: 'Déjà à toi', left_today: '{n} restant(s) aujourd’hui', sold_out: 'Épuisé', buy: 'Acheter', bought: '{n} acheté !', it_potion: 'Potion de chance ×{m}', it_potion_d: 'Ta chance est multipliée par {m} sur tes {n} prochains pulls.', it_instant: 'Recharge éclair', it_instant_d: '+1 pull tout de suite (si ton stock n’est pas plein).', it_hourglass: 'Sablier', it_hourglass_d: 'Tes pulls se rechargent 2× plus vite pendant {n} min.', it_banner: 'Bannière « {n} »', it_banner_d: 'Une nouvelle bannière pour ton profil, à vie.', fx_luck: 'Chance ×{m} · {n} pull(s)', fx_fast: 'Recharge ×2 · {t}', bn_nuit: 'Nuit', in_showcase: 'En vitrine (protégé de la vente)', shown_n: '{n} en vitrine, protégé(s) de la vente', cat_potions: 'Potions de chance', cat_utils: 'Objets utiles', cat_cosm: 'Cosmétiques', stock_n: 'Stock : {n}', back_in: 'Refresh dans', unlocked_b: 'Débloquée', in_stock: '{n}/{m} en stock', odds_info: 'Probas & infos', fx_total: 'Chance totale ×{m}', items: 'Objets', use: 'Utiliser', item_used: 'Objet utilisé !', no_item: 'Tu n’as plus cet objet', bn_plaine: 'Plaine', bn_doodle: 'Doodle', bn_aurore: 'Aurore', bn_ocean: 'Océan', bn_braise: 'Braise', bn_foret: 'Forêt', bn_neon: 'Néon', bn_or: 'Or', bn_cosmos: 'Cosmos', err_coins: 'Pas assez de pièces', err_limit: 'Limite du jour atteinte', err_potion: 'Une autre potion est déjà active', err_stock_full: 'Ton stock est déjà plein', err_owned: 'Tu l’as déjà', err_shop: 'Cet objet n’est plus en boutique', already_showcase: 'Déjà en vitrine', showcase_full: 'Vitrine pleine (5 max)', showcase_added: 'Ajouté à ta vitrine', showcase_hint: 'Ouvre un jeton puis « Mettre en vitrine »', profile_404: 'Joueur introuvable', bio_empty_me: 'Ajoute une bio dans « Modifier le profil »', edit_profile: 'Modifier le profil', st_pulls: 'tirages', st_best: 'meilleur jeton', st_collec: 'collection', st_owned: 'jetons possédés', showcase: 'Vitrine', joined: 'Joueur depuis le {d}', pe_banner: 'Bannière', pe_pp: 'Photo de profil', pe_bio: 'Bio', save: 'Enregistrer', cancel: 'Annuler', banner_locked: 'Bannière à débloquer en boutique', profile_saved: 'Profil enregistré', my_profile: 'Mon profil', close: 'Fermer', mute: 'Couper le son', unmute: 'Activer le son',
     login: 'Connexion', signup: 'Créer un compte', logout: 'Se déconnecter', acc_email: 'Adresse mail', acc_password: 'Mot de passe', acc_pseudo: 'Pseudo',
@@ -50,7 +66,7 @@ const I18N = {
     fr_now: 'Toi et {n} êtes maintenant amis !', fr_got: '{n} veut être ton ami', send: 'Envoyer', back: 'Retour',
     err_banned: 'Ton compte est suspendu', err_not_friends: 'Vous n’êtes pas amis', err_slow: 'Doucement ! Attends un peu avant de réécrire', err_unknown: 'Aucun joueur avec ce pseudo', err_self: 'C’est toi 😄',
     banned_bar: 'Ton compte est suspendu par un admin : tu ne peux plus ouvrir, acheter, vendre ni écrire.',
-    u_pulls: '{n} pulls', u_tokens: '{n} jetons', u_collec: '{n} / {t} jetons', you_tag: 'toi',
+    u_pulls: '{n} pulls', u_vars: '{n} variante(s)', u_collec: '{n} / {t} jetons', you_tag: 'toi', fr_need: 'Connecte-toi pour ajouter des amis, discuter et les défier.',
   },
   en: {
     nav_home: 'Home', nav_board: 'Leaderboard', pulls: 'Pulls', history: 'My history', see_all: 'See all',
@@ -59,15 +75,15 @@ const I18N = {
     hist_empty: 'No pulls yet', ago: '{n} ago', just_now: 'just now', you: 'You', got: 'got',
     grp_perm: 'Permanent', grp_lim: 'Limited', grp_we: 'Weekend', free: 'Free · recharges', limited: 'Limited', permanent: 'Permanent', sat_sun: 'Sat–Sun',
     ends_in: 'Ends in', weekend_only: 'Only available on Saturday and Sunday', always: 'Always available', pull: 'Pull',
-    k_pulls: 'Pulls opened', k_gain: 'Best pull', k_tokens: 'Total tokens', k_collec: 'Collection',
+    k_pulls: 'Pulls opened', k_gain: 'Best pull', k_vars: 'Variants', k_collec: 'Collection',
     stock_full: 'stock full', plus1_in: '+1 in {t}', pulls_word: 'pulls', open1: 'Open 1', open_all: 'Open all ({n})',
     stock_max: 'Max stock {a} → {b}', stock_top: 'Max stock reached (10)', open_again: 'Open again · {n} left', no_pull: 'No pulls left · +1 in {t}',
-    click_coin: 'Click the token', click_reveal: 'Click to reveal', next: 'Next · {a}/{b}', see_recap: 'See recap', back: 'Back',
+    click_coin: 'Click the token', tap_coin: 'Tap the token', click_reveal: 'Click to reveal', next: 'Next · {a}/{b}', see_recap: 'See recap', back: 'Back',
     series: 'Takoras series', stats_note: 'Battle stats', s_hp: 'HP', s_atk: 'Attack', s_def: 'Defense', s_spd: 'Speed',
     recap_tag: 'Recap · {n} pulls', recap_title: 'Your {n} tokens', best: 'Best pull',
     settings: 'Settings', set_speed: 'Opening speed', sp_normal: 'Normal', sp_fast: 'Fast', sp_instant: 'Instant',
-    set_lang: 'Language', set_sound: 'Sound', set_volume: 'Volume', set_fx: 'Visual effects', fx_full: 'Full', fx_reduced: 'Reduced',
-    fx_hint: 'Less shaking, flashes and particles',
+    set_lang: 'Language', set_sound: 'Sound', set_volume: 'Volume', set_fx: 'Visual effects', fx_auto: 'Auto', fx_full: 'Full', fx_reduced: 'Light',
+    fx_hint: 'Auto: lighter if your device struggles. Light = fewer blurs, shakes and particles, smoother on old PCs',
     no_banner: 'No banner yet (coming soon to the shop)', showcase_click: 'click a slot to pick a token', private_zone: 'Your account', private_hint: 'only visible to you', pv_login: 'Login', pv_email: 'Email', open: 'Open', pick_title: 'Showcase · slot {n}', pick_remove: 'Empty this slot', none: 'None', no_banner_owned: 'You don’t have a banner yet. They’ll be in the shop soon.', pp_soon: 'Profile pictures are coming soon.',
     nav_inv: 'Inventory', nav_shop: 'Shop', inv_title: 'Your tokens', inv_select: 'Select', inv_done: 'Done', all: 'All', r_common: 'Common', r_rare: 'Rare', r_epic: 'Epic', r_legend: 'Legendary', r_myth: 'Mythic', search: 'Search…', sort_rarity: 'Rarity', sort_count: 'Amount', sort_recent: 'Recent', sort_name: 'Name', sel_dupes: 'Duplicates', sel_common: 'Commons', sel_all: 'All', sel_none: 'None', sell: 'Sell', sel_n: '{n} selected', inv_count: '{n} tokens · {k} unique', inv_value: 'value', inv_empty: 'No tokens yet. Open some pulls!', inv_locked: 'This token is locked', inv_have: 'You have {n}', sell_one: 'Sell 1', sell_dupes: 'Sell duplicates ({n})', lock: 'Lock', unlock: 'Unlock', set_pp: 'Set as picture', to_showcase: 'Add to showcase', unlocked: 'Unlocked', locked_ok: 'Locked: it won’t be sold', pp_done: 'Profile picture changed', sell_rare_confirm: 'You are about to sell {n} tokens including rare ones (1/1000+) for {v} coins. Sure?', sold: '{n} token(s) sold', power: 'Power', sell_value: 'Sell value', shop_title: 'Shop', shop_reset: 'New stock in', owned: 'Already yours', left_today: '{n} left today', sold_out: 'Sold out', buy: 'Buy', bought: '{n} bought!', it_potion: 'Luck potion ×{m}', it_potion_d: 'Your luck is multiplied by {m} for your next {n} pulls.', it_instant: 'Instant refill', it_instant_d: '+1 pull right now (if your stock isn’t full).', it_hourglass: 'Hourglass', it_hourglass_d: 'Your pulls recharge 2× faster for {n} min.', it_banner: '“{n}” banner', it_banner_d: 'A new banner for your profile, forever.', fx_luck: 'Luck ×{m} · {n} pull(s)', fx_fast: 'Recharge ×2 · {t}', bn_nuit: 'Night', in_showcase: 'In showcase (protected from selling)', shown_n: '{n} in showcase, protected from selling', cat_potions: 'Luck potions', cat_utils: 'Useful items', cat_cosm: 'Cosmetics', stock_n: 'Stock: {n}', back_in: 'Refresh in', unlocked_b: 'Unlocked', in_stock: '{n}/{m} in stock', odds_info: 'Odds & info', fx_total: 'Total luck ×{m}', items: 'Items', use: 'Use', item_used: 'Item used!', no_item: 'You don’t have this item anymore', bn_plaine: 'Plains', bn_doodle: 'Doodle', bn_aurore: 'Dawn', bn_ocean: 'Ocean', bn_braise: 'Ember', bn_foret: 'Forest', bn_neon: 'Neon', bn_or: 'Gold', bn_cosmos: 'Cosmos', err_coins: 'Not enough coins', err_limit: 'Daily limit reached', err_potion: 'Another potion is already active', err_stock_full: 'Your stock is already full', err_owned: 'You already have it', err_shop: 'This item left the shop', already_showcase: 'Already in showcase', showcase_full: 'Showcase full (5 max)', showcase_added: 'Added to your showcase', showcase_hint: 'Open a token then “Add to showcase”', profile_404: 'Player not found', bio_empty_me: 'Add a bio in “Edit profile”', edit_profile: 'Edit profile', st_pulls: 'pulls', st_best: 'best token', st_collec: 'collection', st_owned: 'tokens owned', showcase: 'Showcase', joined: 'Player since {d}', pe_banner: 'Banner', pe_pp: 'Profile picture', pe_bio: 'Bio', save: 'Save', cancel: 'Cancel', banner_locked: 'Unlock this banner in the shop', profile_saved: 'Profile saved', my_profile: 'My profile', close: 'Close', mute: 'Mute', unmute: 'Unmute',
     login: 'Log in', signup: 'Sign up', logout: 'Log out', acc_email: 'Email', acc_password: 'Password', acc_pseudo: 'Username',
@@ -90,7 +106,7 @@ const I18N = {
     fr_now: 'You and {n} are now friends!', fr_got: '{n} wants to be your friend', send: 'Send', back: 'Back',
     err_banned: 'Your account is suspended', err_not_friends: 'You are not friends', err_slow: 'Slow down! Wait a bit before writing again', err_unknown: 'No player with that username', err_self: 'That’s you 😄',
     banned_bar: 'Your account was suspended by an admin: you can’t open, buy, sell or write anymore.',
-    u_pulls: '{n} pulls', u_tokens: '{n} tokens', u_collec: '{n} / {t} tokens', you_tag: 'you',
+    u_pulls: '{n} pulls', u_vars: '{n} variant(s)', u_collec: '{n} / {t} tokens', you_tag: 'you', fr_need: 'Log in to add friends, chat and challenge them.',
   },
 };
 // Étincelles en pixel art, dessinées ici même : X = couleur, o = blanc (petit reflet). Chaque forme est
@@ -143,7 +159,7 @@ applyI18n();
       <div class="set-row"><b>${t('set_speed')}</b>${seg('speed', [['normal', 'sp_normal'], ['rapide', 'sp_fast'], ['instant', 'sp_instant']])}</div>
       <div class="set-row"><b>${t('set_lang')}</b>${seg('lang', [['fr', 'Français'], ['en', 'English']])}</div>
       <div class="set-row"><b>${t('set_volume')}</b><input type="range" id="set-volume" min="0" max="100" step="1" value="${SETTINGS.volume}"><span class="muted" id="set-vol-val">${SETTINGS.volume} %</span></div>
-      <div class="set-row"><b>${t('set_fx')}</b>${seg('fx', [['full', 'fx_full'], ['reduced', 'fx_reduced']])}<small class="muted">${t('fx_hint')}</small></div>`;
+      <div class="set-row"><b>${t('set_fx')}</b>${seg('fx', [['auto', 'fx_auto'], ['full', 'fx_full'], ['reduced', 'fx_reduced']])}<small class="muted">${t('fx_hint')}</small></div>`;
     panel.querySelector('.set-title').textContent = t('settings');
   }
   panel.addEventListener('click', e => {
@@ -153,7 +169,7 @@ applyI18n();
     SETTINGS[key] = b.dataset.v;
     saveSettings();
     if (key === 'lang') return location.reload(); // tout le site se retraduit
-    if (key === 'fx') document.documentElement.classList.toggle('reduce-fx', reducedFx());
+    if (key === 'fx') applyFx();
     render();
   });
   panel.addEventListener('input', e => {
@@ -165,5 +181,11 @@ applyI18n();
   });
   document.getElementById('open-settings').addEventListener('click', () => { render(); panel.classList.add('on'); });
   addEventListener('keydown', e => { if (e.key === 'Escape') panel.classList.remove('on'); });
-  document.documentElement.classList.toggle('reduce-fx', reducedFx());
+  applyFx();
 })();
+
+// Variantes des jetons (utilisées partout, donc définies ici, dans le premier fichier chargé)
+const VARIANTS = { gold: { odds: 20, mult: 3, col: '250, 204, 21' }, celeste: { odds: 200, mult: 10, col: '224, 231, 255' }, ombre: { odds: 500, mult: 25, col: '168, 85, 247' } };
+const vTag = v => (VARIANTS[v] ? `<span class="vtag v-${v}">${t('v_' + v)}</span>` : '');
+const vCls = v => (VARIANTS[v] ? ' v-' + v : '');
+const vOdds = (odds, v) => odds * (VARIANTS[v]?.odds || 1); // rareté totale (jeton × variante)

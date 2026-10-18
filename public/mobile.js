@@ -16,6 +16,7 @@
     sound: '<path d="M11 5 6 9H2v6h4l5 4z"/><path d="M15.5 8.5a5 5 0 0 1 0 7M19 5a10 10 0 0 1 0 14"/>',
     shield: '<path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/>',
     flask: '<path d="M9 3h6M10 3v6l-5 9a2 2 0 0 0 2 3h10a2 2 0 0 0 2-3l-5-9V3"/><path d="M7.5 15h9"/>',
+    idea: '<path d="M9 18h6M10 21h4"/><path d="M12 3a6 6 0 0 0-3.5 10.9c.6.5 1 1.2 1 2.1h5c0-.9.4-1.6 1-2.1A6 6 0 0 0 12 3z"/>',
     scroll: '<path d="M8 3h11v15a3 3 0 0 1-3 3H7a3 3 0 0 1-3-3v-2h11v2a3 3 0 0 0 3 3"/><path d="M8 3a3 3 0 0 0-3 3v10M11 8h5M11 12h5"/>',
   };
   const svg = k => `<svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">${ico[k]}</svg>`;
@@ -39,6 +40,7 @@
         ${ACC.user ? tile('profile', 'profile', t('my_profile')) : ''}
         ${admin ? tile('combat', 'combat', t('nav_combat')) : ''}
         ${ACC.tester ? tile('tester', 'flask', t('tester_menu')) : ''}
+        ${tile('feedback', 'idea', t('fb_btn'))}
         ${tile('patch', 'scroll', t('pn_title'))}
         ${tile('notifs', 'bell', t('ann_hist'), bellN)}
         ${tile('settings', 'gear', t('settings'))}
@@ -60,6 +62,7 @@
     if (go === 'notifs') $('open-notifs').click();
     if (go === 'tester') openTester();
     if (go === 'patch') openPatchnotes();
+    if (go === 'feedback') openFeedback();
     if (go === 'settings') $('open-settings').click();
     if (go === 'mute') $('mute').click();
     if (go === 'admin') $('open-admin').click();
