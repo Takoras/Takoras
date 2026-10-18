@@ -53,11 +53,13 @@ async function ecoSync() {
 
 // Ouvre 1 pull ou tout le stock : le serveur retire les pulls et tire les jetons, on joue juste l'animation
 let opening_busy = false;
+// Pas plus de 1000 pulls d'un coup (au-delà, le navigateur sature) : le reste attend la prochaine ouverture
+const MAX_OPEN = 1000;
 async function openPulls(n) {
   if (!requireAccount() || opening_busy) return;
   if (!isTakoras()) return buy(n === 'all' ? 10 : n);
   regen();
-  const count = n === 'all' ? eco.stock : Math.min(1, eco.stock);
+  const count = n === 'all' ? Math.min(eco.stock, MAX_OPEN) : Math.min(1, eco.stock);
   if (!count) return sfx.deny();
   opening_busy = true;
   const { data, error } = await sb.rpc('take_pulls', { n: count, force: ACC.isAdmin || ACC.tester ? debug.force || null : null, luck: ACC.isAdmin || ACC.tester ? debug.luck : 1, p_variant: ACC.isAdmin || ACC.tester ? debug.variant || null : null });
@@ -94,7 +96,7 @@ function renderActions() {
     </div>
     <div class="row-btns">
       <button class="btn primary" data-open="1" ${eco.stock ? '' : 'disabled'}>${t('open1')}</button>
-      <button class="btn ghost" data-open="all" ${eco.stock > 1 ? '' : 'disabled'}>${t('open_all', { n: eco.stock })}</button>
+      <button class="btn ghost" data-open="all" ${eco.stock > 1 ? '' : 'disabled'}>${t('open_all', { n: Math.min(eco.stock, MAX_OPEN) })}</button>
     </div>
     ${eco.max < TOP_MAX
       ? `<button class="btn upgrade" data-up ${eco.coins >= cost ? '' : 'disabled'}>${t('stock_max', { a: eco.max, b: eco.max + 1 })} · ${money(cost)}</button>`
@@ -116,7 +118,7 @@ function ecoDecorate() {
   again.disabled = !eco.stock;
   again.textContent = eco.stock ? t('open_again', { n: eco.stock }) : t('no_pull', { t: mmss(nextIn()) });
   all.disabled = !eco.stock;
-  all.textContent = eco.stock ? t('open_all', { n: eco.stock }) : t('no_pull', { t: mmss(nextIn()) });
+  all.textContent = eco.stock ? t('open_all', { n: Math.min(eco.stock, MAX_OPEN) }) : t('no_pull', { t: mmss(nextIn()) });
 }
 
 function render() {
