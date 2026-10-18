@@ -124,13 +124,13 @@ function startOpening() {
   opCoin.className = 'op-coin';
   opCoin.innerHTML = `<div class="zoom"><div class="tilt3d"><div class="spin">${coin3D(MYSTERE, 'Jeton mystère')}</div>${'<b class="tw"></b>'.repeat(7)}</div></div>`;
   setGlareMask(MYSTERE);
-  if (c.phase === 'count' && c.shown === 1) spawn(); // le « ? » arrive en grossissant
+  if (c.phase === 'count' && c.shown === 1 && !sess.auto) spawn(); // le « ? » arrive en grossissant
   $('op-hint').textContent = t('click_coin');
   $('op-stats').innerHTML = '';
   if (c.phase === 'hold') hold(true);
   if (c.phase === 'revealed') reveal(true);
   renderAuto();
-  if (sess.auto) setTimeout(autoRun, 250);
+  if (sess.auto) setTimeout(autoRun, 40);
 }
 
 function setTier(v) {
@@ -457,22 +457,47 @@ function renderAuto() {
   b.classList.toggle('on', !!sess?.auto);
   b.textContent = sess?.auto ? '⏸ ' + t('auto_stop') : '⏩ ' + t('auto_go');
 }
+// Mode turbo : environ 0,25 s par jeton, lignes de vitesse, compteur de combo, notes qui montent
+const AUTO_STEP = 230;
 function autoRun() {
-  if (!sess?.auto || !run || !opening.classList.contains('on')) return;
-  if (sess.recap) { sess.auto = false; return renderAuto(); }
+  if (!sess?.auto || !run || !opening.classList.contains('on')) return turbo(false);
+  if (sess.recap) { sess.auto = false; turbo(false); return renderAuto(); }
   if (!run.done) {
     if (isSpecial(run.result, run.variant)) { // on s'arrête : à toi de jouer
-      sess.auto = false; save(); renderAuto();
+      sess.auto = false; save(); renderAuto(); turbo(false);
       sfx.hold(); toast('✨ ' + t('auto_special'));
       return;
     }
+    turbo(true);
     run.queue = []; run.done = true; clearInterval(run.hb);
-    reveal();
-    return setTimeout(autoRun, 700);
+    reveal(false, true); // révélation sans le son normal (le turbo a le sien)
+    // pas de longue rotation : le jeton claque direct
+    opCoin.querySelector('.spin')?.getAnimations().forEach(a => a.finish());
+    run.spinEnd = 0; opening.classList.remove('spinning');
+    turboHit(run.result, run.variant);
+    return setTimeout(autoRun, AUTO_STEP);
   }
-  if (spinning()) return setTimeout(autoRun, 150);
-  if (sess.idx >= sess.total - 1) { sess.auto = false; save(); return showRecap(); }
-  next();
+  if (sess.idx >= sess.total - 1) { sess.auto = false; save(); turbo(false); return setTimeout(showRecap, 250); }
+  sess.idx++; sess.cur = null; save();
+  startOpening();
+}
+let combo = 0;
+function turbo(on) {
+  opening.classList.toggle('turbo', on);
+  if (!on) { combo = 0; const c = $('op-combo'); if (c) c.hidden = true; }
+}
+function turboHit(j) {
+  combo++;
+  sfx.combo?.(combo);
+  let c = $('op-combo');
+  if (!c) { c = document.createElement('div'); c.id = 'op-combo'; c.className = 'op-combo'; opening.appendChild(c); }
+  c.hidden = false;
+  $('op-odds').textContent = '1/' + j.odds.toLocaleString(LOCALE());
+  c.style.setProperty('--cg', hexRGB(j.glow));
+  c.innerHTML = `<b>×${combo}</b><small>${jnH(j.name)}</small>`;
+  c.classList.remove('pop'); void c.offsetWidth; c.classList.add('pop');
+  const z = opCoin.querySelector('.zoom');
+  z?.animate([{ transform: 'scale(1.25) translateX(-30px)', filter: 'brightness(2)' }, { transform: 'scale(1)', filter: 'none' }], { duration: 200, easing: 'cubic-bezier(.2, .9, .3, 1)' });
 }
 $('op-auto').addEventListener('click', e => {
   e.stopPropagation();

@@ -141,6 +141,8 @@ const sfx = (() => {
     // Message d'un ami : petit « ploc » à deux notes
     message() { mar(NOTE(5), { vol: .1, dur: .3 }); mar(NOTE(7), { vol: .1, dur: .4, delay: .08 }); },
     // Refus : « bonk » grave et mat
+    // Mode turbo : petite note qui monte à chaque jeton (la gamme recommence tous les 15)
+    combo(n) { const k = (n - 1) % 15; mar(NOTE(k), { vol: .09, dur: .18 }); if (k === 14) ep(NOTE(15), { vol: .07, dur: .6 }); },
     deny() { mar(110, { vol: .12, dur: .25 }); mar(104, { vol: .08, dur: .25, delay: .06 }); },
   };
 })();
