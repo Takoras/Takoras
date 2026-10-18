@@ -416,13 +416,17 @@ function mppnForm(n = null) {
   $('mppn-title').textContent = n ? 'Modifier la patch note' : 'Nouvelle patch note';
   $('mppn-name').value = n?.title || '';
   $('mppn-lines').value = n ? (n.lines || []).map(l => `${PN_BACK[l.t] || '+'} ${l.x}`).join('\n') : '';
+  $('mppn-name-en').value = n?.title_en || '';
+  $('mppn-lines-en').value = n ? (n.lines_en || []).map(l => `${PN_BACK[l.t] || '+'} ${l.x}`).join('\n') : '';
 }
+const pnParse = v => v.split('\n').map(l => l.trim()).filter(Boolean).map(l => ({ t: PN_MARK[l[0]] || 'new', x: (PN_MARK[l[0]] ? l.slice(1) : l).trim() })).filter(l => l.x);
 $('mppn-reset').addEventListener('click', () => mppnForm());
 $('mppn-save').addEventListener('click', async () => {
   const title = $('mppn-name').value.trim();
-  const lines = $('mppn-lines').value.split('\n').map(l => l.trim()).filter(Boolean).map(l => ({ t: PN_MARK[l[0]] || 'new', x: (PN_MARK[l[0]] ? l.slice(1) : l).trim() })).filter(l => l.x);
+  const lines = pnParse($('mppn-lines').value), titleEn = $('mppn-name-en').value.trim(), linesEn = pnParse($('mppn-lines-en').value);
   if (!title || !lines.length) return admMsg('Mets un titre et au moins une ligne', true);
-  const { error } = await sb.rpc('admin_patchnote_save', { p_id: mppnEdit, p_title: title, p_lines: lines });
+  if (!titleEn || !linesEn.length) return admMsg('Mets aussi la version anglaise (titre + lignes)', true);
+  const { error } = await sb.rpc('admin_patchnote_save', { p_id: mppnEdit, p_title: title, p_lines: lines, p_title_en: titleEn, p_lines_en: linesEn });
   if (error) return admMsg(error.message, true);
   admMsg(mppnEdit ? 'Patch note modifiée' : 'Patch note publiée 📢 (popup chez les joueurs à leur prochaine visite)');
   mppnForm(); mppnLoad(); if (typeof loadPatchnotes === 'function') loadPatchnotes();

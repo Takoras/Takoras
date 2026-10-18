@@ -84,8 +84,10 @@ async function openTester() {
 // Patch notes
 // =====================================================================
 const PN_ICO = { new: ['✅', 'pn_new'], change: ['🔄', 'pn_change'], fix: ['🔧', 'pn_fix'], removed: ['❌', 'pn_removed'] };
+// Version anglaise si le joueur a mis le site en anglais (et qu'elle existe)
+const pnTitle = n => (SETTINGS.lang === 'en' && n.title_en) || n.title;
 const pnLines = n => ['new', 'change', 'fix', 'removed'].map(k => {
-  const l = (n.lines || []).filter(x => x.t === k);
+  const l = ((SETTINGS.lang === 'en' && n.lines_en?.length ? n.lines_en : n.lines) || []).filter(x => x.t === k);
   return l.length ? `<div class="pn-group pn-${k}"><h5>${PN_ICO[k][0]} ${t(PN_ICO[k][1])}</h5><ul>${l.map(x => `<li>${esc(x.x)}</li>`).join('')}</ul></div>` : '';
 }).join('');
 async function loadPatchnotes() {
@@ -100,7 +102,7 @@ async function openPatchnotes() {
   card.onclick = card.oninput = card.onchange = null;
   card.innerHTML = `<button class="set-close jm-close" aria-label="${t('close')}">✕</button>
     <div class="pn-page"><h2>📜 ${t('pn_title')}</h2>
-      ${BETA.notes.map((n, i) => `<article class="pn${i === 0 ? ' latest' : ''}"><div class="pn-head"><b>${esc(n.title)}</b><small class="muted">${new Date(n.created_at).toLocaleDateString(LOCALE(), { day: 'numeric', month: 'long', year: 'numeric' })}</small></div>${pnLines(n)}</article>`).join('') || `<p class="muted">${t('pn_none')}</p>`}
+      ${BETA.notes.map((n, i) => `<article class="pn${i === 0 ? ' latest' : ''}"><div class="pn-head"><b>${esc(pnTitle(n))}</b><small class="muted">${new Date(n.created_at).toLocaleDateString(LOCALE(), { day: 'numeric', month: 'long', year: 'numeric' })}</small></div>${pnLines(n)}</article>`).join('') || `<p class="muted">${t('pn_none')}</p>`}
     </div>`;
   jm.classList.add('on');
   markPatchSeen();
@@ -118,7 +120,7 @@ async function patchPopup() {
     o.className = 'askbox pn-box';
     o.innerHTML = `<div class="ask-card pn-card">
       <div class="pn-pop-tag">✨ ${t('pn_newtag')}</div>
-      <h3>${esc(last.title)}</h3>
+      <h3>${esc(pnTitle(last))}</h3>
       <div class="pn-pop-body">${pnLines(last)}</div>
       <div class="ask-btns"><button class="btn ghost" data-a="all">📜 ${t('pn_all')}</button><button class="btn primary" data-a="ok">${t('pn_ok')}</button></div>
     </div>`;
