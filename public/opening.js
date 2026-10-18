@@ -556,8 +556,9 @@ function showRecap() {
   const list = sess.results.map(findJeton), vars = sess.rvars || [], best = list.reduce((a, b) => (b.odds > a.odds ? b : a));
   opening.style.setProperty('--tier', hexRGB(best.glow));
   startBg(best);
+  const bi = list.indexOf(best); // un seul « meilleur tirage », même s'il y en a plusieurs pareils
   $('op-recap-grid').innerHTML = list.map((j, i) =>
-    `<div class="rc${j === best ? ' best' : ''}" style="--g:${hexRGB(j.glow)};animation-delay:${i * 45}ms">${j === best ? `<span class="rc-tag">${t('best')}</span>` : ''}${jetonHTML(j, 72, vars[i])}<b>${jnH(j.name)}${vTag(vars[i])}</b><small>1/${j.odds.toLocaleString(LOCALE())}</small></div>`).join('');
+    `<div class="rc${i === bi ? ' best' : ''}" style="--g:${hexRGB(j.glow)};animation-delay:${Math.min(i, 20) * 45}ms">${i === bi ? `<span class="rc-tag">${t('best')}</span>` : ''}${jetonHTML(j, 72, vars[i])}<b>${jnH(j.name)}${vTag(vars[i])}</b><small>1/${j.odds.toLocaleString(LOCALE())}</small></div>`).join('');
   $('op-recap-tag').textContent = t('recap_tag', { n: sess.total });
   $('op-recap-title').textContent = t('recap_title', { n: sess.total });
   if (typeof ecoDecorate === 'function') ecoDecorate();

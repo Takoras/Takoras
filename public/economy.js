@@ -7,6 +7,8 @@
 const ECO_KEY = 'takoras-eco';
 const REGEN = 3 * 60 * 1000, BASE_MAX = 5, TOP_MAX = 50;
 const nextMax = m => Math.min(TOP_MAX, m + 1);
+// Recharge : 180 s au départ, −10 s par amélioration, 60 s minimum (même prix que le serveur : _regen_cost)
+const regenCost = target => Math.round(300 * Math.max(1, Math.floor((180 - target) / 10)) ** 1.8 / 50) * 50; // 170 = 300 … 60 = 26 300
 const upgradeCost = target => Math.max(100, Math.round(100 * Math.max(1, target - BASE_MAX) ** 1.4 / 50) * 50); // 6 = 100 … 50 = 20 650
 
 let eco = { coins: 0, stock: BASE_MAX, max: BASE_MAX, last: Date.now() };
@@ -35,6 +37,7 @@ function applyState(st) {
   eco.coins = st.coins; eco.stock = st.stock; eco.max = st.max;
   eco.step = (st.step || 180) * 1000;
   eco.last = Date.now() - (eco.step / 1000 - st.next_in) * 1000;
+  eco.regen = st.regen || 180;
   eco.potions = st.potions || []; eco.luck = +st.luck || 1; eco.fast_left = st.fast_left || 0; eco.synced = Date.now();
   ACC.isAdmin = !!st.admin;
   // compte bêta (badge) et testeur (menu de test, tirages de test) tant que la bêta est ouverte
@@ -70,11 +73,20 @@ async function openPulls(n) {
   buy(data.results.length, data.results, data.variants || null);
 }
 
+async function upgradeRegen() {
+  if (!requireAccount()) return;
+  const r = eco.regen || 180;
+  if (r <= 60 || eco.coins < regenCost(r - 10)) return;
+  const { data, error } = await sb.rpc('upgrade_regen');
+  if (error) { sfx.deny(); toast(errText(error), true); return ecoSync(); }
+  sfx.upgrade(); toast('⏱️ ' + t('regen_ok', { s: data.regen }));
+  applyState(data);
+}
 async function upgrade() {
   if (!requireAccount()) return;
   if (eco.max >= TOP_MAX || eco.coins < upgradeCost(nextMax(eco.max))) return;
   const { data, error } = await sb.rpc('upgrade_stock');
-  if (error) { sfx.deny(); return ecoSync(); }
+  if (error) { sfx.deny(); toast(errText(error), true); return ecoSync(); }
   sfx.upgrade();
   applyState(data);
 }
@@ -102,6 +114,9 @@ function renderActions() {
     ${eco.max < TOP_MAX
       ? `<button class="btn upgrade" data-up ${eco.coins >= cost ? '' : 'disabled'}>${t('stock_max', { a: eco.max, b: nextMax(eco.max) })} · ${money(cost)}</button>`
       : `<span class="muted small">${t('stock_top')}</span>`}
+    ${(eco.regen || 180) > 60
+      ? `<button class="btn upgrade" data-regen ${eco.coins >= regenCost((eco.regen || 180) - 10) ? '' : 'disabled'}>⏱️ ${t('regen_up', { a: mmss((eco.regen || 180) * 1000), b: mmss(((eco.regen || 180) - 10) * 1000) })} · ${money(regenCost((eco.regen || 180) - 10))}</button>`
+      : `<span class="muted small">${t('regen_top')}</span>`}
     ${typeof effectsHTML === 'function' ? `<div class="fx-row" id="home-fx">${effectsHTML()}</div>` : ''}
     ${info}`;
 }
@@ -109,6 +124,7 @@ $('actions').addEventListener('click', e => {
   const b = e.target.closest('button'); if (!b || b.disabled) return;
   if (b.dataset.open) openPulls(b.dataset.open === 'all' ? 'all' : +b.dataset.open);
   else if ('up' in b.dataset) upgrade();
+  else if ('regen' in b.dataset) upgradeRegen();
 });
 
 // Boutons de fin d'ouverture : « Ouvrir encore » / « Tout ouvrir » selon le stock

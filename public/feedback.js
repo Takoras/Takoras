@@ -26,7 +26,7 @@ function openFeedback(kind = 'idea') {
     </div>`;
     const ta = o.querySelector('#fb-text');
     ta.oninput = () => { st.text = ta.value; o.querySelector('#fb-count').textContent = ta.value.length + '/1500'; };
-    setTimeout(() => ta.focus(), 50);
+    if (!matchMedia('(pointer: coarse)').matches) setTimeout(() => ta.focus(), 50); // sur téléphone, le clavier ne s'ouvre pas tout seul (il cachait la fenêtre)
   };
   draw();
   document.body.appendChild(o);

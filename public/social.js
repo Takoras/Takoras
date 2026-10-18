@@ -236,7 +236,7 @@ function drawDock() {
     <form class="cd-form" id="cd-form"><input id="cd-in" maxlength="500" placeholder="${t('fr_write', { n: esc(f.pseudo) })}" autocomplete="off"><button aria-label="${t('send')}">➤</button></form>`;
   drawMsgs();
   $('cd-form').onsubmit = sendMsg;
-  if (!FR.min) $('cd-in').focus({ preventScroll: true });
+  if (!FR.min && !matchMedia('(pointer: coarse)').matches) $('cd-in').focus({ preventScroll: true }); // sur téléphone, pas de clavier qui saute tout seul
 }
 function drawMsgs() {
   const box = $('cd-msgs'); if (!box) return;

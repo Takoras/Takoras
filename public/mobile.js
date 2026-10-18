@@ -79,3 +79,10 @@
   mirror('bell-badge', 'tb-more-b');
   dispatchEvent(new Event('resize')); // allume le bon onglet tout de suite
 })();
+
+// Clavier du téléphone : il cachait le bas des fenêtres (avis, chat, codes…). On remonte tout de la hauteur du clavier.
+if (window.visualViewport) {
+  const kb = () => document.documentElement.style.setProperty('--kb', Math.max(0, innerHeight - visualViewport.height - visualViewport.offsetTop) + 'px');
+  visualViewport.addEventListener('resize', kb);
+  visualViewport.addEventListener('scroll', kb);
+}

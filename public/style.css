@@ -1912,3 +1912,60 @@ html.reduce-fx .opening.turbo::before { display: none; }
 .stock-count { font-family: "Space Grotesk"; line-height: 1; }
 .stock-count b { font-size: 30px; font-weight: 700; color: #fff; }
 .stock-count span { font-size: 18px; color: var(--muted); font-weight: 600; }
+
+/* ===================== Téléphone : rien de coupé ===================== */
+/* Sur iPhone / Android, 100vh est plus grand que l'écran visible (barre d'adresse) : on utilise la vraie hauteur visible (dvh) */
+@supports (height: 100dvh) {
+  .modal-card, .annf-card { max-height: calc(100dvh - 32px); }
+  .debug, .debug.admin { max-height: calc(100dvh - 32px); }
+  .debug.admin2 { height: min(820px, calc(100dvh - 32px)); }
+  .chat-dock { height: min(500px, calc(100dvh - 140px)); }
+  .page { min-height: calc(100dvh - 64px); }
+  .mo-fx { height: 100dvh; }
+}
+@media (max-width: 760px) {
+  /* Fenêtres qui montent du bas : jamais plus hautes que l'écran, elles défilent à l'intérieur */
+  .ask-card { max-height: 88dvh; overflow-y: auto; overscroll-behavior: contain; -webkit-overflow-scrolling: touch; }
+  .modal-card, .set-card, .sh-card, .annf-card { overscroll-behavior: contain; }
+  /* iPhone zoome tout seul sur les champs de moins de 16 px (et la page paraît coupée) : 16 px partout */
+  input, select, textarea, .mpx-in { font-size: 16px !important; }
+  /* Rien ne dépasse sur les côtés */
+  html, body { max-width: 100%; overflow-x: clip; }
+  .float { display: none; }
+  .fx-row { flex-wrap: wrap; justify-content: center; }
+}
+@media (max-width: 760px) {
+  .askbox, .modal, .settings { padding-bottom: var(--kb, 0px) !important; transition: padding-bottom .15s; }
+  .ask-card { max-height: calc(88dvh - var(--kb, 0px)); }
+  .chat-dock { bottom: calc(var(--tabh) + 10px + var(--kb, 0px)) !important; }
+}
+@media (max-width: 760px) {
+  /* Filtres : sur plusieurs lignes au lieu d'une rangée qui sort de l'écran (on croyait que c'était coupé) */
+  .chips { flex-wrap: wrap !important; overflow: visible !important; margin-left: 0 !important; margin-right: 0 !important; padding: 0 !important; gap: 6px !important; }
+  .inv-tools .chips { width: auto !important; }
+  .chips .chip { padding: 7px 12px; font-size: 13px; }
+}
+@media (max-width: 760px) {
+  /* Ouverture : jeton plus petit sur les petits écrans, rien caché sous les boutons du haut, et on peut défiler si ça ne tient pas */
+  .opening { --coin: clamp(130px, 27dvh, 210px); justify-content: flex-start; overflow-y: auto; overflow-x: hidden;
+    padding: calc(72px + env(safe-area-inset-top)) 16px calc(20px + env(safe-area-inset-bottom)); }
+  .opening > .op-main, .opening > .op-recap-view { margin-block: auto; }
+  .op-coin-col { gap: 6px; }
+  .op-stats .stat { padding-block: 2px; }
+  .op-note { display: none; }
+  /* Récap : 3 colonnes compactes, boutons toujours visibles en bas */
+  .op-recap-grid { grid-template-columns: repeat(3, 1fr) !important; gap: 6px !important; }
+  .rc { padding: 12px 4px 8px !important; border-radius: 12px !important; gap: 3px !important; }
+  .rc img { width: 46px !important; height: 46px !important; }
+  .rc b { font-size: 12px !important; } .rc small { font-size: 11px !important; } .rc .vtag { font-size: 8px; padding: 1px 4px; }
+  .rc-tag { font-size: 8px !important; padding: 1px 6px !important; top: -8px !important; }
+  .op-recap-view h2 { font-size: 26px !important; }
+  .op-recap-view .op-actions { position: sticky; bottom: calc(-20px - env(safe-area-inset-bottom)); width: calc(100% + 32px); margin: 0 -16px; padding: 12px 16px calc(14px + env(safe-area-inset-bottom));
+    background: linear-gradient(to top, var(--bg) 70%, transparent); z-index: 3; }
+}
+@media (max-width: 760px) {
+  /* Menu testeur : les listes prennent toute la largeur, la quantité et le bouton en dessous */
+  .ts-row { flex-wrap: wrap; }
+  .ts-row select { flex: 1 1 100%; min-width: 0; }
+  .ts-row .ts-qty { flex: 1; }
+}
