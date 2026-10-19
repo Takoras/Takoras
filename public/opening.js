@@ -101,7 +101,7 @@ function wave() {
 const SAVE_KEY = 'takoras-session';
 let sess = null;
 function save() { try { sess ? localStorage.setItem(SAVE_KEY, JSON.stringify(sess)) : localStorage.removeItem(SAVE_KEY); } catch {} }
-function startSession(n, plan = null, vars = null, lucks = null) { sess = { pull: current, total: n, idx: 0, results: [], rvars: [], cur: null, plan, vars, lucks }; save(); }
+function startSession(n, plan = null, vars = null, lucks = null, ids = null) { sess = { pull: current, total: n, idx: 0, results: [], rvars: [], cur: null, plan, vars, lucks, ids }; save(); }
 function endSession() { sess = null; save(); }
 const seriesOf = () => SERIES[PULLS[sess.pull].name] || SERIES.Takoras;
 const findJeton = name => seriesOf().find(j => j.name === name);
@@ -466,30 +466,26 @@ function renderAuto() {
   s.hidden = !show;
   s.textContent = '✕ ' + t('auto_quit');
 }
-// « Retour au menu » : on arrête d'ouvrir et on repart à l'accueil. Les pulls pas encore ouverts sont gardés pour plus tard
-// (bouton « Reprendre » sur l'accueil). Les jetons sont déjà à toi (tirés par le serveur) : rien n'est perdu ni relancé.
-const PAUSE_KEY = 'takoras-paused';
-const loadPaused = () => { try { const p = JSON.parse(localStorage.getItem(PAUSE_KEY)); return p && p.owner === ACC.user?.id && p.results.length < p.total ? p : null; } catch { return null; } };
-function quitAll() {
-  if (!sess || sess.recap || sess.total < 2) return;
+// « Retour au menu » : on arrête d'ouvrir et on repart à l'accueil. Les pulls pas encore ouverts reviennent dans ton stock.
+// (Leurs résultats sont gardés par le serveur et ressortent tels quels aux prochains pulls : impossible de « relancer ».)
+try { localStorage.removeItem('takoras-paused'); } catch {} // ancienne version (bouton Reprendre)
+async function quitAll() {
+  if (!sess || sess.recap || sess.total < 2 || quitAll.busy) return;
+  quitAll.busy = true;
   sess.auto = false; turbo(false);
   if (run) { run.done = true; run.queue = []; clearInterval(run.hb); run.spinEnd = 0; }
   opening.classList.remove('spinning', 'hold');
-  const left = sess.total - sess.results.length;
-  // le jeton en cours (pas encore révélé) reste à ouvrir : on repartira de lui
-  const p = { ...sess, idx: sess.results.length, cur: null, auto: false, recap: false, owner: ACC.user?.id };
-  try { localStorage.setItem(PAUSE_KEY, JSON.stringify(p)); } catch {}
+  const ids = (sess.ids || []).slice(sess.results.length); // le jeton en cours (pas encore révélé) compte comme pas ouvert
+  let back = 0;
+  if (ids.length) {
+    const { data, error } = await sb.rpc('refund_pulls', { ids });
+    if (error) { quitAll.busy = false; sfx.deny(); return toast(errText(error), true); }
+    back = data.refunded; applyState(data.state);
+  }
   sess.recap = true; // on a le droit de partir
-  leave().then(() => { if (typeof renderActions === 'function') renderActions(); });
-  toast('🎒 ' + t('auto_quit_ok', { n: left }));
-}
-// « ▶ Reprendre » sur l'accueil : on rouvre là où on s'était arrêté
-function resumePaused() {
-  const p = loadPaused(); if (!p) return;
-  try { localStorage.removeItem(PAUSE_KEY); } catch {}
-  closeOpening();
-  sess = p; delete sess.owner; save();
-  runTransition();
+  await leave();
+  quitAll.busy = false;
+  if (back) toast('🎒 ' + t('auto_quit_ok', { n: back }));
 }
 $('op-skip').addEventListener('click', e => { e.stopPropagation(); quitAll(); });
 // Mode turbo : environ 0,25 s par jeton, lignes de vitesse, compteur de combo, notes qui montent
@@ -617,7 +613,7 @@ addEventListener('keydown', e => {
   tap();
 });
 
-function buy(n, plan = null, vars = null, lucks = null) { closeOpening(); startSession(n, plan, vars, lucks); runTransition(); }
+function buy(n, plan = null, vars = null, lucks = null, ids = null) { closeOpening(); startSession(n, plan, vars, lucks, ids); runTransition(); }
 $('op-next').addEventListener('click', next);
 // Pendant un ×10 : un clic n'importe où sur l'écran passe au jeton suivant
 opening.addEventListener('click', e => {
