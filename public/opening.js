@@ -101,7 +101,7 @@ function wave() {
 const SAVE_KEY = 'takoras-session';
 let sess = null;
 function save() { try { sess ? localStorage.setItem(SAVE_KEY, JSON.stringify(sess)) : localStorage.removeItem(SAVE_KEY); } catch {} }
-function startSession(n, plan = null, vars = null) { sess = { pull: current, total: n, idx: 0, results: [], rvars: [], cur: null, plan, vars }; save(); }
+function startSession(n, plan = null, vars = null, lucks = null) { sess = { pull: current, total: n, idx: 0, results: [], rvars: [], cur: null, plan, vars, lucks }; save(); }
 function endSession() { sess = null; save(); }
 const seriesOf = () => SERIES[PULLS[sess.pull].name] || SERIES.Takoras;
 const findJeton = name => seriesOf().find(j => j.name === name);
@@ -207,7 +207,8 @@ function fillInfo(j, variant = '') {
   const lvl = Math.log10(j.odds) / 6; // 0 → 1 pour 1/1 → 1/1 000 000
   const stat = (k, base) => { const v = Math.round(base * (.35 + lvl * .65) * (.85 + Math.random() * .3)); return [k, v, Math.min(100, v / base * 100)]; };
   $('op-name').innerHTML = jnH(j.name) + vTag(variant);
-  $('op-rarity').innerHTML = '1/' + j.odds.toLocaleString(LOCALE()) + (variant ? ` <small>× ${t('v_' + variant)} 1/${fmt(VARIANTS[variant].odds)}</small>` : '');
+  const lk = +(sess.lucks || [])[sess.idx] || 0; // chance active quand ce jeton a été tiré
+  $('op-rarity').innerHTML = '1/' + j.odds.toLocaleString(LOCALE()) + (variant ? ` <small>× ${t('v_' + variant)} 1/${fmt(VARIANTS[variant].odds)}</small>` : '') + (lk > 1 ? ` <span class="op-luck">🍀 ×${fmtLuck(lk)}</span>` : '');
   // Mêmes stats que dans l'inventaire (stables pour un même jeton)
   const S = statsOf(j.name, j.odds);
   sess.cur.stats = ['s_hp', 's_atk', 's_def', 's_spd'].map(k => [k, S[k], Math.min(100, S[k] / STAT_MAX[k] * 100)]);
@@ -465,23 +466,30 @@ function renderAuto() {
   s.hidden = !show;
   s.textContent = '✕ ' + t('auto_quit');
 }
-// « Retour au menu » : on arrête d'ouvrir et on repart à l'accueil. Les jetons pas encore ouverts sont déjà à toi
-// (tirés par le serveur) : ils vont directement dans l'inventaire et l'historique.
+// « Retour au menu » : on arrête d'ouvrir et on repart à l'accueil. Les pulls pas encore ouverts sont gardés pour plus tard
+// (bouton « Reprendre » sur l'accueil). Les jetons sont déjà à toi (tirés par le serveur) : rien n'est perdu ni relancé.
+const PAUSE_KEY = 'takoras-paused';
+const loadPaused = () => { try { const p = JSON.parse(localStorage.getItem(PAUSE_KEY)); return p && p.owner === ACC.user?.id && p.results.length < p.total ? p : null; } catch { return null; } };
 function quitAll() {
   if (!sess || sess.recap || sess.total < 2) return;
   sess.auto = false; turbo(false);
   if (run) { run.done = true; run.queue = []; clearInterval(run.hb); run.spinEnd = 0; }
   opening.classList.remove('spinning', 'hold');
-  for (let i = sess.results.length; i < sess.total; i++) {
-    const j = (sess.plan && findJeton(sess.plan[i])) || (i === sess.idx && sess.cur ? findJeton(sess.cur.name) : draw(seriesOf()));
-    const v = (sess.vars || [])[i] || '';
-    sess.results.push(j.name); (sess.rvars ||= []).push(v);
-    addToHistory(j, v);
-  }
-  sess.idx = sess.total - 1; sess.cur = null; sess.recap = true; // fini : on a le droit de partir
-  save();
-  leave();
-  toast('🎒 ' + t('auto_quit_ok'));
+  const left = sess.total - sess.results.length;
+  // le jeton en cours (pas encore révélé) reste à ouvrir : on repartira de lui
+  const p = { ...sess, idx: sess.results.length, cur: null, auto: false, recap: false, owner: ACC.user?.id };
+  try { localStorage.setItem(PAUSE_KEY, JSON.stringify(p)); } catch {}
+  sess.recap = true; // on a le droit de partir
+  leave().then(() => { if (typeof renderActions === 'function') renderActions(); });
+  toast('🎒 ' + t('auto_quit_ok', { n: left }));
+}
+// « ▶ Reprendre » sur l'accueil : on rouvre là où on s'était arrêté
+function resumePaused() {
+  const p = loadPaused(); if (!p) return;
+  try { localStorage.removeItem(PAUSE_KEY); } catch {}
+  closeOpening();
+  sess = p; delete sess.owner; save();
+  runTransition();
 }
 $('op-skip').addEventListener('click', e => { e.stopPropagation(); quitAll(); });
 // Mode turbo : environ 0,25 s par jeton, lignes de vitesse, compteur de combo, notes qui montent
@@ -558,10 +566,10 @@ function showRecap() {
   startBg(best);
   // Les doublons sont regroupés en une seule carte « ×N », du plus rare au plus commun (50 pulls tiennent sur un écran)
   const g = new Map();
-  list.forEach((j, i) => { const k = j.name + '|' + (vars[i] || ''); const x = g.get(k) || { j, v: vars[i] || '', n: 0 }; x.n++; g.set(k, x); });
+  list.forEach((j, i) => { const k = j.name + '|' + (vars[i] || ''); const x = g.get(k) || { j, v: vars[i] || '', n: 0, lk: 0 }; x.n++; x.lk = Math.max(x.lk, +(sess.lucks || [])[i] || 0); g.set(k, x); });
   const cards = [...g.values()].sort((a, b) => vOdds(b.j.odds, b.v) - vOdds(a.j.odds, a.v));
-  $('op-recap-grid').innerHTML = cards.map(({ j, v, n }, i) =>
-    `<div class="rc${i === 0 ? ' best' : ''}" style="--g:${hexRGB(j.glow)};animation-delay:${Math.min(i, 20) * 45}ms">${i === 0 ? `<span class="rc-tag">${t('best')}</span>` : ''}${n > 1 ? `<span class="rc-n">×${n}</span>` : ''}${jetonHTML(j, 72, v)}<b>${jnH(j.name)}${vTag(v)}</b><small>1/${vOdds(j.odds, v).toLocaleString(LOCALE())}</small></div>`).join('');
+  $('op-recap-grid').innerHTML = cards.map(({ j, v, n, lk }, i) =>
+    `<div class="rc${i === 0 ? ' best' : ''}" style="--g:${hexRGB(j.glow)};animation-delay:${Math.min(i, 20) * 45}ms">${i === 0 ? `<span class="rc-tag">${t('best')}</span>` : ''}${n > 1 ? `<span class="rc-n">×${n}</span>` : ''}${jetonHTML(j, 72, v)}<b>${jnH(j.name)}${vTag(v)}</b><small>1/${vOdds(j.odds, v).toLocaleString(LOCALE())}${lk > 1 ? ` · 🍀×${fmtLuck(lk)}` : ''}</small></div>`).join('');
   $('op-recap-tag').textContent = t('recap_tag', { n: sess.total });
   $('op-recap-title').textContent = t('recap_title', { n: sess.total });
   if (typeof ecoDecorate === 'function') ecoDecorate();
@@ -572,9 +580,9 @@ function showRecap() {
 // On ne peut quitter qu'à la fin (pour ne pas perdre les pulls achetés)
 function canClose() { return !sess || sess.recap || (sess.total === 1 && opening.classList.contains('revealed')); }
 
-function addToHistory(j, variant = '') {
+function addToHistory(j, variant = '', luck = +(sess?.lucks || [])[sess?.results.length - 1] || 0) {
   const serie = SERIES[PULLS[sess.pull].name] ? PULLS[sess.pull].name : 'Takoras';
-  if (accRecordPull({ ...j, variant }, serie)) return renderHist(); // connecté : enregistré en ligne
+  if (accRecordPull({ ...j, variant, luck }, serie)) return renderHist(); // connecté : enregistré en ligne
   const h = loadLocalHist();
   h.unshift({ name: j.name, odds: j.odds, glow: j.glow, img: texOf(j), ts: Date.now() });
   try { localStorage.setItem('takoras-hist', JSON.stringify(h.slice(0, 30))); } catch {}
@@ -609,7 +617,7 @@ addEventListener('keydown', e => {
   tap();
 });
 
-function buy(n, plan = null, vars = null) { closeOpening(); startSession(n, plan, vars); runTransition(); }
+function buy(n, plan = null, vars = null, lucks = null) { closeOpening(); startSession(n, plan, vars, lucks); runTransition(); }
 $('op-next').addEventListener('click', next);
 // Pendant un ×10 : un clic n'importe où sur l'écran passe au jeton suivant
 opening.addEventListener('click', e => {

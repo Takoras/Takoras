@@ -1976,3 +1976,24 @@ html.reduce-fx .opening.turbo::before { display: none; }
   font-size: 18px; color: #fff; background: rgba(20, 18, 30, .85); border: 1px solid rgba(255, 255, 255, .18); }
 .op-recap-x:hover { background: rgba(255, 255, 255, .14); }
 .opening.recap .op-recap-x { display: grid; place-items: center; }
+/* Chance du tirage (🍀 ×2) à côté de la rareté */
+.op-luck { display: inline-block; margin-left: 6px; padding: 2px 8px; border-radius: 99px; font-size: .6em; vertical-align: middle; color: #bbf7d0; background: rgba(34, 197, 94, .15); border: 1px solid rgba(34, 197, 94, .45); }
+.resume-btn { width: 100%; max-width: 320px; }
+/* Objets : quantité en pastille, utiliser plusieurs d'un coup */
+.it-card { position: relative; }
+.it-qty { position: absolute; top: 10px; right: 12px; padding: 2px 9px; border-radius: 99px; font-family: "Space Grotesk"; font-weight: 700; font-size: 13px; color: #ddd6fe; background: rgba(139, 92, 246, .2); border: 1px solid rgba(139, 92, 246, .45); }
+.it-card b { padding-right: 52px; }
+.it-use { display: flex; flex-wrap: wrap; gap: 6px; align-items: center; }
+.it-step { display: flex; align-items: center; border: 1px solid var(--border); border-radius: 99px; overflow: hidden; }
+.it-step button { width: 30px; height: 32px; font-weight: 700; color: var(--text); }
+.it-step button:hover { background: var(--surface-2); }
+.it-step input { width: 46px; height: 32px; text-align: center; background: transparent; border: 0; color: var(--text); font-weight: 600; -moz-appearance: textfield; }
+.it-step input::-webkit-outer-spin-button, .it-step input::-webkit-inner-spin-button { -webkit-appearance: none; margin: 0; }
+@media (max-width: 760px) { .it-card .it-use { grid-column: 2; } .it-card b { padding-right: 44px; } }
+/* Bonus du jour (au-dessus des quêtes) */
+.daily { display: flex; align-items: center; justify-content: space-between; gap: 10px; margin-bottom: 14px; padding: 12px 14px; border-radius: 14px; background: var(--surface); border: 1px solid var(--border); }
+.daily > div { display: flex; flex-direction: column; gap: 2px; min-width: 0; }
+.daily small { font-size: 12px; }
+.daily.on { border-color: rgba(250, 204, 21, .55); background: linear-gradient(135deg, rgba(250, 204, 21, .12), rgba(249, 115, 22, .08)); animation: qGlow 1.6s ease-in-out infinite; }
+.daily .btn { flex: none; }
+html.reduce-fx .daily.on { animation: none; }

@@ -14,17 +14,32 @@ const sfx = (() => {
     for (let ch = 0; ch < 2; ch++) { const d = ir.getChannelData(ch); for (let i = 0; i < len; i++) d[i] = (Math.random() * 2 - 1) * Math.pow(1 - i / len, 3); }
     const c = ctx.createConvolver(); c.buffer = ir; return c;
   }
+  // Téléphone / appareil lent : la réverbération « convolution » demande trop de calcul et faisait grésiller le son.
+  // On y met un écho léger (délai) à la place, une mémoire audio plus grande et moins de sons en même temps.
+  const LITE = matchMedia('(pointer: coarse)').matches || (typeof reducedFx === 'function' && reducedFx());
+  const MAX_VOICES = LITE ? 18 : 48;
+  let voices = 0;
+  function echo() {
+    const d = ctx.createDelay(1), fb = ctx.createGain(), lp = ctx.createBiquadFilter(), inp = ctx.createGain();
+    d.delayTime.value = .11; fb.gain.value = .32; lp.type = 'lowpass'; lp.frequency.value = 1800;
+    inp.connect(d); d.connect(lp).connect(fb).connect(d);
+    const out = ctx.createGain(); lp.connect(out);
+    return { input: inp, output: out };
+  }
   function init() {
     if (ctx) return ctx.state === 'suspended' && ctx.resume();
-    ctx = new (window.AudioContext || window.webkitAudioContext)();
+    const AC = window.AudioContext || window.webkitAudioContext;
+    try { ctx = new AC({ latencyHint: LITE ? 'playback' : 'interactive' }); } catch { ctx = new AC(); }
     master = ctx.createGain(); master.gain.value = vol();
     // bus → coupe-aigus chaud → (sec + réverb) → compresseur doux → sortie
     bus = ctx.createGain();
     const warm = ctx.createBiquadFilter(); warm.type = 'lowpass'; warm.frequency.value = 3600; warm.Q.value = .5;
-    const verb = room(), wet = ctx.createGain(); wet.gain.value = .22;
+    const wet = ctx.createGain(); wet.gain.value = LITE ? .18 : .22;
     const comp = ctx.createDynamicsCompressor(); comp.threshold.value = -18; comp.ratio.value = 3;
     bus.connect(warm);
-    warm.connect(comp); warm.connect(verb).connect(wet).connect(comp);
+    warm.connect(comp);
+    if (LITE) { const e = echo(); warm.connect(e.input); e.output.connect(wet).connect(comp); }
+    else warm.connect(room()).connect(wet).connect(comp);
     comp.connect(master).connect(ctx.destination);
   }
   addEventListener('pointerdown', init, { capture: true });
@@ -41,6 +56,9 @@ const sfx = (() => {
   }
   function osc(type, f, t, dur, peak, attack = .01, out = bus, glide) {
     const o = ctx.createOscillator(), g = ctx.createGain();
+    // trop de sons en même temps (spam de clics) : les nouveaux sont joués sans être branchés, pour ne pas saturer
+    if (voices >= MAX_VOICES) return o;
+    voices++; o.onended = () => { voices--; };
     o.type = type; o.frequency.setValueAtTime(f, t);
     if (glide) o.frequency.exponentialRampToValueAtTime(glide, t + dur);
     env(g, t, peak, attack, dur);

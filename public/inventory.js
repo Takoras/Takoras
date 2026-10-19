@@ -5,7 +5,7 @@
 //    Un onglet par collection (Takoras aujourd'hui, d'autres plus tard), et un onglet par variante.
 
 // serie : collection affichée · vtab : '' = normaux, sinon gold / celeste / ombre · own : seulement ceux que j'ai
-const INV = { rows: [], groups: [], sel: new Map(), selecting: false, tier: 'all', sort: 'rarity', q: '', vtab: '', serie: 'Takoras', own: false };
+const INV = { groups: [], sel: new Map(), selecting: false, tier: 'all', sort: 'rarity', q: '', vtab: '', serie: 'Takoras', own: false };
 const VKEYS = Object.keys(VARIANTS);
 const serieOf = r => r.serie || 'Takoras';
 const gKey = (serie, name, v) => serie + '|' + name + '|' + (v || '');
@@ -15,19 +15,16 @@ const seriesList = () => Object.keys(SERIES).filter(s => SERIES[s]?.length);
 // Les deux onglets du menu Inventaire
 const invTabs = on => `<div class="seg inv-tabs"><a href="#inventaire" class="${on === 'tok' ? 'on' : ''}">📖 ${t('bestiary')}</a><a href="#inventaire/objets" class="${on === 'items' ? 'on' : ''}">🎒 ${t('items')}</a></div>`;
 
+// Le serveur renvoie l'inventaire déjà regroupé (un seul JSON) : plus de limite de 1000 jetons
 async function loadInventory() {
-  const { data, error } = await sb.rpc('my_inventory');
+  const { data, error } = await sb.rpc('my_inventory_groups');
   if (error) return false;
-  INV.rows = data;
   const g = {};
-  data.forEach(r => {
+  (data || []).forEach(r => {
     // une carte par jeton ET par variante (un Mobu Doré est rangé à part du Mobu normal)
     const key = gKey(serieOf(r), r.jeton, r.variant);
-    const x = g[key] ||= { key, serie: serieOf(r), name: r.jeton, variant: r.variant || '', odds: r.odds, ids: [], free: [], shown: 0, last: 0 };
-    x.ids.push(r.id); if (!r.locked && !r.showcased && !r.in_deck) x.free.push(r.id); // en vitrine ou dans le deck = protégé de la vente
-    if (r.showcased) x.shown++;
-    if (r.in_deck) x.deck = (x.deck || 0) + 1;
-    x.last = Math.max(x.last, Date.parse(r.created_at));
+    g[key] = { key, serie: serieOf(r), name: r.jeton, variant: r.variant || '', odds: r.odds, ids: r.ids, free: r.free || [], // en vitrine ou dans le deck = protégé de la vente
+      shown: +r.shown, deck: +r.deck, last: Date.parse(r.last), luck: +r.best_luck || 0 };
   });
   INV.groups = Object.values(g);
   for (const [k, n] of INV.sel) { const x = g[k]; if (!x || !x.free.length) INV.sel.delete(k); else INV.sel.set(k, Math.min(n, x.free.length)); }
@@ -65,10 +62,15 @@ async function renderInventory() {
       ${invTabs('items')}
       <div class="inv-items" id="inv-items"></div>`;
     $('inv-items').addEventListener('click', async e => {
-      const b = e.target.closest('[data-use]'); if (!b) return;
-      b.disabled = true;
-      const { data, error } = await sb.rpc('use_item', { p_item: b.dataset.use });
-      if (error) { sfx.deny(); toast(errText(error), true); } else { applyState(data); sfx.upgrade(); toast(t('item_used')); }
+      const card = e.target.closest('.it-card'); if (!card) return;
+      const inp = card.querySelector('[data-n]');
+      const st = e.target.closest('[data-d]');
+      if (st) { inp.value = Math.max(1, Math.min(+inp.max, (+inp.value || 1) + +st.dataset.d)); return sfx.click(); }
+      const b = e.target.closest('[data-use], [data-useall]'); if (!b) return;
+      const item = b.dataset.use || b.dataset.useall, qty = b.dataset.useall ? +b.dataset.q : Math.max(1, +(inp?.value) || 1);
+      card.querySelectorAll('button').forEach(x => { x.disabled = true; });
+      const { data, error } = await sb.rpc('use_items', { p_item: item, p_qty: qty });
+      if (error) { sfx.deny(); toast(errText(error), true); } else { applyState(data.state); sfx.upgrade(); toast(data.used > 1 ? t('items_used', { n: data.used }) : t('item_used')); }
       drawItems();
     });
   }
@@ -82,7 +84,10 @@ async function drawItems() {
   const snap = moSnap(box, '.it-card');
   box.innerHTML = (data || []).length ? `<div class="items-row">${data.map(it => {
     const [name, desc] = itemText({ id: it.item, kind: it.kind, data: it.data });
-    return `<div class="it-card" data-key="${it.item}" data-sig="${it.qty}"><div class="si-icon">${(ICONS[it.item] || ICONS.instant)()}</div><b>${name} <span class="ic-n">×${it.qty}</span></b><p class="muted">${desc}</p><button class="btn primary sm" data-use="${it.item}">${t('use')}</button></div>`;
+    // la quantité est une pastille dans le coin (avant, un « ×100 » long faisait passer le nom à la ligne)
+    return `<div class="it-card" data-key="${it.item}" data-sig="${it.qty}"><span class="it-qty">×${it.qty}</span><div class="si-icon">${(ICONS[it.item] || ICONS.instant)()}</div><b>${name}</b><p class="muted">${desc}</p>
+      <div class="it-use">${it.qty > 1 ? `<div class="it-step"><button data-d="-1" aria-label="−">−</button><input type="number" min="1" max="${it.qty}" value="1" data-n><button data-d="1" aria-label="+">+</button></div>` : ''}
+        <button class="btn primary sm" data-use="${it.item}">${t('use')}</button>${it.qty > 1 ? `<button class="btn ghost sm" data-useall="${it.item}" data-q="${it.qty}">${t('use_all')}</button>` : ''}</div></div>`;
   }).join('')}</div>`
     : `<div class="page-empty"><p class="muted">${t('inv_items_empty')}</p><a class="btn primary" href="#boutique">${t('nav_shop')}</a></div>`;
   moPlay(snap, box, '.it-card', { dissolve: true });
@@ -159,10 +164,10 @@ function visibleCards() {
 function drawInventory(mode = '') {
   if (!$('inv-grid') || !$('bst-series')) return;
   const snap = moSnap($('inv-grid'), '.ic');
-  const rows = INV.rows.filter(r => serieOf(r) === INV.serie);
+  const gs = INV.groups.filter(x => x.serie === INV.serie);
   const all = SERIES[INV.serie] || [];
-  const value = rows.reduce((s, r) => s + sellValue(r.odds, r.variant), 0);
-  $('inv-sum').innerHTML = `${t('inv_count', { n: fmt(rows.length), k: new Set(rows.map(r => r.jeton + r.variant)).size })} · ${t('inv_value')} ${money(value)}`;
+  const value = gs.reduce((s, x) => s + x.ids.length * sellValue(x.odds, x.variant), 0);
+  $('inv-sum').innerHTML = `${t('inv_count', { n: fmt(gs.reduce((s, x) => s + x.ids.length, 0)), k: gs.length })} · ${t('inv_value')} ${money(value)}`;
   // Onglets des collections (un seul pour l'instant : Takoras)
   const ser = seriesList();
   $('bst-series').hidden = ser.length < 2;
@@ -176,7 +181,7 @@ function drawInventory(mode = '') {
   document.querySelectorAll('#inv-tiers .chip[data-t]').forEach(b => b.classList.toggle('on', b.dataset.t === INV.tier));
   $('bst-own').classList.toggle('on', INV.own);
   // Onglets Normaux / Doré / Céleste / Ombre, avec le nombre de jetons possédés dans chacun
-  const cnt = v => rows.filter(r => (r.variant || '') === v).length;
+  const cnt = v => gs.filter(x => x.variant === v).reduce((s, x) => s + x.ids.length, 0);
   $('inv-vtabs').innerHTML = [['', t('v_none')], ...VKEYS.map(v => [v, t('v_' + v)])].map(([v, l]) =>
     `<button class="ivt${v ? ' v-' + v : ''}${INV.vtab === v ? ' on' : ''}" data-vt="${v}">${v ? `<i class="v-dot on ${v}"></i>` : ''}${l}<small>${cnt(v)}</small></button>`).join('');
   $('inv-mode').textContent = INV.selecting ? t('inv_done') : t('inv_select');
@@ -233,7 +238,7 @@ function onCardClick(e) {
   // Hors sélection : aperçu du jeton avec ses actions
   const allLocked = !x.free.length;
   openJeton(x.name, `
-    <p class="muted">${t('inv_have', { n: x.ids.length })}${x.shown ? ' · 📌 ' + t('shown_n', { n: x.shown }) : ''}${c ? ' · ' + t('bst_got', { n: c.total }) : ''}</p>
+    <p class="muted">${t('inv_have', { n: x.ids.length })}${x.shown ? ' · 📌 ' + t('shown_n', { n: x.shown }) : ''}${c ? ' · ' + t('bst_got', { n: c.total }) : ''}${x.luck > 1 ? ` · 🍀 ${t('best_luck', { l: fmtLuck(x.luck) })}` : ''}</p>
     ${c ? bstVars(c) : ''}
     <div class="jm-actions">
       ${x.free.length ? `<button class="btn primary" data-a="sell1">${t('sell_one')} · +${money(sellValue(x.odds, x.variant))}</button>` : ''}
@@ -277,8 +282,8 @@ async function onBarClick(e) {
 
 // Vente : pas de confirmation, sauf si ça contient un jeton rare (1/1000 et plus)
 async function sellIds(ids) {
-  const rows = INV.rows.filter(r => ids.includes(r.id));
-  if (rows.some(r => vOdds(r.odds, r.variant) >= 1000) && !await ask(t('sell_rare_confirm', { n: rows.length, v: fmt(rows.reduce((s, r) => s + sellValue(r.odds, r.variant), 0)) }))) return;
+  const set = new Set(ids), rows = INV.groups.flatMap(x => x.ids.filter(id => set.has(id)).map(() => x));
+  if (rows.some(x => vOdds(x.odds, x.variant) >= 1000) && !await ask(t('sell_rare_confirm', { n: rows.length, v: fmt(rows.reduce((s, x) => s + sellValue(x.odds, x.variant), 0)) }))) return;
   const { data, error } = await sb.rpc('sell_pulls', { ids });
   if (error) return toast(errText(error), true);
   applyState(data.state);

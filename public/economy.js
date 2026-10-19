@@ -70,7 +70,7 @@ async function openPulls(n) {
   opening_busy = false;
   if (error) { sfx.deny(); return ecoSync(); }
   applyState(data.state);
-  buy(data.results.length, data.results, data.variants || null);
+  buy(data.results.length, data.results, data.variants || null, data.lucks || null);
 }
 
 async function upgradeRegen() {
@@ -107,6 +107,7 @@ function renderActions() {
       <div class="stock-count"><b id="stock-n">${eco.stock}</b><span>/${eco.max}</span></div>
       <span>${t('pulls_word')} · <span id="stock-next">${full ? t('stock_full') : t('plus1_in', { t: mmss(nextIn()) })}</span></span>
     </div>
+    ${(() => { const p = typeof loadPaused === 'function' && loadPaused(); return p ? `<button class="btn primary resume-btn" data-resume>▶ ${t('resume', { n: p.total - p.results.length })}</button>` : ''; })()}
     <div class="row-btns">
       <button class="btn primary" data-open="1" ${eco.stock ? '' : 'disabled'}>${t('open1')}</button>
       <button class="btn ghost" data-open="all" ${eco.stock > 1 ? '' : 'disabled'}>${t('open_all', { n: Math.min(eco.stock, MAX_OPEN) })}</button>
@@ -125,6 +126,7 @@ $('actions').addEventListener('click', e => {
   if (b.dataset.open) openPulls(b.dataset.open === 'all' ? 'all' : +b.dataset.open);
   else if ('up' in b.dataset) upgrade();
   else if ('regen' in b.dataset) upgradeRegen();
+  else if ('resume' in b.dataset) resumePaused();
 });
 
 // Boutons de fin d'ouverture : « Ouvrir encore » / « Tout ouvrir » selon le stock

@@ -111,7 +111,7 @@ function renderHist() {
   if (whenReady(renderHist)) return;
   const h = loadHist();
   $('hist').innerHTML = h.length
-    ? h.slice(0, 6).map(e => `<div class="h-row"><img class="jeton${vCls(e.variant)}" src="${e.img}" alt="" style="width:26px;height:26px;filter:drop-shadow(0 0 4px ${e.glow})"><div>${jnH(e.name)}${vTag(e.variant)}<small>${ago(e.ts)}</small></div><span class="muted">1/${e.odds.toLocaleString(LOCALE())}</span></div>`).join('')
+    ? h.slice(0, 6).map(e => `<div class="h-row"><img class="jeton${vCls(e.variant)}" src="${e.img}" alt="" style="width:26px;height:26px;filter:drop-shadow(0 0 4px ${e.glow})"><div>${jnH(e.name)}${vTag(e.variant)}<small>${ago(e.ts)}${e.luck > 1 ? ` · 🍀×${fmtLuck(e.luck)}` : ''}</small></div><span class="muted">1/${e.odds.toLocaleString(LOCALE())}</span></div>`).join('')
     : `<p class="empty">${t('hist_empty')}</p>`;
   renderLive();
 }

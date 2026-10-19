@@ -9,7 +9,7 @@ function questsSoon() { clearTimeout(qTimer); qTimer = setTimeout(renderQuests, 
 async function renderQuests() {
   const box = $('quests');
   if (!ACC.user) { box.hidden = true; return; }
-  const { data } = await sb.rpc('my_quests');
+  const [{ data }, { data: daily }] = await Promise.all([sb.rpc('my_quests'), sb.rpc('my_daily')]);
   if (!data) { box.hidden = true; return; }
   // une quête vient d'être terminée : petite notif
   const finished = data.quests.filter(q => q.value >= q.target && !q.claimed).map(q => q.id);
@@ -17,6 +17,10 @@ async function renderQuests() {
   QST = { list: data.quests, loaded: Date.now(), reset: data.reset_in, done: new Set(finished) };
   box.hidden = false;
   box.innerHTML = `
+    ${daily ? `<div class="daily${daily.available ? ' on' : ''}">
+      <div><b>🎁 ${t('daily_title')}</b><small class="muted">${daily.available ? t('daily_streak', { n: daily.next_streak }) : t('daily_tomorrow', { n: fmt(daily.tomorrow) })}</small></div>
+      ${daily.available ? `<button class="btn primary sm" data-daily>+${money(daily.amount)}</button>` : `<span class="q-check">✓</span>`}
+    </div>` : ''}
     <div class="q-head"><b>🎯 ${t('q_title')}</b><small class="muted" id="q-reset"></small></div>
     ${data.quests.map(q => {
       const ok = q.value >= q.target, reward = [q.coins ? money(q.coins) : '', q.item ? `${QUEST_ITEM[q.item] || q.item}${q.qty > 1 ? ' ×' + q.qty : ''}` : ''].filter(Boolean).join(' ');
@@ -31,6 +35,16 @@ async function renderQuests() {
   tick(); qTick = setInterval(tick, 1000);
 }
 $('quests').addEventListener('click', async e => {
+  const d = e.target.closest('[data-daily]');
+  if (d) { // récompense quotidienne
+    d.disabled = true;
+    const { data, error } = await sb.rpc('claim_daily');
+    if (error) { d.disabled = false; sfx.deny(); return toast(errText(error), true); }
+    const r = d.getBoundingClientRect(), coin = document.querySelector('.nav .bal img');
+    for (let i = 0; i < 4; i++) setTimeout(() => moDissolve(coin, { left: r.left + r.width * (.15 + i * .23) - 18, top: r.top - 8, width: 36, height: 36 }, .8), i * 100);
+    sfx.upgrade(); toast('🎁 ' + t('daily_got', { n: fmt(data.amount), s: data.streak }));
+    applyState(data.state); return renderQuests();
+  }
   const b = e.target.closest('[data-q]'); if (!b) return;
   b.disabled = true;
   const { data, error } = await sb.rpc('claim_quest', { p_id: b.dataset.q });
