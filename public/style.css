@@ -2210,7 +2210,7 @@ html.reduce-fx .ar-u.ready { animation: none; }
   .ar-slotf, .ar-slotm { width: 40px; height: 40px; } .ar-slotf img, .ar-slotm img { width: 38px; height: 38px; }
   .ar-bar { min-height: 0; gap: 6px; }
   .ar-bar p { font-size: 12px; line-height: 1.35; }
-  .ar-bar p small { display: none; }
+  .ar-bar p small:not(.ar-foeoff) { display: none; }
   .ar-abil small { display: none; }
   .ar-abil { padding: 8px 12px; justify-content: center; }
   .ar-bar .btn { min-width: 140px; padding: 10px 16px; }
@@ -2271,3 +2271,29 @@ html.reduce-fx .ar-u.ready { animation: none; }
 .tp-series { display: flex; gap: 6px; flex-wrap: wrap; padding: 14px 18px 0; }
 .tp-series button { padding: 8px 16px; border-radius: 12px; font-weight: 700; color: var(--muted); background: rgba(255, 255, 255, .04); border: 1px solid var(--border); }
 .tp-series button.on { color: #fff; background: linear-gradient(135deg, rgba(139, 92, 246, .35), rgba(249, 115, 22, .2)); border-color: rgba(139, 92, 246, .7); }
+/* ----- Combat : infos et transitions ----- */
+.ar-rest { position: absolute; left: 50%; top: 42%; translate: -50% -50%; z-index: 3; padding: 3px 9px; border-radius: 99px; font-size: 11px; font-weight: 800; white-space: nowrap;
+  color: #e2e8f0; background: rgba(15, 23, 42, .85); border: 1px solid rgba(148, 163, 184, .5); }
+.ar-u.tired { opacity: .55; filter: grayscale(.6); }
+.ar-recap { font-size: 12px; padding: 6px 12px; border-radius: 10px; background: rgba(255, 255, 255, .05); border: 1px solid var(--border); color: var(--text); }
+.ar-foeoff { color: #fca5a5; }
+.ar-vs { position: absolute; inset: 0; z-index: 20; display: flex; flex-direction: column; justify-content: center; align-items: center; gap: 22px; background: radial-gradient(ellipse at center, rgba(42, 31, 74, .96), rgba(8, 6, 14, .98)); }
+.ar-vsside { display: flex; flex-direction: column; align-items: center; gap: 10px; animation: vsIn .6s cubic-bezier(.2, 1.1, .4, 1) both; }
+.ar-vsside.s1 { --dx: -120vw; } .ar-vsside.s0 { --dx: 120vw; animation-delay: .1s; }
+.ar-vsside b { font-family: "Space Grotesk"; font-size: 20px; letter-spacing: .04em; }
+.ar-vsside div { display: flex; gap: 14px; }
+.ar-vsside img { width: 64px; height: 64px; image-rendering: pixelated; filter: drop-shadow(0 0 12px rgba(167, 139, 250, .7)); }
+.ar-vsmid { font-family: "Space Grotesk"; font-size: 64px; font-weight: 800; font-style: italic; background: linear-gradient(135deg, #fde68a, #f97316, #ec4899); -webkit-background-clip: text; background-clip: text; color: transparent;
+  filter: drop-shadow(0 0 24px rgba(249, 115, 22, .6)); animation: vsPop .5s .35s cubic-bezier(.2, 1.6, .4, 1) both; }
+@keyframes vsIn { from { transform: translateX(var(--dx)); opacity: 0; } to { transform: none; opacity: 1; } }
+@keyframes vsPop { from { transform: scale(3) rotate(-10deg); opacity: 0; } to { transform: none; opacity: 1; } }
+.ar-banner { position: absolute; left: 50%; top: 50%; translate: none; transform: translate(-50%, -50%); z-index: 6; pointer-events: none; padding: 10px 34px; white-space: nowrap;
+  background: linear-gradient(90deg, transparent, rgba(139, 92, 246, .85), transparent); }
+.ar-banner b { font-family: "Space Grotesk"; font-size: 30px; font-weight: 800; letter-spacing: .06em; text-transform: uppercase; color: #fff; text-shadow: 0 0 16px rgba(196, 181, 253, .9); }
+.ar-banner.rv { background: linear-gradient(90deg, transparent, rgba(249, 115, 22, .85), transparent); }
+.ar-play { position: absolute; left: 50%; top: 10px; translate: -50% 0; z-index: 5; padding: 6px 16px; border-radius: 99px; font-size: 14px; white-space: nowrap;
+  background: rgba(0, 0, 0, .6); border: 1px solid var(--el); box-shadow: 0 0 18px var(--el); animation: arCall 1.6s ease forwards; }
+.ar-lanes.suspense .ar-lane { animation: susp .55s ease-in-out; }
+@keyframes susp { 30% { transform: scale(.96); border-color: rgba(249, 115, 22, .8); } 60% { transform: scale(1.02); } }
+.ar-ghost { filter: drop-shadow(0 10px 18px rgba(0, 0, 0, .6)) drop-shadow(0 0 14px var(--c, rgba(255, 255, 255, .35))); }
+@media (max-height: 780px) { .ar-vsside img { width: 48px; height: 48px; } .ar-vsmid { font-size: 48px; } .ar-banner b { font-size: 22px; } .ar-recap { font-size: 11px; padding: 4px 10px; } }

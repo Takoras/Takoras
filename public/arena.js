@@ -56,7 +56,7 @@ const AT = {
   fr: { title: 'Combat', sub: 'Choisis 3 jetons et affronte le robot. Le classé avec les rangs arrive bientôt.', team: 'Ton équipe',
     slots: ['Jeton 1', 'Jeton 2', 'Jeton 3'], lanes: ['Gauche', 'Milieu', 'Droite'], pick: 'Choisir', train: '⚔️ Entraînement contre le robot', ranked: '🏆 Classé', soon: 'Bientôt : rangs Bronze → Légende, saisons et battle pass',
     need3: 'Choisis 3 jetons pour combattre', els: 'Éléments', elsHelp: '🔥 bat 🌿 · 🌿 bat 💧 · 💧 bat 🔥 · ✨ et 🌑 forts l’un contre l’autre (×1,3 de dégâts)',
-    how: 'Comment ça marche', howText: 'À chaque manche, vous choisissez chacun un jeton (on voit celui de l’autre), puis vous le posez <b>à gauche, au milieu ou à droite</b> sans voir où l’autre le met. <b>Même endroit</b> : les deux jetons se battent. <b>Endroits différents</b> : chacun frappe le joueur d’en face. Chaque capacité ne sert qu’<b>une fois</b> par combat. Un jeton joué se repose la manche suivante.', round: 'Manche {n}', needLogin: 'Connecte-toi pour monter ton équipe et combattre.', normal: 'Normal', stHp: 'PV', stAtk: 'Attaque', stDef: 'Défense', stCurse: 'maudit', stRust: 'rouillé (−30 % déf.)', stNoHeal: 'ne peut plus être soigné', inTeam: 'déjà dans l’équipe', version: 'Version', chooseThis: 'Prendre ce jeton', dragHint: 'Glisse ton jeton sur un endroit, ou touche un endroit puis « Poser ici ».', phaseToken: 'Choisis ton jeton pour cette manche', phaseLane: 'Tu joues <b>{a}</b>, il joue <b>{b}</b>. Où poses-tu ton jeton ?', ok: 'Valider', place: 'Poser ici', usedAb: 'déjà utilisée', tired: 'Ce jeton se repose cette manche', clash: 'Croisement !', block: 'Protégé', dazzled: 'Ébloui', recharged: 'Capacité rechargée', frozenL: 'Gelé', rounds: '{n} manches', dmgWord: 'dégâts',
+    how: 'Comment ça marche', howText: 'À chaque manche, vous choisissez chacun un jeton (on voit celui de l’autre), puis vous le posez <b>à gauche, au milieu ou à droite</b> sans voir où l’autre le met. <b>Même endroit</b> : les deux jetons se battent. <b>Endroits différents</b> : chacun frappe le joueur d’en face. Chaque capacité ne sert qu’<b>une fois</b> par combat. Un jeton joué se repose la manche suivante.', round: 'Manche {n}', rest: 'Repos', stuck: 'Bloqué', foeCant: 'En face, ne peut pas jouer : {n}', foePlays: 'Il joue', revealTxt: 'Révélation !', recapClash: '⚔️ {a} et {b} se croisent ({l}) · tu infliges {x}, tu prends {y}', recapMiss: '{a} ({la}) et {b} ({lb}) ne se croisent pas · tu infliges {x}, tu prends {y}', needLogin: 'Connecte-toi pour monter ton équipe et combattre.', normal: 'Normal', stHp: 'PV', stAtk: 'Attaque', stDef: 'Défense', stCurse: 'maudit', stRust: 'rouillé (−30 % déf.)', stNoHeal: 'ne peut plus être soigné', inTeam: 'déjà dans l’équipe', version: 'Version', chooseThis: 'Prendre ce jeton', dragHint: 'Glisse ton jeton sur un endroit, ou touche un endroit puis « Poser ici ».', phaseToken: 'Choisis ton jeton pour cette manche', phaseLane: 'Tu joues <b>{a}</b>, il joue <b>{b}</b>. Où poses-tu ton jeton ?', ok: 'Valider', place: 'Poser ici', usedAb: 'déjà utilisée', tired: 'Ce jeton se repose cette manche', clash: 'Croisement !', block: 'Protégé', dazzled: 'Ébloui', recharged: 'Capacité rechargée', frozenL: 'Gelé', rounds: '{n} manches', dmgWord: 'dégâts',
     pickTitle: 'Choisis un jeton', lvl: 'Niv.', power: 'Puissance', ability: 'Capacité', passive: 'Passif', remove: 'Retirer', none: 'Tu n’as pas encore de jeton : ouvre des pulls !',
     ready: 'PRÊT', win: 'Victoire !', lose: 'Défaite…', draw: 'Égalité', again: 'Rejouer', back: 'Retour', bot: 'Robot', you: 'Toi', mvp: 'Meilleur jeton',
     quit: 'Abandonner le combat ?', eff: 'Efficace !', weak: 'Peu efficace', dodge: 'Esquive', miss: 'Raté', crit: 'CRITIQUE', revive: 'Ressuscité !', time: 'Temps écoulé',
@@ -64,7 +64,7 @@ const AT = {
   en: { title: 'Battle', sub: 'Pick 3 tokens and fight the bot. Ranked with tiers is coming soon.', team: 'Your team',
     slots: ['Token 1', 'Token 2', 'Token 3'], lanes: ['Left', 'Middle', 'Right'], pick: 'Pick', train: '⚔️ Training vs the bot', ranked: '🏆 Ranked', soon: 'Soon: Bronze → Legend tiers, seasons and battle pass',
     need3: 'Pick 3 tokens to fight', els: 'Elements', elsHelp: '🔥 beats 🌿 · 🌿 beats 💧 · 💧 beats 🔥 · ✨ and 🌑 strong against each other (×1.3 damage)',
-    how: 'How it works', howText: 'Each round, you both pick a token (you see each other’s), then place it <b>left, middle or right</b> without seeing where the other puts theirs. <b>Same spot</b>: the two tokens fight. <b>Different spots</b>: each hits the opposing player. Each ability can only be used <b>once</b> per battle. A token that just played rests the next round.', round: 'Round {n}', needLogin: 'Log in to build your team and fight.', normal: 'Normal', stHp: 'HP', stAtk: 'Attack', stDef: 'Defense', stCurse: 'cursed', stRust: 'rusted (−30% def.)', stNoHeal: 'can no longer be healed', inTeam: 'already in the team', version: 'Version', chooseThis: 'Take this token', dragHint: 'Drag your token onto a spot, or tap a spot then “Place here”.', phaseToken: 'Pick your token for this round', phaseLane: 'You play <b>{a}</b>, they play <b>{b}</b>. Where do you place your token?', ok: 'Confirm', place: 'Place here', usedAb: 'already used', tired: 'This token is resting this round', clash: 'Clash!', block: 'Protected', dazzled: 'Dazzled', recharged: 'Ability recharged', frozenL: 'Frozen', rounds: '{n} rounds', dmgWord: 'damage',
+    how: 'How it works', howText: 'Each round, you both pick a token (you see each other’s), then place it <b>left, middle or right</b> without seeing where the other puts theirs. <b>Same spot</b>: the two tokens fight. <b>Different spots</b>: each hits the opposing player. Each ability can only be used <b>once</b> per battle. A token that just played rests the next round.', round: 'Round {n}', rest: 'Resting', stuck: 'Stuck', foeCant: 'Opponent can’t play: {n}', foePlays: 'They play', revealTxt: 'Reveal!', recapClash: '⚔️ {a} and {b} clash ({l}) · you deal {x}, you take {y}', recapMiss: '{a} ({la}) and {b} ({lb}) don’t cross · you deal {x}, you take {y}', needLogin: 'Log in to build your team and fight.', normal: 'Normal', stHp: 'HP', stAtk: 'Attack', stDef: 'Defense', stCurse: 'cursed', stRust: 'rusted (−30% def.)', stNoHeal: 'can no longer be healed', inTeam: 'already in the team', version: 'Version', chooseThis: 'Take this token', dragHint: 'Drag your token onto a spot, or tap a spot then “Place here”.', phaseToken: 'Pick your token for this round', phaseLane: 'You play <b>{a}</b>, they play <b>{b}</b>. Where do you place your token?', ok: 'Confirm', place: 'Place here', usedAb: 'already used', tired: 'This token is resting this round', clash: 'Clash!', block: 'Protected', dazzled: 'Dazzled', recharged: 'Ability recharged', frozenL: 'Frozen', rounds: '{n} rounds', dmgWord: 'damage',
     pickTitle: 'Pick a token', lvl: 'Lv.', power: 'Power', ability: 'Ability', passive: 'Passive', remove: 'Remove', none: 'You have no tokens yet: open some pulls!',
     ready: 'READY', win: 'Victory!', lose: 'Defeat…', draw: 'Draw', again: 'Play again', back: 'Back', bot: 'Bot', you: 'You', mvp: 'Best token',
     quit: 'Forfeit the battle?', eff: 'Effective!', weak: 'Not effective', dodge: 'Dodge', miss: 'Miss', crit: 'CRIT', revive: 'Revived!', time: 'Time’s up',
@@ -290,7 +290,33 @@ function startFight(teams, seed, names) {
   };
   o.querySelector('.ar-x').onclick = async () => { if (FIGHT.st.over || await ask(at('quit'))) closeFight(); };
   o.querySelector('[data-help]').onclick = () => toast(at('howText'));
+  FIGHT.recap = '';
   refresh();
+  intro(names, teams);
+}
+// Écran d'entrée : les deux équipes arrivent de chaque côté, « VS » au milieu
+async function intro(names, teams) {
+  FIGHT.busy = true;
+  const o = $('arena'), v = document.createElement('div'); v.className = 'ar-vs';
+  const row = (side) => `<div class="ar-vsside s${side}"><b>${esc(names[side])}</b><div>${FIGHT.st.teams[side].map(u => `<img class="${vCls(u.variant)}" src="${texOf(jetonOf(u.name))}" alt="">`).join('')}</div></div>`;
+  v.innerHTML = `${row(1)}<div class="ar-vsmid">VS</div>${row(0)}`;
+  o.appendChild(v);
+  sfx.reveal?.(2500);
+  document.querySelectorAll('.ar-u').forEach((c, k) => anim(c, [{ opacity: 0, transform: `translateY(${c.closest('.foe') ? -30 : 30}px) scale(.8)` }, { opacity: 1, transform: 'none' }], { duration: 420, delay: 900 + (k % 3) * 90, easing: 'cubic-bezier(.2, 1.2, .4, 1)', fill: 'backwards' }));
+  await sleep(1400);
+  anim(v, [{ opacity: 1 }, { opacity: 0, transform: 'scale(1.08)' }], { duration: 300, fill: 'forwards' });
+  await sleep(300); v.remove();
+  FIGHT.busy = false;
+  roundBanner();
+}
+// « Manche 3 » qui traverse les endroits
+function roundBanner() {
+  const L = $('ar-lanes'); if (!L || FIGHT.st.over) return;
+  const b = document.createElement('div'); b.className = 'ar-banner';
+  b.innerHTML = `<b>${at('round', { n: FIGHT.st.round })}</b>`;
+  L.appendChild(b);
+  anim(b, [{ opacity: 0, transform: 'translate(-50%, -50%) translateX(-60px) skewX(-12deg)' }, { opacity: 1, transform: 'translate(-50%, -50%) skewX(-12deg)', offset: .25 }, { opacity: 1, transform: 'translate(-50%, -50%) skewX(-12deg)', offset: .7 }, { opacity: 0, transform: 'translate(-50%, -50%) translateX(60px) skewX(-12deg)' }], { duration: 1100, easing: 'ease-out' });
+  setTimeout(() => b.remove(), 1150);
 }
 function closeFight() {
   const o = $('arena'); if (!o) return;
@@ -311,7 +337,7 @@ function unitHTML(u) {
 const unitEl = r => $('ar-row' + r.side)?.children[r.i];
 // Redessine tout l'état (PV, jetons jouables, manche…)
 function refresh() {
-  const st = FIGHT.st, me = new Set(st.over ? [] : CB.playable(st, 0));
+  const st = FIGHT.st, can = [0, 1].map(sd => new Set(st.over ? [] : CB.playable(st, sd)));
   $('ar-round').textContent = at('round', { n: Math.min(st.over ? st.round - 1 : st.round, CB.MAX_ROUNDS) });
   document.querySelectorAll('.ar-pl').forEach((p, k) => {
     const side = k === 0 ? 1 : 0;
@@ -325,7 +351,10 @@ function refresh() {
     c.querySelector('.ar-hp em').textContent = u.hp;
     c.classList.toggle('ko', !u.alive);
     c.classList.toggle('used', u.used);
-    const tired = u.alive && u.side === 0 && !me.has(u.i);
+    const tired = u.alive && !can[u.side].has(u.i) && FIGHT.phase !== 'resolve';
+    const why = !tired ? '' : u.stuck ? '🔗 ' + at('stuck') : '💤 ' + at('rest');
+    let tag = c.querySelector('.ar-rest'); if (!tag) { tag = document.createElement('span'); tag.className = 'ar-rest'; c.appendChild(tag); }
+    tag.textContent = why; tag.hidden = !why;
     c.classList.toggle('tired', tired);
     c.classList.toggle('sel', u.side === 0 && FIGHT.sel === u.i);
     c.classList.toggle('foepick', u.side === 1 && FIGHT.foePick === u.i && FIGHT.phase === 'lane');
@@ -344,7 +373,8 @@ function drawBar() {
   const st = FIGHT.st, bar = $('ar-bar'); if (!bar) return;
   if (FIGHT.phase === 'resolve' || st.over) { bar.innerHTML = ''; return; }
   if (FIGHT.phase === 'token') {
-    bar.innerHTML = `<p>${at('phaseToken')}</p><button class="btn primary" data-ok ${FIGHT.sel == null ? 'disabled' : ''}>${at('ok')}</button>`;
+    const off = st.teams[1].filter(u => u.alive && !CB.playable(st, 1).includes(u.i)).map(u => jn(u.name));
+    bar.innerHTML = `${FIGHT.recap ? `<div class="ar-recap">${FIGHT.recap}</div>` : ''}<p>${at('phaseToken')}${off.length ? `<br><small class="ar-foeoff">${at('foeCant', { n: off.join(', ') })}</small>` : ''}</p><button class="btn primary" data-ok ${FIGHT.sel == null ? 'disabled' : ''}>${at('ok')}</button>`;
     return;
   }
   const me = st.teams[0][FIGHT.sel], foe = st.teams[1][FIGHT.foePick], [an, ad] = skillsOf(me.name);
@@ -405,9 +435,15 @@ async function fightConfirm() {
     FIGHT.foePick = CB.aiToken(st, 1);
     FIGHT.phase = 'lane'; FIGHT.lane = null; FIGHT.abil = false;
     sfx.reveal?.(300);
+    refresh();
+    // le jeton choisi en face se retourne, celui qu'on a choisi se soulève
     const c = unitEl({ side: 1, i: FIGHT.foePick });
-    anim(c, [{ transform: 'scale(1)' }, { transform: 'scale(1.15)' }, { transform: 'scale(1)' }], { duration: 420, easing: 'cubic-bezier(.2, 1.4, .4, 1)' });
-    return refresh();
+    anim(c, [{ transform: 'rotateY(0)' }, { transform: 'rotateY(90deg) scale(1.1)', offset: .45 }, { transform: 'rotateY(0) scale(1.08)' }, { transform: 'none' }], { duration: 650, easing: 'ease-in-out' });
+    anim(unitEl({ side: 0, i: FIGHT.sel }), [{ transform: 'none' }, { transform: 'translateY(-10px) scale(1.06)' }, { transform: 'translateY(-6px)' }], { duration: 420, easing: 'cubic-bezier(.2, 1.4, .4, 1)' });
+    const pill = document.createElement('div'); pill.className = 'ar-play'; pill.style.setProperty('--el', ELS[st.teams[1][FIGHT.foePick].el].col);
+    pill.innerHTML = `${at('foePlays')} <b>${jnH(st.teams[1][FIGHT.foePick].name)}</b>`;
+    $('ar-lanes').appendChild(pill); setTimeout(() => pill.remove(), 1600);
+    return;
   }
   if (FIGHT.phase === 'lane' && FIGHT.lane != null) {
     FIGHT.phase = 'resolve'; refresh();
@@ -418,6 +454,7 @@ async function fightConfirm() {
     if (st.over) return showResult();
     FIGHT.phase = 'token';
     refresh();
+    roundBanner();
   }
 }
 
@@ -458,6 +495,28 @@ function flyImg(src, cls, from, toEl, ms = 520) {
   // si l'onglet est en arrière-plan, les animations s'arrêtent : on n'attend jamais plus que prévu
   return Promise.race([a.finished.catch(() => {}), new Promise(r => setTimeout(r, ms + 150))]).then(() => g.remove());
 }
+// Charge vers une barre de vie : élan en arrière, vol en arc avec traînée, impact, retour à sa place
+async function dashTo(slot, target, col) {
+  const img = slot.querySelector('img'); if (!img || reducedFx()) return;
+  const a = img.getBoundingClientRect(), b = target.getBoundingClientRect();
+  const up = b.top < a.top ? -1 : 1;
+  await new Promise(r => { const k = img.animate([{ transform: 'none' }, { transform: `translateY(${-up * 10}px) scale(.9)` }], { duration: 160, easing: 'ease-out', fill: 'forwards' }); setTimeout(r, 170); k.finished.catch(() => {}); });
+  img.style.visibility = 'hidden'; img.getAnimations().forEach(x => x.cancel());
+  const g = document.createElement('img'); g.src = img.src; g.className = 'ar-ghost ' + img.className; const w = a.width;
+  g.style.cssText = `width:${w}px;height:${w}px;left:0;top:0;--c:${col}`;
+  document.body.appendChild(g);
+  const x0 = a.left, y0 = a.top, x1 = b.left + b.width / 2 - w / 2, y1 = b.top + b.height / 2 - w / 2, mx = (x0 + x1) / 2 + (x1 > x0 ? 40 : -40), my = (y0 + y1) / 2;
+  const fly = (from, to, ms) => new Promise(r => { g.animate([from, to], { duration: ms, easing: 'cubic-bezier(.5, 0, .9, .5)', fill: 'forwards' }); setTimeout(r, ms); });
+  // traînée
+  const trail = setInterval(() => { const R = g.getBoundingClientRect(); const t = document.createElement('i'); t.className = 'ar-spark'; t.style.background = col; document.body.appendChild(t); t.animate([{ transform: `translate(${R.left + R.width / 2}px, ${R.top + R.height / 2}px) scale(1.4)`, opacity: .9 }, { transform: `translate(${R.left + R.width / 2}px, ${R.top + R.height / 2}px) scale(.2)`, opacity: 0 }], { duration: 380 }).finished.then(() => t.remove(), () => t.remove()); }, 30);
+  await fly({ transform: `translate(${x0}px, ${y0}px) rotate(0) scale(1)` }, { transform: `translate(${mx}px, ${my}px) rotate(${x1 > x0 ? 180 : -180}deg) scale(1.15)` }, 170);
+  await fly({ transform: `translate(${mx}px, ${my}px) rotate(${x1 > x0 ? 180 : -180}deg) scale(1.15)` }, { transform: `translate(${x1}px, ${y1}px) rotate(${x1 > x0 ? 360 : -360}deg) scale(.9)` }, 170);
+  clearInterval(trail);
+  sparks(target, col, 14);
+  await fly({ transform: `translate(${x1}px, ${y1}px) scale(.9)`, opacity: 1 }, { transform: `translate(${x0}px, ${y0}px) scale(1)`, opacity: .2 }, 260);
+  g.remove(); img.style.visibility = '';
+  img.animate([{ transform: 'scale(1.25)', opacity: .4 }, { transform: 'none', opacity: 1 }], { duration: 200 });
+}
 async function placeIn(lane, side, u, abil) {
   const slot = slotOf(lane, side); if (!slot) return;
   const card = unitEl(u), img = card?.querySelector('.ar-uimg img');
@@ -478,12 +537,25 @@ async function returnHome(picks) {
   }));
   document.querySelectorAll('.ar-u.out').forEach(c => c.classList.remove('out'));
 }
+function roundRecap(ev) {
+  const st = FIGHT.st, rv = ev.find(e => e.t === 'reveal'); if (!rv) return '';
+  const [a, b] = rv.picks, me = st.teams[0][a.i], foe = st.teams[1][b.i];
+  const clash = ev.find(e => e.t === 'clash');
+  const dealt = sd => ev.filter(e => (e.t === 'hit' || e.t === 'face') && e.from?.side === sd).reduce((x, e) => x + e.d, 0);
+  const lanes = atList('lanes');
+  return clash ? at('recapClash', { a: jn(me.name), b: jn(foe.name), l: lanes[a.lane], x: dealt(0), y: dealt(1) })
+    : at('recapMiss', { a: jn(me.name), la: lanes[a.lane], b: jn(foe.name), lb: lanes[b.lane], x: dealt(0), y: dealt(1) });
+}
 async function playRound(ev) {
   document.querySelectorAll('.ar-slotf, .ar-slotm').forEach(s => { s.innerHTML = ''; });
+  FIGHT.recap = roundRecap(ev);
   let picks = null;
   for (const e of ev) {
     if (e.t === 'reveal') {
       picks = e.picks;
+      const L = $('ar-lanes'), rv = document.createElement('div'); rv.className = 'ar-banner rv'; rv.innerHTML = `<b>${at('revealTxt')}</b>`; L.appendChild(rv);
+      anim(rv, [{ opacity: 0, transform: 'translate(-50%, -50%) scale(1.6)' }, { opacity: 1, transform: 'translate(-50%, -50%) scale(1)', offset: .3 }, { opacity: 0, transform: 'translate(-50%, -50%) scale(.9)' }], { duration: 700 });
+      L.classList.add('suspense'); await sleep(550); L.classList.remove('suspense'); rv.remove();
       sfx.whooshOut?.();
       await Promise.all(e.picks.map((p, side) => placeIn(p.lane, side, FIGHT.st.teams[side][p.i], p.abil)));
       FIGHT.dropFrom = null;
@@ -520,7 +592,7 @@ async function playRound(ev) {
       const p = lifeEl(e.side);
       // le jeton fonce sur la barre de vie du joueur d'en face puis revient
       const pk = e.from && picks?.[e.from.side], sl = pk && slotOf(pk.lane, e.from.side);
-      if (sl?.firstElementChild) { const a = sl.getBoundingClientRect(), b = p.getBoundingClientRect(); await anim(sl, [{ transform: 'none' }, { transform: `translate(${(b.left + b.width / 2) - (a.left + a.width / 2)}px, ${(b.top + b.height / 2) - (a.top + a.height / 2)}px) scale(.8)`, offset: .45 }, { transform: 'none' }], { duration: 520, easing: 'cubic-bezier(.5, 0, .3, 1)' }); await sleep(520); }
+      if (sl?.firstElementChild) await dashTo(sl, p, ELS[unitOf(e.from).el].col);
       if (e.from) FIGHT.dmg[e.from.side][e.from.i] = (FIGHT.dmg[e.from.side][e.from.i] || 0) + e.d;
       floater(p, (e.crit ? '💥 ' : '') + '−' + e.d + ' ❤️', e.crit ? 'crit' : 'dmg');
       anim(p, [{ transform: 'translateX(-6px)' }, { transform: 'translateX(6px)' }, { transform: 'none' }], { duration: 260 });
@@ -557,6 +629,12 @@ function showResult() {
     <div class="ask-btns"><button class="btn ghost" data-back>${at('back')}</button><button class="btn primary" data-again>${at('again')}</button></div>
   </div>`;
   o.appendChild(box);
+  anim(box.querySelector('.ar-endc'), [{ opacity: 0, transform: 'scale(.6) translateY(30px)' }, { opacity: 1, transform: 'scale(1.04)', offset: .7 }, { transform: 'none' }], { duration: 520, easing: 'cubic-bezier(.2, 1.2, .4, 1)' });
+  if (mine && !reducedFx()) for (let k = 0; k < 40; k++) setTimeout(() => {
+    const c = document.createElement('i'); c.className = 'ar-spark'; c.style.background = ['#fde68a', '#a78bfa', '#4ade80', '#f472b6', '#38bdf8'][k % 5];
+    document.body.appendChild(c); const x = Math.random() * innerWidth;
+    c.animate([{ transform: `translate(${x}px, -10px) rotate(0)` }, { transform: `translate(${x + (Math.random() - .5) * 120}px, ${innerHeight + 10}px) rotate(${Math.random() * 720}deg)` }], { duration: 1600 + Math.random() * 900, easing: 'ease-in' }).finished.then(() => c.remove(), () => c.remove());
+  }, k * 30);
   mine ? sfx.upgrade?.() : sfx.deny?.();
   box.onclick = e => {
     if (e.target.closest('[data-back]')) closeFight();
