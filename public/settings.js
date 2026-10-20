@@ -128,7 +128,7 @@ function sparkStyle(color, px = 2 + Math.floor(Math.random() * 2)) {
 const JETON_EN = { 'Givre': 'Frost', 'Rouillé': 'Rusty', 'Carmin': 'Crimson', 'Zénith': 'Zenith' };
 const jn = name => (SETTINGS.lang === 'en' && JETON_EN[name]) || name;
 // Pareil en HTML : le jeton ultime « Takoras » (1/1 000 000) a sa police angélique qui « glitche » doucement
-const jnH = name => name === 'Takoras' ? '<span class="goth">Takoras</span>' : String(jn(name)).replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' })[c]);
+const jnH = name => String(jn(name)).replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' })[c]);
 
 function t(key, vars = {}) {
   let s = (I18N[SETTINGS.lang] || I18N.fr)[key] ?? I18N.fr[key] ?? key;
