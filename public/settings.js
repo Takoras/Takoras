@@ -22,7 +22,7 @@ addEventListener('load', () => setTimeout(() => {
   (function f(t) { ts.push(t); if (t - t0 < 3000) requestAnimationFrame(f); else {
     const d = ts.slice(1).map((x, i) => x - ts[i]).sort((a, b) => a - b), med = d[d.length >> 1] || 16, slow = d.filter(x => x > 40).length / (d.length || 1);
     if (document.hidden) return;
-    const low = med > 24 || slow > .25;
+    const low = med > 34 && slow > .4; // vraiment lent (moins de ~30 images/s la plupart du temps) : sinon on garde tous les effets
     if (low !== LOWFX && (low || !(navigator.hardwareConcurrency <= 2))) { LOWFX = low; try { localStorage.setItem('takoras-lowfx', low ? '1' : '0'); } catch {} applyFx(); }
   } })(t0);
 }, 1500));
@@ -193,3 +193,23 @@ const vOdds = (odds, v) => odds * (VARIANTS[v]?.odds || 1); // rareté totale (j
 
 // Chance affichée joliment : ×2, ×1,3, ×6,3
 const fmtLuck = l => (+l).toLocaleString(LOCALE(), { maximumFractionDigits: 2 });
+
+// Safari (Mac) et tous les navigateurs d'iPhone / iPad (moteur WebKit) n'appliquent pas le filtre SVG « dessin » des jetons :
+// on le remplace par un petit tremblement image par image (même rythme), qui marche partout.
+const WEBKIT_ONLY = (() => {
+  const ua = navigator.userAgent;
+  const ios = /iPhone|iPad|iPod/.test(ua) || (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
+  return ios || (/AppleWebKit/.test(ua) && !/Chrome|Chromium|Edg|OPR|Android/.test(ua)) || /[?&]webkit\b/.test(location.search);
+})();
+if (WEBKIT_ONLY) {
+  const j = ['translate: 0 0; rotate: 0deg', 'translate: .7px -.6px; rotate: -.8deg', 'translate: -.6px .7px; rotate: .7deg'];
+  const kf = (name, f) => `@keyframes ${name} { 0% { filter: ${f}; ${j[0]}; } 33% { filter: ${f}; ${j[1]}; } 66% { filter: ${f}; ${j[2]}; } }`;
+  const css = [
+    kf('doodle', 'var(--df)'),
+    kf('vGold', 'sepia(1) saturate(2.6) hue-rotate(-12deg) brightness(1.12) drop-shadow(0 0 9px rgba(250, 204, 21, .85))'),
+    kf('vCeleste', 'grayscale(.55) brightness(1.35) sepia(.15) hue-rotate(195deg) saturate(1.4) drop-shadow(0 0 7px #fff) drop-shadow(0 0 18px rgba(199, 210, 254, .85))'),
+    kf('vOmbre', 'grayscale(.6) brightness(.55) sepia(.45) hue-rotate(225deg) saturate(1.7) contrast(1.3) drop-shadow(0 0 2px #c084fc) drop-shadow(0 0 11px rgba(124, 58, 237, .9))'),
+  ].join('\n');
+  // ajouté à la fin du <head> une fois la page prête, pour passer après style.css
+  addEventListener('DOMContentLoaded', () => document.head.appendChild(Object.assign(document.createElement('style'), { id: 'webkit-doodle', textContent: css })));
+}

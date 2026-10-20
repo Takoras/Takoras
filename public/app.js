@@ -128,7 +128,7 @@ function renderLive() { drawLive(); fetchLive(); }
 function drawLive() {
   if (whenReady(drawLive)) return;
   const mine = typeof ACC !== 'undefined' && ACC.user;
-  const local = mine ? [] : loadLocalHist().slice(0, 12);
+  const local = mine ? [] : loadLocalHist().filter(e => vOdds(e.odds, e.variant) >= 100).slice(0, 12); // seulement les beaux tirages, comme le serveur
   const h = [...liveRows, ...local].sort((a, b) => b.ts - a.ts).slice(0, 20);
   const item = e => {
     const me = !e.pseudo || (mine && e.pseudo === ACC.pseudo), who = me ? t('you') : esc2(e.pseudo);

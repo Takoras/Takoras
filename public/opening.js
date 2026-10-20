@@ -123,6 +123,7 @@ function startOpening() {
   $('op-odds').textContent = '1/' + c.shown.toLocaleString(LOCALE());
   stopBg();
   opening.classList.remove('hold', 'rare', 'revealed', 'recap', 'spinning', 'mythic', 'god', 'cinema', 'v-gold', 'v-celeste', 'v-ombre');
+  opening.querySelectorAll('.v-pop').forEach(x => x.remove()); // l'annonce de variante ne reste jamais sur le jeton suivant
   setTier(c.shown);
   opCoin.className = 'op-coin';
   opCoin.innerHTML = `<div class="zoom"><div class="tilt3d"><div class="spin">${coin3D(MYSTERE, 'Jeton mystère')}</div>${'<b class="tw"></b>'.repeat(7)}</div></div>`;
@@ -397,9 +398,10 @@ function reveal(restored, quiet = false) {
 function variantFx(v) {
   const d = document.createElement('div');
   d.className = 'v-pop v-' + v;
-  d.innerHTML = `<b>${t('v_' + v)}</b><small>1/${fmt(VARIANTS[v].odds)} · ×${VARIANTS[v].mult}</small>`;
+  d.innerHTML = `<i></i><b>${t('v_' + v)}</b><small>1/${fmt(VARIANTS[v].odds)}</small>`;
+  opening.querySelectorAll('.v-pop').forEach(x => x.remove());
   opening.appendChild(d);
-  setTimeout(() => d.remove(), 2200);
+  setTimeout(() => d.remove(), 1800);
   flash(.35, 500); burst(v === 'gold' ? 24 : 36); shake(v === 'gold' ? .5 : 1);
   sfx.upgrade(); if (v !== 'gold') setTimeout(() => sfx.reveal(20000), 120);
 }
