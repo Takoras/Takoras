@@ -38,6 +38,7 @@ function applyState(st) {
   eco.step = (st.step || 180) * 1000;
   eco.last = Date.now() - (eco.step / 1000 - st.next_in) * 1000;
   eco.regen = st.regen || 180;
+  renderStreak(+st.streak || 0, !!st.streak_today);
   eco.potions = st.potions || []; eco.luck = +st.luck || 1; eco.fast_left = st.fast_left || 0; eco.synced = Date.now();
   ACC.isAdmin = !!st.admin;
   // compte bêta (badge) et testeur (menu de test, tirages de test) tant que la bêta est ouverte
@@ -167,3 +168,18 @@ select = function (i) { selectBase(i); renderActions(); };
 
 regen();
 render();
+
+// Flamme 🔥 : nombre de jours de suite où tu as récupéré ton bonus du jour. Grise tant que celui d'aujourd'hui n'est pas pris
+// (elle s'éteint si tu rates un jour). Un clic emmène au bonus du jour.
+function renderStreak(n, today) {
+  const b = $('streak'); if (!b) return;
+  b.hidden = !ACC.user;
+  b.innerHTML = `<span>🔥</span><b>${n}</b>`;
+  b.classList.toggle('cold', !today);
+  b.title = today ? t('streak_ok', { n }) : t('streak_todo');
+}
+$('streak')?.addEventListener('click', () => {
+  sfx.click();
+  if (location.hash && location.hash !== '#') location.hash = '#';
+  setTimeout(() => document.querySelector('.daily')?.scrollIntoView({ behavior: 'smooth', block: 'center' }), 350);
+});

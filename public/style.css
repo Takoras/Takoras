@@ -2084,3 +2084,21 @@ html.reduce-fx .daily.on { animation: none; }
 .ar-mvp img { width: 48px; height: 48px; image-rendering: pixelated; } .ar-mvp div { display: flex; flex-direction: column; text-align: left; }
 .ar-endc .ask-btns { width: 100%; } .ar-endc .ask-btns .btn { flex: 1; }
 html.reduce-fx .ar-u.ready { animation: none; }
+/* Flamme 🔥 (jours de suite) à côté des pièces */
+.streak { display: flex; align-items: center; gap: 4px; height: 36px; padding: 0 11px; border-radius: 99px; background: rgba(249, 115, 22, .14); border: 1px solid rgba(249, 115, 22, .45);
+  font-family: "Space Grotesk"; font-weight: 700; color: #fdba74; }
+.streak span { font-size: 15px; filter: drop-shadow(0 0 6px rgba(249, 115, 22, .8)); }
+.streak.cold { background: rgba(255, 255, 255, .05); border-color: var(--border); color: var(--muted); }
+.streak.cold span { filter: grayscale(1) opacity(.6); }
+.prof-streak { font-size: 15px; font-weight: 700; color: #fdba74; white-space: nowrap; }
+@media (max-width: 760px) { .streak { height: 32px; padding: 0 8px; } }
+/* Téléphone : le bouton « Donner un avis » revient en bas à gauche, en petit rond au-dessus de la barre d'onglets */
+@media (max-width: 760px) {
+  .fb-btn { display: flex !important; left: 12px !important; bottom: calc(var(--tabh) + 12px) !important; width: 44px; height: 44px; padding: 0 !important; justify-content: center; border-radius: 50%; }
+  .fb-btn .fb-txt { display: none; }
+}
+@media (max-width: 760px) {
+  /* barre du haut : la cloche des annonces est déjà dans le menu Plus (avec sa pastille) → plus de place pour la flamme */
+  #open-notifs { display: none !important; }
+  .nav-in { gap: 6px !important; }
+}
