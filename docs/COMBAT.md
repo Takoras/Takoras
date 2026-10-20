@@ -1,9 +1,17 @@
 # Combat Takoras — le plan (décidé le 20/10/2026)
 
-## Les décisions
-- **Semi-automatique, rapide** (30 s à 1 min) : les jetons attaquent tout seuls ; le joueur déclenche la **capacité** de
-  chaque jeton quand sa jauge d'énergie est pleine (en touchant sa carte). Pensé pour le téléphone.
-- **Équipe de 3 jetons.**
+## Les décisions (mises à jour le 20/10/2026 : combat « 3 endroits », idée du propriétaire)
+- **Combat de bluff « 3 endroits »** (remplace le semi-auto, jugé trop passif) :
+  - chaque joueur a **3 jetons** et **60 PV** ;
+  - à chaque manche, les deux joueurs choisissent **en même temps** un jeton → les deux jetons sont révélés ;
+  - puis ils choisissent **en même temps** où le poser (gauche / milieu / droite), sans voir où l'autre le met,
+    et s'ils activent sa **capacité** (1 fois par jeton et par combat) → on révèle ;
+  - **même endroit** : les deux jetons se battent (dégâts selon stats, élément, passifs, capacités) ; les PV des jetons restent, K.O. = plus jouable ;
+  - **endroits différents** : chaque jeton frappe directement le joueur d'en face ;
+  - un jeton joué **se repose** la manche suivante (sauf s'il est le seul debout) ;
+  - perdu si on tombe à 0 PV ou sans jeton debout ; 20 manches max (sinon le plus de PV gagne).
+- **Choix de l'équipe** : il suffit de posséder un jeton (peu importe le nombre d'exemplaires) ; on choisit sa version
+  normale ou une mutation possédée (Doré +5 %, Céleste +10 %, Ombre +15 % de stats).
 - **5 éléments** : 🔥 Feu > 🌿 Plante > 💧 Eau > 🔥 Feu, et ✨ Lumière ⇄ 🌑 Ténèbres (forts l'un contre l'autre ; « Ténèbres » pour ne pas confondre avec la variante Ombre).
   Avantage = dégâts ×1,5 · désavantage = ×0,75.
 - **Chaque jeton a une capacité (active) et un passif** (voir le tableau).
@@ -22,6 +30,8 @@
 3. Battle pass (gratuit + Premium), XP des combats et des pulls, récompenses.
 
 ## Éléments, capacités et passifs
+
+> Les textes à jour (mode « 3 endroits ») sont dans `public/arena.js` (`SKILLS`) et leurs effets dans `public/combat-engine.js` (`ABIL`). Le tableau ci-dessous donne l'élément de chaque jeton.
 
 | Jeton | Élément | Capacité (active) | Passif |
 |---|---|---|---|
@@ -44,7 +54,5 @@
 | Takoras 1/1 000 000 | ✨ Lumière | **Jugement** : dégâts à tous les ennemis + bouclier à toute l'équipe | **Couronne** : +15 % à toutes les stats de l'équipe |
 
 ## Règles techniques
-- Le moteur (`public/combat-engine.js`) est **déterministe** : même équipes + même graine + mêmes moments où les
-  capacités sont lancées = même combat. Le serveur pourra donc rejouer et vérifier un combat classé (étape 2).
-- Un combat avance par « tics » de 100 ms. Chaque jeton remplit sa jauge d'attaque selon sa vitesse ; l'énergie de la
-  capacité monte avec le temps, les coups donnés et reçus.
+- Le moteur (`public/combat-engine.js`) est **déterministe** : mêmes équipes + même graine + mêmes choix = même combat.
+  Pour le classé (étape 2), chaque joueur envoie ses choix au serveur, qui résout la manche : impossible de tricher.

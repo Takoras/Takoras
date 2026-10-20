@@ -1,12 +1,18 @@
-// Moteur de combat semi-automatique (règles seulement, aucun affichage). Voir docs/COMBAT.md.
-// Déterministe : mêmes équipes + même graine + mêmes capacités lancées aux mêmes tics = même combat
-// (le serveur pourra rejouer un combat classé pour le vérifier).
+// Moteur de combat « 3 endroits » (règles seulement, aucun affichage). Voir docs/COMBAT.md.
 //
-// Un combat avance par tics de 100 ms. Chaque jeton remplit sa jauge d'attaque selon sa vitesse et attaque tout seul
-// le premier ennemi encore debout. Son énergie monte avec le temps et les coups ; à 100, le joueur peut lancer sa capacité.
+// Chaque joueur a une équipe de 3 jetons et des PV. À chaque manche :
+//   1. les deux joueurs choisissent EN MÊME TEMPS le jeton qu'ils vont jouer → les deux jetons sont révélés ;
+//   2. les deux joueurs choisissent EN MÊME TEMPS où le poser (gauche, milieu, droite), en cachant l'endroit,
+//      et s'ils activent sa capacité (1 fois par jeton et par combat) → on révèle.
+//   - Même endroit : les deux jetons se tapent (éléments, passifs, capacités). Les PV des jetons restent d'une manche
+//     à l'autre ; un jeton K.O. ne peut plus être joué.
+//   - Endroits différents : chaque jeton frappe directement le joueur d'en face.
+// Le premier joueur à 0 PV (ou sans jeton debout) perd. Un jeton joué ne peut pas être rejoué à la manche suivante
+// (sauf si c'est le seul encore debout).
+// Déterministe : mêmes équipes + même graine + mêmes choix = même combat (le serveur pourra arbitrer le classé).
 
 const CB = (() => {
-  const TICK = 100, MAX_TICKS = 900; // 90 s maximum
+  const LIFE = 60, MAX_ROUNDS = 20, LANES = 3;
   // ---------- Éléments
   const EL = {
     'Mobu': 'water', 'Pikko': 'plant', 'Rouillé': 'fire', 'Givre': 'water', 'Soléo': 'fire', 'Azura': 'water', 'Carmin': 'fire',
@@ -15,8 +21,7 @@ const CB = (() => {
   };
   const BEATS = { fire: 'plant', plant: 'water', water: 'fire' };
   const elOf = name => EL[name] || 'water';
-  // ×1,3 si avantage, ×0,8 si désavantage
-  function elMult(a, b) {
+  function elMult(a, b) { // ×1,3 si avantage, ×0,8 si désavantage
     if ((a === 'light' && b === 'shadow') || (a === 'shadow' && b === 'light')) return 1.3;
     if (BEATS[a] === b) return 1.3;
     if (BEATS[b] === a) return .8;
@@ -24,7 +29,7 @@ const CB = (() => {
   }
   const VBONUS = { gold: 1.05, celeste: 1.1, ombre: 1.15 };
 
-  // ---------- Stats (niveau 1, sans variante) : un peu plus fort quand c'est rare, les niveaux comptent autant
+  // ---------- Stats (affichées dans les fiches) : un peu plus fort quand c'est rare ; niveaux et mutations comptent
   const strHash = s => [...String(s ?? '')].reduce((h, c) => (h * 31 + c.charCodeAt(0)) >>> 0, 7);
   function stats(name, odds, lvl = 1, variant = '') {
     const r = Math.log10(Math.max(1, odds)) / 6, h = strHash(name);
@@ -34,7 +39,7 @@ const CB = (() => {
       hp: Math.round((1150 + 600 * r + 70 * v(0)) * m),
       atk: Math.round((50 + 28 * r + 4 * v(1)) * m),
       def: Math.round((16 + 14 * r + 3 * v(2)) * m),
-      spd: Math.round(98 + 22 * r + 8 * v(3)), // la vitesse ne monte pas avec le niveau
+      spd: Math.round(98 + 22 * r + 8 * v(3)),
     };
   }
   const power = s => Math.round(s.hp / 4 + s.atk * 4 + s.def * 6 + s.spd * 2);
@@ -42,173 +47,183 @@ const CB = (() => {
   // ---------- Hasard déterministe
   function rng(seed) { let a = seed >>> 0; return () => { a = (a + 0x6D2B79F5) >>> 0; let t = a; t = Math.imul(t ^ (t >>> 15), t | 1); t ^= t + Math.imul(t ^ (t >>> 7), t | 61); return ((t ^ (t >>> 14)) >>> 0) / 4294967296; }; }
 
-  // ---------- Création du combat
-  // teams : [[{ name, odds, lvl, variant }×3], [...]]
+  // ---------- Création. teams : [[{ name, odds, lvl, variant }×3], [...]]
   function create(teams, seed = 1) {
-    const st = { tick: 0, over: false, winner: null, rnd: rng(seed), ev: [], teams: [] };
+    const st = { round: 1, over: false, winner: null, rnd: rng(seed), ev: [], life: [LIFE, LIFE], guard: [0, 0], frozen: [-1, -1], last: [-1, -1],
+      dazzle: [false, false], stars: [0, 0], curseFace: [0, 0], teams: [] };
     st.teams = teams.map((team, side) => {
-      const crown = team.some(j => j.name === 'Takoras') ? 1.15 : 1; // passif Couronne : +15 % à toute l'équipe
+      const crown = team.some(j => j.name === 'Takoras') ? 1.15 : 1; // passif Couronne
       return team.map((j, i) => {
         const s = stats(j.name, j.odds, j.lvl, j.variant);
-        const hp = Math.round(s.hp * crown);
-        return { side, i, name: j.name, odds: j.odds, lvl: j.lvl || 1, variant: j.variant || '', el: elOf(j.name),
-          max: hp, hp, atk: Math.round(s.atk * crown), def: Math.round(s.def * crown), spd: s.spd * (j.name === 'Nyx' ? 1.2 : 1),
-          shield: 0, energy: j.name === 'Soléo' ? 50 : 0, atb: 20 * i, alive: true,
-          st: { slow: 0, freeze: 0, blind: 0, evade: 0, curse: 0, curseDmg: 0, rust: 0, wither: 0, x2: false, fury: 0 }, revived: false, pollen: 0 };
+        const hp = Math.round(s.hp / 10 * crown);
+        return { side, i, name: j.name, odds: j.odds, lvl: j.lvl || 1, variant: j.variant || '', el: elOf(j.name), max: hp, hp,
+          atk: s.atk * crown, def: s.def * crown, alive: true, used: false, plays: 0, rust: false, noHeal: false, curse: 0, stuck: false };
       });
     });
     return st;
   }
-
-  const allies = (st, u) => st.teams[u.side].filter(x => x.alive);
-  const enemies = (st, u) => st.teams[1 - u.side].filter(x => x.alive);
-  const front = (st, u) => enemies(st, u)[0];
   const ref = u => ({ side: u.side, i: u.i });
-  const emit = (st, e) => st.ev.push({ ...e, tick: st.tick });
+  const emit = (st, e) => st.ev.push({ ...e, round: st.round });
 
-  // ---------- Dégâts, soins, boucliers
-  function hit(st, from, to, mult, o = {}) {
-    if (!to.alive) return 0;
-    if (!o.ability && from.st.blind > 0) { from.st.blind--; emit(st, { t: 'miss', from: ref(from), to: ref(to) }); return 0; }
-    if (!o.true && (to.st.evade > 0 || (to.name === 'Koi' && st.rnd() < .1))) { emit(st, { t: 'dodge', from: ref(from), to: ref(to) }); return 0; }
-    let atk = from.atk * (1 + .05 * from.st.fury);
-    if (from.name === 'Carmin') atk *= 1 + .4 * (1 - from.hp / from.max); // Rage
-    const def = to.def * (to.st.rust > 0 ? .7 : 1);
-    const em = elMult(from.el, to.el);
-    let crit = o.crit || st.rnd() < .12;
-    let d = atk * mult * (o.true ? 1 : 100 / (100 + def)) * em * (.85 + st.rnd() * .3);
-    if (crit) d *= from.name === 'Lumis' ? 2.25 : 1.5;
-    if (from.name === 'Givre' && (to.st.slow > 0 || to.st.freeze > 0)) d *= 1.25; // Froid
-    if (st.teams[to.side].some(x => x.alive && x.name === 'Zénith')) d *= .9;       // Halo
-    d = Math.max(1, Math.round(d));
-    let sh = 0;
-    if (!o.true && to.shield) { sh = Math.min(to.shield, d); to.shield -= sh; d -= sh; }
-    to.hp = Math.max(0, to.hp - d);
-    to.energy = Math.min(100, to.energy + 4);
-    emit(st, { t: 'hit', from: ref(from), to: ref(to), d, sh, crit, em, ability: !!o.ability, hp: to.hp, shield: to.shield });
-    if (crit) st.teams[from.side].forEach(a => { if (a.alive && a.name === 'Astra') a.energy = Math.min(100, a.energy + 12); }); // Constellation
-    if (from.name === 'Oblivion') to.st.wither = 30;                                   // Vide
-    if (to.name === 'Néphéris' && d > 0 && from.alive && !o.reflect) {                  // Racines
-      const back = Math.max(1, Math.round(d * .2)); from.hp = Math.max(0, from.hp - back);
-      emit(st, { t: 'hit', from: ref(to), to: ref(from), d: back, sh: 0, crit: false, em: 1, reflect: true, hp: from.hp, shield: from.shield });
-      if (from.hp <= 0) ko(st, from);
-    }
-    if (to.hp <= 0) ko(st, to);
-    return d + sh;
+  // Jetons jouables cette manche : debout, pas joué à la manche d'avant (sauf s'il est le seul), pas « collé » par Mobu
+  function playable(st, side) {
+    const alive = st.teams[side].filter(u => u.alive);
+    const ok = alive.filter(u => u.i !== st.last[side] && !u.stuck);
+    return (ok.length ? ok : alive).map(u => u.i);
   }
-  function heal(st, u, n) {
-    if (!u.alive) return;
-    const h = Math.min(Math.round(n * (u.st.wither > 0 ? .5 : 1)), u.max - u.hp);
-    if (h <= 0) return;
+  // Endroits possibles (Givre peut geler un endroit pour l'adversaire)
+  const lanes = (st, side) => [0, 1, 2].filter(l => l !== st.frozen[side]);
+
+  // ---------- Dégâts
+  function clashDmg(st, u, v, x) { // croisement : u tape v
+    let d = u.atk * elMult(u.el, v.el) * 100 / (100 + v.def * (v.rust ? .7 : 1));
+    if (u.name === 'Carmin') d *= 1 + .5 * (1 - u.hp / u.max);                  // Rage
+    if (u.name === 'Givre' && v.hp < v.max) d *= 1.25;                          // Froid
+    if (u.name === 'Soléo' && x.lane === 1) d *= 1.2;                            // Aube (au milieu)
+    if (u.name === 'Kraïos') d *= 1 + .1 * Math.min(5, u.plays - 1);            // Fureur
+    d *= 1 + .06 * st.stars[u.side];                                             // Constellation (Astra)
+    return d * (.9 + st.rnd() * .2);
+  }
+  function faceDmg(st, u) { // coup direct sur le joueur d'en face
+    let d = u.atk / 6;
+    if (u.name === 'Azura') d += 3;                                              // Courant
+    if (u.name === 'Lumis') d *= 1.5;                                            // Éclat
+    if (u.name === 'Kraïos') d *= 1 + .1 * Math.min(5, u.plays - 1);
+    return d * (1 + .06 * st.stars[u.side]);
+  }
+  function hurtToken(st, from, v, d, o = {}) {
+    if (!v.alive) return 0;
+    if (!o.true && v.guarded) { emit(st, { t: 'block', u: ref(v) }); return 0; }
+    if (!o.true && v.name === 'Koi' && st.rnd() < .2) { emit(st, { t: 'dodge', u: ref(v) }); return 0; } // Chance
+    d = Math.max(1, Math.round(d));
+    v.hp = Math.max(0, v.hp - d);
+    emit(st, { t: 'hit', from: from && ref(from), to: ref(v), d, em: from ? elMult(from.el, v.el) : 1, hp: v.hp, crit: !!o.crit });
+    if (from && v.name === 'Néphéris' && from.alive && !o.reflect) hurtToken(st, v, from, d * .25, { reflect: true, true: true }); // Racines
+    if (from && from.name === 'Oblivion') v.noHeal = true;                       // Vide
+    if (v.hp <= 0) ko(st, v);
+    return d;
+  }
+  function hurtPlayer(st, side, d, from, o = {}) {
+    let x = d;
+    if (st.teams[side].some(u => u.alive && u.name === 'Zénith')) x *= .8;      // Halo
+    x = Math.max(1, Math.round(x));
+    if (st.guard[side]) { const g = Math.min(st.guard[side], x); st.guard[side] -= g; x -= g; emit(st, { t: 'guard', side, n: g, left: st.guard[side] }); }
+    if (x <= 0) return 0;
+    st.life[side] = Math.max(0, st.life[side] - x);
+    emit(st, { t: 'face', side, from: from && ref(from), d: x, life: st.life[side], crit: !!o.crit });
+    return x;
+  }
+  function healToken(st, u, n) {
+    if (!u.alive || u.noHeal) return;
+    const h = Math.min(Math.round(n), u.max - u.hp); if (h <= 0) return;
     u.hp += h; emit(st, { t: 'heal', u: ref(u), n: h, hp: u.hp });
   }
-  function shieldOf(st, u, n) { if (!u.alive) return; u.shield += Math.round(n); emit(st, { t: 'shield', u: ref(u), n: Math.round(n), shield: u.shield }); }
-  function status(st, u, k, v) { u.st[k] = Math.max(u.st[k] || 0, v); emit(st, { t: 'status', u: ref(u), k }); }
   function ko(st, u) {
     if (!u.alive) return;
-    u.alive = false; u.hp = 0; u.shield = 0;
+    u.alive = false; u.hp = 0;
     emit(st, { t: 'ko', u: ref(u) });
-    if (u.name === 'Rouillé') enemies(st, u).forEach(e => hit(st, u, e, 1.5, { true: true, ability: true })); // Ferraille
-    checkEnd(st);
-  }
-  function checkEnd(st) {
-    if (st.over) return;
-    const dead = st.teams.map(t => !t.some(u => u.alive));
-    if (!dead[0] && !dead[1]) return;
-    st.over = true; st.winner = dead[0] && dead[1] ? -1 : dead[0] ? 1 : 0;
-    emit(st, { t: 'end', winner: st.winner });
+    if (u.name === 'Rouillé') hurtPlayer(st, 1 - u.side, 5, u);                  // Ferraille
   }
 
-  // ---------- Capacités (actives)
+  // ---------- Capacités (activées en posant le jeton, 1 fois par jeton et par combat)
+  // x = { me, foe (jeton adverse joué), crossed (même endroit ?), lane, dealt }
   const ABIL = {
-    'Mobu': (st, u) => { const a = allies(st, u).sort((x, y) => x.hp / x.max - y.hp / y.max)[0]; shieldOf(st, a, a.max * .2); },
-    'Pikko': (st, u) => { for (let k = 0; k < 3; k++) { const e = enemies(st, u); if (!e.length) break; hit(st, u, e[Math.floor(st.rnd() * e.length)], .7, { ability: true }); } },
-    'Rouillé': (st, u) => { const e = front(st, u); status(st, e, 'rust', 60); hit(st, u, e, 1, { ability: true }); },
-    'Givre': (st, u) => { const e = front(st, u); status(st, e, 'freeze', 20); hit(st, u, e, .8, { ability: true }); },
-    'Soléo': (st, u) => allies(st, u).forEach(a => heal(st, a, a.max * .15)),
-    'Azura': (st, u) => enemies(st, u).forEach(e => hit(st, u, e, 1, { ability: true })),
-    'Carmin': (st, u) => { const d = hit(st, u, front(st, u), 2.2, { ability: true }); heal(st, u, d * .5); },
-    'Vyolis': (st, u) => allies(st, u).forEach(a => shieldOf(st, a, u.max * .12)),
-    'Lumis': (st, u) => { const e = front(st, u); status(st, e, 'blind', 2); hit(st, u, e, .8, { ability: true }); },
-    'Nyx': (st, u) => { status(st, u, 'evade', 30); u.st.x2 = true; },
-    'Astra': (st, u) => { const e = enemies(st, u).sort((x, y) => x.hp - y.hp)[0]; hit(st, u, e, 2, { ability: true, crit: true }); },
-    'Kraïos': (st, u) => enemies(st, u).forEach(e => { hit(st, u, e, .9, { ability: true }); if (e.alive) status(st, e, 'slow', 30); }),
-    'Koi': (st, u) => { allies(st, u).forEach(a => { if (a !== u) a.energy = Math.min(100, a.energy + 50); }); hit(st, u, front(st, u), 1, { ability: true }); },
-    'Néphéris': (st, u) => { const e = front(st, u); e.st.curse = 60; e.st.curseDmg = u.atk * 3 / 60; emit(st, { t: 'status', u: ref(e), k: 'curse' }); },
-    'Zénith': (st, u) => {
-      const dead = st.teams[u.side].find(a => !a.alive && !a.revived);
-      if (dead) { dead.alive = true; dead.revived = true; dead.hp = Math.round(dead.max * .4); dead.atb = 0; emit(st, { t: 'revive', u: ref(dead), hp: dead.hp }); }
-      else { const a = allies(st, u).sort((x, y) => x.hp / x.max - y.hp / y.max)[0]; heal(st, a, a.max * .35); }
-    },
-    'Oblivion': (st, u) => hit(st, u, front(st, u), 3, { ability: true, true: true }),
-    'Takoras': (st, u) => { enemies(st, u).forEach(e => hit(st, u, e, 1.4, { ability: true })); allies(st, u).forEach(a => shieldOf(st, a, a.max * .1)); },
+    'Mobu': { pre: x => { x.me.guarded = true; } },                                                   // Bulle : aucun dégât ce tour
+    'Pikko': { post: (st, x) => hurtPlayer(st, 1 - x.me.side, 6, x.me) },                            // Épines : 6 dégâts au joueur quoi qu'il arrive
+    'Rouillé': { post: (st, x) => { if (x.crossed && x.foe.alive) { x.foe.rust = true; emit(st, { t: 'status', u: ref(x.foe), k: 'rust' }); } } },
+    'Givre': { post: (st, x) => { st.frozen[1 - x.me.side] = x.lane; emit(st, { t: 'frozen', side: 1 - x.me.side, lane: x.lane }); } }, // Gel : endroit interdit à l'adversaire au tour suivant
+    'Soléo': { post: (st, x) => st.teams[x.me.side].forEach(u => healToken(st, u, u.max * .3)) },
+    'Azura': { pre: x => { x.force = true; } },                                                      // Raz-de-marée : touche le jeton adverse où qu'il soit
+    'Carmin': { mult: 2, post: (st, x) => { if (x.dealt && x.crossed) healToken(st, x.me, x.dealt / 2); } },
+    'Vyolis': { pre: (x, st) => { st.guard[x.me.side] += 8; emit(st, { t: 'guardup', side: x.me.side, n: 8 }); } },
+    'Lumis': { post: (st, x) => { st.dazzle[1 - x.me.side] = true; } },                              // Éblouir : le prochain jeton adverse ne fait rien
+    'Nyx': { pre: x => { x.slip = true; } },                                                         // Ombre : passe à travers et tape le joueur ×2
+    'Astra': { crit: true },                                                                         // Étoile filante : coup critique ×2
+    'Kraïos': { both: true },                                                                        // Tempête : tape le jeton croisé ET le joueur
+    'Koi': { post: (st, x) => { const a = st.teams[x.me.side].find(u => u.alive && u.used && u !== x.me); if (a) { a.used = false; emit(st, { t: 'recharge', u: ref(a) }); } } },
+    'Néphéris': { post: (st, x) => { if (x.crossed && x.foe.alive) { x.foe.curse = 3; emit(st, { t: 'status', u: ref(x.foe), k: 'curse' }); } else st.curseFace[1 - x.me.side] = 3; } },
+    'Zénith': { post: (st, x) => { const d = st.teams[x.me.side].find(u => !u.alive); if (d) { d.alive = true; d.hp = Math.round(d.max * .5); emit(st, { t: 'revive', u: ref(d), hp: d.hp }); } else st.teams[x.me.side].forEach(u => healToken(st, u, u.max * .2)); } },
+    'Oblivion': { post: (st, x) => { if (x.crossed && x.foe.alive && x.foe.name !== 'Takoras') hurtToken(st, x.me, x.foe, x.foe.hp, { true: true }); else if (!x.crossed) hurtPlayer(st, 1 - x.me.side, 10, x.me); } },
+    'Takoras': { pre: (x, st) => { x.force = true; st.guard[x.me.side] += 6; emit(st, { t: 'guardup', side: x.me.side, n: 6 }); } }, // Jugement
   };
-  const canCast = u => u.alive && u.energy >= 100 && u.st.freeze <= 0;
-  function cast(st, u) {
-    if (!canCast(u) || st.over) return false;
-    u.energy = 0;
-    emit(st, { t: 'abil', u: ref(u), name: u.name });
-    (ABIL[u.name] || ABIL.Mobu)(st, u);
-    st.teams[u.side].forEach(a => { if (a !== u && a.alive && a.name === 'Azura') a.energy = Math.min(100, a.energy + 15); }); // Courant
-    checkEnd(st);
-    return true;
-  }
 
-  // ---------- Un tic de combat. inputs : [{ side, i }] = capacités lancées par les joueurs à ce tic
-  function step(st, inputs = []) {
+  // ---------- Résoudre une manche. picks : [{ i, lane, abil }, { i, lane, abil }] (joueur 0, joueur 1)
+  function resolve(st, picks) {
     if (st.over) return [];
     st.ev = [];
-    st.tick++;
-    inputs.forEach(({ side, i }) => { const u = st.teams[side]?.[i]; if (u) cast(st, u); });
-    for (const side of [0, 1]) for (const u of st.teams[side]) {
-      if (!u.alive || st.over) continue;
-      const s = u.st;
-      for (const k of ['slow', 'freeze', 'evade', 'rust', 'wither']) if (s[k] > 0) s[k]--;
-      if (s.curse > 0) { s.curse--; const d = Math.max(1, Math.round(s.curseDmg)); u.hp = Math.max(0, u.hp - d); emit(st, { t: 'dot', u: ref(u), d, hp: u.hp }); if (u.hp <= 0) { ko(st, u); continue; } }
-      u.energy = Math.min(100, u.energy + .25); // +2,5 par seconde
-      if (u.name === 'Pikko' && ++u.pollen >= 50) { u.pollen = 0; allies(st, u).forEach(a => heal(st, a, a.max * .02)); } // Pollen
-      if (s.freeze > 0) continue;
-      const interval = 1300 * 100 / (u.spd * (s.slow > 0 ? .75 : 1));
-      u.atb += 100 * TICK / interval;
-      if (u.atb >= 100) {
-        u.atb -= 100;
-        const e = front(st, u); if (!e) continue;
-        const mult = s.x2 ? 2 : 1; s.x2 = false;
-        emit(st, { t: 'atk', from: ref(u), to: ref(e) });
-        hit(st, u, e, mult);
-        if (u.alive) u.energy = Math.min(100, u.energy + 7);
-        if (u.name === 'Mobu' && e.alive) status(st, e, 'slow', 20);                        // Collant
-        if (u.name === 'Kraïos') s.fury = Math.min(10, s.fury + 1);                        // Fureur
-        if (u.name === 'Vyolis' && st.rnd() < .2 && !st.over) { const e2 = front(st, u); if (e2) hit(st, u, e2, 1); } // Écho
-      }
+    st.teams.forEach(t => t.forEach(u => { u.guarded = false; u.stuck = false; }));
+    const frozenNow = [...st.frozen]; st.frozen = [-1, -1];
+    const c = picks.map((p, side) => {
+      const me = st.teams[side][p.i];
+      const lane = frozenNow[side] === p.lane ? (p.lane + 1) % LANES : p.lane; // jamais sur un endroit gelé
+      const abil = p.abil && !me.used && ABIL[me.name] ? ABIL[me.name] : null;
+      if (abil) me.used = true;
+      me.plays++;
+      return { me, lane, abil, side };
+    });
+    c[0].foe = c[1].me; c[1].foe = c[0].me;
+    st.last = [c[0].me.i, c[1].me.i];
+    emit(st, { t: 'reveal', picks: c.map(x => ({ i: x.me.i, lane: x.lane, abil: !!x.abil })) });
+    c.forEach(x => { if (x.abil) { emit(st, { t: 'abil', u: ref(x.me) }); x.abil.pre?.(x, st); } });
+    const forced = c[0].force || c[1].force, crossed = c[0].lane === c[1].lane || forced;
+    c.forEach(x => { x.crossed = crossed; });
+    const dazz = st.dazzle; st.dazzle = [false, false];
+    if (crossed) {
+      emit(st, { t: 'clash', lane: forced ? -1 : c[0].lane });
+      const dmg = c.map((x, side) => {
+        if (dazz[side]) { emit(st, { t: 'dazzled', u: ref(x.me) }); return 0; }
+        return clashDmg(st, x.me, x.foe, x) * (x.abil?.mult || 1) * (x.abil?.crit ? 2 : 1);
+      });
+      c.forEach((x, side) => {
+        if (x.slip) { if (!dazz[side]) x.dealt = hurtPlayer(st, 1 - side, faceDmg(st, x.me) * 2, x.me); return; } // Nyx passe à travers
+        if (c[1 - side].slip) return;                                                                        // … et n'est pas touché
+        if (dmg[side] > 0) x.dealt = hurtToken(st, x.me, x.foe, dmg[side], { crit: !!x.abil?.crit });
+        if (x.abil?.both && !dazz[side]) hurtPlayer(st, 1 - side, faceDmg(st, x.me), x.me);
+        if (x.me.name === 'Vyolis' && x.foe.alive && dmg[side] > 0 && st.rnd() < .25) hurtToken(st, x.me, x.foe, dmg[side] * .5); // Écho
+      });
+      c.forEach(x => {
+        if (x.me.name === 'Mobu' && x.me.alive && x.foe.alive) x.foe.stuck = true;                         // Collant
+        if (x.me.name === 'Astra' && !x.foe.alive) st.stars[x.side] = Math.min(5, st.stars[x.side] + 1);  // Constellation
+      });
+    } else {
+      c.forEach((x, side) => {
+        if (dazz[side]) { emit(st, { t: 'dazzled', u: ref(x.me) }); return; }
+        x.dealt = hurtPlayer(st, 1 - side, faceDmg(st, x.me) * (x.abil?.crit ? 2 : 1), x.me, { crit: !!x.abil?.crit });
+      });
     }
-    if (!st.over && st.tick >= MAX_TICKS) {
-      // temps écoulé : l'équipe à qui il reste le plus de PV (en %) gagne
-      const pct = st.teams.map(t => t.reduce((s, u) => s + u.hp / u.max, 0));
-      st.over = true; st.winner = pct[0] === pct[1] ? -1 : pct[0] > pct[1] ? 0 : 1;
-      emit(st, { t: 'end', winner: st.winner, timeout: true });
+    c.forEach(x => x.abil?.post?.(st, x));
+    // fin de manche : malédictions, Pollen
+    st.teams.forEach(team => team.forEach(u => {
+      if (u.alive && u.curse > 0) { u.curse--; hurtToken(st, null, u, u.max * .12, { true: true }); }
+      if (u.alive && u.name === 'Pikko' && !c.some(x => x.me === u)) team.forEach(a => healToken(st, a, 5));
+    }));
+    st.curseFace.forEach((n, side) => { if (n > 0) { st.curseFace[side]--; hurtPlayer(st, side, 3, null); } });
+    const out = [0, 1].map(s => st.life[s] <= 0 || !st.teams[s].some(u => u.alive));
+    st.round++;
+    if (out[0] || out[1] || st.round > MAX_ROUNDS) {
+      st.over = true;
+      // égalité de PV : celui dont les jetons ont le plus de PV restants (en %) gagne
+      const hpPct = s => st.teams[s].reduce((a, u) => a + u.hp / u.max, 0);
+      const byLife = st.life[0] !== st.life[1] ? (st.life[0] > st.life[1] ? 0 : 1) : Math.abs(hpPct(0) - hpPct(1)) < .001 ? -1 : hpPct(0) > hpPct(1) ? 0 : 1;
+      st.winner = out[0] && out[1] ? byLife : out[0] ? 1 : out[1] ? 0 : byLife;
+      emit(st, { t: 'end', winner: st.winner });
     }
     return st.ev;
   }
 
-  // ---------- IA (robot, et plus tard l'adversaire absent) : lance ses capacités au bon moment
-  const SUPPORT = { 'Mobu': .8, 'Soléo': .75, 'Vyolis': .85, 'Zénith': .6 };
-  function ai(st, side) {
-    const out = [];
-    for (const u of st.teams[side]) {
-      if (!canCast(u)) continue;
-      const need = SUPPORT[u.name];
-      if (need) {
-        const team = st.teams[side];
-        const low = team.some(a => a.alive && a.hp / a.max < need) || (u.name === 'Zénith' && team.some(a => !a.alive && !a.revived));
-        if (!low && u.energy < 100) continue;
-        if (!low && st.rnd() > .02) continue; // attend un peu qu'un allié soit blessé
-      } else if (st.rnd() > .25) continue;     // petit temps de réaction
-      out.push({ side, i: u.i });
-    }
-    return out;
+  // ---------- Robot
+  function aiToken(st, side) { // choisit un jeton sans voir celui d'en face
+    const opts = playable(st, side).map(i => st.teams[side][i]);
+    const w = opts.map(u => (u.hp / u.max) * (1 + u.atk / 100) + st.rnd() * .6);
+    return opts[w.indexOf(Math.max(...w))].i;
+  }
+  function aiLane(st, side, myI) { // choisit l'endroit (au hasard : c'est du bluff) et s'il lance sa capacité
+    const me = st.teams[side][myI], L = lanes(st, side);
+    const late = st.round >= 3 || st.life[side] < 25 || me.hp < me.max * .6;
+    const zenithWait = me.name === 'Zénith' && !st.teams[side].some(u => !u.alive) && st.round < 6;
+    return { i: myI, lane: L[Math.floor(st.rnd() * L.length)], abil: !me.used && late && !zenithWait && st.rnd() < .5 };
   }
 
-  return { TICK, MAX_TICKS, EL, elOf, elMult, stats, power, create, step, ai, canCast };
+  return { LIFE, MAX_ROUNDS, LANES, EL, elOf, elMult, stats, power, create, resolve, playable, lanes, aiToken, aiLane };
 })();
 if (typeof window !== 'undefined') window.CB = CB;
