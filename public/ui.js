@@ -12,11 +12,12 @@ const TIER_NAMES = [[60, 'r_common'], [1000, 'r_rare'], [10000, 'r_epic'], [1000
 const tierKey = odds => TIER_NAMES.find(([m]) => odds < m)[1];
 const strHash = s => [...String(s ?? "")].reduce((h, c) => (h * 31 + c.charCodeAt(0)) >>> 0, 7);
 // Stats de combat : les rares sont un peu plus forts, mais pas trop (la capacité et le pile ou face comptent plus)
-// Mêmes stats que le combat (combat-engine.js), au niveau 1 sans variante. Barres à 100 % ≈ un Takoras niveau 1.
-const STAT_MAX = { s_hp: 1850, s_atk: 82, s_def: 32, s_spd: 125 };
-function statsOf(name, odds) {
-  const c = CB.stats(name, odds);
-  return { s_hp: c.hp, s_atk: c.atk, s_def: c.def, s_spd: c.spd, power: CB.power(c) };
+// Mêmes stats que le combat (combat-engine.js), avec le niveau du jeton (fusion de doublons) et la mutation.
+// PV à l'échelle du combat (comme dans la fiche du combat). Barres à 100 % ≈ un Takoras niveau 10.
+const STAT_MAX = { s_hp: 330, s_atk: 140, s_def: 55, s_spd: 125 };
+function statsOf(name, odds, variant = '', lvl = typeof lvlOf === 'function' ? lvlOf(name) : 1) {
+  const c = CB.stats(name, odds, lvl, variant);
+  return { s_hp: Math.round(c.hp / 10), s_atk: c.atk, s_def: c.def, s_spd: c.spd, power: CB.power(c), lvl };
 }
 const jetonOf = name => SERIES.Takoras.find(j => j.name === name) || { name, odds: 1, glow: '#ffffff' };
 
@@ -174,7 +175,7 @@ new MutationObserver(hydrateBeta).observe(document.body, { childList: true, subt
 // ---------- Aperçu d'un jeton (fenêtre) : grand jeton qui penche, rareté, valeur, puissance et stats
 const jm = $('jeton-modal');
 function openJeton(name, extra = '', variant = '', locked = false) {
-  const j = jetonOf(name), s = statsOf(j.name, j.odds);
+  const j = jetonOf(name), s = statsOf(j.name, j.odds, variant);
   jm.style.setProperty('--g', hexRGB(j.glow));
   $('jm-card').onclick = null; $('jm-card').oninput = null; $('jm-card').onchange = null;
   $('jm-card').innerHTML = `
@@ -182,7 +183,7 @@ function openJeton(name, extra = '', variant = '', locked = false) {
     <div class="jm-coin"${texScale(j) !== 1 ? ` style="scale:${texScale(j)}"` : ''}><img class="${vCls(variant)}${locked ? ' sil' : ''}" src="${texOf(j)}" alt="">${locked ? '' : `<i class="glare${variant ? ' hv-' + variant : ''}" style="-webkit-mask-image:url(${texOf(j)});mask-image:url(${texOf(j)})"></i>`}</div>
     <div class="jm-info">
       <span class="tier t-${tierKey(j.odds)}">${t(tierKey(j.odds))}</span>
-      <h2>${jnH(j.name)} ${vTag(variant)}</h2>
+      <h2>${jnH(j.name)} ${vTag(variant)}${s.lvl > 1 ? ` <small class="jm-lvl">${SETTINGS.lang === 'en' ? 'Lv.' : 'Niv.'} ${s.lvl}</small>` : ''}</h2>
       <div class="jm-odds">1/${fmt(j.odds)}${variant ? ` <small class="muted">× ${t('v_' + variant)} 1/${fmt(VARIANTS[variant].odds)} = 1/${fmt(vOdds(j.odds, variant))}</small>` : ''}</div>
       <div class="jm-power">${t('power')} <b>${fmt(s.power)}</b></div>
       <div class="op-stats">${['s_hp', 's_atk', 's_def', 's_spd'].map(k => `<div class="stat"><span class="muted">${t(k)}</span><div class="bar"><i style="width:${Math.min(100, s[k] / STAT_MAX[k] * 100)}%"></i></div><b>${s[k]}</b></div>`).join('')}</div>

@@ -197,7 +197,7 @@ function drawInventory(mode = '') {
         <b>${jnH(j.name)}</b>
         <small><span class="t-${tierKey(j.odds)}">1/${fmt(vOdds(j.odds, v))}</span>${seen ? ' · ×0' : ''}</small>
       </div>`;
-    const q = INV.sel.get(x.key) || 0, locked = !x.free.length, s = statsOf(j.name, j.odds);
+    const q = INV.sel.get(x.key) || 0, locked = !x.free.length, s = statsOf(j.name, j.odds, INV.vtab);
     return `<div class="ic${q ? ' sel' : ''}${locked ? ' locked' : ''}" data-n="${esc(j.name)}" data-key="${esc(x.key)}" data-sig="${n}|${locked}|${x.deck || 0}|${x.shown}" style="--g:${hexRGB(j.glow)}">
       <span class="bc-num">#${String(num).padStart(2, '0')}</span>
       <span class="ic-n">×${n}</span>
