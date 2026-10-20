@@ -56,7 +56,7 @@ const AT = {
   fr: { title: 'Combat', sub: 'Choisis 3 jetons et affronte le robot. Le classé avec les rangs arrive bientôt.', team: 'Ton équipe',
     slots: ['Jeton 1', 'Jeton 2', 'Jeton 3'], lanes: ['Gauche', 'Milieu', 'Droite'], pick: 'Choisir', train: '⚔️ Entraînement contre le robot', ranked: '🏆 Classé', soon: 'Bientôt : rangs Bronze → Légende, saisons et battle pass',
     need3: 'Choisis 3 jetons pour combattre', els: 'Éléments', elsHelp: '🔥 bat 🌿 · 🌿 bat 💧 · 💧 bat 🔥 · ✨ et 🌑 forts l’un contre l’autre (×1,3 de dégâts)',
-    how: 'Comment ça marche', howText: 'À chaque manche, vous choisissez chacun un jeton (on voit celui de l’autre), puis vous le posez <b>à gauche, au milieu ou à droite</b> sans voir où l’autre le met. <b>Même endroit</b> : les deux jetons se battent. <b>Endroits différents</b> : chacun frappe le joueur d’en face. Chaque capacité ne sert qu’<b>une fois</b> par combat. Un jeton joué se repose la manche suivante.', round: 'Manche {n}', normal: 'Normal', phaseToken: 'Choisis ton jeton pour cette manche', phaseLane: 'Tu joues <b>{a}</b>, il joue <b>{b}</b>. Où poses-tu ton jeton ?', ok: 'Valider', place: 'Poser ici', usedAb: 'déjà utilisée', tired: 'Ce jeton se repose cette manche', clash: 'Croisement !', block: 'Protégé', dazzled: 'Ébloui', recharged: 'Capacité rechargée', frozenL: 'Gelé', rounds: '{n} manches', dmgWord: 'dégâts',
+    how: 'Comment ça marche', howText: 'À chaque manche, vous choisissez chacun un jeton (on voit celui de l’autre), puis vous le posez <b>à gauche, au milieu ou à droite</b> sans voir où l’autre le met. <b>Même endroit</b> : les deux jetons se battent. <b>Endroits différents</b> : chacun frappe le joueur d’en face. Chaque capacité ne sert qu’<b>une fois</b> par combat. Un jeton joué se repose la manche suivante.', round: 'Manche {n}', normal: 'Normal', stHp: 'PV', stAtk: 'Attaque', stDef: 'Défense', stCurse: 'maudit', stRust: 'rouillé (−30 % déf.)', stNoHeal: 'ne peut plus être soigné', inTeam: 'déjà dans l’équipe', version: 'Version', chooseThis: 'Prendre ce jeton', dragHint: 'Glisse ton jeton sur un endroit, ou touche un endroit puis « Poser ici ».', phaseToken: 'Choisis ton jeton pour cette manche', phaseLane: 'Tu joues <b>{a}</b>, il joue <b>{b}</b>. Où poses-tu ton jeton ?', ok: 'Valider', place: 'Poser ici', usedAb: 'déjà utilisée', tired: 'Ce jeton se repose cette manche', clash: 'Croisement !', block: 'Protégé', dazzled: 'Ébloui', recharged: 'Capacité rechargée', frozenL: 'Gelé', rounds: '{n} manches', dmgWord: 'dégâts',
     pickTitle: 'Choisis un jeton', lvl: 'Niv.', power: 'Puissance', ability: 'Capacité', passive: 'Passif', remove: 'Retirer', none: 'Tu n’as pas encore de jeton : ouvre des pulls !',
     ready: 'PRÊT', win: 'Victoire !', lose: 'Défaite…', draw: 'Égalité', again: 'Rejouer', back: 'Retour', bot: 'Robot', you: 'Toi', mvp: 'Meilleur jeton',
     quit: 'Abandonner le combat ?', eff: 'Efficace !', weak: 'Peu efficace', dodge: 'Esquive', miss: 'Raté', crit: 'CRITIQUE', revive: 'Ressuscité !', time: 'Temps écoulé',
@@ -64,7 +64,7 @@ const AT = {
   en: { title: 'Battle', sub: 'Pick 3 tokens and fight the bot. Ranked with tiers is coming soon.', team: 'Your team',
     slots: ['Token 1', 'Token 2', 'Token 3'], lanes: ['Left', 'Middle', 'Right'], pick: 'Pick', train: '⚔️ Training vs the bot', ranked: '🏆 Ranked', soon: 'Soon: Bronze → Legend tiers, seasons and battle pass',
     need3: 'Pick 3 tokens to fight', els: 'Elements', elsHelp: '🔥 beats 🌿 · 🌿 beats 💧 · 💧 beats 🔥 · ✨ and 🌑 strong against each other (×1.3 damage)',
-    how: 'How it works', howText: 'Each round, you both pick a token (you see each other’s), then place it <b>left, middle or right</b> without seeing where the other puts theirs. <b>Same spot</b>: the two tokens fight. <b>Different spots</b>: each hits the opposing player. Each ability can only be used <b>once</b> per battle. A token that just played rests the next round.', round: 'Round {n}', normal: 'Normal', phaseToken: 'Pick your token for this round', phaseLane: 'You play <b>{a}</b>, they play <b>{b}</b>. Where do you place your token?', ok: 'Confirm', place: 'Place here', usedAb: 'already used', tired: 'This token is resting this round', clash: 'Clash!', block: 'Protected', dazzled: 'Dazzled', recharged: 'Ability recharged', frozenL: 'Frozen', rounds: '{n} rounds', dmgWord: 'damage',
+    how: 'How it works', howText: 'Each round, you both pick a token (you see each other’s), then place it <b>left, middle or right</b> without seeing where the other puts theirs. <b>Same spot</b>: the two tokens fight. <b>Different spots</b>: each hits the opposing player. Each ability can only be used <b>once</b> per battle. A token that just played rests the next round.', round: 'Round {n}', normal: 'Normal', stHp: 'HP', stAtk: 'Attack', stDef: 'Defense', stCurse: 'cursed', stRust: 'rusted (−30% def.)', stNoHeal: 'can no longer be healed', inTeam: 'already in the team', version: 'Version', chooseThis: 'Take this token', dragHint: 'Drag your token onto a spot, or tap a spot then “Place here”.', phaseToken: 'Pick your token for this round', phaseLane: 'You play <b>{a}</b>, they play <b>{b}</b>. Where do you place your token?', ok: 'Confirm', place: 'Place here', usedAb: 'already used', tired: 'This token is resting this round', clash: 'Clash!', block: 'Protected', dazzled: 'Dazzled', recharged: 'Ability recharged', frozenL: 'Frozen', rounds: '{n} rounds', dmgWord: 'damage',
     pickTitle: 'Pick a token', lvl: 'Lv.', power: 'Power', ability: 'Ability', passive: 'Passive', remove: 'Remove', none: 'You have no tokens yet: open some pulls!',
     ready: 'READY', win: 'Victory!', lose: 'Defeat…', draw: 'Draw', again: 'Play again', back: 'Back', bot: 'Bot', you: 'You', mvp: 'Best token',
     quit: 'Forfeit the battle?', eff: 'Effective!', weak: 'Not effective', dodge: 'Dodge', miss: 'Miss', crit: 'CRIT', revive: 'Revived!', time: 'Time’s up',
@@ -122,47 +122,91 @@ function drawCombat() {
   page.querySelector('.ar-train').onclick = () => startTraining();
 }
 
-// ---------- Choix d'un jeton pour une case : la meilleure variante possédée de chaque jeton
-// Peu importe combien d'exemplaires tu as : il suffit d'avoir le jeton. Pour chaque jeton, tu choisis la version
-// (normale ou une mutation que tu possèdes : Doré +5 %, Céleste +10 %, Ombre +15 % de stats).
+// ---------- Fiche complète d'un jeton (équipe, choix, combat) : stats, élément, capacité, passif, état en combat
+const SHEET_MAX = { hp: 330, atk: 140, def: 55 };
+function tokenSheetHTML(o) {
+  const j = jetonOf(o.name), el = CB.elOf(o.name), lvl = o.lvl || lvlOf(o.name), s = CB.stats(o.name, j.odds, lvl, o.variant || ''), [an, ad, pn, pd] = skillsOf(o.name), u = o.unit;
+  const hp = u ? u.hp : Math.round(s.hp / 10), hpMax = u ? u.max : Math.round(s.hp / 10), atk = Math.round(u ? u.atk : s.atk), def = Math.round(u ? u.def : s.def);
+  const bar = (label, v, max, txt) => `<div class="tk-bar"><span>${label}</span><div><i style="width:${Math.min(100, v / max * 100)}%"></i></div><b>${txt}</b></div>`;
+  const status = u ? [u.used && '✦ ' + at('usedAb'), u.curse > 0 && '💀 ' + at('stCurse'), u.rust && '🧲 ' + at('stRust'), u.noHeal && '🥀 ' + at('stNoHeal'), !u.alive && '☠️ K.O.'].filter(Boolean) : [];
+  return `<div class="tk-sheet" style="--g:${hexRGB(j.glow)};--el:${ELS[el].col}">
+    <div class="tk-top">
+      <div class="tk-img"><img class="${vCls(o.variant || '')}" src="${texOf(j)}" alt=""></div>
+      <div><span class="tier t-${tierKey(j.odds)}">${t(tierKey(j.odds))}</span>
+        <h2>${jnH(o.name)} ${vTag(o.variant || '')}</h2>
+        <div class="tk-chips"><span style="color:${ELS[el].col}">${ELS[el].ico} ${elName(el)}</span><span>${at('lvl')} ${lvl}/10</span><span>1/${fmt(j.odds)}</span></div></div>
+    </div>
+    <div class="tk-stats">
+      ${bar('❤️ ' + at('stHp'), hp, SHEET_MAX.hp, u ? `${hp}/${hpMax}` : hp)}
+      ${bar('⚔️ ' + at('stAtk'), atk, SHEET_MAX.atk, atk)}
+      ${bar('🛡️ ' + at('stDef'), def, SHEET_MAX.def, def)}
+    </div>
+    <div class="tk-sk${u?.used ? ' done' : ''}"><small>✦ ${at('ability')}</small><b>${esc(an)}</b><p>${esc(ad)}</p></div>
+    <div class="tk-sk p"><small>◈ ${at('passive')}</small><b>${esc(pn)}</b><p>${esc(pd)}</p></div>
+    ${status.length ? `<div class="tk-status">${status.map(x => `<span>${x}</span>`).join('')}</div>` : ''}
+    ${o.extra || ''}
+  </div>`;
+}
+function openSheet(o) {
+  const card = $('jm-card');
+  jm.style.setProperty('--g', hexRGB(jetonOf(o.name).glow));
+  card.onclick = card.oninput = card.onchange = null;
+  card.innerHTML = `<button class="set-close jm-close" aria-label="${t('close')}">✕</button>${tokenSheetHTML(o)}`;
+  jm.classList.add('on');
+}
+
+// ---------- Choix d'un jeton pour l'équipe : une grille comme le Bestiaire, puis la fiche du jeton avec ses mutations.
+// Peu importe combien d'exemplaires tu as : il suffit d'avoir le jeton. Mutations : Doré +5 %, Céleste +10 %, Ombre +15 % de stats.
 const VBONUS_TXT = { '': 0, gold: 5, celeste: 10, ombre: 15 };
 function pickSlot(slot) {
   sfx.click();
   const used = new Set(ARENA.team.filter((u, i) => u && i !== slot).map(u => u.name));
   const by = {}; // jeton → { variante → id d'un exemplaire }
   INV.groups.forEach(x => { (by[x.name] ||= { name: x.name, odds: x.odds, vars: {} }).vars[x.variant] = x.ids[0]; });
-  const bestV = t => Object.keys(t.vars).sort((a, b) => VRANK[b] - VRANK[a])[0];
-  const list = Object.values(by).sort((a, b) => CB.power(CB.stats(b.name, b.odds, lvlOf(b.name), bestV(b))) - CB.power(CB.stats(a.name, a.odds, lvlOf(a.name), bestV(a))));
-  const cur = ARENA.team[slot];
-  const card = $('jm-card');
-  jm.style.setProperty('--g', '139, 92, 246');
-  card.onclick = card.oninput = card.onchange = null;
-  card.innerHTML = `<button class="set-close jm-close" aria-label="${t('close')}">✕</button>
-    <div class="pk-wrap ar-pick"><h2>${at('pickTitle')} · ${slotName(slot)}</h2>
-      ${cur ? `<button class="btn ghost sm" data-rm>✕ ${at('remove')}</button>` : ''}
-      <div class="ar-plist">${list.map(u => {
-        const j = jetonOf(u.name), el = CB.elOf(u.name), bv = bestV(u), s = CB.stats(u.name, u.odds, lvlOf(u.name), bv), [an, ad, pn, pd] = skillsOf(u.name), off = used.has(u.name);
-        const vs = Object.keys(u.vars).sort((a, b) => VRANK[a] - VRANK[b]);
-        return `<div class="ar-pi${off ? ' off' : ''}" style="--g:${hexRGB(j.glow)};--el:${ELS[el].col}">
-          <img class="${vCls(bv)}" src="${texOf(j)}" alt="">
-          <div><b>${jnH(u.name)} <span class="ar-elc">${ELS[el].ico} ${elName(el)}</span></b>
-            <small>${at('lvl')} ${lvlOf(u.name)} · ⚡${fmt(CB.power(s))} · ❤️${fmt(s.hp)} · ⚔️${s.atk}</small>
-            <small><b>✦ ${esc(an)}</b> — ${esc(ad)}</small><small><b>◈ ${esc(pn)}</b> — ${esc(pd)}</small>
-            <div class="ar-vpick">${vs.map(v => `<button data-pick="${u.vars[v]}" data-n="${esc(u.name)}" data-v="${v}" ${off ? 'disabled' : ''} class="${v ? 'v-' + v : 'v-none'}${cur && cur.name === u.name && cur.variant === v ? ' on' : ''}">${v ? t('v_' + v) + ' +' + VBONUS_TXT[v] + '%' : at('normal')}</button>`).join('')}</div></div>
-        </div>`;
-      }).join('') || `<p class="muted">${at('none')}</p>`}</div></div>`;
-  jm.classList.add('on');
-  card.onclick = async e => {
-    if (e.target.closest('[data-rm]')) ARENA.team[slot] = null;
-    else {
-      const b = e.target.closest('[data-pick]'); if (!b) return;
-      const u = by[b.dataset.n];
-      ARENA.team[slot] = { id: +b.dataset.pick, name: u.name, odds: u.odds, variant: b.dataset.v };
-    }
-    sfx.click(); jm.classList.remove('on');
-    await sb.rpc('set_deck', { ids: ARENA.team.filter(Boolean).map(u => u.id) });
-    drawCombat();
+  const bestV = g => Object.keys(g.vars).sort((a, b) => VRANK[b] - VRANK[a])[0];
+  const list = Object.values(by).sort((a, b) => b.odds - a.odds);
+  const cur = ARENA.team[slot], card = $('jm-card');
+  const save = async () => { jm.classList.remove('on'); await sb.rpc('set_deck', { ids: ARENA.team.filter(Boolean).map(x => x.id) }); drawCombat(); };
+  const grid = () => {
+    jm.style.setProperty('--g', '139, 92, 246');
+    card.innerHTML = `<button class="set-close jm-close" aria-label="${t('close')}">✕</button>
+      <div class="ar-pick"><h2>${at('pickTitle')} · ${slotName(slot)}</h2>
+        ${cur ? `<button class="btn ghost sm" data-rm>✕ ${at('remove')}</button>` : ''}
+        <div class="ar-pgrid">${list.map(u => {
+          const j = jetonOf(u.name), el = CB.elOf(u.name), off = used.has(u.name);
+          return `<button class="bc ar-pc${off ? ' off' : ''}${cur?.name === u.name ? ' cur' : ''}" data-n="${esc(u.name)}" style="--g:${hexRGB(j.glow)}">
+            <span class="bc-num">${ELS[el].ico}</span><span class="bc-own">${at('lvl')}${lvlOf(u.name)}</span>
+            <img class="${vCls(bestV(u))}" src="${texOf(j)}" alt=""><b>${jnH(u.name)}</b><small class="t-${tierKey(u.odds)}">1/${fmt(u.odds)}</small>
+            ${off ? `<small class="ar-inteam">${at('inTeam')}</small>` : ''}
+          </button>`;
+        }).join('') || `<p class="muted">${at('none')}</p>`}</div></div>`;
+    card.onclick = async e => {
+      if (e.target.closest('[data-rm]')) { ARENA.team[slot] = null; return save(); }
+      const b = e.target.closest('.ar-pc'); if (!b || b.classList.contains('off')) return;
+      sfx.click(); detail(b.dataset.n);
+    };
   };
+  const detail = name => {
+    const u = by[name], vs = Object.keys(u.vars).sort((a, b) => VRANK[a] - VRANK[b]);
+    let v = cur?.name === name ? cur.variant : bestV(u);
+    const draw = () => {
+      jm.style.setProperty('--g', hexRGB(jetonOf(name).glow));
+      card.innerHTML = `<button class="set-close jm-close" aria-label="${t('close')}">✕</button><button class="tk-back" data-back>‹ ${at('back')}</button>
+        ${tokenSheetHTML({ name, variant: v, extra: `
+          <div class="tk-vp"><small>${at('version')}</small><div class="ar-vpick">${vs.map(x => `<button data-v="${x}" class="${x ? 'v-' + x : 'v-none'}${x === v ? ' on' : ''}">${x ? t('v_' + x) + ' +' + VBONUS_TXT[x] + '%' : at('normal')}</button>`).join('')}</div></div>
+          <button class="btn primary tk-choose" data-choose>${at('chooseThis')}</button>` })}`;
+      card.querySelector('.tk-img')?.animate([{ transform: 'scale(.85)', opacity: .4 }, { transform: 'none', opacity: 1 }], { duration: 260, easing: 'cubic-bezier(.2, 1.3, .4, 1)' });
+    };
+    draw();
+    card.onclick = e => {
+      if (e.target.closest('[data-back]')) { sfx.click(); return grid(); }
+      const b = e.target.closest('[data-v]'); if (b) { v = b.dataset.v; sfx.click(); return draw(); }
+      if (e.target.closest('[data-choose]')) { ARENA.team[slot] = { id: u.vars[v], name, odds: u.odds, variant: v }; sfx.upgrade(); save(); }
+    };
+  };
+  card.oninput = card.onchange = null;
+  grid();
+  jm.classList.add('on');
 }
 
 // ---------- Robot : une équipe de force proche de la tienne (mêmes paliers de rareté, niveaux proches)
@@ -204,8 +248,13 @@ function startFight(teams, seed, names) {
   o.hidden = false;
   document.documentElement.classList.add('lock');
   requestAnimationFrame(() => o.classList.add('on'));
-  o.querySelector('#ar-row0').onclick = e => { const c = e.target.closest('.ar-u'); if (c) pickToken(+c.dataset.i); };
+  o.querySelector('#ar-row0').onclick = e => {
+    const c = e.target.closest('.ar-u'); if (!c || FIGHT.dragged) return;
+    if (e.target.closest('.ar-ui')) return unitInfo(FIGHT.st.teams[0][+c.dataset.i]);
+    pickToken(+c.dataset.i);
+  };
   o.querySelector('#ar-row1').onclick = e => { const c = e.target.closest('.ar-u'); if (c) unitInfo(FIGHT.st.teams[1][+c.dataset.i]); };
+  o.querySelector('#ar-row0').addEventListener('pointerdown', dragStart);
   o.querySelector('#ar-lanes').onclick = e => { const b = e.target.closest('[data-lane]'); if (b) pickLane(+b.dataset.lane); };
   o.querySelector('#ar-bar').onclick = e => {
     if (e.target.closest("[data-ok]")) fightConfirm();
@@ -223,10 +272,11 @@ function closeFight() {
 function unitHTML(u) {
   const j = jetonOf(u.name), el = ELS[u.el];
   return `<div class="ar-u" data-i="${u.i}" style="--g:${hexRGB(j.glow)};--el:${el.col}">
-    <span class="ar-uel">${el.ico}</span><span class="ar-ulv">${at('lvl')}${u.lvl}</span><span class="ar-uab" title="${esc(skillsOf(u.name)[0])}">✦</span>
+    <span class="ar-uel">${el.ico}</span><span class="ar-ulv">${at('lvl')}${u.lvl}</span><button class="ar-ui" aria-label="i">i</button>
     <div class="ar-uimg"><img class="${vCls(u.variant)}" src="${texOf(j)}" alt=""></div>
     <b class="ar-un">${jnH(u.name)}</b>
     <div class="ar-hp"><i></i><em></em></div>
+    <small class="ar-sk a">✦ ${esc(skillsOf(u.name)[0])}</small><small class="ar-sk p">◈ ${esc(skillsOf(u.name)[2])}</small>
     <small class="ar-ust"></small>
   </div>`;
 }
@@ -270,7 +320,7 @@ function drawBar() {
     return;
   }
   const me = st.teams[0][FIGHT.sel], foe = st.teams[1][FIGHT.foePick], [an, ad] = skillsOf(me.name);
-  bar.innerHTML = `<p>${at('phaseLane', { a: jn(me.name), b: jn(foe.name) })}</p>
+  bar.innerHTML = `<p>${at('phaseLane', { a: jn(me.name), b: jn(foe.name) })}<br><small>${at('dragHint')}</small></p>
     <div class="ar-barr">
       ${me.used ? `<span class="ar-abil off">✦ ${esc(an)} · ${at('usedAb')}</span>` : `<button class="ar-abil${FIGHT.abil ? ' on' : ''}" data-abil title="${esc(ad)}">✦ ${esc(an)}<small>${esc(ad)}</small></button>`}
       <button class="btn primary" data-ok ${FIGHT.lane == null ? 'disabled' : ''}>${at('place')}</button>
@@ -285,9 +335,40 @@ function pickLane(l) {
   if (FIGHT.phase !== 'lane') return;
   FIGHT.lane = l; sfx.click(); refresh();
 }
-function unitInfo(u) {
-  const [an, ad, pn, pd] = skillsOf(u.name);
-  toast(`<b>${jn(u.name)}</b> · ${ELS[u.el].ico} ${elName(u.el)} · ❤️ ${u.hp}/${u.max}<br>✦ <b>${esc(an)}</b>${u.used ? ' (' + at('usedAb') + ')' : ''} — ${esc(ad)}<br>◈ <b>${esc(pn)}</b> — ${esc(pd)}`);
+function unitInfo(u) { sfx.click(); openSheet({ name: u.name, variant: u.variant, lvl: u.lvl, unit: u }); }
+
+// ---------- Glisser son jeton sur un endroit (téléphone et souris) : au moment de choisir l'endroit
+function dragStart(e) {
+  const c = e.target.closest('.ar-u');
+  FIGHT.dragged = false;
+  if (!c || e.target.closest('.ar-ui') || FIGHT.phase !== 'lane' || +c.dataset.i !== FIGHT.sel) return;
+  const img = c.querySelector('.ar-uimg img'), r = img.getBoundingClientRect(), x0 = e.clientX, y0 = e.clientY;
+  let ghost = null, over = null;
+  const lanes = [...document.querySelectorAll('.ar-lane')];
+  const move = ev => {
+    const dx = ev.clientX - x0, dy = ev.clientY - y0;
+    if (!ghost && Math.hypot(dx, dy) < 8) return;
+    if (!ghost) {
+      FIGHT.dragged = true;
+      ghost = img.cloneNode(); ghost.className = 'ar-ghost ' + img.className;
+      ghost.style.cssText = `width:${r.width}px;height:${r.height}px;left:${r.left}px;top:${r.top}px`;
+      document.body.appendChild(ghost); c.classList.add('lifted'); sfx.click();
+    }
+    ghost.style.transform = `translate(${dx}px, ${dy}px) scale(1.25) rotate(${Math.max(-12, Math.min(12, dx / 12))}deg)`;
+    const hit = lanes.find(L => { const b = L.getBoundingClientRect(); return ev.clientX >= b.left && ev.clientX <= b.right && ev.clientY >= b.top && ev.clientY <= b.bottom && !L.disabled; });
+    if (hit !== over) { over?.classList.remove('hover'); over = hit; over?.classList.add('hover'); }
+  };
+  const up = () => {
+    removeEventListener('pointermove', move); removeEventListener('pointerup', up); removeEventListener('pointercancel', up);
+    c.classList.remove('lifted'); over?.classList.remove('hover');
+    if (ghost) {
+      if (over) { // posé : on lance la manche
+        ghost.remove(); FIGHT.lane = +over.dataset.lane; FIGHT.dropFrom = r; refresh(); fightConfirm();
+      } else ghost.animate([{ transform: ghost.style.transform }, { transform: 'none' }], { duration: 220, easing: 'ease-out' }).finished.then(() => ghost.remove());
+    }
+    setTimeout(() => { FIGHT.dragged = false; }, 50);
+  };
+  addEventListener('pointermove', move); addEventListener('pointerup', up); addEventListener('pointercancel', up);
 }
 async function fightConfirm() {
   const st = FIGHT.st;
@@ -332,32 +413,69 @@ function sparks(el, col, n = 10) {
 }
 const unitOf = r => FIGHT.st.teams[r.side][r.i];
 const lifeEl = side => document.querySelectorAll('.ar-pl')[side === 0 ? 1 : 0];
-function placeIn(lane, side, u, abil) {
-  const L = document.querySelectorAll('.ar-lane')[lane]; if (!L) return;
-  const slot = L.querySelector(side === 0 ? '.ar-slotm' : '.ar-slotf');
+const slotOf = (lane, side) => document.querySelectorAll('.ar-lane')[lane]?.querySelector(side === 0 ? '.ar-slotm' : '.ar-slotf');
+// un jeton vole d'un point A (sa carte, ou là où on l'a lâché) jusqu'au centre d'un élément B, en arc
+function flyImg(src, cls, from, toEl, ms = 520) {
+  const to = toEl.getBoundingClientRect(), g = document.createElement('img');
+  g.src = src; g.className = 'ar-ghost ' + cls;
+  const w = 52; g.style.cssText = `width:${w}px;height:${w}px;left:0;top:0`;
+  document.body.appendChild(g);
+  const x0 = from.left + from.width / 2 - w / 2, y0 = from.top + from.height / 2 - w / 2, x1 = to.left + to.width / 2 - w / 2, y1 = to.top + to.height / 2 - w / 2;
+  const mx = (x0 + x1) / 2 + (x1 > x0 ? -30 : 30), my = Math.min(y0, y1) - 30;
+  const a = g.animate([
+    { transform: `translate(${x0}px, ${y0}px) scale(1.3) rotate(0)` },
+    { transform: `translate(${mx}px, ${my}px) scale(1.15) rotate(${x1 > x0 ? 200 : -200}deg)`, offset: .5 },
+    { transform: `translate(${x1}px, ${y1}px) scale(1) rotate(360deg)` },
+  ], { duration: reducedFx() ? 1 : ms, easing: 'cubic-bezier(.45, 0, .2, 1)' });
+  // si l'onglet est en arrière-plan, les animations s'arrêtent : on n'attend jamais plus que prévu
+  return Promise.race([a.finished.catch(() => {}), new Promise(r => setTimeout(r, ms + 150))]).then(() => g.remove());
+}
+async function placeIn(lane, side, u, abil) {
+  const slot = slotOf(lane, side); if (!slot) return;
+  const card = unitEl(u), img = card?.querySelector('.ar-uimg img');
+  const from = side === 0 && FIGHT.dropFrom ? FIGHT.dropFrom : img.getBoundingClientRect();
+  card?.classList.add('out');
+  await flyImg(texOf(jetonOf(u.name)), vCls(u.variant), from, slot);
   slot.innerHTML = `<img class="${vCls(u.variant)}" src="${texOf(jetonOf(u.name))}" alt="">${abil ? '<i>✦</i>' : ''}`;
   slot.style.setProperty('--el', ELS[u.el].col);
-  anim(slot, [{ transform: `translateY(${side === 0 ? 60 : -60}px) scale(.6)`, opacity: 0 }, { transform: 'none', opacity: 1 }], { duration: 380, easing: 'cubic-bezier(.2, .9, .3, 1)' });
+  anim(slot, [{ transform: 'scale(1.35)' }, { transform: 'scale(.92)' }, { transform: 'none' }], { duration: 260 });
+}
+// fin de manche : les jetons repartent dans leur carte
+async function returnHome(picks) {
+  await Promise.all(picks.map((p, side) => {
+    const slot = slotOf(p.lane, side), u = FIGHT.st.teams[side][p.i], card = unitEl(u);
+    if (!slot?.firstElementChild || !card) { card?.classList.remove('out'); return; }
+    const from = slot.getBoundingClientRect(); slot.innerHTML = '';
+    return flyImg(texOf(jetonOf(u.name)), vCls(u.variant), from, card.querySelector('.ar-uimg'), 420).then(() => card.classList.remove('out'));
+  }));
+  document.querySelectorAll('.ar-u.out').forEach(c => c.classList.remove('out'));
 }
 async function playRound(ev) {
   document.querySelectorAll('.ar-slotf, .ar-slotm').forEach(s => { s.innerHTML = ''; });
+  let picks = null;
   for (const e of ev) {
     if (e.t === 'reveal') {
-      e.picks.forEach((p, side) => placeIn(p.lane, side, FIGHT.st.teams[side][p.i], p.abil));
+      picks = e.picks;
       sfx.whooshOut?.();
-      await sleep(650);
+      await Promise.all(e.picks.map((p, side) => placeIn(p.lane, side, FIGHT.st.teams[side][p.i], p.abil)));
+      FIGHT.dropFrom = null;
+      await sleep(250);
     }
     if (e.t === 'abil') {
-      const u = unitOf(e.u), [an] = skillsOf(u.name);
+      const u = unitOf(e.u), [an] = skillsOf(u.name), side = e.u.side, mine = picks?.[side], theirs = picks?.[1 - side];
       const call = document.createElement('div'); call.className = 'ar-call'; call.style.setProperty('--el', ELS[u.el].col);
       call.innerHTML = `<img src="${texOf(jetonOf(u.name))}" alt=""><b>${esc(an)}</b>`;
-      $('ar-lanes').appendChild(call); setTimeout(() => call.remove(), 1200);
-      sparks(unitEl(e.u), ELS[u.el].col, 14); sfx.reveal?.(e.u.side === 0 ? 900 : 300);
-      await sleep(700);
+      $('ar-lanes').appendChild(call); setTimeout(() => call.remove(), 1400);
+      sfx.reveal?.(side === 0 ? 900 : 300);
+      const lanes = [...document.querySelectorAll('.ar-lane')];
+      await ABFX(u.name)({ me: unitEl(e.u), foe: unitEl({ side: 1 - side, i: theirs?.i ?? 0 }), mySlot: mine && slotOf(mine.lane, side), foeSlot: theirs && slotOf(theirs.lane, 1 - side),
+        myLane: mine && lanes[mine.lane], lanes, myBar: lifeEl(side), foeBar: lifeEl(1 - side), myCards: [...$('ar-row' + side).children], foeCards: [...$('ar-row' + (1 - side)).children], col: ELS[u.el].col });
     }
     if (e.t === 'clash') {
       const lanes = document.querySelectorAll('.ar-lane');
       (e.lane < 0 ? [...lanes] : [lanes[e.lane]]).forEach(L => { L.classList.add('clash'); setTimeout(() => L.classList.remove('clash'), 700); });
+      // les deux jetons foncent l'un sur l'autre
+      if (picks) picks.forEach((p, side) => anim(slotOf(p.lane, side), [{ transform: 'none' }, { transform: `translateY(${side === 0 ? -28 : 28}px) scale(1.15)` }, { transform: 'none' }], { duration: 380, easing: 'cubic-bezier(.5, 0, .3, 1.4)' }));
       floater($('ar-lanes'), '⚔️ ' + at('clash'), 'clashf');
       sfx.thump?.(); await sleep(450);
     }
@@ -372,6 +490,9 @@ async function playRound(ev) {
     }
     if (e.t === 'face') {
       const p = lifeEl(e.side);
+      // le jeton fonce sur la barre de vie du joueur d'en face puis revient
+      const pk = e.from && picks?.[e.from.side], sl = pk && slotOf(pk.lane, e.from.side);
+      if (sl?.firstElementChild) { const a = sl.getBoundingClientRect(), b = p.getBoundingClientRect(); await anim(sl, [{ transform: 'none' }, { transform: `translate(${(b.left + b.width / 2) - (a.left + a.width / 2)}px, ${(b.top + b.height / 2) - (a.top + a.height / 2)}px) scale(.8)`, offset: .45 }, { transform: 'none' }], { duration: 520, easing: 'cubic-bezier(.5, 0, .3, 1)' }); await sleep(520); }
       if (e.from) FIGHT.dmg[e.from.side][e.from.i] = (FIGHT.dmg[e.from.side][e.from.i] || 0) + e.d;
       floater(p, (e.crit ? '💥 ' : '') + '−' + e.d + ' ❤️', e.crit ? 'crit' : 'dmg');
       anim(p, [{ transform: 'translateX(-6px)' }, { transform: 'translateX(6px)' }, { transform: 'none' }], { duration: 260 });
@@ -391,7 +512,8 @@ async function playRound(ev) {
     if (e.t === 'ko') { anim(unitEl(e.u), [{ transform: 'none', opacity: 1 }, { transform: 'translateY(10px) rotate(-6deg)', opacity: .4 }], { duration: 450 }); sfx.deny?.(); refresh(); await sleep(500); }
   }
   refresh();
-  await sleep(500);
+  await sleep(450);
+  if (picks) await returnHome(picks);
   document.querySelectorAll('.ar-slotf, .ar-slotm').forEach(s => { s.innerHTML = ''; });
 }
 

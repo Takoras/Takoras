@@ -2155,3 +2155,42 @@ html.reduce-fx .ar-u.ready { animation: none; }
 .ar-abil.on::before { content: "✓ "; }
 .ar-abil.off { opacity: .45; justify-content: center; }
 @media (max-width: 760px) { .ar-lanes { min-height: 130px; } .ar-u { padding: 14px 4px 6px; } .ar-un { font-size: 11px; } .arena { gap: 6px; } }
+/* ----- Fiche complète d'un jeton ----- */
+.tk-sheet { display: flex; flex-direction: column; gap: 12px; text-align: left; }
+.tk-top { display: flex; gap: 16px; align-items: center; }
+.tk-img { flex: none; width: 110px; height: 110px; display: grid; place-items: center; border-radius: 50%; background: radial-gradient(closest-side, rgba(var(--g), .35), transparent); }
+.tk-img img { width: 100px; height: 100px; image-rendering: pixelated; filter: drop-shadow(0 0 14px rgba(var(--g), .7)); }
+.tk-top h2 { font-family: "Space Grotesk"; font-size: 26px; margin: 4px 0; }
+.tk-chips { display: flex; flex-wrap: wrap; gap: 6px; } .tk-chips span { padding: 3px 9px; border-radius: 99px; font-size: 12px; font-weight: 700; background: rgba(255, 255, 255, .06); border: 1px solid var(--border); }
+.tk-stats { display: flex; flex-direction: column; gap: 6px; padding: 12px; border-radius: 14px; background: rgba(255, 255, 255, .03); border: 1px solid var(--border); }
+.tk-bar { display: grid; grid-template-columns: 96px 1fr 56px; align-items: center; gap: 10px; font-size: 13px; }
+.tk-bar span { color: var(--muted); } .tk-bar b { text-align: right; }
+.tk-bar div { height: 8px; border-radius: 4px; background: rgba(255, 255, 255, .08); overflow: hidden; } .tk-bar i { display: block; height: 100%; background: linear-gradient(90deg, rgba(var(--g), .6), rgb(var(--g))); }
+.tk-sk { padding: 12px 14px; border-radius: 14px; background: rgba(255, 255, 255, .03); border: 1px solid var(--border); border-left: 3px solid var(--el); }
+.tk-sk small { display: block; font-size: 11px; font-weight: 700; letter-spacing: .08em; text-transform: uppercase; color: var(--el); }
+.tk-sk b { font-size: 16px; } .tk-sk p { font-size: 13px; color: var(--muted); margin-top: 2px; }
+.tk-sk.p { border-left-color: rgba(255, 255, 255, .35); } .tk-sk.p small { color: var(--muted); }
+.tk-sk.done { opacity: .5; }
+.tk-status { display: flex; flex-wrap: wrap; gap: 6px; } .tk-status span { padding: 4px 10px; border-radius: 99px; font-size: 12px; background: rgba(255, 255, 255, .06); }
+.tk-vp small { display: block; font-size: 11px; font-weight: 700; letter-spacing: .08em; text-transform: uppercase; color: var(--muted); margin-bottom: 4px; }
+.tk-choose { width: 100%; padding: 14px; font-size: 16px; }
+.tk-back { align-self: flex-start; margin-bottom: 6px; padding: 6px 12px; border-radius: 99px; font-weight: 700; color: var(--muted); background: rgba(255, 255, 255, .05); }
+/* Choix : grille façon Bestiaire */
+.ar-pgrid { display: grid; grid-template-columns: repeat(auto-fill, minmax(120px, 1fr)); gap: 10px; margin-top: 12px; max-height: 62dvh; overflow-y: auto; padding: 4px; }
+.ar-pc { cursor: pointer; } .ar-pc.off { opacity: .35; cursor: not-allowed; } .ar-pc.cur { box-shadow: 0 0 0 2px var(--accent); }
+.ar-inteam { font-size: 10px !important; color: var(--muted); }
+@media (max-width: 760px) { .ar-pgrid { grid-template-columns: repeat(3, 1fr); gap: 6px; } .tk-img { width: 86px; height: 86px; } .tk-img img { width: 76px; height: 76px; } .tk-top h2 { font-size: 22px; } .tk-bar { grid-template-columns: 84px 1fr 50px; } }
+/* ----- Combat : cartes, glisser, envol ----- */
+.ar-ui { position: absolute; top: 3px; left: 50%; translate: -50% 0; width: 18px; height: 18px; border-radius: 50%; font-size: 11px; font-weight: 800; font-style: italic; font-family: Georgia, serif;
+  color: #fff; background: rgba(255, 255, 255, .14); border: 1px solid rgba(255, 255, 255, .25); line-height: 16px; z-index: 2; }
+.ar-sk { display: block; max-width: 100%; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font-size: 10px; font-weight: 600; line-height: 1.3; }
+.ar-sk.a { color: var(--el); } .ar-sk.p { color: var(--muted); }
+.ar-u.used .ar-sk.a { text-decoration: line-through; opacity: .5; }
+.ar-u.out .ar-uimg { opacity: .2; transform: scale(.85); transition: opacity .2s, transform .2s; }
+.ar-u.lifted .ar-uimg { opacity: .25; }
+.ar-u.sel.can-drag { cursor: grab; }
+.ar-ghost { position: fixed; z-index: 97; pointer-events: none; image-rendering: pixelated; filter: drop-shadow(0 10px 18px rgba(0, 0, 0, .6)) drop-shadow(0 0 12px rgba(255, 255, 255, .35)); }
+.ar-lane.hover { background: rgba(139, 92, 246, .3); border: 1px solid #c4b5fd; box-shadow: 0 0 28px rgba(139, 92, 246, .7); transform: scale(1.03); }
+.ar-bar small { font-size: 11px; opacity: .8; }
+.ar-row.me .ar-u { touch-action: none; }
+.fx { will-change: transform, opacity; }
