@@ -178,6 +178,7 @@ function openJeton(name, extra = '', variant = '', locked = false) {
   const j = jetonOf(name), s = statsOf(j.name, j.odds, variant);
   jm.style.setProperty('--g', hexRGB(j.glow));
   $('jm-card').onclick = null; $('jm-card').oninput = null; $('jm-card').onchange = null;
+  $('jm-card').classList.remove('sheetmode');
   $('jm-card').innerHTML = `
     <button class="set-close jm-close" aria-label="${t('close')}">✕</button>
     <div class="jm-coin"${texScale(j) !== 1 ? ` style="scale:${texScale(j)}"` : ''}><img class="${vCls(variant)}${locked ? ' sil' : ''}" src="${texOf(j)}" alt="">${locked ? '' : `<i class="glare${variant ? ' hv-' + variant : ''}" style="-webkit-mask-image:url(${texOf(j)});mask-image:url(${texOf(j)})"></i>`}</div>
@@ -192,7 +193,7 @@ function openJeton(name, extra = '', variant = '', locked = false) {
     </div>`;
   jm.classList.add('on');
 }
-jm.addEventListener('click', e => { if (e.target === jm || e.target.closest('.jm-close')) jm.classList.remove('on'); });
+jm.addEventListener('click', e => { if (e.target === jm || e.target.closest('.jm-close')) { jm.classList.remove('on'); setTimeout(() => $('jm-card').classList.remove('sheetmode'), 300); } });
 // Le jeton penche seulement quand la souris est dessus, puis revient doucement
 jm.addEventListener('pointermove', e => {
   const c = e.target.closest('.jm-coin'); if (!c) return;

@@ -151,11 +151,14 @@ function openSheet(o) {
   const card = $('jm-card');
   jm.style.setProperty('--g', hexRGB(jetonOf(o.name).glow));
   card.onclick = card.oninput = card.onchange = null;
+  card.classList.add('sheetmode');
   card.innerHTML = `<button class="set-close jm-close" aria-label="${t('close')}">✕</button>${tokenSheetHTML(o)}`;
   jm.classList.add('on');
 }
 
-// ---------- Choix d'un jeton pour l'équipe : une grille comme le Bestiaire, puis la fiche du jeton avec ses mutations.
+// ---------- Choix d'un jeton pour l'équipe : grande fenêtre à part.
+// À gauche : tous tes jetons (filtre par élément), à droite : la fiche du jeton choisi, ses versions et « Prendre ce jeton ».
+// Sur téléphone : la grille, puis la fiche s'ouvre par-dessus (bouton retour).
 // Peu importe combien d'exemplaires tu as : il suffit d'avoir le jeton. Mutations : Doré +5 %, Céleste +10 %, Ombre +15 % de stats.
 const VBONUS_TXT = { '': 0, gold: 5, celeste: 10, ombre: 15 };
 function pickSlot(slot) {
@@ -165,48 +168,65 @@ function pickSlot(slot) {
   INV.groups.forEach(x => { (by[x.name] ||= { name: x.name, odds: x.odds, vars: {} }).vars[x.variant] = x.ids[0]; });
   const bestV = g => Object.keys(g.vars).sort((a, b) => VRANK[b] - VRANK[a])[0];
   const list = Object.values(by).sort((a, b) => b.odds - a.odds);
-  const cur = ARENA.team[slot], card = $('jm-card');
-  const save = async () => { jm.classList.remove('on'); await sb.rpc('set_deck', { ids: ARENA.team.filter(Boolean).map(x => x.id) }); drawCombat(); };
-  const grid = () => {
-    jm.style.setProperty('--g', '139, 92, 246');
-    card.innerHTML = `<button class="set-close jm-close" aria-label="${t('close')}">✕</button>
-      <div class="ar-pick"><h2>${at('pickTitle')} · ${slotName(slot)}</h2>
-        ${cur ? `<button class="btn ghost sm" data-rm>✕ ${at('remove')}</button>` : ''}
-        <div class="ar-pgrid">${list.map(u => {
-          const j = jetonOf(u.name), el = CB.elOf(u.name), off = used.has(u.name);
-          return `<button class="bc ar-pc${off ? ' off' : ''}${cur?.name === u.name ? ' cur' : ''}" data-n="${esc(u.name)}" style="--g:${hexRGB(j.glow)}">
-            <span class="bc-num">${ELS[el].ico}</span><span class="bc-own">${at('lvl')}${lvlOf(u.name)}</span>
-            <img class="${vCls(bestV(u))}" src="${texOf(j)}" alt=""><b>${jnH(u.name)}</b><small class="t-${tierKey(u.odds)}">1/${fmt(u.odds)}</small>
-            ${off ? `<small class="ar-inteam">${at('inTeam')}</small>` : ''}
-          </button>`;
-        }).join('') || `<p class="muted">${at('none')}</p>`}</div></div>`;
-    card.onclick = async e => {
-      if (e.target.closest('[data-rm]')) { ARENA.team[slot] = null; return save(); }
-      const b = e.target.closest('.ar-pc'); if (!b || b.classList.contains('off')) return;
-      sfx.click(); detail(b.dataset.n);
-    };
+  const cur = ARENA.team[slot];
+  const S = { el: 'all', name: cur?.name || list.find(u => !used.has(u.name))?.name || null, v: cur?.variant ?? null };
+  const o = document.createElement('div');
+  o.className = 'tp-box';
+  o.innerHTML = `<div class="tp-panel">
+    <div class="tp-head"><div><small class="eyebrow">${at('team')} · ${slotName(slot)}</small><h2>${at('pickTitle')}</h2></div>
+      <div class="tp-hbtn">${cur ? `<button class="btn ghost sm" data-rm>✕ ${at('remove')}</button>` : ''}<button class="tp-x" data-close aria-label="${t('close')}">✕</button></div></div>
+    <div class="tp-body">
+      <div class="tp-left">
+        <div class="tp-els">${['all', 'fire', 'water', 'plant', 'light', 'shadow'].map(e => `<button data-el="${e}">${e === 'all' ? t('all') : ELS[e].ico + ' ' + elName(e)}</button>`).join('')}</div>
+        <div class="tp-grid" id="tp-grid"></div>
+      </div>
+      <div class="tp-right" id="tp-right"></div>
+    </div>
+  </div>`;
+  document.body.appendChild(o);
+  document.documentElement.classList.add('lock');
+  requestAnimationFrame(() => o.classList.add('on'));
+  const close = () => { o.classList.remove('on'); document.documentElement.classList.remove('lock'); setTimeout(() => o.remove(), 250); };
+  const save = async () => { close(); await sb.rpc('set_deck', { ids: ARENA.team.filter(Boolean).map(x => x.id) }); drawCombat(); };
+
+  const drawGrid = () => {
+    o.querySelectorAll('[data-el]').forEach(b => b.classList.toggle('on', b.dataset.el === S.el));
+    const vis = list.filter(u => S.el === 'all' || CB.elOf(u.name) === S.el);
+    o.querySelector('#tp-grid').innerHTML = vis.map(u => {
+      const j = jetonOf(u.name), el = CB.elOf(u.name), off = used.has(u.name), bv = bestV(u);
+      return `<button class="tp-c${off ? ' off' : ''}${S.name === u.name ? ' sel' : ''}" data-n="${esc(u.name)}" style="--g:${hexRGB(j.glow)};--el:${ELS[el].col}">
+        <span class="tp-el">${ELS[el].ico}</span><span class="tp-lv">${at('lvl')}${lvlOf(u.name)}</span>
+        <img class="${vCls(bv)}" src="${texOf(j)}" alt="">
+        <b>${jnH(u.name)}</b>
+        <span class="tp-vd">${Object.keys(u.vars).filter(Boolean).map(v => `<i class="v-dot on ${v}"></i>`).join('')}</span>
+        ${off ? `<small>${at('inTeam')}</small>` : `<small class="t-${tierKey(u.odds)}">1/${fmt(u.odds)}</small>`}
+      </button>`;
+    }).join('') || `<p class="muted">${at('none')}</p>`;
   };
-  const detail = name => {
-    const u = by[name], vs = Object.keys(u.vars).sort((a, b) => VRANK[a] - VRANK[b]);
-    let v = cur?.name === name ? cur.variant : bestV(u);
-    const draw = () => {
-      jm.style.setProperty('--g', hexRGB(jetonOf(name).glow));
-      card.innerHTML = `<button class="set-close jm-close" aria-label="${t('close')}">✕</button><button class="tk-back" data-back>‹ ${at('back')}</button>
-        ${tokenSheetHTML({ name, variant: v, extra: `
-          <div class="tk-vp"><small>${at('version')}</small><div class="ar-vpick">${vs.map(x => `<button data-v="${x}" class="${x ? 'v-' + x : 'v-none'}${x === v ? ' on' : ''}">${x ? t('v_' + x) + ' +' + VBONUS_TXT[x] + '%' : at('normal')}</button>`).join('')}</div></div>
-          <button class="btn primary tk-choose" data-choose>${at('chooseThis')}</button>` })}`;
-      card.querySelector('.tk-img')?.animate([{ transform: 'scale(.85)', opacity: .4 }, { transform: 'none', opacity: 1 }], { duration: 260, easing: 'cubic-bezier(.2, 1.3, .4, 1)' });
-    };
-    draw();
-    card.onclick = e => {
-      if (e.target.closest('[data-back]')) { sfx.click(); return grid(); }
-      const b = e.target.closest('[data-v]'); if (b) { v = b.dataset.v; sfx.click(); return draw(); }
-      if (e.target.closest('[data-choose]')) { ARENA.team[slot] = { id: u.vars[v], name, odds: u.odds, variant: v }; sfx.upgrade(); save(); }
-    };
+  const drawRight = (anim = true) => {
+    const R = o.querySelector('#tp-right');
+    if (!S.name) { R.innerHTML = `<p class="muted tp-empty">${at('none')}</p>`; return; }
+    const u = by[S.name], vs = Object.keys(u.vars).sort((a, b) => VRANK[a] - VRANK[b]);
+    if (S.v == null || !(S.v in u.vars)) S.v = bestV(u);
+    R.innerHTML = `<button class="tp-back" data-back>‹ ${at('back')}</button>
+      ${tokenSheetHTML({ name: S.name, variant: S.v, extra: `
+        <div class="tk-vp"><small>${at('version')}</small><div class="ar-vpick">${vs.map(x => `<button data-v="${x}" class="${x ? 'v-' + x : 'v-none'}${x === S.v ? ' on' : ''}">${x ? t('v_' + x) + ' +' + VBONUS_TXT[x] + '%' : at('normal')}</button>`).join('')}</div></div>
+        <button class="btn primary tk-choose" data-choose ${used.has(S.name) ? 'disabled' : ''}>${used.has(S.name) ? at('inTeam') : at('chooseThis')}</button>` })}`;
+    if (anim && !reducedFx()) R.querySelector('.tk-sheet').animate([{ opacity: 0, transform: 'translateY(10px)' }, { opacity: 1, transform: 'none' }], { duration: 260, easing: 'cubic-bezier(.2, .9, .3, 1)' });
   };
-  card.oninput = card.onchange = null;
-  grid();
-  jm.classList.add('on');
+  drawGrid(); drawRight(false);
+  o.addEventListener('click', e => {
+    if (e.target === o || e.target.closest('[data-close]')) return close();
+    if (e.target.closest('[data-rm]')) { ARENA.team[slot] = null; return save(); }
+    if (e.target.closest('[data-back]')) { o.classList.remove('detail'); return; }
+    const el = e.target.closest('[data-el]'); if (el) { S.el = el.dataset.el; sfx.click(); return drawGrid(); }
+    const c = e.target.closest('.tp-c');
+    if (c) { S.name = c.dataset.n; S.v = cur?.name === S.name ? cur.variant : null; sfx.click(); drawGrid(); drawRight(); o.classList.add('detail'); return; }
+    const v = e.target.closest('[data-v]'); if (v) { S.v = v.dataset.v; sfx.click(); return drawRight(false); }
+    if (e.target.closest('[data-choose]') && S.name && !used.has(S.name)) {
+      const u = by[S.name]; ARENA.team[slot] = { id: u.vars[S.v], name: S.name, odds: u.odds, variant: S.v }; sfx.upgrade(); save();
+    }
+  });
 }
 
 // ---------- Robot : une équipe de force proche de la tienne (mêmes paliers de rareté, niveaux proches)
