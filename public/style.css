@@ -2297,3 +2297,36 @@ html.reduce-fx .ar-u.ready { animation: none; }
 @keyframes susp { 30% { transform: scale(.96); border-color: rgba(249, 115, 22, .8); } 60% { transform: scale(1.02); } }
 .ar-ghost { filter: drop-shadow(0 10px 18px rgba(0, 0, 0, .6)) drop-shadow(0 0 14px var(--c, rgba(255, 255, 255, .35))); }
 @media (max-height: 780px) { .ar-vsside img { width: 48px; height: 48px; } .ar-vsmid { font-size: 48px; } .ar-banner b { font-size: 22px; } .ar-recap { font-size: 11px; padding: 4px 10px; } }
+/* ----- Combat : guidage (étapes ① ②), moins de clics ----- */
+.ar-step { display: flex; align-items: center; gap: 10px; justify-content: center; }
+.ar-step span { width: 28px; height: 28px; border-radius: 50%; display: grid; place-items: center; font-family: "Space Grotesk"; font-weight: 800; color: #fff;
+  background: linear-gradient(135deg, #8b5cf6, #ec4899); box-shadow: 0 0 16px rgba(139, 92, 246, .7); animation: stepPulse 1.6s ease-in-out infinite; }
+.ar-step b { font-family: "Space Grotesk"; font-size: 17px; }
+@keyframes stepPulse { 50% { transform: scale(1.12); box-shadow: 0 0 26px rgba(236, 72, 153, .8); } }
+.ar-vsline { font-size: 12px; color: var(--muted); } .ar-vsline b { color: var(--text); }
+.ar-abil.big { width: min(100%, 340px); align-items: center; text-align: center; padding: 10px 16px; border-radius: 14px; font-size: 14px; }
+.ar-abil.big span { font-weight: 600; } .ar-abil.big span b { color: var(--text); }
+.ar-abil.big.on { background: linear-gradient(135deg, rgba(250, 204, 21, .28), rgba(249, 115, 22, .18)); }
+.ar-abil.on::before { content: none; }
+/* étape ① : mes jetons jouables respirent et brillent */
+.arena.ph-token .ar-row.me .ar-u:not(.tired):not(.ko) { border-color: rgba(var(--g), .8); box-shadow: 0 0 0 1px rgba(var(--g), .5), 0 0 22px -4px rgba(var(--g), .8); animation: pickMe 1.4s ease-in-out infinite; cursor: pointer; }
+.arena.ph-token .ar-row.me .ar-u:not(.tired):not(.ko):hover { transform: translateY(-6px) scale(1.04); }
+@keyframes pickMe { 50% { transform: translateY(-3px); } }
+/* étape ② : les endroits s'allument, mon jeton choisi flotte */
+.arena.ph-lane .ar-lane:not(:disabled) { border: 1px solid rgba(167, 139, 250, .55); background: linear-gradient(180deg, rgba(139, 92, 246, .06), rgba(139, 92, 246, .16)); animation: laneGlow 1.5s ease-in-out infinite; cursor: pointer; }
+.arena.ph-lane .ar-lane:not(:disabled):hover { background: rgba(139, 92, 246, .3); transform: translateY(-3px); }
+@keyframes laneGlow { 50% { box-shadow: inset 0 0 26px rgba(139, 92, 246, .45), 0 0 18px rgba(139, 92, 246, .25); } }
+.arena.ph-lane .ar-row.me .ar-u.sel { animation: floatSel 1.2s ease-in-out infinite; cursor: grab; }
+@keyframes floatSel { 50% { transform: translateY(-10px); } }
+.ar-lhint { position: absolute; left: 50%; top: calc(50% + 16px); translate: -50% 0; font-style: normal; font-size: 9px; font-weight: 600; letter-spacing: .04em; color: var(--muted); opacity: 0; transition: opacity .3s; white-space: nowrap; }
+.arena.ph-lane .ar-lhint { opacity: .8; }
+/* Mini-tuto du premier combat */
+.ar-tuto { position: absolute; inset: 0; z-index: 25; display: grid; place-items: center; padding: 20px; background: rgba(8, 6, 14, .9); backdrop-filter: blur(6px); }
+.ar-tutoc { width: min(400px, 100%); display: flex; flex-direction: column; align-items: center; gap: 10px; padding: 28px 22px 22px; border-radius: 22px; text-align: center;
+  background: linear-gradient(180deg, #221c3b, #15121f); border: 1px solid rgba(139, 92, 246, .4); box-shadow: 0 0 60px -10px rgba(139, 92, 246, .6); }
+.ar-tutoi { font-size: 54px; line-height: 1; animation: stepPulse 1.6s ease-in-out infinite; }
+.ar-tutoc small { color: var(--muted); font-weight: 700; letter-spacing: .1em; }
+.ar-tutoc h3 { font-family: "Space Grotesk"; font-size: 24px; }
+.ar-tutoc p { color: var(--muted); line-height: 1.5; } .ar-tutoc p b { color: var(--text); }
+.ar-tutoc .btn { width: 100%; padding: 14px; font-size: 16px; }
+html.reduce-fx .arena.ph-token .ar-row.me .ar-u, html.reduce-fx .arena.ph-lane .ar-lane, html.reduce-fx .ar-step span { animation: none !important; }

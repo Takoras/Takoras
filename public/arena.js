@@ -56,7 +56,7 @@ const AT = {
   fr: { title: 'Combat', sub: 'Choisis 3 jetons et affronte le robot. Le classé avec les rangs arrive bientôt.', team: 'Ton équipe',
     slots: ['Jeton 1', 'Jeton 2', 'Jeton 3'], lanes: ['Gauche', 'Milieu', 'Droite'], pick: 'Choisir', train: '⚔️ Entraînement contre le robot', ranked: '🏆 Classé', soon: 'Bientôt : rangs Bronze → Légende, saisons et battle pass',
     need3: 'Choisis 3 jetons pour combattre', els: 'Éléments', elsHelp: '🔥 bat 🌿 · 🌿 bat 💧 · 💧 bat 🔥 · ✨ et 🌑 forts l’un contre l’autre (×1,3 de dégâts)',
-    how: 'Comment ça marche', howText: 'À chaque manche, vous choisissez chacun un jeton (on voit celui de l’autre), puis vous le posez <b>à gauche, au milieu ou à droite</b> sans voir où l’autre le met. <b>Même endroit</b> : les deux jetons se battent. <b>Endroits différents</b> : chacun frappe le joueur d’en face. Chaque capacité ne sert qu’<b>une fois</b> par combat. Un jeton joué se repose la manche suivante.', round: 'Manche {n}', rest: 'Repos', stuck: 'Bloqué', foeCant: 'En face, ne peut pas jouer : {n}', foePlays: 'Il joue', revealTxt: 'Révélation !', recapClash: '⚔️ {a} et {b} se croisent ({l}) · tu infliges {x}, tu prends {y}', recapMiss: '{a} ({la}) et {b} ({lb}) ne se croisent pas · tu infliges {x}, tu prends {y}', needLogin: 'Connecte-toi pour monter ton équipe et combattre.', normal: 'Normal', stHp: 'PV', stAtk: 'Attaque', stDef: 'Défense', stCurse: 'maudit', stRust: 'rouillé (−30 % déf.)', stNoHeal: 'ne peut plus être soigné', inTeam: 'déjà dans l’équipe', version: 'Version', chooseThis: 'Prendre ce jeton', dragHint: 'Glisse ton jeton sur un endroit, ou touche un endroit puis « Poser ici ».', phaseToken: 'Choisis ton jeton pour cette manche', phaseLane: 'Tu joues <b>{a}</b>, il joue <b>{b}</b>. Où poses-tu ton jeton ?', ok: 'Valider', place: 'Poser ici', usedAb: 'déjà utilisée', tired: 'Ce jeton se repose cette manche', clash: 'Croisement !', block: 'Protégé', dazzled: 'Ébloui', recharged: 'Capacité rechargée', frozenL: 'Gelé', rounds: '{n} manches', dmgWord: 'dégâts',
+    how: 'Comment ça marche', howText: 'À chaque manche, vous choisissez chacun un jeton (on voit celui de l’autre), puis vous le posez <b>à gauche, au milieu ou à droite</b> sans voir où l’autre le met. <b>Même endroit</b> : les deux jetons se battent. <b>Endroits différents</b> : chacun frappe le joueur d’en face. Chaque capacité ne sert qu’<b>une fois</b> par combat. Un jeton joué se repose la manche suivante.', round: 'Manche {n}', step1: 'Touche un de tes jetons', step2: 'Touche ou glisse ton jeton vers un endroit', abilOn: 'Capacité activée', abilOff: 'Activer la capacité', laneHint: 'même endroit = duel', tuto1t: 'Choisis un jeton', tuto1: 'À chaque manche, touche un de tes jetons. L’adversaire choisit en même temps : vous voyez chacun le jeton de l’autre.', tuto2t: 'Pose-le en cachette', tuto2: 'Touche (ou glisse vers) <b>gauche, milieu ou droite</b>. L’autre ne voit pas où tu le mets. Tu peux allumer la capacité avant (1 fois par combat).', tuto3t: 'Duel ou coup direct', tuto3: '<b>Même endroit</b> : les deux jetons se battent. <b>Endroits différents</b> : chacun frappe le joueur d’en face. Le premier à 0 ❤️ perd !', tutoGo: 'Compris, on y va !', rest: 'Repos', stuck: 'Bloqué', foeCant: 'En face, ne peut pas jouer : {n}', foePlays: 'Il joue', revealTxt: 'Révélation !', recapClash: '⚔️ Duel ({l}) : {a} contre {b} · ton jeton inflige {x} PV, en reçoit {y}', recapMiss: '💥 Coups directs : {a} ({la}) et {b} ({lb}) · tu infliges {x} ❤️, tu perds {y} ❤️', needLogin: 'Connecte-toi pour monter ton équipe et combattre.', normal: 'Normal', stHp: 'PV', stAtk: 'Attaque', stDef: 'Défense', stCurse: 'maudit', stRust: 'rouillé (−30 % déf.)', stNoHeal: 'ne peut plus être soigné', inTeam: 'déjà dans l’équipe', version: 'Version', chooseThis: 'Prendre ce jeton', dragHint: 'Glisse ton jeton sur un endroit, ou touche un endroit puis « Poser ici ».', phaseToken: 'Choisis ton jeton pour cette manche', phaseLane: 'Tu joues <b>{a}</b>, il joue <b>{b}</b>. Où poses-tu ton jeton ?', ok: 'Valider', place: 'Poser ici', usedAb: 'déjà utilisée', tired: 'Ce jeton se repose cette manche', clash: 'Croisement !', block: 'Protégé', dazzled: 'Ébloui', recharged: 'Capacité rechargée', frozenL: 'Gelé', rounds: '{n} manches', dmgWord: 'dégâts',
     pickTitle: 'Choisis un jeton', lvl: 'Niv.', power: 'Puissance', ability: 'Capacité', passive: 'Passif', remove: 'Retirer', none: 'Tu n’as pas encore de jeton : ouvre des pulls !',
     ready: 'PRÊT', win: 'Victoire !', lose: 'Défaite…', draw: 'Égalité', again: 'Rejouer', back: 'Retour', bot: 'Robot', you: 'Toi', mvp: 'Meilleur jeton',
     quit: 'Abandonner le combat ?', eff: 'Efficace !', weak: 'Peu efficace', dodge: 'Esquive', miss: 'Raté', crit: 'CRITIQUE', revive: 'Ressuscité !', time: 'Temps écoulé',
@@ -64,7 +64,7 @@ const AT = {
   en: { title: 'Battle', sub: 'Pick 3 tokens and fight the bot. Ranked with tiers is coming soon.', team: 'Your team',
     slots: ['Token 1', 'Token 2', 'Token 3'], lanes: ['Left', 'Middle', 'Right'], pick: 'Pick', train: '⚔️ Training vs the bot', ranked: '🏆 Ranked', soon: 'Soon: Bronze → Legend tiers, seasons and battle pass',
     need3: 'Pick 3 tokens to fight', els: 'Elements', elsHelp: '🔥 beats 🌿 · 🌿 beats 💧 · 💧 beats 🔥 · ✨ and 🌑 strong against each other (×1.3 damage)',
-    how: 'How it works', howText: 'Each round, you both pick a token (you see each other’s), then place it <b>left, middle or right</b> without seeing where the other puts theirs. <b>Same spot</b>: the two tokens fight. <b>Different spots</b>: each hits the opposing player. Each ability can only be used <b>once</b> per battle. A token that just played rests the next round.', round: 'Round {n}', rest: 'Resting', stuck: 'Stuck', foeCant: 'Opponent can’t play: {n}', foePlays: 'They play', revealTxt: 'Reveal!', recapClash: '⚔️ {a} and {b} clash ({l}) · you deal {x}, you take {y}', recapMiss: '{a} ({la}) and {b} ({lb}) don’t cross · you deal {x}, you take {y}', needLogin: 'Log in to build your team and fight.', normal: 'Normal', stHp: 'HP', stAtk: 'Attack', stDef: 'Defense', stCurse: 'cursed', stRust: 'rusted (−30% def.)', stNoHeal: 'can no longer be healed', inTeam: 'already in the team', version: 'Version', chooseThis: 'Take this token', dragHint: 'Drag your token onto a spot, or tap a spot then “Place here”.', phaseToken: 'Pick your token for this round', phaseLane: 'You play <b>{a}</b>, they play <b>{b}</b>. Where do you place your token?', ok: 'Confirm', place: 'Place here', usedAb: 'already used', tired: 'This token is resting this round', clash: 'Clash!', block: 'Protected', dazzled: 'Dazzled', recharged: 'Ability recharged', frozenL: 'Frozen', rounds: '{n} rounds', dmgWord: 'damage',
+    how: 'How it works', howText: 'Each round, you both pick a token (you see each other’s), then place it <b>left, middle or right</b> without seeing where the other puts theirs. <b>Same spot</b>: the two tokens fight. <b>Different spots</b>: each hits the opposing player. Each ability can only be used <b>once</b> per battle. A token that just played rests the next round.', round: 'Round {n}', step1: 'Tap one of your tokens', step2: 'Tap or drag your token to a spot', abilOn: 'Ability on', abilOff: 'Turn on ability', laneHint: 'same spot = duel', tuto1t: 'Pick a token', tuto1: 'Each round, tap one of your tokens. The opponent picks at the same time: you each see the other’s token.', tuto2t: 'Place it secretly', tuto2: 'Tap (or drag to) <b>left, middle or right</b>. The other can’t see where you put it. You can turn on the ability first (once per battle).', tuto3t: 'Duel or direct hit', tuto3: '<b>Same spot</b>: the two tokens fight. <b>Different spots</b>: each hits the opposing player. First to 0 ❤️ loses!', tutoGo: 'Got it, let’s go!', rest: 'Resting', stuck: 'Stuck', foeCant: 'Opponent can’t play: {n}', foePlays: 'They play', revealTxt: 'Reveal!', recapClash: '⚔️ Duel ({l}): {a} vs {b} · your token deals {x} HP, takes {y}', recapMiss: '💥 Direct hits: {a} ({la}) and {b} ({lb}) · you deal {x} ❤️, you lose {y} ❤️', needLogin: 'Log in to build your team and fight.', normal: 'Normal', stHp: 'HP', stAtk: 'Attack', stDef: 'Defense', stCurse: 'cursed', stRust: 'rusted (−30% def.)', stNoHeal: 'can no longer be healed', inTeam: 'already in the team', version: 'Version', chooseThis: 'Take this token', dragHint: 'Drag your token onto a spot, or tap a spot then “Place here”.', phaseToken: 'Pick your token for this round', phaseLane: 'You play <b>{a}</b>, they play <b>{b}</b>. Where do you place your token?', ok: 'Confirm', place: 'Place here', usedAb: 'already used', tired: 'This token is resting this round', clash: 'Clash!', block: 'Protected', dazzled: 'Dazzled', recharged: 'Ability recharged', frozenL: 'Frozen', rounds: '{n} rounds', dmgWord: 'damage',
     pickTitle: 'Pick a token', lvl: 'Lv.', power: 'Power', ability: 'Ability', passive: 'Passive', remove: 'Remove', none: 'You have no tokens yet: open some pulls!',
     ready: 'READY', win: 'Victory!', lose: 'Defeat…', draw: 'Draw', again: 'Play again', back: 'Back', bot: 'Bot', you: 'You', mvp: 'Best token',
     quit: 'Forfeit the battle?', eff: 'Effective!', weak: 'Not effective', dodge: 'Dodge', miss: 'Miss', crit: 'CRIT', revive: 'Revived!', time: 'Time’s up',
@@ -269,7 +269,7 @@ function startFight(teams, seed, names) {
     <div class="ar-top"><button class="ar-x" aria-label="${t('close')}">✕</button><b class="ar-round" id="ar-round"></b><button class="ar-x" data-help aria-label="?">?</button></div>
     <div class="ar-pl foe"><b>${esc(names[1])}</b><div class="ar-life"><i></i><em></em></div><span class="ar-guard"></span></div>
     <div class="ar-row foe" id="ar-row1">${FIGHT.st.teams[1].map(unitHTML).join('')}</div>
-    <div class="ar-lanes" id="ar-lanes">${[0, 1, 2].map(l => `<button class="ar-lane" data-lane="${l}"><span>${atList('lanes')[l]}</span><div class="ar-slotf"></div><div class="ar-slotm"></div></button>`).join('')}</div>
+    <div class="ar-lanes" id="ar-lanes">${[0, 1, 2].map(l => `<button class="ar-lane" data-lane="${l}"><span>${atList('lanes')[l]}</span><em class="ar-lhint">${at('laneHint')}</em><div class="ar-slotf"></div><div class="ar-slotm"></div></button>`).join('')}</div>
     <div class="ar-row me" id="ar-row0">${FIGHT.st.teams[0].map(unitHTML).join('')}</div>
     <div class="ar-pl me"><b>${esc(names[0])}</b><div class="ar-life"><i></i><em></em></div><span class="ar-guard"></span></div>
     <div class="ar-bar" id="ar-bar"></div>`;
@@ -289,14 +289,33 @@ function startFight(teams, seed, names) {
     if (e.target.closest('[data-abil]')) { FIGHT.abil = !FIGHT.abil; sfx.click(); drawBar(); }
   };
   o.querySelector('.ar-x').onclick = async () => { if (FIGHT.st.over || await ask(at('quit'))) closeFight(); };
-  o.querySelector('[data-help]').onclick = () => toast(at('howText'));
+  o.querySelector('[data-help]').onclick = () => fightTuto();
   FIGHT.recap = '';
   refresh();
   intro(names, teams);
 }
 // Écran d'entrée : les deux équipes arrivent de chaque côté, « VS » au milieu
+// Mini-tuto (3 écrans) avant le tout premier combat ; le bouton « ? » le rouvre
+function fightTuto() {
+  return new Promise(res => {
+    const o = $('arena'), box = document.createElement('div'); box.className = 'ar-tuto';
+    const steps = [['🎯', at('tuto1t'), at('tuto1')], ['🫣', at('tuto2t'), at('tuto2')], ['⚔️', at('tuto3t'), at('tuto3')]];
+    let k = 0;
+    const draw = () => {
+      const [ico, ti, tx] = steps[k];
+      box.innerHTML = `<div class="ar-tutoc"><div class="ar-tutoi">${ico}</div><small>${k + 1} / 3</small><h3>${ti}</h3><p>${tx}</p>
+        <div class="tuto-dots">${steps.map((_, i) => `<i class="${i === k ? 'on' : ''}"></i>`).join('')}</div>
+        <button class="btn primary">${k < 2 ? t('tuto_next') + ' ›' : at('tutoGo')}</button></div>`;
+      anim(box.querySelector('.ar-tutoc'), [{ opacity: 0, transform: 'translateY(16px) scale(.96)' }, { opacity: 1, transform: 'none' }], { duration: 280, easing: 'cubic-bezier(.2, 1.1, .4, 1)' });
+    };
+    draw(); o.appendChild(box);
+    box.onclick = e => { if (!e.target.closest('.btn')) return; sfx.click(); if (++k < 3) return draw(); box.remove(); try { localStorage.setItem('takoras-fight-tuto', '1'); } catch {} res(); };
+  });
+}
 async function intro(names, teams) {
   FIGHT.busy = true;
+  let seen = '1'; try { seen = localStorage.getItem('takoras-fight-tuto'); } catch {}
+  if (seen !== '1') await fightTuto();
   const o = $('arena'), v = document.createElement('div'); v.className = 'ar-vs';
   const row = (side) => `<div class="ar-vsside s${side}"><b>${esc(names[side])}</b><div>${FIGHT.st.teams[side].map(u => `<img class="${vCls(u.variant)}" src="${texOf(jetonOf(u.name))}" alt="">`).join('')}</div></div>`;
   v.innerHTML = `${row(1)}<div class="ar-vsmid">VS</div>${row(0)}`;
@@ -360,6 +379,8 @@ function refresh() {
     c.classList.toggle('foepick', u.side === 1 && FIGHT.foePick === u.i && FIGHT.phase === 'lane');
     c.querySelector('.ar-ust').textContent = [u.curse > 0 && '💀', u.rust && '🧲', u.noHeal && '🥀', tired && '💤'].filter(Boolean).join(' ');
   }
+  $('arena')?.classList.toggle('ph-token', FIGHT.phase === 'token' && !st.over);
+  $('arena')?.classList.toggle('ph-lane', FIGHT.phase === 'lane');
   document.querySelectorAll('.ar-lane').forEach(b => {
     const l = +b.dataset.lane;
     b.classList.toggle('pick', FIGHT.phase === 'lane' && FIGHT.lane === l);
@@ -374,24 +395,27 @@ function drawBar() {
   if (FIGHT.phase === 'resolve' || st.over) { bar.innerHTML = ''; return; }
   if (FIGHT.phase === 'token') {
     const off = st.teams[1].filter(u => u.alive && !CB.playable(st, 1).includes(u.i)).map(u => jn(u.name));
-    bar.innerHTML = `${FIGHT.recap ? `<div class="ar-recap">${FIGHT.recap}</div>` : ''}<p>${at('phaseToken')}${off.length ? `<br><small class="ar-foeoff">${at('foeCant', { n: off.join(', ') })}</small>` : ''}</p><button class="btn primary" data-ok ${FIGHT.sel == null ? 'disabled' : ''}>${at('ok')}</button>`;
+    // étape ① : un seul geste, toucher un jeton (il est choisi tout de suite)
+    bar.innerHTML = `${FIGHT.recap ? `<div class="ar-recap">${FIGHT.recap}</div>` : ''}
+      <div class="ar-step"><span>1</span><b>${at('step1')}</b></div>
+      ${off.length ? `<small class="ar-foeoff">${at('foeCant', { n: off.join(', ') })}</small>` : ''}`;
     return;
   }
+  // étape ② : toucher ou glisser vers un endroit = posé tout de suite ; la capacité s'allume avant si on veut
   const me = st.teams[0][FIGHT.sel], foe = st.teams[1][FIGHT.foePick], [an, ad] = skillsOf(me.name);
-  bar.innerHTML = `<p>${at('phaseLane', { a: jn(me.name), b: jn(foe.name) })}<br><small>${at('dragHint')}</small></p>
-    <div class="ar-barr">
-      ${me.used ? `<span class="ar-abil off">✦ ${esc(an)} · ${at('usedAb')}</span>` : `<button class="ar-abil${FIGHT.abil ? ' on' : ''}" data-abil title="${esc(ad)}">✦ ${esc(an)}<small>${esc(ad)}</small></button>`}
-      <button class="btn primary" data-ok ${FIGHT.lane == null ? 'disabled' : ''}>${at('place')}</button>
-    </div>`;
+  bar.innerHTML = `<div class="ar-step"><span>2</span><b>${at('step2')}</b></div>
+    <small class="ar-vsline">${at('phaseLane', { a: jn(me.name), b: jn(foe.name) })}</small>
+    ${me.used ? `<span class="ar-abil off">✦ ${esc(an)} · ${at('usedAb')}</span>` : `<button class="ar-abil big${FIGHT.abil ? ' on' : ''}" data-abil><span>✦ ${FIGHT.abil ? at('abilOn') : at('abilOff')} : <b>${esc(an)}</b></span><small>${esc(ad)}</small></button>`}`;
 }
 function pickToken(i) {
   if (FIGHT.phase !== 'token' || FIGHT.busy) { const u = FIGHT.st.teams[0][i]; return unitInfo(u); }
-  if (!CB.playable(FIGHT.st, 0).includes(i)) { sfx.deny(); return toast(at('tired'), true); }
+  if (!CB.playable(FIGHT.st, 0).includes(i)) { sfx.deny(); anim(unitEl({ side: 0, i }), [{ transform: 'translateX(-6px)' }, { transform: 'translateX(6px)' }, { transform: 'none' }], { duration: 240 }); return toast(at('tired'), true); }
   FIGHT.sel = i; sfx.click(); refresh();
+  FIGHT.busy = true; setTimeout(() => { FIGHT.busy = false; fightConfirm(); }, 220); // choisi tout de suite, pas de bouton « Valider »
 }
 function pickLane(l) {
-  if (FIGHT.phase !== 'lane') return;
-  FIGHT.lane = l; sfx.click(); refresh();
+  if (FIGHT.phase !== 'lane' || FIGHT.busy) return;
+  FIGHT.lane = l; sfx.click(); refresh(); fightConfirm(); // posé tout de suite, pas de bouton « Poser ici »
 }
 function unitInfo(u) { sfx.click(); openSheet({ name: u.name, variant: u.variant, lvl: u.lvl, unit: u }); }
 
