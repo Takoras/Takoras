@@ -12,13 +12,11 @@ const TIER_NAMES = [[60, 'r_common'], [1000, 'r_rare'], [10000, 'r_epic'], [1000
 const tierKey = odds => TIER_NAMES.find(([m]) => odds < m)[1];
 const strHash = s => [...String(s ?? "")].reduce((h, c) => (h * 31 + c.charCodeAt(0)) >>> 0, 7);
 // Stats de combat : les rares sont un peu plus forts, mais pas trop (la capacité et le pile ou face comptent plus)
-const STAT_MAX = { s_hp: 140, s_atk: 30, s_def: 10, s_spd: 20 };
+// Mêmes stats que le combat (combat-engine.js), au niveau 1 sans variante. Barres à 100 % ≈ un Takoras niveau 1.
+const STAT_MAX = { s_hp: 1850, s_atk: 82, s_def: 32, s_spd: 125 };
 function statsOf(name, odds) {
-  const lvl = Math.log10(Math.max(1, odds)) / 6, h = strHash(name);
-  const r = i => ((h >>> (i * 5)) % 31) / 30 - .5; // petite variation propre à chaque jeton (-0,5 à 0,5)
-  const s = { s_hp: Math.round(100 + 30 * lvl + 8 * r(0)), s_atk: Math.round(20 + 7 * lvl + 3 * r(1)), s_def: Math.round(4 + 4 * lvl + 2 * r(2)), s_spd: Math.round(10 + 7 * lvl + 4 * r(3)) };
-  s.power = Math.round(s.s_hp / 2 + s.s_atk * 3 + s.s_def * 5 + s.s_spd * 2);
-  return s;
+  const c = CB.stats(name, odds);
+  return { s_hp: c.hp, s_atk: c.atk, s_def: c.def, s_spd: c.spd, power: CB.power(c) };
 }
 const jetonOf = name => SERIES.Takoras.find(j => j.name === name) || { name, odds: 1, glow: '#ffffff' };
 

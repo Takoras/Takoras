@@ -40,7 +40,7 @@
       <div class="sh-grid">
         ${tile('board', 'board', t('nav_board'))}
         ${ACC.user ? tile('profile', 'profile', t('my_profile')) : ''}
-        ${admin ? tile('combat', 'combat', t('nav_combat')) : ''}
+        ${tile('combat', 'combat', t('nav_combat'))}
         ${ACC.tester ? tile('tester', 'flask', t('tester_menu')) : ''}
         ${tile('tuto', 'help', t('tuto_again'))}
         ${tile('feedback', 'idea', t('fb_btn'))}
