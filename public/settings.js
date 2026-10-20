@@ -9,23 +9,13 @@ const saveSettings = () => { try { localStorage.setItem('takoras-settings', JSON
 // Vitesse des ouvertures : facteur appliqué aux durées (rotation, blocage…)
 const SPEED = { normal: 1, rapide: .5, instant: 0 };
 const speed = () => SPEED[SETTINGS.speed] ?? 1;
-// Effets « Auto » : allégés si l'ordi est lent (peu de cœurs / de mémoire, ou images par seconde trop basses au chargement)
-let LOWFX = false;
-try { LOWFX = localStorage.getItem('takoras-lowfx') === '1'; } catch {}
-if ((navigator.hardwareConcurrency || 8) <= 2 || (navigator.deviceMemory || 8) <= 2) LOWFX = true;
+// Effets « Auto » : allégés seulement sur un appareil vraiment faible (2 cœurs ou 2 Go de mémoire maximum).
+// (L'ancienne mesure des images/s se trompait : une fenêtre en arrière-plan ou l'économiseur de batterie de Chrome
+// faisaient croire à un ordi lent et coupaient l'effet « dessin » des jetons pour de bon.)
+const LOWFX = (navigator.hardwareConcurrency || 8) <= 2 || (navigator.deviceMemory || 8) <= 2;
+try { localStorage.removeItem('takoras-lowfx'); } catch {}
 const reducedFx = () => SETTINGS.fx === 'reduced' || (SETTINGS.fx === 'auto' && LOWFX);
 const applyFx = () => document.documentElement.classList.toggle('reduce-fx', reducedFx());
-// On mesure la fluidité pendant ~3 s après le chargement : sous ~40 images/s en moyenne, on passe en effets allégés (et on s'en souvient)
-addEventListener('load', () => setTimeout(() => {
-  if (document.hidden) return;
-  const ts = []; const t0 = performance.now();
-  (function f(t) { ts.push(t); if (t - t0 < 3000) requestAnimationFrame(f); else {
-    const d = ts.slice(1).map((x, i) => x - ts[i]).sort((a, b) => a - b), med = d[d.length >> 1] || 16, slow = d.filter(x => x > 40).length / (d.length || 1);
-    if (document.hidden) return;
-    const low = med > 34 && slow > .4; // vraiment lent (moins de ~30 images/s la plupart du temps) : sinon on garde tous les effets
-    if (low !== LOWFX && (low || !(navigator.hardwareConcurrency <= 2))) { LOWFX = low; try { localStorage.setItem('takoras-lowfx', low ? '1' : '0'); } catch {} applyFx(); }
-  } })(t0);
-}, 1500));
 const LOCALE = () => (SETTINGS.lang === 'en' ? 'en-US' : 'fr-FR');
 
 const I18N = {
