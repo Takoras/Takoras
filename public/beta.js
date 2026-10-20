@@ -113,6 +113,9 @@ const markPatchSeen = () => { try { localStorage.setItem('takoras-pn-seen', Stri
 async function patchPopup() {
   await loadPatchnotes();
   const last = BETA.notes[0]; if (!last) return;
+  // tout nouveau joueur : il a le tuto, pas besoin de la dernière patch note en plus
+  let tuto = '1'; try { tuto = localStorage.getItem('takoras-tuto-done'); } catch {}
+  if (tuto !== '1') return markPatchSeen();
   let seen = 0; try { seen = +localStorage.getItem('takoras-pn-seen') || 0; } catch {}
   if (last.id <= seen) return;
   setTimeout(function show() {
