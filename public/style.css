@@ -2267,3 +2267,7 @@ html.reduce-fx .ar-u.ready { animation: none; }
   .tp-box.detail .tp-right { transform: none; }
   .tp-back { display: inline-block; margin-bottom: 10px; padding: 7px 14px; border-radius: 99px; font-weight: 700; color: var(--text); background: rgba(255, 255, 255, .07); }
 }
+/* Onglets des collections dans le choix des jetons (dès qu'il y en a plus d'une) */
+.tp-series { display: flex; gap: 6px; flex-wrap: wrap; padding: 14px 18px 0; }
+.tp-series button { padding: 8px 16px; border-radius: 12px; font-weight: 700; color: var(--muted); background: rgba(255, 255, 255, .04); border: 1px solid var(--border); }
+.tp-series button.on { color: #fff; background: linear-gradient(135deg, rgba(139, 92, 246, .35), rgba(249, 115, 22, .2)); border-color: rgba(139, 92, 246, .7); }

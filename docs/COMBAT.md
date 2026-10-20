@@ -56,3 +56,13 @@
 ## Règles techniques
 - Le moteur (`public/combat-engine.js`) est **déterministe** : mêmes équipes + même graine + mêmes choix = même combat.
   Pour le classé (étape 2), chaque joueur envoie ses choix au serveur, qui résout la manche : impossible de tricher.
+
+## Ajouter une nouvelle collection (série)
+Le combat est prêt pour plusieurs collections : l'équipe, les niveaux (`token_levels`), le choix des jetons
+(un onglet par collection) et le robot (il pioche dans la même collection) utilisent tous « collection + jeton ».
+Pour une nouvelle collection, il faut :
+1. l'ajouter dans `SERIES` (`public/opening.js`) et dans la table `jetons` (serveur) ;
+2. donner un **élément** à chaque nouveau jeton dans `EL` (`public/combat-engine.js`) ;
+3. écrire sa **capacité et son passif** : texte FR/EN dans `SKILLS` (`public/arena.js`), effet dans `ABIL`
+   (`public/combat-engine.js`), animation dans `public/arena-fx.js` (sinon une animation générique est utilisée).
+Sans ça, un nouveau jeton reçoit par défaut l'élément Eau et la capacité de Mobu.

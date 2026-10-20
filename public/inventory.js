@@ -225,7 +225,7 @@ function onCardClick(e) {
   if (!x) {
     if (INV.selecting) return;
     if (!c) return openJeton(card.dataset.n, `<p class="muted bst-unk">🔒 ${t('bst_unknown')}</p>`, '', true);
-    return openJeton(card.dataset.n, `<p class="muted">${t('bst_got', { n: c.total })} · ${t('inv_have', { n: 0 })}</p>${bstVars(c)}${combatInfoHTML(card.dataset.n, 0)}`, INV.vtab);
+    return openJeton(card.dataset.n, `<p class="muted">${t('bst_got', { n: c.total })} · ${t('inv_have', { n: 0 })}</p>${bstVars(c)}${combatInfoHTML(card.dataset.n, 0, INV.serie)}`, INV.vtab);
   }
   const step = e.target.closest('[data-d]');
   if (INV.selecting) {
@@ -240,7 +240,7 @@ function onCardClick(e) {
   openJeton(x.name, `
     <p class="muted">${t('inv_have', { n: x.ids.length })}${x.shown ? ' · 📌 ' + t('shown_n', { n: x.shown }) : ''}${c ? ' · ' + t('bst_got', { n: c.total }) : ''}${x.luck > 1 ? ` · 🍀 ${t('best_luck', { l: fmtLuck(x.luck) })}` : ''}</p>
     ${c ? bstVars(c) : ''}
-    ${combatInfoHTML(x.name, INV.groups.filter(g => g.name === x.name).reduce((s, g) => s + g.ids.length, 0))}
+    ${combatInfoHTML(x.name, INV.groups.filter(g => g.name === x.name && g.serie === x.serie).reduce((s, g) => s + g.ids.length, 0), x.serie)}
     <div class="jm-actions">
       ${x.free.length ? `<button class="btn primary" data-a="sell1">${t('sell_one')} · +${money(sellValue(x.odds, x.variant))}</button>` : ''}
       ${x.free.length > 1 ? `<button class="btn ghost" data-a="selldupes">${t('sell_dupes', { n: x.ids.length - 1 })}</button>` : ''}
@@ -248,7 +248,7 @@ function onCardClick(e) {
     </div>`, x.variant);
   $('jm-card').onclick = async ev => {
     const up = ev.target.closest('[data-lvlup]');
-    if (up) { up.disabled = true; if (await levelUp(up.dataset.lvlup)) { jm.classList.remove('on'); await Promise.all([loadInventory(), loadCollection()]); drawInventory('sell'); } else up.disabled = false; return; }
+    if (up) { up.disabled = true; if (await levelUp(up.dataset.lvlup, up.dataset.serie)) { jm.classList.remove('on'); await Promise.all([loadInventory(), loadCollection()]); drawInventory('sell'); } else up.disabled = false; return; }
     const a = ev.target.closest('[data-a]')?.dataset.a; if (!a) return;
     if (a === 'sell1') await sellIds([x.free[0]]);
     if (a === 'selldupes') await sellIds(x.free.slice(0, x.ids.length - 1));

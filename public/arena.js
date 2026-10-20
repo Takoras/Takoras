@@ -56,7 +56,7 @@ const AT = {
   fr: { title: 'Combat', sub: 'Choisis 3 jetons et affronte le robot. Le classé avec les rangs arrive bientôt.', team: 'Ton équipe',
     slots: ['Jeton 1', 'Jeton 2', 'Jeton 3'], lanes: ['Gauche', 'Milieu', 'Droite'], pick: 'Choisir', train: '⚔️ Entraînement contre le robot', ranked: '🏆 Classé', soon: 'Bientôt : rangs Bronze → Légende, saisons et battle pass',
     need3: 'Choisis 3 jetons pour combattre', els: 'Éléments', elsHelp: '🔥 bat 🌿 · 🌿 bat 💧 · 💧 bat 🔥 · ✨ et 🌑 forts l’un contre l’autre (×1,3 de dégâts)',
-    how: 'Comment ça marche', howText: 'À chaque manche, vous choisissez chacun un jeton (on voit celui de l’autre), puis vous le posez <b>à gauche, au milieu ou à droite</b> sans voir où l’autre le met. <b>Même endroit</b> : les deux jetons se battent. <b>Endroits différents</b> : chacun frappe le joueur d’en face. Chaque capacité ne sert qu’<b>une fois</b> par combat. Un jeton joué se repose la manche suivante.', round: 'Manche {n}', normal: 'Normal', stHp: 'PV', stAtk: 'Attaque', stDef: 'Défense', stCurse: 'maudit', stRust: 'rouillé (−30 % déf.)', stNoHeal: 'ne peut plus être soigné', inTeam: 'déjà dans l’équipe', version: 'Version', chooseThis: 'Prendre ce jeton', dragHint: 'Glisse ton jeton sur un endroit, ou touche un endroit puis « Poser ici ».', phaseToken: 'Choisis ton jeton pour cette manche', phaseLane: 'Tu joues <b>{a}</b>, il joue <b>{b}</b>. Où poses-tu ton jeton ?', ok: 'Valider', place: 'Poser ici', usedAb: 'déjà utilisée', tired: 'Ce jeton se repose cette manche', clash: 'Croisement !', block: 'Protégé', dazzled: 'Ébloui', recharged: 'Capacité rechargée', frozenL: 'Gelé', rounds: '{n} manches', dmgWord: 'dégâts',
+    how: 'Comment ça marche', howText: 'À chaque manche, vous choisissez chacun un jeton (on voit celui de l’autre), puis vous le posez <b>à gauche, au milieu ou à droite</b> sans voir où l’autre le met. <b>Même endroit</b> : les deux jetons se battent. <b>Endroits différents</b> : chacun frappe le joueur d’en face. Chaque capacité ne sert qu’<b>une fois</b> par combat. Un jeton joué se repose la manche suivante.', round: 'Manche {n}', needLogin: 'Connecte-toi pour monter ton équipe et combattre.', normal: 'Normal', stHp: 'PV', stAtk: 'Attaque', stDef: 'Défense', stCurse: 'maudit', stRust: 'rouillé (−30 % déf.)', stNoHeal: 'ne peut plus être soigné', inTeam: 'déjà dans l’équipe', version: 'Version', chooseThis: 'Prendre ce jeton', dragHint: 'Glisse ton jeton sur un endroit, ou touche un endroit puis « Poser ici ».', phaseToken: 'Choisis ton jeton pour cette manche', phaseLane: 'Tu joues <b>{a}</b>, il joue <b>{b}</b>. Où poses-tu ton jeton ?', ok: 'Valider', place: 'Poser ici', usedAb: 'déjà utilisée', tired: 'Ce jeton se repose cette manche', clash: 'Croisement !', block: 'Protégé', dazzled: 'Ébloui', recharged: 'Capacité rechargée', frozenL: 'Gelé', rounds: '{n} manches', dmgWord: 'dégâts',
     pickTitle: 'Choisis un jeton', lvl: 'Niv.', power: 'Puissance', ability: 'Capacité', passive: 'Passif', remove: 'Retirer', none: 'Tu n’as pas encore de jeton : ouvre des pulls !',
     ready: 'PRÊT', win: 'Victoire !', lose: 'Défaite…', draw: 'Égalité', again: 'Rejouer', back: 'Retour', bot: 'Robot', you: 'Toi', mvp: 'Meilleur jeton',
     quit: 'Abandonner le combat ?', eff: 'Efficace !', weak: 'Peu efficace', dodge: 'Esquive', miss: 'Raté', crit: 'CRITIQUE', revive: 'Ressuscité !', time: 'Temps écoulé',
@@ -64,7 +64,7 @@ const AT = {
   en: { title: 'Battle', sub: 'Pick 3 tokens and fight the bot. Ranked with tiers is coming soon.', team: 'Your team',
     slots: ['Token 1', 'Token 2', 'Token 3'], lanes: ['Left', 'Middle', 'Right'], pick: 'Pick', train: '⚔️ Training vs the bot', ranked: '🏆 Ranked', soon: 'Soon: Bronze → Legend tiers, seasons and battle pass',
     need3: 'Pick 3 tokens to fight', els: 'Elements', elsHelp: '🔥 beats 🌿 · 🌿 beats 💧 · 💧 beats 🔥 · ✨ and 🌑 strong against each other (×1.3 damage)',
-    how: 'How it works', howText: 'Each round, you both pick a token (you see each other’s), then place it <b>left, middle or right</b> without seeing where the other puts theirs. <b>Same spot</b>: the two tokens fight. <b>Different spots</b>: each hits the opposing player. Each ability can only be used <b>once</b> per battle. A token that just played rests the next round.', round: 'Round {n}', normal: 'Normal', stHp: 'HP', stAtk: 'Attack', stDef: 'Defense', stCurse: 'cursed', stRust: 'rusted (−30% def.)', stNoHeal: 'can no longer be healed', inTeam: 'already in the team', version: 'Version', chooseThis: 'Take this token', dragHint: 'Drag your token onto a spot, or tap a spot then “Place here”.', phaseToken: 'Pick your token for this round', phaseLane: 'You play <b>{a}</b>, they play <b>{b}</b>. Where do you place your token?', ok: 'Confirm', place: 'Place here', usedAb: 'already used', tired: 'This token is resting this round', clash: 'Clash!', block: 'Protected', dazzled: 'Dazzled', recharged: 'Ability recharged', frozenL: 'Frozen', rounds: '{n} rounds', dmgWord: 'damage',
+    how: 'How it works', howText: 'Each round, you both pick a token (you see each other’s), then place it <b>left, middle or right</b> without seeing where the other puts theirs. <b>Same spot</b>: the two tokens fight. <b>Different spots</b>: each hits the opposing player. Each ability can only be used <b>once</b> per battle. A token that just played rests the next round.', round: 'Round {n}', needLogin: 'Log in to build your team and fight.', normal: 'Normal', stHp: 'HP', stAtk: 'Attack', stDef: 'Defense', stCurse: 'cursed', stRust: 'rusted (−30% def.)', stNoHeal: 'can no longer be healed', inTeam: 'already in the team', version: 'Version', chooseThis: 'Take this token', dragHint: 'Drag your token onto a spot, or tap a spot then “Place here”.', phaseToken: 'Pick your token for this round', phaseLane: 'You play <b>{a}</b>, they play <b>{b}</b>. Where do you place your token?', ok: 'Confirm', place: 'Place here', usedAb: 'already used', tired: 'This token is resting this round', clash: 'Clash!', block: 'Protected', dazzled: 'Dazzled', recharged: 'Ability recharged', frozenL: 'Frozen', rounds: '{n} rounds', dmgWord: 'damage',
     pickTitle: 'Pick a token', lvl: 'Lv.', power: 'Power', ability: 'Ability', passive: 'Passive', remove: 'Remove', none: 'You have no tokens yet: open some pulls!',
     ready: 'READY', win: 'Victory!', lose: 'Defeat…', draw: 'Draw', again: 'Play again', back: 'Back', bot: 'Bot', you: 'You', mvp: 'Best token',
     quit: 'Forfeit the battle?', eff: 'Effective!', weak: 'Not effective', dodge: 'Dodge', miss: 'Miss', crit: 'CRIT', revive: 'Revived!', time: 'Time’s up',
@@ -75,31 +75,32 @@ const atList = k => (AT[SETTINGS.lang] || AT.fr)[k];
 const at = (k, v = {}) => String((AT[SETTINGS.lang] || AT.fr)[k] ?? AT.fr[k]).replace(/\{(\w+)\}/g, (_, x) => v[x] ?? '');
 
 const ARENA = { levels: {}, team: [null, null, null] };
-const lvlOf = name => ARENA.levels[name] || 1;
+// niveau d'un jeton dans sa collection (plusieurs collections : la clé est « collection|jeton »)
+const lvlOf = (name, serie = 'Takoras') => ARENA.levels[(serie || 'Takoras') + '|' + name] || 1;
 async function loadLevels() {
   const { data } = await sb.rpc('my_levels');
-  ARENA.levels = {}; (data || []).forEach(r => { ARENA.levels[r.jeton] = r.lvl; });
+  ARENA.levels = {}; (data || []).forEach(r => { ARENA.levels[(r.serie || 'Takoras') + '|' + r.jeton] = r.lvl; });
 }
 const VRANK = { '': 0, gold: 1, celeste: 2, ombre: 3 };
 
 // ---------- Page Combat
 async function renderCombat() {
   const page = $('page-combat');
-  if (!ACC.user) { page.innerHTML = `<div class="page-empty"><h2>${at('title')}</h2><p class="muted">${t('acc_need')}</p><button class="btn primary" onclick="openAccount('login')">${t('login')}</button></div>`; return; }
+  if (!ACC.user) { page.innerHTML = `<div class="page-empty"><h2>${at('title')}</h2><p class="muted">${at('needLogin')}</p><button class="btn primary" onclick="openAccount('login')">${t('login')}</button></div>`; return; }
   await Promise.all([loadInventory(), loadLevels(), (async () => {
     const { data } = await sb.rpc('my_deck');
-    ARENA.team = [0, 1, 2].map(i => data?.[i] ? { id: data[i].id, name: data[i].jeton, odds: data[i].odds, variant: data[i].variant || '' } : null);
+    ARENA.team = [0, 1, 2].map(i => data?.[i] ? { id: data[i].id, serie: data[i].serie || 'Takoras', name: data[i].jeton, odds: data[i].odds, variant: data[i].variant || '' } : null);
   })()]);
   drawCombat();
 }
 function teamCard(u, i) {
   if (!u) return `<button class="ar-slot empty" data-slot="${i}"><span class="ar-pos">${slotName(i)}</span><b>＋</b><small>${at('pick')}</small></button>`;
-  const j = jetonOf(u.name), el = CB.elOf(u.name), s = CB.stats(u.name, u.odds, lvlOf(u.name), u.variant), [an] = skillsOf(u.name);
+  const j = jetonOf(u.name, u.serie), el = CB.elOf(u.name), s = CB.stats(u.name, u.odds, lvlOf(u.name, u.serie), u.variant), [an] = skillsOf(u.name);
   return `<button class="ar-slot" data-slot="${i}" style="--g:${hexRGB(j.glow)};--el:${ELS[el].col}">
     <span class="ar-pos">${slotName(i)}</span><span class="ar-el" title="${elName(el)}">${ELS[el].ico}</span>
     <img class="${vCls(u.variant)}" src="${texOf(j)}" alt="">
     <b>${jnH(u.name)}${vTag(u.variant)}</b>
-    <small>${at('lvl')} ${lvlOf(u.name)} · ⚡${fmt(CB.power(s))}</small>
+    <small>${at('lvl')} ${lvlOf(u.name, u.serie)} · ⚡${fmt(CB.power(s))}</small>
     <small class="ar-ab">✦ ${esc(an)}</small>
   </button>`;
 }
@@ -125,7 +126,7 @@ function drawCombat() {
 // ---------- Fiche complète d'un jeton (équipe, choix, combat) : stats, élément, capacité, passif, état en combat
 const SHEET_MAX = { hp: 330, atk: 140, def: 55 };
 function tokenSheetHTML(o) {
-  const j = jetonOf(o.name), el = CB.elOf(o.name), lvl = o.lvl || lvlOf(o.name), s = CB.stats(o.name, j.odds, lvl, o.variant || ''), [an, ad, pn, pd] = skillsOf(o.name), u = o.unit;
+  const j = jetonOf(o.name, o.serie), el = CB.elOf(o.name), lvl = o.lvl || lvlOf(o.name, o.serie), s = CB.stats(o.name, j.odds, lvl, o.variant || ''), [an, ad, pn, pd] = skillsOf(o.name), u = o.unit;
   const hp = u ? u.hp : Math.round(s.hp / 10), hpMax = u ? u.max : Math.round(s.hp / 10), atk = Math.round(u ? u.atk : s.atk), def = Math.round(u ? u.def : s.def);
   const bar = (label, v, max, txt) => `<div class="tk-bar"><span>${label}</span><div><i style="width:${Math.min(100, v / max * 100)}%"></i></div><b>${txt}</b></div>`;
   const status = u ? [u.used && '✦ ' + at('usedAb'), u.curse > 0 && '💀 ' + at('stCurse'), u.rust && '🧲 ' + at('stRust'), u.noHeal && '🥀 ' + at('stNoHeal'), !u.alive && '☠️ K.O.'].filter(Boolean) : [];
@@ -163,13 +164,16 @@ function openSheet(o) {
 const VBONUS_TXT = { '': 0, gold: 5, celeste: 10, ombre: 15 };
 function pickSlot(slot) {
   sfx.click();
-  const used = new Set(ARENA.team.filter((u, i) => u && i !== slot).map(u => u.name));
-  const by = {}; // jeton → { variante → id d'un exemplaire }
-  INV.groups.forEach(x => { (by[x.name] ||= { name: x.name, odds: x.odds, vars: {} }).vars[x.variant] = x.ids[0]; });
-  const bestV = g => Object.keys(g.vars).sort((a, b) => VRANK[b] - VRANK[a])[0];
-  const list = Object.values(by).sort((a, b) => b.odds - a.odds);
-  const cur = ARENA.team[slot];
-  const S = { el: 'all', name: cur?.name || list.find(u => !used.has(u.name))?.name || null, v: cur?.variant ?? null };
+  const key = (serie, name) => serie + '|' + name; // plusieurs collections : un jeton = collection + nom
+  const used = new Set(ARENA.team.filter((u, i) => u && i !== slot).map(u => key(u.serie || 'Takoras', u.name)));
+  const by = {}; // collection|jeton → { variante → id d'un exemplaire }
+  INV.groups.forEach(x => { (by[key(x.serie, x.name)] ||= { k: key(x.serie, x.name), serie: x.serie, name: x.name, odds: x.odds, vars: {} }).vars[x.variant] = x.ids[0]; });
+  // version par défaut : la normale (c'est au joueur de choisir une mutation), sinon la plus simple qu'il a
+  const baseV = g => Object.keys(g.vars).sort((a, b) => VRANK[a] - VRANK[b])[0];
+  const all = Object.values(by);
+  const series = seriesList().filter(sr => all.some(u => u.serie === sr));
+  const cur = ARENA.team[slot], curK = cur && key(cur.serie || 'Takoras', cur.name);
+  const S = { serie: cur?.serie || series[0] || 'Takoras', el: 'all', k: curK || all.find(u => !used.has(u.k))?.k || null, v: cur?.variant ?? null };
   const o = document.createElement('div');
   o.className = 'tp-box';
   o.innerHTML = `<div class="tp-panel">
@@ -177,6 +181,7 @@ function pickSlot(slot) {
       <div class="tp-hbtn">${cur ? `<button class="btn ghost sm" data-rm>✕ ${at('remove')}</button>` : ''}<button class="tp-x" data-close aria-label="${t('close')}">✕</button></div></div>
     <div class="tp-body">
       <div class="tp-left">
+        ${series.length > 1 ? `<div class="tp-series">${series.map(sr => `<button data-serie="${esc(sr)}">${esc(sr)}</button>`).join('')}</div>` : ''}
         <div class="tp-els">${['all', 'fire', 'water', 'plant', 'light', 'shadow'].map(e => `<button data-el="${e}">${e === 'all' ? t('all') : ELS[e].ico + ' ' + elName(e)}</button>`).join('')}</div>
         <div class="tp-grid" id="tp-grid"></div>
       </div>
@@ -191,12 +196,13 @@ function pickSlot(slot) {
 
   const drawGrid = () => {
     o.querySelectorAll('[data-el]').forEach(b => b.classList.toggle('on', b.dataset.el === S.el));
-    const vis = list.filter(u => S.el === 'all' || CB.elOf(u.name) === S.el);
+    o.querySelectorAll('[data-serie]').forEach(b => b.classList.toggle('on', b.dataset.serie === S.serie));
+    const vis = all.filter(u => u.serie === S.serie && (S.el === 'all' || CB.elOf(u.name) === S.el)).sort((a, b) => b.odds - a.odds);
     o.querySelector('#tp-grid').innerHTML = vis.map(u => {
-      const j = jetonOf(u.name), el = CB.elOf(u.name), off = used.has(u.name), bv = bestV(u);
-      return `<button class="tp-c${off ? ' off' : ''}${S.name === u.name ? ' sel' : ''}" data-n="${esc(u.name)}" style="--g:${hexRGB(j.glow)};--el:${ELS[el].col}">
-        <span class="tp-el">${ELS[el].ico}</span><span class="tp-lv">${at('lvl')}${lvlOf(u.name)}</span>
-        <img class="${vCls(bv)}" src="${texOf(j)}" alt="">
+      const j = jetonOf(u.name, u.serie), el = CB.elOf(u.name), off = used.has(u.k);
+      return `<button class="tp-c${off ? ' off' : ''}${S.k === u.k ? ' sel' : ''}" data-k="${esc(u.k)}" style="--g:${hexRGB(j.glow)};--el:${ELS[el].col}">
+        <span class="tp-el">${ELS[el].ico}</span><span class="tp-lv">${at('lvl')}${lvlOf(u.name, u.serie)}</span>
+        <img src="${texOf(j)}" alt="">
         <b>${jnH(u.name)}</b>
         <span class="tp-vd">${Object.keys(u.vars).filter(Boolean).map(v => `<i class="v-dot on ${v}"></i>`).join('')}</span>
         ${off ? `<small>${at('inTeam')}</small>` : `<small class="t-${tierKey(u.odds)}">1/${fmt(u.odds)}</small>`}
@@ -205,13 +211,13 @@ function pickSlot(slot) {
   };
   const drawRight = (anim = true) => {
     const R = o.querySelector('#tp-right');
-    if (!S.name) { R.innerHTML = `<p class="muted tp-empty">${at('none')}</p>`; return; }
-    const u = by[S.name], vs = Object.keys(u.vars).sort((a, b) => VRANK[a] - VRANK[b]);
-    if (S.v == null || !(S.v in u.vars)) S.v = bestV(u);
+    if (!S.k || !by[S.k]) { R.innerHTML = `<p class="muted tp-empty">${at('none')}</p>`; return; }
+    const u = by[S.k], vs = Object.keys(u.vars).sort((a, b) => VRANK[a] - VRANK[b]);
+    if (S.v == null || !(S.v in u.vars)) S.v = baseV(u);
     R.innerHTML = `<button class="tp-back" data-back>‹ ${at('back')}</button>
-      ${tokenSheetHTML({ name: S.name, variant: S.v, extra: `
+      ${tokenSheetHTML({ name: u.name, serie: u.serie, variant: S.v, extra: `
         <div class="tk-vp"><small>${at('version')}</small><div class="ar-vpick">${vs.map(x => `<button data-v="${x}" class="${x ? 'v-' + x : 'v-none'}${x === S.v ? ' on' : ''}">${x ? t('v_' + x) + ' +' + VBONUS_TXT[x] + '%' : at('normal')}</button>`).join('')}</div></div>
-        <button class="btn primary tk-choose" data-choose ${used.has(S.name) ? 'disabled' : ''}>${used.has(S.name) ? at('inTeam') : at('chooseThis')}</button>` })}`;
+        <button class="btn primary tk-choose" data-choose ${used.has(S.k) ? 'disabled' : ''}>${used.has(S.k) ? at('inTeam') : at('chooseThis')}</button>` })}`;
     if (anim && !reducedFx()) R.querySelector('.tk-sheet').animate([{ opacity: 0, transform: 'translateY(10px)' }, { opacity: 1, transform: 'none' }], { duration: 260, easing: 'cubic-bezier(.2, .9, .3, 1)' });
   };
   drawGrid(); drawRight(false);
@@ -220,23 +226,25 @@ function pickSlot(slot) {
     if (e.target.closest('[data-rm]')) { ARENA.team[slot] = null; return save(); }
     if (e.target.closest('[data-back]')) { o.classList.remove('detail'); return; }
     const el = e.target.closest('[data-el]'); if (el) { S.el = el.dataset.el; sfx.click(); return drawGrid(); }
+    const sr = e.target.closest('[data-serie]'); if (sr) { S.serie = sr.dataset.serie; S.el = 'all'; sfx.click(); return drawGrid(); }
     const c = e.target.closest('.tp-c');
-    if (c) { S.name = c.dataset.n; S.v = cur?.name === S.name ? cur.variant : null; sfx.click(); drawGrid(); drawRight(); o.classList.add('detail'); return; }
+    if (c) { S.k = c.dataset.k; S.v = curK === S.k ? cur.variant : null; sfx.click(); drawGrid(); drawRight(); o.classList.add('detail'); return; }
     const v = e.target.closest('[data-v]'); if (v) { S.v = v.dataset.v; sfx.click(); return drawRight(false); }
-    if (e.target.closest('[data-choose]') && S.name && !used.has(S.name)) {
-      const u = by[S.name]; ARENA.team[slot] = { id: u.vars[S.v], name: S.name, odds: u.odds, variant: S.v }; sfx.upgrade(); save();
+    if (e.target.closest('[data-choose]') && S.k && !used.has(S.k)) {
+      const u = by[S.k]; ARENA.team[slot] = { id: u.vars[S.v], serie: u.serie, name: u.name, odds: u.odds, variant: S.v }; sfx.upgrade(); save();
     }
   });
 }
 
 // ---------- Robot : une équipe de force proche de la tienne (mêmes paliers de rareté, niveaux proches)
 function botTeam(mine, rnd) {
-  const all = SERIES.Takoras, idx = n => all.findIndex(j => j.name === n), pickd = new Set();
+  const pickd = new Set();
   return mine.map(u => {
+    const all = SERIES[u.serie] || SERIES.Takoras, idx = n => all.findIndex(j => j.name === n); // le robot pioche dans la même collection
     let k = 0, cand;
     do { const i = Math.max(0, Math.min(all.length - 1, idx(u.name) + Math.round((rnd() - .5) * 4))); cand = all[i]; k++; } while (pickd.has(cand.name) && k < 20);
     pickd.add(cand.name);
-    return { name: cand.name, odds: cand.odds, lvl: Math.max(1, Math.min(10, lvlOf(u.name) + Math.round((rnd() - .5) * 2))), variant: '' };
+    return { name: cand.name, odds: cand.odds, lvl: Math.max(1, Math.min(10, lvlOf(u.name, u.serie) + Math.round((rnd() - .5) * 2))), variant: '' };
   });
 }
 
@@ -251,7 +259,7 @@ function startTraining() {
   if (!ARENA.team.every(Boolean)) return;
   const seed = (Math.random() * 2 ** 31) >>> 0;
   let s = seed; const rnd = () => { s = (s * 1664525 + 1013904223) >>> 0; return s / 4294967296; };
-  const mine = ARENA.team.map(u => ({ name: u.name, odds: u.odds, lvl: lvlOf(u.name), variant: u.variant }));
+  const mine = ARENA.team.map(u => ({ name: u.name, serie: u.serie, odds: u.odds, lvl: lvlOf(u.name, u.serie), variant: u.variant }));
   startFight([mine, botTeam(mine, rnd)], seed, [ACC.pseudo || at('you'), at('bot')]);
 }
 function startFight(teams, seed, names) {
@@ -557,21 +565,21 @@ function showResult() {
 }
 
 // ---------- Fiche d'un jeton (Bestiaire) : élément, capacité, passif, niveau et bouton pour monter de niveau
-function combatInfoHTML(name, owned = 0) {
-  const el = CB.elOf(name), [an, ad, pn, pd] = skillsOf(name), L = lvlOf(name);
-  const free = INV.groups.filter(x => x.name === name).reduce((s, x) => s + x.free.length, 0);
+function combatInfoHTML(name, owned = 0, serie = 'Takoras') {
+  const el = CB.elOf(name), [an, ad, pn, pd] = skillsOf(name), L = lvlOf(name, serie);
+  const free = INV.groups.filter(x => x.name === name && x.serie === serie).reduce((s, x) => s + x.free.length, 0);
   const can = L < 10 && free >= L && owned - L >= 1;
   return `<div class="ar-info" style="--el:${ELS[el].col}">
     <div class="ar-info-h"><span>${ELS[el].ico} ${elName(el)}</span><b>${at('lvl')} ${L}/10</b></div>
     <p><b>✦ ${esc(an)}</b> — ${esc(ad)}</p>
     <p><b>◈ ${esc(pn)}</b> — ${esc(pd)}</p>
-    ${owned ? (L >= 10 ? `<small class="muted">${at('lvlMax')}</small>` : `<button class="btn ghost ar-lvl" data-lvlup="${esc(name)}" ${can ? '' : 'disabled'}>⬆️ ${at('lvlUp', { n: L + 1 })} · ${at('lvlCost', { n: L })}</button>${can ? '' : `<small class="muted">${at('lvlNeed', { n: L, h: Math.max(0, Math.min(free, owned - 1)) })}</small>`}`) : ''}
+    ${owned ? (L >= 10 ? `<small class="muted">${at('lvlMax')}</small>` : `<button class="btn ghost ar-lvl" data-lvlup="${esc(name)}" data-serie="${esc(serie)}" ${can ? '' : 'disabled'}>⬆️ ${at('lvlUp', { n: L + 1 })} · ${at('lvlCost', { n: L })}</button>${can ? '' : `<small class="muted">${at('lvlNeed', { n: L, h: Math.max(0, Math.min(free, owned - 1)) })}</small>`}`) : ''}
   </div>`;
 }
-async function levelUp(name) {
-  const { data, error } = await sb.rpc('level_up', { p_jeton: name });
+async function levelUp(name, serie = 'Takoras') {
+  const { data, error } = await sb.rpc('level_up', { p_jeton: name, p_serie: serie });
   if (error) { sfx.deny(); toast(errText(error), true); return false; }
-  ARENA.levels[name] = data.lvl; sfx.upgrade(); toast('⬆️ ' + at('lvlOk', { j: jn(name), n: data.lvl }));
+  ARENA.levels[serie + '|' + name] = data.lvl; sfx.upgrade(); toast('⬆️ ' + at('lvlOk', { j: jn(name), n: data.lvl }));
   return true;
 }
 if (typeof ACC !== 'undefined' && ACC.user) loadLevels();

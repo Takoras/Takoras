@@ -15,11 +15,12 @@ const strHash = s => [...String(s ?? "")].reduce((h, c) => (h * 31 + c.charCodeA
 // Mêmes stats que le combat (combat-engine.js), avec le niveau du jeton (fusion de doublons) et la mutation.
 // PV à l'échelle du combat (comme dans la fiche du combat). Barres à 100 % ≈ un Takoras niveau 10.
 const STAT_MAX = { s_hp: 330, s_atk: 140, s_def: 55, s_spd: 125 };
-function statsOf(name, odds, variant = '', lvl = typeof lvlOf === 'function' ? lvlOf(name) : 1) {
+function statsOf(name, odds, variant = '', lvl = typeof lvlOf === 'function' ? lvlOf(name, typeof INV !== 'undefined' ? INV.serie : undefined) : 1) {
   const c = CB.stats(name, odds, lvl, variant);
   return { s_hp: Math.round(c.hp / 10), s_atk: c.atk, s_def: c.def, s_spd: c.spd, power: CB.power(c), lvl };
 }
-const jetonOf = name => SERIES.Takoras.find(j => j.name === name) || { name, odds: 1, glow: '#ffffff' };
+// Un jeton par son nom (et sa collection si on la connaît) : on cherche d'abord dans sa collection, puis dans toutes
+const jetonOf = (name, serie) => (serie && SERIES[serie]?.find(j => j.name === name)) || Object.values(SERIES).flat().find(j => j.name === name) || { name, odds: 1, glow: '#ffffff' };
 
 // ---------- Navigation entre pages : #inventaire, #boutique, #profil/Pseudo, #classement
 // Transition : les éléments de la page actuelle partent vers le haut en fondu, ceux de la nouvelle arrivent du bas un par un.
