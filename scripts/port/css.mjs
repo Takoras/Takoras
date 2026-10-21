@@ -8,6 +8,7 @@ const OUT = [
   ['src/engines/ring.css', /\.(rg|rs)(-|\b)/],
   ['src/engines/cinema.css', /\.cine(-|\b)|\.cinema\b/],
   ['src/engines/motion.css', /\.mo-fx\b/],
+  ['src/engines/opening.css', /\.(opening|op-[a-z-]+|fx|dust|rc(-[a-z]+)?|jeton|v-pop|stat)\b/],
   // classes communes de l'ancien site encore utilisées par le HTML des moteurs (boutons, étiquettes de variante)
   ['src/engines/legacy-base.css', /^\.btn\b|^\.vtag\b|^\.v-(gold|celeste|ombre)\b|^img\.v-|^\.v-(gold|celeste|ombre) img/],
 ];

@@ -8,8 +8,12 @@ import { sfx } from './sound.js';
 
 export { hexRGB, jetonOf, SERIES, texOf, sfx };
 
-// Lecture seule : les moteurs lisent SETTINGS.lang, SETTINGS.speed…
-export const SETTINGS = new Proxy({} as ReturnType<typeof useSettings.getState>, { get: (_o, k) => useSettings.getState()[k as keyof ReturnType<typeof useSettings.getState>] });
+// Les moteurs lisent SETTINGS.lang, SETTINGS.speed… et l'ouverture auto écrit SETTINGS.autoMin / autoVars
+type St = ReturnType<typeof useSettings.getState>;
+export const SETTINGS = new Proxy({} as St, {
+  get: (_o, k) => useSettings.getState()[k as keyof St],
+  set: (_o, k, v) => (useSettings.getState().set({ [k]: v } as Partial<St>), true),
+});
 export const reducedFx = () => rfx();
 export const speed = () => speedFactor();
 export const fmt = (n: number) => Number(n).toLocaleString(locale());
@@ -29,3 +33,56 @@ export const jnH = (name: string) => esc(jn(name));
 // Variantes : classe CSS et petite étiquette
 export const vCls = (v: string) => (v in VARIANTS ? ' v-' + v : '');
 export const vTag = (v: string) => (v in VARIANTS ? `<span class="vtag v-${v}">${esc(t('v_' + v))}</span>` : '');
+
+// ---------- Pour le moteur d'ouverture (opening + transitions de l'ancien site)
+import { sb } from '@/lib/supabase';
+import { qc } from '@/lib/queryClient';
+import { useAuth } from '@/lib/auth';
+import { errorText } from '@/api/rpc';
+import { toast as toastUI } from '@/ui/toast';
+import type { Me } from '@/api/queries';
+import { CB } from './combat-engine.js';
+import { RCFG } from './ring-config.js';
+export { sb, VARIANTS };
+export { vOdds } from '@/data/jetons';
+export { sparkStyle } from './sparks.js';
+
+export const $ = (id: string) => document.getElementById(id);
+export const LOCALE = () => locale();
+export const fmtLuck = (l: number | string) => Number(l).toLocaleString(locale(), { maximumFractionDigits: 2 });
+// Les toasts de l'ancien site peuvent contenir un peu de HTML : on n'affiche que le texte
+export const toast = (text: string, bad = false) => toastUI(String(text).replace(/<[^>]*>/g, ''), bad);
+export const errText = (e: unknown) => errorText(e, useSettings.getState().lang);
+export const saveSettings = () => undefined; // les réglages se sauvegardent tout seuls (SETTINGS écrit dans le store)
+
+// Le joueur, vu par les moteurs : session (useAuth) + état serveur (cache ['me'])
+const me = () => qc.getQueryData<Me>(['me', useAuth.getState().user?.id]);
+export const ACC = {
+  get user() { return useAuth.getState().user; },
+  get pseudo() { return me()?.pseudo ?? null; },
+  get isAdmin() { return !!me()?.admin; },
+  get tester() { return !!me()?.tester; },
+  get beta() { return !!me()?.beta; },
+  hist: [] as unknown[],
+};
+
+// Le seul type de pull (même objet que l'ancien site)
+export const PULLS = [{ group: '', name: 'Takoras', color: 'takoras', price: 100, free: true, img: '/img/jetons/takoras.png' }];
+
+// Stats affichées dans la fiche d'un jeton (même calcul que l'ancien ui.js)
+export const STAT_MAX = { s_mass: RCFG.STAT_MAX.mass, s_pow: RCFG.STAT_MAX.power, s_size: RCFG.STAT_MAX.r };
+export function statsOf(name: string, odds: number, variant = '', lvl = 1) {
+  const c = CB.stats(name, odds, lvl, variant);
+  return { s_mass: Math.round(c.mass * 100) / 100, s_pow: Math.round(c.power), s_size: c.r, power: CB.power(c), lvl };
+}
+
+// Crochets : ce que le moteur demande au reste du site (économie, historique…). React les branche au démarrage.
+export const host = {
+  openPulls: (n: number | 'all') => { void n; },
+  applyState: (st: unknown) => { void st; },
+  ecoDecorate: () => undefined,
+  accRecordPull: (j: unknown, serie?: string) => { void j; void serie; return false; },
+  loadLocalHist: (): unknown[] => [],
+  renderHist: () => undefined,
+  toggleAdmin: () => undefined,
+};

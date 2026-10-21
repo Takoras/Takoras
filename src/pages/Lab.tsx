@@ -57,6 +57,11 @@ export default function Lab() {
         {jetons.filter((j) => j.odds >= 1000).map((j) => (
           <Button key={j.name} size="sm" onClick={() => void CINE.play(j)}>Cinématique {j.name}</Button>
         ))}
+        <Button onClick={async () => {
+          const { buy } = await import('@/engines/opening.js');
+          const names = ['Mobu', 'Pikko', 'Givre', 'Soléo', 'Carmin', 'Vyolis', 'Nyx', 'Mobu', 'Astra', 'Koi'];
+          buy(names.length, names, [null, 'gold', null, null, 'celeste', null, null, null, null, 'ombre'], names.map(() => 1), null);
+        }}>Ouverture ×10 (simulée)</Button>
         <Button variant="danger" onClick={async () => setReport(await leakTest())}>Test de fuites (50 ×)</Button>
       </div>
       {report ? <pre data-testid="leak">{JSON.stringify(report, null, 2)}</pre> : null}
