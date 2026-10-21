@@ -98,6 +98,7 @@ export type Database = {
         stock: number;
         stock_last: string;
         stock_max: number;
+        tester: boolean;
       }>;
       promo_codes: T<{
         active: boolean;
@@ -187,6 +188,7 @@ export type Database = {
       admin_reset: { Args: { target: string | null }; Returns: number };
       admin_set_beta: { Args: { p_on: boolean }; Returns: undefined };
       admin_set_items: { Args: { p_item: string; p_qty: number; target: string }; Returns: undefined };
+      admin_set_tester: { Args: { p_on: boolean; target: string }; Returns: undefined };
       admin_set_pseudo: { Args: { p: string; target: string }; Returns: undefined };
       admin_shop: { Args: never; Returns: Json };
       admin_shop_reroll: { Args: never; Returns: undefined };
