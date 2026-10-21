@@ -1,5 +1,5 @@
-// Éléments et stats des jetons (aucune règle de combat pour l'instant : le combat est remis à zéro). Voir docs/COMBAT.md.
-// Les stats servent aux fiches, à l'équipe et aux niveaux ; elles serviront au futur combat.
+// Éléments (= familles) et stats affichées des jetons. Voir docs/COMBAT.md.
+// Les stats viennent de fight-config.js (FCFG), le combat lui-même est dans fight-engine.js (FE).
 
 const CB = (() => {
   // ---------- Éléments
@@ -16,22 +16,12 @@ const CB = (() => {
     if (BEATS[b] === a) return .8;
     return 1;
   }
-  const VBONUS = { gold: 1.05, celeste: 1.1, ombre: 1.15 };
-
-  // ---------- Stats (affichées dans les fiches) : un peu plus fort quand c'est rare ; niveaux et mutations comptent
-  const strHash = s => [...String(s ?? '')].reduce((h, c) => (h * 31 + c.charCodeAt(0)) >>> 0, 7);
+  // ---------- Stats affichées (fiches, équipe) : les mêmes que le combat (fight-config.js), avec niveau et mutation
   function stats(name, odds, lvl = 1, variant = '') {
-    const r = Math.log10(Math.max(1, odds)) / 6, h = strHash(name);
-    const v = i => ((h >>> (i * 5)) % 31) / 30 - .5;
-    const m = (1 + .08 * (Math.max(1, lvl) - 1)) * (VBONUS[variant] || 1);
-    return {
-      hp: Math.round((1150 + 600 * r + 70 * v(0)) * m),
-      atk: Math.round((50 + 28 * r + 4 * v(1)) * m),
-      def: Math.round((16 + 14 * r + 3 * v(2)) * m),
-      spd: Math.round(98 + 22 * r + 8 * v(3)),
-    };
+    const k = FCFG.TOKENS[name] || FCFG.DEFAULT_TOKEN, m = (1 + FCFG.LEVEL_BONUS * (Math.max(1, lvl) - 1)) * (FCFG.MUTATION[variant] || 1);
+    return { hp: Math.round(k.hp * m), atk: Math.round(k.atk * m), spd: Math.round(100 / k.spd) }; // vitesse : 100 = 1 attaque par seconde
   }
-  const power = s => Math.round(s.hp / 4 + s.atk * 4 + s.def * 6 + s.spd * 2);
+  const power = s => Math.round(s.hp / 5 + s.atk * 6 * s.spd / 100);
 
   return { EL, elOf, elMult, stats, power };
 })();

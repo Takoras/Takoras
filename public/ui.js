@@ -11,13 +11,12 @@ const sellValue = (odds, v) => Math.max(1, Math.round(odds * .5)) * (VARIANTS[v]
 const TIER_NAMES = [[60, 'r_common'], [1000, 'r_rare'], [10000, 'r_epic'], [100000, 'r_legend'], [Infinity, 'r_myth']];
 const tierKey = odds => TIER_NAMES.find(([m]) => odds < m)[1];
 const strHash = s => [...String(s ?? "")].reduce((h, c) => (h * 31 + c.charCodeAt(0)) >>> 0, 7);
-// Stats de combat : les rares sont un peu plus forts, mais pas trop (la capacité et le pile ou face comptent plus)
 // Mêmes stats que le combat (combat-engine.js), avec le niveau du jeton (fusion de doublons) et la mutation.
-// PV à l'échelle du combat (comme dans la fiche du combat). Barres à 100 % ≈ un Takoras niveau 10.
-const STAT_MAX = { s_hp: 330, s_atk: 140, s_def: 55, s_spd: 125 };
+// Barres à 100 % ≈ le jeton le plus fort au niveau 10 avec la meilleure mutation.
+const STAT_MAX = { s_hp: 4000, s_atk: 115, s_spd: 125 };
 function statsOf(name, odds, variant = '', lvl = typeof lvlOf === 'function' ? lvlOf(name, typeof INV !== 'undefined' ? INV.serie : undefined) : 1) {
   const c = CB.stats(name, odds, lvl, variant);
-  return { s_hp: Math.round(c.hp / 10), s_atk: c.atk, s_def: c.def, s_spd: c.spd, power: CB.power(c), lvl };
+  return { s_hp: c.hp, s_atk: c.atk, s_spd: c.spd, power: CB.power(c), lvl };
 }
 // Un jeton par son nom (et sa collection si on la connaît) : on cherche d'abord dans sa collection, puis dans toutes
 const jetonOf = (name, serie) => (serie && SERIES[serie]?.find(j => j.name === name)) || Object.values(SERIES).flat().find(j => j.name === name) || { name, odds: 1, glow: '#ffffff' };
@@ -188,7 +187,7 @@ function openJeton(name, extra = '', variant = '', locked = false) {
       <h2>${jnH(j.name)} ${vTag(variant)}${s.lvl > 1 ? ` <small class="jm-lvl">${SETTINGS.lang === 'en' ? 'Lv.' : 'Niv.'} ${s.lvl}</small>` : ''}</h2>
       <div class="jm-odds">1/${fmt(j.odds)}${variant ? ` <small class="muted">× ${t('v_' + variant)} 1/${fmt(VARIANTS[variant].odds)} = 1/${fmt(vOdds(j.odds, variant))}</small>` : ''}</div>
       <div class="jm-power">${t('power')} <b>${fmt(s.power)}</b></div>
-      <div class="op-stats">${['s_hp', 's_atk', 's_def', 's_spd'].map(k => `<div class="stat"><span class="muted">${t(k)}</span><div class="bar"><i style="width:${Math.min(100, s[k] / STAT_MAX[k] * 100)}%"></i></div><b>${s[k]}</b></div>`).join('')}</div>
+      <div class="op-stats">${['s_hp', 's_atk', 's_spd'].map(k => `<div class="stat"><span class="muted">${t(k)}</span><div class="bar"><i style="width:${Math.min(100, s[k] / STAT_MAX[k] * 100)}%"></i></div><b>${s[k]}</b></div>`).join('')}</div>
       <div class="jm-val">${t('sell_value')} : ${money(sellValue(j.odds, variant))}</div>
       ${extra}
     </div>`;
