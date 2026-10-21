@@ -41,7 +41,7 @@ export const en: Dict = {
     "open1": "Open 1",
     "open_all": "Open all ({n})",
     "stock_max": "Max stock {a} → {b}",
-    "stock_top": "Max stock reached (10)",
+    "stock_top": "Max stock reached ({n})",
     "open_again": "Open again · {n} left",
     "no_pull": "No pulls left · +1 in {t}",
     "click_coin": "Click the token",

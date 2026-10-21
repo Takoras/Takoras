@@ -39,7 +39,7 @@ export const fr = {
     "open1": "Ouvrir 1",
     "open_all": "Tout ouvrir ({n})",
     "stock_max": "Stock max {a} → {b}",
-    "stock_top": "Stock max atteint (10)",
+    "stock_top": "Stock max atteint ({n})",
     "open_again": "Ouvrir encore · reste {n}",
     "no_pull": "Plus de pull · +1 dans {t}",
     "click_coin": "Clique sur le jeton",

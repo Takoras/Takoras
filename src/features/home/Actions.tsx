@@ -51,7 +51,7 @@ export function Actions() {
           <Button size="sm" disabled={e.coins < upCost} onClick={() => void upgrade('stock')}>
             {t('ui.stock_max', { a: e.max, b: nextMax(e.max) })} · {n(upCost)} <Coin />
           </Button>
-        ) : <span className="muted">{t('ui.stock_top')}</span>}
+        ) : <span className="muted">{t('ui.stock_top', { n: TOP_MAX })}</span>}
         {e.regen > 60 ? (
           <Button size="sm" disabled={e.coins < rgCost} onClick={() => void upgrade('regen')}>
             {t('ui.regen_up', { a: mmss(e.regen * 1000), b: mmss((e.regen - 10) * 1000) })} · {n(rgCost)} <Coin />
