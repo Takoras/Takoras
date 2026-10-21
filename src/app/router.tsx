@@ -2,6 +2,7 @@ import { lazy } from 'react';
 import { createBrowserRouter } from 'react-router';
 import { SoonPage } from '@/pages/Soon';
 import Home from '@/features/home/Home';
+import Shop from '@/features/shop/Shop';
 import NotFound from '@/pages/NotFound';
 import { Layout } from './Layout';
 
@@ -15,7 +16,7 @@ export const router = createBrowserRouter([
       { path: '/', element: <Home /> },
       { path: '/inventaire', element: <SoonPage k="ui.bestiary" /> },
       { path: '/inventaire/objets', element: <SoonPage k="ui.nav_inv" /> },
-      { path: '/boutique', element: <SoonPage k="ui.nav_shop" /> },
+      { path: '/boutique', element: <Shop /> },
       { path: '/classement', element: <SoonPage k="ui.nav_board" /> },
       { path: '/combat', element: <SoonPage k="ui.nav_combat" /> },
       { path: '/amis', element: <SoonPage k="ui.nav_friends" /> },

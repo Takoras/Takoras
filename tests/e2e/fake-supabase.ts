@@ -33,6 +33,18 @@ export async function fakeSupabase(page: Page, state: Partial<FakeState> = {}, d
       { id: 'q2', stat: 'sold', target: 5, value: 2, claimed: false, coins: 0, item: 'potion1', qty: 1 },
       { id: 'q3', stat: 'rares', target: 1, value: 1, claimed: true, coins: 500, item: null, qty: 0 },
     ] });
+    if (rpc === 'shop_today') return json({ reset_in: 7200, items: [
+      { id: 'potion1', kind: 'potion', data: { mult: 1.3, rolls: 5 }, price: 300, base_price: 300, stock: 7, bought: 0, owned: false },
+      { id: 'potion10', kind: 'potion', data: { mult: 10, rolls: 1 }, price: 60000, base_price: 50000, stock: 1, bought: 0, owned: false },
+      { id: 'hourglass', kind: 'hourglass', data: { minutes: 60 }, price: 2000, base_price: 2000, stock: 2, bought: 2, owned: false },
+      { id: 'b_plaine', kind: 'banner', data: {}, price: 5000, base_price: 5000, stock: 1, bought: 0, owned: true },
+    ] });
+    if (rpc === 'buy_item') { st.coins -= 300; return json({ ...st }); }
+    if (rpc === 'redeem_code') {
+      const code = (JSON.parse(route.request().postData() ?? '{}') as { p_code: string }).p_code;
+      if (code !== 'BONJOUR') return route.fulfill({ status: 400, contentType: 'application/json', body: JSON.stringify({ message: 'code_invalid', code: 'P0001' }) });
+      st.coins += 1000; return json({ coins: 1000, pulls: 0, items: [], state: { ...st } });
+    }
     if (rpc === 'my_daily') return json({ available: true, amount: 750, next_streak: 3, tomorrow: 1000 });
     if (rpc === 'claim_daily') { st.coins += 750; return json({ amount: 750, streak: 3, state: { ...st } }); }
     if (rpc === 'claim_quest') { st.coins += 300; return json({ ...st }); }
