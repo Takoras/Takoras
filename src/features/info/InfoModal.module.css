@@ -1,0 +1,11 @@
+.luck { display: flex; flex-wrap: wrap; align-items: center; gap: var(--s-2); margin-bottom: var(--s-4); }
+.luck button { min-height: 32px; padding: 0 var(--s-3); border-radius: var(--r-sm); background: var(--bg-raised); border: 1px solid var(--line); font-size: var(--fs-sm); }
+.luck button[aria-pressed='true'] { border-color: var(--accent-hi); background: rgb(124 58 237 / 18%); }
+.table { overflow-x: auto; margin-bottom: var(--s-4); }
+.table table { width: 100%; border-collapse: collapse; font-size: var(--fs-sm); }
+.table th { text-align: left; color: var(--muted); font-weight: 600; padding: var(--s-2); border-bottom: 1px solid var(--line); white-space: nowrap; }
+.table td { padding: var(--s-2); border-bottom: 1px solid var(--line); white-space: nowrap; }
+.table td:first-child { display: flex; align-items: center; gap: var(--s-2); }
+.h3 { margin: var(--s-4) 0 var(--s-2); font-size: var(--fs-lg); }
+.rules { display: grid; gap: var(--s-3); }
+.rules p { font-size: var(--fs-sm); }

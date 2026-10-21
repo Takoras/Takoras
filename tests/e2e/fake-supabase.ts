@@ -28,6 +28,14 @@ export async function fakeSupabase(page: Page, state: Partial<FakeState> = {}, d
       return json({ state: { ...st }, results, variants: results.map(() => null), lucks: results.map(() => 1), ids: results.map((_, i) => i + 1) });
     }
     if (rpc === 'refund_pulls') return json({ refunded: 0 });
+    if (rpc === 'my_quests') return json({ reset_in: 3600, quests: [
+      { id: 'q1', stat: 'pulls', target: 10, value: 10, claimed: false, coins: 300, item: null, qty: 0 },
+      { id: 'q2', stat: 'sold', target: 5, value: 2, claimed: false, coins: 0, item: 'potion1', qty: 1 },
+      { id: 'q3', stat: 'rares', target: 1, value: 1, claimed: true, coins: 500, item: null, qty: 0 },
+    ] });
+    if (rpc === 'my_daily') return json({ available: true, amount: 750, next_streak: 3, tomorrow: 1000 });
+    if (rpc === 'claim_daily') { st.coins += 750; return json({ amount: 750, streak: 3, state: { ...st } }); }
+    if (rpc === 'claim_quest') { st.coins += 300; return json({ ...st }); }
     if (rpc === 'live_feed' || rpc === 'avatars_of') return json([]);
     if (url.includes('/rest/v1/pulls')) return json([]);
     return json(null);

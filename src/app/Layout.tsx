@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { NavLink, Outlet, useLocation } from 'react-router';
+import { NavLink, Outlet, useLocation, useNavigate } from 'react-router';
 import { useMe } from '@/api/queries';
 import { useAuth, signOut } from '@/lib/auth';
 import { locale } from '@/lib/settings';
@@ -21,6 +21,9 @@ export function Layout() {
   const more = useUI((x) => x.more);
   const [muted, setMuted] = useState(sfx.muted);
   useEffect(() => openUI('more', false), [pathname]);
+  const navigate = useNavigate();
+  const streak = Number(me.data?.streak ?? 0), today = !!me.data?.streak_today;
+  const goDaily = () => { navigate('/'); setTimeout(() => document.getElementById('daily')?.scrollIntoView({ behavior: 'smooth', block: 'center' }), 350); };
   const toggleMute = () => { sfx.setMuted(!muted); setMuted(!muted); };
   const inMore = !NAV.some((n) => n.tab && (n.to === '/' ? pathname === '/' : pathname.startsWith(n.to)));
 
@@ -42,6 +45,11 @@ export function Layout() {
         <div className={s.tools}>
           <button type="button" className={s.icon} onClick={() => openUI('settings')} aria-label={t('ui.settings')}><Icon name="gear" /></button>
           <button type="button" className={s.icon} onClick={toggleMute} aria-label={muted ? t('ui.unmute') : t('ui.mute')} data-nosound><Icon name={muted ? 'mute' : 'sound'} /></button>
+          {user && me.data ? (
+            <button type="button" className={`${s.streak} ${today ? '' : s.cold}`} onClick={goDaily} title={today ? t('ui.streak_ok', { n: streak }) : t('ui.streak_todo')} aria-label={today ? t('ui.streak_ok', { n: streak }) : t('ui.streak_todo')}>
+              <Icon name="flame" size={18} /><b>{streak}</b>
+            </button>
+          ) : null}
           {user ? (
             <>
               <span className={s.bal} aria-label={t('app.balance')}>

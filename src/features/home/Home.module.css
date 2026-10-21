@@ -8,6 +8,7 @@
 .center { grid-area: center; display: grid; justify-items: center; text-align: center; gap: var(--s-3); padding-top: var(--s-2); }
 .side:nth-child(2) { grid-area: right; }
 .side:nth-child(3) { grid-area: left; }
+.stack { display: grid; gap: var(--s-4); align-content: start; }
 
 @media (min-width: 1000px) {
   .stage { grid-template-columns: 280px 1fr 300px; grid-template-areas: 'left center right'; align-items: start; }
@@ -148,3 +149,10 @@
 @media (max-width: 759px) {
   .live { flex-direction: column; align-items: stretch; gap: var(--s-2); }
 }
+
+/* Effets actifs */
+.fx { list-style: none; display: flex; flex-wrap: wrap; gap: var(--s-2); justify-content: center; }
+.fx li { padding: 4px var(--s-3); border-radius: var(--r-pill); background: var(--surface-2); border: 1px solid var(--line); font-size: var(--fs-xs); }
+.fx .fxTotal { border-color: var(--ok); color: #bbf7d0; }
+.info { color: var(--muted); font-size: var(--fs-sm); text-decoration: underline dotted; text-underline-offset: 3px; }
+.info:hover { color: var(--text); }

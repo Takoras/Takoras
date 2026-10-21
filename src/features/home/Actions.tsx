@@ -9,6 +9,8 @@ import { Button } from '@/ui/Button';
 import { toast } from '@/ui/toast';
 import { MAX_OPEN, mmss, nextMax, regenCost, TOP_MAX, upgradeCost, useEco } from '../eco/eco';
 import { openPulls } from '../eco/openPulls';
+import { openInfo } from '../info/InfoModal';
+import { Effects } from './Effects';
 import s from './Home.module.css';
 
 const Coin = () => <img className="px" src="/img/piece.png" alt="" width={16} height={16} />;
@@ -20,7 +22,8 @@ export function Actions() {
   const user = useAuth((x) => x.user);
   const e = useEco();
   const qc = useQueryClient();
-  if (!user) return <Button variant="primary" size="lg" onClick={() => openUI('account')}>{t('ui.acc_login_to_open')}</Button>;
+  const info = <button type="button" className={s.info} onClick={openInfo}>{t('ui.odds_info')}</button>;
+  if (!user) return <div className={s.actions}><Button variant="primary" size="lg" onClick={() => openUI('account')}>{t('ui.acc_login_to_open')}</Button>{info}</div>;
   if (!e) return <div className={s.stock} aria-busy>…</div>;
   const n = (v: number) => v.toLocaleString(locale(lang));
   const upCost = upgradeCost(nextMax(e.max)), rgCost = regenCost(e.regen - 10);
@@ -58,6 +61,8 @@ export function Actions() {
           </Button>
         ) : <span className="muted">{t('ui.regen_top')}</span>}
       </div>
+      <Effects />
+      {info}
     </div>
   );
 }

@@ -7,6 +7,7 @@ import { router } from './app/router';
 import { redirectLegacyHash } from './app/legacyHash';
 import { AccountModal } from './app/AccountModal';
 import { SettingsModal } from './app/SettingsModal';
+import { InfoModal } from './features/info/InfoModal';
 import { ToastHost } from './ui/toast';
 import { ConfirmHost } from './ui/confirm';
 import { initAuth } from './lib/auth';
@@ -38,6 +39,7 @@ createRoot(root).render(
       <RouterProvider router={router} />
       <AccountModal />
       <SettingsModal />
+      <InfoModal />
       <ConfirmHost />
       <ToastHost />
     </QueryClientProvider>

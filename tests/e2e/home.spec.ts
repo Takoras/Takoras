@@ -60,3 +60,23 @@ test('une ouverture interrompue reprend après un rechargement de la page', asyn
   await expect(page.locator('#opening')).toHaveClass(/\bon\b/);
   await expect(page.locator('#op-tag')).toContainText('/3');
 });
+
+test('bonus du jour et quêtes : récupérer met à jour le solde', async ({ page }) => {
+  await fakeSupabase(page, { coins: 5000 });
+  await page.goto('/');
+  await expect(page.getByRole('heading', { name: 'Quêtes du jour' })).toBeVisible();
+  await page.getByRole('button', { name: /\+750/ }).click();
+  await expect(page.getByLabel('Solde')).toContainText('5 750');
+  await page.getByRole('button', { name: 'Récupérer' }).click();
+  await expect(page.getByLabel('Solde')).toContainText('6 050');
+});
+
+test('« Probas & infos » : la somme des probabilités affichées et le choix de chance', async ({ page }) => {
+  await page.goto('/');
+  await page.getByRole('button', { name: 'Probas & infos' }).click();
+  const dialog = page.getByRole('dialog');
+  await expect(dialog.getByRole('heading', { name: 'Probas & infos' })).toBeVisible();
+  await expect(dialog.locator('tbody tr')).toHaveCount(17 + 3);
+  await dialog.getByRole('button', { name: '×500' }).click();
+  await expect(dialog.getByRole('button', { name: '×500' })).toHaveAttribute('aria-pressed', 'true');
+});

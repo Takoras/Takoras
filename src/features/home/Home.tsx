@@ -6,6 +6,7 @@ import { Actions } from './Actions';
 import { AutoConfig } from './AutoConfig';
 import { History, Live } from './Feeds';
 import { HeroCoin } from './HeroCoin';
+import { Quests } from '../quests/Quests';
 import s from './Home.module.css';
 
 // Accueil : le pull Takoras au centre, l'ouverture auto à gauche, l'historique à droite, « En direct » en bas
@@ -22,7 +23,8 @@ export default function Home() {
           <h1 className={s.title}>{t('ui.pull')} {pull.name}</h1>
           <Actions />
         </div>
-        <div className={s.side}>
+        <div className={`${s.side} ${s.stack}`}>
+          <Quests />
           <History />
         </div>
         <div className={s.side}>

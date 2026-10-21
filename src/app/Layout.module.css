@@ -91,6 +91,11 @@
 
 .me { border-radius: 50%; }
 
+.streak { display: flex; align-items: center; gap: 4px; height: 36px; padding: 0 var(--s-2); border-radius: var(--r-pill); color: var(--gold); font-family: var(--font-display); }
+.streak svg { fill: currentcolor; }
+.streak.cold { color: var(--muted); }
+.streak:hover { background: var(--surface); }
+
 .main {
   max-width: var(--page-max);
   margin: 0 auto;
