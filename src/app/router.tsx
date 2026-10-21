@@ -1,6 +1,7 @@
 import { lazy } from 'react';
 import { createBrowserRouter } from 'react-router';
 import { SoonPage } from '@/pages/Soon';
+import Home from '@/features/home/Home';
 import NotFound from '@/pages/NotFound';
 import { Layout } from './Layout';
 
@@ -11,7 +12,7 @@ export const router = createBrowserRouter([
   {
     element: <Layout />,
     children: [
-      { path: '/', element: <SoonPage k="ui.nav_home" /> },
+      { path: '/', element: <Home /> },
       { path: '/inventaire', element: <SoonPage k="ui.bestiary" /> },
       { path: '/inventaire/objets', element: <SoonPage k="ui.nav_inv" /> },
       { path: '/boutique', element: <SoonPage k="ui.nav_shop" /> },

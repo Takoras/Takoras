@@ -80,9 +80,9 @@ export function statsOf(name: string, odds: number, variant = '', lvl = 1) {
 export const host = {
   openPulls: (n: number | 'all') => { void n; },
   applyState: (st: unknown) => { void st; },
-  ecoDecorate: () => undefined,
+  ecoDecorate: (): void => undefined,
   accRecordPull: (j: unknown, serie?: string) => { void j; void serie; return false; },
   loadLocalHist: (): unknown[] => [],
-  renderHist: () => undefined,
-  toggleAdmin: () => undefined,
+  renderHist: (): void => undefined,
+  toggleAdmin: (): void => undefined,
 };
