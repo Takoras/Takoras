@@ -21,8 +21,8 @@ function fight(E: typeof RG, seed: number) {
   const names = Object.keys(RCFG.TOKENS);
   const pick = () => {
     const s = new Set<string>();
-    while (s.size < 3) s.add(names[Math.floor(r() * names.length)]!);
-    return [...s].map((name, k) => ({ name, lvl: 1 + Math.floor(r() * 10), variant: ['', 'gold', 'celeste', 'ombre'][k % 4]! }));
+    while (s.size < 3) s.add(names[Math.floor(r() * names.length)] ?? 'Mobu');
+    return [...s].map((name, k) => ({ name, lvl: 1 + Math.floor(r() * 10), variant: ['', 'gold', 'celeste', 'ombre'][k % 4] ?? '' }));
   };
   const st = E.create([pick(), pick()]);
   const log: string[] = [];

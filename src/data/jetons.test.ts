@@ -11,7 +11,7 @@ const legacy = (() => {
 
 test('catalogue : 17 jetons Takoras, chemins d’images absolus', () => {
   expect(SERIES.Takoras).toHaveLength(17);
-  for (const j of SERIES.Takoras!) if (j.img) expect(j.img.startsWith('/img/')).toBe(true);
+  for (const j of SERIES.Takoras ?? []) if (j.img) expect(j.img.startsWith('/img/')).toBe(true);
 });
 test('rareté et revente identiques à l’ancien site', () => {
   for (const odds of [1, 2, 59, 60, 999, 1000, 9999, 10000, 99999, 100000, 1e6]) {

@@ -19,7 +19,7 @@ export const jetonOf = (name: string, serie?: string): Jeton =>
 // Raretés (bornes en « 1 sur X »)
 export type Tier = 'r_common' | 'r_rare' | 'r_epic' | 'r_legend' | 'r_myth';
 const TIER_NAMES: [number, Tier][] = [[60, 'r_common'], [1000, 'r_rare'], [10000, 'r_epic'], [100000, 'r_legend'], [Infinity, 'r_myth']];
-export const tierKey = (odds: number): Tier => TIER_NAMES.find(([m]) => odds < m)![1];
+export const tierKey = (odds: number): Tier => TIER_NAMES.find(([m]) => odds < m)?.[1] ?? 'r_myth';
 
 // Variantes : chance d'apparition (1 sur X) et multiplicateur de revente
 export type Variant = 'gold' | 'celeste' | 'ombre';
