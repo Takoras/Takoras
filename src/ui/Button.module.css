@@ -44,7 +44,7 @@
   box-shadow: var(--press) var(--accent-lo);
 }
 
-.primary:not(:disabled):hover { background: var(--accent-hi); }
+.primary:not(:disabled):hover { background: var(--accent-hover); }
 
 .danger {
   background: var(--danger);

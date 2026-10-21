@@ -1,0 +1,23 @@
+.form { display: grid; gap: var(--s-2); margin-top: var(--s-4); }
+.label { font-weight: 600; font-size: var(--fs-sm); }
+
+.input {
+  min-height: 48px;
+  padding: 0 var(--s-3);
+  border-radius: var(--r-sm);
+  border: 1px solid var(--line-strong);
+  background: var(--bg-raised);
+  font-size: var(--fs-lg);
+}
+
+.input:focus-visible { border-color: var(--accent); }
+.form > :last-child { margin-top: var(--s-3); }
+
+.discord {
+  margin-top: var(--s-5);
+  background: #5865f2;
+  border-color: #5865f2;
+  color: #fff;
+}
+
+.discord:hover { background: #4752c4 !important; }

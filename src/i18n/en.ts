@@ -807,5 +807,16 @@ export const en: Dict = {
     "Rouillé": "Rusty",
     "Carmin": "Crimson",
     "Zénith": "Zenith"
+  },
+  "app": {
+    "soon_t": "Coming soon",
+    "soon_p": "This page is coming in the new version of Takoras. Meanwhile it works on the current site.",
+    "not_found": "This page doesn’t exist.",
+    "go_home": "Back to home",
+    "skip": "Skip to content",
+    "main_nav": "Main navigation",
+    "balance": "Balance",
+    "account": "Account",
+    "login_error": "Login didn’t work. Try again."
   }
 };

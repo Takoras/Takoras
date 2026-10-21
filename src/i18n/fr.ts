@@ -800,5 +800,16 @@ export const fr = {
       "Le site est en bêta : un bug, une idée ? Le bouton « <b>Donner un avis</b> » est là pour ça (menu Plus sur téléphone). Bonne chance pour ton premier Takoras !"
     ]
   ],
-  "names": {}
+  "names": {},
+  "app": {
+    "soon_t": "Bientôt ici",
+    "soon_p": "Cette page arrive dans la nouvelle version de Takoras. En attendant, elle marche sur le site actuel.",
+    "not_found": "Cette page n’existe pas.",
+    "go_home": "Retour à l’accueil",
+    "skip": "Aller au contenu",
+    "main_nav": "Navigation principale",
+    "balance": "Solde",
+    "account": "Compte",
+    "login_error": "La connexion n’a pas marché. Réessaie."
+  }
 } as const;
