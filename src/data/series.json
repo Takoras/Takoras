@@ -1,0 +1,104 @@
+{
+  "Takoras": [
+    {
+      "name": "Mobu",
+      "odds": 2,
+      "glow": "#8fb3c4",
+      "img": "/img/jetons/serie-takoras/mobu.png"
+    },
+    {
+      "name": "Pikko",
+      "odds": 4,
+      "glow": "#f0a3b0",
+      "img": "/img/jetons/serie-takoras/pikko.png"
+    },
+    {
+      "name": "Rouillé",
+      "odds": 10,
+      "glow": "#d2603a",
+      "img": "/img/jetons/serie-takoras/rouille.png"
+    },
+    {
+      "name": "Givre",
+      "odds": 25,
+      "glow": "#a5b4fc",
+      "img": "/img/jetons/serie-takoras/givre.png"
+    },
+    {
+      "name": "Soléo",
+      "odds": 60,
+      "glow": "#f0805c",
+      "img": "/img/jetons/serie-takoras/soleo.png"
+    },
+    {
+      "name": "Azura",
+      "odds": 150,
+      "glow": "#7c7cc4",
+      "img": "/img/jetons/serie-takoras/azura.png"
+    },
+    {
+      "name": "Carmin",
+      "odds": 400,
+      "glow": "#d0408f",
+      "img": "/img/jetons/serie-takoras/carmin.png"
+    },
+    {
+      "name": "Vyolis",
+      "odds": 1000,
+      "glow": "#c45cf0",
+      "img": "/img/jetons/serie-takoras/vyolis.png"
+    },
+    {
+      "name": "Lumis",
+      "odds": 2500,
+      "glow": "#f39ad8",
+      "img": "/img/jetons/serie-takoras/lumis.png"
+    },
+    {
+      "name": "Nyx",
+      "odds": 5000,
+      "glow": "#5b5fd6",
+      "img": "/img/jetons/serie-takoras/nyx.png"
+    },
+    {
+      "name": "Astra",
+      "odds": 10000,
+      "glow": "#f2c98f",
+      "img": "/img/jetons/serie-takoras/astra.png"
+    },
+    {
+      "name": "Kraïos",
+      "odds": 25000,
+      "glow": "#4f46e5",
+      "img": "/img/jetons/serie-takoras/kraios.gif"
+    },
+    {
+      "name": "Koi",
+      "odds": 50000,
+      "glow": "#ff5a3c",
+      "img": "/img/jetons/serie-takoras/koi.png"
+    },
+    {
+      "name": "Néphéris",
+      "odds": 100000,
+      "glow": "#f0abfc",
+      "img": "/img/jetons/serie-takoras/nepheris.gif",
+      "grid": 74
+    },
+    {
+      "name": "Zénith",
+      "odds": 250000,
+      "glow": "#e2e8f0"
+    },
+    {
+      "name": "Oblivion",
+      "odds": 500000,
+      "glow": "#fb7185"
+    },
+    {
+      "name": "Takoras",
+      "odds": 1000000,
+      "glow": "#ffffff"
+    }
+  ]
+}
