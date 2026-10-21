@@ -81,6 +81,7 @@ async function admDetail() {
       <div class="mpx-row"><input class="mpx-in" id="mpx-newpseudo" placeholder="Nouveau pseudo" value="${esc(p.pseudo || '')}" maxlength="16"><button id="mpx-rename">Renommer</button></div>
       <div class="mpx-quick">
         ${p.is_admin ? '' : `<button class="${p.banned ? '' : 'red'}" id="mpx-ban">${p.banned ? '✅ Débannir' : '⛔ Bannir'}</button>`}
+        <button id="mpx-tester" title="Accès au menu testeur pendant la bêta (se donner pièces, jetons, tirages forcés)">${p.tester ? '🧪 Retirer testeur' : '🧪 Rendre testeur'}</button>
         <button id="mpx-clear-sc">🧹 Vider vitrine + bio</button>
         <button id="mpx-msgs">💬 Voir ses messages</button>
       </div>
@@ -178,6 +179,12 @@ $('mpx-detail').addEventListener('click', async e => {
     const { error } = await sb.rpc('admin_ban', { target: admSel, p_ban: ban });
     if (error) return admMsg(error.message, true);
     admMsg(`${admSelP.pseudo} ${ban ? 'banni' : 'débanni'}`); return admAfter();
+  }
+  if (e.target.closest('#mpx-tester')) {
+    const on = !admSelP.tester;
+    const { error } = await sb.rpc('admin_set_tester', { target: admSel, p_on: on });
+    if (error) return admMsg(error.message, true);
+    admMsg(`${admSelP.pseudo} ${on ? 'est maintenant testeur' : 'n\'est plus testeur'}`); return admAfter();
   }
   if (e.target.closest('#mpx-clear-sc')) {
     if (!await ask(`Vider la vitrine et la bio de ${admSelP.pseudo} ?`)) return;
