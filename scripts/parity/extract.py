@@ -9,13 +9,14 @@ Usage :
 import json, re, sys, pathlib
 
 PATTERNS = {
-    'rpc':      re.compile(r"""\.rpc\(\s*['"`]([a-z_0-9]+)['"`]"""),
+    'rpc':      re.compile(r"""(?:\.|\b)rpc\(\s*['"`]([a-z_0-9]+)['"`]"""),
     'tables':   re.compile(r"""\.from\(\s*['"`]([a-z_0-9]+)['"`]"""),
     'channels': re.compile(r"""\.channel\(\s*['"`]([a-z_\-]+)"""),
     'realtime': re.compile(r"""table:\s*['"`]([a-z_0-9]+)['"`]"""),
     'storage':  re.compile(r"""['"`](takoras-[a-z\-]+)['"`]"""),
     'routes':   re.compile(r"""['"`]#((?![a-f0-9]{3,6}['"`])[a-z]+)(?:/|['"`])"""),
 }
+NS = {'settings': 'ui', 'ring-ui': 'ring'}  # nom de l'espace dans le nouveau site
 KEY = re.compile(r"""(?<![\w.])([a-zA-Z_][a-zA-Z0-9_]*):\s*['"`\[{]""")
 
 def scan(root):
@@ -28,14 +29,22 @@ def scan(root):
         for k, rx in PATTERNS.items():
             out[k].update(rx.findall(s))
         # clés de traduction : bloc « fr: { … } » jusqu'à « en: { » (I18N, AT, RT, TUTO, INFO) ou fichier i18n/fr.*
-        if f.stem == 'fr':
-            out['i18n'].update(f'{f.parent.name}.{k}' for k in KEY.findall(s))
+        if f.stem == 'fr' and f.suffix == '.ts':
+            # nouveau site : src/i18n/fr.ts (JSON) → « espace.clé »
+            data = json.loads(s[s.index('{'): s.rindex('}') + 1])
+            for ns, d in data.items():
+                if ns == 'names' or not isinstance(d, dict):
+                    continue
+                for k, v in d.items():
+                    out['i18n'].add(f'{ns}.{k}')
+                    if isinstance(v, dict):  # sous-objets (pouvoirs du Ring…) : l'ancien script les liste à plat
+                        out['i18n'].update(f'{ns}.{k2}' for k2 in v)
         else:
             for m in re.finditer(r"\bfr:\s*\{", s):
                 e = re.compile(r"\n\s*en:\s*\{").search(s, m.end())
                 block = s[m.end(): e.start() if e else None]
                 if len(block) > 400:
-                    out['i18n'].update(f'{f.stem}.{k}' for k in KEY.findall(block))
+                    out['i18n'].update(f'{NS.get(f.stem, f.stem)}.{k}' for k in KEY.findall(block))
     return {k: sorted(v) for k, v in out.items()}
 
 def main():
