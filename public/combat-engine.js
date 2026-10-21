@@ -1,5 +1,5 @@
-// Éléments (= familles) et stats affichées des jetons. Voir docs/COMBAT.md.
-// Les stats viennent de fight-config.js (FCFG), le combat lui-même est dans fight-engine.js (FE).
+// Éléments des jetons (couleur, filtres) et stats affichées. Voir docs/COMBAT.md.
+// Les stats viennent de ring-config.js (RCFG) via ring-engine.js (RG).
 
 const CB = (() => {
   // ---------- Éléments
@@ -16,12 +16,9 @@ const CB = (() => {
     if (BEATS[b] === a) return .8;
     return 1;
   }
-  // ---------- Stats affichées (fiches, équipe) : les mêmes que le combat (fight-config.js), avec niveau et mutation
-  function stats(name, odds, lvl = 1, variant = '') {
-    const k = FCFG.TOKENS[name] || FCFG.DEFAULT_TOKEN, m = (1 + FCFG.LEVEL_BONUS * (Math.max(1, lvl) - 1)) * (FCFG.MUTATION[variant] || 1);
-    return { hp: Math.round(k.hp * m), atk: Math.round(k.atk * m), spd: Math.round(100 / k.spd) }; // vitesse : 100 = 1 attaque par seconde
-  }
-  const power = s => Math.round(s.hp / 5 + s.atk * 6 * s.spd / 100);
+  // ---------- Stats affichées (fiches, équipe) : les mêmes que le Ring (ring-config.js), avec niveau et mutation
+  const stats = (name, odds, lvl = 1, variant = '') => RG.stats(name, lvl, variant);
+  const power = s => Math.round(s.mass * 300 + s.power / 4 + s.r * 2); // note globale « ⚡ » des cartes
 
   return { EL, elOf, elMult, stats, power };
 })();

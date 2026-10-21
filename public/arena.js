@@ -1,5 +1,5 @@
-// Page Combat : rang, JOUER (classé), Entraînement, ton équipe de 3 jetons et ses synergies, fiches des jetons.
-// Le combat lui-même : fight-engine.js (règles), fight-ui.js (écran), fight-config.js (valeurs). Voir docs/COMBAT.md.
+// Page Combat (« Ring ») : rang, JOUER (classé), Entraînement, ton équipe de 3 jetons, fiches des jetons.
+// Le match lui-même : ring-engine.js (physique), ring-ui.js (écran), ring-config.js (valeurs). Voir docs/COMBAT.md.
 
 const ELS = {
   fire: { ico: '🔥', col: '#fb923c', fr: 'Feu', en: 'Fire' },
@@ -10,18 +10,18 @@ const ELS = {
 };
 const elName = el => ELS[el][SETTINGS.lang === 'en' ? 'en' : 'fr'];
 const AT = {
-  fr: { tryTuto: 'Essayer le combat (tuto)', rank: 'Ton rang', r_bronze: 'Bronze', r_silver: 'Argent', r_gold: 'Or', r_plat: 'Platine', r_diam: 'Diamant', r_master: 'Maître', r_legend: 'Légende', play: 'JOUER', rankedSoon: 'Classé · arrive bientôt', edit: 'Modifier', noSyn: 'Pas de synergie : mets 2 jetons de la même famille, ou des jetons dont les effets se combinent.', howTitle: 'Comment ça marche ?', statuses: 'Statuts', reactions: 'Réactions (combos)', tuto: 'Revoir le tuto du combat', cost: '{n} pt', stSpd: 'Vitesse', cd: 'recharge {n} s', saveTeam: 'Valider l’équipe', budget: 'Budget : {n}/{m} pts', budgetOver: 'Trop de points pour le classé (l’entraînement reste possible).', budgetHint: 'Commune 1 · Rare 2 · Épique 3 · Légendaire 4 · Mythique 5 pts', teamFull: 'Ton équipe est pleine : retire un jeton d’abord', title: 'Combat', sub: 'Prépare ton équipe de 3 jetons. Le combat est en train d’être refait.', newMode: '🛠️ Nouveau combat en préparation', newModeTxt: 'L’ancien mode est retiré, un combat tout neuf arrive bientôt.', team: 'Ton équipe',
+  fr: { tryTuto: 'Essayer le Ring (tuto)', rank: 'Ton rang', r_bronze: 'Bronze', r_silver: 'Argent', r_gold: 'Or', r_plat: 'Platine', r_diam: 'Diamant', r_master: 'Maître', r_legend: 'Légende', play: 'JOUER', rankedSoon: 'Classé · arrive bientôt', edit: 'Modifier', noSyn: 'Pas de synergie : mets 2 jetons de la même famille, ou des jetons dont les effets se combinent.', howTitle: 'Comment ça marche ?', statuses: 'Statuts', reactions: 'Réactions (combos)', tuto: 'Revoir le tuto du Ring', cost: '{n} pt', stSpd: 'Vitesse', cd: 'recharge {n} s', saveTeam: 'Valider l’équipe', budget: 'Budget : {n}/{m} pts', budgetOver: 'Trop de points pour le classé (l’entraînement reste possible).', budgetHint: 'Commune 1 · Rare 2 · Épique 3 · Légendaire 4 · Mythique 5 pts', teamFull: 'Ton équipe est pleine : retire un jeton d’abord', title: 'Combat', sub: 'Prépare ton équipe de 3 jetons. Le combat est en train d’être refait.', newMode: '🛠️ Nouveau combat en préparation', newModeTxt: 'L’ancien mode est retiré, un combat tout neuf arrive bientôt.', team: 'Ton équipe',
     slots: ['Jeton 1', 'Jeton 2', 'Jeton 3'], lanes: ['Gauche', 'Milieu', 'Droite'], pick: 'Choisir', train: 'Entraînement contre l’IA', ranked: '🏆 Classé', soon: 'Bientôt : rangs Bronze → Légende, saisons et battle pass',
     need3: 'Choisis 3 jetons pour combattre', els: 'Éléments', elsHelp: '🔥 bat 🌿 · 🌿 bat 💧 · 💧 bat 🔥 · ✨ et 🌑 forts l’un contre l’autre (×1,3 de dégâts)',
-    how: 'Comment ça marche', howText: 'Tes 3 jetons attaquent tout seuls la cible de ton équipe. Toi, tu as 2 gestes : <b>tape un bouton qui brille</b> pour lancer une abilité, et <b>tape un ennemi</b> pour que toute ton équipe le vise. Chaque jeton a soit un passif (automatique), soit une abilité (à lancer au bon moment). Combine les statuts pour déclencher des réactions ! Match de 90 s max : au chrono, l’équipe avec le plus de PV (en %) gagne.', round: 'Manche {n}', step1: 'Touche un de tes jetons', step2: 'Touche ou glisse ton jeton vers un endroit', abilOn: 'Capacité activée', abilOff: 'Activer la capacité', laneHint: 'même endroit = duel', tuto1t: 'Choisis un jeton', tuto1: 'À chaque manche, touche un de tes jetons. L’adversaire choisit en même temps : vous voyez chacun le jeton de l’autre.', tuto2t: 'Pose-le en cachette', tuto2: 'Touche (ou glisse vers) <b>gauche, milieu ou droite</b>. L’autre ne voit pas où tu le mets. Tu peux allumer la capacité avant (1 fois par combat).', tuto3t: 'Duel ou coup direct', tuto3: '<b>Même endroit</b> : les deux jetons se battent. <b>Endroits différents</b> : chacun frappe le joueur d’en face. Le premier à 0 ❤️ perd !', tutoGo: 'Compris, on y va !', rest: 'Repos', stuck: 'Bloqué', foeCant: 'En face, ne peut pas jouer : {n}', foePlays: 'Il joue', revealTxt: 'Révélation !', recapClash: '⚔️ Duel ({l}) : {a} contre {b} · ton jeton inflige {x} PV, en reçoit {y}', recapMiss: '💥 Coups directs : {a} ({la}) et {b} ({lb}) · tu infliges {x} ❤️, tu perds {y} ❤️', needLogin: 'Connecte-toi pour monter ton équipe et combattre.', normal: 'Normal', stHp: 'PV', stAtk: 'Attaque', stDef: 'Défense', stCurse: 'maudit', stRust: 'rouillé (−30 % déf.)', stNoHeal: 'ne peut plus être soigné', inTeam: 'déjà dans l’équipe', version: 'Version', chooseThis: 'Prendre ce jeton', dragHint: 'Glisse ton jeton sur un endroit, ou touche un endroit puis « Poser ici ».', phaseToken: 'Choisis ton jeton pour cette manche', phaseLane: 'Tu joues <b>{a}</b>, il joue <b>{b}</b>. Où poses-tu ton jeton ?', ok: 'Valider', place: 'Poser ici', usedAb: 'déjà utilisée', tired: 'Ce jeton se repose cette manche', clash: 'Croisement !', block: 'Protégé', dazzled: 'Ébloui', recharged: 'Capacité rechargée', frozenL: 'Gelé', rounds: '{n} manches', dmgWord: 'dégâts',
+    how: 'Comment ça marche', howText: 'Un duel sur un ring rond, façon billard × pétanque × sumo. À chaque tour, toi et l’adversaire visez <b>en même temps</b> sans voir le tir de l’autre : tape un de tes jetons, glisse vers l’arrière comme un lance-pierre (plus tu tires loin, plus c’est fort), puis valide. Les deux tirs partent ensemble. Un jeton dont le centre sort du ring est éliminé. Le premier qui n’a plus de jetons perd. Chaque jeton a un pouvoir et 3 stats : poids, puissance, taille.', round: 'Manche {n}', step1: 'Touche un de tes jetons', step2: 'Touche ou glisse ton jeton vers un endroit', abilOn: 'Capacité activée', abilOff: 'Activer la capacité', laneHint: 'même endroit = duel', tuto1t: 'Choisis un jeton', tuto1: 'À chaque manche, touche un de tes jetons. L’adversaire choisit en même temps : vous voyez chacun le jeton de l’autre.', tuto2t: 'Pose-le en cachette', tuto2: 'Touche (ou glisse vers) <b>gauche, milieu ou droite</b>. L’autre ne voit pas où tu le mets. Tu peux allumer la capacité avant (1 fois par combat).', tuto3t: 'Duel ou coup direct', tuto3: '<b>Même endroit</b> : les deux jetons se battent. <b>Endroits différents</b> : chacun frappe le joueur d’en face. Le premier à 0 ❤️ perd !', tutoGo: 'Compris, on y va !', rest: 'Repos', stuck: 'Bloqué', foeCant: 'En face, ne peut pas jouer : {n}', foePlays: 'Il joue', revealTxt: 'Révélation !', recapClash: '⚔️ Duel ({l}) : {a} contre {b} · ton jeton inflige {x} PV, en reçoit {y}', recapMiss: '💥 Coups directs : {a} ({la}) et {b} ({lb}) · tu infliges {x} ❤️, tu perds {y} ❤️', needLogin: 'Connecte-toi pour monter ton équipe et combattre.', normal: 'Normal', stHp: 'PV', stAtk: 'Attaque', stDef: 'Défense', stCurse: 'maudit', stRust: 'rouillé (−30 % déf.)', stNoHeal: 'ne peut plus être soigné', inTeam: 'déjà dans l’équipe', version: 'Version', chooseThis: 'Prendre ce jeton', dragHint: 'Glisse ton jeton sur un endroit, ou touche un endroit puis « Poser ici ».', phaseToken: 'Choisis ton jeton pour cette manche', phaseLane: 'Tu joues <b>{a}</b>, il joue <b>{b}</b>. Où poses-tu ton jeton ?', ok: 'Valider', place: 'Poser ici', usedAb: 'déjà utilisée', tired: 'Ce jeton se repose cette manche', clash: 'Croisement !', block: 'Protégé', dazzled: 'Ébloui', recharged: 'Capacité rechargée', frozenL: 'Gelé', rounds: '{n} manches', dmgWord: 'dégâts',
     pickTitle: 'Choisis un jeton', lvl: 'Niv.', power: 'Puissance', ability: 'Capacité', passive: 'Passif', remove: 'Retirer', none: 'Tu n’as pas encore de jeton : ouvre des pulls !',
     ready: 'PRÊT', win: 'Victoire !', lose: 'Défaite…', draw: 'Égalité', again: 'Rejouer', back: 'Retour', bot: 'Robot', you: 'Toi', mvp: 'Meilleur jeton',
     quit: 'Abandonner le combat ?', eff: 'Efficace !', weak: 'Peu efficace', dodge: 'Esquive', miss: 'Raté', crit: 'CRITIQUE', revive: 'Ressuscité !', time: 'Temps écoulé',
     lvlUp: 'Monter au niveau {n}', lvlCost: 'utilise {n} doublon(s)', lvlNeed: 'Il faut {n} doublon(s) libre(s) (tu en as {h})', lvlMax: 'Niveau max', lvlOk: '{j} passe niveau {n} !', element: 'Élément' },
-  en: { tryTuto: 'Try battles (tutorial)', rank: 'Your rank', r_bronze: 'Bronze', r_silver: 'Silver', r_gold: 'Gold', r_plat: 'Platinum', r_diam: 'Diamond', r_master: 'Master', r_legend: 'Legend', play: 'PLAY', rankedSoon: 'Ranked · coming soon', edit: 'Edit', noSyn: 'No synergy: add 2 tokens of the same family, or tokens whose effects combine.', howTitle: 'How does it work?', statuses: 'Statuses', reactions: 'Reactions (combos)', tuto: 'Replay the battle tutorial', cost: '{n} pt', stSpd: 'Speed', cd: '{n} s cooldown', saveTeam: 'Save team', budget: 'Budget: {n}/{m} pts', budgetOver: 'Too many points for ranked (training still works).', budgetHint: 'Common 1 · Rare 2 · Epic 3 · Legendary 4 · Mythic 5 pts', teamFull: 'Your team is full: remove a token first', title: 'Battle', sub: 'Build your team of 3 tokens. Battles are being remade.', newMode: '🛠️ New battle mode in the works', newModeTxt: 'The old mode is gone, a brand-new battle is coming soon.', team: 'Your team',
+  en: { tryTuto: 'Try the Ring (tutorial)', rank: 'Your rank', r_bronze: 'Bronze', r_silver: 'Silver', r_gold: 'Gold', r_plat: 'Platinum', r_diam: 'Diamond', r_master: 'Master', r_legend: 'Legend', play: 'PLAY', rankedSoon: 'Ranked · coming soon', edit: 'Edit', noSyn: 'No synergy: add 2 tokens of the same family, or tokens whose effects combine.', howTitle: 'How does it work?', statuses: 'Statuses', reactions: 'Reactions (combos)', tuto: 'Replay the Ring tutorial', cost: '{n} pt', stSpd: 'Speed', cd: '{n} s cooldown', saveTeam: 'Save team', budget: 'Budget: {n}/{m} pts', budgetOver: 'Too many points for ranked (training still works).', budgetHint: 'Common 1 · Rare 2 · Epic 3 · Legendary 4 · Mythic 5 pts', teamFull: 'Your team is full: remove a token first', title: 'Battle', sub: 'Build your team of 3 tokens. Battles are being remade.', newMode: '🛠️ New battle mode in the works', newModeTxt: 'The old mode is gone, a brand-new battle is coming soon.', team: 'Your team',
     slots: ['Token 1', 'Token 2', 'Token 3'], lanes: ['Left', 'Middle', 'Right'], pick: 'Pick', train: 'Training vs the AI', ranked: '🏆 Ranked', soon: 'Soon: Bronze → Legend tiers, seasons and battle pass',
     need3: 'Pick 3 tokens to fight', els: 'Elements', elsHelp: '🔥 beats 🌿 · 🌿 beats 💧 · 💧 beats 🔥 · ✨ and 🌑 strong against each other (×1.3 damage)',
-    how: 'How it works', howText: 'Your 3 tokens attack your team’s target on their own. You have 2 moves: <b>tap a glowing button</b> to cast an ability, and <b>tap an enemy</b> so your whole team targets it. Each token has either a passive (automatic) or an ability (cast it at the right time). Combine statuses to trigger reactions! 90 s max: when time runs out, the team with the most HP (in %) wins.', round: 'Round {n}', step1: 'Tap one of your tokens', step2: 'Tap or drag your token to a spot', abilOn: 'Ability on', abilOff: 'Turn on ability', laneHint: 'same spot = duel', tuto1t: 'Pick a token', tuto1: 'Each round, tap one of your tokens. The opponent picks at the same time: you each see the other’s token.', tuto2t: 'Place it secretly', tuto2: 'Tap (or drag to) <b>left, middle or right</b>. The other can’t see where you put it. You can turn on the ability first (once per battle).', tuto3t: 'Duel or direct hit', tuto3: '<b>Same spot</b>: the two tokens fight. <b>Different spots</b>: each hits the opposing player. First to 0 ❤️ loses!', tutoGo: 'Got it, let’s go!', rest: 'Resting', stuck: 'Stuck', foeCant: 'Opponent can’t play: {n}', foePlays: 'They play', revealTxt: 'Reveal!', recapClash: '⚔️ Duel ({l}): {a} vs {b} · your token deals {x} HP, takes {y}', recapMiss: '💥 Direct hits: {a} ({la}) and {b} ({lb}) · you deal {x} ❤️, you lose {y} ❤️', needLogin: 'Log in to build your team and fight.', normal: 'Normal', stHp: 'HP', stAtk: 'Attack', stDef: 'Defense', stCurse: 'cursed', stRust: 'rusted (−30% def.)', stNoHeal: 'can no longer be healed', inTeam: 'already in the team', version: 'Version', chooseThis: 'Take this token', dragHint: 'Drag your token onto a spot, or tap a spot then “Place here”.', phaseToken: 'Pick your token for this round', phaseLane: 'You play <b>{a}</b>, they play <b>{b}</b>. Where do you place your token?', ok: 'Confirm', place: 'Place here', usedAb: 'already used', tired: 'This token is resting this round', clash: 'Clash!', block: 'Protected', dazzled: 'Dazzled', recharged: 'Ability recharged', frozenL: 'Frozen', rounds: '{n} rounds', dmgWord: 'damage',
+    how: 'How it works', howText: 'A duel on a round ring, billiards × pétanque × sumo. Each turn, you and your opponent aim <b>at the same time</b> without seeing each other’s shot: tap one of your tokens, drag backwards like a slingshot (the further, the harder), then confirm. Both shots go off together. A token whose center leaves the ring is out. The first player with no tokens left loses. Each token has a power and 3 stats: weight, power, size.', round: 'Round {n}', step1: 'Tap one of your tokens', step2: 'Tap or drag your token to a spot', abilOn: 'Ability on', abilOff: 'Turn on ability', laneHint: 'same spot = duel', tuto1t: 'Pick a token', tuto1: 'Each round, tap one of your tokens. The opponent picks at the same time: you each see the other’s token.', tuto2t: 'Place it secretly', tuto2: 'Tap (or drag to) <b>left, middle or right</b>. The other can’t see where you put it. You can turn on the ability first (once per battle).', tuto3t: 'Duel or direct hit', tuto3: '<b>Same spot</b>: the two tokens fight. <b>Different spots</b>: each hits the opposing player. First to 0 ❤️ loses!', tutoGo: 'Got it, let’s go!', rest: 'Resting', stuck: 'Stuck', foeCant: 'Opponent can’t play: {n}', foePlays: 'They play', revealTxt: 'Reveal!', recapClash: '⚔️ Duel ({l}): {a} vs {b} · your token deals {x} HP, takes {y}', recapMiss: '💥 Direct hits: {a} ({la}) and {b} ({lb}) · you deal {x} ❤️, you lose {y} ❤️', needLogin: 'Log in to build your team and fight.', normal: 'Normal', stHp: 'HP', stAtk: 'Attack', stDef: 'Defense', stCurse: 'cursed', stRust: 'rusted (−30% def.)', stNoHeal: 'can no longer be healed', inTeam: 'already in the team', version: 'Version', chooseThis: 'Take this token', dragHint: 'Drag your token onto a spot, or tap a spot then “Place here”.', phaseToken: 'Pick your token for this round', phaseLane: 'You play <b>{a}</b>, they play <b>{b}</b>. Where do you place your token?', ok: 'Confirm', place: 'Place here', usedAb: 'already used', tired: 'This token is resting this round', clash: 'Clash!', block: 'Protected', dazzled: 'Dazzled', recharged: 'Ability recharged', frozenL: 'Frozen', rounds: '{n} rounds', dmgWord: 'damage',
     pickTitle: 'Pick a token', lvl: 'Lv.', power: 'Power', ability: 'Ability', passive: 'Passive', remove: 'Remove', none: 'You have no tokens yet: open some pulls!',
     ready: 'READY', win: 'Victory!', lose: 'Defeat…', draw: 'Draw', again: 'Play again', back: 'Back', bot: 'Bot', you: 'You', mvp: 'Best token',
     quit: 'Forfeit the battle?', eff: 'Effective!', weak: 'Not effective', dodge: 'Dodge', miss: 'Miss', crit: 'CRIT', revive: 'Revived!', time: 'Time’s up',
@@ -41,12 +41,12 @@ async function loadLevels() {
 const VRANK = { '': 0, gold: 1, celeste: 2, ombre: 3 };
 
 // ---------- Page Combat : rang, JOUER (classé), Entraînement, ton équipe
-const rankOf = elo => [...FCFG.RANKS].reverse().find(r => elo >= r.min) || FCFG.RANKS[0];
+const rankOf = elo => [...RCFG.RANKS].reverse().find(r => elo >= r.min) || RCFG.RANKS[0];
 async function renderCombat() {
   const page = $('page-combat');
   if (!ACC.user) {
     page.innerHTML = `<div class="page-empty"><h2>${at('title')}</h2><p class="muted">${at('needLogin')}</p><button class="btn primary" onclick="openAccount('login')">${t('login')}</button><button class="btn ghost" data-ftuto>🎓 ${at('tryTuto')}</button></div>`;
-    page.querySelector('[data-ftuto]').onclick = () => startFightTuto(() => renderCombat());
+    page.querySelector('[data-ftuto]').onclick = () => startRingTuto(() => renderCombat());
     return;
   }
   await Promise.all([loadInventory(), loadLevels(), (async () => {
@@ -58,23 +58,18 @@ async function renderCombat() {
 // Mini carte d'un jeton de l'équipe : image, nom, niveau, passif ou abilité
 function teamCard(u, i) {
   if (!u) return `<button class="ar-slot empty" data-edit><span class="ar-pos">${slotName(i)}</span><b>＋</b><small>${at('pick')}</small></button>`;
-  const j = jetonOf(u.name, u.serie), el = CB.elOf(u.name), k = kitText(u.name);
+  const j = jetonOf(u.name, u.serie), el = CB.elOf(u.name), k = powerText(u.name);
   return `<button class="ar-slot" data-info="${i}" style="--g:${hexRGB(j.glow)};--el:${ELS[el].col}">
     <span class="ar-pos">${slotName(i)}</span><span class="ar-el" title="${elName(el)}">${ELS[el].ico}</span>
     <img class="${vCls(u.variant)}" src="${texOf(j)}" alt="">
     <b>${jnH(u.name)}${vTag(u.variant)}</b>
     <small>${at('lvl')} ${lvlOf(u.name, u.serie)}</small>
-    <small class="ar-ab ${k.kind}">${k.kind === 'abil' ? '✦' : '◈'} ${esc(k.name)}</small>
+    <small class="ar-ab" style="--c:${PW_COL[k.pw]}">✦ ${esc(k.name)}</small>
   </button>`;
-}
-function synergyHTML(team) {
-  const { fam, combos } = teamSynergy(team);
-  const lines = [...famLines(fam).map(x => `<span class="sy-fam">${x}</span>`), ...combos.map(r => `<span class="sy-re" style="--c:${RE_COL[r]}">${RE_ICO[r]} ${ftL().re[r]} <small>${ftL().reD[r]}</small></span>`)];
-  return lines.length ? `<div class="sy">${lines.join('')}</div>` : `<p class="muted sy-none">${at('noSyn')}</p>`;
 }
 function drawCombat() {
   const page = $('page-combat'), full = ARENA.team.every(Boolean), team = ARENA.team.filter(Boolean);
-  const elo = FCFG.ELO.start, rk = rankOf(elo);
+  const elo = RCFG.ELO.start, rk = rankOf(elo);
   page.innerHTML = `<div class="ar-page fm">
     <div class="fm-rank"><span class="fm-ico">${rk.ico}</span><div><small>${at('rank')}</small><b>${at('r_' + rk.k)}</b></div><div class="fm-elo"><b>${fmt(elo)}</b><small>Elo</small></div></div>
     <button class="fm-play" disabled><b>⚔️ ${at('play')}</b><small>${at('rankedSoon')}</small></button>
@@ -83,57 +78,52 @@ function drawCombat() {
     <div class="fm-team">
       <div class="fm-th"><h3>${at('team')}</h3><button class="btn ghost sm" data-edit>✏️ ${at('edit')}</button></div>
       <div class="ar-team">${ARENA.team.map(teamCard).join('')}</div>
-      ${team.length ? synergyHTML(team) : ''}
     </div>
     <details class="ar-help"><summary>${at('howTitle')}</summary>
       <p class="muted">${at('howText')}</p>
-      <h4>${at('els')}</h4><p class="muted">${at('elsHelp')}</p>
-      <h4>${at('statuses')}</h4><div class="sy">${['burn', 'poison', 'freeze', 'shock', 'rage'].map(s => `<span>${ST_ICO[s]} <b>${ftL().st[s]}</b> <small>${ftL().stD[s]}</small></span>`).join('')}</div>
-      <h4>${at('reactions')}</h4><div class="sy">${Object.keys(FCFG.REACTIONS).map(r => `<span class="sy-re" style="--c:${RE_COL[r]}">${RE_ICO[r]} ${ftL().re[r]} <small>${ftL().reD[r]}</small></span>`).join('')}</div>
       <button class="btn ghost sm" data-ftuto>🎓 ${at('tuto')}</button>
     </details>
   </div>`;
   page.onclick = e => {
     if (e.target.closest('[data-edit]')) return editTeam();
     const inf = e.target.closest('[data-info]'); if (inf) { const u = ARENA.team[+inf.dataset.info]; sfx.click(); return openSheet({ name: u.name, serie: u.serie, variant: u.variant }); }
-    if (e.target.closest('[data-ftuto]')) return startFightTuto(() => drawCombat());
+    if (e.target.closest('[data-ftuto]')) return startRingTuto(() => drawCombat());
     if (e.target.closest('.fm-train')) return startTraining();
   };
 }
-// ---------- Entraînement contre l'IA (sans Elo). Le tout premier combat lance le tuto.
+// ---------- Entraînement contre l'IA (sans Elo). Le tout premier match lance le tuto.
 function startTraining() {
-  if (!fightTutoSeen()) return startFightTuto(() => drawCombat());
+  if (!ringTutoSeen()) return startRingTuto(() => drawCombat());
   const mine = ARENA.team.map(u => ({ name: u.name, lvl: lvlOf(u.name, u.serie), variant: u.variant }));
   const avg = Math.round(mine.reduce((x, u) => x + u.lvl, 0) / 3);
-  const pool = Object.keys(FCFG.TOKENS).sort(() => Math.random() - .5).slice(0, 3);
-  const bot = pool.map(name => ({ name, lvl: Math.max(1, Math.min(FCFG.LEVEL_MAX, avg + Math.round(Math.random() * 2 - 1))), variant: '' }));
-  startFight([mine, bot], { names: [ACC.pseudo || ft('you'), ft('bot')], ai: 'normal', onEnd: r => r === 'again' ? startTraining() : drawCombat() });
+  const pool = Object.keys(RCFG.TOKENS).sort(() => Math.random() - .5).slice(0, 3);
+  const bot = pool.map(name => ({ name, lvl: Math.max(1, Math.min(RCFG.LEVEL_MAX, avg + Math.round(Math.random() * 2 - 1))), variant: '' }));
+  startRing([mine, bot], { names: [ACC.pseudo || rt('you'), rt('bot')], ai: 'normal', onEnd: r => r === 'again' ? startTraining() : drawCombat() });
 }
 
 // ---------- Fiche complète d'un jeton (équipe, choix) : stats, élément, niveau, passif ou abilité
-const SHEET_MAX = { hp: 4000, atk: 115, spd: 125 };
 function tokenSheetHTML(o) {
-  const j = jetonOf(o.name, o.serie), el = CB.elOf(o.name), lvl = o.lvl || lvlOf(o.name, o.serie), s = CB.stats(o.name, j.odds, lvl, o.variant || ''), k = kitText(o.name);
-  const bar = (label, v, max) => `<div class="tk-bar"><span>${label}</span><div><i style="width:${Math.min(100, v / max * 100)}%"></i></div><b>${fmt(v)}</b></div>`;
+  const j = jetonOf(o.name, o.serie), el = CB.elOf(o.name), lvl = o.lvl || lvlOf(o.name, o.serie), s = CB.stats(o.name, j.odds, lvl, o.variant || '');
+  const bar = (label, v, max, txt) => `<div class="tk-bar"><span>${label}</span><div><i style="width:${Math.min(100, v / max * 100)}%"></i></div><b>${txt}</b></div>`;
   return `<div class="tk-sheet" style="--g:${hexRGB(j.glow)};--el:${ELS[el].col}">
     <div class="tk-top">
       <div class="tk-img"><img class="${vCls(o.variant || '')}" src="${texOf(j)}" alt=""></div>
       <div><span class="tier t-${tierKey(j.odds)}">${t(tierKey(j.odds))}</span>
         <h2>${jnH(o.name)} ${vTag(o.variant || '')}</h2>
-        <div class="tk-chips"><span style="color:${ELS[el].col}">${ELS[el].ico} ${elName(el)}</span><span>${at('lvl')} ${lvl}/10</span><span>${at('cost', { n: FCFG.BUDGET[tierKey(j.odds)] })}</span></div></div>
+        <div class="tk-chips"><span style="color:${ELS[el].col}">${ELS[el].ico} ${elName(el)}</span><span>${at('lvl')} ${lvl}/10</span><span>${at('cost', { n: RCFG.BUDGET[tierKey(j.odds)] })}</span></div></div>
     </div>
     <div class="tk-stats">
-      ${bar('❤️ ' + at('stHp'), s.hp, SHEET_MAX.hp)}
-      ${bar('⚔️ ' + at('stAtk'), s.atk, SHEET_MAX.atk)}
-      ${bar('💨 ' + at('stSpd'), s.spd, SHEET_MAX.spd)}
+      ${bar('⚖️ ' + rt('mass'), s.mass, RCFG.STAT_MAX.mass, s.mass.toFixed(2))}
+      ${bar('💥 ' + rt('powerS'), s.power, RCFG.STAT_MAX.power, fmt(Math.round(s.power)))}
+      ${bar('⭕ ' + rt('size'), s.r, RCFG.STAT_MAX.r, s.r)}
     </div>
     ${kitHTML(o.name)}
     ${o.extra || ''}
   </div>`;
 }
 function kitHTML(name) {
-  const k = kitText(name);
-  return `<div class="tk-sk${k.kind === 'abil' ? '' : ' p'}"><small>${k.kind === 'abil' ? `✦ ${at('ability')} · ${at('cd', { n: k.cd })}` : `◈ ${at('passive')}`}</small><b>${esc(k.name)}</b><p>${esc(k.desc)}</p></div>`;
+  const k = powerText(name);
+  return `<div class="tk-sk" style="--g:${hexRGB(PW_COL[k.pw])}"><small>✦ ${rt('power')} · ${k.when}</small><b>${esc(k.name)}</b><p>${esc(k.desc)}</p></div>`;
 }
 function openSheet(o) {
   const card = $('jm-card');
@@ -156,7 +146,7 @@ function editTeam() {
   const team = ARENA.team.map(u => u && by[key(u.serie || 'Takoras', u.name)] ? { ...u } : null);
   const S = { serie: series[0] || 'Takoras', el: 'all' };
   const baseV = g => Object.keys(g.vars).sort((a, b) => VRANK[a] - VRANK[b])[0]; // par défaut : la version normale
-  const pts = () => team.filter(Boolean).reduce((x, u) => x + FCFG.BUDGET[tierKey(u.odds)], 0);
+  const pts = () => team.filter(Boolean).reduce((x, u) => x + RCFG.BUDGET[tierKey(u.odds)], 0);
   const o = document.createElement('div');
   o.className = 'tp-box te';
   o.innerHTML = `<div class="tp-panel">
@@ -180,10 +170,10 @@ function editTeam() {
       const j = jetonOf(u.name, u.serie), g = by[key(u.serie, u.name)], vs = Object.keys(g.vars);
       return `<div class="te-s" style="--g:${hexRGB(j.glow)}"><button class="te-rm" data-rm="${i}" aria-label="${at('remove')}">✕</button>
         <img class="${vCls(u.variant)}" src="${texOf(j)}" alt=""><b>${jnH(u.name)}</b>
-        <button class="te-v ${u.variant ? 'v-' + u.variant : 'v-none'}" data-cyc="${i}" ${vs.length > 1 ? '' : 'disabled'}>${u.variant ? t('v_' + u.variant) + ' ×' + FCFG.MUTATION[u.variant] : at('normal')}${vs.length > 1 ? ' ⟳' : ''}</button></div>`;
+        <button class="te-v ${u.variant ? 'v-' + u.variant : 'v-none'}" data-cyc="${i}" ${vs.length > 1 ? '' : 'disabled'}>${u.variant ? t('v_' + u.variant) + ' ×' + RCFG.MUTATION[u.variant] : at('normal')}${vs.length > 1 ? ' ⟳' : ''}</button></div>`;
     }).join('')}</div>
-    <div class="te-info"><span class="te-pts${p > FCFG.BUDGET_MAX ? ' over' : ''}">${at('budget', { n: p, m: FCFG.BUDGET_MAX })}</span><small class="muted">${p > FCFG.BUDGET_MAX ? at('budgetOver') : at('budgetHint')}</small></div>
-    ${tm.length ? synergyHTML(tm) : ''}`;
+    <div class="te-info"><span class="te-pts${p > RCFG.BUDGET_MAX ? ' over' : ''}">${at('budget', { n: p, m: RCFG.BUDGET_MAX })}</span><small class="muted">${p > RCFG.BUDGET_MAX ? at('budgetOver') : at('budgetHint')}</small></div>
+`;
   };
   const drawGrid = () => {
     o.querySelectorAll('[data-el]').forEach(b => b.classList.toggle('on', b.dataset.el === S.el));
@@ -191,14 +181,16 @@ function editTeam() {
     const inTeam = new Set(team.filter(Boolean).map(u => key(u.serie, u.name)));
     const vis = all.filter(u => u.serie === S.serie && (S.el === 'all' || CB.elOf(u.name) === S.el)).sort((a, b) => b.odds - a.odds);
     o.querySelector('#te-grid').innerHTML = vis.map(u => {
-      const j = jetonOf(u.name, u.serie), el = CB.elOf(u.name), k = kitText(u.name), on = inTeam.has(u.k);
+      const j = jetonOf(u.name, u.serie), el = CB.elOf(u.name), k = powerText(u.name), on = inTeam.has(u.k), sx = RG.stats(u.name, lvlOf(u.name, u.serie)), M = RCFG.STAT_MAX;
       return `<button class="tp-c${on ? ' sel' : ''}" data-k="${esc(u.k)}" style="--g:${hexRGB(j.glow)};--el:${ELS[el].col}">
         <span class="tp-el">${ELS[el].ico}</span><span class="tp-lv">${at('lvl')}${lvlOf(u.name, u.serie)}</span>
         <span class="te-i" data-i="${esc(u.k)}">ⓘ</span>
         <img src="${texOf(j)}" alt="">
         <b>${jnH(u.name)}</b>
-        <small class="ar-ab ${k.kind}">${k.kind === 'abil' ? '✦' : '◈'} ${esc(k.name)}</small>
-        <small class="te-cost">${at('cost', { n: FCFG.BUDGET[tierKey(u.odds)] })}</small>
+        <small class="ar-ab" style="--c:${PW_COL[k.pw]}" title="${esc(k.desc)}">✦ ${esc(k.name)}</small>
+        <small class="te-pd">${esc(k.desc)}</small>
+        <span class="te-bars"><i style="--w:${sx.mass / M.mass * 100}%" title="${rt('mass')}"></i><i style="--w:${sx.power / M.power * 100}%" title="${rt('powerS')}"></i><i style="--w:${sx.r / M.r * 100}%" title="${rt('size')}"></i></span>
+        <small class="te-cost">${at('cost', { n: RCFG.BUDGET[tierKey(u.odds)] })}</small>
         ${on ? '<span class="te-ok">✓</span>' : ''}
       </button>`;
     }).join('') || `<p class="muted">${at('none')}</p>`;
