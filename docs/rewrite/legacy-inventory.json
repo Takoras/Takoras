@@ -26,6 +26,7 @@
     "admin_set_beta",
     "admin_set_items",
     "admin_set_pseudo",
+    "admin_set_tester",
     "admin_shop",
     "admin_shop_reroll",
     "admin_shop_set",
