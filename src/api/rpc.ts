@@ -14,7 +14,8 @@ export class RpcError extends Error {
 
 // Appel typé d'une RPC Supabase. Lève RpcError en cas d'erreur.
 export async function rpc<N extends RpcName>(name: N, ...args: Args<N> extends never ? [] : [Args<N>]): Promise<Rpc[N]['Returns']> {
-  const call = sb.rpc as unknown as (n: string, a?: object) => PromiseLike<{ data: unknown; error: { message: string } | null }>;
+  // bind : sb.rpc a besoin de son client (this) ; détachée, elle plantait avant même d'envoyer la requête
+  const call = sb.rpc.bind(sb) as unknown as (n: string, a?: object) => PromiseLike<{ data: unknown; error: { message: string } | null }>;
   const { data, error } = await call(name, args[0] as object | undefined);
   if (error) throw new RpcError(codeOf(error.message), error.message);
   return data as Rpc[N]['Returns'];

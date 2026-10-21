@@ -46,7 +46,7 @@ export function Layout() {
             <>
               <span className={s.bal} aria-label={t('app.balance')}>
                 <img className="px" src="/img/piece.png" alt="" width={18} height={18} />
-                {me.data ? me.data.coins.toLocaleString(locale()) : '…'}
+                {me.data ? me.data.coins.toLocaleString(locale()) : me.isError ? '—' : '…'}
               </span>
               <NavLink to="/profil" className={s.me} aria-label={t('app.account')}>
                 <Avatar pseudo={me.data?.pseudo ?? '?'} size={32} />
