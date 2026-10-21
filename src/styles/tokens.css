@@ -94,7 +94,7 @@
   --press: 0 3px 0 0;
   --shadow-1: 0 1px 0 rgb(255 255 255 / 4%) inset, 0 8px 24px rgb(0 0 0 / 35%);
   --shadow-pop: 0 20px 60px rgb(0 0 0 / 60%);
-  --glow: 0 0 24px rgb(var(--g) / 45%);
+  --glow-shadow: 0 0 24px rgb(var(--g) / 45%);
 
   /* Mouvement */
   --t-fast: 120ms;
@@ -110,6 +110,11 @@
   --z-overlay: 90;
   --z-modal: 100;
   --z-toast: 120;
+
+  /* Compatibilité : variables de l'ancien site encore lues par les écrans portés tels quels (Ring, cinéma) */
+  --border: var(--line);
+  --mid: var(--accent);
+  --glow: 139, 92, 246;
 
   /* Mobile : hauteur de la barre d'onglets et du clavier (mise à jour par JS) */
   --tabh: 0px;

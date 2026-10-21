@@ -22,7 +22,7 @@ Composants : `src/ui/`.
 | Ring | `--me` (vert), `--foe` (rouge) |
 | Typo | `--font-display` (Space Grotesk), `--font-body` (Inter), `--fs-xs` à `--fs-3xl` |
 | Espaces | `--s-1` à `--s-12` (grille de 4), `--gutter` 16 px |
-| Ombres | `--press` (ombre « arcade » des boutons), `--shadow-1`, `--shadow-pop`, `--glow` |
+| Ombres | `--press` (ombre « arcade » des boutons), `--shadow-1`, `--shadow-pop`, `--glow-shadow` |
 | Mouvement | `--t-fast` 120 ms, `--t-med` 220 ms, `--t-slow` 420 ms (à 0 si `prefers-reduced-motion`), `--ease-out`, `--ease-spring` |
 | Empilement | `--z-nav`, `--z-tabbar`, `--z-overlay`, `--z-modal`, `--z-toast` |
 

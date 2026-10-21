@@ -1,7 +1,11 @@
+import { lazy } from 'react';
 import { createBrowserRouter } from 'react-router';
 import { SoonPage } from '@/pages/Soon';
 import NotFound from '@/pages/NotFound';
 import { Layout } from './Layout';
+
+// Labo des moteurs : seulement en développement (absent du site en ligne)
+const Lab = import.meta.env.DEV ? lazy(() => import('@/pages/Lab')) : null;
 
 export const router = createBrowserRouter([
   {
@@ -16,6 +20,7 @@ export const router = createBrowserRouter([
       { path: '/amis', element: <SoonPage k="ui.nav_friends" /> },
       { path: '/profil', element: <SoonPage k="app.account" /> },
       { path: '/profil/:pseudo', element: <SoonPage k="app.account" /> },
+      ...(Lab ? [{ path: '/__lab', element: <Lab /> }] : []),
       { path: '*', element: <NotFound /> },
     ],
   },
