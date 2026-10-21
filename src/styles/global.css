@@ -1,38 +1,109 @@
-/* Base globale. Les tokens de design arriveront en phase 4 (src/styles/tokens.css). */
-:root {
-  color-scheme: dark;
+@import '@fontsource-variable/inter';
+@import '@fontsource-variable/space-grotesk';
+@import './tokens.css';
 
-  --bg: #0d0d12;
-  --text: #f2f2f5;
-  --muted: #8d8da0;
-}
-
-* {
+*,
+*::before,
+*::after {
   box-sizing: border-box;
   margin: 0;
   padding: 0;
+}
+
+html {
+  -webkit-text-size-adjust: 100%;
+  scrollbar-color: var(--line-strong) transparent;
 }
 
 body {
   min-height: 100dvh;
   background: var(--bg);
   color: var(--text);
-  font-family: system-ui, sans-serif;
+  font-family: var(--font-body);
+  font-size: var(--fs-md);
+  line-height: var(--lh);
+  -webkit-font-smoothing: antialiased;
+  overflow-x: hidden;
 }
 
-.boot {
-  min-height: 100dvh;
-  display: grid;
-  place-content: center;
-  justify-items: center;
-  gap: 12px;
-  text-align: center;
+h1,
+h2,
+h3,
+h4 {
+  font-family: var(--font-display);
+  line-height: var(--lh-tight);
+  font-weight: 700;
+  letter-spacing: -0.01em;
 }
 
-.boot img {
+a {
+  color: inherit;
+}
+
+button,
+input,
+select,
+textarea {
+  font: inherit;
+  color: inherit;
+}
+
+button {
+  background: none;
+  border: 0;
+  cursor: pointer;
+}
+
+img {
+  display: block;
+  max-width: 100%;
+}
+
+/* Pixel art toujours net */
+.px {
   image-rendering: pixelated;
 }
 
-.boot p {
+/* Focus visible au clavier uniquement, bien contrasté */
+:focus-visible {
+  outline: 2px solid var(--accent-hi);
+  outline-offset: 2px;
+  border-radius: var(--r-xs);
+}
+
+/* Petit texte en capitales espacées (sur-titres) */
+.eyebrow {
+  font-family: var(--font-display);
+  font-size: var(--fs-xs);
+  font-weight: 600;
+  letter-spacing: var(--tracking-caps);
+  text-transform: uppercase;
+  color: var(--accent-hi);
+}
+
+.muted {
   color: var(--muted);
+}
+
+.visually-hidden {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip-path: inset(50%);
+  white-space: nowrap;
+}
+
+/* Raretés */
+.r-common { color: var(--r-common); }
+.r-rare { color: var(--r-rare); }
+.r-epic { color: var(--r-epic); }
+.r-legend { color: var(--r-legend); }
+.r-myth { color: var(--r-myth); }
+
+/* Page bloquée (ouverture, Ring, modale plein écran) */
+html.lock,
+html.lock body {
+  overflow: hidden;
+  overscroll-behavior: none;
 }

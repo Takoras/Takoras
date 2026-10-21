@@ -1,0 +1,54 @@
+.dialog {
+  margin: auto;
+  width: min(100% - 2 * var(--gutter), 440px);
+  max-height: min(90dvh, 100dvh - var(--kb) - 2 * var(--gutter));
+  padding: 0;
+  border: 0;
+  background: transparent;
+  color: var(--text);
+  overflow: visible;
+}
+
+.wide { width: min(100% - 2 * var(--gutter), 720px); }
+
+.dialog::backdrop {
+  background: rgb(5 5 10 / 72%);
+  backdrop-filter: blur(4px);
+}
+
+.dialog[open] { animation: rise var(--t-med) var(--ease-out); }
+
+.card {
+  position: relative;
+  max-height: inherit;
+  overflow-y: auto;
+  padding: var(--s-6);
+  background: var(--surface);
+  border: 1px solid var(--line);
+  border-radius: var(--r-lg);
+  box-shadow: var(--shadow-pop);
+}
+
+.title {
+  font-size: var(--fs-xl);
+  margin-bottom: var(--s-4);
+  padding-right: var(--s-8);
+}
+
+.close {
+  position: absolute;
+  top: var(--s-3);
+  right: var(--s-3);
+  display: grid;
+  place-items: center;
+  width: 36px;
+  height: 36px;
+  border-radius: var(--r-sm);
+  color: var(--muted);
+}
+
+.close:hover { background: var(--surface-2); color: var(--text); }
+
+@keyframes rise {
+  from { opacity: 0; transform: translateY(12px) scale(0.98); }
+}

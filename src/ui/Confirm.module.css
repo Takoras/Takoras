@@ -1,0 +1,12 @@
+.text { font-size: var(--fs-lg); margin-bottom: var(--s-5); padding-right: var(--s-6); }
+.row { display: flex; gap: var(--s-3); justify-content: flex-end; }
+
+.input {
+  width: 100%;
+  min-height: 44px;
+  margin-bottom: var(--s-4);
+  padding: 0 var(--s-3);
+  border-radius: var(--r-sm);
+  border: 1px solid var(--line-strong);
+  background: var(--bg-raised);
+}
