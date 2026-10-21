@@ -1,0 +1,38 @@
+/* Base globale. Les tokens de design arriveront en phase 4 (src/styles/tokens.css). */
+:root {
+  color-scheme: dark;
+
+  --bg: #0d0d12;
+  --text: #f2f2f5;
+  --muted: #8d8da0;
+}
+
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+body {
+  min-height: 100dvh;
+  background: var(--bg);
+  color: var(--text);
+  font-family: system-ui, sans-serif;
+}
+
+.boot {
+  min-height: 100dvh;
+  display: grid;
+  place-content: center;
+  justify-items: center;
+  gap: 12px;
+  text-align: center;
+}
+
+.boot img {
+  image-rendering: pixelated;
+}
+
+.boot p {
+  color: var(--muted);
+}
