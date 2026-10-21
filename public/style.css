@@ -2452,3 +2452,39 @@ details.ar-help > * + * { margin-top: 10px; } details.ar-help h4 { font-family: 
 @keyframes rgOn { 50% { box-shadow: 0 0 34px var(--c); } }
 @keyframes rgHl { 50% { outline-color: rgba(253, 230, 138, .25); } }
 @media (min-width: 900px) { .rg { max-width: 760px; margin: 0 auto; } .rg::before { content: ""; position: fixed; inset: 0; z-index: -1; background: #0b0914; } }
+
+/* Ring : stats expliquées (mêmes couleurs partout : poids violet, puissance orange, taille bleu) */
+.rs { display: flex; flex-direction: column; gap: 8px; text-align: left; }
+.rs-row { display: grid; grid-template-columns: 96px 1fr 44px; align-items: center; gap: 4px 8px; }
+.rs-row small { grid-column: 1 / -1; font-size: 11px; color: var(--muted); line-height: 1.3; margin-top: -2px; }
+.rs-l { font-size: 12.5px; font-weight: 600; white-space: nowrap; }
+.rs-b { height: 8px; border-radius: 4px; background: rgba(255, 255, 255, .08); overflow: hidden; }
+.rs-b i { display: block; height: 100%; border-radius: 4px; }
+.rs-row.mass .rs-b i { background: linear-gradient(90deg, #7c3aed, #a78bfa); } .rs-row.pow .rs-b i { background: linear-gradient(90deg, #ea580c, #fb923c); } .rs-row.size .rs-b i { background: linear-gradient(90deg, #0284c7, #38bdf8); }
+.rs-row b { font-size: 12px; text-align: right; font-variant-numeric: tabular-nums; }
+.rs.compact { gap: 3px; width: 100%; padding: 0 2px; }
+.rs.compact .rs-row { grid-template-columns: 16px 1fr; gap: 4px; }
+.rs.compact .rs-l { font-size: 10px; } .rs.compact .rs-l { overflow: hidden; width: 14px; } .rs.compact .rs-b { height: 5px; } .rs.compact b { display: none; }
+.te-legend { padding: 0 18px 6px; font-size: 11px; color: var(--muted); line-height: 1.4; }
+
+/* Ring : les équipes dans les coins (la sienne en haut à droite, la tienne en bas à gauche) */
+.rg-team { position: absolute; display: flex; gap: 6px; z-index: 2; }
+.rg-team.foe { top: 4px; right: 4px; } .rg-team.me { bottom: 4px; left: 4px; }
+.rg-tc { position: relative; width: 42px; height: 42px; border-radius: 50%; padding: 3px; background: radial-gradient(circle at 35% 30%, #3a2f5a, #120d20); box-shadow: 0 0 0 2px #22c55e, 0 4px 12px rgba(0, 0, 0, .5); transition: transform .15s, filter .3s; }
+.rg-team.foe .rg-tc { box-shadow: 0 0 0 2px #f43f5e, 0 4px 12px rgba(0, 0, 0, .5); }
+.rg-tc img { width: 100%; height: 100%; border-radius: 50%; image-rendering: pixelated; object-fit: cover; }
+.rg-tc:hover { transform: scale(1.08); } .rg-tc.sel { box-shadow: 0 0 0 3px #fff, 0 0 14px rgba(255, 255, 255, .5); }
+.rg-tc.ko { filter: grayscale(1) brightness(.4); }
+.rg-tcp { position: absolute; right: -4px; bottom: -4px; min-width: 18px; height: 18px; padding: 0 4px; border-radius: 9px; display: grid; place-items: center; font-size: 10.5px; font-weight: 800; color: #0b0914; background: var(--c); box-shadow: 0 0 8px var(--c); }
+.rg-tc.ko .rg-tcp { background: #444; color: #fff; box-shadow: none; }
+/* Ring : fiche d'un jeton pendant le match */
+.rg-info { position: fixed; inset: 0; z-index: 8; display: grid; place-items: center; padding: 20px; background: rgba(5, 3, 12, .6); backdrop-filter: blur(3px); }
+.rg-ic { position: relative; width: min(100%, 340px); display: flex; flex-direction: column; gap: 12px; padding: 18px; border-radius: 20px; background: linear-gradient(180deg, rgba(var(--g), .16), #15111f 45%); border: 2px solid #22c55e; }
+.rg-ic.foe { border-color: #f43f5e; }
+.rg-icx { position: absolute; top: 10px; right: 10px; width: 30px; height: 30px; border-radius: 50%; background: rgba(255, 255, 255, .07); color: var(--muted); }
+.rg-ih { display: flex; gap: 12px; align-items: center; } .rg-ih img { width: 64px; height: 64px; image-rendering: pixelated; filter: drop-shadow(0 0 10px rgba(var(--g), .6)); }
+.rg-ih b { display: block; font-size: 18px; font-family: "Space Grotesk"; } .rg-ih small { color: var(--muted); font-size: 12px; }
+.rg-ip { padding: 10px 12px; border-radius: 14px; background: color-mix(in srgb, var(--c) 12%, transparent); border: 1px solid color-mix(in srgb, var(--c) 55%, transparent); }
+.rg-ip b { color: var(--c); } .rg-ip p { font-size: 13.5px; margin: 2px 0; } .rg-ip small { font-size: 11.5px; color: var(--muted); }
+.rg-banner { font-size: clamp(26px, 8.5vw, 40px); text-align: center; line-height: 1.05; }
+.rg-banner small { display: block; font-size: .45em; font-weight: 700; opacity: .85; letter-spacing: .04em; }

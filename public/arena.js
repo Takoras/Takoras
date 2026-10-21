@@ -103,8 +103,7 @@ function startTraining() {
 
 // ---------- Fiche complète d'un jeton (équipe, choix) : stats, élément, niveau, passif ou abilité
 function tokenSheetHTML(o) {
-  const j = jetonOf(o.name, o.serie), el = CB.elOf(o.name), lvl = o.lvl || lvlOf(o.name, o.serie), s = CB.stats(o.name, j.odds, lvl, o.variant || '');
-  const bar = (label, v, max, txt) => `<div class="tk-bar"><span>${label}</span><div><i style="width:${Math.min(100, v / max * 100)}%"></i></div><b>${txt}</b></div>`;
+  const j = jetonOf(o.name, o.serie), el = CB.elOf(o.name), lvl = o.lvl || lvlOf(o.name, o.serie);
   return `<div class="tk-sheet" style="--g:${hexRGB(j.glow)};--el:${ELS[el].col}">
     <div class="tk-top">
       <div class="tk-img"><img class="${vCls(o.variant || '')}" src="${texOf(j)}" alt=""></div>
@@ -112,12 +111,8 @@ function tokenSheetHTML(o) {
         <h2>${jnH(o.name)} ${vTag(o.variant || '')}</h2>
         <div class="tk-chips"><span style="color:${ELS[el].col}">${ELS[el].ico} ${elName(el)}</span><span>${at('lvl')} ${lvl}/10</span><span>${at('cost', { n: RCFG.BUDGET[tierKey(j.odds)] })}</span></div></div>
     </div>
-    <div class="tk-stats">
-      ${bar('⚖️ ' + rt('mass'), s.mass, RCFG.STAT_MAX.mass, s.mass.toFixed(2))}
-      ${bar('💥 ' + rt('powerS'), s.power, RCFG.STAT_MAX.power, fmt(Math.round(s.power)))}
-      ${bar('⭕ ' + rt('size'), s.r, RCFG.STAT_MAX.r, s.r)}
-    </div>
     ${kitHTML(o.name)}
+    ${ringStatsHTML(o.name, lvl, o.variant || '')}
     ${o.extra || ''}
   </div>`;
 }
@@ -156,6 +151,7 @@ function editTeam() {
       ${series.length > 1 ? `<div class="tp-series">${series.map(sr => `<button data-serie="${esc(sr)}">${esc(sr)}</button>`).join('')}</div>` : ''}
       <div class="tp-els">${['all', 'fire', 'water', 'plant', 'light', 'shadow'].map(e => `<button data-el="${e}">${e === 'all' ? t('all') : ELS[e].ico + ' ' + elName(e)}</button>`).join('')}</div>
     </div>
+    <p class="te-legend">${rt('statsLegend')}</p>
     <div class="tp-grid te-grid" id="te-grid"></div>
     <div class="te-foot"><button class="btn primary" data-save>${at('saveTeam')}</button></div>
   </div>`;
@@ -181,7 +177,7 @@ function editTeam() {
     const inTeam = new Set(team.filter(Boolean).map(u => key(u.serie, u.name)));
     const vis = all.filter(u => u.serie === S.serie && (S.el === 'all' || CB.elOf(u.name) === S.el)).sort((a, b) => b.odds - a.odds);
     o.querySelector('#te-grid').innerHTML = vis.map(u => {
-      const j = jetonOf(u.name, u.serie), el = CB.elOf(u.name), k = powerText(u.name), on = inTeam.has(u.k), sx = RG.stats(u.name, lvlOf(u.name, u.serie)), M = RCFG.STAT_MAX;
+      const j = jetonOf(u.name, u.serie), el = CB.elOf(u.name), k = powerText(u.name), on = inTeam.has(u.k);
       return `<button class="tp-c${on ? ' sel' : ''}" data-k="${esc(u.k)}" style="--g:${hexRGB(j.glow)};--el:${ELS[el].col}">
         <span class="tp-el">${ELS[el].ico}</span><span class="tp-lv">${at('lvl')}${lvlOf(u.name, u.serie)}</span>
         <span class="te-i" data-i="${esc(u.k)}">ⓘ</span>
@@ -189,7 +185,7 @@ function editTeam() {
         <b>${jnH(u.name)}</b>
         <small class="ar-ab" style="--c:${PW_COL[k.pw]}" title="${esc(k.desc)}">✦ ${esc(k.name)}</small>
         <small class="te-pd">${esc(k.desc)}</small>
-        <span class="te-bars"><i style="--w:${sx.mass / M.mass * 100}%" title="${rt('mass')}"></i><i style="--w:${sx.power / M.power * 100}%" title="${rt('powerS')}"></i><i style="--w:${sx.r / M.r * 100}%" title="${rt('size')}"></i></span>
+        ${ringStatsHTML(u.name, lvlOf(u.name, u.serie), '', true)}
         <small class="te-cost">${at('cost', { n: RCFG.BUDGET[tierKey(u.odds)] })}</small>
         ${on ? '<span class="te-ok">✓</span>' : ''}
       </button>`;

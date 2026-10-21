@@ -75,7 +75,7 @@ async function route() {
   document.querySelectorAll('.home-sec').forEach(s => { s.hidden = page !== 'home'; });
   Object.entries(PAGES).forEach(([k, id]) => { $(id).hidden = k !== page; });
   if (page !== 'home' || from !== 'home') scrollTo({ top: 0 });
-  const ready = page === 'bestiary' ? renderBestiary() : page === 'inv' ? renderInventory() : page === 'shop' ? renderShop() : page === 'profile' ? renderProfile(arg || ACC.pseudo) : page === 'friends' ? renderFriends() : page === 'combat' ? renderCombat() : page === 'board' ? renderBoard() : null;
+  const ready = page === 'bestiary' ? renderBestiary() : page === 'inv' ? renderInventory() : page === 'shop' ? renderShop() : page === 'profile' ? renderProfile(arg || ACC.pseudo) : page === 'friends' ? renderFriends() : page === 'combat' ? (typeof renderCombat === 'function' && renderCombat()) : page === 'board' ? renderBoard() : null;
 
   // 3. Elle arrive : les blocs montent un par un, puis les cartes en cascade
   if (animate) {

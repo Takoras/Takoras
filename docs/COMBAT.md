@@ -6,7 +6,8 @@ le but est d'éjecter les jetons adverses du ring.
 Fichiers :
 - `public/ring-config.js` (`RCFG`) : **toutes les valeurs d'équilibrage** (stats et pouvoir de chaque jeton, frottement, chocs, ralenti, niveaux, mutations, budget, Elo, rangs, IA).
 - `public/ring-engine.js` (`RG`) : moteur physique maison, 100 % déterministe (pas fixe 1/120 s, pas de hasard ni de trigonométrie, valeurs arrondies à chaque pas). `RG.resolve(st, [tir0, tir1])` joue un tour ; c'est ce que le serveur rejouera pour le classé.
-- `public/ring-ui.js` : l'écran (visée, révélation, animation, effets, sons), l'IA d'entraînement, l'écran de fin et le tuto interactif.
+- `public/ring-ui.js` : l'écran (visée, révélation, animation, équipes dans les coins, fiche au toucher), l'IA d'entraînement, l'écran de fin et le tuto interactif.
+- `public/ring-fx.js` : la mise en scène des pouvoirs (intro qui fige le temps, aura, effet clé, son synthétisé propre à chaque pouvoir).
 - `public/arena.js` : la page Combat (rang, JOUER, Entraînement, équipe), l'éditeur d'équipe (budget, pouvoir, 3 stats) et les fiches.
 
 ## Règles
