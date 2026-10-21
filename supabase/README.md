@@ -76,7 +76,7 @@ La publication `supabase_realtime` contient `announcements`, `messages`, `friend
 | `info.js` | Probas & infos |
 | `profile.js` | Profils |
 | `social.js` | Amis + chat |
-| `battle-engine.js` / `combat.js` | Combat (moteur commun + affichage) |
+| `combat-engine.js` / `arena.js` | Éléments, stats, équipe (combat remis à zéro) |
 | `quests.js` | Quêtes du jour |
 | `beta.js` | Bêta : menu testeur, patch notes |
 | `feedback.js` | Bouton « Donner un avis » |
