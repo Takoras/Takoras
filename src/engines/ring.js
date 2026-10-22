@@ -99,7 +99,7 @@ const rgImg = name => {
 // teams : [[{ name, lvl, variant }×3] ×2]. opts : { names, ai, tuto, onEnd }
 function startRing(teams, opts = {}) {
   closeRing();
-  Object.assign(RNG, { st: RG.create(teams, opts.map), phase: 'aim', sel: null, aim: null, pow: false, drag: null, prev: null, foe: null, foeOk: false, locked: false, play: null, parts: [], trails: {}, spin: {}, shake: 0,
+  Object.assign(RNG, { cam: { z: 1, cx: 0, cy: 0 }, ptrs: new Map(), pinch: null, st: RG.create(teams, opts.map), phase: 'aim', sel: null, aim: null, pow: false, drag: null, prev: null, foe: null, foeOk: false, locked: false, play: null, parts: [], trails: {}, spin: {}, shake: 0,
     ai: opts.ai || 'normal', names: opts.names || [rt('you'), rt('bot')], onEnd: opts.onEnd || null, tuto: opts.tuto ? { step: 0 } : null, last: 0 });
   teams.flat().forEach(j => rgImg(j.name));
   const o = document.createElement('div');
@@ -111,7 +111,7 @@ function startRing(teams, opts = {}) {
       <div class="rg-timer" id="rg-timer"><svg viewBox="0 0 36 36"><circle cx="18" cy="18" r="15.5"/><circle class="p" cx="18" cy="18" r="15.5" pathLength="100"/></svg><b></b></div>
     </div>
     <div class="rg-names"><span>${esc(RNG.names[0])}</span><span class="rg-ok" id="rg-ok">${rt('foeOk')}</span><span>${esc(RNG.names[1])} <button class="rg-scout" data-scout>👁 ${rt('scout')}</button></span></div>
-    <div class="rg-stage" id="rg-stage"><canvas id="rg-cv"></canvas><div class="rg-banner" id="rg-banner"></div><div class="rg-team foe" id="rg-t1"></div><div class="rg-team me" id="rg-t0"></div></div>
+    <div class="rg-stage" id="rg-stage"><canvas id="rg-cv"></canvas><div class="rg-zoom"><button data-z="in" aria-label="Zoom +">+</button><button data-z="out" aria-label="Zoom −">−</button><button data-z="fit" aria-label="Recentrer">⤢</button></div><div class="rg-banner" id="rg-banner"></div><div class="rg-team foe" id="rg-t1"></div><div class="rg-team me" id="rg-t0"></div></div>
     <p class="rg-hint" id="rg-hint"></p>
     <div class="rg-bot">
       <button class="rg-pw" id="rg-pw" disabled></button>
@@ -127,6 +127,10 @@ function startRing(teams, opts = {}) {
   addEventListener('pointermove', rgMove); addEventListener('pointerup', rgUp); addEventListener('pointercancel', rgUp);
   o.querySelectorAll('.rg-team').forEach(p => p.addEventListener('click', e => { const b = e.target.closest('[data-id]'); if (b) rgInfo(+b.dataset.id); }));
   o.querySelector('#rg-pw').onclick = rgTogglePow;
+  // zoom : boutons, molette (autour de la souris), pincer à deux doigts (dans rgDown / rgMove)
+  o.querySelectorAll('[data-z]').forEach(b => b.addEventListener('pointerdown', e => e.stopPropagation()));
+  o.querySelector('.rg-zoom').onclick = e => { const z = e.target.closest('[data-z]')?.dataset.z; if (!z) return; const h = RNG.view.size / 2; rgZoom(z === 'fit' ? 1 : RNG.cam.z * (z === 'in' ? 1.35 : 1 / 1.35), h, h, z === 'fit'); sfx.click(); };
+  stage.addEventListener('wheel', e => { e.preventDefault(); const [px, py] = rgPt(e); rgZoom(RNG.cam.z * Math.exp(-e.deltaY * .0015), px, py); }, { passive: false });
   o.querySelector('[data-scout]').onclick = () => rgScout(1);
   o.querySelector('#rg-go').onclick = () => rgLock();
   o.querySelector('[data-quit]').onclick = async () => { if (RNG.st?.over || RNG.tuto || await host.ask(rt('quit'))) { if (!RNG.st) return; RNG.tuto = null; closeRing(); RNG.onEnd?.('back'); } };
@@ -149,15 +153,30 @@ function rgResize() {
   const st = RNG.el.querySelector('#rg-stage'), r = st.getBoundingClientRect(), size = Math.max(200, Math.min(r.width, r.height)), dpr = Math.min(2, devicePixelRatio || 1);
   RNG.cv.style.width = RNG.cv.style.height = size + 'px';
   RNG.cv.width = RNG.cv.height = Math.round(size * dpr);
-  const px = size >= 520 ? 3 : 2, low = Math.ceil(size / px);
+  // pixels du décor : 1,5 px sur grand écran, 1 px sur téléphone (pixel art discret)
+  const px = size >= 520 ? 1.5 : 1, low = Math.ceil(size / px);
   for (const k of ['lo', 'hi']) {
     const cv = RNG[k] || (RNG[k] = document.createElement('canvas'));
     cv.width = cv.height = low;
   }
-  RNG.view = { size, dpr, px, s: size / 2 / ((RNG.st ? RG.ringR(RNG.st) : RCFG.RING_R) * 1.08) };
+  const base = size / 2 / ((RNG.st ? RG.ringR(RNG.st) : RCFG.RING_R) * 1.08);
+  RNG.view = { size, dpr, px, base, s: base * (RNG.cam?.z || 1) };
+  rgZoom(RNG.cam?.z || 1, size / 2, size / 2);
 }
-const w2s = (x, y) => [RNG.view.size / 2 + x * RNG.view.s, RNG.view.size / 2 + y * RNG.view.s];
-const s2w = (px, py) => [(px - RNG.view.size / 2) / RNG.view.s, (py - RNG.view.size / 2) / RNG.view.s];
+// Caméra : zoom (1× à 2,6×) autour d'un point de l'écran, sans sortir du terrain
+function rgZoom(z, ax, ay, fit) {
+  const V = RNG.view, cam = RNG.cam; if (!V || !cam) return;
+  const [wx, wy] = s2w(ax, ay);
+  cam.z = Math.max(1, Math.min(2.6, z));
+  V.s = V.base * cam.z;
+  if (fit || cam.z === 1) { cam.cx = 0; cam.cy = 0; return; }
+  cam.cx = wx - (ax - V.size / 2) / V.s; cam.cy = wy - (ay - V.size / 2) / V.s;
+  const lim = Math.max(0, (RNG.st ? RG.ringR(RNG.st) : RCFG.RING_R) * 1.08 - V.size / 2 / V.s);
+  cam.cx = Math.max(-lim, Math.min(lim, cam.cx)); cam.cy = Math.max(-lim, Math.min(lim, cam.cy));
+}
+const camX = () => RNG.cam?.cx || 0, camY = () => RNG.cam?.cy || 0;
+const w2s = (x, y) => [RNG.view.size / 2 + (x - camX()) * RNG.view.s, RNG.view.size / 2 + (y - camY()) * RNG.view.s];
+const s2w = (px, py) => [(px - RNG.view.size / 2) / RNG.view.s + camX(), (py - RNG.view.size / 2) / RNG.view.s + camY()];
 // Couleurs des camps : violet = toi, orange = l'adversaire (les couleurs du site)
 const SIDE = [{ hi: '#ddd6fe', md: '#a78bfa', lo: '#4c1d95', rgb: '167,139,250' }, { hi: '#fed7aa', md: '#fb923c', lo: '#7c2d12', rgb: '251,146,60' }];
 // Filtres des variantes (les mêmes que sur tout le site)
@@ -250,6 +269,15 @@ function rgPt(e) { const r = RNG.cv.getBoundingClientRect(); return [e.clientX -
 function rgDown(e) {
   if (!RNG.st) return;
   e.preventDefault();
+  // deux doigts : on zoome / déplace la vue au lieu de viser
+  RNG.ptrs.set(e.pointerId, rgPt(e));
+  if (RNG.ptrs.size === 2) {
+    const [a, b] = [...RNG.ptrs.values()];
+    RNG.drag = null;
+    RNG.pinch = { d0: Math.hypot(a[0] - b[0], a[1] - b[1]) || 1, z0: RNG.cam.z, m: [(a[0] + b[0]) / 2, (a[1] + b[1]) / 2] };
+    return;
+  }
+  if (RNG.ptrs.size > 2) return;
   const [px, py] = rgPt(e), [wx, wy] = s2w(px, py);
   const near = b => RG.len(b.x - wx, b.y - wy) < b.r * 1.3 + 15;
   // toucher un jeton adverse (ou un des tiens hors visée) : sa fiche
@@ -263,6 +291,16 @@ function rgDown(e) {
   RNG.drag = { x: px, y: py, id: e.pointerId };
 }
 function rgMove(e) {
+  if (RNG.ptrs?.has(e.pointerId)) RNG.ptrs.set(e.pointerId, rgPt(e));
+  if (RNG.pinch && RNG.ptrs.size >= 2) {
+    const [a, b] = [...RNG.ptrs.values()], m = [(a[0] + b[0]) / 2, (a[1] + b[1]) / 2], P = RNG.pinch;
+    // déplacement des deux doigts = on fait glisser la vue
+    const [wx, wy] = s2w(P.m[0], P.m[1]);
+    rgZoom(P.z0 * Math.hypot(a[0] - b[0], a[1] - b[1]) / P.d0, P.m[0], P.m[1]);
+    if (RNG.cam.z > 1) { RNG.cam.cx = wx - (m[0] - RNG.view.size / 2) / RNG.view.s; RNG.cam.cy = wy - (m[1] - RNG.view.size / 2) / RNG.view.s; rgZoom(RNG.cam.z, m[0], m[1]); }
+    P.m = m;
+    return;
+  }
   const d = RNG.drag; if (!d || e.pointerId !== d.id || RNG.locked) return;
   const [px, py] = rgPt(e), dx = d.x - px, dy = d.y - py, L = Math.hypot(dx, dy);
   const full = Math.min(170, RNG.view.size * .42);
@@ -273,6 +311,8 @@ function rgMove(e) {
   if (!RNG.aimTick || performance.now() - RNG.aimTick > 90) { RNG.aimTick = performance.now(); sfx.tick?.(.2 + f * .6); }
 }
 function rgUp(e) {
+  RNG.ptrs?.delete(e.pointerId);
+  if (RNG.pinch) { if (RNG.ptrs.size < 2) RNG.pinch = null; return; }
   const d = RNG.drag; if (!d || e.pointerId !== d.id) return;
   RNG.drag = null;
   if (RNG.aim && RNG.aim.f < RCFG.MIN_FORCE) { RNG.aim = null; RNG.prev = null; }
@@ -416,26 +456,51 @@ const MAP_THEME = {
   glace: { floor: ['#1e3a52', '#142838', '#0b1824'], rim: '#a5f3fc', rimDark: '#155e75', stud: '#22d3ee', rock: ['#7aa6c2', '#3f6480', '#d6f3ff'] },
   ruines: { floor: ['#3a3326', '#26211a', '#17140f'], rim: '#fde68a', rimDark: '#713f12', stud: '#ca8a04', rock: ['#8a7e66', '#4f4637', '#c2b594'] },
 };
-// Obstacles : rocher en pierre pixel (amortit) ou champignon lumineux qui pulse (renvoie plus fort)
-function rgObstacles(c, t) {
-  const obs = RNG.st?.map?.obs; if (!obs) return;
-  const V = RNG.view, px = V.px, T = MAP_THEME[RNG.st.map.id] || MAP_THEME.arene;
-  for (const o of obs) {
-    const [x, y] = w2s(o.x, o.y), r = o.r * V.s;
-    c.fillStyle = 'rgba(0,0,0,.45)'; c.beginPath(); c.ellipse(x + r * .12, y + r * .3, r * 1.02, r * .75, 0, 0, 7); c.fill();
-    if (o.k > 1) {
-      const p = 1 + .06 * Math.sin(t * 5 + o.x);
-      const g = c.createRadialGradient(x, y, r * .3, x, y, r * 1.6 * p); g.addColorStop(0, 'rgba(244,114,182,.45)'); g.addColorStop(1, 'rgba(244,114,182,0)');
-      c.fillStyle = g; c.beginPath(); c.arc(x, y, r * 1.6 * p, 0, 7); c.fill();
-      c.fillStyle = '#831843'; c.beginPath(); c.arc(x, y, r * p, 0, 7); c.fill();
-      c.fillStyle = '#ec4899'; c.beginPath(); c.arc(x, y, r * .82 * p, 0, 7); c.fill();
-      c.fillStyle = '#fbcfe8'; for (let k = 0; k < 6; k++) { const a = k / 6 * 6.283 + t * .4; c.fillRect(x + Math.cos(a) * r * .5 - px, y + Math.sin(a) * r * .5 - px, px * 2, px * 2); }
-      c.fillStyle = '#fff'; c.fillRect(x - px, y - px, px * 2, px * 2);
+// Zones au sol : boue qui bouillonne (ralentit) ou glace qui brille (fait filer)
+function rgZones(c, t) {
+  const Z = RNG.st?.map?.zones; if (!Z?.length) return;
+  const V = RNG.view, px = V.px;
+  for (const z of Z) {
+    const [x0, y0] = w2s(z.x - z.w / 2, z.y - z.h / 2), w = z.w * V.s, h = z.h * V.s, rad = Math.min(w, h) * .18;
+    c.save(); c.beginPath(); c.roundRect(x0, y0, w, h, rad);
+    if (z.fric > 1) {
+      c.fillStyle = 'rgba(92,56,24,.55)'; c.fill(); c.clip();
+      c.fillStyle = 'rgba(60,36,14,.6)';
+      for (let k = 0; k < 9; k++) { const bx = x0 + w * ((k * .37 + .1) % 1), by = y0 + h * ((k * .61 + .2) % 1); c.beginPath(); c.ellipse(bx, by, w * .12, h * .08, 0, 0, 7); c.fill(); }
+      for (let k = 0; k < 5; k++) { const ph = (t * .6 + k * .2) % 1, bx = x0 + w * ((k * .29 + .15) % 1), by = y0 + h * ((k * .53 + .3) % 1); c.strokeStyle = `rgba(214,170,120,${.6 * (1 - ph)})`; c.lineWidth = px; c.beginPath(); c.arc(bx, by, 2 + ph * 7, 0, 7); c.stroke(); }
+      c.restore(); c.save(); c.beginPath(); c.roundRect(x0, y0, w, h, rad); c.strokeStyle = 'rgba(180,120,60,.7)'; c.setLineDash([px * 4, px * 3]); c.lineWidth = px * 1.5; c.stroke();
     } else {
-      c.fillStyle = T.rock[1]; c.beginPath(); c.arc(x, y, r, 0, 7); c.fill();
-      c.fillStyle = T.rock[0]; c.beginPath(); c.arc(x - r * .1, y - r * .12, r * .82, 0, 7); c.fill();
-      c.fillStyle = T.rock[2]; c.beginPath(); c.arc(x - r * .3, y - r * .35, r * .3, 0, 7); c.fill();
-      c.fillStyle = T.rock[1]; c.fillRect(x + r * .1, y - r * .1, px * 3, px); c.fillRect(x + r * .1 + px * 2, y - r * .1 + px, px, px * 2); c.fillRect(x - r * .4, y + r * .3, px * 2, px);
+      c.fillStyle = 'rgba(165,243,252,.22)'; c.fill(); c.clip();
+      c.strokeStyle = 'rgba(255,255,255,.35)'; c.lineWidth = px * 1.5;
+      for (let k = -2; k < 7; k++) { const o = ((t * 30 + k * 70) % (w + h)) - h; c.beginPath(); c.moveTo(x0 + o, y0 + h); c.lineTo(x0 + o + h * .5, y0); c.stroke(); }
+      c.restore(); c.save(); c.beginPath(); c.roundRect(x0, y0, w, h, rad); c.strokeStyle = 'rgba(207,250,254,.75)'; c.lineWidth = px * 1.5; c.stroke();
+    }
+    c.restore();
+  }
+}
+// Murs : pierre en briques (amortit) ou mur rebondisseur rose lumineux, chevrons qui défilent (renvoie plus vite)
+function rgWalls(c, t) {
+  const W = RNG.st?.map?.walls; if (!W?.length) return;
+  const V = RNG.view, px = V.px, T = MAP_THEME[RNG.st.map.id] || MAP_THEME.arene;
+  for (const o of W) {
+    const [ax, ay] = w2s(o.x1, o.y1), [bx, by] = w2s(o.x2, o.y2), w = o.w * V.s, L = Math.hypot(bx - ax, by - ay) || 1, ux = (bx - ax) / L, uy = (by - ay) / L;
+    const seg = (col, lw, dx = 0, dy = 0) => { c.strokeStyle = col; c.lineWidth = lw; c.lineCap = 'round'; c.beginPath(); c.moveTo(ax + dx, ay + dy); c.lineTo(bx + dx, by + dy); c.stroke(); };
+    seg('rgba(0,0,0,.45)', w + px * 2, w * .15, w * .3); // ombre
+    if (o.k > 1) {
+      const p = .6 + .4 * Math.sin(t * 6);
+      c.shadowColor = '#f472b6'; c.shadowBlur = 10 * p; seg('#831843', w + px * 2); c.shadowBlur = 0;
+      seg('#ec4899', w * .78);
+      // chevrons qui défilent le long du mur
+      c.fillStyle = 'rgba(255,255,255,.85)';
+      const step = 26, off = (t * 40) % step, hw = w * .22;
+      for (let d = off; d < L; d += step) { const cx = ax + ux * d, cy = ay + uy * d; c.beginPath(); c.moveTo(cx - uy * hw, cy + ux * hw); c.lineTo(cx + ux * 6, cy + uy * 6); c.lineTo(cx + uy * hw, cy - ux * hw); c.lineTo(cx + ux * 2, cy + uy * 2); c.fill(); }
+    } else {
+      seg(T.rock[1], w + px * 2);
+      seg(T.rock[0], w * .8);
+      seg(T.rock[2], Math.max(px, w * .14), -uy * w * .2, ux * w * .2); // reflet sur le dessus
+      // joints de briques
+      c.strokeStyle = T.rock[1]; c.lineWidth = Math.max(1, px);
+      for (let d = 18, k = 0; d < L - 6; d += 22, k++) { const cx = ax + ux * d, cy = ay + uy * d, h = w * .38, o2 = k % 2 ? h * .5 : -h * .5; c.beginPath(); c.moveTo(cx - uy * (o2 > 0 ? 0 : h), cy + ux * (o2 > 0 ? 0 : h)); c.lineTo(cx + uy * (o2 > 0 ? h : 0), cy - ux * (o2 > 0 ? h : 0)); c.stroke(); }
     }
   }
 }
@@ -465,36 +530,46 @@ function rgScout(side) {
 }
 
 // Sol du ring en pixel art : disque sombre tramé, cercles repères, bord épais en deux tons avec des plots, étoiles autour
-function rgFloor(c, mid, R, t) {
+function rgFloor(c, ox, oy, R, t) {
   const px = RNG.view.px;
   // étoiles qui scintillent dans les coins (hors du ring)
   if (!RNG.stars) RNG.stars = Array.from({ length: 34 }, () => { const a = Math.random() * 6.283, d = 1.04 + Math.random() * .5; return { a, d, k: Math.random() * 6 }; });
   for (const s of RNG.stars) {
-    const x = mid + Math.cos(s.a) * R * s.d, y = mid + Math.sin(s.a) * R * s.d, on = .35 + .65 * Math.abs(Math.sin(t * 1.3 + s.k));
+    const x = ox + Math.cos(s.a) * R * s.d, y = oy + Math.sin(s.a) * R * s.d, on = .35 + .65 * Math.abs(Math.sin(t * 1.3 + s.k));
     c.fillStyle = `rgba(221,214,254,${on * .8})`; c.fillRect(Math.round(x / px) * px, Math.round(y / px) * px, px, px);
   }
   const T = MAP_THEME[RNG.st?.map?.id] || MAP_THEME.arene;
-  const g = c.createRadialGradient(mid, mid, R * .05, mid, mid, R);
-  g.addColorStop(0, T.floor[0]); g.addColorStop(.7, T.floor[1]); g.addColorStop(1, T.floor[2]);
-  c.fillStyle = g; c.beginPath(); c.arc(mid, mid, R, 0, 7); c.fill();
-  // trame en damier (un pixel sur deux, très léger) pour le grain pixel art
-  c.save(); c.beginPath(); c.arc(mid, mid, R, 0, 7); c.clip();
-  c.fillStyle = 'rgba(255,255,255,.025)';
-  for (let y = mid - R; y < mid + R; y += px * 2) for (let x = mid - R + ((y / px / 2) % 2 ? px : 0); x < mid + R; x += px * 4) c.fillRect(x, y, px, px);
-  c.restore();
-  // cercles repères en pointillés pixel
-  c.strokeStyle = 'rgba(196,181,253,.10)'; c.lineWidth = px; c.setLineDash([px * 2, px * 3]);
-  [.33, .66].forEach(k => { c.beginPath(); c.arc(mid, mid, R * k, 0, 7); c.stroke(); });
-  c.setLineDash([]);
-  // centre : petit losange
-  c.fillStyle = 'rgba(221,214,254,.35)'; c.beginPath(); c.moveTo(mid, mid - px * 3); c.lineTo(mid + px * 3, mid); c.lineTo(mid, mid + px * 3); c.lineTo(mid - px * 3, mid); c.fill();
+  // le sol fixe (dégradé, trame, repères) est dessiné une fois puis gardé en cache, tant que la vue ne change pas
+  const V = RNG.view, key = `${V.size}|${px}|${V.s}|${ox}|${oy}|${RNG.st?.map?.id}`;
+  if (RNG.floor?.key !== key) {
+    const cv = RNG.floor?.cv || document.createElement('canvas');
+    cv.width = c.canvas.width; cv.height = c.canvas.height;
+    const f = cv.getContext('2d');
+    f.setTransform(1 / px, 0, 0, 1 / px, 0, 0);
+    const g = f.createRadialGradient(ox, oy, R * .05, ox, oy, R);
+    g.addColorStop(0, T.floor[0]); g.addColorStop(.7, T.floor[1]); g.addColorStop(1, T.floor[2]);
+    f.fillStyle = g; f.beginPath(); f.arc(ox, oy, R, 0, 7); f.fill();
+    // trame en damier très légère pour le grain pixel art
+    f.save(); f.beginPath(); f.arc(ox, oy, R, 0, 7); f.clip();
+    f.fillStyle = 'rgba(255,255,255,.025)';
+    for (let y = Math.max(0, oy - R); y < Math.min(V.size, oy + R); y += px * 2) for (let x = Math.max(0, ox - R) + ((y / px / 2) % 2 ? px : 0); x < Math.min(V.size, ox + R); x += px * 4) f.fillRect(x, y, px, px);
+    f.restore();
+    // cercles repères en pointillés
+    f.strokeStyle = 'rgba(196,181,253,.10)'; f.lineWidth = px; f.setLineDash([px * 2, px * 3]);
+    [.33, .66].forEach(k => { f.beginPath(); f.arc(ox, oy, R * k, 0, 7); f.stroke(); });
+    f.setLineDash([]);
+    // centre : petit losange
+    f.fillStyle = 'rgba(221,214,254,.35)'; f.beginPath(); f.moveTo(ox, oy - px * 3); f.lineTo(ox + px * 3, oy); f.lineTo(ox, oy + px * 3); f.lineTo(ox - px * 3, oy); f.fill();
+    RNG.floor = { key, cv };
+  }
+  c.save(); c.setTransform(1, 0, 0, 1, (RNG.shakeX || 0) / px, (RNG.shakeY || 0) / px); c.drawImage(RNG.floor.cv, 0, 0); c.restore();
   // bord : anneau sombre + anneau clair qui pulse
-  c.lineWidth = px * 3; c.strokeStyle = T.rimDark; c.beginPath(); c.arc(mid, mid, R + px, 0, 7); c.stroke();
+  c.lineWidth = px * 3; c.strokeStyle = T.rimDark; c.beginPath(); c.arc(ox, oy, R + px, 0, 7); c.stroke();
   c.globalAlpha = .6 + .25 * Math.sin(t * 2); c.lineWidth = px * 1.4; c.strokeStyle = T.rim; c.shadowColor = T.rim; c.shadowBlur = 6;
-  c.beginPath(); c.arc(mid, mid, R, 0, 7); c.stroke(); c.shadowBlur = 0; c.globalAlpha = 1;
+  c.beginPath(); c.arc(ox, oy, R, 0, 7); c.stroke(); c.shadowBlur = 0; c.globalAlpha = 1;
   // plots sur le bord (16)
   for (let k = 0; k < 16; k++) {
-    const a = k / 16 * 6.283 + t * .05, x = mid + Math.cos(a) * (R + px), y = mid + Math.sin(a) * (R + px);
+    const a = k / 16 * 6.283 + t * .05, x = ox + Math.cos(a) * (R + px), y = oy + Math.sin(a) * (R + px);
     c.fillStyle = k % 4 ? T.stud : '#fde68a'; c.fillRect(x - px, y - px, px * 2, px * 2);
   }
 }
@@ -519,19 +594,21 @@ function rgTeamMark(c, b, x, y, rr, t, live) {
 }
 
 function rgDraw(dt) {
-  const M = RNG.ctx, V = RNG.view, R = RG.ringR(RNG.st) * V.s, mid = V.size / 2, t = performance.now() / 1000;
+  const M = RNG.ctx, V = RNG.view, R = RG.ringR(RNG.st) * V.s, [ox, oy] = w2s(0, 0), t = performance.now() / 1000;
   const lo = RNG.lo.getContext('2d'), hi = RNG.hi.getContext('2d');
   // tremblement de l'écran (le même décalage pour toutes les couches)
   let sx0 = 0, sy0 = 0;
   if (RNG.shake > 0) { sx0 = (Math.random() - .5) * RNG.shake; sy0 = (Math.random() - .5) * RNG.shake; RNG.shake = Math.max(0, RNG.shake - dt * 40); }
+  RNG.shakeX = sx0; RNG.shakeY = sy0;
   M.setTransform(V.dpr, 0, 0, V.dpr, 0, 0); M.clearRect(0, 0, V.size, V.size); M.translate(sx0, sy0);
   for (const L of [lo, hi]) { L.setTransform(1 / V.px, 0, 0, 1 / V.px, 0, 0); L.clearRect(0, 0, V.size, V.size); L.translate(sx0, sy0); }
   const blit = L => { M.save(); M.setTransform(V.dpr, 0, 0, V.dpr, 0, 0); M.imageSmoothingEnabled = false; M.drawImage(L.canvas, 0, 0, L.canvas.width * V.px, L.canvas.height * V.px); M.restore(); };
 
   // ----- Couche basse (pixel) : sol, effets au sol, traînées, repères de camp, auras
   let c = lo;
-  rgFloor(c, mid, R, t);
-  rgObstacles(c, t);
+  rgFloor(c, ox, oy, R, t);
+  rgZones(c, t);
+  rgWalls(c, t);
   // corps à afficher : pendant l'animation, les positions enregistrées ; sinon l'état du match
   const P = RNG.play;
   let list;
@@ -903,14 +980,14 @@ const RFX = (() => {
   }
   // Sol : traînée de glace de Glissade, ronces autour du ring
   function under(c, list, t, dt) {
-    const V = RNG.view, R = RG.ringR(RNG.st) * V.s, mid = V.size / 2;
+    const V = RNG.view, R = RG.ringR(RNG.st) * V.s, [ox, oy] = w2s(0, 0);
     for (const b of list) if (active[b.id] === 'slide' && RNG.play) ground.push({ x: b.x, y: b.y, r: b.r, life: 1 });
     ground = ground.filter(g => (g.life -= dt * .35) > 0);
     for (const g of ground) { const [x, y] = w2s(g.x, g.y); c.fillStyle = `rgba(186,230,253,${g.life * .12})`; c.beginPath(); c.arc(x, y, g.r * V.s * .9, 0, 7); c.fill(); }
-    if (vines) drawVines(c, mid, R, t, dt);
+    if (vines) drawVines(c, ox, oy, R, t, dt);
   }
   // Les ronces poussent tout autour du bord : tige ondulée, épines, fleurs, lueur verte
-  function drawVines(c, mid, R, t, dt) {
+  function drawVines(c, ox, oy, R, t, dt) {
     vines.t += dt;
     if (vines.out != null && (vines.out += dt) > .6) { vines = null; return; }
     const grow = Math.min(1, vines.t / .7) * (vines.out != null ? 1 - vines.out / .6 : 1), end = grow * 6.2832, N = 140;
@@ -918,14 +995,14 @@ const RFX = (() => {
     for (const [w, col, blur] of [[9, 'rgba(22,101,52,.9)', 0], [4, '#4ade80', 14]]) {
       c.lineWidth = w; c.strokeStyle = col; c.shadowColor = '#22c55e'; c.shadowBlur = blur;
       c.beginPath();
-      for (let k = 0; k <= N; k++) { const a = -1.5708 + k / N * end, rr = R + Math.sin(k * .9 + t * 3) * 4 + Math.sin(k * .37) * 3; const x = mid + Math.cos(a) * rr, y = mid + Math.sin(a) * rr; k ? c.lineTo(x, y) : c.moveTo(x, y); }
+      for (let k = 0; k <= N; k++) { const a = -1.5708 + k / N * end, rr = R + Math.sin(k * .9 + t * 3) * 4 + Math.sin(k * .37) * 3; const x = ox + Math.cos(a) * rr, y = oy + Math.sin(a) * rr; k ? c.lineTo(x, y) : c.moveTo(x, y); }
       c.stroke();
     }
     c.shadowBlur = 0;
     for (let k = 0; k < 48; k++) {
       const a = -1.5708 + k / 48 * 6.2832; if (a + 1.5708 > end) break;
       const fl = vines.flash.reduce((m, f) => Math.max(m, f.t * Math.max(0, 1 - Math.abs(Math.atan2(Math.sin(a - f.a), Math.cos(a - f.a))) * 3)), 0);
-      const out = k % 2 ? 1 : -1, len = 9 + fl * 10, bx = mid + Math.cos(a) * R, by = mid + Math.sin(a) * R, nx = Math.cos(a) * out, ny = Math.sin(a) * out;
+      const out = k % 2 ? 1 : -1, len = 9 + fl * 10, bx = ox + Math.cos(a) * R, by = oy + Math.sin(a) * R, nx = Math.cos(a) * out, ny = Math.sin(a) * out;
       c.fillStyle = fl > .1 ? '#bbf7d0' : '#15803d';
       c.beginPath(); c.moveTo(bx - Math.sin(a) * 4, by + Math.cos(a) * 4); c.lineTo(bx + Math.sin(a) * 4, by - Math.cos(a) * 4); c.lineTo(bx + nx * len, by + ny * len); c.fill();
       if (k % 6 === 3) { c.fillStyle = '#f0abfc'; c.beginPath(); c.arc(bx + nx * 3, by + ny * 3, 3.5 + Math.sin(t * 4 + k) * .8, 0, 7); c.fill(); }

@@ -4,7 +4,7 @@ import { fakeSupabase } from './fake-supabase';
 // Porte de la phase 8 : une partie complète d'entraînement, jouée avec de vrais gestes (glisser = lance-pierre),
 // au doigt en 375 px et à la souris sur PC, jusqu'à l'écran de fin. Mesure aussi la fluidité pendant les tirs.
 type Body = { id: number; side: number; x: number; y: number; alive: boolean };
-type Ring = { RNG: { st: { over: boolean; bodies: Body[] } | null; phase: string; locked: boolean; play: unknown; cv: HTMLCanvasElement; view: { size: number; s: number } } };
+type Ring = { startRing: (t: unknown, o: unknown) => void; closeRing: () => void; RNG: { cam: { z: number; cx: number; cy: number }; st: { over: boolean; bodies: Body[] } | null; phase: string; locked: boolean; play: unknown; cv: HTMLCanvasElement; view: { size: number; s: number } } };
 declare global { interface Window { __ring?: Ring } }
 
 // Un tir : toucher un de ses jetons, tirer vers l'arrière (opposé au jeton adverse le plus proche), lâcher, valider
@@ -46,6 +46,25 @@ test('Ring : partie complète contre l’IA, au doigt (375 px) et à la souris (
     if (over) break;
     // captures pour vérifier la DA (visée, puis tir en cours)
     if (turns === 0) {
+      // zoom : boutons, puis molette (PC) ou pincer à deux doigts (téléphone), puis recentrer
+      await page.locator('.rg-zoom [data-z="in"]').click();
+      expect(await page.evaluate(() => window.__ring?.RNG.cam.z)).toBeGreaterThan(1.3);
+      await page.locator('.rg-zoom [data-z="fit"]').click();
+      expect(await page.evaluate(() => window.__ring?.RNG.cam.z)).toBe(1);
+      if (isMobile) {
+        await page.evaluate(() => {
+          const st = document.querySelector('#rg-stage') as HTMLElement, r = (document.querySelector('#rg-cv') as HTMLElement).getBoundingClientRect();
+          const cx = r.left + r.width / 2, cy = r.top + r.height / 2, ev = (type: string, id: number, x: number) => new PointerEvent(type, { pointerId: id, pointerType: 'touch', clientX: x, clientY: cy, bubbles: true, cancelable: true });
+          st.dispatchEvent(ev('pointerdown', 21, cx - 30)); st.dispatchEvent(ev('pointerdown', 22, cx + 30));
+          for (let k = 1; k <= 5; k++) { window.dispatchEvent(ev('pointermove', 21, cx - 30 - k * 12)); window.dispatchEvent(ev('pointermove', 22, cx + 30 + k * 12)); }
+          window.dispatchEvent(ev('pointerup', 21, cx - 90)); window.dispatchEvent(ev('pointerup', 22, cx + 90));
+        });
+      } else {
+        await page.locator('#rg-cv').hover();
+        await page.mouse.wheel(0, -400);
+      }
+      expect(await page.evaluate(() => window.__ring?.RNG.cam.z)).toBeGreaterThan(1.3);
+      await page.locator('.rg-zoom [data-z="fit"]').click();
       // l'équipe adverse : pouvoirs et état, chrono en pause
       await page.locator('.rg [data-scout]').click();
       await expect(page.locator('.rg-scoutbox .rg-sc')).toHaveCount(3);
@@ -70,4 +89,22 @@ test('Ring : partie complète contre l’IA, au doigt (375 px) et à la souris (
   // retour à la page Combat
   await page.locator('.rg-res [data-back]').click();
   await expect(page.locator('.rg, .rg-res')).toHaveCount(0);
+});
+
+// Captures des 5 maps (vérification visuelle du rendu)
+test('Ring : les 5 maps s’affichent', async ({ page, isMobile }) => {
+  test.skip(!process.env.SHOT, 'seulement pour les captures');
+  await fakeSupabase(page, {}, [], { deck: [11, 16, 17] });
+  await page.addInitScript(() => localStorage.setItem('takoras-ring-tuto', '1'));
+  await page.goto('/combat');
+  await page.getByRole('button', { name: /Entraînement/ }).click();
+  await page.waitForFunction(() => !!window.__ring?.RNG.st);
+  for (const map of ['arene', 'jardin', 'volcan', 'glace', 'ruines']) {
+    await page.evaluate((map) => {
+      const T = (n: string[]) => n.map((name) => ({ name, lvl: 2, variant: '' }));
+      window.__ring?.startRing([T(['Mobu', 'Pikko', 'Soléo']), T(['Kraïos', 'Azura', 'Carmin'])], { ai: 'still', map });
+    }, map);
+    await page.waitForTimeout(1600);
+    await page.screenshot({ path: `${process.env.SHOT}/map-${map}-${isMobile ? 'm' : 'd'}.png` });
+  }
 });

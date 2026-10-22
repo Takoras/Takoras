@@ -22,7 +22,7 @@ const RG = (() => {
   function create(teams, mapId) {
     const st = { turn: 1, over: false, winner: null, sudden: false, bodies: [] };
     const map = mapId ? C.MAPS.find(m => m.id === mapId) : null;
-    if (map) st.map = { id: map.id, R: map.R, fric: map.fric, obs: map.obs.map(o => ({ ...o })) };
+    if (map) st.map = { id: map.id, R: map.R, fric: map.fric, walls: map.walls.map(o => ({ ...o })), zones: map.zones.map(z => ({ ...z })) };
     const k0 = map ? map.R / C.RING_R : 1;
     teams.forEach((team, side) => team.forEach((j, i) => {
       const s = stats(j.name, j.lvl, j.variant), k = kit(j.name);
@@ -32,7 +32,17 @@ const RG = (() => {
     return st;
   }
   const ringR = st => st.map ? st.map.R : C.RING_R;
-  const obsOf = st => st.map ? st.map.obs : [];
+  const wallsOf = st => st.map ? st.map.walls : [];
+  const zonesOf = st => st.map ? st.map.zones : [];
+  // Mur = segment épais (capsule) de (x1, y1) à (x2, y2), épaisseur w. Point du mur le plus proche de (px, py).
+  function nearest(o, px, py) {
+    const ex = o.x2 - o.x1, ey = o.y2 - o.y1, L2 = ex * ex + ey * ey;
+    const u = L2 ? Math.max(0, Math.min(1, ((px - o.x1) * ex + (py - o.y1) * ey) / L2)) : 0;
+    return [o.x1 + ex * u, o.y1 + ey * u];
+  }
+  const touchesWall = (st, x, y, r) => wallsOf(st).some(o => { const [cx, cy] = nearest(o, x, y); return len(x - cx, y - cy) < r + o.w / 2; });
+  // Zones au sol (rectangles centrés en x, y) : boue (fric > 1, ralentit) ou glace (fric < 1, fait filer)
+  const zoneFric = (Z, x, y) => { let f = 1; for (const z of Z) if (Math.abs(x - z.x) <= z.w / 2 && Math.abs(y - z.y) <= z.h / 2) f *= z.fric; return f; };
   const clone = st => JSON.parse(JSON.stringify(st));
   const alive = (st, side) => st.bodies.filter(b => b.alive && !b.tmp && (side == null || b.side === side));
   const ready = b => b.alive && b.pw !== 'none' && b.cd === 0 && !b.spent;
@@ -41,7 +51,7 @@ const RG = (() => {
   // shots : [tir du joueur 0 | null, tir du joueur 1 | null]. opts.preview : on s'arrête peu après le premier choc.
   function resolve(st, shots, opts = {}) {
     const B = st.bodies, ev = [], frames = [], start = [0, 1].map(s => alive(st, s).length);
-    const dt = C.DT, RR = ringR(st), OBS = obsOf(st), GF = st.map ? st.map.fric : 1;
+    const dt = C.DT, RR = ringR(st), WALLS = wallsOf(st), ZONES = zonesOf(st), GF = st.map ? st.map.fric : 1;
     B.forEach(b => { b.t = { fric: 1, bounce: false, ghost: false, shield: false, anchor: false, shooter: false, v0: 0, hit: false, stopped: false, el: 0, pw: null }; });
     // pouvoirs et lancers
     const fired = [];
@@ -101,7 +111,7 @@ const RG = (() => {
         }
         b.x += b.vx * dt; b.y += b.vy * dt;
         // frottement
-        if (s > 0) { const ns = Math.max(0, s - C.FRICTION * T.fric * GF * dt) * (1 - C.DRAG * dt), k = ns / s; b.vx *= k; b.vy *= k; }
+        if (s > 0) { const zf = ZONES.length ? zoneFric(ZONES, b.x, b.y) : 1, ns = Math.max(0, s - C.FRICTION * T.fric * GF * zf * dt) * (1 - C.DRAG * dt), k = ns / s; b.vx *= k; b.vy *= k; }
       }
       // chocs entre jetons
       for (let a = 0; a < list.length; a++) for (let c = a + 1; c < list.length; c++) {
@@ -134,19 +144,19 @@ const RG = (() => {
         ev.push({ t: 'hit', a: A.id, b: Cc.id, j: Math.round(Math.abs(j)), x: q(A.x + nx * A.r), y: q(A.y + ny * A.r), at: tm });
         if (firstHit < 0) firstHit = steps;
       }
-      // obstacles (fixes) : le jeton rebondit dessus (k < 1 amortit, k > 1 renvoie plus fort)
-      if (OBS.length) for (const b of list) {
+      // murs (fixes) : le jeton rebondit dessus (k < 1 amortit, k > 1 renvoie plus vite)
+      if (WALLS.length) for (const b of list) {
         if (!b.alive) continue;
-        for (const o of OBS) {
-          const dx = b.x - o.x, dy = b.y - o.y, d = len(dx, dy), rr = b.r + o.r;
+        for (const o of WALLS) {
+          const [cx, cy] = nearest(o, b.x, b.y), dx = b.x - cx, dy = b.y - cy, d = len(dx, dy), rr = b.r + o.w / 2;
           if (d >= rr) continue;
           const nx = d ? dx / d : 0, ny = d ? dy / d : 1;
-          b.x = o.x + nx * rr; b.y = o.y + ny * rr;
+          b.x = cx + nx * rr; b.y = cy + ny * rr;
           const vn = b.vx * nx + b.vy * ny;
           if (vn >= 0) continue;
           b.vx -= (1 + o.k) * vn * nx; b.vy -= (1 + o.k) * vn * ny;
           if (b.t.shooter) b.t.hit = true;
-          ev.push({ t: 'wall', id: b.id, x: q(o.x + nx * o.r), y: q(o.y + ny * o.r), k: o.k, j: Math.round(-vn), at: tm });
+          ev.push({ t: 'wall', id: b.id, x: q(cx + nx * o.w / 2), y: q(cy + ny * o.w / 2), k: o.k, j: Math.round(-vn), at: tm });
         }
       }
       // bord du ring
@@ -227,7 +237,7 @@ const RG = (() => {
         const b = st.bodies.find(x => x.side === s && x.i === 0) || st.bodies.find(x => x.side === s);
         // sur une map : on recule le jeton tant qu'il touche un obstacle (toujours pareil, donc déterministe)
         let y = C.SUDDEN_Y;
-        while (obsOf(st).some(o => len(0 - o.x, (s ? -y : y) - o.y) < b.base.r + o.r + 10)) y += 20;
+        while (touchesWall(st, 0, s ? -y : y, b.base.r + 10)) y += 20;
         Object.assign(b, { alive: true, x: 0, y: s ? -y : y, vx: 0, vy: 0 });
       });
       ev.push({ t: 'sudden' });
@@ -262,7 +272,7 @@ const RG = (() => {
         continue;
       }
       // avec des obstacles, l'IA essaie aussi des tirs un peu de biais (bandes, contournements)
-      const tilts = obsOf(st).length ? [0, .22, -.22] : [0];
+      const tilts = wallsOf(st).length ? [0, .22, -.22] : [0];
       for (const foe of alive(st, 1 - side)) for (const f of [.55, .8, 1]) for (const tl of tilts) {
         const dx0 = foe.x - b.x, dy0 = foe.y - b.y;
         const shot = { i: b.i, ax: Math.round(dx0 - dy0 * tl), ay: Math.round(dy0 + dx0 * tl), f, pow };
@@ -280,7 +290,7 @@ const RG = (() => {
     return best;
   }
 
-  return { kit, stats, create, clone, alive, ready, resolve, aiShot, len, ringR };
+  return { kit, stats, create, clone, alive, ready, resolve, aiShot, len, ringR, nearest, touchesWall };
 })();
 
 export { RG };
