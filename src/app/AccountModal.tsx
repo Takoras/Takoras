@@ -44,10 +44,24 @@ export function AccountModal() {
             }
           }}
         >
-          <label className={s.label} htmlFor="pseudo">{t('ui.acc_pseudo')}</label>
-          <input id="pseudo" className={s.input} value={pseudo} maxLength={16} autoComplete="nickname" onChange={(e) => setPseudo(e.target.value.trim())} aria-describedby="pseudo-hint" />
-          <small id="pseudo-hint" className="muted">{t('ui.acc_pseudo_hint')}</small>
-          <Button type="submit" variant="primary" block loading={busy} disabled={!valid}>{t('ui.confirm_ok')}</Button>
+          <label className={s.label} htmlFor="pseudo">
+            {t('ui.acc_pseudo')}
+          </label>
+          <input
+            id="pseudo"
+            className={s.input}
+            value={pseudo}
+            maxLength={16}
+            autoComplete="nickname"
+            onChange={(e) => setPseudo(e.target.value.trim())}
+            aria-describedby="pseudo-hint"
+          />
+          <small id="pseudo-hint" className="muted">
+            {t('ui.acc_pseudo_hint')}
+          </small>
+          <Button type="submit" variant="primary" block loading={busy} disabled={!valid}>
+            {t('ui.confirm_ok')}
+          </Button>
         </form>
       </Modal>
     );

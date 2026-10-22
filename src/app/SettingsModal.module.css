@@ -1,4 +1,19 @@
-.rows { display: grid; gap: var(--s-5); }
-.row { display: grid; gap: var(--s-2); justify-items: start; }
-.vol { display: flex; align-items: center; gap: var(--s-3); width: 100%; }
-.vol input { flex: 1; accent-color: var(--accent); }
+.rows {
+  display: grid;
+  gap: var(--s-5);
+}
+.row {
+  display: grid;
+  gap: var(--s-2);
+  justify-items: start;
+}
+.vol {
+  display: flex;
+  align-items: center;
+  gap: var(--s-3);
+  width: 100%;
+}
+.vol input {
+  flex: 1;
+  accent-color: var(--accent);
+}

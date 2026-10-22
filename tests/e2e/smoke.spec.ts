@@ -37,7 +37,7 @@ test('connexion : la fenêtre propose Discord', async ({ page }) => {
 
 // Pages connectées (Supabase simulé) : pas de problème d'accessibilité grave non plus
 import { fakeSupabase } from './fake-supabase';
-for (const path of ['/inventaire', '/inventaire/objets', '/profil', '/profil/Ami']) {
+for (const path of ['/inventaire', '/inventaire/objets', '/profil', '/profil/Ami', '/amis']) {
   test(`${path} (connecté) : accessibilité`, async ({ page }) => {
     await fakeSupabase(page);
     await page.goto(path);

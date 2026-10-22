@@ -8,7 +8,8 @@ const user = { id: '00000000-0000-0000-0000-000000000001', aud: 'authenticated',
 const jwt = `${b64({ alg: 'HS256', typ: 'JWT' })}.${b64({ sub: user.id, role: 'authenticated', exp })}.sig`;
 
 export type FakeState = { coins: number; stock: number; max: number; pseudo: string; step: number; next_in: number; regen: number };
-export async function fakeSupabase(page: Page, state: Partial<FakeState> = {}, draws: string[][] = []) {
+export type FakeAnn = { id: number; body: string; author: string | null; banner: boolean; fullscreen: boolean; created_at: string };
+export async function fakeSupabase(page: Page, state: Partial<FakeState> = {}, draws: string[][] = [], opts: { ann?: FakeAnn[] } = {}) {
   const st: FakeState = { coins: 5000, stock: 12, max: 20, pseudo: 'Testeur', step: 180, next_in: 100, regen: 180, ...state };
   const calls: string[] = [];
   // Inventaire de test : 4 Mobu (niveau 1), 1 Mobu Doré, 1 Vyolis (rare : vente confirmée)
@@ -18,6 +19,14 @@ export async function fakeSupabase(page: Page, state: Partial<FakeState> = {}, d
     { jeton: 'Vyolis', serie: 'Takoras', variant: null, odds: 1000, ids: [16], free: [16], shown: 0, deck: 0, last: '2026-10-20T12:00:00Z', best_luck: 1 },
   ];
   let lvl = 1;
+  const friends = [
+    { id: 'u-ami', pseudo: 'Ami', status: 'accepted', incoming: false, last_at: '2026-10-20T10:00:00Z', unread: 2 },
+    { id: 'u-nouveau', pseudo: 'Nouveau', status: 'pending', incoming: true, last_at: null, unread: 0 },
+  ];
+  const msgs = [
+    { id: 1, mine: false, body: 'Salut, tu as eu Nyx ?', created_at: '2026-10-20T10:00:00Z' },
+    { id: 2, mine: false, body: 'Moi oui !', created_at: '2026-10-20T10:01:00Z' },
+  ];
   const prof: { avatar: string; bio: string; banner: string | null; showcase: (number | null)[] } = { avatar: 'default', bio: '', banner: null, showcase: [] };
   const items = [
     { item: 'potion1', kind: 'potion', data: { mult: 1.3, rolls: 5 }, qty: 3 },
@@ -104,6 +113,21 @@ export async function fakeSupabase(page: Page, state: Partial<FakeState> = {}, d
     if (rpc === 'collection_of') return json([{ jeton: 'Mobu', serie: 'Takoras', variant: 'gold', total: 1 }, { jeton: 'Mobu', serie: 'Takoras', variant: null, total: 5 }]);
     if (rpc === 'friend_status') return json({ id: 'u-ami', status: null, incoming: false });
     if (rpc === 'friend_request') return json('sent');
+    if (rpc === 'my_friends') return json(friends);
+    if (rpc === 'my_conversation') return json(msgs);
+    if (rpc === 'mark_read') { friends.forEach((f) => { f.unread = 0; }); return json(null); }
+    if (rpc === 'send_message') {
+      const b = JSON.parse(route.request().postData() ?? '{}') as { p_body: string };
+      const id = 100 + msgs.length; msgs.push({ id, mine: true, body: b.p_body, created_at: new Date().toISOString() }); return json(id);
+    }
+    if (rpc === 'friend_respond') {
+      const b = JSON.parse(route.request().postData() ?? '{}') as { p_other: string; p_accept: boolean };
+      const f = friends.find((x) => x.id === b.p_other);
+      if (f) { if (b.p_accept) { f.status = 'accepted'; f.incoming = false; } else friends.splice(friends.indexOf(f), 1); }
+      return json(null);
+    }
+    if (rpc === 'friend_remove') { const i = friends.findIndex((x) => x.id === (JSON.parse(route.request().postData() ?? '{}') as { p_other: string }).p_other); if (i >= 0) friends.splice(i, 1); return json(null); }
+    if (url.includes('/rest/v1/announcements')) return json(opts.ann ?? []);
     if (rpc === 'live_feed' || rpc === 'avatars_of') return json([]);
     if (url.includes('/rest/v1/pulls')) return json([]);
     return json(null);

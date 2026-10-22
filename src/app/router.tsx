@@ -6,6 +6,7 @@ import Shop from '@/features/shop/Shop';
 import Bestiary from '@/features/inventory/Bestiary';
 import Items from '@/features/inventory/Items';
 import Profile from '@/features/profile/Profile';
+import Friends from '@/features/social/Friends';
 import NotFound from '@/pages/NotFound';
 import { Layout } from './Layout';
 
@@ -23,7 +24,7 @@ export const router = createBrowserRouter([
       { path: '/boutique', element: <Shop /> },
       { path: '/classement', element: <SoonPage k="ui.nav_board" /> },
       { path: '/combat', element: <SoonPage k="ui.nav_combat" /> },
-      { path: '/amis', element: <SoonPage k="ui.nav_friends" /> },
+      { path: '/amis', element: <Friends /> },
       { path: '/profil', element: <Profile /> },
       { path: '/profil/:pseudo', element: <Profile /> },
       ...(Lab ? [{ path: '/__lab', element: <Lab /> }] : []),
