@@ -1,31 +1,28 @@
-/* eslint-disable react-refresh/only-export-components -- la fonction d'ouverture vit à côté de la modale */
 import { useState } from 'react';
-import { create } from 'zustand';
 import { useMe } from '@/api/queries';
 import { jetonOf, sellValue, texOf, tierKey, VARIANTS, type Variant } from '@/data/jetons';
 import { dec } from '@/data/items';
 import { pct, realOdds } from '@/data/odds';
-import { fr } from '@/i18n/fr';
-import { en } from '@/i18n/en';
 import { useJn } from '@/lib/names';
 import { locale, useSettings } from '@/lib/settings';
 import { Modal } from '@/ui/Modal';
 import { VTag } from '@/ui/VTag';
+import { useDict } from '@/i18n/useT';
+import { useInfo } from './store';
 import s from './InfoModal.module.css';
 
 // « Probas & infos » : vraies probabilités selon la chance, variantes, règles du jeu
-export const useInfo = create<{ open: boolean }>(() => ({ open: false }));
-export const openInfo = () => useInfo.setState({ open: true });
-
-export function InfoModal() {
+// (fichier téléchargé seulement à l'ouverture : voir InfoGate.tsx)
+export default function InfoModal() {
   const open = useInfo((x) => x.open);
   const lang = useSettings((x) => x.lang);
+  const dict = useDict();
   const jn = useJn();
   const me = useMe();
   const mine = Number(me.data?.luck ?? 1);
   const [luck, setLuck] = useState<number | null>(null);
   const L = luck ?? mine;
-  const T = (lang === 'en' ? en : fr).info;
+  const T = dict.info;
   const n = (v: number) => v.toLocaleString(locale(lang));
   const choices = [...new Set([1, 1.3, 2, 5, 10, 25, 100, 500, Number(mine.toFixed(2))])].sort((a, b) => a - b);
   return (

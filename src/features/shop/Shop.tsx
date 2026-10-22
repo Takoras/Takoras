@@ -13,7 +13,7 @@ import { Button } from '@/ui/Button';
 import { toast } from '@/ui/toast';
 import { useNow } from '../eco/eco';
 import { Effects } from '../home/Effects';
-import { openInfo } from '../info/InfoModal';
+import { openInfo } from '../info/store';
 import s from './Shop.module.css';
 
 type Item = ShopItem & { price: number; base_price: number | null; stock: number; bought: number; owned: boolean };

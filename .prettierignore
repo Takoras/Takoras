@@ -2,3 +2,8 @@ dist
 legacy
 public
 docs
+# moteurs portés ou générés, et types générés : on garde leur forme d'origine
+src/engines/*.js
+src/engines/*.css
+src/engines/*.d.ts
+src/lib/database.types.ts

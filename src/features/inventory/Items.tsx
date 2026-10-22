@@ -11,7 +11,8 @@ import { useT } from '@/i18n/useT';
 import { Button } from '@/ui/Button';
 import { toast } from '@/ui/toast';
 import { Effects } from '../home/Effects';
-import { InvTabs, NeedLogin } from './Bestiary';
+import { NeedLogin } from '@/app/NeedLogin';
+import { InvTabs } from './Bestiary';
 import s from './Inventory.module.css';
 
 type Row = { item: string; kind: string; data: ShopItem['data']; qty: number };

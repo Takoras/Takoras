@@ -8,9 +8,7 @@ import { sfx } from '@/engines/sound.js';
 import { useAuth } from '@/lib/auth';
 import { useJn } from '@/lib/names';
 import { reducedFx, useSettings } from '@/lib/settings';
-import { fr } from '@/i18n/fr';
-import { en } from '@/i18n/en';
-import { useT } from '@/i18n/useT';
+import { useDict, useT } from '@/i18n/useT';
 import { Button } from '@/ui/Button';
 import { Modal } from '@/ui/Modal';
 import { toast } from '@/ui/toast';
@@ -37,6 +35,7 @@ export function TeamEditor({
   const t = useT();
   const jn = useJn();
   const lang = useSettings((x) => x.lang);
+  const dict = useDict();
   const uid = useAuth((x) => x.user?.id);
   const qc = useQueryClient();
   const all = ownedTokens(groups);
@@ -50,7 +49,7 @@ export function TeamEditor({
   const [info, setInfo] = useState<Owned | null>(null);
   const [busy, setBusy] = useState(false);
   const slotsRef = useRef<HTMLUListElement>(null);
-  const slots = (lang === 'en' ? en : fr).arena.slots;
+  const slots = dict.arena.slots;
   const pts = points(team),
     over = pts > RCFG.BUDGET_MAX;
   const inTeam = new Set(team.filter(Boolean).map((u) => ownKey(u?.serie ?? '', u?.name ?? '')));

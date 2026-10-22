@@ -1,9 +1,7 @@
 import { RG } from '@/engines/ring-engine.js';
 import { RCFG } from '@/engines/ring-config.js';
 import { CB } from '@/engines/combat-engine.js';
-import { fr } from '@/i18n/fr';
-import { en } from '@/i18n/en';
-import type { Lang } from '@/i18n';
+import { dictOf, type Lang } from '@/i18n';
 
 // Infos de combat d'un jeton (élément, pouvoir, stats du Ring) sans charger tout l'écran du Ring.
 export type El = 'fire' | 'water' | 'plant' | 'light' | 'shadow';
@@ -41,7 +39,7 @@ export const PW_COL: Record<string, string> = {
 type PwDict = Record<string, readonly [string, string]>;
 export function powerInfo(name: string, lang: Lang) {
   const k = RG.kit(name),
-    r = lang === 'en' ? en.ring : fr.ring;
+    r = dictOf(lang).ring;
   const pw = r.pw as unknown as PwDict;
   const [n, d] = pw[k.pw] ?? pw.none ?? ['', ''];
   const when = k.pw === 'none' ? '' : k.cd ? r.every.replace('{n}', String(k.cd)) : r.once;

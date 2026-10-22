@@ -8,10 +8,8 @@ import { openUI } from '@/app/ui-store';
 import { useAuth } from '@/lib/auth';
 import { useJn } from '@/lib/names';
 import { locale, useSettings } from '@/lib/settings';
-import { fr } from '@/i18n/fr';
-import { en } from '@/i18n/en';
 import { Rich } from '@/i18n/Rich';
-import { useT } from '@/i18n/useT';
+import { useDict, useT } from '@/i18n/useT';
 import { Button } from '@/ui/Button';
 import { VTag } from '@/ui/VTag';
 import { lvlOf, useInventory } from '../inventory/inv';
@@ -43,6 +41,7 @@ export const playTuto = async (onEnd?: () => void) => {
 export default function Combat() {
   const t = useT();
   const lang = useSettings((x) => x.lang);
+  const dict = useDict();
   const user = useAuth((x) => x.user);
   const me = useMe();
   const inv = useInventory();
@@ -76,7 +75,7 @@ export default function Combat() {
   const lvl = (u: Member) => lvlOf(inv.data, u.serie, u.name);
   const elo = RCFG.ELO.start,
     rk = rankOf(elo);
-  const slots = (lang === 'en' ? en : fr).arena.slots;
+  const slots = dict.arena.slots;
 
   const train = async () => {
     const R = await loadRing();

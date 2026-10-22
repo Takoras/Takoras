@@ -10,7 +10,7 @@ import { Avatar } from '@/ui/Avatar';
 import { Button } from '@/ui/Button';
 import { confirm } from '@/ui/confirm';
 import { toast } from '@/ui/toast';
-import { NeedLogin } from '../inventory/Bestiary';
+import { NeedLogin } from '@/app/NeedLogin';
 import { openChat } from './chatStore';
 import { friendRequest } from './FriendButton';
 import { dateOf, useFriends, type Friend } from './social';

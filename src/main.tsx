@@ -7,13 +7,14 @@ import { router } from './app/router';
 import { redirectLegacyHash } from './app/legacyHash';
 import { AccountModal } from './app/AccountModal';
 import { SettingsModal } from './app/SettingsModal';
-import { InfoModal } from './features/info/InfoModal';
+import { InfoGate } from './features/info/InfoGate';
 import { ToastHost } from './ui/toast';
 import { ConfirmHost } from './ui/confirm';
 import { initAuth } from './lib/auth';
 import { reducedFx, useSettings, WEBKIT_ONLY } from './lib/settings';
 import { configureSound, installSoundListeners } from './engines/sound';
 import { host } from './engines/env';
+import { loadEn } from './i18n';
 import { confirm } from './ui/confirm';
 import './styles/global.css';
 import './styles/art.css';
@@ -26,6 +27,7 @@ if (legacy) history.replaceState(null, '', legacy);
 const applySettings = () => {
   const st = useSettings.getState();
   document.documentElement.lang = st.lang;
+  if (st.lang === 'en') void loadEn();
   document.documentElement.classList.toggle('reduce-fx', reducedFx(st.fx));
   document.documentElement.classList.toggle('no-svgfx', WEBKIT_ONLY);
 };
@@ -38,15 +40,19 @@ host.ask = (text) => confirm(text, { danger: true });
 
 const root = document.getElementById('root');
 if (!root) throw new Error('#root introuvable');
-createRoot(root).render(
-  <StrictMode>
-    <QueryClientProvider client={qc}>
-      <RouterProvider router={router} />
-      <AccountModal />
-      <SettingsModal />
-      <InfoModal />
-      <ConfirmHost />
-      <ToastHost />
-    </QueryClientProvider>
-  </StrictMode>,
+// Joueur en anglais : on attend le dictionnaire avant d'afficher (pas d'éclair de français)
+const ready = useSettings.getState().lang === 'en' ? loadEn() : Promise.resolve();
+void ready.finally(() =>
+  createRoot(root).render(
+    <StrictMode>
+      <QueryClientProvider client={qc}>
+        <RouterProvider router={router} />
+        <AccountModal />
+        <SettingsModal />
+        <InfoGate />
+        <ConfirmHost />
+        <ToastHost />
+      </QueryClientProvider>
+    </StrictMode>,
+  ),
 );

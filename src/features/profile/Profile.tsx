@@ -20,7 +20,7 @@ import { toast } from '@/ui/toast';
 import { VTag } from '@/ui/VTag';
 import { JetonModal } from '../inventory/JetonModal';
 import { useInventory } from '../inventory/inv';
-import { NeedLogin } from '../inventory/Bestiary';
+import { NeedLogin } from '@/app/NeedLogin';
 import { FriendButton } from '../social/FriendButton';
 import s from './Profile.module.css';
 

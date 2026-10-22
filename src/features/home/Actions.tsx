@@ -9,7 +9,7 @@ import { Button } from '@/ui/Button';
 import { toast } from '@/ui/toast';
 import { MAX_OPEN, mmss, nextMax, regenCost, TOP_MAX, upgradeCost, useEco } from '../eco/eco';
 import { openPulls } from '../eco/openPulls';
-import { openInfo } from '../info/InfoModal';
+import { openInfo } from '../info/store';
 import { Effects } from './Effects';
 import s from './Home.module.css';
 

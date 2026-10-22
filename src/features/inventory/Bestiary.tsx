@@ -1,5 +1,6 @@
 import { useLayoutEffect, useMemo, useRef, useState, type CSSProperties } from 'react';
 import { Link, NavLink } from 'react-router';
+import { NeedLogin } from '@/app/NeedLogin';
 import { useQueryClient } from '@tanstack/react-query';
 import { combatApi, errorText, invApi } from '@/api';
 import {
@@ -18,7 +19,6 @@ import {
 import { statsOf, fmtLuck } from '@/engines/env';
 import { moPlay, moSnap } from '@/engines/motion.js';
 import { sfx } from '@/engines/sound.js';
-import { openUI } from '@/app/ui-store';
 import { useAuth } from '@/lib/auth';
 import { useJn } from '@/lib/names';
 import { locale, useSettings } from '@/lib/settings';
@@ -61,18 +61,6 @@ export function InvTabs() {
       </NavLink>
       <NavLink to="/inventaire/objets">{t('ui.items')}</NavLink>
     </nav>
-  );
-}
-export function NeedLogin({ title }: { title: string }) {
-  const t = useT();
-  return (
-    <section className={s.empty}>
-      <h1>{title}</h1>
-      <p className="muted">{t('ui.acc_need')}</p>
-      <Button variant="primary" onClick={() => openUI('account')}>
-        {t('ui.login')}
-      </Button>
-    </section>
   );
 }
 
