@@ -9,7 +9,7 @@ const jwt = `${b64({ alg: 'HS256', typ: 'JWT' })}.${b64({ sub: user.id, role: 'a
 
 export type FakeState = { coins: number; stock: number; max: number; pseudo: string; step: number; next_in: number; regen: number };
 export type FakeAnn = { id: number; body: string; author: string | null; banner: boolean; fullscreen: boolean; created_at: string };
-export async function fakeSupabase(page: Page, state: Partial<FakeState> = {}, draws: string[][] = [], opts: { ann?: FakeAnn[] } = {}) {
+export async function fakeSupabase(page: Page, state: Partial<FakeState> = {}, draws: string[][] = [], opts: { ann?: FakeAnn[]; tuto?: boolean; pnSeen?: number; tester?: boolean } = {}) {
   const st: FakeState = { coins: 5000, stock: 12, max: 20, pseudo: 'Testeur', step: 180, next_in: 100, regen: 180, ...state };
   const calls: string[] = [];
   // Inventaire de test : 4 Mobu (niveau 1), 1 Mobu Doré, 1 Vyolis (rare : vente confirmée)
@@ -32,6 +32,11 @@ export async function fakeSupabase(page: Page, state: Partial<FakeState> = {}, d
     { item: 'potion1', kind: 'potion', data: { mult: 1.3, rolls: 5 }, qty: 3 },
     { item: 'instant', kind: 'instant', data: {}, qty: 1 },
   ];
+  // Tuto de première visite et popup de patch note : déjà vus, sauf si le test les veut
+  await page.addInitScript(([tuto, pn]) => {
+    if (tuto !== '1') localStorage.setItem('takoras-tuto-done', '1');
+    if (pn !== '-1' && localStorage.getItem('takoras-pn-seen') === null) localStorage.setItem('takoras-pn-seen', pn);
+  }, [opts.tuto ? '1' : '0', String(opts.pnSeen ?? 99)] as const);
   await page.addInitScript(([key, session]) => localStorage.setItem(key, session), [
     'sb-joyskjoofihwhycyreyn-auth-token',
     JSON.stringify({ access_token: jwt, refresh_token: 'r', token_type: 'bearer', expires_in: 3600, expires_at: exp, user }),
@@ -41,7 +46,7 @@ export async function fakeSupabase(page: Page, state: Partial<FakeState> = {}, d
     const rpc = /\/rpc\/([a-z_]+)/.exec(url)?.[1];
     calls.push(rpc ?? url);
     const json = (body: unknown) => route.fulfill({ status: 200, contentType: 'application/json', body: JSON.stringify(body) });
-    if (rpc === 'eco_state') return json({ ...st, admin: false, banned: false, beta: true, tester: false, streak: 2, streak_today: true, potions: [], luck: 1 });
+    if (rpc === 'eco_state') return json({ ...st, admin: false, banned: false, beta: true, tester: !!opts.tester, streak: 2, streak_today: true, potions: [], luck: 1 });
     if (rpc === 'take_pulls') {
       const n = (JSON.parse(route.request().postData() ?? '{}') as { n: number }).n;
       const results = draws.shift() ?? Array.from({ length: n }, () => 'Mobu');
@@ -128,6 +133,17 @@ export async function fakeSupabase(page: Page, state: Partial<FakeState> = {}, d
     }
     if (rpc === 'friend_remove') { const i = friends.findIndex((x) => x.id === (JSON.parse(route.request().postData() ?? '{}') as { p_other: string }).p_other); if (i >= 0) friends.splice(i, 1); return json(null); }
     if (url.includes('/rest/v1/announcements')) return json(opts.ann ?? []);
+    if (url.includes('/rest/v1/patchnotes')) return json([
+      { id: 12, title: 'Version 0.13', title_en: 'Version 0.13', created_at: '2026-10-21T10:00:00Z', lines: [{ t: 'new', x: 'Le site passe en React' }, { t: 'fix', x: 'Stock max corrigé' }], lines_en: [{ t: 'new', x: 'The site moves to React' }] },
+      { id: 11, title: 'Version 0.12', title_en: null, created_at: '2026-10-10T10:00:00Z', lines: [{ t: 'change', x: 'Ring plus rapide' }], lines_en: null },
+    ]);
+    if (url.includes('/rest/v1/site_settings')) return json({ v: 'on' });
+    if (url.includes('/rest/v1/shop_items')) return json([{ id: 'potion1', kind: 'potion', price: 300, data: { mult: 1.3, rolls: 5 } }]);
+    if (rpc === 'send_feedback') return json(null);
+    if (rpc === 'beta_give') {
+      const b = JSON.parse(route.request().postData() ?? '{}') as { p_coins?: number; p_pulls?: number };
+      st.coins += b.p_coins ?? 0; st.stock += b.p_pulls ?? 0; return json({ ...st });
+    }
     if (rpc === 'live_feed' || rpc === 'avatars_of') return json([]);
     if (url.includes('/rest/v1/pulls')) return json([]);
     return json(null);

@@ -10,6 +10,7 @@ import { Button } from '@/ui/Button';
 import { Modal } from '@/ui/Modal';
 import { Announcements, openAnnHistory, unreadAnn, useAnn } from '@/features/social/Announcements';
 import { SocialLayer } from '@/features/social/SocialLayer';
+import { BetaChip, BetaLayer, openFeedback, openPatchnotes, openTester, openTuto } from '@/features/beta/Beta';
 import { badgeOf, useFriends } from '@/features/social/social';
 import { Icon } from './Icon';
 import { NAV } from './nav';
@@ -58,6 +59,7 @@ export function Layout() {
           <img className="px" src="/img/logo.png" alt="" width={32} height={32} />
           <span>Takoras</span>
         </NavLink>
+        <BetaChip />
         <nav className={s.links} aria-label={t('app.main_nav')}>
           {NAV.map((n) => (
             <NavLink
@@ -72,6 +74,11 @@ export function Layout() {
           ))}
         </nav>
         <div className={s.tools}>
+          {me.data?.tester ? (
+            <button type="button" className={s.icon} onClick={openTester} aria-label={t('ui.tester_menu')}>
+              <Icon name="flask" />
+            </button>
+          ) : null}
           <button
             type="button"
             className={`${s.icon} ${s.bell}`}
@@ -148,6 +155,7 @@ export function Layout() {
       </nav>
 
       <SocialLayer />
+      <BetaLayer />
 
       <Modal open={more} onClose={() => openUI('more', false)} title={t('ui.more')}>
         <div className={s.sheet}>
@@ -163,6 +171,48 @@ export function Layout() {
               {t('app.account')}
             </NavLink>
           ) : null}
+          <button
+            type="button"
+            onClick={() => {
+              openUI('more', false);
+              openPatchnotes();
+            }}
+          >
+            <Icon name="scroll" />
+            {t('ui.pn_title')}
+          </button>
+          <button
+            type="button"
+            onClick={() => {
+              openUI('more', false);
+              openFeedback();
+            }}
+          >
+            <Icon name="bulb" />
+            {t('ui.fb_btn')}
+          </button>
+          {me.data?.tester ? (
+            <button
+              type="button"
+              onClick={() => {
+                openUI('more', false);
+                openTester();
+              }}
+            >
+              <Icon name="flask" />
+              {t('ui.tester_menu')}
+            </button>
+          ) : null}
+          <button
+            type="button"
+            onClick={() => {
+              openUI('more', false);
+              openTuto();
+            }}
+          >
+            <Icon name="help" />
+            {t('ui.tuto_again')}
+          </button>
           <button
             type="button"
             onClick={() => {

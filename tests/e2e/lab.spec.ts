@@ -1,5 +1,9 @@
 import { test, expect } from '@playwright/test';
 
+test.beforeEach(async ({ page }) => {
+  await page.addInitScript(() => localStorage.setItem('takoras-tuto-done', '1'));
+});
+
 // Porte de la phase 5 : les moteurs portés tournent dans React et ne laissent rien derrière eux.
 test('Ring : 50 montages / démontages sans fuite', async ({ page }) => {
   const errors: string[] = [];

@@ -1,6 +1,11 @@
 import { test, expect } from '@playwright/test';
 import AxeBuilder from '@axe-core/playwright';
 
+// Pas de tuto de première visite pendant ces tests
+test.beforeEach(async ({ page }) => {
+  await page.addInitScript(() => localStorage.setItem('takoras-tuto-done', '1'));
+});
+
 const ROUTES = ['/', '/inventaire', '/boutique', '/classement', '/combat', '/amis'];
 
 for (const path of ROUTES) {

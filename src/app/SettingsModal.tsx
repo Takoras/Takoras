@@ -2,6 +2,8 @@ import { useSettings, type Fx, type Speed } from '@/lib/settings';
 import { useT } from '@/i18n/useT';
 import type { Lang } from '@/i18n';
 import { Modal } from '@/ui/Modal';
+import { Button } from '@/ui/Button';
+import { openTuto } from '@/features/beta/Beta';
 import { Segmented } from '@/ui/Segmented';
 import { openUI, useUI } from './ui-store';
 import s from './SettingsModal.module.css';
@@ -71,6 +73,17 @@ export function SettingsModal() {
             ]}
           />
           <small className="muted">{t('ui.fx_hint')}</small>
+        </div>
+        <div className={s.row}>
+          <Button
+            size="sm"
+            onClick={() => {
+              openUI('settings', false);
+              openTuto();
+            }}
+          >
+            {t('ui.tuto_again')}
+          </Button>
         </div>
       </div>
     </Modal>

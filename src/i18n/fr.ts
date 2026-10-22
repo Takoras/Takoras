@@ -810,6 +810,9 @@ export const fr = {
     "main_nav": "Navigation principale",
     "balance": "Solde",
     "account": "Compte",
-    "login_error": "La connexion n’a pas marché. Réessaie."
+    "login_error": "La connexion n’a pas marché. Réessaie.",
+    "beta": "bêta",
+    "feedback_short": "Avis",
+    "tester_short": "Testeur"
   }
 } as const;

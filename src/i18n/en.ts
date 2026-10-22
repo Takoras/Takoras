@@ -817,6 +817,9 @@ export const en: Dict = {
     "main_nav": "Main navigation",
     "balance": "Balance",
     "account": "Account",
-    "login_error": "Login didn’t work. Try again."
+    "login_error": "Login didn’t work. Try again.",
+    "beta": "beta",
+    "feedback_short": "Feedback",
+    "tester_short": "Tester"
   }
 };
