@@ -143,7 +143,7 @@ export type Database = {
       admin_clear_showcase: { Args: { target: string }; Returns: undefined };
       admin_code_delete: { Args: { p_code: string }; Returns: undefined };
       admin_code_save: {
-        Args: { p_code: string; p_coins: number; p_expires: string; p_items: Json; p_max: number; p_pulls: number };
+        Args: { p_code: string; p_coins: number; p_expires: string | null; p_items: Json; p_max: number; p_pulls: number };
         Returns: undefined;
       };
       admin_code_toggle: { Args: { p_active: boolean; p_code: string }; Returns: undefined };
@@ -166,7 +166,7 @@ export type Database = {
       };
       admin_patchnote_delete: { Args: { p_id: number }; Returns: undefined };
       admin_patchnote_save: {
-        Args: { p_id: number; p_lines: Json; p_lines_en?: Json; p_title: string; p_title_en?: string };
+        Args: { p_id: number | null; p_lines: Json; p_lines_en?: Json; p_title: string; p_title_en?: string };
         Returns: number;
       };
       admin_player: { Args: { target: string }; Returns: Json };

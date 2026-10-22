@@ -198,9 +198,9 @@ La commande doit renvoyer `{"missing": {}}`.
 - [x] « Donner un avis » : 4 types, 1 500 caractères, page + appareil.
 - [x] Tuto de première visite (10 écrans, swipe), ignoré pour les anciens joueurs.
 
-## Admin (chargé uniquement pour les admins)
+## Admin (chargé uniquement pour les admins — testé : un non-admin ne télécharge jamais le fichier)
 
-- [ ] Joueurs :
+- [x] Joueurs :
   - liste, recherche, tri ;
   - fiche ;
   - dons de pièces, pulls, jetons, objets ;
@@ -209,14 +209,14 @@ La commande doit renvoyer `{"missing": {}}`.
   - messages ;
   - collection ;
   - remise à zéro.
-- [ ] Global : stats, don à tous, bêta on/off, remise à zéro générale (taper « RESET »).
-- [ ] Boutique : prix, stock, actif, nouveau stock.
-- [ ] Annonces : plein écran / bandeau, suppression.
-- [ ] Codes promo : créer, aléatoire, objets, utilisations max, expiration, copier, activer, supprimer.
-- [ ] Patch notes FR + EN (syntaxe `+ ~ ! -`).
-- [ ] Retours : filtres, statuts.
-- [ ] Tests (tirages forcés).
-- [ ] Raccourci clavier « debug ».
+- [x] Global : stats, don à tous, bêta on/off, remise à zéro générale (taper « RESET »).
+- [x] Boutique : prix, stock, actif, nouveau stock.
+- [x] Annonces : plein écran / bandeau, suppression.
+- [x] Codes promo : créer, aléatoire, objets, utilisations max, expiration, copier, activer, supprimer.
+- [x] Patch notes FR + EN (syntaxe `+ ~ ! -`).
+- [x] Retours : filtres, statuts.
+- [x] Tests (tirages forcés).
+- [x] Raccourci clavier « debug ».
 
 ## Corrections à faire pendant la réécriture
 

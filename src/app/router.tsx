@@ -7,6 +7,7 @@ import Items from '@/features/inventory/Items';
 import Profile from '@/features/profile/Profile';
 import Friends from '@/features/social/Friends';
 import Board from '@/features/board/Board';
+import AdminGate from '@/features/admin/AdminGate';
 import NotFound from '@/pages/NotFound';
 import { Layout } from './Layout';
 
@@ -43,6 +44,7 @@ export const router = createBrowserRouter([
       { path: '/amis', element: <Friends /> },
       { path: '/profil', element: <Profile /> },
       { path: '/profil/:pseudo', element: <Profile /> },
+      { path: '/admin', element: <AdminGate /> },
       ...(Lab ? [{ path: '/__lab', element: <Lab /> }] : []),
       { path: '*', element: <NotFound /> },
     ],

@@ -9,7 +9,7 @@ const jwt = `${b64({ alg: 'HS256', typ: 'JWT' })}.${b64({ sub: user.id, role: 'a
 
 export type FakeState = { coins: number; stock: number; max: number; pseudo: string; step: number; next_in: number; regen: number };
 export type FakeAnn = { id: number; body: string; author: string | null; banner: boolean; fullscreen: boolean; created_at: string };
-export async function fakeSupabase(page: Page, state: Partial<FakeState> = {}, draws: string[][] = [], opts: { ann?: FakeAnn[]; tuto?: boolean; pnSeen?: number; tester?: boolean; deck?: number[] } = {}) {
+export async function fakeSupabase(page: Page, state: Partial<FakeState> = {}, draws: string[][] = [], opts: { ann?: FakeAnn[]; tuto?: boolean; pnSeen?: number; tester?: boolean; deck?: number[]; admin?: boolean } = {}) {
   const st: FakeState = { coins: 5000, stock: 12, max: 20, pseudo: 'Testeur', step: 180, next_in: 100, regen: 180, ...state };
   const calls: string[] = [];
   // Inventaire de test : 4 Mobu (niveau 1), 1 Mobu Doré, 1 Vyolis (rare : vente confirmée)
@@ -20,6 +20,8 @@ export async function fakeSupabase(page: Page, state: Partial<FakeState> = {}, d
     { jeton: 'Pikko', serie: 'Takoras', variant: null, odds: 4, ids: [17], free: [17], shown: 0, deck: 0, last: '2026-10-19T12:00:00Z', best_luck: 1 },
   ];
   let lvl = 1;
+  let admBanned = false;
+  const codes: Record<string, unknown>[] = [];
   let deck: number[] = opts.deck ?? [];
   const friends = [
     { id: 'u-ami', pseudo: 'Ami', status: 'accepted', incoming: false, last_at: '2026-10-20T10:00:00Z', unread: 2 },
@@ -48,7 +50,7 @@ export async function fakeSupabase(page: Page, state: Partial<FakeState> = {}, d
     const rpc = /\/rpc\/([a-z_]+)/.exec(url)?.[1];
     calls.push(rpc ?? url);
     const json = (body: unknown) => route.fulfill({ status: 200, contentType: 'application/json', body: JSON.stringify(body) });
-    if (rpc === 'eco_state') return json({ ...st, admin: false, banned: false, beta: true, tester: !!opts.tester, streak: 2, streak_today: true, potions: [], luck: 1 });
+    if (rpc === 'eco_state') return json({ ...st, admin: !!opts.admin, banned: false, beta: true, tester: !!opts.tester, streak: 2, streak_today: true, potions: [], luck: 1 });
     if (rpc === 'take_pulls') {
       const n = (JSON.parse(route.request().postData() ?? '{}') as { n: number }).n;
       const results = draws.shift() ?? Array.from({ length: n }, () => 'Mobu');
@@ -155,6 +157,22 @@ export async function fakeSupabase(page: Page, state: Partial<FakeState> = {}, d
       const b = JSON.parse(route.request().postData() ?? '{}') as { p_coins?: number; p_pulls?: number };
       st.coins += b.p_coins ?? 0; st.stock += b.p_pulls ?? 0; return json({ ...st });
     }
+    // ----- admin (seulement si opts.admin ; sinon le vrai serveur refuserait)
+    if (rpc?.startsWith('admin_') && !opts.admin) return route.fulfill({ status: 400, contentType: 'application/json', body: JSON.stringify({ message: 'not_admin', code: 'P0001' }) });
+    if (rpc === 'admin_players') return json([
+      { id: 'u-1', pseudo: 'Alice', coins: 1200, stock: 4, stock_max: 20, pulls: 300, best_odds: 5000, created_at: '2026-09-01T00:00:00Z', banned: false },
+      { id: 'u-2', pseudo: 'Bob', coins: 50, stock: 0, stock_max: 10, pulls: 12, best_odds: 60, created_at: '2026-10-01T00:00:00Z', banned: false },
+    ]);
+    if (rpc === 'admin_player') return json({ pseudo: 'Alice', is_admin: false, email: 'alice@example.com', created_at: '2026-09-01T00:00:00Z', coins: 1200, stock: 4, stock_max: 20, potions: [], luck: 1, fast_until: null, banner: null, banned: admBanned, tester: false, items: [{ item: 'potion1', qty: 2 }], recent: [{ jeton: 'Nyx', odds: 5000, at: '2026-10-20T10:00:00Z', sold: false }] });
+    if (rpc === 'admin_inventory') return json([{ id: 501, jeton: 'Nyx', odds: 5000, locked: false, showcased: false }, { id: 502, jeton: 'Mobu', odds: 2, locked: true, showcased: false }]);
+    if (rpc === 'admin_ban') { admBanned = (JSON.parse(route.request().postData() ?? '{}') as { p_ban: boolean }).p_ban; return json(null); }
+    if (rpc === 'admin_stats') return json({ players: 2, pulls_today: 40, pulls_total: 312, coins_total: 1250, best_today: 5000 });
+    if (rpc === 'admin_shop') return json([{ id: 'potion1', kind: 'potion', data: { mult: 1.3, rolls: 5 }, price: 300, base_price: 300, stock: 7, sold: 1, active: true }]);
+    if (rpc === 'admin_codes') return json(codes);
+    if (rpc === 'admin_code_save') { const b = JSON.parse(route.request().postData() ?? '{}') as { p_code: string; p_coins: number }; codes.push({ code: b.p_code, coins: b.p_coins, pulls: 0, items: [], max_uses: null, uses: 0, expires_at: null, active: true }); return json(null); }
+    if (rpc === 'admin_feedback') return json([{ id: 1, kind: 'bug', body: 'Le bouton vendre bug', page: '/inventaire', device: '375×760', pseudo: 'Bob', status: 'new', created_at: '2026-10-20T10:00:00Z' }]);
+    if (rpc === 'admin_messages') return json([]);
+    if (rpc?.startsWith('admin_')) return json(rpc === 'admin_give' || rpc === 'admin_reset' ? 2 : null);
     if (rpc === 'live_feed' || rpc === 'avatars_of') return json([]);
     if (url.includes('/rest/v1/pulls')) return json([]);
     return json(null);

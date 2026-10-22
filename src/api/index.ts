@@ -99,13 +99,13 @@ export const adminApi = {
   announce: (p_body: string, p_fullscreen: boolean, p_banner: boolean) => rpc('admin_announce', { p_body, p_fullscreen, p_banner }),
   deleteAnnouncement: (p_id: number) => rpc('admin_delete_announcement', { p_id }),
   codes: () => rpc('admin_codes'),
-  codeSave: (a: { p_code: string; p_coins: number; p_pulls: number; p_items: Json; p_max: number; p_expires: string }) => rpc('admin_code_save', a),
+  codeSave: (a: { p_code: string; p_coins: number; p_pulls: number; p_items: Json; p_max: number; p_expires: string | null }) => rpc('admin_code_save', a),
   codeDelete: (p_code: string) => rpc('admin_code_delete', { p_code }),
   codeToggle: (p_code: string, p_active: boolean) => rpc('admin_code_toggle', { p_code, p_active }),
   feedback: () => rpc('admin_feedback'),
   feedbackSet: (p_id: number, p_status: string) => rpc('admin_feedback_set', { p_id, p_status }),
   setBeta: (p_on: boolean) => rpc('admin_set_beta', { p_on }),
-  patchnoteSave: (a: { p_id: number; p_title: string; p_lines: Json; p_title_en?: string; p_lines_en?: Json }) => rpc('admin_patchnote_save', a),
+  patchnoteSave: (a: { p_id: number | null; p_title: string; p_lines: Json; p_title_en?: string; p_lines_en?: Json }) => rpc('admin_patchnote_save', a),
   patchnoteDelete: (p_id: number) => rpc('admin_patchnote_delete', { p_id }),
 };
 

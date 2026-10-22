@@ -34,6 +34,22 @@ export function Layout() {
   const [muted, setMuted] = useState(sfx.muted);
   useEffect(() => openUI('more', false), [pathname]);
   const navigate = useNavigate();
+  // Raccourci « debug » (taper le mot n'importe où) : ouvre le panel admin, pour les admins seulement
+  const isAdmin = !!me.data?.admin;
+  useEffect(() => {
+    if (!isAdmin) return;
+    let typed = '';
+    const onKey = (e: KeyboardEvent) => {
+      if ((e.target as HTMLElement | null)?.closest?.('input, textarea, select, [contenteditable]')) return;
+      typed = (typed + e.key.toLowerCase()).slice(-5);
+      if (typed === 'debug') {
+        typed = '';
+        void navigate('/admin');
+      }
+    };
+    addEventListener('keydown', onKey);
+    return () => removeEventListener('keydown', onKey);
+  }, [isAdmin, navigate]);
   const streak = Number(me.data?.streak ?? 0),
     today = !!me.data?.streak_today;
   const goDaily = () => {
@@ -74,6 +90,11 @@ export function Layout() {
           ))}
         </nav>
         <div className={s.tools}>
+          {me.data?.admin ? (
+            <NavLink to="/admin" className={s.icon} aria-label="Admin">
+              <Icon name="shield" />
+            </NavLink>
+          ) : null}
           {me.data?.tester ? (
             <button type="button" className={s.icon} onClick={openTester} aria-label={t('ui.tester_menu')}>
               <Icon name="flask" />
@@ -191,6 +212,12 @@ export function Layout() {
             <Icon name="bulb" />
             {t('ui.fb_btn')}
           </button>
+          {me.data?.admin ? (
+            <NavLink to="/admin">
+              <Icon name="shield" />
+              Admin
+            </NavLink>
+          ) : null}
           {me.data?.tester ? (
             <button
               type="button"

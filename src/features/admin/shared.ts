@@ -1,0 +1,36 @@
+import { BANNER_IMG, bannerName } from '@/data/items';
+import { locale } from '@/lib/settings';
+import { errorText } from '@/api';
+import { toast } from '@/ui/toast';
+
+// Petits outils communs à l'admin (réservé aux comptes admin ; le serveur vérifie chaque action)
+export const fmt = (n: number) => Number(n ?? 0).toLocaleString(locale());
+export const day = (d: string) => new Date(d).toLocaleDateString(locale());
+export const dt = (d: string) =>
+  new Date(d).toLocaleString(locale(), { day: '2-digit', month: '2-digit', hour: '2-digit', minute: '2-digit' });
+// Objets qu'on peut donner (mêmes libellés que l'ancien panel)
+export const ITEMS: [string, string][] = [
+  ['potion1', '🧪 Potion ×1,3 (5)'],
+  ['potion2', '🧪 Potion ×2 (3)'],
+  ['potion3', '🧪 Potion ×5 (1)'],
+  ['potion10', '🧪 Potion ×10'],
+  ['potion25', '🧪 Potion ×25'],
+  ['potion50', '🧪 Potion ×50'],
+  ['potion100', '🧪 Potion ×100'],
+  ['instant', '⚡ Recharge éclair'],
+  ['hourglass', '⏳ Sablier 1 h'],
+  ['a_etoile', '✨ Photo animée Étoile'],
+  ...Object.keys(BANNER_IMG).map((b): [string, string] => [`b_${b}`, `🎨 Bannière ${bannerName(b, 'fr')}`]),
+];
+export const itemLabel = (id: string) => ITEMS.find(([k]) => k === id)?.[1] ?? id;
+// Exécute une action admin : message de réussite, ou l'erreur du serveur
+export async function act(f: () => Promise<unknown>, ok: string) {
+  try {
+    await f();
+    if (ok) toast(ok);
+    return true;
+  } catch (e) {
+    toast(errorText(e, 'fr'), true);
+    return false;
+  }
+}

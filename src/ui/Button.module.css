@@ -47,7 +47,7 @@
 .primary:not(:disabled):hover { background: var(--accent-hover); }
 
 .danger {
-  background: var(--danger);
+  background: var(--danger-bg);
   color: #fff;
   box-shadow: var(--press) var(--danger-lo);
 }
