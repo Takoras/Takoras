@@ -22,11 +22,29 @@ export function Actions() {
   const user = useAuth((x) => x.user);
   const e = useEco();
   const qc = useQueryClient();
-  const info = <button type="button" className={s.info} onClick={openInfo}>{t('ui.odds_info')}</button>;
-  if (!user) return <div className={s.actions}><Button variant="primary" size="lg" onClick={() => openUI('account')}>{t('ui.acc_login_to_open')}</Button>{info}</div>;
-  if (!e) return <div className={s.stock} aria-busy>…</div>;
+  const info = (
+    <button type="button" className={s.info} onClick={openInfo}>
+      {t('ui.odds_info')}
+    </button>
+  );
+  if (!user)
+    return (
+      <div className={s.actions}>
+        <Button variant="primary" size="lg" onClick={() => openUI('account')}>
+          {t('ui.acc_login_to_open')}
+        </Button>
+        {info}
+      </div>
+    );
+  if (!e)
+    return (
+      <div className={s.stock} aria-busy>
+        …
+      </div>
+    );
   const n = (v: number) => v.toLocaleString(locale(lang));
-  const upCost = upgradeCost(nextMax(e.max)), rgCost = regenCost(e.regen - 10);
+  const upCost = upgradeCost(nextMax(e.max)),
+    rgCost = regenCost(e.regen - 10);
   const upgrade = async (kind: 'stock' | 'regen') => {
     try {
       const st = kind === 'stock' ? await ecoApi.upgradeStock() : await ecoApi.upgradeRegen();
@@ -43,23 +61,33 @@ export function Actions() {
       <div className={s.stock} role="status">
         <b className={s.stockN}>{e.stock}</b>
         <span className={s.stockMax}>/{e.max}</span>
-        <span className="muted">{t('ui.pulls_word')} · {e.full ? t('ui.stock_full') : t('ui.plus1_in', { t: mmss(e.nextIn) })}</span>
+        <span className="muted">
+          {t('ui.pulls_word')} · {e.full ? t('ui.stock_full') : t('ui.plus1_in', { t: mmss(e.nextIn) })}
+        </span>
       </div>
       <div className={s.row}>
-        <Button variant="primary" size="lg" disabled={!e.stock} onClick={() => void openPulls(1)} data-nosound>{t('ui.open1')}</Button>
-        <Button size="lg" disabled={e.stock < 2} onClick={() => void openPulls('all')} data-nosound>{t('ui.open_all', { n: Math.min(e.stock, MAX_OPEN) })}</Button>
+        <Button variant="primary" size="lg" disabled={!e.stock} onClick={() => void openPulls(1)} data-nosound>
+          {t('ui.open1')}
+        </Button>
+        <Button size="lg" disabled={e.stock < 2} onClick={() => void openPulls('all')} data-nosound>
+          {t('ui.open_all', { n: Math.min(e.stock, MAX_OPEN) })}
+        </Button>
       </div>
       <div className={s.ups}>
         {e.max < TOP_MAX ? (
           <Button size="sm" disabled={e.coins < upCost} onClick={() => void upgrade('stock')}>
             {t('ui.stock_max', { a: e.max, b: nextMax(e.max) })} · {n(upCost)} <Coin />
           </Button>
-        ) : <span className="muted">{t('ui.stock_top', { n: TOP_MAX })}</span>}
+        ) : (
+          <span className="muted">{t('ui.stock_top', { n: TOP_MAX })}</span>
+        )}
         {e.regen > 60 ? (
           <Button size="sm" disabled={e.coins < rgCost} onClick={() => void upgrade('regen')}>
             {t('ui.regen_up', { a: mmss(e.regen * 1000), b: mmss((e.regen - 10) * 1000) })} · {n(rgCost)} <Coin />
           </Button>
-        ) : <span className="muted">{t('ui.regen_top')}</span>}
+        ) : (
+          <span className="muted">{t('ui.regen_top')}</span>
+        )}
       </div>
       <Effects />
       {info}

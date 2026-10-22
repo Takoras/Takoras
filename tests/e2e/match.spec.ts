@@ -44,7 +44,10 @@ test('Ring : partie complète contre l’IA, au doigt (375 px) et à la souris (
     await page.waitForFunction(() => { const R = window.__ring?.RNG; return !R?.st || R.st.over || (R.phase === 'aim' && !R.locked && !R.play); }, null, { timeout: 30_000 });
     const over = await page.evaluate(() => !window.__ring?.RNG.st || window.__ring.RNG.st.over);
     if (over) break;
+    // captures pour vérifier la DA (visée, puis tir en cours)
+    if (turns === 1 && process.env.SHOT) await page.screenshot({ path: `${process.env.SHOT}/ring-aim-${isMobile ? 'm' : 'd'}.png` });
     expect(await shoot(page, isMobile)).toBe('shot');
+    if (turns === 1 && process.env.SHOT) { await page.waitForTimeout(500); await page.screenshot({ path: `${process.env.SHOT}/ring-play-${isMobile ? 'm' : 'd'}.png` }); }
     // fluidité pendant l'animation du tir
     if (turns < 3)
       fps.push(await page.evaluate(() => new Promise<number>((res) => {

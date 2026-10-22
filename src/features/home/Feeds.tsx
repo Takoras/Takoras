@@ -32,24 +32,41 @@ export function History() {
   const rows = user ? (h.data ?? []).slice(0, 6) : [];
   return (
     <section className={s.panel} aria-labelledby="hist-t">
-      <h2 id="hist-t" className={s.panelT}>{t('ui.history')}</h2>
+      <h2 id="hist-t" className={s.panelT}>
+        {t('ui.history')}
+      </h2>
       {rows.length ? (
         <ul className={s.hist}>
           {rows.map((r) => {
             const j = jetonOf(r.jeton, r.serie);
             return (
               <li key={r.created_at + r.jeton}>
-                <img className={vCls(r.variant)} src={texOf(j)} alt="" width={28} height={28} style={{ '--df': `drop-shadow(0 0 4px ${j.glow})` } as React.CSSProperties} />
+                <img
+                  className={vCls(r.variant)}
+                  src={texOf(j)}
+                  alt=""
+                  width={28}
+                  height={28}
+                  style={{ '--df': `drop-shadow(0 0 4px ${j.glow})` } as React.CSSProperties}
+                />
                 <div>
-                  <b>{jn(r.jeton)}</b><VTag v={r.variant} />
-                  <small className="muted">{ago(r.created_at)}{r.luck && r.luck > 1 ? ` · ×${r.luck.toLocaleString(locale(lang), { maximumFractionDigits: 2 })}` : ''}</small>
+                  <b>{jn(r.jeton)}</b>
+                  <VTag v={r.variant} />
+                  <small className="muted">
+                    {ago(r.created_at)}
+                    {r.luck && r.luck > 1
+                      ? ` · ×${r.luck.toLocaleString(locale(lang), { maximumFractionDigits: 2 })}`
+                      : ''}
+                  </small>
                 </div>
                 <span className="muted">1/{r.odds.toLocaleString(locale(lang))}</span>
               </li>
             );
           })}
         </ul>
-      ) : <p className="muted">{t('ui.hist_empty')}</p>}
+      ) : (
+        <p className="muted">{t('ui.hist_empty')}</p>
+      )}
     </section>
   );
 }
@@ -66,16 +83,21 @@ export function Live() {
   const loop = rows.length >= 6 ? [...rows, ...rows] : rows; // contenu doublé pour un défilement sans saut
   return (
     <section className={s.live} aria-label={t('ui.live')}>
-      <div className={s.liveHead}><span className={s.dot} aria-hidden />{t('ui.live')}</div>
+      <div className={s.liveHead}>
+        <span className={s.dot} aria-hidden />
+        {t('ui.live')}
+      </div>
       <div className={s.ticker}>
         <ul className={`${s.track} ${rows.length >= 6 ? s.scroll : ''}`}>
           {loop.map((r, i) => {
-            const j = jetonOf(r.jeton, r.serie), mine = r.pseudo === me.data?.pseudo;
+            const j = jetonOf(r.jeton, r.serie),
+              mine = r.pseudo === me.data?.pseudo;
             return (
               <li key={i} aria-hidden={i >= rows.length || undefined}>
                 <Avatar pseudo={r.pseudo} size={24} />
                 <span>
-                  {mine ? <b>{t('ui.you')}</b> : <Link to={`/profil/${encodeURIComponent(r.pseudo)}`}>{r.pseudo}</Link>} <span className="muted">{t('ui.got')}</span> {jn(r.jeton)}
+                  {mine ? <b>{t('ui.you')}</b> : <Link to={`/profil/${encodeURIComponent(r.pseudo)}`}>{r.pseudo}</Link>}{' '}
+                  <span className="muted">{t('ui.got')}</span> {jn(r.jeton)}
                   <VTag v={r.variant} /> <span className="muted">· 1/{r.odds.toLocaleString(locale(lang))}</span>
                 </span>
                 <img className={vCls(r.variant)} src={texOf(j)} alt="" width={22} height={22} />

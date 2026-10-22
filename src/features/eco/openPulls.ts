@@ -24,7 +24,8 @@ let busy = false;
 export async function openPulls(n: number | 'all') {
   const user = useAuth.getState().user;
   if (!user) return openUI('account');
-  const e = eco(), me = meState()?.data;
+  const e = eco(),
+    me = meState()?.data;
   if (!e || !me?.pseudo || busy) return;
   const count = n === 'all' ? Math.min(e.stock, MAX_OPEN) : Math.min(1, e.stock);
   if (!count) return sfx.deny();
@@ -32,8 +33,15 @@ export async function openPulls(n: number | 'all') {
   try {
     const { debug, buy } = await engine();
     const test = me.admin || me.tester; // tirages de test : seulement admin et testeurs (le serveur vérifie aussi)
-    const data = (await ecoApi.takePulls(count, test ? { force: debug.force || undefined, luck: debug.luck, p_variant: debug.variant || undefined } : {})) as {
-      state: Me; results: string[]; variants?: (string | null)[]; lucks?: number[]; ids?: number[];
+    const data = (await ecoApi.takePulls(
+      count,
+      test ? { force: debug.force || undefined, luck: debug.luck, p_variant: debug.variant || undefined } : {},
+    )) as {
+      state: Me;
+      results: string[];
+      variants?: (string | null)[];
+      lucks?: number[];
+      ids?: number[];
     };
     qc.setQueryData(meKey(), data.state);
     buy(data.results.length, data.results, data.variants ?? null, data.lucks ?? null, data.ids ?? null);
@@ -49,9 +57,11 @@ export async function openPulls(n: number | 'all') {
 // Boutons de fin d'ouverture : « Ouvrir encore » / « Tout ouvrir », selon le stock restant
 function ecoDecorate() {
   const e = eco();
-  const again = document.getElementById('op-again') as HTMLButtonElement | null, all = document.getElementById('op-recap-again') as HTMLButtonElement | null;
+  const again = document.getElementById('op-again') as HTMLButtonElement | null,
+    all = document.getElementById('op-recap-again') as HTMLButtonElement | null;
   if (!e || !again || !all) return;
-  const lang = useSettings.getState().lang, wait = translate(lang, 'ui.no_pull', { t: mmss(e.nextIn) });
+  const lang = useSettings.getState().lang,
+    wait = translate(lang, 'ui.no_pull', { t: mmss(e.nextIn) });
   again.disabled = !e.stock;
   again.textContent = e.stock ? translate(lang, 'ui.open_again', { n: e.stock }) : wait;
   all.disabled = !e.stock;
@@ -73,7 +83,11 @@ export function installOpeningHost() {
   };
   host.renderHist = () => void qc.invalidateQueries({ queryKey: ['history'] });
   host.loadLocalHist = () => {
-    try { return JSON.parse(localStorage.getItem('takoras-hist') ?? '[]') as unknown[]; } catch { return []; }
+    try {
+      return JSON.parse(localStorage.getItem('takoras-hist') ?? '[]') as unknown[];
+    } catch {
+      return [];
+    }
   };
   // Pendant une ouverture sans pull restant : le compte à rebours des boutons avance chaque seconde
   setInterval(() => {

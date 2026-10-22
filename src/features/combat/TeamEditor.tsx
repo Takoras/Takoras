@@ -15,7 +15,7 @@ import { Button } from '@/ui/Button';
 import { Modal } from '@/ui/Modal';
 import { toast } from '@/ui/toast';
 import { lvlOf, seriesList, type Group, type InvData } from '../inventory/inv';
-import { baseVariant, costOf, cycleVariant, ownedTokens, ownKey, points, type Owned, type Team } from './team';
+import { baseVariant, costOf, ownedTokens, ownKey, points, VRANK, type Owned, type Team } from './team';
 import { TokenSheet } from './TokenSheet';
 import s from './Combat.module.css';
 
@@ -113,8 +113,7 @@ export function TeamEditor({
               </li>
             );
           const j = jetonOf(u.name, u.serie),
-            o = by.get(ownKey(u.serie, u.name)),
-            many = !!o && Object.keys(o.vars).length > 1;
+            o = by.get(ownKey(u.serie, u.name));
           return (
             <li key={i} style={{ '--g': hexRGB(j.glow) } as CSSProperties}>
               <button
@@ -130,20 +129,29 @@ export function TeamEditor({
               </button>
               <img className={vImg(u.variant)} src={texOf(j)} alt="" />
               <b>{jn(u.name)}</b>
-              <button
-                type="button"
-                className={`${s.teV} ${s[`v_${u.variant || 'none'}`] ?? ''}`}
-                disabled={!many}
-                onClick={() => {
-                  if (o) {
-                    sfx.click();
-                    setTeam(team.map((x, k) => (k === i && x ? cycleVariant(x, o) : x)));
-                  }
-                }}
-              >
-                {u.variant ? `${t(`ui.v_${u.variant as 'gold'}`)} ×${RCFG.MUTATION[u.variant]}` : t('arena.normal')}
-                {many ? ' ⟳' : ''}
-              </button>
+              {/* Versions possédées : une pastille par version, toucher = la prendre */}
+              <div className={s.vers} role="radiogroup" aria-label={t('arena.version')}>
+                {(o ? Object.keys(o.vars).sort((a, b) => (VRANK[a] ?? 0) - (VRANK[b] ?? 0)) : [u.variant]).map((v) => (
+                  <button
+                    key={v || 'none'}
+                    type="button"
+                    role="radio"
+                    aria-checked={u.variant === v}
+                    aria-label={v ? t(`ui.v_${v as 'gold'}`) : t('arena.normal')}
+                    title={v ? t(`ui.v_${v as 'gold'}`) : t('arena.normal')}
+                    className={`${s.sw} ${s[`sw_${v || 'none'}`] ?? ''}`}
+                    onClick={() => {
+                      if (!o || u.variant === v) return;
+                      sfx.click();
+                      setTeam(team.map((x, k) => (k === i && x ? { ...x, variant: v, id: o.vars[v] ?? x.id } : x)));
+                    }}
+                  />
+                ))}
+              </div>
+              <small className={s.vLabel}>
+                {u.variant ? t(`ui.v_${u.variant as 'gold'}`) : t('arena.normal')}
+                {u.variant ? <b> +{Math.round(((RCFG.MUTATION[u.variant] ?? 1) - 1) * 100)} %</b> : null}
+              </small>
             </li>
           );
         })}

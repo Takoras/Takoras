@@ -207,10 +207,12 @@ function TeamCard({ u, pos, lvl, onOpen }: { u: Member; pos: string; lvl: number
         {el.ico}
       </span>
       <img className={vImg(u.variant)} src={texOf(j)} alt="" />
-      <b>
-        {jn(u.name)}
-        <VTag v={u.variant} />
-      </b>
+      {u.variant ? (
+        <span className={s.vtag}>
+          <VTag v={u.variant} />
+        </span>
+      ) : null}
+      <b>{jn(u.name)}</b>
       <small>
         {t('arena.lvl')} {lvl}
       </small>

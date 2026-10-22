@@ -255,34 +255,6 @@
   background: var(--surface-3);
   font-size: 12px;
 }
-.teV {
-  min-height: 28px;
-  padding: 0 var(--s-2);
-  border-radius: var(--r-pill);
-  border: 1px solid var(--line-strong);
-  background: var(--surface);
-  font-size: 11px;
-  font-weight: 700;
-}
-.teV:disabled {
-  opacity: 0.8;
-  cursor: default;
-}
-.v_gold {
-  color: #3b2400;
-  background: linear-gradient(135deg, #fef08a, #f59e0b);
-  border-color: transparent;
-}
-.v_celeste {
-  color: #1e1b4b;
-  background: linear-gradient(135deg, #fff, #c7d2fe);
-  border-color: transparent;
-}
-.v_ombre {
-  color: #e9d5ff;
-  background: #0b0614;
-  border-color: #a855f7;
-}
 .budget {
   margin: var(--s-3) 0;
   font-size: var(--fs-sm);
@@ -433,4 +405,56 @@
     max-height: none;
     overflow: visible;
   }
+}
+
+/* Pastilles de version (normale, Doré, Céleste, Ombre) */
+.vers {
+  display: flex;
+  gap: 6px;
+  justify-content: center;
+}
+.sw {
+  width: 18px;
+  height: 18px;
+  border-radius: 50%;
+  border: 2px solid var(--surface);
+  box-shadow: 0 0 0 1px var(--line-strong);
+  transition:
+    transform var(--t-fast),
+    box-shadow var(--t-fast);
+}
+.sw[aria-checked='true'] {
+  transform: scale(1.2);
+  box-shadow: 0 0 0 2px var(--text);
+}
+.sw_none {
+  background: radial-gradient(circle at 35% 30%, #cbd5e1, #475569);
+}
+.sw_gold {
+  background: radial-gradient(circle at 35% 30%, #fef08a, #d97706);
+}
+.sw_celeste {
+  background: radial-gradient(circle at 35% 30%, #fff, #a5b4fc);
+}
+.sw_ombre {
+  background: radial-gradient(circle at 35% 30%, #a855f7, #0b0614);
+}
+.vLabel {
+  font-size: 11px;
+  color: var(--muted);
+}
+.vLabel b {
+  color: var(--gold);
+}
+.vtag {
+  position: absolute;
+  top: 22px;
+  left: 50%;
+  translate: -50% 0;
+  z-index: 2;
+}
+.vtag > span {
+  margin: 0;
+  font-size: 9px;
+  padding: 1px 6px;
 }

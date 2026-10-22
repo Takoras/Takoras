@@ -20,7 +20,9 @@ export default function Home() {
         <div className={s.center}>
           <HeroCoin img={pull.img} label={pull.name} />
           <p className="eyebrow">{t('ui.permanent')}</p>
-          <h1 className={s.title}>{t('ui.pull')} {pull.name}</h1>
+          <h1 className={s.title}>
+            {t('ui.pull')} {pull.name}
+          </h1>
           <Actions />
         </div>
         <div className={`${s.side} ${s.stack}`}>

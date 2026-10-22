@@ -97,6 +97,7 @@ export default function Bestiary() {
   const [sel, setSel] = useState<Map<string, number>>(new Map());
   const [open, setOpen] = useState<{ name: string; key: string } | null>(null);
   const [busy, setBusy] = useState(false);
+  const [lvlUp, setLvlUp] = useState(0);
   const grid = useRef<HTMLUListElement>(null);
   const snap = useRef<{ m: Map<string, DOMRect>; dissolve: boolean } | null>(null);
 
@@ -188,6 +189,7 @@ export default function Bestiary() {
       else m.delete(g.key);
       return setSel(m);
     }
+    setLvlUp(0);
     setOpen({ name: c.j.name, key: g?.key ?? '' });
   };
 
@@ -364,6 +366,7 @@ export default function Bestiary() {
           variant={og ? og.variant : view.vtab}
           lvl={lvlOf(d, view.serie, open.name)}
           locked={!og && !oc}
+          celebrate={lvlUp}
           onClose={() => setOpen(null)}
         >
           {!og && !oc ? (
@@ -376,10 +379,8 @@ export default function Bestiary() {
               serie={view.serie}
               vtab={view.vtab}
               onSell={async (ids) => {
-                if (await sell(ids)) {
-                  setOpen(null);
-                  await refresh(true);
-                }
+                // la fiche reste ouverte et se met à jour (Tu en as N…)
+                if (await sell(ids)) await refresh(true);
               }}
               onLock={async (g, lock) => {
                 try {
@@ -388,7 +389,6 @@ export default function Bestiary() {
                 } catch (e) {
                   toast(errorText(e, lang), true);
                 }
-                setOpen(null);
                 await refresh(false);
               }}
               onLevel={async () => {
@@ -396,8 +396,8 @@ export default function Bestiary() {
                   const r = (await combatApi.levelUp(open.name, view.serie)) as { lvl: number };
                   sfx.upgrade();
                   toast(`⬆️ ${t('arena.lvlOk', { j: jn(open.name), n: r.lvl })}`);
-                  setOpen(null);
                   await refresh(true);
+                  setLvlUp((n) => n + 1); // la pièce de la fiche fête la montée de niveau
                 } catch (e) {
                   sfx.deny();
                   toast(errorText(e, lang), true);
@@ -521,12 +521,13 @@ function Sheet({
   const allLocked = !!g && !g.free.length;
   return (
     <>
-      <p className="muted">
-        {t('ui.inv_have', { n: g?.ids.length ?? 0 })}
-        {g?.shown ? ` · 📌 ${t('ui.shown_n', { n: g.shown })}` : ''}
-        {c ? ` · ${t('ui.bst_got', { n: c.total })}` : ''}
-        {g && g.luck > 1 ? ` · 🍀 ${t('ui.best_luck', { l: fmtLuck(g.luck) })}` : ''}
-      </p>
+      <ul className={s.owned}>
+        <li>{t('ui.inv_have', { n: g?.ids.length ?? 0 })}</li>
+        {c ? <li>{t('ui.bst_got', { n: c.total })}</li> : null}
+        {g?.shown ? <li>📌 {t('ui.shown_n', { n: g.shown })}</li> : null}
+        {g?.deck ? <li>⚔️ {t('ui.in_deck')}</li> : null}
+        {g && g.luck > 1 ? <li>🍀 {t('ui.best_luck', { l: fmtLuck(g.luck) })}</li> : null}
+      </ul>
       {c ? (
         <ul className={s.vlist} aria-label={t('ui.bst_variants')}>
           {VKEYS.map((v) => (
@@ -542,7 +543,7 @@ function Sheet({
           ))}
         </ul>
       ) : null}
-      <CombatInfo name={name} lvl={lv.L} variant={g?.variant ?? vtab}>
+      <CombatInfo name={name} lvl={lv.L} variant={g?.variant ?? vtab} showLvl={false}>
         {lv.owned ? (
           lv.L >= 10 ? (
             <small className="muted">{t('arena.lvlMax')}</small>

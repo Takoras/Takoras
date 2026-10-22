@@ -17,8 +17,12 @@ export function Effects() {
   if (!pots.length && !fast) return null;
   return (
     <ul className={s.fx} aria-label={t('ui.fx_total', { m: dec(Number(me.data.luck ?? 1), lang) })}>
-      {pots.length ? <li className={s.fxTotal}>{t('ui.fx_total', { m: dec(Number(me.data.luck ?? 1), lang) })}</li> : null}
-      {pots.map((p, i) => <li key={i}>{t('ui.fx_luck', { m: dec(p.m, lang), n: p.n })}</li>)}
+      {pots.length ? (
+        <li className={s.fxTotal}>{t('ui.fx_total', { m: dec(Number(me.data.luck ?? 1), lang) })}</li>
+      ) : null}
+      {pots.map((p, i) => (
+        <li key={i}>{t('ui.fx_luck', { m: dec(p.m, lang), n: p.n })}</li>
+      ))}
       {fast ? <li>{t('ui.fx_fast', { t: hms(fast) })}</li> : null}
     </ul>
   );

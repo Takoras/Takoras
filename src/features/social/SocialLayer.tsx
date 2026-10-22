@@ -155,12 +155,7 @@ function ChatFab() {
   if (!user || !list.some((f) => f.status === 'accepted')) return null;
   const { unread } = badgeOf(list);
   return (
-    <button
-      type="button"
-      className={s.fab}
-      aria-expanded={dock}
-      onClick={() => (dock ? closeChat() : openChat(null))}
-    >
+    <button type="button" className={s.fab} aria-expanded={dock} onClick={() => (dock ? closeChat() : openChat(null))}>
       <svg
         viewBox="0 0 24 24"
         width="24"
@@ -175,9 +170,7 @@ function ChatFab() {
         <path d="M21 12a8 8 0 0 1-11.6 7.1L4 21l1.9-5.4A8 8 0 1 1 21 12z" />
       </svg>
       <span className="visually-hidden">{t('ui.fr_chats')}</span>
-      {unread ? (
-        <i className={s.badge}>{unread > 9 ? '9+' : unread}</i>
-      ) : null}
+      {unread ? <i className={s.badge}>{unread > 9 ? '9+' : unread}</i> : null}
     </button>
   );
 }

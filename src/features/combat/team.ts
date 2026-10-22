@@ -27,13 +27,6 @@ export function ownedTokens(groups: Group[]): Owned[] {
 export const baseVariant = (o: Owned) => Object.keys(o.vars).sort((a, b) => (VRANK[a] ?? 0) - (VRANK[b] ?? 0))[0] ?? '';
 export const costOf = (odds: number) => RCFG.BUDGET[tierKey(odds)] ?? 1;
 export const points = (team: Team) => team.reduce((n, u) => n + (u ? costOf(u.odds) : 0), 0);
-// Changer de version (normale → Doré → Céleste → Ombre → normale), parmi celles possédées
-export function cycleVariant(u: Member, o: Owned): Member {
-  const vs = Object.keys(o.vars).sort((a, b) => (VRANK[a] ?? 0) - (VRANK[b] ?? 0));
-  const v = vs[(vs.indexOf(u.variant) + 1) % vs.length] ?? u.variant;
-  return { ...u, variant: v, id: o.vars[v] ?? u.id };
-}
-
 type DeckRow = { id: number; jeton: string; lvl: number; odds: number; serie: string | null; variant: string | null };
 export function useDeck() {
   const uid = useAuth((s) => s.user?.id);

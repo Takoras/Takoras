@@ -8,7 +8,9 @@ export function HeroCoin({ img, label }: { img: string; label: string }) {
   const move = (e: React.PointerEvent) => {
     const el = ref.current;
     if (!el) return;
-    const r = el.getBoundingClientRect(), x = (e.clientX - r.left) / r.width, y = (e.clientY - r.top) / r.height;
+    const r = el.getBoundingClientRect(),
+      x = (e.clientX - r.left) / r.width,
+      y = (e.clientY - r.top) / r.height;
     el.style.setProperty('--rx', `${((0.5 - y) * 28).toFixed(1)}deg`);
     el.style.setProperty('--ry', `${((x - 0.5) * 28).toFixed(1)}deg`);
     el.style.setProperty('--mx', `${(x * 100).toFixed(0)}%`);

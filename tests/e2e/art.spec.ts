@@ -45,7 +45,7 @@ test('pastilles de variante colorées (éditeur d’équipe, Bestiaire)', async 
   await fakeSupabase(page, {}, [], { deck: [15, 16, 17] });
   await page.goto('/combat');
   await page.getByRole('button', { name: /Modifier/ }).click();
-  const b = page.getByRole('dialog').getByRole('button', { name: /Doré/ });
+  const b = page.getByRole('dialog').getByRole('radio', { name: 'Doré' });
   expect(await b.evaluate((el) => getComputedStyle(el).backgroundImage)).toContain('gradient');
   await page.keyboard.press('Escape');
   await page.goto('/inventaire');

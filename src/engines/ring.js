@@ -1,4 +1,5 @@
-// Généré par scripts/port/canvas.mjs depuis legacy/ring-ui.js + legacy/ring-fx.js — ne pas modifier ici, modifier legacy/ puis relancer.
+// Écran du Ring (repris de legacy/ring-ui.js + ring-fx.js, puis retravaillé en phase 8 : DA pixel art).
+// Ce fichier est la référence : il n'est plus régénéré. Les règles (physique) restent dans ring-engine.js, inchangé.
 import { RCFG } from './ring-config.js';
 import { RG } from './ring-engine.js';
 import { SETTINGS, esc, fmt, hexRGB, host, jetonOf, jn, jnH, reducedFx, sfx, texOf, vCls, vTag, t, at } from './env';
@@ -137,16 +138,26 @@ function closeRing() {
   document.documentElement.classList.remove('lock');
   RNG.st = null; RNG.el = null;
 }
-// Le ring prend toute la place disponible (carré), en pixels nets
+// Le ring prend toute la place disponible (carré). Rendu en deux couches « pixel art » basse résolution (décor et effets,
+// agrandies sans lissage = vrais gros pixels) et les jetons au-dessus en pleine résolution, nets.
 function rgResize() {
   if (!RNG.el) return;
   const st = RNG.el.querySelector('#rg-stage'), r = st.getBoundingClientRect(), size = Math.max(200, Math.min(r.width, r.height)), dpr = Math.min(2, devicePixelRatio || 1);
   RNG.cv.style.width = RNG.cv.style.height = size + 'px';
   RNG.cv.width = RNG.cv.height = Math.round(size * dpr);
-  RNG.view = { size, dpr, s: size / 2 / (RCFG.RING_R * 1.1) };
+  const px = size >= 520 ? 3 : 2, low = Math.ceil(size / px);
+  for (const k of ['lo', 'hi']) {
+    const cv = RNG[k] || (RNG[k] = document.createElement('canvas'));
+    cv.width = cv.height = low;
+  }
+  RNG.view = { size, dpr, px, s: size / 2 / (RCFG.RING_R * 1.1) };
 }
 const w2s = (x, y) => [RNG.view.size / 2 + x * RNG.view.s, RNG.view.size / 2 + y * RNG.view.s];
 const s2w = (px, py) => [(px - RNG.view.size / 2) / RNG.view.s, (py - RNG.view.size / 2) / RNG.view.s];
+// Couleurs des camps : violet = toi, orange = l'adversaire (les couleurs du site)
+const SIDE = [{ hi: '#ddd6fe', md: '#a78bfa', lo: '#4c1d95', rgb: '167,139,250' }, { hi: '#fed7aa', md: '#fb923c', lo: '#7c2d12', rgb: '251,146,60' }];
+// Filtres des variantes (les mêmes que sur tout le site)
+const VFILTER = { gold: 'sepia(1) saturate(2.6) hue-rotate(-12deg) brightness(1.12)', celeste: 'grayscale(.55) brightness(1.35) sepia(.15) hue-rotate(195deg) saturate(1.4)', ombre: 'grayscale(.6) brightness(.55) sepia(.45) hue-rotate(225deg) saturate(1.7) contrast(1.3)' };
 
 // ---------- Tour : visée (10 s), l'IA prépare son tir en même temps
 function rgTurnStart() {
@@ -329,8 +340,8 @@ function rgEvent(e) {
     const b = body(e.id), [x, y] = at(e.x, e.y);
     P.fall.push({ b, x: e.x, y: e.y, vx: e.vx, vy: e.vy, t: 0 });
     P.slow = RCFG.SLOWMO_S * 1.4; RNG.shake = 10;
-    rgSparks(x, y, 26, b.side ? '#fb7185' : '#4ade80', 4);
-    rgBanner(rt('out'), b.side ? '#4ade80' : '#fb7185');
+    rgSparks(x, y, 26, b.side ? '#fb923c' : '#a78bfa', 4);
+    rgBanner(rt('out'), b.side ? '#a78bfa' : '#fb923c');
     sfx.evaporate?.(); sfx.impact?.();
   }
   RFX.event(e, P); // pouvoirs : effets, sons et ralentis propres à chacun (ring-fx.js)
@@ -388,21 +399,72 @@ function rgFrame(now) {
 }
 
 // ---------- Dessin du ring
-function rgDraw(dt) {
-  const c = RNG.ctx, V = RNG.view, R = RCFG.RING_R * V.s, mid = V.size / 2, t = performance.now() / 1000;
-  c.setTransform(V.dpr, 0, 0, V.dpr, 0, 0);
-  c.clearRect(0, 0, V.size, V.size);
-  if (RNG.shake > 0) { c.translate((Math.random() - .5) * RNG.shake, (Math.random() - .5) * RNG.shake); RNG.shake = Math.max(0, RNG.shake - dt * 40); }
-  // sol du ring
-  const g = c.createRadialGradient(mid, mid, R * .1, mid, mid, R);
-  g.addColorStop(0, '#2b2348'); g.addColorStop(1, '#17122a');
+// Sol du ring en pixel art : disque sombre tramé, cercles repères, bord épais en deux tons avec des plots, étoiles autour
+function rgFloor(c, mid, R, t) {
+  const px = RNG.view.px;
+  // étoiles qui scintillent dans les coins (hors du ring)
+  if (!RNG.stars) RNG.stars = Array.from({ length: 34 }, () => { const a = Math.random() * 6.283, d = 1.04 + Math.random() * .5; return { a, d, k: Math.random() * 6 }; });
+  for (const s of RNG.stars) {
+    const x = mid + Math.cos(s.a) * R * s.d, y = mid + Math.sin(s.a) * R * s.d, on = .35 + .65 * Math.abs(Math.sin(t * 1.3 + s.k));
+    c.fillStyle = `rgba(221,214,254,${on * .8})`; c.fillRect(Math.round(x / px) * px, Math.round(y / px) * px, px, px);
+  }
+  const g = c.createRadialGradient(mid, mid, R * .05, mid, mid, R);
+  g.addColorStop(0, '#2e2550'); g.addColorStop(.7, '#1d1736'); g.addColorStop(1, '#140f26');
   c.fillStyle = g; c.beginPath(); c.arc(mid, mid, R, 0, 7); c.fill();
-  c.strokeStyle = 'rgba(255,255,255,.05)'; c.lineWidth = 1;
+  // trame en damier (un pixel sur deux, très léger) pour le grain pixel art
+  c.save(); c.beginPath(); c.arc(mid, mid, R, 0, 7); c.clip();
+  c.fillStyle = 'rgba(255,255,255,.025)';
+  for (let y = mid - R; y < mid + R; y += px * 2) for (let x = mid - R + ((y / px / 2) % 2 ? px : 0); x < mid + R; x += px * 4) c.fillRect(x, y, px, px);
+  c.restore();
+  // cercles repères en pointillés pixel
+  c.strokeStyle = 'rgba(196,181,253,.10)'; c.lineWidth = px; c.setLineDash([px * 2, px * 3]);
   [.33, .66].forEach(k => { c.beginPath(); c.arc(mid, mid, R * k, 0, 7); c.stroke(); });
-  c.beginPath(); c.arc(mid, mid, 4, 0, 7); c.fillStyle = 'rgba(255,255,255,.18)'; c.fill();
-  // bord bien visible, qui pulse doucement
-  c.lineWidth = 5; c.strokeStyle = `rgba(167,139,250,${.65 + .2 * Math.sin(t * 2)})`; c.shadowColor = '#a78bfa'; c.shadowBlur = 18;
+  c.setLineDash([]);
+  // centre : petit losange
+  c.fillStyle = 'rgba(221,214,254,.35)'; c.beginPath(); c.moveTo(mid, mid - px * 3); c.lineTo(mid + px * 3, mid); c.lineTo(mid, mid + px * 3); c.lineTo(mid - px * 3, mid); c.fill();
+  // bord : anneau sombre + anneau clair qui pulse
+  c.lineWidth = px * 3; c.strokeStyle = '#2e1065'; c.beginPath(); c.arc(mid, mid, R + px, 0, 7); c.stroke();
+  c.lineWidth = px * 1.4; c.strokeStyle = `rgba(196,181,253,${.6 + .25 * Math.sin(t * 2)})`; c.shadowColor = '#8b5cf6'; c.shadowBlur = 6;
   c.beginPath(); c.arc(mid, mid, R, 0, 7); c.stroke(); c.shadowBlur = 0;
+  // plots sur le bord (16)
+  for (let k = 0; k < 16; k++) {
+    const a = k / 16 * 6.283 + t * .05, x = mid + Math.cos(a) * (R + px), y = mid + Math.sin(a) * (R + px);
+    c.fillStyle = k % 4 ? '#7c3aed' : '#fde68a'; c.fillRect(x - px, y - px, px * 2, px * 2);
+  }
+}
+
+// Repère de camp sous un jeton : anneau pixel à la couleur du camp, en segments qui tournent doucement
+function rgTeamMark(c, b, x, y, rr, t, live) {
+  const S = SIDE[b.side], px = RNG.view.px;
+  // ombre portée (ellipse sombre)
+  c.fillStyle = 'rgba(0,0,0,.45)'; c.beginPath(); c.ellipse(x + rr * .12, y + rr * .32, rr * 1.02, rr * .72, 0, 0, 7); c.fill();
+  // halo de camp
+  const g = c.createRadialGradient(x, y, rr * .7, x, y, rr * 1.45); g.addColorStop(0, `rgba(${S.rgb},.35)`); g.addColorStop(1, `rgba(${S.rgb},0)`);
+  c.fillStyle = g; c.beginPath(); c.arc(x, y, rr * 1.45, 0, 7); c.fill();
+  // anneau en 8 segments qui tourne (sens opposé pour l'adversaire)
+  const rot = (b.side ? -1 : 1) * t * .6, seg = 6.283 / 8;
+  c.lineWidth = px * 1.5; c.strokeStyle = S.md;
+  for (let k = 0; k < 8; k++) { c.beginPath(); c.arc(x, y, rr + px * 2.5, rot + k * seg, rot + k * seg + seg * .62); c.stroke(); }
+  // pouvoir activé pendant la visée : anneau de la couleur du pouvoir qui pulse
+  if (live && b.id === RNG.sel && RNG.pow && RNG.phase === 'aim') {
+    const pc = PW_COL[b.pw]; c.strokeStyle = pc; c.lineWidth = px * 1.5; c.globalAlpha = .6 + .4 * Math.sin(t * 8);
+    c.beginPath(); c.arc(x, y, rr + px * 5, 0, 7); c.stroke(); c.globalAlpha = 1;
+  }
+}
+
+function rgDraw(dt) {
+  const M = RNG.ctx, V = RNG.view, R = RCFG.RING_R * V.s, mid = V.size / 2, t = performance.now() / 1000;
+  const lo = RNG.lo.getContext('2d'), hi = RNG.hi.getContext('2d');
+  // tremblement de l'écran (le même décalage pour toutes les couches)
+  let sx0 = 0, sy0 = 0;
+  if (RNG.shake > 0) { sx0 = (Math.random() - .5) * RNG.shake; sy0 = (Math.random() - .5) * RNG.shake; RNG.shake = Math.max(0, RNG.shake - dt * 40); }
+  M.setTransform(V.dpr, 0, 0, V.dpr, 0, 0); M.clearRect(0, 0, V.size, V.size); M.translate(sx0, sy0);
+  for (const L of [lo, hi]) { L.setTransform(1 / V.px, 0, 0, 1 / V.px, 0, 0); L.clearRect(0, 0, V.size, V.size); L.translate(sx0, sy0); }
+  const blit = L => { M.save(); M.setTransform(V.dpr, 0, 0, V.dpr, 0, 0); M.imageSmoothingEnabled = false; M.drawImage(L.canvas, 0, 0, L.canvas.width * V.px, L.canvas.height * V.px); M.restore(); };
+
+  // ----- Couche basse (pixel) : sol, effets au sol, traînées, repères de camp, auras
+  let c = lo;
+  rgFloor(c, mid, R, t);
   // corps à afficher : pendant l'animation, les positions enregistrées ; sinon l'état du match
   const P = RNG.play;
   let list;
@@ -412,163 +474,151 @@ function rgDraw(dt) {
   } else list = RNG.st.bodies.filter(b => b.alive);
   RFX.under(c, list, t, dt);
   // traînées des jetons rapides (et rotation des jetons qui roulent)
-  if (!reducedFx()) for (const b of list) {
+  for (const b of list) {
     const tr = RNG.trails[b.id] ||= [];
     const lp = tr[tr.length - 1]; if (lp) RNG.spin[b.id] = (RNG.spin[b.id] || 0) + RG.len(b.x - lp[0], b.y - lp[1]) / b.r * (b.side ? -1 : 1);
     tr.push([b.x, b.y]); if (tr.length > 14) tr.shift();
-    if (tr.length < 3) continue;
+    if (reducedFx() || tr.length < 3) continue;
     const d = RG.len(tr[tr.length - 1][0] - tr[0][0], tr[tr.length - 1][1] - tr[0][1]);
     if (d < 40) continue;
-    const col = b.variant === 'gold' ? '253,230,138' : b.variant === 'celeste' ? '165,243,252' : b.variant === 'ombre' ? '139,92,246' : b.side ? '251,113,133' : '74,222,128';
+    const col = b.variant === 'gold' ? '253,230,138' : b.variant === 'celeste' ? '165,243,252' : b.variant === 'ombre' ? '139,92,246' : SIDE[b.side].rgb;
     for (let k = 1; k < tr.length; k++) {
       const [ax, ay] = w2s(...tr[k - 1]), [bx, by] = w2s(...tr[k]);
-      c.strokeStyle = `rgba(${col},${k / tr.length * .55})`; c.lineWidth = b.r * V.s * 1.4 * k / tr.length; c.lineCap = 'round';
+      c.strokeStyle = `rgba(${col},${k / tr.length * .6})`; c.lineWidth = b.r * V.s * 1.3 * k / tr.length; c.lineCap = 'square';
       c.beginPath(); c.moveTo(ax, ay); c.lineTo(bx, by); c.stroke();
     }
   }
-  // visée : trajectoire en pointillés, flèche et jauge de force
+  // repères de camp, auras des pouvoirs et des variantes
+  for (const b of list) {
+    const [x, y] = w2s(b.x, b.y), rr = b.r * V.s;
+    if (b.variant && !reducedFx()) {
+      const col = b.variant === 'gold' ? '253,230,138' : b.variant === 'celeste' ? '165,243,252' : '124,58,237';
+      const ag = c.createRadialGradient(x, y, rr * .9, x, y, rr * 1.9); ag.addColorStop(0, `rgba(${col},.55)`); ag.addColorStop(1, `rgba(${col},0)`);
+      c.fillStyle = ag; c.beginPath(); c.arc(x, y, rr * 1.9, 0, 7); c.fill();
+      if (b.variant === 'celeste') for (let k = 0; k < 6; k++) { const a = t * 1.5 + k * 1.047; c.fillStyle = '#e0f2fe'; c.fillRect(x + Math.cos(a) * rr * 1.5 - V.px, y + Math.sin(a) * rr * 1.5 - V.px, V.px * 2, V.px * 2); }
+      if (b.variant === 'ombre') for (let k = 0; k < 4; k++) { const a = -t * 1.2 + k * 1.57; c.fillStyle = 'rgba(46,16,101,.85)'; c.fillRect(x + Math.cos(a) * rr * 1.35 - V.px * 1.5, y + Math.sin(a) * rr * 1.35 - V.px * 1.5, V.px * 3, V.px * 3); }
+    }
+    rgTeamMark(c, b, x, y, rr, t, !P);
+    RFX.aura(c, b, x, y, rr, t);
+  }
+  blit(lo);
+
+  // ----- Jetons, nets, en pleine résolution
+  for (const b of list) {
+    const [x, y] = w2s(b.x, b.y), rr = b.r * V.s, tr = RNG.trails[b.id] || [], lp = tr[tr.length - 3];
+    rgToken(M, b, t, false);
+    RFX.emit(b, x, y, rr, !!lp && RG.len(b.x - lp[0], b.y - lp[1]) > 4);
+  }
+  // jetons qui tombent hors du ring
+  if (P) P.fall.forEach(x => {
+    const k = Math.min(1, x.t / .7);
+    rgToken(M, { ...x.b, x: x.x + x.vx * x.t * .35, y: x.y + x.vy * x.t * .35 }, t, 1 - k);
+  });
+
+  // ----- Couche haute (pixel) : visée, révélation des tirs, particules, effets
+  c = hi;
   const sel = !P && RNG.st.bodies.find(b => b.id === RNG.sel && b.alive);
   if (sel && RNG.phase === 'aim') {
-    const [sx, sy] = w2s(sel.x, sel.y);
-    c.strokeStyle = '#fff'; c.lineWidth = 2.5; c.globalAlpha = .55 + .35 * Math.sin(t * 6);
-    c.beginPath(); c.arc(sx, sy, sel.r * V.s + 7, 0, 7); c.stroke(); c.globalAlpha = 1;
+    const [sx, sy] = w2s(sel.x, sel.y), px = V.px;
+    // jeton choisi : 4 coins de visée qui respirent
+    const o = sel.r * V.s + px * 5 + Math.sin(t * 6) * px, L = px * 4;
+    c.fillStyle = '#fff';
+    for (const [dx, dy] of [[-1, -1], [1, -1], [1, 1], [-1, 1]]) { c.fillRect(sx + dx * o - (dx > 0 ? L : 0), sy + dy * o - (dy > 0 ? px : 0), L, px); c.fillRect(sx + dx * o - (dx > 0 ? px : 0), sy + dy * o - (dy > 0 ? L : 0), px, L); }
     if (RNG.prev && RNG.aim) {
-      const col = RNG.aim.f < .5 ? '#4ade80' : RNG.aim.f < .8 ? '#fb923c' : '#f43f5e';
-      c.setLineDash([3, 7]); c.lineWidth = 2.5; c.strokeStyle = RNG.prev.out ? '#f43f5e' : 'rgba(255,255,255,.75)';
-      c.beginPath(); RNG.prev.me.forEach((p, k) => { const [x, y] = w2s(p[0], p[1]); k ? c.lineTo(x, y) : c.moveTo(x, y); }); c.stroke();
-      if (RNG.prev.hit.length > 1) { c.strokeStyle = 'rgba(253,230,138,.85)'; c.beginPath(); RNG.prev.hit.forEach((p, k) => { const [x, y] = w2s(p[0], p[1]); k ? c.lineTo(x, y) : c.moveTo(x, y); }); c.stroke(); }
-      c.setLineDash([]);
-      const end = RNG.prev.me[RNG.prev.me.length - 1]; if (end) { const [x, y] = w2s(end[0], end[1]); c.strokeStyle = 'rgba(255,255,255,.4)'; c.lineWidth = 1.5; c.beginPath(); c.arc(x, y, sel.r * V.s, 0, 7); c.stroke(); }
-      const L = 26 + RNG.aim.f * 70, n = RG.len(RNG.aim.ax, RNG.aim.ay), ux = RNG.aim.ax / n, uy = RNG.aim.ay / n;
-      const ax = sx + ux * (sel.r * V.s + 6), ay = sy + uy * (sel.r * V.s + 6), bx = ax + ux * L, by = ay + uy * L;
-      c.strokeStyle = col; c.fillStyle = col; c.lineWidth = 5 + RNG.aim.f * 3; c.lineCap = 'round'; c.shadowColor = col; c.shadowBlur = 12;
+      const col = RNG.aim.f < .5 ? '#a78bfa' : RNG.aim.f < .8 ? '#fb923c' : '#f43f5e';
+      // trajectoire prévue : pointillés pixel
+      c.fillStyle = RNG.prev.out ? '#f43f5e' : 'rgba(255,255,255,.8)';
+      RNG.prev.me.forEach((p, k) => { if (k % 3) return; const [x, y] = w2s(p[0], p[1]); c.fillRect(Math.round(x / px) * px, Math.round(y / px) * px, px, px); });
+      if (RNG.prev.hit.length > 1) { c.fillStyle = 'rgba(253,230,138,.9)'; RNG.prev.hit.forEach((p, k) => { if (k % 3) return; const [x, y] = w2s(p[0], p[1]); c.fillRect(Math.round(x / px) * px, Math.round(y / px) * px, px, px); }); }
+      const end = RNG.prev.me[RNG.prev.me.length - 1]; if (end) { const [x, y] = w2s(end[0], end[1]); c.strokeStyle = 'rgba(255,255,255,.45)'; c.lineWidth = px; c.setLineDash([px * 2, px * 2]); c.beginPath(); c.arc(x, y, sel.r * V.s, 0, 7); c.stroke(); c.setLineDash([]); }
+      // flèche
+      const Lr = 26 + RNG.aim.f * 70, n = RG.len(RNG.aim.ax, RNG.aim.ay), ux = RNG.aim.ax / n, uy = RNG.aim.ay / n;
+      const ax = sx + ux * (sel.r * V.s + 6), ay = sy + uy * (sel.r * V.s + 6), bx = ax + ux * Lr, by = ay + uy * Lr;
+      c.strokeStyle = col; c.fillStyle = col; c.lineWidth = px * 2 + RNG.aim.f * px * 2; c.lineCap = 'butt';
       c.beginPath(); c.moveTo(ax, ay); c.lineTo(bx, by); c.stroke();
-      c.beginPath(); c.moveTo(bx + ux * 12, by + uy * 12); c.lineTo(bx - uy * 9, by + ux * 9); c.lineTo(bx + uy * 9, by - ux * 9); c.fill(); c.shadowBlur = 0;
-      // jauge de force
-      c.lineWidth = 5; c.strokeStyle = 'rgba(255,255,255,.12)'; c.beginPath(); c.arc(sx, sy, sel.r * V.s + 15, -1.57, 4.71); c.stroke();
-      c.strokeStyle = col; c.beginPath(); c.arc(sx, sy, sel.r * V.s + 15, -1.57, -1.57 + 6.283 * RNG.aim.f); c.stroke();
+      c.beginPath(); c.moveTo(bx + ux * 14, by + uy * 14); c.lineTo(bx - uy * 10, by + ux * 10); c.lineTo(bx + uy * 10, by - ux * 10); c.fill();
+      // jauge de force : 12 crans autour du jeton
+      const gr = sel.r * V.s + px * 9, on = Math.round(RNG.aim.f * 12);
+      for (let k = 0; k < 12; k++) { const a = -1.571 + k / 12 * 6.283; c.fillStyle = k < on ? col : 'rgba(255,255,255,.14)'; c.fillRect(sx + Math.cos(a) * gr - px, sy + Math.sin(a) * gr - px, px * 2, px * 2); }
     }
   }
   // révélation : on montre les deux tirs
   if (RNG.reveal) RNG.reveal.forEach(r => {
     if (!r || !r.s.f) return;
     const b = r.body, [sx, sy] = w2s(b.x, b.y), n = RG.len(r.s.ax, r.s.ay), ux = r.s.ax / n, uy = r.s.ay / n, L = 30 + r.s.f * 80;
-    c.strokeStyle = b.side ? '#fb7185' : '#4ade80'; c.lineWidth = 6; c.lineCap = 'round'; c.shadowColor = c.strokeStyle; c.shadowBlur = 14;
-    c.beginPath(); c.moveTo(sx + ux * b.r * V.s, sy + uy * b.r * V.s); c.lineTo(sx + ux * (b.r * V.s + L), sy + uy * (b.r * V.s + L)); c.stroke(); c.shadowBlur = 0;
+    c.strokeStyle = SIDE[b.side].md; c.lineWidth = V.px * 3; c.lineCap = 'butt';
+    c.beginPath(); c.moveTo(sx + ux * b.r * V.s, sy + uy * b.r * V.s); c.lineTo(sx + ux * (b.r * V.s + L), sy + uy * (b.r * V.s + L)); c.stroke();
   });
-  // jetons (avec l'aura de leur pouvoir)
-  for (const b of list) {
-    const [x, y] = w2s(b.x, b.y), rr = b.r * V.s, tr = RNG.trails[b.id] || [], lp = tr[tr.length - 3];
-    RFX.aura(c, b, x, y, rr, t);
-    rgToken(c, b, t, false);
-    RFX.emit(b, x, y, rr, !!lp && RG.len(b.x - lp[0], b.y - lp[1]) > 4);
-  }
-  // jetons qui tombent hors du ring
-  if (P) P.fall.forEach(x => {
-    const k = Math.min(1, x.t / .7);
-    rgToken(c, { ...x.b, x: x.x + x.vx * x.t * .35, y: x.y + x.vy * x.t * .35 }, t, 1 - k);
-  });
-  // particules et formes d'effets
+  // particules et formes d'effets (les textes, eux, restent nets)
   RNG.parts = RNG.parts.filter(p => p.life > 0);
   for (const p of RNG.parts) {
+    c = p.text ? M : hi;
     c.save();
     if (p.ring) {
       const k = 1 - p.life, rad = (p.inward ? 1 - k : k) * p.size * 30 + 6;
-      c.strokeStyle = p.col; c.globalAlpha = p.life; c.lineWidth = 4; c.beginPath(); c.arc(p.x, p.y, rad, 0, 7); c.stroke();
+      c.strokeStyle = p.col; c.globalAlpha = p.life; c.lineWidth = V.px * 1.5; c.beginPath(); c.arc(p.x, p.y, rad, 0, 7); c.stroke();
       p.life -= dt * 1.8;
     } else if (p.wave) { // onde de choc pleine (éruption) ou qui se referme (aimant)
       const k = 1 - p.life, rad = p.inward ? p.rad * (1 - k) : p.rad * Math.min(1, k * 1.6);
       const g = c.createRadialGradient(p.x, p.y, rad * .6, p.x, p.y, rad); g.addColorStop(0, 'rgba(0,0,0,0)'); g.addColorStop(1, p.col);
       c.globalAlpha = p.life * .8; c.fillStyle = g; c.beginPath(); c.arc(p.x, p.y, rad, 0, 7); c.fill();
-      c.strokeStyle = p.col; c.lineWidth = 4; c.shadowColor = p.col; c.shadowBlur = 20; c.stroke();
+      c.strokeStyle = p.col; c.lineWidth = V.px * 1.5; c.stroke();
       p.life -= dt * 1.5;
     } else if (p.star) { // éclat en étoile (Frappe ×2)
-      const k = 1 - p.life; c.translate(p.x, p.y); c.rotate(k * 1.5); c.globalAlpha = p.life; c.fillStyle = p.col; c.shadowColor = p.col; c.shadowBlur = 24;
+      const k = 1 - p.life; c.translate(p.x, p.y); c.rotate(k * 1.5); c.globalAlpha = p.life; c.fillStyle = p.col;
       c.beginPath(); for (let i = 0; i < 16; i++) { const r = (i % 2 ? .35 : 1) * p.size * (.5 + k); const a = i / 16 * 6.283; i ? c.lineTo(Math.cos(a) * r, Math.sin(a) * r) : c.moveTo(Math.cos(a) * r, Math.sin(a) * r); } c.fill();
       p.life -= dt * 2.2;
     } else if (p.text) {
       c.globalAlpha = Math.min(1, p.life * 2); c.fillStyle = p.col; c.font = `900 ${p.size}px "Space Grotesk Variable", sans-serif`; c.textAlign = 'center'; c.shadowColor = '#000'; c.shadowBlur = 8;
       c.fillText(p.text, p.x, p.y - (1 - p.life) * 30); p.life -= dt * 1.2;
     } else if (p.bolt) { // éclair violet (Néant)
-      const [ax, ay, bx, by] = p.bolt; c.globalAlpha = p.life; c.strokeStyle = p.col; c.lineWidth = 3; c.shadowColor = p.col; c.shadowBlur = 16;
+      const [ax, ay, bx, by] = p.bolt; c.globalAlpha = p.life; c.strokeStyle = p.col; c.lineWidth = V.px * 1.5;
       c.beginPath(); c.moveTo(ax, ay); for (let i = 1; i < 8; i++) { const k = i / 8; c.lineTo(ax + (bx - ax) * k + (Math.random() - .5) * 18, ay + (by - ay) * k + (Math.random() - .5) * 18); } c.lineTo(bx, by); c.stroke();
       p.life -= dt * 2.5;
     } else if (p.hole) { // trou noir qui tourbillonne
       const r = p.size * (1.2 - p.life * .4); const g = c.createRadialGradient(p.x, p.y, 0, p.x, p.y, r); g.addColorStop(0, 'rgba(0,0,0,.95)'); g.addColorStop(.6, 'rgba(59,7,100,.7)'); g.addColorStop(1, 'rgba(168,85,247,0)');
       c.globalAlpha = p.life; c.fillStyle = g; c.beginPath(); c.arc(p.x, p.y, r, 0, 7); c.fill(); p.life -= dt * 1.4;
     } else if (p.hex) {
-      c.globalAlpha = p.life; c.strokeStyle = p.col; c.lineWidth = 3; c.shadowColor = '#fff'; c.shadowBlur = 16; const r = p.size * (1.4 - p.life * .4);
+      c.globalAlpha = p.life; c.strokeStyle = p.col; c.lineWidth = V.px * 1.5; const r = p.size * (1.4 - p.life * .4);
       c.beginPath(); for (let i = 0; i <= 6; i++) { const a = i / 6 * 6.283; i ? c.lineTo(p.x + Math.cos(a) * r, p.y + Math.sin(a) * r) : c.moveTo(p.x + Math.cos(a) * r, p.y + Math.sin(a) * r); } c.stroke(); p.life -= dt * 2.4;
     } else {
       if (p.sink) { p.vx = (p.sink[0] - p.x) * .12; p.vy = (p.sink[1] - p.y) * .12; }
       p.x += p.vx; p.y += p.vy; if (!p.sink && !p.bubble) { p.vx *= .92; p.vy *= .92; }
       p.life -= dt * (p.bubble ? 1.1 : 1.6);
       c.fillStyle = p.col; c.globalAlpha = Math.max(0, p.life);
-      if (p.bubble) { c.strokeStyle = p.col; c.lineWidth = 1.2; c.beginPath(); c.arc(p.x, p.y, p.size, 0, 7); c.stroke(); }
-      else c.fillRect(p.x - p.size / 2, p.y - p.size / 2, p.size, p.size);
+      if (p.bubble) { c.strokeStyle = p.col; c.lineWidth = V.px; c.beginPath(); c.arc(p.x, p.y, p.size, 0, 7); c.stroke(); }
+      else { const sz = Math.max(V.px, Math.round(p.size / V.px) * V.px); c.fillRect(Math.round(p.x / V.px) * V.px, Math.round(p.y / V.px) * V.px, sz, sz); }
     }
     c.restore();
   }
-  RFX.over(c, t, dt);
+  RFX.over(hi, t, dt);
+  blit(hi);
 }
-// Un jeton vu de dessus, comme un palet : anneau métallique à la couleur de son camp (vert = toi, rouge = lui),
-// disque intérieur teinté par le jeton, image qui tourne quand il roule, reflet brillant, effet de mutation.
-const SIDE_COL = [['#bbf7d0', '#22c55e', '#14532d'], ['#fecdd3', '#f43f5e', '#7f1d1d']];
+// Un jeton vu de dessus : son dessin en pixel art (avec l'effet de sa variante), qui tourne quand il roule.
+// Le camp se lit à l'anneau pixel dessous (violet = toi, orange = lui). Gemme = pouvoir prêt.
 function rgToken(c, b, t, fall) {
   const V = RNG.view, [x, y] = w2s(b.x, b.y), rr = b.r * V.s * (fall === false ? 1 : .4 + .6 * fall);
   if (rr <= .5) return;
   c.save();
   if (fall !== false) c.globalAlpha = Math.max(0, fall);
   if (RFX.isActive(b.id) === 'ghost' && RNG.play) c.globalAlpha *= .55;
-  const [hi, md, lo] = SIDE_COL[b.side], glow = jetonOf(b.name).glow || '#a78bfa', spin = RNG.spin[b.id] || 0;
-  // aura de mutation
-  if (b.variant && !reducedFx()) {
-    const col = b.variant === 'gold' ? '253,230,138' : b.variant === 'celeste' ? '165,243,252' : '91,33,182';
-    const ag = c.createRadialGradient(x, y, rr * .8, x, y, rr * 1.75); ag.addColorStop(0, `rgba(${col},.6)`); ag.addColorStop(1, `rgba(${col},0)`);
-    c.fillStyle = ag; c.beginPath(); c.arc(x, y, rr * 1.75, 0, 7); c.fill();
-    if (b.variant === 'celeste') for (let k = 0; k < 5; k++) { const a = t * 1.5 + k * 1.257; c.fillStyle = '#e0f2fe'; c.fillRect(x + Math.cos(a) * rr * 1.4 - 1.5, y + Math.sin(a) * rr * 1.4 - 1.5, 3, 3); }
-    if (b.variant === 'ombre') for (let k = 0; k < 3; k++) { const a = -t * 1.2 + k * 2.09; c.fillStyle = 'rgba(46,16,101,.7)'; c.beginPath(); c.arc(x + Math.cos(a) * rr * 1.25, y + Math.sin(a) * rr * 1.25, rr * .28, 0, 7); c.fill(); }
-  }
-  // ombre portée douce
-  const sg = c.createRadialGradient(x + rr * .15, y + rr * .3, rr * .3, x + rr * .15, y + rr * .3, rr * 1.25);
-  sg.addColorStop(0, 'rgba(0,0,0,.55)'); sg.addColorStop(1, 'rgba(0,0,0,0)'); c.fillStyle = sg; c.beginPath(); c.arc(x + rr * .15, y + rr * .3, rr * 1.25, 0, 7); c.fill();
-  // anneau métallique
-  const rim = c.createLinearGradient(x - rr, y - rr, x + rr, y + rr);
-  if (b.tmp) { rim.addColorStop(0, '#fde68a'); rim.addColorStop(.5, '#f0abfc'); rim.addColorStop(1, '#67e8f9'); }
-  else { rim.addColorStop(0, hi); rim.addColorStop(.45, md); rim.addColorStop(1, lo); }
-  c.fillStyle = rim; c.beginPath(); c.arc(x, y, rr, 0, 7); c.fill();
-  // crans sur l'anneau (ils tournent quand le jeton roule)
-  if (rr > 9) { c.fillStyle = 'rgba(255,255,255,.35)'; for (let k = 0; k < 10; k++) { const a = spin + k * .628; c.beginPath(); c.arc(x + Math.cos(a) * rr * .91, y + Math.sin(a) * rr * .91, Math.max(1, rr * .045), 0, 7); c.fill(); } }
-  // disque intérieur teinté par la couleur du jeton
-  const ri = rr * .8, inner = c.createRadialGradient(x - ri * .3, y - ri * .3, ri * .1, x, y, ri);
-  inner.addColorStop(0, glow); inner.addColorStop(.55, '#2a2140'); inner.addColorStop(1, '#0f0b1c');
-  c.fillStyle = inner; c.beginPath(); c.arc(x, y, ri, 0, 7); c.fill();
-  c.lineWidth = Math.max(1, rr * .05); c.strokeStyle = 'rgba(0,0,0,.45)'; c.stroke();
-  // image du jeton, qui tourne
-  const im = rgImg(b.name);
-  c.save(); c.beginPath(); c.arc(x, y, ri * .97, 0, 7); c.clip();
+  if (b.tmp) c.globalAlpha *= .8;
+  const spin = RNG.spin[b.id] || 0, im = rgImg(b.name);
   c.translate(x, y); c.rotate(spin * .5); c.imageSmoothingEnabled = false;
-  if (im.complete && im.naturalWidth) { const sz = ri * 2.05; c.drawImage(im, -sz / 2, -sz / 2, sz, sz); }
+  if (b.variant && VFILTER[b.variant]) c.filter = VFILTER[b.variant];
+  if (im.complete && im.naturalWidth) { const sz = rr * 2.08; c.drawImage(im, -sz / 2, -sz / 2, sz, sz); }
+  else { c.fillStyle = SIDE[b.side].md; c.beginPath(); c.arc(0, 0, rr, 0, 7); c.fill(); }
+  c.filter = 'none';
   c.restore();
-  c.save(); c.beginPath(); c.arc(x, y, ri, 0, 7); c.clip();
-  if (b.variant === 'gold') { const sh = (t * .8 % 2) - .5, cl = v => Math.min(1, Math.max(0, v)); const lg = c.createLinearGradient(x - rr, y - rr, x + rr, y + rr); lg.addColorStop(cl(sh - .15), 'rgba(255,240,180,0)'); lg.addColorStop(cl(sh), 'rgba(255,240,180,.6)'); lg.addColorStop(cl(sh + .15), 'rgba(255,240,180,0)'); c.fillStyle = lg; c.fillRect(x - rr, y - rr, rr * 2, rr * 2); }
-  if (b.variant === 'ombre') { c.fillStyle = 'rgba(30,10,60,.3)'; c.fillRect(x - rr, y - rr, rr * 2, rr * 2); }
-  // reflet brillant en haut à gauche
-  const gl = c.createRadialGradient(x - ri * .45, y - ri * .55, 0, x - ri * .45, y - ri * .55, ri * .9);
-  gl.addColorStop(0, 'rgba(255,255,255,.32)'); gl.addColorStop(1, 'rgba(255,255,255,0)'); c.fillStyle = gl; c.fillRect(x - rr, y - rr, rr * 2, rr * 2);
-  c.restore();
-  // fin liseré clair sur le bord
-  c.lineWidth = Math.max(1, rr * .04); c.strokeStyle = 'rgba(255,255,255,.45)'; c.beginPath(); c.arc(x, y, rr - c.lineWidth / 2, 3.6, 5.6); c.stroke();
-  // pouvoir prêt (tes jetons) : petite gemme ; pouvoir activé en visée : halo coloré
-  if (fall === false && !b.tmp) {
+  // pouvoir prêt (pendant la visée) : petite gemme pixel
+  if (fall === false && !b.tmp && RNG.phase === 'aim') {
     const live = RNG.st?.bodies.find(z => z.id === b.id);
-    if (b.id === RNG.sel && RNG.pow && RNG.phase === 'aim') {
-      const pc = PW_COL[b.pw]; c.strokeStyle = pc; c.lineWidth = 3; c.shadowColor = pc; c.shadowBlur = 16; c.globalAlpha = .6 + .4 * Math.sin(t * 8);
-      c.beginPath(); c.arc(x, y, rr + 5, 0, 7); c.stroke(); c.shadowBlur = 0; c.globalAlpha = 1;
+    if (live && RG.ready(live)) {
+      const gx = Math.round(x + rr * .74), gy = Math.round(y - rr * .74), gr = Math.max(4, Math.round(rr * .2));
+      c.fillStyle = '#0b0914'; c.beginPath(); c.moveTo(gx, gy - gr - 2); c.lineTo(gx + gr + 2, gy); c.lineTo(gx, gy + gr + 2); c.lineTo(gx - gr - 2, gy); c.fill();
+      c.fillStyle = PW_COL[b.pw]; c.beginPath(); c.moveTo(gx, gy - gr); c.lineTo(gx + gr, gy); c.lineTo(gx, gy + gr); c.lineTo(gx - gr, gy); c.fill();
     }
-    if (live && RG.ready(live) && RNG.phase === 'aim') { const gx = x + rr * .72, gy = y - rr * .72, gr = Math.max(3.5, rr * .2); c.fillStyle = PW_COL[b.pw]; c.shadowColor = PW_COL[b.pw]; c.shadowBlur = 8; c.beginPath(); c.moveTo(gx, gy - gr); c.lineTo(gx + gr, gy); c.lineTo(gx, gy + gr); c.lineTo(gx - gr, gy); c.fill(); }
   }
-  c.restore();
 }
 
 // ---------- Fin du match

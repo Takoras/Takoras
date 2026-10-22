@@ -12,8 +12,9 @@ test('combat : monter son équipe (ajouter, version, budget, enregistrer)', asyn
   // un 4e jeton : équipe pleine (toast)
   await expect(d.getByText(/Budget : \d+\/8 pts/)).toBeVisible();
   // Mobu existe aussi en Doré : on change de version
-  await d.getByRole('button', { name: /Normal ⟳/ }).click();
-  await expect(d.getByRole('button', { name: /Doré ×1.05/ })).toBeVisible();
+  await d.getByRole('radio', { name: 'Doré' }).click();
+  await expect(d.getByRole('radio', { name: 'Doré' })).toHaveAttribute('aria-checked', 'true');
+  await expect(d.getByText('+5 %')).toBeVisible();
   await d.getByRole('button', { name: 'Valider l’équipe' }).click();
   await expect(d).toBeHidden();
   expect(calls).toContain('set_deck');

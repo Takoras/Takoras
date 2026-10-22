@@ -1,4 +1,4 @@
-import { useRef, type CSSProperties, type PointerEvent, type ReactNode } from 'react';
+import { useEffect, useRef, type CSSProperties, type PointerEvent, type ReactNode } from 'react';
 import {
   hexRGB,
   jetonOf,
@@ -21,14 +21,16 @@ import { Modal } from '@/ui/Modal';
 import { VTag } from '@/ui/VTag';
 import s from './Inventory.module.css';
 
-// Fiche d'un jeton : grande pièce qui penche sous le doigt, rareté, puissance, stats, valeur de revente.
-// `locked` = jamais trouvé : silhouette. `children` = infos et actions en plus (inventaire, profil…).
+// Fiche d'un jeton : en-tête (pièce qui penche sous le doigt, rareté, nom, chance), 3 chiffres clés
+// (puissance, niveau, revente), les 3 stats, puis `children` (possession, variantes, combat, actions).
+// `locked` = jamais trouvé : silhouette. `celebrate` : change de valeur à chaque montée de niveau (petite fête).
 export function JetonModal({
   name,
   serie,
   variant = '',
   lvl = 1,
   locked,
+  celebrate = 0,
   onClose,
   children,
 }: {
@@ -37,6 +39,7 @@ export function JetonModal({
   variant?: string;
   lvl?: number;
   locked?: boolean;
+  celebrate?: number;
   onClose: () => void;
   children?: ReactNode;
 }) {
@@ -48,6 +51,20 @@ export function JetonModal({
   const j = jetonOf(name ?? '', serie),
     st = statsOf(j.name, j.odds, variant, lvl),
     tier = tierKey(j.odds);
+  // Montée de niveau : la pièce rebondit et « Niv. N » s'envole
+  useEffect(() => {
+    if (!celebrate || reducedFx()) return;
+    {
+      coin.current?.animate(
+        [
+          { transform: 'scale(1)' },
+          { transform: 'scale(1.18) rotate(-6deg)', filter: 'brightness(1.6)' },
+          { transform: 'scale(1)' },
+        ],
+        { duration: 620, easing: 'cubic-bezier(.2, 1.4, .4, 1)' },
+      );
+    }
+  }, [celebrate]);
   const tilt = (e: PointerEvent) => {
     const c = coin.current;
     if (!c || reducedFx()) return;
@@ -66,45 +83,62 @@ export function JetonModal({
   return (
     <Modal open={!!name} onClose={onClose} wide>
       {name ? (
-        <div className={s.jm} style={{ '--g': hexRGB(j.glow) } as CSSProperties}>
-          <div
-            ref={coin}
-            className={s.jmCoin}
-            onPointerMove={tilt}
-            onPointerLeave={untilt}
-            style={texScale(j) !== 1 ? { scale: String(texScale(j)) } : undefined}
-          >
-            <img className={`${vImg(variant)} ${locked ? s.sil : ''}`} src={texOf(j)} alt="" />
-            {locked ? null : (
-              <i className={s.glare} style={{ maskImage: `url(${texOf(j)})`, WebkitMaskImage: `url(${texOf(j)})` }} />
-            )}
-          </div>
-          <div className={s.jmInfo}>
-            <span className={s.tier} style={{ color: tierCol(tier) }}>
-              {t(`ui.${tier}`)}
-            </span>
-            <h2>
-              {locked ? '???' : jn(j.name)} <VTag v={variant} />
-              {st.lvl > 1 ? (
-                <small className={s.lvl}>
-                  {' '}
-                  {t('arena.lvl')} {st.lvl}
-                </small>
-              ) : null}
-            </h2>
-            <p className={s.odds}>
-              1/{fmt(j.odds)}
-              {variant ? (
-                <small className="muted">
-                  {' '}
-                  × {t(`ui.v_${variant as Variant}`)} 1/{fmt(VARIANTS[variant as Variant].odds)} = 1/
-                  {fmt(vOdds(j.odds, variant))}
-                </small>
-              ) : null}
-            </p>
-            <p className="muted">
-              {t('ui.power')} <b className={s.pow}>{fmt(st.power)}</b>
-            </p>
+        <div className={s.jm} style={{ '--g': hexRGB(j.glow), '--tier': tierCol(tier) } as CSSProperties}>
+          <header className={s.jmHero}>
+            <div
+              ref={coin}
+              className={s.jmCoin}
+              onPointerMove={tilt}
+              onPointerLeave={untilt}
+              style={texScale(j) !== 1 ? { scale: String(texScale(j)) } : undefined}
+            >
+              <img className={`${vImg(variant)} ${locked ? s.sil : ''}`} src={texOf(j)} alt="" />
+              {locked ? null : (
+                <i className={s.glare} style={{ maskImage: `url(${texOf(j)})`, WebkitMaskImage: `url(${texOf(j)})` }} />
+              )}
+            </div>
+            {celebrate ? (
+              <b key={celebrate} className={s.lvlPop} aria-hidden>
+                {t('arena.lvl')} {lvl}
+              </b>
+            ) : null}
+            <div className={s.jmId}>
+              <span className={s.tier}>{t(`ui.${tier}`)}</span>
+              <h2>
+                {locked ? '???' : jn(j.name)} <VTag v={variant} />
+              </h2>
+              <p className={s.odds}>
+                1/{fmt(vOdds(j.odds, variant))}
+                {variant ? (
+                  <small className="muted">
+                    {' '}
+                    (1/{fmt(j.odds)} × {t(`ui.v_${variant as Variant}`)} 1/{fmt(VARIANTS[variant as Variant].odds)})
+                  </small>
+                ) : null}
+              </p>
+            </div>
+          </header>
+          <div className={s.jmBody}>
+            <dl className={s.facts}>
+              <div>
+                <dt>{t('ui.power')}</dt>
+                <dd className={s.pow}>{fmt(st.power)}</dd>
+              </div>
+              <div>
+                <dt>{t('arena.lvl')}</dt>
+                <dd>
+                  {st.lvl}
+                  <small>/{LEVEL_MAX}</small>
+                </dd>
+              </div>
+              <div>
+                <dt>{t('ui.sell_value')}</dt>
+                <dd>
+                  {fmt(sellValue(j.odds, variant))}{' '}
+                  <img className={`px ${s.coin}`} src="/img/piece.png" alt="" width={16} height={16} />
+                </dd>
+              </div>
+            </dl>
             <dl className={s.stats}>
               {(['s_mass', 's_pow', 's_size'] as const).map((k) => (
                 <div key={k}>
@@ -118,10 +152,6 @@ export function JetonModal({
                 </div>
               ))}
             </dl>
-            <p>
-              {t('ui.sell_value')} : <b>{fmt(sellValue(j.odds, variant))}</b>{' '}
-              <img className={`px ${s.coin}`} src="/img/piece.png" alt="" width={14} height={14} />
-            </p>
             {children}
           </div>
         </div>
@@ -136,12 +166,14 @@ export function CombatInfo({
   lvl,
   variant = '',
   stats,
+  showLvl = true,
   children,
 }: {
   name: string;
   lvl: number;
   variant?: string;
   stats?: boolean;
+  showLvl?: boolean;
   children?: ReactNode;
 }) {
   const t = useT();
@@ -166,9 +198,11 @@ export function CombatInfo({
         <span>
           {E.ico} {E[lang]}
         </span>
-        <b>
-          {t('arena.lvl')} {lvl}/{LEVEL_MAX}
-        </b>
+        {showLvl ? (
+          <b>
+            {t('arena.lvl')} {lvl}/{LEVEL_MAX}
+          </b>
+        ) : null}
       </header>
       {k.pw !== 'none' ? (
         <div className={s.kit}>

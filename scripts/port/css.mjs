@@ -5,7 +5,7 @@ import postcss from 'postcss';
 import safe from 'postcss-safe-parser'; // l'ancien style.css a une accolade en trop (ligne 116) : les navigateurs l'ignorent, on fait pareil
 
 const OUT = [
-  ['src/engines/ring.css', /\.(rg|rs)(-|\b)/],
+  // ring.css n'est plus généré (phase 8) : src/engines/ring.css est la référence.
   ['src/engines/cinema.css', /\.cine(-|\b)|\.cinema\b/],
   ['src/engines/motion.css', /\.mo-fx\b/],
   ['src/engines/opening.css', /\.(opening|op-[a-z-]+|fx|dust|rc(-[a-z]+)?|jeton|v-pop|stat)\b/],
