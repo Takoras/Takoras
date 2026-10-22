@@ -243,8 +243,23 @@
   background: rgb(124 58 237 / 20%);
 }
 
+/* Téléphone : bulle ronde 💡 en bas à gauche, au-dessus de la barre d'onglets (la bulle de chat est à droite) */
 @media (max-width: 759px) {
   .fab {
-    display: none;
+    bottom: calc(var(--tabh) + env(safe-area-inset-bottom) + var(--s-4));
+    width: 52px;
+    height: 52px;
+    padding: 0;
+    justify-content: center;
+    border-radius: 50%;
+    font-size: 22px;
+  }
+  .fabTxt {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    overflow: hidden;
+    clip-path: inset(50%);
+    white-space: nowrap;
   }
 }

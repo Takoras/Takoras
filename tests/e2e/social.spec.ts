@@ -1,12 +1,13 @@
 import { test, expect } from '@playwright/test';
 import { fakeSupabase } from './fake-supabase';
 
-test('amis : pastille, accepter une demande, chat (lire, envoyer)', async ({ page }) => {
+test('amis : pastille, accepter une demande, chat (lire, envoyer)', async ({ page, isMobile }) => {
   const { calls } = await fakeSupabase(page);
   await page.goto('/amis');
   await expect(page.getByRole('heading', { level: 1 })).toBeVisible();
   // 1 demande + 2 messages non lus
-  await expect(page.getByRole('link', { name: /Amis/ }).first()).toContainText('3');
+  // sur téléphone, Amis est dans « Plus » : la pastille est sur le bouton Plus
+  await expect(isMobile ? page.getByRole('button', { name: /Plus/ }) : page.getByRole('link', { name: /Amis/ }).first()).toContainText('3');
   await page.getByRole('button', { name: /Accepter/ }).click();
   await expect(page.getByRole('status').getByText(/Nouveau/)).toBeVisible();
   // ouvrir le chat avec Ami

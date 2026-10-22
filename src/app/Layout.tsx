@@ -10,7 +10,7 @@ import { Button } from '@/ui/Button';
 import { Modal } from '@/ui/Modal';
 import { Announcements, openAnnHistory, unreadAnn, useAnn } from '@/features/social/Announcements';
 import { SocialLayer } from '@/features/social/SocialLayer';
-import { BetaChip, BetaLayer, openFeedback, openPatchnotes, openTester, openTuto } from '@/features/beta/Beta';
+import { BetaChip, BetaLayer, openPatchnotes, openTester } from '@/features/beta/Beta';
 import { badgeOf, useFriends } from '@/features/social/social';
 import { Icon } from './Icon';
 import { NAV } from './nav';
@@ -172,6 +172,7 @@ export function Layout() {
         >
           <Icon name="more" size={22} />
           <span>{t('ui.more')}</span>
+          <Badge n={frN} />
         </button>
       </nav>
 
@@ -184,14 +185,9 @@ export function Layout() {
             <NavLink key={n.to} to={n.to}>
               <Icon name={n.icon} />
               {t(n.key)}
+              {n.to === '/amis' ? <Badge n={frN} /> : null}
             </NavLink>
           ))}
-          {user ? (
-            <NavLink to="/profil">
-              <Icon name="user" />
-              {t('app.account')}
-            </NavLink>
-          ) : null}
           <button
             type="button"
             onClick={() => {
@@ -201,16 +197,6 @@ export function Layout() {
           >
             <Icon name="scroll" />
             {t('ui.pn_title')}
-          </button>
-          <button
-            type="button"
-            onClick={() => {
-              openUI('more', false);
-              openFeedback();
-            }}
-          >
-            <Icon name="bulb" />
-            {t('ui.fb_btn')}
           </button>
           {me.data?.admin ? (
             <NavLink to="/admin">
@@ -234,36 +220,11 @@ export function Layout() {
             type="button"
             onClick={() => {
               openUI('more', false);
-              openTuto();
-            }}
-          >
-            <Icon name="help" />
-            {t('ui.tuto_again')}
-          </button>
-          <button
-            type="button"
-            onClick={() => {
-              openUI('more', false);
-              openAnnHistory();
-            }}
-          >
-            <Icon name="bell" />
-            {t('ui.ann_hist')}
-            <Badge n={annN} />
-          </button>
-          <button
-            type="button"
-            onClick={() => {
-              openUI('more', false);
               openUI('settings');
             }}
           >
             <Icon name="gear" />
             {t('ui.settings')}
-          </button>
-          <button type="button" onClick={toggleMute} data-nosound>
-            <Icon name={muted ? 'mute' : 'sound'} />
-            {muted ? t('ui.unmute') : t('ui.mute')}
           </button>
           {user ? (
             <button type="button" onClick={() => void signOut()}>

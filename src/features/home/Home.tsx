@@ -4,7 +4,7 @@ import { useT } from '@/i18n/useT';
 import { installOpeningHost } from '../eco/openPulls';
 import { Actions } from './Actions';
 import { AutoConfig } from './AutoConfig';
-import { History, Live } from './Feeds';
+import { Live } from './Feeds';
 import { HeroCoin } from './HeroCoin';
 import { Quests } from '../quests/Quests';
 import s from './Home.module.css';
@@ -27,7 +27,6 @@ export default function Home() {
         </div>
         <div className={`${s.side} ${s.stack}`}>
           <Quests />
-          <History />
         </div>
         <div className={s.side}>
           <AutoConfig />

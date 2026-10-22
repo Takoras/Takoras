@@ -10,6 +10,11 @@
   padding: 0;
 }
 
+/* « hidden » cache toujours, même si une classe impose un display (ex. le compteur ×N du mode rapide de l'ouverture) */
+[hidden] {
+  display: none !important;
+}
+
 html {
   -webkit-text-size-adjust: 100%;
   scrollbar-color: var(--line-strong) transparent;

@@ -36,8 +36,8 @@ test('patch notes : popup de la nouveauté, puis toutes les notes via la puce b�
 test('donner un avis', async ({ page }) => {
   const { calls } = await fakeSupabase(page);
   await page.goto('/');
-  await page.getByRole('button', { name: 'Plus' }).or(page.getByRole('button', { name: /Donner un avis/ })).first().click();
-  if (await page.getByRole('dialog', { name: 'Plus' }).isVisible()) await page.getByRole('dialog').getByRole('button', { name: /Donner un avis/ }).click();
+  // bouton en bas à gauche (bulle 💡 sur téléphone)
+  await page.getByRole('button', { name: /Donner un avis/ }).click();
   const d = page.getByRole('dialog');
   await d.getByRole('radio', { name: /Bug/ }).click();
   await d.getByRole('textbox').fill('ok');

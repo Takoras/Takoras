@@ -80,3 +80,23 @@ test('« Probas & infos » : la somme des probabilités affichées et le choix d
   await dialog.getByRole('button', { name: '×500' }).click();
   await expect(dialog.getByRole('button', { name: '×500' })).toHaveAttribute('aria-pressed', 'true');
 });
+
+test('après un « Tout ouvrir » en mode rapide, le compteur ×N ne reste pas affiché', async ({ page }) => {
+  test.setTimeout(90_000);
+  await fakeSupabase(page, { stock: 8 }, [['Mobu', 'Mobu', 'Pikko', 'Mobu', 'Givre'], ['Pikko']]);
+  await page.goto('/');
+  await page.getByRole('button', { name: /Tout ouvrir/ }).click();
+  const opening = page.locator('#opening');
+  await page.locator('#op-auto').dispatchEvent('click');
+  for (let i = 0; i < 300 && !(await opening.getAttribute('class'))?.includes('recap'); i++) {
+    const cls = (await opening.getAttribute('class')) ?? '';
+    if (!cls.includes('revealed')) await page.locator('#op-coin').dispatchEvent('pointerdown');
+    else if (await page.locator('#op-recap').isVisible()) await page.locator('#op-recap').dispatchEvent('click');
+    else if (await page.locator('#op-next').isVisible()) await page.locator('#op-next').dispatchEvent('click');
+    await page.waitForTimeout(100);
+  }
+  await page.locator('#op-recap-back').dispatchEvent('click');
+  await page.getByRole('button', { name: 'Ouvrir 1' }).click();
+  await expect(opening).toHaveClass(/\bon\b/);
+  await expect(page.locator('#op-combo')).toBeHidden();
+});

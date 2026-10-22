@@ -1,11 +1,23 @@
 /// <reference types="vitest/config" />
-import { defineConfig } from 'vite';
+import { defineConfig, type Plugin } from 'vite';
 import react from '@vitejs/plugin-react';
 import { fileURLToPath } from 'node:url';
 
+// Identifiant de cette version du site : écrit dans le JS et dans dist/version.json.
+// Les pages ouvertes comparent les deux et se rechargent toutes seules quand une nouvelle version est en ligne.
+const BUILD_ID = Date.now().toString(36);
+const versionFile = (): Plugin => ({
+  name: 'takoras-version',
+  apply: 'build',
+  generateBundle() {
+    this.emitFile({ type: 'asset', fileName: 'version.json', source: JSON.stringify({ id: BUILD_ID }) });
+  },
+});
+
 // Build du site : sortie dans dist/ (servie par Cloudflare, voir wrangler.jsonc).
 export default defineConfig({
-  plugins: [react()],
+  plugins: [react(), versionFile()],
+  define: { __BUILD_ID__: JSON.stringify(BUILD_ID) },
   resolve: {
     alias: {
       '@': fileURLToPath(new URL('./src', import.meta.url)),

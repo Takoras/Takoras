@@ -20,3 +20,7 @@
 # Images : elles gardent leur nom quand on les redessine → 1 jour, puis mise à jour en arrière-plan (comme l'ancien site)
 /img/*
   Cache-Control: public, max-age=86400, stale-while-revalidate=604800
+
+# Identifiant de la version en ligne : jamais en cache (les pages s'en servent pour se mettre à jour toutes seules)
+/version.json
+  Cache-Control: no-store
