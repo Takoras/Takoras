@@ -193,14 +193,14 @@
   position: relative;
   display: grid;
   border-radius: var(--r-md);
-  background: radial-gradient(circle at 50% 38%, rgb(var(--g) / 16%), transparent 62%), var(--surface);
+  background: radial-gradient(circle at 50% 38%, rgba(var(--g), 0.16), transparent 62%), var(--surface);
   border: 1px solid var(--line);
   transition:
     border-color var(--t-fast),
     transform var(--t-fast);
 }
 .card:hover {
-  border-color: rgb(var(--g) / 50%);
+  border-color: rgba(var(--g), 0.5);
 }
 .cardBtn {
   display: grid;
@@ -214,7 +214,7 @@
   width: 72px;
   height: 72px;
   margin-bottom: var(--s-1);
-  --df: drop-shadow(0 0 10px rgb(var(--g) / 45%));
+  --df: drop-shadow(0 0 10px rgba(var(--g), 0.45));
 }
 .cardBtn b {
   font-size: var(--fs-sm);
@@ -329,7 +329,7 @@
   place-items: center;
   margin: 0 auto;
   transition: transform var(--t-fast);
-  background: radial-gradient(closest-side, rgb(var(--g) / 45%), transparent);
+  background: radial-gradient(closest-side, rgba(var(--g), 0.45), transparent);
   cursor: grab;
   touch-action: none;
 }
@@ -453,8 +453,8 @@
 .kit {
   padding: var(--s-2) var(--s-3);
   border-radius: var(--r-sm);
-  background: rgb(var(--pw) / 8%);
-  border: 1px solid rgb(var(--pw) / 30%);
+  background: rgba(var(--pw), 0.08);
+  border: 1px solid rgba(var(--pw), 0.3);
 }
 .kit small {
   color: var(--muted);
@@ -521,7 +521,7 @@
   width: 72px;
   height: 72px;
   object-fit: contain;
-  --df: drop-shadow(0 6px 14px rgb(var(--g) / 45%));
+  --df: drop-shadow(0 6px 14px rgba(var(--g), 0.45));
 }
 .use {
   display: flex;

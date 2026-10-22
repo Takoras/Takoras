@@ -44,3 +44,6 @@ html.reduce-fx img.v-celeste,
 html.no-svgfx img.v-celeste { animation: none !important; filter: grayscale(0.55) brightness(1.35) sepia(0.15) hue-rotate(195deg) saturate(1.4) drop-shadow(0 0 10px rgb(199 210 254 / 90%)) !important; }
 html.reduce-fx img.v-ombre,
 html.no-svgfx img.v-ombre { animation: none !important; filter: grayscale(0.6) brightness(0.55) sepia(0.45) hue-rotate(225deg) saturate(1.7) contrast(1.3) drop-shadow(0 0 8px rgb(192 132 252 / 80%)) !important; }
+
+/* Images qui restent fixes (logo) */
+img.px.still { animation: none; }

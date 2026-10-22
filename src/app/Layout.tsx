@@ -56,7 +56,7 @@ export function Layout() {
       </a>
       <header className={s.top}>
         <NavLink to="/" className={s.brand} aria-label="Takoras">
-          <img className="px" src="/img/logo.png" alt="" width={32} height={32} />
+          <img className="px still" src="/img/logo.png" alt="" width={32} height={32} />
           <span>Takoras</span>
         </NavLink>
         <BetaChip />

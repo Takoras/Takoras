@@ -105,7 +105,7 @@
   position: relative;
   min-height: 150px;
   border-radius: var(--r-md);
-  background: radial-gradient(circle at 50% 40%, rgb(var(--g, 139 92 246) / 18%), transparent 65%), var(--surface);
+  background: radial-gradient(circle at 50% 40%, rgba(var(--g), 0.18), transparent 65%), var(--surface);
   border: 1px solid var(--line);
 }
 .sc > button {
@@ -121,7 +121,7 @@
 .sc img {
   width: 72px;
   height: 72px;
-  --df: drop-shadow(0 0 10px rgb(var(--g) / 50%));
+  --df: drop-shadow(0 0 10px rgba(var(--g), 0.5));
 }
 .sc b {
   font-size: var(--fs-sm);
@@ -163,7 +163,7 @@
 .coll img {
   width: 48px;
   height: 48px;
-  --df: drop-shadow(0 0 8px rgb(var(--g) / 45%));
+  --df: drop-shadow(0 0 8px rgba(var(--g), 0.45));
 }
 .coll small {
   font-size: 10px;
@@ -279,7 +279,7 @@
   border: 1px solid var(--line);
 }
 .pk button:hover {
-  border-color: rgb(var(--g) / 60%);
+  border-color: rgba(var(--g), 0.6);
 }
 .pk img {
   width: 56px;

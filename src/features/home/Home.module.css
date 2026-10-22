@@ -34,7 +34,7 @@
   height: 100%;
   perspective: 700px;
   cursor: pointer;
-  filter: drop-shadow(0 24px 40px rgb(var(--glow) / 45%));
+  filter: drop-shadow(0 24px 40px rgba(var(--glow), 0.45));
   animation: bob 5s ease-in-out infinite;
 }
 

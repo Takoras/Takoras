@@ -94,7 +94,7 @@
   --press: 0 3px 0 0;
   --shadow-1: 0 1px 0 rgb(255 255 255 / 4%) inset, 0 8px 24px rgb(0 0 0 / 35%);
   --shadow-pop: 0 20px 60px rgb(0 0 0 / 60%);
-  --glow-shadow: 0 0 24px rgb(var(--g) / 45%);
+  --glow-shadow: 0 0 24px rgba(var(--g), 0.45);
 
   /* Mouvement */
   --t-fast: 120ms;
