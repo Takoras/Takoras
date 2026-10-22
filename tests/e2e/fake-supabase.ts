@@ -11,6 +11,17 @@ export type FakeState = { coins: number; stock: number; max: number; pseudo: str
 export async function fakeSupabase(page: Page, state: Partial<FakeState> = {}, draws: string[][] = []) {
   const st: FakeState = { coins: 5000, stock: 12, max: 20, pseudo: 'Testeur', step: 180, next_in: 100, regen: 180, ...state };
   const calls: string[] = [];
+  // Inventaire de test : 4 Mobu (niveau 1), 1 Mobu Doré, 1 Vyolis (rare : vente confirmée)
+  const inv = [
+    { jeton: 'Mobu', serie: 'Takoras', variant: null, odds: 2, ids: [11, 12, 13, 14], free: [11, 12, 13, 14], shown: 0, deck: 0, last: '2026-10-20T10:00:00Z', best_luck: 1 },
+    { jeton: 'Mobu', serie: 'Takoras', variant: 'gold', odds: 2, ids: [15], free: [15], shown: 0, deck: 0, last: '2026-10-20T11:00:00Z', best_luck: 1 },
+    { jeton: 'Vyolis', serie: 'Takoras', variant: null, odds: 1000, ids: [16], free: [16], shown: 0, deck: 0, last: '2026-10-20T12:00:00Z', best_luck: 1 },
+  ];
+  let lvl = 1;
+  const items = [
+    { item: 'potion1', kind: 'potion', data: { mult: 1.3, rolls: 5 }, qty: 3 },
+    { item: 'instant', kind: 'instant', data: {}, qty: 1 },
+  ];
   await page.addInitScript(([key, session]) => localStorage.setItem(key, session), [
     'sb-joyskjoofihwhycyreyn-auth-token',
     JSON.stringify({ access_token: jwt, refresh_token: 'r', token_type: 'bearer', expires_in: 3600, expires_at: exp, user }),
@@ -48,6 +59,31 @@ export async function fakeSupabase(page: Page, state: Partial<FakeState> = {}, d
     if (rpc === 'my_daily') return json({ available: true, amount: 750, next_streak: 3, tomorrow: 1000 });
     if (rpc === 'claim_daily') { st.coins += 750; return json({ amount: 750, streak: 3, state: { ...st } }); }
     if (rpc === 'claim_quest') { st.coins += 300; return json({ ...st }); }
+    if (rpc === 'my_inventory_groups') return json(inv.filter((g) => g.ids.length));
+    if (rpc === 'my_collection') return json([
+      { jeton: 'Mobu', serie: 'Takoras', variant: null, total: 6, owned: 4 },
+      { jeton: 'Mobu', serie: 'Takoras', variant: 'gold', total: 1, owned: 1 },
+      { jeton: 'Vyolis', serie: 'Takoras', variant: null, total: 1, owned: 1 },
+      { jeton: 'Pikko', serie: 'Takoras', variant: null, total: 2, owned: 0 },
+    ]);
+    if (rpc === 'my_levels') return json([{ jeton: 'Mobu', serie: 'Takoras', lvl: lvl }]);
+    if (rpc === 'sell_pulls') {
+      const ids = (JSON.parse(route.request().postData() ?? '{}') as { ids: number[] }).ids;
+      inv.forEach((g) => { g.ids = g.ids.filter((i) => !ids.includes(i)); g.free = g.free.filter((i) => !ids.includes(i)); });
+      st.coins += ids.length; return json({ sold: ids.length, coins: ids.length, state: { ...st } });
+    }
+    if (rpc === 'lock_pulls') {
+      const b = JSON.parse(route.request().postData() ?? '{}') as { ids: number[]; p_locked: boolean };
+      inv.forEach((g) => { if (b.ids.some((i) => g.ids.includes(i))) g.free = b.p_locked ? [] : [...g.ids]; });
+      return json(b.ids.length);
+    }
+    if (rpc === 'level_up') { lvl += 1; const g = inv[0]; if (g) { g.ids = g.ids.slice(lvl - 1); g.free = [...g.ids]; } return json({ lvl }); }
+    if (rpc === 'my_items') return json(items.filter((i) => i.qty > 0));
+    if (rpc === 'use_items') {
+      const b = JSON.parse(route.request().postData() ?? '{}') as { p_item: string; p_qty: number };
+      const it = items.find((i) => i.item === b.p_item); if (it) it.qty -= b.p_qty;
+      return json({ used: b.p_qty, state: { ...st } });
+    }
     if (rpc === 'live_feed' || rpc === 'avatars_of') return json([]);
     if (url.includes('/rest/v1/pulls')) return json([]);
     return json(null);

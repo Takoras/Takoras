@@ -32,3 +32,7 @@ const isVariant = (v: string | null | undefined): v is Variant => !!v && v in VA
 export const vOdds = (odds: number, v?: string | null) => odds * (isVariant(v) ? VARIANTS[v].odds : 1);
 // Valeur de revente : même règle que le serveur (_sell_value × multiplicateur de variante)
 export const sellValue = (odds: number, v?: string | null) => Math.max(1, Math.round(odds * 0.5)) * (isVariant(v) ? VARIANTS[v].mult : 1);
+
+// Couleur d'une rareté et classe d'image d'une variante
+export const tierCol = (t: string) => `var(--${t.replace('_', '-')})`;
+export const vImg = (v?: string | null) => (isVariant(v) ? `px v-${v}` : 'px');

@@ -22,7 +22,8 @@
 }
 
 .card.epic { border-color: rgb(var(--g) / 55%); box-shadow: 0 0 28px rgb(var(--g) / 15%); }
-.card.out { opacity: 0.6; }
+.card.out { border-style: dashed; }
+.card.out .icon { opacity: 0.45; filter: grayscale(0.7); }
 .card h3 { font-size: var(--fs-md); }
 .card p { font-size: var(--fs-sm); }
 .icon { display: grid; place-items: center; height: 96px; }
@@ -32,7 +33,7 @@
 .stock, .deal { position: absolute; top: var(--s-2); padding: 2px var(--s-2); border-radius: var(--r-pill); font-size: 11px; font-weight: 700; }
 .stock { right: var(--s-2); background: var(--surface-3); color: var(--text-2); }
 .stock.ok { color: var(--ok); }
-.stock.none { color: var(--muted); }
+.stock.none { color: var(--text-2); }
 .deal { left: var(--s-2); background: rgb(74 222 128 / 15%); color: var(--ok); }
 .deal.up { background: rgb(244 63 94 / 15%); color: var(--danger); }
 
