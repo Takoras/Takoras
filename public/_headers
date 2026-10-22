@@ -1,8 +1,22 @@
-# Cache navigateur (Cloudflare). Les .js / .css sont appelés avec ?v=… (changé à chaque mise à jour) : on peut les garder 1 an.
-# Les images gardent leur nom quand on les redessine : 1 jour, puis mise à jour en arrière-plan.
-/*.js
+# En-têtes de sécurité (Cloudflare les applique à toutes les réponses du site).
+# CSP en mode « Report-Only » pendant la bêta : elle signale (console du navigateur) sans rien bloquer.
+# Quand aucune violation n'apparaît, on renomme l'en-tête en « Content-Security-Policy » pour la rendre active.
+#   script-src 'self'      : seuls nos fichiers JS (aucun script en ligne, aucun eval)
+#   style-src 'unsafe-inline' : les moteurs repris (ouverture, Ring) posent des styles en ligne dans leur HTML
+#   connect-src            : uniquement le serveur de jeu Supabase (API + temps réel)
+/*
+  Strict-Transport-Security: max-age=31536000; includeSubDomains
+  X-Content-Type-Options: nosniff
+  X-Frame-Options: DENY
+  Referrer-Policy: strict-origin-when-cross-origin
+  Permissions-Policy: camera=(), microphone=(), geolocation=(), payment=(), usb=(), interest-cohort=()
+  Cross-Origin-Opener-Policy: same-origin
+  Content-Security-Policy-Report-Only: default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob:; font-src 'self'; connect-src 'self' https://joyskjoofihwhycyreyn.supabase.co wss://joyskjoofihwhycyreyn.supabase.co; worker-src 'self'; media-src 'self'; object-src 'none'; base-uri 'self'; form-action 'self'; frame-ancestors 'none'; upgrade-insecure-requests
+
+# Fichiers versionnés (le nom change à chaque version) : gardés en cache un an
+/assets/*
   Cache-Control: public, max-age=31536000, immutable
-/*.css
-  Cache-Control: public, max-age=31536000, immutable
+
+# Images : elles gardent leur nom quand on les redessine → 1 jour, puis mise à jour en arrière-plan (comme l'ancien site)
 /img/*
   Cache-Control: public, max-age=86400, stale-while-revalidate=604800

@@ -226,3 +226,8 @@ Elles ne servent pas à la parité :
 - [x] Remplacer `confirm()` natif par la confirmation maison.
 - [x] Changer de langue sans recharger la page.
 - [ ] Zénith, Oblivion, Takoras : images manquantes (signaler, pas bloquant).
+
+## À supprimer après la bascule (phase 13, par toi)
+
+- RPC qui ne servent plus : `my_inventory`, `use_item` (remplacées par `my_inventory_groups`, `use_items`), `battle_result` (déjà fermée aux joueurs).
+- Edge Function `battle` (remplacée par une version qui répond 410).
