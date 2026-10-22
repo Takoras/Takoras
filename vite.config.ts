@@ -24,7 +24,7 @@ export default defineConfig({
         codeSplitting: {
           groups: [
             { name: 'vendor', test: /node_modules/ },
-            { name: 'shared', test: /src\/(api|lib|data|ui|i18n\/(index|useT|Rich|fr)|app\/ui-store|features\/(social\/social|eco\/eco|info\/store|beta\/store))[\/.]/ },
+            { name: 'shared', test: /src\/(api|lib|data|ui|i18n\/(index|useT|Rich|fr)|app\/ui-store|features\/(social\/social|eco\/eco|info\/store|beta\/store))[/.]/ },
           ],
         },
       },
