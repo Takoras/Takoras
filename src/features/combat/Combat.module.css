@@ -1,0 +1,436 @@
+.page {
+  display: grid;
+  gap: var(--s-3);
+  width: min(560px, 100%);
+  margin: 0 auto;
+}
+.empty {
+  display: grid;
+  justify-items: center;
+  gap: var(--s-3);
+  padding: var(--s-10) var(--s-4);
+  text-align: center;
+}
+.row {
+  display: flex;
+  gap: var(--s-2);
+  flex-wrap: wrap;
+  justify-content: center;
+}
+
+/* Rang */
+.rank {
+  display: flex;
+  align-items: center;
+  gap: var(--s-3);
+  padding: var(--s-3) var(--s-4);
+  border-radius: var(--r-lg);
+  background: var(--surface);
+  border: 1px solid var(--line);
+}
+.rankIco {
+  font-size: 34px;
+}
+.rank small {
+  display: block;
+  font-size: var(--fs-xs);
+  color: var(--muted);
+}
+.rank b {
+  font-family: var(--font-display);
+  font-size: var(--fs-lg);
+}
+.elo {
+  margin-left: auto;
+  text-align: right;
+}
+
+/* Gros bouton JOUER (classé, bientôt) */
+.play {
+  display: grid;
+  justify-items: center;
+  gap: 2px;
+  padding: var(--s-5);
+  border-radius: var(--r-lg);
+  background: linear-gradient(135deg, var(--accent), var(--accent-lo));
+  color: #fff;
+  box-shadow: 0 10px 30px -10px rgba(var(--glow), 0.9);
+}
+.play b {
+  font-family: var(--font-display);
+  font-size: var(--fs-2xl);
+  letter-spacing: 0.04em;
+}
+.play small {
+  font-size: var(--fs-sm);
+  opacity: 0.85;
+}
+.play:disabled {
+  opacity: 0.55;
+  cursor: not-allowed;
+  filter: saturate(0.6);
+}
+.need {
+  text-align: center;
+}
+
+/* Équipe */
+.team {
+  display: grid;
+  gap: var(--s-3);
+  margin-top: var(--s-3);
+}
+.team header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+.team h2 {
+  font-size: var(--fs-lg);
+}
+.team ul {
+  list-style: none;
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: var(--s-2);
+}
+.slot {
+  position: relative;
+  width: 100%;
+  min-height: 170px;
+  display: grid;
+  justify-items: center;
+  align-content: center;
+  gap: 2px;
+  padding: var(--s-5) var(--s-2) var(--s-3);
+  border-radius: var(--r-md);
+  background: radial-gradient(circle at 50% 38%, rgba(var(--g, 139, 92, 246), 0.18), transparent 62%), var(--surface);
+  border: 1px solid var(--line);
+  text-align: center;
+}
+.slot:hover {
+  border-color: rgba(var(--g, 139, 92, 246), 0.5);
+}
+.slot img {
+  width: 64px;
+  height: 64px;
+  --df: drop-shadow(0 0 10px rgba(var(--g), 0.5));
+}
+.slot b {
+  font-size: var(--fs-sm);
+}
+.slot small {
+  font-size: 11px;
+  color: var(--muted);
+}
+.emptySlot {
+  border-style: dashed;
+}
+.emptySlot b {
+  font-size: var(--fs-2xl);
+  color: var(--muted);
+}
+.pos {
+  position: absolute;
+  top: 6px;
+  left: 8px;
+  font-size: 10px;
+  color: var(--muted);
+}
+.el {
+  position: absolute;
+  top: 4px;
+  right: 6px;
+  font-size: 14px;
+}
+.ab {
+  color: var(--c, var(--accent-hi)) !important;
+  font-weight: 700;
+}
+
+.help {
+  padding: var(--s-3) var(--s-4);
+  border-radius: var(--r-md);
+  background: var(--surface);
+  border: 1px solid var(--line);
+}
+.help summary {
+  cursor: pointer;
+  font-weight: 600;
+}
+.help p {
+  margin: var(--s-2) 0;
+  font-size: var(--fs-sm);
+  line-height: 1.55;
+}
+
+/* Fiche d'un jeton */
+.sheet {
+  display: grid;
+  gap: var(--s-3);
+}
+.sheetTop {
+  display: flex;
+  gap: var(--s-4);
+  align-items: center;
+}
+.sheetImg {
+  width: 96px;
+  height: 96px;
+  flex: none;
+  display: grid;
+  place-items: center;
+  border-radius: 50%;
+  background: radial-gradient(closest-side, rgba(var(--g), 0.4), transparent);
+}
+.sheetImg img {
+  width: 84px;
+  height: 84px;
+}
+.tier {
+  font-size: var(--fs-xs);
+  font-weight: 800;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+.sheetName {
+  font-family: var(--font-display);
+  font-size: var(--fs-xl);
+  font-weight: 700;
+}
+.chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--s-2);
+  font-size: var(--fs-xs);
+}
+.chips span {
+  padding: 2px var(--s-2);
+  border-radius: var(--r-pill);
+  background: var(--bg-raised);
+  border: 1px solid var(--line);
+}
+
+/* Éditeur d'équipe */
+.teSlots {
+  list-style: none;
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: var(--s-2);
+}
+.teSlots li {
+  position: relative;
+  display: grid;
+  justify-items: center;
+  gap: 4px;
+  padding: var(--s-3) var(--s-2);
+  border-radius: var(--r-md);
+  background: radial-gradient(circle at 50% 35%, rgba(var(--g, 139, 92, 246), 0.16), transparent 65%), var(--bg-raised);
+  border: 1px solid var(--line);
+  text-align: center;
+  min-height: 128px;
+}
+.teSlots img {
+  width: 52px;
+  height: 52px;
+}
+.teSlots b {
+  font-size: var(--fs-sm);
+}
+.teEmpty {
+  border-style: dashed !important;
+  align-content: center;
+  color: var(--muted);
+}
+.teEmpty b {
+  font-size: var(--fs-xl);
+}
+.teRm {
+  position: absolute;
+  top: 4px;
+  right: 4px;
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  background: var(--surface-3);
+  font-size: 12px;
+}
+.teV {
+  min-height: 28px;
+  padding: 0 var(--s-2);
+  border-radius: var(--r-pill);
+  border: 1px solid var(--line-strong);
+  background: var(--surface);
+  font-size: 11px;
+  font-weight: 700;
+}
+.teV:disabled {
+  opacity: 0.8;
+  cursor: default;
+}
+.v_gold {
+  color: #3b2400;
+  background: linear-gradient(135deg, #fef08a, #f59e0b);
+  border-color: transparent;
+}
+.v_celeste {
+  color: #1e1b4b;
+  background: linear-gradient(135deg, #fff, #c7d2fe);
+  border-color: transparent;
+}
+.v_ombre {
+  color: #e9d5ff;
+  background: #0b0614;
+  border-color: #a855f7;
+}
+.budget {
+  margin: var(--s-3) 0;
+  font-size: var(--fs-sm);
+}
+.over {
+  color: var(--danger);
+}
+.filters {
+  display: grid;
+  gap: var(--s-2);
+}
+.chipsRow {
+  display: flex;
+  gap: var(--s-2);
+  overflow-x: auto;
+  scrollbar-width: none;
+}
+.chipsRow button {
+  flex: none;
+  min-height: 32px;
+  padding: 0 var(--s-3);
+  border-radius: var(--r-pill);
+  background: var(--bg-raised);
+  border: 1px solid var(--line);
+  color: var(--text-2);
+  font-size: var(--fs-xs);
+  font-weight: 600;
+}
+.chipsRow button[aria-pressed='true'] {
+  color: var(--text);
+  border-color: var(--accent-hi);
+  background: rgb(124 58 237 / 18%);
+}
+.legend {
+  margin: var(--s-2) 0;
+  font-size: 11px;
+  color: var(--muted);
+}
+.teGrid {
+  list-style: none;
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+  gap: var(--s-2);
+  max-height: 46dvh;
+  overflow-y: auto;
+  padding: 2px;
+}
+.teGrid li {
+  position: relative;
+}
+.teCard {
+  position: relative;
+  width: 100%;
+  height: 100%;
+  display: grid;
+  justify-items: center;
+  align-content: start;
+  gap: 3px;
+  padding: var(--s-5) var(--s-2) var(--s-2);
+  border-radius: var(--r-md);
+  background: radial-gradient(circle at 50% 22%, rgba(var(--g), 0.16), transparent 55%), var(--bg-raised);
+  border: 1px solid var(--line);
+  text-align: center;
+}
+.sel .teCard {
+  border-color: var(--accent-hi);
+  box-shadow: 0 0 0 2px rgb(167 139 250 / 35%);
+}
+.teCard img {
+  width: 56px;
+  height: 56px;
+}
+.teCard b {
+  font-size: var(--fs-sm);
+}
+.teCard small {
+  font-size: 11px;
+}
+.pd {
+  color: var(--muted);
+  line-height: 1.3;
+}
+.tpEl {
+  position: absolute;
+  top: 4px;
+  left: 6px;
+  font-size: 13px;
+}
+.tpLv {
+  position: absolute;
+  top: 6px;
+  right: 30px;
+  font-size: 10px;
+  color: var(--muted);
+}
+.info {
+  position: absolute;
+  top: 2px;
+  right: 2px;
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  color: var(--text-2);
+  font-size: 15px;
+}
+.info:hover {
+  background: var(--surface-3);
+}
+.mini {
+  width: 100%;
+  display: grid;
+  gap: 2px;
+  margin: 2px 0;
+}
+.mini i {
+  display: block;
+  height: 3px;
+  border-radius: 2px;
+  background: var(--el);
+}
+.cost {
+  color: var(--gold);
+  font-weight: 700;
+}
+.ok {
+  position: absolute;
+  bottom: 6px;
+  right: 8px;
+  color: var(--accent-hi);
+  font-weight: 800;
+}
+.foot {
+  display: flex;
+  justify-content: flex-end;
+  margin-top: var(--s-3);
+}
+
+@media (max-width: 559px) {
+  .slot {
+    min-height: 150px;
+  }
+  .slot img {
+    width: 52px;
+    height: 52px;
+  }
+  .teGrid {
+    grid-template-columns: 1fr 1fr;
+    max-height: none;
+    overflow: visible;
+  }
+}

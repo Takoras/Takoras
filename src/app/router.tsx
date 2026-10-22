@@ -1,6 +1,5 @@
-import { lazy } from 'react';
+import { lazy, Suspense } from 'react';
 import { createBrowserRouter } from 'react-router';
-import { SoonPage } from '@/pages/Soon';
 import Home from '@/features/home/Home';
 import Shop from '@/features/shop/Shop';
 import Bestiary from '@/features/inventory/Bestiary';
@@ -10,6 +9,9 @@ import Friends from '@/features/social/Friends';
 import Board from '@/features/board/Board';
 import NotFound from '@/pages/NotFound';
 import { Layout } from './Layout';
+
+// Combat : chargé seulement quand on ouvre la page (le Ring, lui, au lancement d'une partie)
+const Combat = lazy(() => import('@/features/combat/Combat'));
 
 // Labo des moteurs : seulement en développement (absent du site en ligne)
 const Lab = import.meta.env.DEV ? lazy(() => import('@/pages/Lab')) : null;
@@ -24,7 +26,20 @@ export const router = createBrowserRouter([
       { path: '/inventaire/objets', element: <Items /> },
       { path: '/boutique', element: <Shop /> },
       { path: '/classement', element: <Board /> },
-      { path: '/combat', element: <SoonPage k="ui.nav_combat" /> },
+      {
+        path: '/combat',
+        element: (
+          <Suspense
+            fallback={
+              <p className="muted" aria-busy>
+                …
+              </p>
+            }
+          >
+            <Combat />
+          </Suspense>
+        ),
+      },
       { path: '/amis', element: <Friends /> },
       { path: '/profil', element: <Profile /> },
       { path: '/profil/:pseudo', element: <Profile /> },

@@ -14,8 +14,10 @@ export default defineConfig({
         { command: 'npx vite --port 5174 --strictPort', port: 5174, reuseExistingServer: true },
       ],
   projects: [
-    { name: 'mobile', testIgnore: /lab\.spec/, use: { ...devices['Pixel 7'], viewport: { width: 375, height: 760 } } },
-    { name: 'desktop', testIgnore: /lab\.spec/, use: { ...devices['Desktop Chrome'], viewport: { width: 1280, height: 800 } } },
-    { name: 'lab', testMatch: /lab\.spec/, use: { ...devices['Desktop Chrome'], baseURL: 'http://localhost:5174', contextOptions: {} } },
+    { name: 'mobile', testIgnore: /(lab|match)\.spec/, use: { ...devices['Pixel 7'], viewport: { width: 375, height: 760 } } },
+    { name: 'desktop', testIgnore: /(lab|match)\.spec/, use: { ...devices['Desktop Chrome'], viewport: { width: 1280, height: 800 } } },
+    { name: 'lab', testMatch: /(lab|match)\.spec/, use: { ...devices['Desktop Chrome'], baseURL: 'http://localhost:5174', contextOptions: {} } },
+    // partie complète du Ring au tactile, en 375 px
+    { name: 'lab-mobile', testMatch: /match\.spec/, use: { ...devices['Pixel 7'], viewport: { width: 375, height: 760 }, baseURL: 'http://localhost:5174', contextOptions: {} } },
   ],
 });

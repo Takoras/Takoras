@@ -13,6 +13,8 @@ import { ConfirmHost } from './ui/confirm';
 import { initAuth } from './lib/auth';
 import { reducedFx, useSettings, WEBKIT_ONLY } from './lib/settings';
 import { configureSound, installSoundListeners } from './engines/sound';
+import { host } from './engines/env';
+import { confirm } from './ui/confirm';
 import './styles/global.css';
 import './styles/art.css';
 
@@ -32,6 +34,7 @@ useSettings.subscribe(applySettings);
 configureSound({ volume: () => useSettings.getState().volume, reduced: () => reducedFx() });
 installSoundListeners();
 initAuth();
+host.ask = (text) => confirm(text, { danger: true });
 
 const root = document.getElementById('root');
 if (!root) throw new Error('#root introuvable');

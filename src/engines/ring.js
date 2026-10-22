@@ -1,7 +1,7 @@
 // Généré par scripts/port/canvas.mjs depuis legacy/ring-ui.js + legacy/ring-fx.js — ne pas modifier ici, modifier legacy/ puis relancer.
 import { RCFG } from './ring-config.js';
 import { RG } from './ring-engine.js';
-import { SETTINGS, esc, fmt, hexRGB, jetonOf, jn, jnH, reducedFx, sfx, texOf, vCls, vTag, t, at } from './env';
+import { SETTINGS, esc, fmt, hexRGB, host, jetonOf, jn, jnH, reducedFx, sfx, texOf, vCls, vTag, t, at } from './env';
 import './legacy-base.css';
 import './ring.css';
 
@@ -125,7 +125,7 @@ function startRing(teams, opts = {}) {
   o.querySelectorAll('.rg-team').forEach(p => p.addEventListener('click', e => { const b = e.target.closest('[data-id]'); if (b) rgInfo(+b.dataset.id); }));
   o.querySelector('#rg-pw').onclick = rgTogglePow;
   o.querySelector('#rg-go').onclick = () => rgLock();
-  o.querySelector('[data-quit]').onclick = () => { if (RNG.st.over || RNG.tuto || confirm(rt('quit'))) { RNG.tuto = null; closeRing(); RNG.onEnd?.('back'); } };
+  o.querySelector('[data-quit]').onclick = async () => { if (RNG.st?.over || RNG.tuto || await host.ask(rt('quit'))) { if (!RNG.st) return; RNG.tuto = null; closeRing(); RNG.onEnd?.('back'); } };
   sfx.whoosh?.();
   rgTurnStart();
   RNG.raf = requestAnimationFrame(rgFrame);

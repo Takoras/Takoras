@@ -9,7 +9,7 @@ test('bestiaire : grille, filtres, fiche, vente, verrou, niveau', async ({ page 
   await expect(page.getByText('3/17')).toBeVisible(); // Mobu, Vyolis, Pikko déjà trouvés
   // « seulement ceux que j'ai »
   await page.getByRole('button', { name: /Possédés/ }).click();
-  await expect(page.locator('ul li[data-key]')).toHaveCount(2);
+  await expect(page.locator('ul li[data-key]')).toHaveCount(3);
   // onglet Doré
   await page.getByRole('tab', { name: /Doré/ }).click();
   await expect(page.locator('ul li[data-key]')).toHaveCount(1);
@@ -37,11 +37,11 @@ test('bestiaire : sélection multiple et vente d’un rare avec confirmation', a
   await page.goto('/inventaire');
   await page.getByRole('button', { name: 'Sélectionner' }).click();
   await page.getByRole('region', { name: 'Vendre' }).getByRole('button', { name: 'Tout' }).click();
-  await expect(page.getByText('5 sélectionné(s)')).toBeVisible();
+  await expect(page.getByText('6 sélectionné(s)')).toBeVisible();
   await page.getByRole('region', { name: 'Vendre' }).getByRole('button', { name: 'Vendre', exact: true }).click();
   // Vyolis est 1/1000 : il faut confirmer
   await page.getByRole('dialog').getByRole('button', { name: 'Vendre' }).click();
-  await expect(page.getByText(/5 jeton\(s\) vendu/)).toBeVisible();
+  await expect(page.getByText(/6 jeton\(s\) vendu/)).toBeVisible();
   expect(calls).toContain('sell_pulls');
 });
 

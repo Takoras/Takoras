@@ -9,7 +9,7 @@ const jwt = `${b64({ alg: 'HS256', typ: 'JWT' })}.${b64({ sub: user.id, role: 'a
 
 export type FakeState = { coins: number; stock: number; max: number; pseudo: string; step: number; next_in: number; regen: number };
 export type FakeAnn = { id: number; body: string; author: string | null; banner: boolean; fullscreen: boolean; created_at: string };
-export async function fakeSupabase(page: Page, state: Partial<FakeState> = {}, draws: string[][] = [], opts: { ann?: FakeAnn[]; tuto?: boolean; pnSeen?: number; tester?: boolean } = {}) {
+export async function fakeSupabase(page: Page, state: Partial<FakeState> = {}, draws: string[][] = [], opts: { ann?: FakeAnn[]; tuto?: boolean; pnSeen?: number; tester?: boolean; deck?: number[] } = {}) {
   const st: FakeState = { coins: 5000, stock: 12, max: 20, pseudo: 'Testeur', step: 180, next_in: 100, regen: 180, ...state };
   const calls: string[] = [];
   // Inventaire de test : 4 Mobu (niveau 1), 1 Mobu Doré, 1 Vyolis (rare : vente confirmée)
@@ -17,8 +17,10 @@ export async function fakeSupabase(page: Page, state: Partial<FakeState> = {}, d
     { jeton: 'Mobu', serie: 'Takoras', variant: null, odds: 2, ids: [11, 12, 13, 14], free: [11, 12, 13, 14], shown: 0, deck: 0, last: '2026-10-20T10:00:00Z', best_luck: 1 },
     { jeton: 'Mobu', serie: 'Takoras', variant: 'gold', odds: 2, ids: [15], free: [15], shown: 0, deck: 0, last: '2026-10-20T11:00:00Z', best_luck: 1 },
     { jeton: 'Vyolis', serie: 'Takoras', variant: null, odds: 1000, ids: [16], free: [16], shown: 0, deck: 0, last: '2026-10-20T12:00:00Z', best_luck: 1 },
+    { jeton: 'Pikko', serie: 'Takoras', variant: null, odds: 4, ids: [17], free: [17], shown: 0, deck: 0, last: '2026-10-19T12:00:00Z', best_luck: 1 },
   ];
   let lvl = 1;
+  let deck: number[] = opts.deck ?? [];
   const friends = [
     { id: 'u-ami', pseudo: 'Ami', status: 'accepted', incoming: false, last_at: '2026-10-20T10:00:00Z', unread: 2 },
     { id: 'u-nouveau', pseudo: 'Nouveau', status: 'pending', incoming: true, last_at: null, unread: 0 },
@@ -140,6 +142,11 @@ export async function fakeSupabase(page: Page, state: Partial<FakeState> = {}, d
     if (url.includes('/rest/v1/site_settings')) return json({ v: 'on' });
     if (url.includes('/rest/v1/shop_items')) return json([{ id: 'potion1', kind: 'potion', price: 300, data: { mult: 1.3, rolls: 5 } }]);
     if (rpc === 'send_feedback') return json(null);
+    if (rpc === 'my_deck') return json(deck.map((id) => {
+      const g = inv.find((x) => x.ids.includes(id));
+      return g ? { id, jeton: g.jeton, lvl: 1, odds: g.odds, serie: g.serie, variant: g.variant } : null;
+    }).filter(Boolean));
+    if (rpc === 'set_deck') { deck = (JSON.parse(route.request().postData() ?? '{}') as { ids: number[] }).ids; return json(null); }
     if (rpc === 'leaderboard') {
       const kind = (JSON.parse(route.request().postData() ?? '{}') as { kind: string }).kind;
       return json(['Alpha', 'Bravo', 'Testeur', 'Delta', 'Echo'].map((pseudo, i) => ({ pseudo, value: kind === 'gain' ? 5000 - i * 1000 : 500 - i * 50, jeton: 'Nyx', odds: 5000 })));

@@ -1,0 +1,265 @@
+import { useRef, useState, type CSSProperties } from 'react';
+import { useQueryClient } from '@tanstack/react-query';
+import { combatApi, errorText } from '@/api';
+import { hexRGB, jetonOf, texOf, vImg } from '@/data/jetons';
+import { ELS, elOf, powerInfo, RING_MAX, ringStats, type El } from '@/data/kit';
+import { RCFG } from '@/engines/ring-config.js';
+import { sfx } from '@/engines/sound.js';
+import { useAuth } from '@/lib/auth';
+import { useJn } from '@/lib/names';
+import { reducedFx, useSettings } from '@/lib/settings';
+import { fr } from '@/i18n/fr';
+import { en } from '@/i18n/en';
+import { useT } from '@/i18n/useT';
+import { Button } from '@/ui/Button';
+import { Modal } from '@/ui/Modal';
+import { toast } from '@/ui/toast';
+import { lvlOf, seriesList, type Group, type InvData } from '../inventory/inv';
+import { baseVariant, costOf, cycleVariant, ownedTokens, ownKey, points, type Owned, type Team } from './team';
+import { TokenSheet } from './TokenSheet';
+import s from './Combat.module.css';
+
+const ELS_ORDER: ('all' | El)[] = ['all', 'fire', 'water', 'plant', 'light', 'shadow'];
+
+// Modifier l'équipe : ta collection en grille, toucher = ajouter / retirer.
+// En haut : les 3 places (toucher la pastille = changer de version), le budget en points.
+export function TeamEditor({
+  groups,
+  levels,
+  team: start,
+  onClose,
+}: {
+  groups: Group[];
+  levels: InvData;
+  team: Team;
+  onClose: () => void;
+}) {
+  const t = useT();
+  const jn = useJn();
+  const lang = useSettings((x) => x.lang);
+  const uid = useAuth((x) => x.user?.id);
+  const qc = useQueryClient();
+  const all = ownedTokens(groups);
+  const by = new Map(all.map((o) => [o.k, o]));
+  const series = seriesList().filter((sr) => all.some((u) => u.serie === sr));
+  const [team, setTeam] = useState<Team>(() =>
+    start.map((u) => (u && by.has(ownKey(u.serie, u.name)) ? { ...u } : null)),
+  );
+  const [serie, setSerie] = useState(series[0] ?? 'Takoras');
+  const [el, setEl] = useState<'all' | El>('all');
+  const [info, setInfo] = useState<Owned | null>(null);
+  const [busy, setBusy] = useState(false);
+  const slotsRef = useRef<HTMLUListElement>(null);
+  const slots = (lang === 'en' ? en : fr).arena.slots;
+  const pts = points(team),
+    over = pts > RCFG.BUDGET_MAX;
+  const inTeam = new Set(team.filter(Boolean).map((u) => ownKey(u?.serie ?? '', u?.name ?? '')));
+  const vis = all
+    .filter((u) => u.serie === serie && (el === 'all' || elOf(u.name) === el))
+    .sort((a, b) => b.odds - a.odds);
+  const lvl = (o: { serie: string; name: string }) => lvlOf(levels, o.serie, o.name);
+
+  const toggle = (o: Owned) => {
+    const had = team.findIndex((u) => u && ownKey(u.serie, u.name) === o.k);
+    if (had >= 0) {
+      sfx.click();
+      return setTeam(team.map((u, i) => (i === had ? null : u)));
+    }
+    const free = team.findIndex((u) => !u);
+    if (free < 0) {
+      sfx.deny();
+      return toast(t('arena.teamFull'), true);
+    }
+    const v = baseVariant(o);
+    sfx.upgrade();
+    setTeam(
+      team.map((u, i) =>
+        i === free ? { id: o.vars[v] ?? 0, serie: o.serie, name: o.name, odds: o.odds, variant: v } : u,
+      ),
+    );
+    if (!reducedFx())
+      requestAnimationFrame(() =>
+        slotsRef.current?.children[free]?.animate(
+          [{ transform: 'scale(.6)', opacity: 0.3 }, { transform: 'scale(1.08)' }, { transform: 'none' }],
+          { duration: 320, easing: 'cubic-bezier(.2, 1.3, .4, 1)' },
+        ),
+      );
+  };
+  const save = async () => {
+    setBusy(true);
+    try {
+      await combatApi.setDeck(team.filter(Boolean).map((u) => u?.id ?? 0));
+      qc.setQueryData(['deck', uid], team);
+      void qc.invalidateQueries({ queryKey: ['inv'] }); // les jetons de l'équipe sont protégés de la vente
+      sfx.upgrade();
+      onClose();
+    } catch (e) {
+      sfx.deny();
+      toast(errorText(e, lang), true);
+    } finally {
+      setBusy(false);
+    }
+  };
+
+  return (
+    <Modal open onClose={onClose} title={t('arena.team')} wide>
+      <ul ref={slotsRef} className={s.teSlots}>
+        {team.map((u, i) => {
+          if (!u)
+            return (
+              <li key={i} className={s.teEmpty}>
+                <b aria-hidden>＋</b>
+                <small>{slots[i]}</small>
+              </li>
+            );
+          const j = jetonOf(u.name, u.serie),
+            o = by.get(ownKey(u.serie, u.name)),
+            many = !!o && Object.keys(o.vars).length > 1;
+          return (
+            <li key={i} style={{ '--g': hexRGB(j.glow) } as CSSProperties}>
+              <button
+                type="button"
+                className={s.teRm}
+                onClick={() => {
+                  sfx.click();
+                  setTeam(team.map((x, k) => (k === i ? null : x)));
+                }}
+                aria-label={`${t('arena.remove')} ${jn(u.name)}`}
+              >
+                ✕
+              </button>
+              <img className={vImg(u.variant)} src={texOf(j)} alt="" />
+              <b>{jn(u.name)}</b>
+              <button
+                type="button"
+                className={`${s.teV} ${s[`v_${u.variant || 'none'}`] ?? ''}`}
+                disabled={!many}
+                onClick={() => {
+                  if (o) {
+                    sfx.click();
+                    setTeam(team.map((x, k) => (k === i && x ? cycleVariant(x, o) : x)));
+                  }
+                }}
+              >
+                {u.variant ? `${t(`ui.v_${u.variant as 'gold'}`)} ×${RCFG.MUTATION[u.variant]}` : t('arena.normal')}
+                {many ? ' ⟳' : ''}
+              </button>
+            </li>
+          );
+        })}
+      </ul>
+      <p className={s.budget}>
+        <b className={over ? s.over : undefined}>{t('arena.budget', { n: pts, m: RCFG.BUDGET_MAX })}</b>{' '}
+        <small className="muted">{over ? t('arena.budgetOver') : t('arena.budgetHint')}</small>
+      </p>
+      <div className={s.filters}>
+        {series.length > 1 ? (
+          <div className={s.chipsRow} role="group" aria-label={t('ui.bestiary')}>
+            {series.map((sr) => (
+              <button
+                key={sr}
+                type="button"
+                aria-pressed={sr === serie}
+                onClick={() => {
+                  setSerie(sr);
+                  setEl('all');
+                }}
+              >
+                {sr}
+              </button>
+            ))}
+          </div>
+        ) : null}
+        <div className={s.chipsRow} role="group" aria-label={t('arena.element')}>
+          {ELS_ORDER.map((e) => (
+            <button
+              key={e}
+              type="button"
+              aria-pressed={el === e}
+              onClick={() => {
+                sfx.click();
+                setEl(e);
+              }}
+            >
+              {e === 'all' ? t('ui.all') : `${ELS[e].ico} ${ELS[e][lang]}`}
+            </button>
+          ))}
+        </div>
+      </div>
+      <p className={s.legend}>{t('ring.statsLegend')}</p>
+      {vis.length ? (
+        <ul className={s.teGrid}>
+          {vis.map((o) => {
+            const j = jetonOf(o.name, o.serie),
+              E = ELS[elOf(o.name)],
+              k = powerInfo(o.name, lang),
+              on = inTeam.has(o.k),
+              L = lvl(o),
+              rs = ringStats(o.name, L);
+            return (
+              <li
+                key={o.k}
+                className={on ? s.sel : undefined}
+                style={{ '--g': hexRGB(j.glow), '--el': E.col } as CSSProperties}
+              >
+                <button type="button" className={s.teCard} aria-pressed={on} onClick={() => toggle(o)}>
+                  <span className={s.tpEl} aria-label={E[lang]}>
+                    {E.ico}
+                  </span>
+                  <span className={s.tpLv}>
+                    {t('arena.lvl')}
+                    {L}
+                  </span>
+                  <img className={vImg('')} src={texOf(j)} alt="" />
+                  <b>{jn(o.name)}</b>
+                  <small className={s.ab} style={{ '--c': k.col } as CSSProperties}>
+                    ✦ {k.name}
+                  </small>
+                  <small className={s.pd}>{k.desc}</small>
+                  <span className={s.mini} aria-hidden>
+                    <i style={{ width: `${Math.min(100, (rs.mass / RING_MAX.mass) * 100)}%` }} />
+                    <i style={{ width: `${Math.min(100, (rs.power / RING_MAX.power) * 100)}%` }} />
+                    <i style={{ width: `${Math.min(100, (rs.r / RING_MAX.r) * 100)}%` }} />
+                  </span>
+                  <small className={s.cost}>{t('arena.cost', { n: costOf(o.odds) })}</small>
+                  {on ? (
+                    <span className={s.ok} aria-hidden>
+                      ✓
+                    </span>
+                  ) : null}
+                </button>
+                <button
+                  type="button"
+                  className={s.info}
+                  onClick={() => {
+                    sfx.click();
+                    setInfo(o);
+                  }}
+                  aria-label={`ⓘ ${jn(o.name)}`}
+                >
+                  ⓘ
+                </button>
+              </li>
+            );
+          })}
+        </ul>
+      ) : (
+        <p className="muted">{t('arena.none')}</p>
+      )}
+      <div className={s.foot}>
+        <Button variant="primary" loading={busy} onClick={() => void save()}>
+          {t('arena.saveTeam')}
+        </Button>
+      </div>
+      {info ? (
+        <TokenSheet
+          name={info.name}
+          serie={info.serie}
+          variant={baseVariant(info)}
+          lvl={lvl(info)}
+          onClose={() => setInfo(null)}
+        />
+      ) : null}
+    </Modal>
+  );
+}

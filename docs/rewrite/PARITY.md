@@ -163,20 +163,20 @@ La commande doit renvoyer `{"missing": {}}`.
 
 ## Combat (Ring)
 
-- [ ] Page Combat :
+- [x] Page Combat :
   - rang + Elo, JOUER (classé bientôt) ;
   - Entraînement ;
   - équipe de 3 + fiches ;
   - aide repliable ;
   - « Essayer le tuto » sans compte.
-- [ ] Éditeur d'équipe :
+- [x] Éditeur d'équipe :
   - séries, éléments ;
   - ajouter / retirer ;
   - mutation par place ;
   - budget 8 pts, légende des stats ;
   - fiche ⓘ ;
   - sauvegarde.
-- [ ] Ring :
+- [x] Ring (partie complète testée au doigt en 375 px et à la souris, 60 images/s pendant les tirs) :
   - visée lance-pierre (n'importe où une fois le jeton choisi) ;
   - trajectoire prévue, jauge de force ;
   - pouvoir, Valider, chrono 10 s ;
@@ -186,9 +186,9 @@ La commande doit renvoyer `{"missing": {}}`.
   - équipes dans les coins + fiche au toucher ;
   - fin du match avec confettis ;
   - abandon (confirmation maison, plus de `confirm()` natif).
-- [ ] Les 17 pouvoirs avec intro, aura, effet et son.
-- [ ] Tuto du Ring en 6 étapes.
-- [ ] Monter de niveau (doublons).
+- [x] Les 17 pouvoirs avec intro, aura, effet et son.
+- [x] Tuto du Ring en 6 étapes.
+- [x] Monter de niveau (doublons).
 
 ## Bêta, avis, tuto
 

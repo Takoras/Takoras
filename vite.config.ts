@@ -8,7 +8,7 @@ export default defineConfig({
   plugins: [react()],
   resolve: { alias: { '@': fileURLToPath(new URL('./src', import.meta.url)) } },
   build: { target: 'es2022', sourcemap: true },
-  css: { modules: { localsConvention: 'camelCaseOnly' } },
+  css: { modules: { localsConvention: 'camelCase' } },
   test: {
     environment: 'jsdom',
     globals: true,

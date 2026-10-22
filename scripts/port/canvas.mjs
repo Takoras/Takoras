@@ -11,8 +11,12 @@ const MODULES = [
   {
     out: 'ring.js',
     from: 'legacy/ring-ui.js + legacy/ring-fx.js',
-    imports: "import { RCFG } from './ring-config.js';\nimport { RG } from './ring-engine.js';\nimport { SETTINGS, esc, fmt, hexRGB, jetonOf, jn, jnH, reducedFx, sfx, texOf, vCls, vTag, t, at } from './env';\nimport './legacy-base.css';\nimport './ring.css';",
-    body: read('ring-ui.js') + '\n\n' + read('ring-fx.js'),
+    imports: "import { RCFG } from './ring-config.js';\nimport { RG } from './ring-engine.js';\nimport { SETTINGS, esc, fmt, hexRGB, host, jetonOf, jn, jnH, reducedFx, sfx, texOf, vCls, vTag, t, at } from './env';\nimport './legacy-base.css';\nimport './ring.css';",
+    // Abandon : confirmation maison (fenêtre du site) au lieu du confirm() natif du navigateur
+    body: (read('ring-ui.js') + '\n\n' + read('ring-fx.js')).replace(
+      "o.querySelector('[data-quit]').onclick = () => { if (RNG.st.over || RNG.tuto || confirm(rt('quit'))) {",
+      "o.querySelector('[data-quit]').onclick = async () => { if (RNG.st?.over || RNG.tuto || await host.ask(rt('quit'))) { if (!RNG.st) return;",
+    ),
     exports: 'export { startRing, closeRing, startRingTuto, ringTutoSeen, powerText, ringStatsHTML, PW_COL, RT, rt, RNG, RFX, RSND };',
   },
   {

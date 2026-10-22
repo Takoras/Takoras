@@ -85,4 +85,6 @@ export const host = {
   loadLocalHist: (): unknown[] => [],
   renderHist: (): void => undefined,
   toggleAdmin: (): void => undefined,
+  // Confirmation (abandon du Ring…) : remplacée au démarrage par la fenêtre maison du site
+  ask: (text: string): Promise<boolean> => Promise.resolve(window.confirm(text)),
 };
