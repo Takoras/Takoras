@@ -11,9 +11,10 @@ import { InfoModal } from './features/info/InfoModal';
 import { ToastHost } from './ui/toast';
 import { ConfirmHost } from './ui/confirm';
 import { initAuth } from './lib/auth';
-import { reducedFx, useSettings } from './lib/settings';
+import { reducedFx, useSettings, WEBKIT_ONLY } from './lib/settings';
 import { configureSound, installSoundListeners } from './engines/sound';
 import './styles/global.css';
+import './styles/art.css';
 
 // Anciens liens #… → nouvelle adresse, avant le premier affichage
 const legacy = redirectLegacyHash();
@@ -24,6 +25,7 @@ const applySettings = () => {
   const st = useSettings.getState();
   document.documentElement.lang = st.lang;
   document.documentElement.classList.toggle('reduce-fx', reducedFx(st.fx));
+  document.documentElement.classList.toggle('no-svgfx', WEBKIT_ONLY);
 };
 applySettings();
 useSettings.subscribe(applySettings);

@@ -201,7 +201,7 @@ function Card({
           className={`px ${img.wide ? s.banner : ''}`}
           src={img.src}
           alt=""
-          style={img.tint ? { filter: img.tint } : undefined}
+          style={img.tint ? ({ '--df': img.tint } as React.CSSProperties) : undefined}
         />
       </div>
       <h3>{name}</h3>

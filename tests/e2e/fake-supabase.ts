@@ -106,7 +106,7 @@ export async function fakeSupabase(page: Page, state: Partial<FakeState> = {}, d
       if (who.toLowerCase() === st.pseudo.toLowerCase())
         return json({ ...base, pseudo: st.pseudo, avatar: prof.avatar, bio: prof.bio, banner: prof.banner, banners: ['plaine'], avatars: [], email: 'test@example.com', provider: 'discord', pseudo_free: false, pseudo_next: null,
           showcase: [prof.showcase[0] ? { id: 16, jeton: 'Vyolis', odds: 1000, variant: null } : null, null, null, null, null] });
-      if (who === 'Ami') return json({ ...base, pseudo: 'Ami', bio: 'Salut !', showcase: [{ id: 99, jeton: 'Mobu', odds: 2, variant: 'gold' }, null, null, null, null] });
+      if (who === 'Ami') return json({ ...base, pseudo: 'Ami', bio: 'Salut !', showcase: [{ id: 99, jeton: 'Mobu', odds: 2, variant: 'gold' }, { id: 98, jeton: 'Vyolis', odds: 1000, variant: 'ombre' }, { id: 97, jeton: 'Pikko', odds: 4, variant: 'celeste' }, { id: 96, jeton: 'Nyx', odds: 5000, variant: null }, null] });
       return json(null);
     }
     if (rpc === 'update_profile') {

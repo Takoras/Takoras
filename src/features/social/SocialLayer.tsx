@@ -357,7 +357,7 @@ function Notifs() {
               alt=""
               width={36}
               height={36}
-              style={n.img.tint ? { filter: n.img.tint } : undefined}
+              style={n.img.tint ? ({ '--df': n.img.tint } as React.CSSProperties) : undefined}
             />
           ) : null}
           <span>

@@ -104,7 +104,7 @@ function ItemCard({ it, before }: { it: Row; before: () => void }) {
     <li className={s.item} data-key={it.item} data-sig={it.qty} style={{ '--g': '139, 92, 246' } as CSSProperties}>
       <span className={s.qty}>×{it.qty}</span>
       <div className={s.itemIcon}>
-        <img className="px" src={img.src} alt="" style={img.tint ? { filter: img.tint } : undefined} />
+        <img className="px" src={img.src} alt="" style={img.tint ? ({ '--df': img.tint } as React.CSSProperties) : undefined} />
       </div>
       <h2>{name}</h2>
       <p className="muted">{desc}</p>

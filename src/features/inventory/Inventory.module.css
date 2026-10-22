@@ -214,7 +214,7 @@
   width: 72px;
   height: 72px;
   margin-bottom: var(--s-1);
-  filter: drop-shadow(0 0 10px rgb(var(--g) / 45%));
+  --df: drop-shadow(0 0 10px rgb(var(--g) / 45%));
 }
 .cardBtn b {
   font-size: var(--fs-sm);
@@ -251,7 +251,7 @@
 }
 .gone img {
   opacity: 0.45;
-  filter: grayscale(0.6);
+  --df: grayscale(0.6);
 }
 .unk b {
   color: var(--muted);
@@ -521,7 +521,7 @@
   width: 72px;
   height: 72px;
   object-fit: contain;
-  filter: drop-shadow(0 6px 14px rgb(var(--g) / 45%));
+  --df: drop-shadow(0 6px 14px rgb(var(--g) / 45%));
 }
 .use {
   display: flex;
@@ -634,3 +634,8 @@
     flex: none;
   }
 }
+
+/* Contour de la carte selon la variante du jeton */
+.card:has(img.v-gold) { border-color: rgb(250 204 21 / 50%); }
+.card:has(img.v-celeste) { border-color: rgb(224 231 255 / 60%); }
+.card:has(img.v-ombre) { border-color: rgb(168 85 247 / 60%); }

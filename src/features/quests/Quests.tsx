@@ -86,7 +86,7 @@ export function Quests() {
                 <span>{t(`ui.q_${x.stat}` as Parameters<typeof t>[0], { n: x.target })}</span>
                 <span className={s.rew}>
                   {x.coins ? <>{n(x.coins)} <img className="px" src="/img/piece.png" alt="" width={12} height={12} /></> : null}
-                  {item ? <img className="px" src={item.src} alt={x.item ?? ''} width={18} height={18} style={item.tint ? { filter: item.tint } : undefined} /> : null}
+                  {item ? <img className="px" src={item.src} alt={x.item ?? ''} width={18} height={18} style={item.tint ? ({ '--df': item.tint } as React.CSSProperties) : undefined} /> : null}
                   {x.qty > 1 ? `×${x.qty}` : ''}
                 </span>
               </div>

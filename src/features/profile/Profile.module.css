@@ -121,7 +121,7 @@
 .sc img {
   width: 72px;
   height: 72px;
-  filter: drop-shadow(0 0 10px rgb(var(--g) / 50%));
+  --df: drop-shadow(0 0 10px rgb(var(--g) / 50%));
 }
 .sc b {
   font-size: var(--fs-sm);
@@ -163,7 +163,7 @@
 .coll img {
   width: 48px;
   height: 48px;
-  filter: drop-shadow(0 0 8px rgb(var(--g) / 45%));
+  --df: drop-shadow(0 0 8px rgb(var(--g) / 45%));
 }
 .coll small {
   font-size: 10px;
@@ -372,7 +372,7 @@
   font-style: normal;
 }
 .lockedPp img {
-  filter: grayscale(1);
+  --df: grayscale(1);
 }
 .peActions {
   display: flex;
@@ -405,3 +405,9 @@
     height: 56px;
   }
 }
+
+/* Contour de la case selon la variante du jeton */
+.sc:has(img.v-gold) { border-color: rgb(250 204 21 / 50%); }
+.sc:has(img.v-celeste) { border-color: rgb(224 231 255 / 60%); }
+.sc:has(img.v-ombre) { border-color: rgb(168 85 247 / 60%); }
+.scV > span { margin: 0; font-size: 9px; padding: 1px 6px; }

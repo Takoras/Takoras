@@ -39,7 +39,7 @@ export function History() {
             const j = jetonOf(r.jeton, r.serie);
             return (
               <li key={r.created_at + r.jeton}>
-                <img className={vCls(r.variant)} src={texOf(j)} alt="" width={28} height={28} style={{ filter: `drop-shadow(0 0 4px ${j.glow})` }} />
+                <img className={vCls(r.variant)} src={texOf(j)} alt="" width={28} height={28} style={{ '--df': `drop-shadow(0 0 4px ${j.glow})` } as React.CSSProperties} />
                 <div>
                   <b>{jn(r.jeton)}</b><VTag v={r.variant} />
                   <small className="muted">{ago(r.created_at)}{r.luck && r.luck > 1 ? ` · ×${r.luck.toLocaleString(locale(lang), { maximumFractionDigits: 2 })}` : ''}</small>

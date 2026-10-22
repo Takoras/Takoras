@@ -27,7 +27,7 @@
 .card h3 { font-size: var(--fs-md); }
 .card p { font-size: var(--fs-sm); }
 .icon { display: grid; place-items: center; height: 96px; }
-.icon img { width: 72px; height: 72px; object-fit: contain; filter: drop-shadow(0 0 14px rgb(var(--g) / 55%)); }
+.icon img { width: 72px; height: 72px; object-fit: contain; --df: drop-shadow(0 0 14px rgb(var(--g) / 55%)); }
 .icon img.banner { width: 100%; height: 72px; object-fit: cover; border-radius: var(--r-sm); }
 
 .stock, .deal { position: absolute; top: var(--s-2); padding: 2px var(--s-2); border-radius: var(--r-pill); font-size: 11px; font-weight: 700; }
