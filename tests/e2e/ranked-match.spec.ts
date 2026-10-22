@@ -55,7 +55,8 @@ test('classé : le tuto du Ring est obligatoire avant de jouer', async ({ page }
     (window as unknown as { __ring: { RNG: { tuto: { onDone: () => void } } } }).__ring.RNG.tuto.onDone(),
   );
   await expect.poll(() => calls.includes('ranked_tuto_done')).toBe(true);
-  await page.locator('.rg [data-quit]').click();
+  // l'arène se referme toute seule et JOUER est débloqué
+  await expect(page.locator('.rg')).toHaveCount(0);
   await expect(page.getByRole('button', { name: /JOUER/ })).toBeVisible();
   await expect(page.getByRole('button', { name: /Entraînement/ })).toBeEnabled();
 });

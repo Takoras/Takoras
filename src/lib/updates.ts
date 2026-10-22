@@ -5,7 +5,7 @@ const EVERY = 60_000;
 let pending = false;
 
 const busy = () => {
-  if (document.querySelector('#opening.on, .rg')) return true; // ouverture ou match en cours
+  if (document.querySelector('#opening.on, .rg, [data-busy]')) return true; // ouverture, match ou recherche en cours
   const a = document.activeElement;
   return !!a && (a.tagName === 'TEXTAREA' || (a.tagName === 'INPUT' && (a as HTMLInputElement).value !== '')); // en train d'écrire
 };

@@ -44,6 +44,7 @@ export function useRanked() {
     queryKey: ['ranked', uid],
     enabled: !!uid,
     queryFn: async () => (await combatApi.rankedMe()) as unknown as RankedMe,
+    refetchOnWindowFocus: true,
   });
 }
 

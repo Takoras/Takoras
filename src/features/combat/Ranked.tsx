@@ -43,7 +43,14 @@ export function RankCard({ me }: { me: RankedMe | undefined }) {
       <div className={s.cardMain}>
         <small>{t('arena.rank')}</small>
         <b className={s.rankName}>{name(r)}</b>
-        <div className={s.bar} role="progressbar" aria-label={next ? name(next) : name(r)} aria-valuemin={0} aria-valuemax={100} aria-valuenow={Math.round(pct)}>
+        <div
+          className={s.bar}
+          role="progressbar"
+          aria-label={next ? name(next) : name(r)}
+          aria-valuemin={0}
+          aria-valuemax={100}
+          aria-valuenow={Math.round(pct)}
+        >
           <i style={{ width: `${pct}%` }} />
         </div>
         <small>
@@ -150,7 +157,7 @@ export function SearchModal({
     ss = String(sec % 60).padStart(2, '0');
   return (
     <Modal open onClose={onClose} title={t('arena.searching')}>
-      <div className={s.search}>
+      <div className={s.search} data-busy>
         <span className={s.radar} aria-hidden>
           <RankBadge r={rankOf(elo)} size={52} />
         </span>

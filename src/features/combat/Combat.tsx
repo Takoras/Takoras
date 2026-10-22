@@ -17,7 +17,7 @@ import { toast } from '@/ui/toast';
 import { VTag } from '@/ui/VTag';
 import { lvlOf, useInventory } from '../inventory/inv';
 import { botTeam, points, useDeck, type Member } from './team';
-import { call, fetchMatch, toLocal, useRanked, watchMatch } from './rankedApi';
+import { call, fetchMatch, toLocal, useRanked, watchMatch, type RankedMe } from './rankedApi';
 import { RankCard, RankRoad, SearchModal } from './Ranked';
 import rs from './Ranked.module.css';
 import { TeamEditor } from './TeamEditor';
@@ -94,11 +94,16 @@ export default function Combat() {
     sfx.click();
     (await loadRing()).startRingTuto(() => refresh(), {
       must: true,
-      onDone: () =>
-        void combatApi.rankedTutoDone().then(() => {
-          refresh();
-          toast(t('arena.tutoDoneToast'));
-        }),
+      // tuto fini : on referme l'arène et JOUER est tout de suite débloqué (sans attendre le serveur)
+      onDone: () => {
+        qc.setQueryData<RankedMe>(['ranked', user.id], (d) => (d ? { ...d, tuto_done: true } : d));
+        setTimeout(() => loaded?.closeRing(), 900);
+        void combatApi
+          .rankedTutoDone()
+          .then(() => toast(t('arena.tutoDoneToast')))
+          .catch(() => toast(t('arena.errNet'), true))
+          .finally(refresh);
+      },
     });
   };
 
