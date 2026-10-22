@@ -7,6 +7,7 @@ import Bestiary from '@/features/inventory/Bestiary';
 import Items from '@/features/inventory/Items';
 import Profile from '@/features/profile/Profile';
 import Friends from '@/features/social/Friends';
+import Board from '@/features/board/Board';
 import NotFound from '@/pages/NotFound';
 import { Layout } from './Layout';
 
@@ -22,7 +23,7 @@ export const router = createBrowserRouter([
       { path: '/bestiaire', element: <Bestiary /> },
       { path: '/inventaire/objets', element: <Items /> },
       { path: '/boutique', element: <Shop /> },
-      { path: '/classement', element: <SoonPage k="ui.nav_board" /> },
+      { path: '/classement', element: <Board /> },
       { path: '/combat', element: <SoonPage k="ui.nav_combat" /> },
       { path: '/amis', element: <Friends /> },
       { path: '/profil', element: <Profile /> },

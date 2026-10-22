@@ -17,6 +17,7 @@ La commande doit renvoyer `{"missing": {}}`.
   - `takoras-pn-seen`, `-tuto-done`, `-ring-tuto` ;
   - `takoras-ann-seen`, `-ann-closed` ;
   - `takoras-session`, `-eco`.
+  - Note (phase 7) : `takoras-eco` (cache de l'économie de l'ancien site) est remplacé par le cache TanStack Query ; `takoras-lowfx` était seulement effacé par l'ancien site. Les routes `#accueil`, `#amis`… signalées par le script sont redirigées par `src/app/legacyHash.ts` (le script ne reconnaît pas cette forme).
 - [ ] Les **~608 clés de traduction** existent en FR et en EN (la compilation échoue si une clé EN manque).
 - [ ] Les anciens liens `#…` redirigent vers les nouvelles URL.
 
@@ -41,8 +42,8 @@ La commande doit renvoyer `{"missing": {}}`.
 - [ ] Doodle désactivé sur Safari/iOS.
 - [ ] Sons synthétisés : clic, survol et tous les sons de jeu ; bouton muet mémorisé.
 - [ ] Toast, confirmation maison (y compris « taper le mot »), erreurs serveur traduites.
-- [ ] Bandeau d'annonce, annonce plein écran avec les annonces manquées, historique, temps réel.
-- [ ] Notification de changement de prix, cliquable vers la boutique.
+- [ ] Bandeau d'annonce, annonce plein écran avec les annonces manquées, historique, temps réel. (Fait et testé avec Supabase simulé ; temps réel à vérifier en vrai.)
+- [ ] Notification de changement de prix, cliquable vers la boutique. (Fait ; temps réel à vérifier en vrai.)
 - [ ] Bannissement : bandeau `#ban-bar`.
 
 ## Compte
@@ -92,7 +93,7 @@ La commande doit renvoyer `{"missing": {}}`.
 
 ## Inventaire
 
-- [ ] Bestiaire :
+- [x] Bestiaire :
   - onglets de séries ;
   - progression (jetons, variantes) ;
   - onglets de variantes ;
@@ -100,61 +101,61 @@ La commande doit renvoyer `{"missing": {}}`.
   - tri (rareté, quantité, récents, nom) ;
   - cartes possédé / vu / inconnu (silhouette) ;
   - badges ⚔️ 📌 🔒.
-- [ ] Mode sélection :
+- [x] Mode sélection :
   - quantité par carte ;
   - Doublons / Communs / Tout / Rien ;
   - Vendre, avec confirmation si un jeton ≥ 1/1000.
-- [ ] Fiche jeton :
+- [x] Fiche jeton :
   - 3D + reflet ;
   - rareté, chance × variante ;
   - puissance, 3 stats ;
   - valeur de revente ;
   - vendre 1, vendre les doublons, verrouiller ;
   - pouvoir du Ring + monter de niveau.
-- [ ] Objets : quantité, −/+, « Utiliser ×N », « Tout utiliser ».
+- [x] Objets : quantité, −/+, « Utiliser ×N », « Tout utiliser ».
 
 ## Boutique
 
-- [ ] Boutique du jour :
+- [x] Boutique du jour :
   - stock 5 h + compte à rebours ;
   - catégories ;
   - stock / épuisé / déjà possédé ;
   - prix barré ±% ;
   - achat (secousse si pas assez de pièces, dissolution, pop).
-- [ ] Code promo (pluie de pièces).
-- [ ] Modale « Probas & infos » :
+- [x] Code promo (pluie de pièces).
+- [x] Modale « Probas & infos » :
   - règles ;
   - simulation de chance ;
   - tableau des jetons et des variantes.
 
 ## Profil
 
-- [ ] Profil public :
+- [x] Profil public :
   - bannière, avatar, pseudo, numéro, flamme ;
   - bio, 4 stats ;
   - vitrine 5 cases ;
   - mini-bestiaire ;
   - badge bêta, date, bilan de combats.
-- [ ] Mon profil : zone privée (provider, email, paramètres, déconnexion).
-- [ ] Choix de la vitrine (recherche + tri).
-- [ ] Modifier :
+- [x] Mon profil : zone privée (provider, email, paramètres, déconnexion).
+- [x] Choix de la vitrine (recherche + tri).
+- [x] Modifier :
   - pseudo (1 gratuit, puis 1 tous les 30 jours) ;
   - bio (120 caractères max) ;
   - bannières, avatars (verrouillés → boutique).
 
 ## Classement
 
-- [ ] 4 types : pulls, gain, variantes, collection.
-- [ ] Semaine / toujours.
-- [ ] Podium + liste 4 à 50, rafraîchi toutes les 60 s.
+- [x] 4 types : pulls, gain, variantes, collection.
+- [x] Semaine / toujours.
+- [x] Podium + liste 4 à 50, rafraîchi toutes les 60 s.
 
 ## Amis et chat
 
-- [ ] Ajouter par pseudo.
-- [ ] Demandes reçues (accepter / refuser) et envoyées.
-- [ ] Liste ; retirer avec confirmation.
-- [ ] Bouton ami sur les profils.
-- [ ] Chat dock :
+- [x] Ajouter par pseudo.
+- [x] Demandes reçues (accepter / refuser) et envoyées.
+- [x] Liste ; retirer avec confirmation.
+- [x] Bouton ami sur les profils.
+- [ ] Chat dock (fait et testé avec Supabase simulé ; reste à vérifier à deux vraies sessions) :
   - choix de l'ami, conversation, séparateurs de jour ;
   - réduire / fermer ;
   - lu / non lu, notifications, pastilles ;
@@ -191,11 +192,11 @@ La commande doit renvoyer `{"missing": {}}`.
 
 ## Bêta, avis, tuto
 
-- [ ] Puce bêta, menu testeur (pulls, pièces, objets, jetons, chance / jeton / variante forcés).
-- [ ] Patch notes groupées (nouveau / changé / corrigé / retiré), FR/EN.
-- [ ] Popup « nouvelle mise à jour ».
-- [ ] « Donner un avis » : 4 types, 1 500 caractères, page + appareil.
-- [ ] Tuto de première visite (10 écrans, swipe), ignoré pour les anciens joueurs.
+- [x] Puce bêta, menu testeur (pulls, pièces, objets, jetons, chance / jeton / variante forcés).
+- [x] Patch notes groupées (nouveau / changé / corrigé / retiré), FR/EN.
+- [x] Popup « nouvelle mise à jour ».
+- [x] « Donner un avis » : 4 types, 1 500 caractères, page + appareil.
+- [x] Tuto de première visite (10 écrans, swipe), ignoré pour les anciens joueurs.
 
 ## Admin (chargé uniquement pour les admins)
 
@@ -222,6 +223,6 @@ La commande doit renvoyer `{"missing": {}}`.
 Elles ne servent pas à la parité :
 - [ ] Supprimer le code mort : `#battle`, `duelSub`, `cinematic`, `draw` local, minuteur limité.
 - [ ] Échapper le HTML par défaut (React), sans `dangerouslySetInnerHTML` sur des données joueur.
-- [ ] Remplacer `confirm()` natif par la confirmation maison.
-- [ ] Changer de langue sans recharger la page.
+- [x] Remplacer `confirm()` natif par la confirmation maison.
+- [x] Changer de langue sans recharger la page.
 - [ ] Zénith, Oblivion, Takoras : images manquantes (signaler, pas bloquant).

@@ -140,6 +140,10 @@ export async function fakeSupabase(page: Page, state: Partial<FakeState> = {}, d
     if (url.includes('/rest/v1/site_settings')) return json({ v: 'on' });
     if (url.includes('/rest/v1/shop_items')) return json([{ id: 'potion1', kind: 'potion', price: 300, data: { mult: 1.3, rolls: 5 } }]);
     if (rpc === 'send_feedback') return json(null);
+    if (rpc === 'leaderboard') {
+      const kind = (JSON.parse(route.request().postData() ?? '{}') as { kind: string }).kind;
+      return json(['Alpha', 'Bravo', 'Testeur', 'Delta', 'Echo'].map((pseudo, i) => ({ pseudo, value: kind === 'gain' ? 5000 - i * 1000 : 500 - i * 50, jeton: 'Nyx', odds: 5000 })));
+    }
     if (rpc === 'beta_give') {
       const b = JSON.parse(route.request().postData() ?? '{}') as { p_coins?: number; p_pulls?: number };
       st.coins += b.p_coins ?? 0; st.stock += b.p_pulls ?? 0; return json({ ...st });
