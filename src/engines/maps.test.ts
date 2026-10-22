@@ -52,6 +52,7 @@ test.each(RCFG.MAPS.map((m) => m.id))(
     expect(a.log).toEqual(b.log);
     expect(a.log.length).toBeGreaterThan(0);
   },
+  20_000, // parties plus longues depuis le ring qui rétrécit (plus de limite à 12 tours)
 );
 
 test('murs : la pierre amortit, le rebondisseur renvoie plus vite', () => {
@@ -74,4 +75,19 @@ test('sans map : le terrain d’avant (rayon 1000, aucun mur)', () => {
   const st = RG.create([A, B]);
   expect(st.map).toBeUndefined();
   expect(RG.ringR(st)).toBe(1000);
+});
+
+test('le ring rétrécit à chaque tour (plus de limite de 12 tours) et fait tomber ceux restés au bord', () => {
+  const st = RG.create([A, B], 'arene');
+  const R0 = RG.ringR(st);
+  // personne ne tire : seul le ring bouge
+  RG.resolve(st, [null, null]);
+  expect(RG.ringR(st)).toBeCloseTo(R0 * (1 - RCFG.SHRINK.step), 3);
+  let fell = 0;
+  for (let k = 0; k < 60 && !st.over; k++) fell += RG.resolve(st, [null, null]).ev.filter((e) => e.t === 'out').length;
+  expect(RG.ringR(st)).toBeCloseTo(R0 * RCFG.SHRINK.min, 3); // plancher
+  // les 6 jetons restés au départ finissent dehors, puis mort subite au centre ; la partie se termine toujours
+  expect(fell).toBe(6);
+  expect(st.sudden).toBe(true);
+  expect(st.over).toBe(true);
 });

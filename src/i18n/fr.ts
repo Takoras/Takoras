@@ -484,7 +484,7 @@ export const fr = {
     "els": "Éléments",
     "elsHelp": "🔥 bat 🌿 · 🌿 bat 💧 · 💧 bat 🔥 · ✨ et 🌑 forts l’un contre l’autre (×1,3 de dégâts)",
     "how": "Comment ça marche",
-    "howText": "Un duel sur un ring rond, façon billard × pétanque × sumo. À chaque tour, toi et l’adversaire visez <b>en même temps</b> sans voir le tir de l’autre : tape un de tes jetons, glisse vers l’arrière comme un lance-pierre (plus tu tires loin, plus c’est fort), puis valide. Les deux tirs partent ensemble. Un jeton dont le centre sort du ring est éliminé. Le premier qui n’a plus de jetons perd. Chaque jeton a un pouvoir et 3 stats : poids, puissance, taille.",
+    "howText": "Un duel sur un ring rond, façon billard × pétanque × sumo. À chaque tour, toi et l’adversaire visez <b>en même temps</b> sans voir le tir de l’autre : tape un de tes jetons, glisse vers l’arrière comme un lance-pierre (plus tu tires loin, plus c’est fort), puis valide. Les deux tirs partent ensemble. Un jeton dont le centre sort du ring est éliminé, et <b>le ring rétrécit à chaque tour</b> : impossible de rester planqué au bord. Le premier qui n’a plus de jetons perd. Chaque jeton a un pouvoir et 3 stats : poids, puissance, taille.",
     "round": "Manche {n}",
     "step1": "Touche un de tes jetons",
     "step2": "Touche ou glisse ton jeton vers un endroit",

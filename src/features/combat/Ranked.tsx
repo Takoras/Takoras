@@ -84,7 +84,9 @@ export function RankRoad({ elo }: { elo: number }) {
     <section className={s.road} aria-labelledby="road-t">
       <h2 id="road-t">{t('arena.road')}</h2>
       <p className="muted">{t('arena.roadTxt')}</p>
-      <ol ref={list}>
+      {/* liste qui défile : focusable au clavier pour pouvoir la parcourir (accessibilité) */}
+      {/* eslint-disable-next-line jsx-a11y/no-noninteractive-tabindex */}
+      <ol ref={list} tabIndex={0} aria-labelledby="road-t">
         {ROAD.map((r) => (
           <li
             key={r.idx}

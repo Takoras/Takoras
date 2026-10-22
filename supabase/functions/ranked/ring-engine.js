@@ -22,7 +22,7 @@ const RG = (() => {
   function create(teams, mapId) {
     const st = { turn: 1, over: false, winner: null, sudden: false, bodies: [] };
     const map = mapId ? C.MAPS.find(m => m.id === mapId) : null;
-    if (map) st.map = { id: map.id, R: map.R, fric: map.fric, walls: map.walls.map(o => ({ ...o })), zones: map.zones.map(z => ({ ...z })) };
+    if (map) st.map = { id: map.id, R: map.R, R0: map.R, fric: map.fric, walls: map.walls.map(o => ({ ...o })), zones: map.zones.map(z => ({ ...z })) };
     const k0 = map ? map.R / C.RING_R : 1;
     teams.forEach((team, side) => team.forEach((j, i) => {
       const s = stats(j.name, j.lvl, j.variant), k = kit(j.name);
@@ -220,6 +220,12 @@ const RG = (() => {
       if (b.cd > 0) b.cd--; // recharge « 3 tours » : utilisé au tour 1, de nouveau prêt au tour 4
       delete b.t;
     });
+    // sur une map : le ring rétrécit, ceux qui se retrouvent dehors tombent
+    if (st.map) {
+      const S = C.SHRINK, R0 = st.map.R0 || st.map.R;
+      st.map.R = q(R0 * Math.max(S.min, 1 - S.step * st.turn));
+      for (const b of alive(st)) if (len(b.x, b.y) > st.map.R) { b.alive = false; ev.push({ t: 'out', id: b.id, x: b.x, y: b.y, vx: 0, vy: 0, at: tm, shrink: true }); }
+    }
     endTurn(st, start, ev);
     return { frames, ev, ids: B.map(b => b.id) };
   }
@@ -237,7 +243,7 @@ const RG = (() => {
         const b = st.bodies.find(x => x.side === s && x.i === 0) || st.bodies.find(x => x.side === s);
         // sur une map : on recule le jeton tant qu'il touche un obstacle (toujours pareil, donc déterministe)
         let y = C.SUDDEN_Y;
-        while (touchesWall(st, 0, s ? -y : y, b.base.r + 10)) y += 20;
+        while (touchesWall(st, 0, s ? -y : y, b.base.r + 10) && y + 20 < ringR(st) * .7) y += 20;
         Object.assign(b, { alive: true, x: 0, y: s ? -y : y, vx: 0, vy: 0 });
       });
       ev.push({ t: 'sudden' });
@@ -245,7 +251,7 @@ const RG = (() => {
       return;
     }
     st.turn++;
-    if (st.turn > C.TURNS + (st.sudden ? 3 : 0)) {
+    if (st.turn > (st.map ? C.SHRINK.maxTurns : C.TURNS) + (st.sudden ? 3 : 0)) {
       if (n[0] !== n[1]) return finish(st, n[0] > n[1] ? 0 : 1, ev, 'turns');
       const dist = s => alive(st, s).reduce((x, b) => x + len(b.x, b.y), 0);
       const d = [dist(0), dist(1)];

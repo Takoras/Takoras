@@ -107,3 +107,59 @@ test('classé : rang, route des rangs, recherche puis match en ligne jusqu’à 
   await page.locator('.rg-res [data-back]').click();
   await expect(page.locator('.rg, .rg-res')).toHaveCount(0);
 });
+
+test('Ring : toucher un jeton adverse montre sa fiche, même avec mon jeton choisi ; le ring rétrécit', async ({
+  page,
+}) => {
+  test.setTimeout(60_000);
+  await fakeSupabase(page, {}, [], { deck: [11, 16, 17] });
+  await page.goto('/combat');
+  await page.getByRole('button', { name: /Entraînement/ }).click();
+  await page.waitForFunction(() => (window as unknown as W).__ring?.RNG.phase === 'aim');
+  const tap = (side: 'me' | 'foe') =>
+    page.evaluate((side) => {
+      const R = (window as unknown as W).__ring?.RNG;
+      if (!R?.st) return;
+      const v = R.view,
+        r = R.cv.getBoundingClientRect(),
+        k = v.s * (R.me ? -1 : 1);
+      const b = R.st.bodies.find((x) => (side === 'me' ? x.side === R.me : x.side !== R.me) && x.alive);
+      if (!b) return;
+      const pt = {
+        pointerId: 4,
+        pointerType: 'mouse',
+        isPrimary: true,
+        bubbles: true,
+        cancelable: true,
+        clientX: r.left + v.size / 2 + b.x * k,
+        clientY: r.top + v.size / 2 + b.y * k,
+      };
+      document.querySelector('#rg-stage')?.dispatchEvent(new PointerEvent('pointerdown', pt));
+      window.dispatchEvent(new PointerEvent('pointerup', pt));
+    }, side);
+  await tap('me'); // mon jeton est choisi
+  await expect(page.locator('#rg-pw')).not.toHaveText(/Choisis un jeton/);
+  await tap('foe'); // simple toucher sur un jeton d'en face : sa fiche
+  await expect(page.locator('.rg-info .rg-ic.foe')).toBeVisible();
+  await expect(page.locator('.rg-info .rs')).toBeVisible(); // ses stats
+  await page.locator('.rg-info').click();
+  // le tour passe : le ring rétrécit (pas de compteur « Tour n/12 »)
+  await expect(page.locator('#rg-turn')).toHaveText('');
+  const R0 = await page.evaluate(
+    () => (window as unknown as { __ring: { RNG: { st: { map: { R: number } } } } }).__ring.RNG.st.map.R,
+  );
+  await page.locator('#rg-go').click();
+  await page.waitForFunction(
+    (r0) => {
+      const R = (window as unknown as { __ring?: { RNG: { st: { map: { R: number } } | null; phase: string } } }).__ring
+        ?.RNG;
+      return !!R?.st && R.st.map.R < r0 && R.phase === 'aim';
+    },
+    R0,
+    { timeout: 30_000 },
+  );
+  if (process.env.SHOT) {
+    await page.waitForTimeout(1200);
+    await page.screenshot({ path: `${process.env.SHOT}/ring-shrink.png` });
+  }
+});

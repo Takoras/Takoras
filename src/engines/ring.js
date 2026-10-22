@@ -38,15 +38,16 @@ const RT = {
     power: 'Pouvoir', on: 'Activé', validate: 'Valider', validated: 'Validé ✓', pass: 'Passer le tour', turn: 'Tour {n}/{m}', sudden: 'Mort subite !', foeOk: '✓ L’adversaire a validé',
     hSel: 'Tape un de tes jetons', hAim: 'Glisse vers l’arrière pour viser (n’importe où sur l’écran)', hVal: 'Valide quand tu es prêt', hWait: 'En attente de l’adversaire…',
     reveal: 'Feu !', out: 'Éjecté !', win: 'Victoire !', lose: 'Défaite…', draw: 'Égalité', again: 'Rejouer', back: 'Retour', quit: 'Abandonner le match ?', you: 'Toi', bot: 'Robot',
-    why: { forfeit: 'Abandon', afk: 'Absent 3 tours de suite', out: 'Tous ses jetons sont sortis du ring', count: 'Plus de jetons au dernier tour', turns: 'Plus de jetons restants après 12 tours', center: 'Jetons plus proches du centre', draw: 'Personne ne gagne' },
+    why: { forfeit: 'Abandon', afk: 'Absent 3 tours de suite', out: 'Tous ses jetons sont sortis du ring', count: 'Plus de jetons au dernier tour', turns: 'Plus de jetons restants à la fin', center: 'Jetons plus proches du centre', draw: 'Personne ne gagne' },
     turns: '{n} tours', mass: 'Poids', powerS: 'Puissance', size: 'Taille', koS: 'Éjecté',
     massD: 'Plus il est lourd, plus il est dur à pousser et plus il pousse fort.', powD: 'La force max de son tir : jusqu’où il peut aller.', sizeD: 'Plus il est gros, plus il touche facilement… mais plus il est facile à toucher.', statsLegend: '⚖️ Poids : dur à pousser, pousse fort · 💥 Puissance : force du tir · ⭕ Taille : touche plus facilement, mais cible plus facile',
     t1: 'Tape un de tes jetons pour le choisir.', t2: 'Glisse vers l’arrière pour viser. Plus tu tires loin, plus c’est fort. Regarde la trajectoire !',
     t3: 'Valide ! Ton adversaire tire en même temps que toi.', t4: 'Éjecte ses jetons du ring pour gagner.', t5: 'Chaque jeton a un pouvoir, essaie-le ! Active-le, vise, puis valide.',
     t6: 'Bien joué, tu es prêt pour le classé !', tOk: 'OK', tSkip: 'Passer', tEnd: 'Terminer',
-    tTimer: 'Le chrono : <b>30 s</b> pour viser à chaque tour. Si les deux joueurs valident avant, le tour part tout de suite. Sans validation, ton tir part tel quel à 0.',
+    shrink: 'Le ring rétrécit à chaque tour !',
+    tTimer: 'Le chrono : <b>30 s</b> pour viser à chaque tour. Si les deux valident avant, le tour part tout de suite. Et <b>le ring rétrécit à chaque tour</b> : reste loin du bord !',
     tWalls: 'Les murs : les gris amortissent, les <b>roses renvoient plus fort</b>. Sers-t’en pour faire des bandes ou te protéger.',
-    tScout: 'Touche <b>« Leurs pouvoirs »</b> (en haut) pour voir les jetons et les pouvoirs d’en face avant de tirer.',
+    tScout: 'Touche un <b>jeton adverse</b> (même si tu as déjà choisi le tien) ou <b>« Leurs pouvoirs »</b> pour voir ses stats et son pouvoir avant de tirer.',
     tRanked: '<b>Le classé</b> : tu affrontes un vrai joueur de ton niveau (Elo). Victoire = +Elo, défaite = −Elo. Monte de <b>Fer 1</b> jusqu’à <b>Légende</b> ! Si tu ne joues pas 3 tours de suite, tu perds le match.',
   },
   en: {
@@ -75,15 +76,16 @@ const RT = {
     power: 'Power', on: 'On', validate: 'Confirm', validated: 'Confirmed ✓', pass: 'Skip turn', turn: 'Turn {n}/{m}', sudden: 'Sudden death!', foeOk: '✓ Opponent is ready',
     hSel: 'Tap one of your tokens', hAim: 'Drag backwards to aim (anywhere on the screen)', hVal: 'Confirm when you’re ready', hWait: 'Waiting for the opponent…',
     reveal: 'Go!', out: 'Out!', win: 'Victory!', lose: 'Defeat…', draw: 'Draw', again: 'Play again', back: 'Back', quit: 'Forfeit the match?', you: 'You', bot: 'Bot',
-    why: { forfeit: 'Forfeit', afk: 'Away for 3 turns in a row', out: 'All their tokens left the ring', count: 'More tokens on the last turn', turns: 'More tokens left after 12 turns', center: 'Tokens closer to the center', draw: 'Nobody wins' },
+    why: { forfeit: 'Forfeit', afk: 'Away for 3 turns in a row', out: 'All their tokens left the ring', count: 'More tokens on the last turn', turns: 'More tokens left at the end', center: 'Tokens closer to the center', draw: 'Nobody wins' },
     turns: '{n} turns', mass: 'Weight', powerS: 'Power', size: 'Size', koS: 'Knocked out',
     massD: 'The heavier, the harder to push and the harder it pushes.', powD: 'Its max shot strength: how far it can go.', sizeD: 'The bigger, the easier it hits… but the easier it is to hit.', statsLegend: '⚖️ Weight: hard to push, pushes hard · 💥 Power: shot strength · ⭕ Size: hits more easily, but easier to hit',
     t1: 'Tap one of your tokens to pick it.', t2: 'Drag backwards to aim. The further you pull, the harder the shot. Watch the path!',
     t3: 'Confirm! Your opponent shoots at the same time.', t4: 'Knock their tokens out of the ring to win.', t5: 'Every token has a power, try it! Turn it on, aim, then confirm.',
     t6: 'Well done, you’re ready for ranked!', tOk: 'OK', tSkip: 'Skip', tEnd: 'Finish',
-    tTimer: 'The timer: <b>30 s</b> to aim each turn. If both players confirm earlier, the turn starts right away. Without confirming, your shot goes as it is at 0.',
+    shrink: 'The ring shrinks every turn!',
+    tTimer: 'The timer: <b>30 s</b> to aim each turn. If both confirm earlier, the turn starts right away. And <b>the ring shrinks every turn</b>: stay away from the edge!',
     tWalls: 'Walls: grey ones absorb, <b>pink ones bounce you back harder</b>. Use them for bank shots or cover.',
-    tScout: 'Tap <b>“Their powers”</b> (at the top) to see the opponent’s tokens and powers before you shoot.',
+    tScout: 'Tap an <b>enemy token</b> (even with yours selected) or <b>“Their powers”</b> to see its stats and power before you shoot.',
     tRanked: '<b>Ranked</b>: you face a real player at your level (Elo). Win = +Elo, lose = −Elo. Climb from <b>Iron 1</b> up to <b>Legend</b>! Skip 3 turns in a row and you lose the match.',
   },
 };
@@ -103,6 +105,8 @@ const RNG = { st: null, el: null, cv: null, ctx: null, raf: 0, phase: 'aim', sel
 // l'écran est tourné d'un demi-tour (les maps sont symétriques, donc chacun voit le même terrain).
 const ME = () => RNG.me || 0, FOE = () => 1 - ME(), FL = () => (RNG.me ? -1 : 1);
 const sideCol = b => SIDE[b.side === ME() ? 0 : 1];
+// Rayon de départ (la vue ne bouge pas) et rayon affiché (le bord se resserre en douceur entre deux tours)
+const rgR0 = () => RNG.st?.map?.R0 || RG.ringR(RNG.st);
 const rgImg = name => {
   if (RNG.imgs[name]) return RNG.imgs[name];
   const im = new Image(); im.src = texOf(jetonOf(name)); RNG.imgs[name] = im; return im;
@@ -113,7 +117,7 @@ const rgImg = name => {
 function startRing(teams, opts = {}) {
   closeRing();
   const on = opts.online || null;
-  Object.assign(RNG, { me: on ? on.me : 0, online: on, st: on ? RG.clone(on.state) : RG.create(teams, opts.map), phase: 'aim', sel: null, aim: null, pow: false, drag: null, prev: null, foe: null, foeOk: false, locked: false, play: null, parts: [], trails: {}, spin: {}, shake: 0,
+  Object.assign(RNG, { dispR: null, me: on ? on.me : 0, online: on, st: on ? RG.clone(on.state) : RG.create(teams, opts.map), phase: 'aim', sel: null, aim: null, pow: false, drag: null, prev: null, foe: null, foeOk: false, locked: false, play: null, parts: [], trails: {}, spin: {}, shake: 0,
     ai: opts.ai || 'normal', names: opts.names || [rt('you'), rt('bot')], onEnd: opts.onEnd || null, tuto: opts.tuto ? { step: 0, must: !!opts.must, onDone: opts.onDone || null } : null, last: 0 });
   teams.flat().forEach(j => rgImg(j.name));
   const o = document.createElement('div');
@@ -175,7 +179,7 @@ function rgResize() {
     const cv = RNG[k] || (RNG[k] = document.createElement('canvas'));
     cv.width = cv.height = low;
   }
-  RNG.view = { size, dpr, px, s: size / 2 / ((RNG.st ? RG.ringR(RNG.st) : RCFG.RING_R) * 1.08) };
+  RNG.view = { size, dpr, px, s: size / 2 / ((RNG.st ? rgR0() : RCFG.RING_R) * 1.08) };
 }
 const w2s = (x, y) => { const k = RNG.view.s * FL(); return [RNG.view.size / 2 + x * k, RNG.view.size / 2 + y * k]; };
 const s2w = (px, py) => { const k = RNG.view.s * FL(); return [(px - RNG.view.size / 2) / k, (py - RNG.view.size / 2) / k]; };
@@ -205,6 +209,7 @@ function rgTurnStart() {
   if (!mine.some(b => b.id === RNG.sel)) RNG.sel = null;
   RNG.timer = RCFG.AIM_S;
   RNG.el.querySelector('#rg-ok').classList.remove('on');
+  if (st.map && st.turn === 2 && !RNG.tuto) setTimeout(() => RNG.st && rgBanner(rt('shrink'), '#fb7185', true, 1500), 200);
   if (RNG.online) { RNG.online.sent = false; rgHud(); return; } // l'adversaire est un vrai joueur : rien à simuler
   // l'IA réfléchit (hors simulation : son hasard ne touche pas au déterminisme du tour)
   clearTimeout(RNG.foeT); clearTimeout(RNG.okT); RNG.foeReady = false;
@@ -224,7 +229,7 @@ function rgHud() {
   const st = RNG.st, o = RNG.el; if (!o) return;
   [0, 1].forEach(s => { o.querySelector('#rg-n' + (s === ME() ? 0 : 1)).innerHTML = st.bodies.filter(b => b.side === s).map(b => `<i class="${b.alive ? '' : 'off'}"></i>`).join(''); });
   rgPanels();
-  o.querySelector('#rg-turn').textContent = st.sudden ? rt('sudden') : rt('turn', { n: Math.min(st.turn, RCFG.TURNS), m: RCFG.TURNS });
+  o.querySelector('#rg-turn').textContent = st.sudden ? rt('sudden') : st.map ? '' : rt('turn', { n: Math.min(st.turn, RCFG.TURNS), m: RCFG.TURNS });
   const b = st.bodies.find(x => x.id === RNG.sel), pwB = o.querySelector('#rg-pw'), go = o.querySelector('#rg-go');
   if (b) {
     const p = powerText(b.name), rd = RG.ready(b);
@@ -289,9 +294,11 @@ function rgDown(e) {
   e.preventDefault();
   const [px, py] = rgPt(e), [wx, wy] = s2w(px, py);
   const near = b => RG.len(b.x - wx, b.y - wy) < b.r * 1.3 + 15;
-  // toucher un jeton adverse (ou un des tiens hors visée) : sa fiche
+  // toucher un jeton adverse : sa fiche (stats, pouvoir), même quand un de tes jetons est déjà choisi.
+  // Si tu glisses au lieu de toucher, c'est une visée comme d'habitude.
   const foe = !RNG.play && RG.alive(RNG.st, FOE()).find(near);
-  if (foe && !RNG.drag && RNG.sel == null || foe && RNG.phase !== 'aim') return rgInfo(foe.id);
+  if (foe && (RNG.sel == null || RNG.phase !== 'aim' || RNG.locked || RNG.tuto?.block)) return rgInfo(foe.id);
+  if (foe) { RNG.drag = { x: px, y: py, id: e.pointerId, foe: foe.id }; return; }
   if (RNG.phase !== 'aim' || RNG.locked) { const mine = !RNG.play && RG.alive(RNG.st, ME()).find(near); return mine && rgInfo(mine.id); }
   if (RNG.tuto?.block) return;
   const hit = RG.alive(RNG.st, ME()).find(b => RG.len(b.x - wx, b.y - wy) < b.r * 1.5 + 20);
@@ -304,6 +311,7 @@ function rgMove(e) {
   const [px, py] = rgPt(e), dx = d.x - px, dy = d.y - py, L = Math.hypot(dx, dy);
   const full = Math.min(170, RNG.view.size * .42);
   if (L < 8) return;
+  d.moved = true;
   const f = Math.round(Math.min(1, L / full) * 100) / 100;
   RNG.aim = { ax: Math.round(dx / L * 1000 * FL()) || 0, ay: Math.round(dy / L * 1000 * FL()) || 0, f }; // direction dans le monde (écran tourné si camp 1)
   RNG.prevDirty = true;
@@ -312,6 +320,7 @@ function rgMove(e) {
 function rgUp(e) {
   const d = RNG.drag; if (!d || e.pointerId !== d.id) return;
   RNG.drag = null;
+  if (d.foe != null && !d.moved) return rgInfo(d.foe); // simple toucher sur un jeton adverse
   if (RNG.aim && RNG.aim.f < RCFG.MIN_FORCE) { RNG.aim = null; RNG.prev = null; }
   rgHud();
   if (RNG.aim) RNG.tuto?.on?.('aim');
@@ -479,6 +488,10 @@ function rgFrame(now) {
     if (RNG.timer <= 0) { RNG.timer = 0; rgLock(true); }
   }
   if (RNG.prevDirty) rgPreview();
+  // le bord rejoint le nouveau rayon une fois l'animation du tour finie
+  const Rt = RG.ringR(RNG.st);
+  if (RNG.dispR == null) RNG.dispR = Rt;
+  if (RNG.phase !== 'play' && RNG.phase !== 'reveal' && RNG.dispR !== Rt) RNG.dispR = Math.abs(RNG.dispR - Rt) < 1 ? Rt : RNG.dispR + (Rt - RNG.dispR) * Math.min(1, dt * 2.5);
   const P = RNG.play;
   if (RNG.phase === 'play' && P && (P.intros?.length || RFX.busy())) {
     if (!RFX.busy()) RFX.introStart(P.intros.shift(), P); // le temps se fige le temps de l'intro du pouvoir
@@ -587,7 +600,8 @@ function rgScout(side) {
 }
 
 // Sol du ring en pixel art : disque sombre tramé, cercles repères, bord épais en deux tons avec des plots, étoiles autour
-function rgFloor(c, ox, oy, R, t) {
+// R0 : sol de départ (en cache) · Rc : bord actuel (le ring rétrécit : au-delà, le vide)
+function rgFloor(c, ox, oy, R, Rc, t) {
   const px = RNG.view.px;
   // étoiles qui scintillent dans les coins (hors du ring)
   if (!RNG.stars) RNG.stars = Array.from({ length: 34 }, () => { const a = Math.random() * 6.283, d = 1.04 + Math.random() * .5; return { a, d, k: Math.random() * 6 }; });
@@ -620,6 +634,13 @@ function rgFloor(c, ox, oy, R, t) {
     RNG.floor = { key, cv };
   }
   c.save(); c.setTransform(1, 0, 0, 1, (RNG.shakeX || 0) / px, (RNG.shakeY || 0) / px); c.drawImage(RNG.floor.cv, 0, 0); c.restore();
+  // partie du sol déjà avalée : le vide, avec un liseré rouge qui s'effrite au bord
+  if (Rc < R - .5) {
+    c.fillStyle = 'rgba(6,4,12,.88)'; c.beginPath(); c.arc(ox, oy, R + px * 2, 0, 7); c.arc(ox, oy, Rc, 0, 7, true); c.fill();
+    c.fillStyle = `rgba(251,113,133,${.35 + .2 * Math.sin(t * 3)})`;
+    for (let k = 0; k < 72; k++) { const a = k / 72 * 6.283, d = Rc + px * (2 + (k * 7 % 5)); if (k % 3) c.fillRect(Math.round((ox + Math.cos(a) * d) / px) * px, Math.round((oy + Math.sin(a) * d) / px) * px, px, px); }
+  }
+  R = Rc;
   // bord : anneau sombre + anneau clair qui pulse
   c.lineWidth = px * 3; c.strokeStyle = T.rimDark; c.beginPath(); c.arc(ox, oy, R + px, 0, 7); c.stroke();
   c.globalAlpha = .6 + .25 * Math.sin(t * 2); c.lineWidth = px * 1.4; c.strokeStyle = T.rim; c.shadowColor = T.rim; c.shadowBlur = 6;
@@ -651,7 +672,7 @@ function rgTeamMark(c, b, x, y, rr, t, live) {
 }
 
 function rgDraw(dt) {
-  const M = RNG.ctx, V = RNG.view, R = RG.ringR(RNG.st) * V.s, [ox, oy] = w2s(0, 0), t = performance.now() / 1000;
+  const M = RNG.ctx, V = RNG.view, R = (RNG.dispR ?? RG.ringR(RNG.st)) * V.s, R0 = rgR0() * V.s, [ox, oy] = w2s(0, 0), t = performance.now() / 1000;
   const lo = RNG.lo.getContext('2d'), hi = RNG.hi.getContext('2d');
   // tremblement de l'écran (le même décalage pour toutes les couches)
   let sx0 = 0, sy0 = 0;
@@ -663,7 +684,7 @@ function rgDraw(dt) {
 
   // ----- Couche basse (pixel) : sol, effets au sol, traînées, repères de camp, auras
   let c = lo;
-  rgFloor(c, ox, oy, R, t);
+  rgFloor(c, ox, oy, R0, R, t);
   rgZones(c, t);
   rgWalls(c, t);
   // corps à afficher : pendant l'animation, les positions enregistrées ; sinon l'état du match
@@ -834,7 +855,7 @@ function rgResult(e) {
     <h2>${draw ? rt('draw') : me ? rt('win') : rt('lose')}</h2>
     <small class="muted">${rtL().why[e?.why] || ''}</small>
     <div class="rg-rleft"><span class="me">${RG.alive(st, ME()).map(b => `<img src="${texOf(jetonOf(b.name))}" alt="">`).join('') || '—'}</span><b>vs</b><span class="foe">${RG.alive(st, FOE()).map(b => `<img src="${texOf(jetonOf(b.name))}" alt="">`).join('') || '—'}</span></div>
-    <small class="muted">${rt('turns', { n: Math.min(st.turn, RCFG.TURNS + 3) })}</small>
+    <small class="muted">${rt('turns', { n: st.map ? st.turn - 1 : Math.min(st.turn, RCFG.TURNS + 3) })}</small>
     ${dElo == null ? '' : `<p class="rg-elo ${dElo >= 0 ? 'up' : 'down'}"><b>${dElo >= 0 ? '+' : ''}${dElo} Elo</b><small>${fmt(elo.after[ME()])}</small></p>`}
     <div class="rg-rbtn"><button class="btn primary" data-again>${rt('again')}</button><button class="btn ghost" data-back>${rt('back')}</button></div>
   </div>`;
@@ -1047,7 +1068,7 @@ const RFX = (() => {
   }
   // Sol : traînée de glace de Glissade, ronces autour du ring
   function under(c, list, t, dt) {
-    const V = RNG.view, R = RG.ringR(RNG.st) * V.s, [ox, oy] = w2s(0, 0);
+    const V = RNG.view, R = (RNG.dispR ?? RG.ringR(RNG.st)) * V.s, [ox, oy] = w2s(0, 0);
     for (const b of list) if (active[b.id] === 'slide' && RNG.play) ground.push({ x: b.x, y: b.y, r: b.r, life: 1 });
     ground = ground.filter(g => (g.life -= dt * .35) > 0);
     for (const g of ground) { const [x, y] = w2s(g.x, g.y); c.fillStyle = `rgba(186,230,253,${g.life * .12})`; c.beginPath(); c.arc(x, y, g.r * V.s * .9, 0, 7); c.fill(); }

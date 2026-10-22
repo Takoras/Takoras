@@ -10,6 +10,9 @@ const RCFG = {
   START_Y: 560,          // départ : tes jetons en bas (y = +560), ceux d'en face en haut
   START_X: [-360, 0, 360],
   SUDDEN_Y: 220,         // mort subite : 1 jeton chacun près du centre
+  // Sur une map : plus de limite de 12 tours, le ring RÉTRÉCIT à la fin de chaque tour (−4,5 % du rayon de départ,
+  // jusqu'à 38 %). Un jeton dont le centre se retrouve hors du bord tombe. Sécurité : 40 tours au plus.
+  SHRINK: { step: .045, min: .38, maxTurns: 40 },
 
   // ---------- Maps : rayon du ring et murs. Équilibrées par demi-tour : chaque mur a son jumeau en (−x, −y),
   // donc les deux camps voient exactement le même terrain depuis leur côté.

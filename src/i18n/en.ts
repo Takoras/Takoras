@@ -486,7 +486,7 @@ export const en: Dict = {
     "els": "Elements",
     "elsHelp": "🔥 beats 🌿 · 🌿 beats 💧 · 💧 beats 🔥 · ✨ and 🌑 strong against each other (×1.3 damage)",
     "how": "How it works",
-    "howText": "A duel on a round ring, billiards × pétanque × sumo. Each turn, you and your opponent aim <b>at the same time</b> without seeing each other’s shot: tap one of your tokens, drag backwards like a slingshot (the further, the harder), then confirm. Both shots go off together. A token whose center leaves the ring is out. The first player with no tokens left loses. Each token has a power and 3 stats: weight, power, size.",
+    "howText": "A duel on a round ring, billiards × pétanque × sumo. Each turn, you and your opponent aim <b>at the same time</b> without seeing each other’s shot: tap one of your tokens, drag backwards like a slingshot (the further, the harder), then confirm. Both shots go off together. A token whose center leaves the ring is out, and <b>the ring shrinks every turn</b>: no hiding at the edge. The first player with no tokens left loses. Each token has a power and 3 stats: weight, power, size.",
     "round": "Round {n}",
     "step1": "Tap one of your tokens",
     "step2": "Tap or drag your token to a spot",
