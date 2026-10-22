@@ -60,10 +60,15 @@ const RCFG = {
   // ---------- Classé
   BUDGET: { r_common: 1, r_rare: 2, r_epic: 3, r_legend: 4, r_myth: 5 },
   BUDGET_MAX: 8,
-  ELO: { start: 1000, kNew: 40, k: 20, newGames: 10 },
-  RANKS: [ // rang selon l'Elo (Légende = top 100)
-    { k: 'bronze', min: 0, ico: '🥉' }, { k: 'silver', min: 1000, ico: '🥈' }, { k: 'gold', min: 1200, ico: '🥇' },
-    { k: 'plat', min: 1400, ico: '💠' }, { k: 'diam', min: 1600, ico: '💎' }, { k: 'master', min: 1800, ico: '👑' },
+  ELO: { start: 1000, kNew: 40, k: 24, newGames: 10 }, // K = 40 les 10 premiers matchs, puis 24 (calculé par le serveur)
+  // Rangs selon l'Elo : 3 divisions de 50 Elo par rang (Fer 1, Fer 2, Fer 3, Bronze 1…), puis Maître et Légende.
+  // On commence à 1000 = Fer 1. Les couleurs servent aux badges.
+  DIV: 50,
+  RANKS: [
+    { k: 'iron', min: 0, col: '#9ca3af', divs: 3 }, { k: 'bronze', min: 1150, col: '#d97706', divs: 3 },
+    { k: 'silver', min: 1300, col: '#cbd5e1', divs: 3 }, { k: 'gold', min: 1450, col: '#facc15', divs: 3 },
+    { k: 'plat', min: 1600, col: '#2dd4bf', divs: 3 }, { k: 'diam', min: 1750, col: '#60a5fa', divs: 3 },
+    { k: 'master', min: 1900, col: '#c084fc', divs: 1 }, { k: 'legend', min: 2100, col: '#fb7185', divs: 1 },
   ],
 
   // ---------- IA
