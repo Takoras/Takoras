@@ -98,7 +98,3 @@
 .rg-sp { font-size: 13px; color: var(--text-2); line-height: 1.4; }
 .rg-sp b { color: var(--c); }
 .rg-sp small { color: var(--muted); }
-/* Zoom du terrain (boutons ; aussi molette et pincer à deux doigts) */
-.rg-zoom { position: absolute; right: 4px; bottom: 4px; z-index: 3; display: flex; flex-direction: column; gap: 6px; }
-.rg-zoom button { width: 36px; height: 36px; border-radius: 10px; background: rgba(20, 16, 36, .85); border: 1px solid rgba(255, 255, 255, .14); color: #e9e5ff; font-size: 18px; font-weight: 800; line-height: 1; backdrop-filter: blur(4px); }
-.rg-zoom button:hover { border-color: #a78bfa; }

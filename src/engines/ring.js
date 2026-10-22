@@ -99,7 +99,7 @@ const rgImg = name => {
 // teams : [[{ name, lvl, variant }×3] ×2]. opts : { names, ai, tuto, onEnd }
 function startRing(teams, opts = {}) {
   closeRing();
-  Object.assign(RNG, { cam: { z: 1, cx: 0, cy: 0 }, ptrs: new Map(), pinch: null, st: RG.create(teams, opts.map), phase: 'aim', sel: null, aim: null, pow: false, drag: null, prev: null, foe: null, foeOk: false, locked: false, play: null, parts: [], trails: {}, spin: {}, shake: 0,
+  Object.assign(RNG, { st: RG.create(teams, opts.map), phase: 'aim', sel: null, aim: null, pow: false, drag: null, prev: null, foe: null, foeOk: false, locked: false, play: null, parts: [], trails: {}, spin: {}, shake: 0,
     ai: opts.ai || 'normal', names: opts.names || [rt('you'), rt('bot')], onEnd: opts.onEnd || null, tuto: opts.tuto ? { step: 0 } : null, last: 0 });
   teams.flat().forEach(j => rgImg(j.name));
   const o = document.createElement('div');
@@ -111,7 +111,7 @@ function startRing(teams, opts = {}) {
       <div class="rg-timer" id="rg-timer"><svg viewBox="0 0 36 36"><circle cx="18" cy="18" r="15.5"/><circle class="p" cx="18" cy="18" r="15.5" pathLength="100"/></svg><b></b></div>
     </div>
     <div class="rg-names"><span>${esc(RNG.names[0])}</span><span class="rg-ok" id="rg-ok">${rt('foeOk')}</span><span>${esc(RNG.names[1])} <button class="rg-scout" data-scout>👁 ${rt('scout')}</button></span></div>
-    <div class="rg-stage" id="rg-stage"><canvas id="rg-cv"></canvas><div class="rg-zoom"><button data-z="in" aria-label="Zoom +">+</button><button data-z="out" aria-label="Zoom −">−</button><button data-z="fit" aria-label="Recentrer">⤢</button></div><div class="rg-banner" id="rg-banner"></div><div class="rg-team foe" id="rg-t1"></div><div class="rg-team me" id="rg-t0"></div></div>
+    <div class="rg-stage" id="rg-stage"><canvas id="rg-cv"></canvas><div class="rg-banner" id="rg-banner"></div><div class="rg-team foe" id="rg-t1"></div><div class="rg-team me" id="rg-t0"></div></div>
     <p class="rg-hint" id="rg-hint"></p>
     <div class="rg-bot">
       <button class="rg-pw" id="rg-pw" disabled></button>
@@ -127,10 +127,6 @@ function startRing(teams, opts = {}) {
   addEventListener('pointermove', rgMove); addEventListener('pointerup', rgUp); addEventListener('pointercancel', rgUp);
   o.querySelectorAll('.rg-team').forEach(p => p.addEventListener('click', e => { const b = e.target.closest('[data-id]'); if (b) rgInfo(+b.dataset.id); }));
   o.querySelector('#rg-pw').onclick = rgTogglePow;
-  // zoom : boutons, molette (autour de la souris), pincer à deux doigts (dans rgDown / rgMove)
-  o.querySelectorAll('[data-z]').forEach(b => b.addEventListener('pointerdown', e => e.stopPropagation()));
-  o.querySelector('.rg-zoom').onclick = e => { const z = e.target.closest('[data-z]')?.dataset.z; if (!z) return; const h = RNG.view.size / 2; rgZoom(z === 'fit' ? 1 : RNG.cam.z * (z === 'in' ? 1.35 : 1 / 1.35), h, h, z === 'fit'); sfx.click(); };
-  stage.addEventListener('wheel', e => { e.preventDefault(); const [px, py] = rgPt(e); rgZoom(RNG.cam.z * Math.exp(-e.deltaY * .0015), px, py); }, { passive: false });
   o.querySelector('[data-scout]').onclick = () => rgScout(1);
   o.querySelector('#rg-go').onclick = () => rgLock();
   o.querySelector('[data-quit]').onclick = async () => { if (RNG.st?.over || RNG.tuto || await host.ask(rt('quit'))) { if (!RNG.st) return; RNG.tuto = null; closeRing(); RNG.onEnd?.('back'); } };
@@ -159,30 +155,29 @@ function rgResize() {
     const cv = RNG[k] || (RNG[k] = document.createElement('canvas'));
     cv.width = cv.height = low;
   }
-  const base = size / 2 / ((RNG.st ? RG.ringR(RNG.st) : RCFG.RING_R) * 1.08);
-  RNG.view = { size, dpr, px, base, s: base * (RNG.cam?.z || 1) };
-  rgZoom(RNG.cam?.z || 1, size / 2, size / 2);
+  RNG.view = { size, dpr, px, s: size / 2 / ((RNG.st ? RG.ringR(RNG.st) : RCFG.RING_R) * 1.08) };
 }
-// Caméra : zoom (1× à 2,6×) autour d'un point de l'écran, sans sortir du terrain
-function rgZoom(z, ax, ay, fit) {
-  const V = RNG.view, cam = RNG.cam; if (!V || !cam) return;
-  const [wx, wy] = s2w(ax, ay);
-  cam.z = Math.max(1, Math.min(2.6, z));
-  V.s = V.base * cam.z;
-  if (fit || cam.z === 1) { cam.cx = 0; cam.cy = 0; return; }
-  cam.cx = wx - (ax - V.size / 2) / V.s; cam.cy = wy - (ay - V.size / 2) / V.s;
-  const lim = Math.max(0, (RNG.st ? RG.ringR(RNG.st) : RCFG.RING_R) * 1.08 - V.size / 2 / V.s);
-  cam.cx = Math.max(-lim, Math.min(lim, cam.cx)); cam.cy = Math.max(-lim, Math.min(lim, cam.cy));
-}
-const camX = () => RNG.cam?.cx || 0, camY = () => RNG.cam?.cy || 0;
-const w2s = (x, y) => [RNG.view.size / 2 + (x - camX()) * RNG.view.s, RNG.view.size / 2 + (y - camY()) * RNG.view.s];
-const s2w = (px, py) => [(px - RNG.view.size / 2) / RNG.view.s + camX(), (py - RNG.view.size / 2) / RNG.view.s + camY()];
+const w2s = (x, y) => [RNG.view.size / 2 + x * RNG.view.s, RNG.view.size / 2 + y * RNG.view.s];
+const s2w = (px, py) => [(px - RNG.view.size / 2) / RNG.view.s, (py - RNG.view.size / 2) / RNG.view.s];
 // Couleurs des camps : violet = toi, orange = l'adversaire (les couleurs du site)
 const SIDE = [{ hi: '#ddd6fe', md: '#a78bfa', lo: '#4c1d95', rgb: '167,139,250' }, { hi: '#fed7aa', md: '#fb923c', lo: '#7c2d12', rgb: '251,146,60' }];
 // Filtres des variantes (les mêmes que sur tout le site)
 const VFILTER = { gold: 'sepia(1) saturate(2.6) hue-rotate(-12deg) brightness(1.12)', celeste: 'grayscale(.55) brightness(1.35) sepia(.15) hue-rotate(195deg) saturate(1.4)', ombre: 'grayscale(.6) brightness(.55) sepia(.45) hue-rotate(225deg) saturate(1.7) contrast(1.3)' };
 
 // ---------- Tour : visée (30 s, ou dès que les deux ont validé), l'IA prépare son tir en même temps
+// L'IA calcule dans un Worker (fil à part) ; sans Worker, on calcule ici (même résultat, juste un petit à-coup)
+let aiWorker = null, aiSeq = 0;
+function rgAiThink(st, level) {
+  if (level === 'still') return Promise.resolve(null);
+  try { aiWorker ??= new Worker(new URL('./ai.worker.js', import.meta.url), { type: 'module' }); } catch { aiWorker = false; }
+  if (!aiWorker) return Promise.resolve(RG.aiShot(st, 1, level));
+  const id = ++aiSeq;
+  return new Promise(res => {
+    const done = e => { if (e.data.id !== id) return; aiWorker.removeEventListener('message', done); res(e.data.shot); };
+    aiWorker.addEventListener('message', done);
+    aiWorker.postMessage({ id, st, side: 1, level });
+  });
+}
 function rgTurnStart() {
   const st = RNG.st;
   Object.assign(RNG, { phase: 'aim', aim: null, pow: false, prev: null, foe: null, foeOk: false, locked: false, drag: null });
@@ -193,9 +188,11 @@ function rgTurnStart() {
   // l'IA réfléchit (hors simulation : son hasard ne touche pas au déterminisme du tour)
   clearTimeout(RNG.foeT); clearTimeout(RNG.okT); RNG.foeReady = false;
   const turn = st.turn;
-  RNG.foeT = setTimeout(() => {
+  RNG.foeT = setTimeout(async () => {
     if (!RNG.st || RNG.st.turn !== turn) return;
-    RNG.foe = RG.aiShot(RG.clone(RNG.st), 1, RNG.ai); RNG.foeReady = true;
+    const shot = await rgAiThink(RG.clone(RNG.st), RNG.ai);
+    if (!RNG.st || RNG.st.turn !== turn) return;
+    RNG.foe = shot; RNG.foeReady = true;
     if (RNG.ai === 'still') return;
     RNG.okT = setTimeout(() => { if (RNG.st && RNG.phase === 'aim' && !RNG.foeOk) { RNG.foeOk = true; RNG.el.querySelector('#rg-ok').classList.add('on'); sfx.click?.(); } }, 1200 + Math.random() * 3500);
   }, 60);
@@ -269,15 +266,6 @@ function rgPt(e) { const r = RNG.cv.getBoundingClientRect(); return [e.clientX -
 function rgDown(e) {
   if (!RNG.st) return;
   e.preventDefault();
-  // deux doigts : on zoome / déplace la vue au lieu de viser
-  RNG.ptrs.set(e.pointerId, rgPt(e));
-  if (RNG.ptrs.size === 2) {
-    const [a, b] = [...RNG.ptrs.values()];
-    RNG.drag = null;
-    RNG.pinch = { d0: Math.hypot(a[0] - b[0], a[1] - b[1]) || 1, z0: RNG.cam.z, m: [(a[0] + b[0]) / 2, (a[1] + b[1]) / 2] };
-    return;
-  }
-  if (RNG.ptrs.size > 2) return;
   const [px, py] = rgPt(e), [wx, wy] = s2w(px, py);
   const near = b => RG.len(b.x - wx, b.y - wy) < b.r * 1.3 + 15;
   // toucher un jeton adverse (ou un des tiens hors visée) : sa fiche
@@ -291,16 +279,6 @@ function rgDown(e) {
   RNG.drag = { x: px, y: py, id: e.pointerId };
 }
 function rgMove(e) {
-  if (RNG.ptrs?.has(e.pointerId)) RNG.ptrs.set(e.pointerId, rgPt(e));
-  if (RNG.pinch && RNG.ptrs.size >= 2) {
-    const [a, b] = [...RNG.ptrs.values()], m = [(a[0] + b[0]) / 2, (a[1] + b[1]) / 2], P = RNG.pinch;
-    // déplacement des deux doigts = on fait glisser la vue
-    const [wx, wy] = s2w(P.m[0], P.m[1]);
-    rgZoom(P.z0 * Math.hypot(a[0] - b[0], a[1] - b[1]) / P.d0, P.m[0], P.m[1]);
-    if (RNG.cam.z > 1) { RNG.cam.cx = wx - (m[0] - RNG.view.size / 2) / RNG.view.s; RNG.cam.cy = wy - (m[1] - RNG.view.size / 2) / RNG.view.s; rgZoom(RNG.cam.z, m[0], m[1]); }
-    P.m = m;
-    return;
-  }
   const d = RNG.drag; if (!d || e.pointerId !== d.id || RNG.locked) return;
   const [px, py] = rgPt(e), dx = d.x - px, dy = d.y - py, L = Math.hypot(dx, dy);
   const full = Math.min(170, RNG.view.size * .42);
@@ -311,8 +289,6 @@ function rgMove(e) {
   if (!RNG.aimTick || performance.now() - RNG.aimTick > 90) { RNG.aimTick = performance.now(); sfx.tick?.(.2 + f * .6); }
 }
 function rgUp(e) {
-  RNG.ptrs?.delete(e.pointerId);
-  if (RNG.pinch) { if (RNG.ptrs.size < 2) RNG.pinch = null; return; }
   const d = RNG.drag; if (!d || e.pointerId !== d.id) return;
   RNG.drag = null;
   if (RNG.aim && RNG.aim.f < RCFG.MIN_FORCE) { RNG.aim = null; RNG.prev = null; }

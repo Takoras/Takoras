@@ -11,25 +11,29 @@ const RCFG = {
   START_X: [-360, 0, 360],
   SUDDEN_Y: 220,         // mort subite : 1 jeton chacun près du centre
 
-  // ---------- Maps : rayon du ring, glisse générale, murs et zones au sol. Toutes symétriques haut/bas (équitables).
-  // Mur : segment épais { x1, y1, x2, y2, w (épaisseur), k } · k = rebond (0,75 pierre qui amortit · 1,4 mur rebondisseur, renvoie plus vite)
-  // Zone : rectangle centré { x, y, w, h, fric } · fric > 1 boue (ralentit) · fric < 1 glace (fait filer)
+  // ---------- Maps : rayon du ring et murs. Équilibrées par demi-tour : chaque mur a son jumeau en (−x, −y),
+  // donc les deux camps voient exactement le même terrain depuis leur côté.
+  // Mur : segment épais { x1, y1, x2, y2, w (épaisseur), k } · k = rebond (0,75 pierre qui amortit · 1,4 rebondisseur, renvoie plus vite)
+  // (Les zones au sol { x, y, w, h, fric } existent dans le moteur mais aucune map n'en a pour l'instant.)
   MAPS: [
-    { id: 'arene', R: 1450, fric: 1,
-      walls: [{ x1: -280, y1: 0, x2: 280, y2: 0, w: 46, k: .75 }, { x1: -980, y1: -260, x2: -980, y2: 260, w: 40, k: 1.4 }, { x1: 980, y1: -260, x2: 980, y2: 260, w: 40, k: 1.4 }],
-      zones: [] },
-    { id: 'jardin', R: 1500, fric: 1,
-      walls: [{ x1: -420, y1: -430, x2: 120, y2: -430, w: 44, k: .75 }, { x1: -420, y1: 430, x2: 120, y2: 430, w: 44, k: .75 }, { x1: 1050, y1: -200, x2: 1050, y2: 200, w: 40, k: 1.4 }],
-      zones: [{ x: -650, y: 0, w: 420, h: 340, fric: 3 }, { x: 450, y: 0, w: 420, h: 340, fric: 3 }] },
-    { id: 'volcan', R: 1500, fric: 1,
-      walls: [{ x1: -330, y1: -230, x2: 330, y2: 230, w: 40, k: 1.4 }, { x1: -330, y1: 230, x2: 330, y2: -230, w: 40, k: 1.4 }, { x1: -1100, y1: -150, x2: -1100, y2: 150, w: 44, k: .75 }, { x1: 1100, y1: -150, x2: 1100, y2: 150, w: 44, k: .75 }],
-      zones: [{ x: -700, y: 0, w: 300, h: 300, fric: 2.5 }, { x: 700, y: 0, w: 300, h: 300, fric: 2.5 }] },
-    { id: 'glace', R: 1550, fric: .6,
-      walls: [{ x1: -560, y1: -300, x2: -560, y2: 300, w: 44, k: .75 }, { x1: 560, y1: -300, x2: 560, y2: 300, w: 44, k: .75 }],
-      zones: [{ x: 0, y: 0, w: 700, h: 520, fric: .35 }] },
-    { id: 'ruines', R: 1600, fric: 1,
-      walls: [{ x1: -760, y1: -380, x2: -260, y2: -380, w: 46, k: .75 }, { x1: 260, y1: -380, x2: 760, y2: -380, w: 46, k: .75 }, { x1: -760, y1: 380, x2: -260, y2: 380, w: 46, k: .75 }, { x1: 260, y1: 380, x2: 760, y2: 380, w: 46, k: .75 }, { x1: -1150, y1: -180, x2: -1150, y2: 180, w: 40, k: 1.4 }, { x1: 1150, y1: -180, x2: 1150, y2: 180, w: 40, k: 1.4 }],
-      zones: [{ x: 0, y: 0, w: 520, h: 280, fric: 2.5 }] },
+    { id: 'arene', R: 1450, fric: 1, zones: [],
+      walls: [{ x1: -260, y1: -120, x2: 260, y2: 120, w: 46, k: .75 },
+        { x1: -620, y1: -160, x2: -300, y2: -460, w: 44, k: .75 }, { x1: 620, y1: 160, x2: 300, y2: 460, w: 44, k: .75 },
+        { x1: -1020, y1: 280, x2: -820, y2: 580, w: 40, k: 1.4 }, { x1: 1020, y1: -280, x2: 820, y2: -580, w: 40, k: 1.4 }] },
+    { id: 'jardin', R: 1500, fric: 1, zones: [],
+      walls: [{ x1: -720, y1: -180, x2: -360, y2: -500, w: 44, k: .75 }, { x1: 720, y1: 180, x2: 360, y2: 500, w: 44, k: .75 },
+        { x1: 220, y1: -260, x2: 580, y2: -40, w: 44, k: .75 }, { x1: -220, y1: 260, x2: -580, y2: 40, w: 44, k: .75 },
+        { x1: -130, y1: 130, x2: 130, y2: -130, w: 40, k: 1.4 }] },
+    { id: 'volcan', R: 1500, fric: 1, zones: [],
+      walls: [{ x1: -330, y1: -230, x2: 330, y2: 230, w: 40, k: 1.4 }, { x1: -330, y1: 230, x2: 330, y2: -230, w: 40, k: 1.4 },
+        { x1: -1120, y1: -120, x2: -960, y2: 260, w: 44, k: .75 }, { x1: 1120, y1: 120, x2: 960, y2: -260, w: 44, k: .75 }] },
+    { id: 'glace', R: 1550, fric: 1, zones: [],
+      walls: [{ x1: -720, y1: -340, x2: -120, y2: -60, w: 44, k: .75 }, { x1: 720, y1: 340, x2: 120, y2: 60, w: 44, k: .75 },
+        { x1: -930, y1: 330, x2: -640, y2: 540, w: 40, k: 1.4 }, { x1: 930, y1: -330, x2: 640, y2: -540, w: 40, k: 1.4 }] },
+    { id: 'ruines', R: 1600, fric: 1, zones: [],
+      walls: [{ x1: -820, y1: -300, x2: -420, y2: -470, w: 46, k: .75 }, { x1: 820, y1: 300, x2: 420, y2: 470, w: 46, k: .75 },
+        { x1: -360, y1: -380, x2: 20, y2: -210, w: 46, k: .75 }, { x1: 360, y1: 380, x2: -20, y2: 210, w: 46, k: .75 },
+        { x1: -1170, y1: -240, x2: -1060, y2: 160, w: 40, k: 1.4 }, { x1: 1170, y1: 240, x2: 1060, y2: -160, w: 40, k: 1.4 }] },
   ],
 
   // ---------- Physique (pas fixe, valeurs arrondies à chaque pas = 100 % déterministe)
@@ -65,7 +69,8 @@ const RCFG = {
   // ---------- IA
   AI: {
     still:  { shoots: false },                                    // tuto : ne tire pas
-    normal: { shoots: true, aimErr: .07, forceErr: .1, tries: 3 }, // entraînement : vise juste, avec un peu d'imprécision
+    normal: { shoots: true, aimErr: .07, forceErr: .1, tries: 3 }, // vise juste, avec un peu d'imprécision (et sert à prédire ton tir)
+    smart:  { shoots: true, smart: true, aimErr: .035, forceErr: .05 }, // entraînement : prédit ton tir, esquive au bord du vide
   },
 
   // ---------- Jetons : stats de base (niveau 1, sans mutation) + UN pouvoir

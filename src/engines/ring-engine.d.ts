@@ -21,6 +21,7 @@ export const RG: {
   ready(b: Body): boolean;
   resolve(st: RingState, shots: (Shot | null)[], opts?: { preview?: number }): Resolved;
   aiShot(st: RingState, side: 0 | 1, level?: string, rnd?: () => number): Shot | null;
+  aiSmart(st: RingState, side: 0 | 1, rnd?: () => number): Shot | null;
   len(x: number, y: number): number;
   ringR(st: RingState): number;
   nearest(o: Wall, px: number, py: number): [number, number];

@@ -85,7 +85,7 @@ export default function Combat() {
     sfx.click();
     R.startRing([mine, botTeam(mine.map((u) => u.lvl))], {
       names: [me.data?.pseudo ?? R.rt('you'), R.rt('bot')],
-      ai: 'normal',
+      ai: 'smart', // prédit ton tir, esquive au bord du vide
       map: randomMap(),
       onEnd: (r) => {
         if (r === 'again') void train();

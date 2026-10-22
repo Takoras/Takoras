@@ -35,8 +35,11 @@ function fight(E: typeof RG, seed: number) {
 }
 
 test('mêmes valeurs d’équilibrage (sauf changements voulus : 30 s par tour, maps)', () => {
-  const { AIM_S, MAPS, ...rest } = RCFG as typeof RCFG & { MAPS: unknown };
-  const { AIM_S: _a, ...old } = legacy.RCFG;
+  const { AIM_S, MAPS, AI, ...rest } = RCFG as typeof RCFG & { MAPS: unknown };
+  const { smart, ...ai } = AI as Record<string, unknown>;
+  expect(smart).toBeTruthy(); // nouvelle IA d'entraînement (l'ancienne « normal » est inchangée)
+  const { AIM_S: _a, AI: oldAi, ...old } = legacy.RCFG;
+  expect(JSON.stringify(ai)).toBe(JSON.stringify(oldAi));
   void _a;
   expect(AIM_S).toBe(30);
   expect(MAPS).toHaveLength(5);

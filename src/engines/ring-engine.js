@@ -263,6 +263,7 @@ const RG = (() => {
   }
   function aiShot(st, side, level = 'normal', rnd = Math.random) {
     const L = C.AI[level]; if (!L?.shoots) return null;
+    if (L.smart) return aiSmart(st, side, rnd);
     let best = null, bestS = -Infinity;
     const base = score(st, side);
     for (const b of alive(st, side)) for (const pow of ready(b) ? [false, true] : [false]) {
@@ -290,7 +291,50 @@ const RG = (() => {
     return best;
   }
 
-  return { kit, stats, create, clone, alive, ready, resolve, aiShot, len, ringR, nearest, touchesWall };
+  // ---------- IA « smart » (entraînement) : elle prédit ton tir et joue en conséquence.
+  // - Elle calcule le meilleur tir que TU pourrais faire (ta prédiction).
+  // - Ses coups possibles : attaquer chacun de tes jetons (3 forces, tout droit ou en biais pour jouer les murs),
+  //   ESQUIVER (ramener vers le centre un de ses jetons au bord du vide), ou ne rien faire.
+  // - Chaque coup est simulé deux fois : avec ton tir prédit en même temps, et si tu ne bouges pas. Elle garde le meilleur compromis.
+  // Son hasard (rnd) ne sert qu'à départager et à l'imprécision : la simulation du tour reste déterministe.
+  function aiSmart(st, side, rnd = Math.random) {
+    const L = C.AI.smart, foeSide = 1 - side, R = ringR(st);
+    const pred = aiShot(st, foeSide, 'normal', () => .5); // ton meilleur tir, sans imprécision
+    const outcome = sim => sim.over ? (sim.winner === side ? 1e6 : sim.winner === foeSide ? -1e6 : 0) : score(sim, side);
+    const play = mine => {
+      const a = clone(st), b = clone(st), A = [null, null], B = [null, null];
+      A[side] = mine; A[foeSide] = pred; B[side] = mine;
+      resolve(a, A); resolve(b, B);
+      return .65 * outcome(a) + .35 * outcome(b);
+    };
+    const tilts = wallsOf(st).length ? [0, .22, -.22] : [0];
+    const cands = [null];
+    for (const b of alive(st, side)) for (const pow of ready(b) ? [false, true] : [false]) {
+      if (pow && b.pw === 'anchor') { cands.push({ i: b.i, ax: 0, ay: -1, f: 0, pow: true }); continue; }
+      for (const foe of alive(st, foeSide)) for (const f of [.55, .8, 1]) for (const tl of tilts) {
+        const dx = foe.x - b.x, dy = foe.y - b.y;
+        cands.push({ i: b.i, ax: Math.round(dx - dy * tl), ay: Math.round(dy + dx * tl), f, pow });
+      }
+      // au bord du vide (ou visé par ton tir prédit) : on prévoit de l'écarter vers le centre
+      const aimed = pred && pred.f && alive(st, foeSide).some(o => o.i === pred.i && Math.abs((b.x - o.x) * pred.ay - (b.y - o.y) * pred.ax) / (len(pred.ax, pred.ay) || 1) < b.r + o.r);
+      if (len(b.x, b.y) > R * .55 || aimed) for (const tl of [0, .6, -.6]) for (const f of [.25, .45, .65]) {
+        const dx = -b.x, dy = -b.y;
+        cands.push({ i: b.i, ax: Math.round(dx - dy * tl), ay: Math.round(dy + dx * tl), f, pow });
+      }
+    }
+    let best = null, bestS = -Infinity;
+    for (const c of cands) {
+      const sc = play(c) - (c && c.pow ? 120 : 0) + rnd() * 30;
+      if (sc > bestS) { bestS = sc; best = c; }
+    }
+    if (best && best.f) {
+      const e = (rnd() * 2 - 1) * L.aimErr, px = -best.ay, py = best.ax;
+      best = { ...best, ax: Math.round(best.ax + px * e), ay: Math.round(best.ay + py * e), f: Math.round(Math.max(.2, Math.min(1, best.f * (1 + (rnd() * 2 - 1) * L.forceErr))) * 100) / 100 };
+    }
+    return best;
+  }
+
+  return { kit, stats, create, clone, alive, ready, resolve, aiShot, aiSmart, len, ringR, nearest, touchesWall };
 })();
 
 export { RG };

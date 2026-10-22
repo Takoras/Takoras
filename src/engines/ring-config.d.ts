@@ -9,7 +9,7 @@ export const RCFG: {
   BUDGET: Record<string, number>; BUDGET_MAX: number;
   ELO: { start: number; kNew: number; k: number; newGames: number };
   RANKS: { k: string; min: number; ico: string }[];
-  AI: Record<string, { shoots: boolean; aimErr?: number; forceErr?: number; tries?: number }>;
+  AI: Record<string, { shoots: boolean; smart?: boolean; aimErr?: number; forceErr?: number; tries?: number }>;
   TOKENS: Record<string, TokenKit>;
   DEFAULT_TOKEN: TokenKit;
   STAT_MAX: { mass: number; power: number; r: number };
