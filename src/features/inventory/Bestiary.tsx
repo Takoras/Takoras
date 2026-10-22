@@ -441,7 +441,6 @@ function CardView({
       : locked
         ? ['🔒', t('ui.lock')]
         : null;
-  const label = g ? `${jn(j.name)} ×${n}` : c.seen ? `${jn(j.name)} ×0` : `#${c.num} ${t('ui.bst_unknown')}`;
   return (
     <li
       data-key={c.j.name}
@@ -453,7 +452,6 @@ function CardView({
         type="button"
         className={s.cardBtn}
         onClick={() => onTap(c)}
-        aria-label={label}
         aria-pressed={selecting && g ? q > 0 : undefined}
       >
         <span className={s.num}>#{String(c.num).padStart(2, '0')}</span>

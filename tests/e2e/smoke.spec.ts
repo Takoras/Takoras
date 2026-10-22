@@ -34,3 +34,16 @@ test('connexion : la fenêtre propose Discord', async ({ page }) => {
   await page.getByRole('button', { name: 'Connexion' }).first().click();
   await expect(page.getByRole('button', { name: /Discord/ })).toBeVisible();
 });
+
+// Pages connectées (Supabase simulé) : pas de problème d'accessibilité grave non plus
+import { fakeSupabase } from './fake-supabase';
+for (const path of ['/inventaire', '/inventaire/objets', '/profil', '/profil/Ami']) {
+  test(`${path} (connecté) : accessibilité`, async ({ page }) => {
+    await fakeSupabase(page);
+    await page.goto(path);
+    await expect(page.locator('main h1')).toBeVisible();
+    await page.waitForLoadState('networkidle');
+    const a11y = await new AxeBuilder({ page }).analyze();
+    expect(a11y.violations.filter((v) => v.impact === 'critical' || v.impact === 'serious').map((v) => `${v.id}: ${v.nodes[0]?.html.slice(0, 120)}`)).toEqual([]);
+  });
+}

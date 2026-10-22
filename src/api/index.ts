@@ -20,7 +20,7 @@ export const publicApi = {
 export const accountApi = {
   setPseudo: (p: string) => rpc('set_pseudo', { p }),
   changePseudo: (p: string) => rpc('change_pseudo', { p }),
-  updateProfile: (a: { p_avatar: string; p_banner: string; p_bio: string; p_showcase: number[] }) => rpc('update_profile', a),
+  updateProfile: (a: { p_avatar: string; p_banner: string | null; p_bio: string; p_showcase: (number | null)[] }) => rpc('update_profile', a),
 };
 
 export const ecoApi = {

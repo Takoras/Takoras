@@ -18,6 +18,7 @@ export async function fakeSupabase(page: Page, state: Partial<FakeState> = {}, d
     { jeton: 'Vyolis', serie: 'Takoras', variant: null, odds: 1000, ids: [16], free: [16], shown: 0, deck: 0, last: '2026-10-20T12:00:00Z', best_luck: 1 },
   ];
   let lvl = 1;
+  const prof: { avatar: string; bio: string; banner: string | null; showcase: (number | null)[] } = { avatar: 'default', bio: '', banner: null, showcase: [] };
   const items = [
     { item: 'potion1', kind: 'potion', data: { mult: 1.3, rolls: 5 }, qty: 3 },
     { item: 'instant', kind: 'instant', data: {}, qty: 1 },
@@ -84,6 +85,25 @@ export async function fakeSupabase(page: Page, state: Partial<FakeState> = {}, d
       const it = items.find((i) => i.item === b.p_item); if (it) it.qty -= b.p_qty;
       return json({ used: b.p_qty, state: { ...st } });
     }
+    if (rpc === 'profile_public') {
+      const who = (JSON.parse(route.request().postData() ?? '{}') as { p_pseudo: string }).p_pseudo;
+      const base = { num: 42, streak: 3, beta: true, wins: 2, losses: 1, avatar: 'default', banner: null, bio: '', joined: '2026-09-01T00:00:00Z', pulls: 120, collection: 3, owned: 6,
+        best_pull: { jeton: 'Vyolis', odds: 1000, variant: null, eff: 1000 } };
+      if (who.toLowerCase() === st.pseudo.toLowerCase())
+        return json({ ...base, pseudo: st.pseudo, avatar: prof.avatar, bio: prof.bio, banner: prof.banner, banners: ['plaine'], avatars: [], email: 'test@example.com', provider: 'discord', pseudo_free: false, pseudo_next: null,
+          showcase: [prof.showcase[0] ? { id: 16, jeton: 'Vyolis', odds: 1000, variant: null } : null, null, null, null, null] });
+      if (who === 'Ami') return json({ ...base, pseudo: 'Ami', bio: 'Salut !', showcase: [{ id: 99, jeton: 'Mobu', odds: 2, variant: 'gold' }, null, null, null, null] });
+      return json(null);
+    }
+    if (rpc === 'update_profile') {
+      const b = JSON.parse(route.request().postData() ?? '{}') as { p_avatar: string; p_banner: string | null; p_bio: string; p_showcase: (number | null)[] };
+      if (b.p_banner === '') return route.fulfill({ status: 400, contentType: 'application/json', body: JSON.stringify({ message: 'bad_banner', code: 'P0001' }) });
+      Object.assign(prof, { avatar: b.p_avatar, banner: b.p_banner, bio: b.p_bio, showcase: b.p_showcase });
+      return json(null);
+    }
+    if (rpc === 'collection_of') return json([{ jeton: 'Mobu', serie: 'Takoras', variant: 'gold', total: 1 }, { jeton: 'Mobu', serie: 'Takoras', variant: null, total: 5 }]);
+    if (rpc === 'friend_status') return json({ id: 'u-ami', status: null, incoming: false });
+    if (rpc === 'friend_request') return json('sent');
     if (rpc === 'live_feed' || rpc === 'avatars_of') return json([]);
     if (url.includes('/rest/v1/pulls')) return json([]);
     return json(null);

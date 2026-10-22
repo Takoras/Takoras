@@ -22,10 +22,18 @@ function want(pseudo: string) {
       const rows = await publicApi.avatarsOf(batch);
       rows.forEach((r) => cache.set(r.pseudo, r.avatar));
       subs.forEach((f) => f());
-    } catch { /* pas grave : on garde l'initiale */ }
+    } catch {
+      /* pas grave : on garde l'initiale */
+    }
   }, 60);
 }
 const subscribe = (f: () => void) => (subs.add(f), () => subs.delete(f));
+// Après un changement de photo : on met à jour toutes les pastilles de ce pseudo
+export function setAvatar(pseudo: string, avatar: string) {
+  cache.set(pseudo, avatar);
+  asked.add(pseudo);
+  subs.forEach((f) => f());
+}
 
 export function Avatar({ pseudo, avatar, size = 40 }: { pseudo: string; avatar?: string | null; size?: number }) {
   const known = avatar && avatar !== 'default' ? avatar : undefined;

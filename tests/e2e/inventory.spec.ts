@@ -16,18 +16,18 @@ test('bestiaire : grille, filtres, fiche, vente, verrou, niveau', async ({ page 
   await page.getByRole('tab', { name: /Normaux|Normal/ }).click();
 
   // fiche de Mobu : vendre 1, puis monter de niveau
-  await page.getByRole('button', { name: 'Mobu ×4' }).click();
+  await page.getByRole('button', { name: /×4 Mobu/ }).click();
   const dlg = page.getByRole('dialog');
   await expect(dlg.getByText('Niv. 1/10')).toBeVisible();
   await dlg.getByRole('button', { name: /Vendre 1/ }).click();
-  await expect(page.getByRole('button', { name: 'Mobu ×3' })).toBeVisible();
+  await expect(page.getByRole('button', { name: /×3 Mobu/ })).toBeVisible();
   await expect(page.getByLabel('Solde')).toContainText('101');
-  await page.getByRole('button', { name: 'Mobu ×3' }).click();
+  await page.getByRole('button', { name: /×3 Mobu/ }).click();
   await page.getByRole('dialog').getByRole('button', { name: /Monter au niveau 2/ }).click();
   await expect(page.getByRole('status').getByText(/niveau 2/)).toBeVisible();
 
   // verrouiller Vyolis
-  await page.getByRole('button', { name: 'Vyolis ×1' }).click();
+  await page.getByRole('button', { name: /×1 Vyolis/ }).click();
   await page.getByRole('dialog').getByRole('button', { name: /Verrouiller/ }).click();
   expect(calls).toContain('lock_pulls');
 });

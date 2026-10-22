@@ -256,7 +256,7 @@ export type Database = {
       shop_today: { Args: never; Returns: Json };
       take_pulls: { Args: { force?: string; luck?: number; n: number; p_variant?: string }; Returns: Json };
       update_profile: {
-        Args: { p_avatar: string; p_banner: string; p_bio: string; p_showcase: number[] };
+        Args: { p_avatar: string; p_banner: string | null; p_bio: string; p_showcase: (number | null)[] };
         Returns: undefined;
       };
       upgrade_regen: { Args: never; Returns: Json };
