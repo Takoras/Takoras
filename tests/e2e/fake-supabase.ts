@@ -1,4 +1,5 @@
 import type { Page } from '@playwright/test';
+import { RG } from '../../src/engines/ring-engine.js';
 
 // Supabase simulé : une fausse session dans le navigateur + de fausses réponses aux RPC.
 // Aucun appel ne part vers le vrai serveur pendant ces tests.
@@ -9,7 +10,7 @@ const jwt = `${b64({ alg: 'HS256', typ: 'JWT' })}.${b64({ sub: user.id, role: 'a
 
 export type FakeState = { coins: number; stock: number; max: number; pseudo: string; step: number; next_in: number; regen: number };
 export type FakeAnn = { id: number; body: string; author: string | null; banner: boolean; fullscreen: boolean; created_at: string };
-export async function fakeSupabase(page: Page, state: Partial<FakeState> = {}, draws: string[][] = [], opts: { ann?: FakeAnn[]; tuto?: boolean; pnSeen?: number; tester?: boolean; deck?: number[]; admin?: boolean } = {}) {
+export async function fakeSupabase(page: Page, state: Partial<FakeState> = {}, draws: string[][] = [], opts: { ann?: FakeAnn[]; tuto?: boolean; pnSeen?: number; tester?: boolean; deck?: number[]; admin?: boolean; ranked?: { tuto?: boolean } } = {}) {
   const st: FakeState = { coins: 5000, stock: 12, max: 20, pseudo: 'Testeur', step: 180, next_in: 100, regen: 180, ...state };
   const calls: string[] = [];
   // Inventaire de test : 4 Mobu (niveau 1), 1 Mobu Doré, 1 Vyolis (rare : vente confirmée)
@@ -36,6 +37,18 @@ export async function fakeSupabase(page: Page, state: Partial<FakeState> = {}, d
     { item: 'potion1', kind: 'potion', data: { mult: 1.3, rolls: 5 }, qty: 3 },
     { item: 'instant', kind: 'instant', data: {}, qty: 1 },
   ];
+  // Classé simulé : moi = le camp 1 (« p2 », pour vérifier l'écran tourné), « Rival » passe toujours son tour.
+  // 1er et 2e « join » : en file ; 3e : match trouvé. 2e tir : le serveur déclare la victoire (+20 Elo).
+  const rk = { tuto: opts.ranked?.tuto ?? true, elo: 1000, joins: 0, shots: [] as unknown[] };
+  type FMatch = { id: string; p1: string; p2: string; names: string[]; map: string; state: ReturnType<typeof RG.create>; turn: number; ready1: boolean; ready2: boolean; deadline: string; status: string; winner: number | null; why: string | null; elo: unknown; last: unknown };
+  let match: FMatch | null = null;
+  const team = (names: string[]) => names.map((name) => ({ name, lvl: 1, variant: '' }));
+  const resolveTurn = (m: FMatch, mine: unknown) => {
+    const shots = [null, mine], before = RG.clone(m.state);
+    RG.resolve(m.state, shots as never);
+    Object.assign(m, { turn: m.turn + 1, ready1: false, ready2: false, last: { turn: m.turn, shots, before }, deadline: new Date(Date.now() + 39_000).toISOString() });
+    if (m.turn === 3) Object.assign(m, { status: 'done', winner: 1, why: 'out', elo: { before: [1000, 1000], after: [980, 1020] } });
+  };
   // Tuto de première visite et popup de patch note : déjà vus, sauf si le test les veut
   await page.addInitScript(([tuto, pn]) => {
     if (tuto !== '1') localStorage.setItem('takoras-tuto-done', '1');
@@ -50,6 +63,30 @@ export async function fakeSupabase(page: Page, state: Partial<FakeState> = {}, d
     const rpc = /\/rpc\/([a-z_]+)/.exec(url)?.[1];
     calls.push(rpc ?? url);
     const json = (body: unknown) => route.fulfill({ status: 200, contentType: 'application/json', body: JSON.stringify(body) });
+    if (rpc === 'ranked_me') return json({ elo: rk.elo, games: 4, wins: 3, losses: 1, draws: 0, best_elo: 1040, tuto_done: rk.tuto, top: 2, live: match?.status === 'live' ? match.id : null, queued: false });
+    if (rpc === 'ranked_tuto_done') { rk.tuto = true; return json(null); }
+    if (rpc === 'ranked_top') return json([{ pseudo: 'Alpha', elo: 1480, games: 30, wins: 22 }, { pseudo: 'Testeur', elo: 1060, games: 4, wins: 3 }, { pseudo: 'Bravo', elo: 990, games: 8, wins: 3 }]);
+    if (url.includes('/functions/v1/ranked')) {
+      if (route.request().method() === 'OPTIONS') return route.fulfill({ status: 200, headers: { 'Access-Control-Allow-Origin': '*', 'Access-Control-Allow-Headers': '*' } });
+      const b = JSON.parse(route.request().postData() ?? '{}') as { op: string; shot?: unknown; turn?: number };
+      calls.push(`ranked:${b.op}`);
+      const now = Date.now();
+      if (b.op === 'join') {
+        if (!rk.tuto) return json({ error: 'tuto_required', now });
+        if (++rk.joins < 3) return json({ queued: true, window: 75, now });
+        match ??= { id: '11111111-2222-3333-4444-555555555555', p1: 'u-rival', p2: user.id, names: ['Rival', st.pseudo], map: 'volcan',
+          state: RG.create([team(['Rouillé', 'Givre', 'Azura']), team(['Mobu', 'Vyolis', 'Pikko'])], 'volcan'), turn: 1, ready1: false, ready2: false,
+          deadline: new Date(now + 36_000).toISOString(), status: 'live', winner: null, why: null, elo: null, last: null };
+        return json({ match: match.id, now });
+      }
+      if (b.op === 'shoot' && match) { rk.shots.push(b.shot); if (b.turn === match.turn) resolveTurn(match, b.shot); return json({ ok: true, now }); }
+      if (b.op === 'forfeit' && match) { Object.assign(match, { status: 'done', winner: 0, why: 'forfeit' }); return json({ ok: true, now }); }
+      return json({ ok: true, now });
+    }
+    if (url.includes('/rest/v1/ranked_matches')) {
+      const one = (route.request().headers().accept ?? '').includes('pgrst.object');
+      return json(one ? match : match ? [match] : []);
+    }
     if (rpc === 'eco_state') return json({ ...st, admin: !!opts.admin, banned: false, beta: true, tester: !!opts.tester, streak: 2, streak_today: true, potions: [], luck: 1 });
     if (rpc === 'take_pulls') {
       const n = (JSON.parse(route.request().postData() ?? '{}') as { n: number }).n;
@@ -177,5 +214,5 @@ export async function fakeSupabase(page: Page, state: Partial<FakeState> = {}, d
     if (url.includes('/rest/v1/pulls')) return json([]);
     return json(null);
   });
-  return { calls, state: st };
+  return { calls, state: st, ranked: rk };
 }

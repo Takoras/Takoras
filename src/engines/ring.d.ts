@@ -1,9 +1,20 @@
 // Écran du Ring (ring-ui + ring-fx de l'ancien site, portés tels quels). Il crée lui-même son overlay plein écran.
 import type { RingState } from './ring-engine';
 type Team = { name: string; lvl?: number; variant?: string }[];
-export function startRing(teams: [Team, Team], opts?: { names?: [string, string]; ai?: string; tuto?: boolean; map?: string; onEnd?: (r: 'again' | 'back') => void }): void;
+export type RingOnline = {
+  me: 0 | 1;
+  state: unknown;
+  turn: number;
+  deadline: number;
+  toLocal: (iso: string) => number;
+  shoot: (shot: { i: number; ax: number; ay: number; f: number; pow: boolean } | null) => void;
+  tick: () => void;
+  forfeit: () => void;
+};
+export function startRing(teams: [Team, Team], opts?: { names?: [string, string]; ai?: string; tuto?: boolean; map?: string; online?: RingOnline; onEnd?: (r: 'again' | 'back') => void }): void;
+export function ringOnline(m: unknown): void;
 export function closeRing(): void;
-export function startRingTuto(onEnd?: (r: 'again' | 'back') => void): void;
+export function startRingTuto(onEnd?: (r: 'again' | 'back') => void, opts?: { must?: boolean; onDone?: () => void }): void;
 export function ringTutoSeen(): boolean;
 export function powerText(name: string): { pw: string; name: string; desc: string; cd: number; when: string };
 export function ringStatsHTML(name: string, lvl?: number, variant?: string, compact?: boolean): string;

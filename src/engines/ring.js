@@ -38,12 +38,16 @@ const RT = {
     power: 'Pouvoir', on: 'Activé', validate: 'Valider', validated: 'Validé ✓', pass: 'Passer le tour', turn: 'Tour {n}/{m}', sudden: 'Mort subite !', foeOk: '✓ L’adversaire a validé',
     hSel: 'Tape un de tes jetons', hAim: 'Glisse vers l’arrière pour viser (n’importe où sur l’écran)', hVal: 'Valide quand tu es prêt', hWait: 'En attente de l’adversaire…',
     reveal: 'Feu !', out: 'Éjecté !', win: 'Victoire !', lose: 'Défaite…', draw: 'Égalité', again: 'Rejouer', back: 'Retour', quit: 'Abandonner le match ?', you: 'Toi', bot: 'Robot',
-    why: { out: 'Tous ses jetons sont sortis du ring', count: 'Plus de jetons au dernier tour', turns: 'Plus de jetons restants après 12 tours', center: 'Jetons plus proches du centre', draw: 'Personne ne gagne' },
+    why: { forfeit: 'Abandon', afk: 'Absent 3 tours de suite', out: 'Tous ses jetons sont sortis du ring', count: 'Plus de jetons au dernier tour', turns: 'Plus de jetons restants après 12 tours', center: 'Jetons plus proches du centre', draw: 'Personne ne gagne' },
     turns: '{n} tours', mass: 'Poids', powerS: 'Puissance', size: 'Taille', koS: 'Éjecté',
     massD: 'Plus il est lourd, plus il est dur à pousser et plus il pousse fort.', powD: 'La force max de son tir : jusqu’où il peut aller.', sizeD: 'Plus il est gros, plus il touche facilement… mais plus il est facile à toucher.', statsLegend: '⚖️ Poids : dur à pousser, pousse fort · 💥 Puissance : force du tir · ⭕ Taille : touche plus facilement, mais cible plus facile',
     t1: 'Tape un de tes jetons pour le choisir.', t2: 'Glisse vers l’arrière pour viser. Plus tu tires loin, plus c’est fort. Regarde la trajectoire !',
     t3: 'Valide ! Ton adversaire tire en même temps que toi.', t4: 'Éjecte ses jetons du ring pour gagner.', t5: 'Chaque jeton a un pouvoir, essaie-le ! Active-le, vise, puis valide.',
     t6: 'Bien joué, tu es prêt pour le classé !', tOk: 'OK', tSkip: 'Passer', tEnd: 'Terminer',
+    tTimer: 'Le chrono : <b>30 s</b> pour viser à chaque tour. Si les deux joueurs valident avant, le tour part tout de suite. Sans validation, ton tir part tel quel à 0.',
+    tWalls: 'Les murs : les gris amortissent, les <b>roses renvoient plus fort</b>. Sers-t’en pour faire des bandes ou te protéger.',
+    tScout: 'Touche <b>« Leurs pouvoirs »</b> (en haut) pour voir les jetons et les pouvoirs d’en face avant de tirer.',
+    tRanked: '<b>Le classé</b> : tu affrontes un vrai joueur de ton niveau (Elo). Victoire = +Elo, défaite = −Elo. Monte de <b>Fer 1</b> jusqu’à <b>Légende</b> ! Si tu ne joues pas 3 tours de suite, tu perds le match.',
   },
   en: {
     map_arene: 'Arena', map_jardin: 'Garden', map_volcan: 'Volcano', map_glace: 'Ice', map_ruines: 'Ruins', foeTeam: 'Opponent team', scout: 'Their powers', scoutHint: 'Tap a token to see its card. The timer is paused while you look (training).',
@@ -71,12 +75,16 @@ const RT = {
     power: 'Power', on: 'On', validate: 'Confirm', validated: 'Confirmed ✓', pass: 'Skip turn', turn: 'Turn {n}/{m}', sudden: 'Sudden death!', foeOk: '✓ Opponent is ready',
     hSel: 'Tap one of your tokens', hAim: 'Drag backwards to aim (anywhere on the screen)', hVal: 'Confirm when you’re ready', hWait: 'Waiting for the opponent…',
     reveal: 'Go!', out: 'Out!', win: 'Victory!', lose: 'Defeat…', draw: 'Draw', again: 'Play again', back: 'Back', quit: 'Forfeit the match?', you: 'You', bot: 'Bot',
-    why: { out: 'All their tokens left the ring', count: 'More tokens on the last turn', turns: 'More tokens left after 12 turns', center: 'Tokens closer to the center', draw: 'Nobody wins' },
+    why: { forfeit: 'Forfeit', afk: 'Away for 3 turns in a row', out: 'All their tokens left the ring', count: 'More tokens on the last turn', turns: 'More tokens left after 12 turns', center: 'Tokens closer to the center', draw: 'Nobody wins' },
     turns: '{n} turns', mass: 'Weight', powerS: 'Power', size: 'Size', koS: 'Knocked out',
     massD: 'The heavier, the harder to push and the harder it pushes.', powD: 'Its max shot strength: how far it can go.', sizeD: 'The bigger, the easier it hits… but the easier it is to hit.', statsLegend: '⚖️ Weight: hard to push, pushes hard · 💥 Power: shot strength · ⭕ Size: hits more easily, but easier to hit',
     t1: 'Tap one of your tokens to pick it.', t2: 'Drag backwards to aim. The further you pull, the harder the shot. Watch the path!',
     t3: 'Confirm! Your opponent shoots at the same time.', t4: 'Knock their tokens out of the ring to win.', t5: 'Every token has a power, try it! Turn it on, aim, then confirm.',
     t6: 'Well done, you’re ready for ranked!', tOk: 'OK', tSkip: 'Skip', tEnd: 'Finish',
+    tTimer: 'The timer: <b>30 s</b> to aim each turn. If both players confirm earlier, the turn starts right away. Without confirming, your shot goes as it is at 0.',
+    tWalls: 'Walls: grey ones absorb, <b>pink ones bounce you back harder</b>. Use them for bank shots or cover.',
+    tScout: 'Tap <b>“Their powers”</b> (at the top) to see the opponent’s tokens and powers before you shoot.',
+    tRanked: '<b>Ranked</b>: you face a real player at your level (Elo). Win = +Elo, lose = −Elo. Climb from <b>Iron 1</b> up to <b>Legend</b>! Skip 3 turns in a row and you lose the match.',
   },
 };
 const rtL = () => RT[SETTINGS.lang] || RT.fr;
@@ -91,16 +99,22 @@ function powerText(name) {
 // ---------- État
 const RNG = { st: null, el: null, cv: null, ctx: null, raf: 0, phase: 'aim', sel: null, aim: null, pow: false, drag: null, prev: null, foe: null, foeOk: false, locked: false,
   timer: 0, play: null, parts: [], trails: {}, spin: {}, shake: 0, imgs: {}, ai: 'normal', names: ['', ''], onEnd: null, tuto: null, view: { s: 1, cx: 0, cy: 0 } };
+// Classé en ligne : chacun se voit EN BAS. ME = mon camp dans l'état du serveur (0 ou 1) ; si je suis le camp 1,
+// l'écran est tourné d'un demi-tour (les maps sont symétriques, donc chacun voit le même terrain).
+const ME = () => RNG.me || 0, FOE = () => 1 - ME(), FL = () => (RNG.me ? -1 : 1);
+const sideCol = b => SIDE[b.side === ME() ? 0 : 1];
 const rgImg = name => {
   if (RNG.imgs[name]) return RNG.imgs[name];
   const im = new Image(); im.src = texOf(jetonOf(name)); RNG.imgs[name] = im; return im;
 };
 
 // teams : [[{ name, lvl, variant }×3] ×2]. opts : { names, ai, tuto, onEnd }
+// opts.online (classé) : { me, state, deadline, shoot(shot), forfeit(), tick(), now() } — l'état vient du serveur
 function startRing(teams, opts = {}) {
   closeRing();
-  Object.assign(RNG, { st: RG.create(teams, opts.map), phase: 'aim', sel: null, aim: null, pow: false, drag: null, prev: null, foe: null, foeOk: false, locked: false, play: null, parts: [], trails: {}, spin: {}, shake: 0,
-    ai: opts.ai || 'normal', names: opts.names || [rt('you'), rt('bot')], onEnd: opts.onEnd || null, tuto: opts.tuto ? { step: 0 } : null, last: 0 });
+  const on = opts.online || null;
+  Object.assign(RNG, { me: on ? on.me : 0, online: on, st: on ? RG.clone(on.state) : RG.create(teams, opts.map), phase: 'aim', sel: null, aim: null, pow: false, drag: null, prev: null, foe: null, foeOk: false, locked: false, play: null, parts: [], trails: {}, spin: {}, shake: 0,
+    ai: opts.ai || 'normal', names: opts.names || [rt('you'), rt('bot')], onEnd: opts.onEnd || null, tuto: opts.tuto ? { step: 0, must: !!opts.must, onDone: opts.onDone || null } : null, last: 0 });
   teams.flat().forEach(j => rgImg(j.name));
   const o = document.createElement('div');
   o.className = 'rg'; o.id = 'rg';
@@ -110,7 +124,7 @@ function startRing(teams, opts = {}) {
       <div class="rg-score"><span class="me" id="rg-n0"></span><b id="rg-turn"></b><span class="foe" id="rg-n1"></span></div>
       <div class="rg-timer" id="rg-timer"><svg viewBox="0 0 36 36"><circle cx="18" cy="18" r="15.5"/><circle class="p" cx="18" cy="18" r="15.5" pathLength="100"/></svg><b></b></div>
     </div>
-    <div class="rg-names"><span>${esc(RNG.names[0])}</span><span class="rg-ok" id="rg-ok">${rt('foeOk')}</span><span>${esc(RNG.names[1])} <button class="rg-scout" data-scout>👁 ${rt('scout')}</button></span></div>
+    <div class="rg-names"><span>${esc(RNG.names[ME()])}</span><span class="rg-ok" id="rg-ok">${rt('foeOk')}</span><span>${esc(RNG.names[FOE()])} <button class="rg-scout" data-scout>👁 ${rt('scout')}</button></span></div>
     <div class="rg-stage" id="rg-stage"><canvas id="rg-cv"></canvas><div class="rg-banner" id="rg-banner"></div><div class="rg-team foe" id="rg-t1"></div><div class="rg-team me" id="rg-t0"></div></div>
     <p class="rg-hint" id="rg-hint"></p>
     <div class="rg-bot">
@@ -127,9 +141,15 @@ function startRing(teams, opts = {}) {
   addEventListener('pointermove', rgMove); addEventListener('pointerup', rgUp); addEventListener('pointercancel', rgUp);
   o.querySelectorAll('.rg-team').forEach(p => p.addEventListener('click', e => { const b = e.target.closest('[data-id]'); if (b) rgInfo(+b.dataset.id); }));
   o.querySelector('#rg-pw').onclick = rgTogglePow;
-  o.querySelector('[data-scout]').onclick = () => rgScout(1);
+  o.querySelector('[data-scout]').onclick = () => rgScout(FOE());
   o.querySelector('#rg-go').onclick = () => rgLock();
-  o.querySelector('[data-quit]').onclick = async () => { if (RNG.st?.over || RNG.tuto || await host.ask(rt('quit'))) { if (!RNG.st) return; RNG.tuto = null; closeRing(); RNG.onEnd?.('back'); } };
+  o.querySelector('[data-quit]').onclick = async () => {
+    if (RNG.st?.over || RNG.tuto || RNG.phase === 'end' || await host.ask(rt('quit'))) {
+      if (!RNG.st) return;
+      if (RNG.online && RNG.phase !== 'end') RNG.online.forfeit();
+      RNG.tuto = null; const onEnd = RNG.onEnd; closeRing(); onEnd?.('back');
+    }
+  };
   sfx.whoosh?.();
   if (RNG.st.map) setTimeout(() => RNG.st && rgBanner(`${rt('map_' + RNG.st.map.id)}`, MAP_THEME[RNG.st.map.id]?.rim || '#c4b5fd', false, 1300), 350);
   rgTurnStart();
@@ -140,7 +160,7 @@ function closeRing() {
   removeEventListener('resize', rgResize); removeEventListener('pointermove', rgMove); removeEventListener('pointerup', rgUp); removeEventListener('pointercancel', rgUp);
   document.querySelectorAll('.rg, .rg-res').forEach(x => { x.classList.remove('on'); setTimeout(() => x.remove(), 250); });
   document.documentElement.classList.remove('lock');
-  RNG.st = null; RNG.el = null;
+  RNG.st = null; RNG.el = null; RNG.online = null; RNG.me = 0;
 }
 // Le ring prend toute la place disponible (carré). Rendu en deux couches « pixel art » basse résolution (décor et effets,
 // agrandies sans lissage = vrais gros pixels) et les jetons au-dessus en pleine résolution, nets.
@@ -157,8 +177,8 @@ function rgResize() {
   }
   RNG.view = { size, dpr, px, s: size / 2 / ((RNG.st ? RG.ringR(RNG.st) : RCFG.RING_R) * 1.08) };
 }
-const w2s = (x, y) => [RNG.view.size / 2 + x * RNG.view.s, RNG.view.size / 2 + y * RNG.view.s];
-const s2w = (px, py) => [(px - RNG.view.size / 2) / RNG.view.s, (py - RNG.view.size / 2) / RNG.view.s];
+const w2s = (x, y) => { const k = RNG.view.s * FL(); return [RNG.view.size / 2 + x * k, RNG.view.size / 2 + y * k]; };
+const s2w = (px, py) => { const k = RNG.view.s * FL(); return [(px - RNG.view.size / 2) / k, (py - RNG.view.size / 2) / k]; };
 // Couleurs des camps : violet = toi, orange = l'adversaire (les couleurs du site)
 const SIDE = [{ hi: '#ddd6fe', md: '#a78bfa', lo: '#4c1d95', rgb: '167,139,250' }, { hi: '#fed7aa', md: '#fb923c', lo: '#7c2d12', rgb: '251,146,60' }];
 // Filtres des variantes (les mêmes que sur tout le site)
@@ -181,10 +201,11 @@ function rgAiThink(st, level) {
 function rgTurnStart() {
   const st = RNG.st;
   Object.assign(RNG, { phase: 'aim', aim: null, pow: false, prev: null, foe: null, foeOk: false, locked: false, drag: null });
-  const mine = RG.alive(st, 0);
+  const mine = RG.alive(st, ME());
   if (!mine.some(b => b.id === RNG.sel)) RNG.sel = null;
   RNG.timer = RCFG.AIM_S;
   RNG.el.querySelector('#rg-ok').classList.remove('on');
+  if (RNG.online) { RNG.online.sent = false; rgHud(); return; } // l'adversaire est un vrai joueur : rien à simuler
   // l'IA réfléchit (hors simulation : son hasard ne touche pas au déterminisme du tour)
   clearTimeout(RNG.foeT); clearTimeout(RNG.okT); RNG.foeReady = false;
   const turn = st.turn;
@@ -201,7 +222,7 @@ function rgTurnStart() {
 }
 function rgHud() {
   const st = RNG.st, o = RNG.el; if (!o) return;
-  [0, 1].forEach(s => { o.querySelector('#rg-n' + s).innerHTML = st.bodies.filter(b => b.side === s).map(b => `<i class="${b.alive ? '' : 'off'}"></i>`).join(''); });
+  [0, 1].forEach(s => { o.querySelector('#rg-n' + (s === ME() ? 0 : 1)).innerHTML = st.bodies.filter(b => b.side === s).map(b => `<i class="${b.alive ? '' : 'off'}"></i>`).join(''); });
   rgPanels();
   o.querySelector('#rg-turn').textContent = st.sudden ? rt('sudden') : rt('turn', { n: Math.min(st.turn, RCFG.TURNS), m: RCFG.TURNS });
   const b = st.bodies.find(x => x.id === RNG.sel), pwB = o.querySelector('#rg-pw'), go = o.querySelector('#rg-go');
@@ -223,7 +244,7 @@ function rgHud() {
 function rgPanels() {
   const st = RNG.st; if (!st || !RNG.el) return;
   [0, 1].forEach(side => {
-    const box = RNG.el.querySelector('#rg-t' + side);
+    const box = RNG.el.querySelector('#rg-t' + (side === ME() ? 0 : 1));
     box.innerHTML = st.bodies.filter(b => b.side === side).map(b => {
       const p = powerText(b.name), rd = RG.ready(b);
       return `<button class="rg-tc${b.alive ? '' : ' ko'}${b.id === RNG.sel ? ' sel' : ''}" data-id="${b.id}" style="--c:${PW_COL[p.pw]}" aria-label="${esc(jn(b.name))}">
@@ -250,7 +271,7 @@ function rgInfo(id) {
   const p = powerText(b.name), rd = RG.ready(b);
   const state = !b.alive ? rt('koS') : rd ? rt('ready') : b.spent ? rt('used') : rt('inCd', { n: b.cd });
   const o = document.createElement('div'); o.className = 'rg-info';
-  o.innerHTML = `<div class="rg-ic ${b.side ? 'foe' : 'me'}" style="--g:${hexRGB(jetonOf(b.name).glow)}">
+  o.innerHTML = `<div class="rg-ic ${b.side === ME() ? 'me' : 'foe'}" style="--g:${hexRGB(jetonOf(b.name).glow)}">
     <button class="rg-icx" aria-label="${t('close')}">✕</button>
     <div class="rg-ih"><img class="${vCls(b.variant)}" src="${texOf(jetonOf(b.name))}" alt=""><div><b>${jnH(b.name)} ${vTag(b.variant)}</b><small>${esc(RNG.names[b.side])} · ${at('lvl')} ${b.lvl}</small></div></div>
     <div class="rg-ip" style="--c:${PW_COL[p.pw]}"><b>✦ ${esc(p.name)}</b><p>${esc(p.desc)}</p><small>${state}${p.when ? ' · ' + p.when : ''}</small></div>
@@ -269,11 +290,11 @@ function rgDown(e) {
   const [px, py] = rgPt(e), [wx, wy] = s2w(px, py);
   const near = b => RG.len(b.x - wx, b.y - wy) < b.r * 1.3 + 15;
   // toucher un jeton adverse (ou un des tiens hors visée) : sa fiche
-  const foe = !RNG.play && RG.alive(RNG.st, 1).find(near);
+  const foe = !RNG.play && RG.alive(RNG.st, FOE()).find(near);
   if (foe && !RNG.drag && RNG.sel == null || foe && RNG.phase !== 'aim') return rgInfo(foe.id);
-  if (RNG.phase !== 'aim' || RNG.locked) { const mine = !RNG.play && RG.alive(RNG.st, 0).find(near); return mine && rgInfo(mine.id); }
+  if (RNG.phase !== 'aim' || RNG.locked) { const mine = !RNG.play && RG.alive(RNG.st, ME()).find(near); return mine && rgInfo(mine.id); }
   if (RNG.tuto?.block) return;
-  const hit = RG.alive(RNG.st, 0).find(b => RG.len(b.x - wx, b.y - wy) < b.r * 1.5 + 20);
+  const hit = RG.alive(RNG.st, ME()).find(b => RG.len(b.x - wx, b.y - wy) < b.r * 1.5 + 20);
   if (hit && hit.id !== RNG.sel) { RNG.sel = hit.id; RNG.aim = null; RNG.pow = false; RNG.prev = null; sfx.click(); rgHud(); RNG.tuto?.on?.('sel'); }
   if (RNG.sel == null) return;
   RNG.drag = { x: px, y: py, id: e.pointerId };
@@ -284,7 +305,7 @@ function rgMove(e) {
   const full = Math.min(170, RNG.view.size * .42);
   if (L < 8) return;
   const f = Math.round(Math.min(1, L / full) * 100) / 100;
-  RNG.aim = { ax: Math.round(dx / L * 1000), ay: Math.round(dy / L * 1000), f };
+  RNG.aim = { ax: Math.round(dx / L * 1000 * FL()) || 0, ay: Math.round(dy / L * 1000 * FL()) || 0, f }; // direction dans le monde (écran tourné si camp 1)
   RNG.prevDirty = true;
   if (!RNG.aimTick || performance.now() - RNG.aimTick > 90) { RNG.aimTick = performance.now(); sfx.tick?.(.2 + f * .6); }
 }
@@ -300,12 +321,13 @@ function rgTogglePow() {
   RNG.pow = !RNG.pow; RNG.prevDirty = true; sfx.next?.(); rgHud();
   if (RNG.pow) RNG.tuto?.on?.('pow');
 }
-function rgShot() { const b = RNG.st.bodies.find(x => x.id === RNG.sel); return b ? { i: b.i, ax: RNG.aim?.ax || 0, ay: RNG.aim?.ay || -1, f: RNG.aim?.f || 0, pow: RNG.pow } : null; }
+function rgShot() { const b = RNG.st.bodies.find(x => x.id === RNG.sel); return b ? { i: b.i, ax: RNG.aim?.ax || 0, ay: RNG.aim?.ay || -FL(), f: RNG.aim?.f || 0, pow: RNG.pow } : null; }
 // Trajectoire prévue : seulement ton tir, jusqu'un peu après le premier choc
 function rgPreview() {
   RNG.prevDirty = false;
   if (!RNG.aim || RNG.sel == null) { RNG.prev = null; return; }
-  const sim = RG.clone(RNG.st), r = RG.resolve(sim, [rgShot(), null], { preview: 70 });
+  const sh = [null, null]; sh[ME()] = rgShot();
+  const sim = RG.clone(RNG.st), r = RG.resolve(sim, sh, { preview: 70 });
   const idx = RNG.st.bodies.findIndex(b => b.id === RNG.sel);
   const hitEv = r.ev.find(e => e.t === 'hit' && (e.a === RNG.sel || e.b === RNG.sel));
   const other = hitEv ? RNG.st.bodies.findIndex(b => b.id === (hitEv.a === RNG.sel ? hitEv.b : hitEv.a)) : -1;
@@ -318,6 +340,8 @@ function rgLock(auto) {
   RNG.locked = true; RNG.drag = null;
   sfx.upgrade?.(); rgHud();
   RNG.tuto?.on?.('go');
+  // en ligne : on envoie le tir au serveur ; le tour part quand il a les deux (ou à la fin du chrono)
+  if (RNG.online) { RNG.online.sent = true; RNG.online.shoot(RNG.aim || RNG.pow ? rgShot() : null); return; }
   // l'adversaire valide (au plus tard à la fin du chrono)
   const go = () => {
     if (!RNG.st) return;
@@ -329,11 +353,65 @@ function rgLock(auto) {
   setTimeout(wait, auto ? 0 : 300 + Math.random() * 600);
 }
 
+// ---------- Classé en ligne : le serveur décide, l'écran rejoue.
+// Chaque mise à jour du match (temps réel) arrive ici. Un tour calculé = on rejoue les deux tirs révélés à partir de
+// l'état d'avant (même moteur, même résultat), puis on se cale exactement sur l'état du serveur.
+function ringOnline(m) {
+  const O = RNG.online; if (!RNG.st || !O || !m) return;
+  if (m.status === 'done') O.done = m;
+  if (m.turn > O.turn) O.next = m;
+  else if (m.turn === O.turn) { O.deadline = O.toLocal(m.deadline); rgFoeReady(ME() ? m.ready1 : m.ready2); }
+  rgOnlineStep();
+}
+function rgFoeReady(on) {
+  if (!RNG.el || !on || RNG.foeOk) return;
+  RNG.foeOk = true; RNG.el.querySelector('#rg-ok').classList.add('on'); sfx.click?.();
+}
+function rgOnlineStep() {
+  const O = RNG.online; if (!O || RNG.phase === 'reveal' || RNG.phase === 'play' || RNG.phase === 'end') return;
+  const m = O.next;
+  if (m) {
+    O.next = null; O.turn = m.turn; O.deadline = O.toLocal(m.deadline); O.snap = m.state;
+    const L = m.last;
+    if (L && L.turn === m.turn - 1 && L.turn === RNG.st.turn) {
+      RNG.st = RG.clone(L.before);
+      RNG.locked = true; rgFoeReady(true);
+      setTimeout(() => rgReveal(L.shots), 350);
+      return;
+    }
+    RNG.st = RG.clone(m.state); // trop en retard pour rejouer : on se cale directement
+    return rgOnlineAfter();
+  }
+  if (O.done) rgOnlineAfter(); // abandon ou absence : fin sans dernier tour à rejouer
+}
+// Après l'animation (ou un recalage) : état exact du serveur, puis tour suivant ou écran de fin
+function rgOnlineAfter() {
+  const O = RNG.online; if (!O) return;
+  if (O.snap) { RNG.st = RG.clone(O.snap); O.snap = null; }
+  if (O.next) return rgOnlineStep();
+  if (O.done) {
+    O.elo = O.done.elo;
+    RNG.phase = 'end'; rgHud();
+    const d = O.done; O.done = null;
+    return setTimeout(() => rgResult({ winner: d.winner, why: d.why }), 600);
+  }
+  rgTurnStart();
+}
+// Chrono du serveur. À zéro : on envoie ce qu'on a ; un peu après, on demande au serveur de calculer le tour.
+function rgOnlineClock() {
+  const O = RNG.online;
+  if (RNG.phase !== 'aim') return;
+  const left = (O.deadline - Date.now()) / 1000;
+  RNG.timer = Math.max(0, Math.min(RCFG.AIM_S, left));
+  if (left <= 0 && !RNG.locked) rgLock(true);
+  if (left < -3 && Date.now() - (O.ticked || 0) > 2500) { O.ticked = Date.now(); O.tick(); }
+}
+
 // ---------- Révélation puis résolution animée
-function rgReveal() {
+function rgReveal(srv) {
   const st = RNG.st; if (!st) return;
   RNG.phase = 'reveal'; rgHud();
-  const shots = [RNG.aim || RNG.pow ? rgShot() : null, RNG.foe || null];
+  const shots = srv || [RNG.aim || RNG.pow ? rgShot() : null, RNG.foe || null];
   RNG.reveal = shots.map((s, side) => s && { body: st.bodies.find(b => b.side === side && b.i === s.i), s });
   rgBanner(rt('reveal'), '#fde68a');
   sfx.riser?.(.6);
@@ -365,8 +443,9 @@ function rgEvent(e) {
     const b = body(e.id), [x, y] = at(e.x, e.y);
     P.fall.push({ b, x: e.x, y: e.y, vx: e.vx, vy: e.vy, t: 0 });
     P.slow = RCFG.SLOWMO_S * 1.4; RNG.shake = 10;
-    rgSparks(x, y, 26, b.side ? '#fb923c' : '#a78bfa', 4);
-    rgBanner(rt('out'), b.side ? '#a78bfa' : '#fb923c');
+    const mine = b.side === ME();
+    rgSparks(x, y, 26, mine ? '#a78bfa' : '#fb923c', 4);
+    rgBanner(rt('out'), mine ? '#fb923c' : '#a78bfa');
     sfx.evaporate?.(); sfx.impact?.();
   }
   RFX.event(e, P); // pouvoirs : effets, sons et ralentis propres à chacun (ring-fx.js)
@@ -394,7 +473,8 @@ function rgFrame(now) {
   if (!RNG.st) return;
   RNG.raf = requestAnimationFrame(rgFrame);
   const dt = Math.min(.05, (now - (RNG.last || now)) / 1000); RNG.last = now;
-  if (RNG.phase === 'aim' && !RNG.locked && !RNG.tuto && !RNG.info) {
+  if (RNG.online) rgOnlineClock();
+  else if (RNG.phase === 'aim' && !RNG.locked && !RNG.tuto && !RNG.info) {
     RNG.timer -= dt;
     if (RNG.timer <= 0) { RNG.timer = 0; rgLock(true); }
   }
@@ -412,7 +492,8 @@ function rgFrame(now) {
     if (P.f >= P.r.frames.length - 1 && P.fall.every(x => x.t > .7)) {
       while (P.ei < ev.length) rgEvent(ev[P.ei++]);
       RNG.play = null; RNG.trails = {}; RFX.endTurn();
-      if (RNG.st.over) { RNG.phase = 'end'; rgHud(); setTimeout(() => rgResult(ev.find(x => x.t === 'end')), 600); }
+      if (RNG.online) rgOnlineAfter();
+      else if (RNG.st.over) { RNG.phase = 'end'; rgHud(); setTimeout(() => rgResult(ev.find(x => x.t === 'end')), 600); }
       else { rgTurnStart(); RNG.tuto?.on?.('turn'); }
     }
   }
@@ -494,9 +575,9 @@ function rgScout(side) {
       ${ringStatsHTML(b.name, b.lvl, b.variant, true)}
     </div>`;
   };
-  o.innerHTML = `<div class="rg-ic ${side ? 'foe' : 'me'} rg-scoutin">
+  o.innerHTML = `<div class="rg-ic ${side === ME() ? 'me' : 'foe'} rg-scoutin">
     <button class="rg-icx" aria-label="${t('close')}">✕</button>
-    <h3>👁 ${side ? rt('foeTeam') : esc(RNG.names[0])}</h3>
+    <h3>👁 ${side !== ME() ? rt('foeTeam') : esc(RNG.names[ME()])}</h3>
     <small class="muted">${rt('scoutHint')}</small>
     ${st.bodies.filter(b => b.side === side && !b.tmp).sort((a, b) => a.i - b.i).map(card).join('')}
   </div>`;
@@ -552,7 +633,7 @@ function rgFloor(c, ox, oy, R, t) {
 
 // Repère de camp sous un jeton : anneau pixel à la couleur du camp, en segments qui tournent doucement
 function rgTeamMark(c, b, x, y, rr, t, live) {
-  const S = SIDE[b.side], px = RNG.view.px;
+  const S = sideCol(b), px = RNG.view.px;
   // ombre portée (ellipse sombre)
   c.fillStyle = 'rgba(0,0,0,.45)'; c.beginPath(); c.ellipse(x + rr * .12, y + rr * .32, rr * 1.02, rr * .72, 0, 0, 7); c.fill();
   // halo de camp
@@ -601,7 +682,7 @@ function rgDraw(dt) {
     if (reducedFx() || tr.length < 3) continue;
     const d = RG.len(tr[tr.length - 1][0] - tr[0][0], tr[tr.length - 1][1] - tr[0][1]);
     if (d < 40) continue;
-    const col = b.variant === 'gold' ? '253,230,138' : b.variant === 'celeste' ? '165,243,252' : b.variant === 'ombre' ? '139,92,246' : SIDE[b.side].rgb;
+    const col = b.variant === 'gold' ? '253,230,138' : b.variant === 'celeste' ? '165,243,252' : b.variant === 'ombre' ? '139,92,246' : sideCol(b).rgb;
     for (let k = 1; k < tr.length; k++) {
       const [ax, ay] = w2s(...tr[k - 1]), [bx, by] = w2s(...tr[k]);
       c.strokeStyle = `rgba(${col},${k / tr.length * .6})`; c.lineWidth = b.r * V.s * 1.3 * k / tr.length; c.lineCap = 'square';
@@ -652,7 +733,7 @@ function rgDraw(dt) {
       if (RNG.prev.hit.length > 1) { c.fillStyle = 'rgba(253,230,138,.9)'; RNG.prev.hit.forEach((p, k) => { if (k % 3) return; const [x, y] = w2s(p[0], p[1]); c.fillRect(Math.round(x / px) * px, Math.round(y / px) * px, px, px); }); }
       const end = RNG.prev.me[RNG.prev.me.length - 1]; if (end) { const [x, y] = w2s(end[0], end[1]); c.strokeStyle = 'rgba(255,255,255,.45)'; c.lineWidth = px; c.setLineDash([px * 2, px * 2]); c.beginPath(); c.arc(x, y, sel.r * V.s, 0, 7); c.stroke(); c.setLineDash([]); }
       // flèche
-      const Lr = 26 + RNG.aim.f * 70, n = RG.len(RNG.aim.ax, RNG.aim.ay), ux = RNG.aim.ax / n, uy = RNG.aim.ay / n;
+      const Lr = 26 + RNG.aim.f * 70, n = RG.len(RNG.aim.ax, RNG.aim.ay) * FL(), ux = RNG.aim.ax / n, uy = RNG.aim.ay / n;
       const ax = sx + ux * (sel.r * V.s + 6), ay = sy + uy * (sel.r * V.s + 6), bx = ax + ux * Lr, by = ay + uy * Lr;
       c.strokeStyle = col; c.fillStyle = col; c.lineWidth = px * 2 + RNG.aim.f * px * 2; c.lineCap = 'butt';
       c.beginPath(); c.moveTo(ax, ay); c.lineTo(bx, by); c.stroke();
@@ -665,8 +746,8 @@ function rgDraw(dt) {
   // révélation : on montre les deux tirs
   if (RNG.reveal) RNG.reveal.forEach(r => {
     if (!r || !r.s.f) return;
-    const b = r.body, [sx, sy] = w2s(b.x, b.y), n = RG.len(r.s.ax, r.s.ay), ux = r.s.ax / n, uy = r.s.ay / n, L = 30 + r.s.f * 80;
-    c.strokeStyle = SIDE[b.side].md; c.lineWidth = V.px * 3; c.lineCap = 'butt';
+    const b = r.body, [sx, sy] = w2s(b.x, b.y), n = RG.len(r.s.ax, r.s.ay) * FL(), ux = r.s.ax / n, uy = r.s.ay / n, L = 30 + r.s.f * 80;
+    c.strokeStyle = sideCol(b).md; c.lineWidth = V.px * 3; c.lineCap = 'butt';
     c.beginPath(); c.moveTo(sx + ux * b.r * V.s, sy + uy * b.r * V.s); c.lineTo(sx + ux * (b.r * V.s + L), sy + uy * (b.r * V.s + L)); c.stroke();
   });
   // particules et formes d'effets (les textes, eux, restent nets)
@@ -727,7 +808,7 @@ function rgToken(c, b, t, fall) {
   c.translate(x, y); c.rotate(spin * .5); c.imageSmoothingEnabled = false;
   if (b.variant && VFILTER[b.variant]) c.filter = VFILTER[b.variant];
   if (im.complete && im.naturalWidth) { const sz = rr * 2.08; c.drawImage(im, -sz / 2, -sz / 2, sz, sz); }
-  else { c.fillStyle = SIDE[b.side].md; c.beginPath(); c.arc(0, 0, rr, 0, 7); c.fill(); }
+  else { c.fillStyle = sideCol(b).md; c.beginPath(); c.arc(0, 0, rr, 0, 7); c.fill(); }
   c.filter = 'none';
   c.restore();
   // pouvoir prêt (pendant la visée) : petite gemme pixel
@@ -744,15 +825,17 @@ function rgToken(c, b, t, fall) {
 // ---------- Fin du match
 function rgResult(e) {
   if (!RNG.st) return;
-  const w = e?.winner, me = w === 0, draw = w == null, st = RNG.st;
+  const w = e?.winner, me = w === ME(), draw = w == null, st = RNG.st, elo = RNG.online?.elo;
+  const dElo = elo ? elo.after[ME()] - elo.before[ME()] : null;
   RNG.tuto = null;
   const box = document.createElement('div');
   box.className = 'rg-res ' + (draw ? 'draw' : me ? 'win' : 'lose');
   box.innerHTML = `<div class="rg-rbox">
     <h2>${draw ? rt('draw') : me ? rt('win') : rt('lose')}</h2>
     <small class="muted">${rtL().why[e?.why] || ''}</small>
-    <div class="rg-rleft"><span class="me">${RG.alive(st, 0).map(b => `<img src="${texOf(jetonOf(b.name))}" alt="">`).join('') || '—'}</span><b>vs</b><span class="foe">${RG.alive(st, 1).map(b => `<img src="${texOf(jetonOf(b.name))}" alt="">`).join('') || '—'}</span></div>
+    <div class="rg-rleft"><span class="me">${RG.alive(st, ME()).map(b => `<img src="${texOf(jetonOf(b.name))}" alt="">`).join('') || '—'}</span><b>vs</b><span class="foe">${RG.alive(st, FOE()).map(b => `<img src="${texOf(jetonOf(b.name))}" alt="">`).join('') || '—'}</span></div>
     <small class="muted">${rt('turns', { n: Math.min(st.turn, RCFG.TURNS + 3) })}</small>
+    ${dElo == null ? '' : `<p class="rg-elo ${dElo >= 0 ? 'up' : 'down'}"><b>${dElo >= 0 ? '+' : ''}${dElo} Elo</b><small>${fmt(elo.after[ME()])}</small></p>`}
     <div class="rg-rbtn"><button class="btn primary" data-again>${rt('again')}</button><button class="btn ghost" data-back>${rt('back')}</button></div>
   </div>`;
   document.body.appendChild(box);
@@ -778,12 +861,14 @@ function rgConfetti(host) {
 // ---------- Tuto interactif (premier match, ou depuis les paramètres)
 const RTUTO_KEY = 'takoras-ring-tuto';
 const ringTutoSeen = () => { try { return localStorage.getItem(RTUTO_KEY) === '1'; } catch { return true; } };
-function startRingTuto(onEnd) {
+// opts.must : premier tuto obligatoire (pas de bouton « Passer ») · opts.onDone : appelé quand le tuto est fini
+function startRingTuto(onEnd, opts = {}) {
   const mine = ['Carmin', 'Mobu', 'Pikko'].map(name => ({ name, lvl: 1 })), foe = ['Rouillé', 'Givre', 'Azura'].map(name => ({ name, lvl: 1 }));
-  startRing([mine, foe], { tuto: true, ai: 'still', names: [rt('you'), rt('bot')], onEnd });
+  startRing([mine, foe], { tuto: true, must: opts.must, onDone: opts.onDone, ai: 'still', map: 'arene', names: [rt('you'), rt('bot')], onEnd });
 }
 function rgTip(text, where, btns = [['skip', rt('tSkip')]]) {
   RNG.el.querySelector('.rg-tip')?.remove();
+  if (RNG.tuto?.must) btns = btns.filter(([k]) => k !== 'skip');
   const b = document.createElement('div'); b.className = 'rg-tip ' + where;
   b.innerHTML = `<p>${text}</p><div>${btns.map(([k, l]) => `<button class="btn ${k === 'skip' ? 'ghost' : 'primary'} sm" data-t="${k}">${l}</button>`).join('')}</div>`;
   RNG.el.appendChild(b);
@@ -799,14 +884,18 @@ function rgTuto() {
     if (n === 1) { rgTip(rt('t1'), 'top'); rgHl('#rg-stage'); }
     if (n === 2) { rgTip(rt('t2'), 'top'); rgHl('#rg-stage'); }
     if (n === 3) { rgTip(rt('t3'), 'top'); rgHl('#rg-go'); tu.block = 'go'; }
-    if (n === 4) { rgTip(rt('t4'), 'top', [['ok', rt('tOk')]]); rgHl(null); tu.block = 'all'; tu.next = () => show(5); }
+    if (n === 4) { rgTip(rt('t4'), 'top', [['ok', rt('tOk')]]); rgHl(null); tu.block = 'all'; tu.next = () => show(4.1); }
+    if (n === 4.1) { rgTip(rt('tTimer'), 'top', [['ok', rt('tOk')]]); rgHl('#rg-timer'); tu.block = 'all'; tu.next = () => show(4.2); }
+    if (n === 4.2) { rgTip(rt('tWalls'), 'top', [['ok', rt('tOk')]]); rgHl('#rg-stage'); tu.block = 'all'; tu.next = () => show(4.3); }
+    if (n === 4.3) { rgTip(rt('tScout'), 'top', [['ok', rt('tOk')]]); rgHl('[data-scout]'); tu.block = 'all'; tu.next = () => show(5); }
     if (n === 5) {
       const carmin = RNG.st.bodies.find(b => b.side === 0 && b.alive && RG.ready(b));
       if (!carmin) return show(6);
       RNG.sel = carmin.id; RNG.pow = false; rgHud();
       rgTip(rt('t5'), 'top'); rgHl('#rg-pw');
     }
-    if (n === 6) { rgTip(rt('t6'), 'top', [['ok', rt('tEnd')]]); rgHl(null); tu.block = 'all'; tu.next = () => rgEndTuto(); }
+    if (n === 6) { rgTip(rt('tRanked'), 'top', [['ok', rt('tOk')]]); rgHl(null); tu.block = 'all'; tu.next = () => show(7); }
+    if (n === 7) { rgTip(rt('t6'), 'top', [['ok', rt('tEnd')]]); rgHl(null); tu.block = 'all'; tu.next = () => rgEndTuto(); }
   };
   tu.on = what => {
     if (tu.step === 1 && what === 'sel') show(2);
@@ -820,7 +909,9 @@ function rgTuto() {
 }
 function rgEndTuto() {
   try { localStorage.setItem(RTUTO_KEY, '1'); } catch {}
+  const done = RNG.tuto?.onDone;
   RNG.tuto = null;
+  done?.();
   RNG.el?.querySelector('.rg-tip')?.remove(); RNG.el && rgHl(null);
   RNG.timer = RCFG.AIM_S;
   rgHud();
@@ -902,7 +993,7 @@ const RFX = (() => {
     intro = { e, b, t: 0 };
     RSND.charge(); setTimeout(() => RSND[e.pw]?.(), 280);
     const [x, y] = w2s(b.x, b.y), col = PW_COL[e.pw];
-    rgBanner(`<small>${b.side ? '⚠️ ' : ''}${jnH(b.name)}</small>✦ ${rtL().pw[e.pw][0]}`, col, false, 950);
+    rgBanner(`<small>${b.side !== ME() ? '⚠️ ' : ''}${jnH(b.name)}</small>✦ ${rtL().pw[e.pw][0]}`, col, false, 950);
     burst(x, y, 30, col, 3.5);
     if (e.pw === 'roots') vines = { side: b.side, t: 0, flash: [] };
     if (e.pw === 'anchor') { RNG.shake = 12; for (let k = 0; k < 24; k++) { const a = k / 24 * 6.283; part({ x, y, vx: Math.cos(a) * 3.2, vy: Math.sin(a) * 3.2, col: '#93c5fd', size: 4 }); } }
@@ -914,7 +1005,7 @@ const RFX = (() => {
     const body = id => P.bodies.find(b => b.id === id);
     if (e.t === 'edge') {
       const [x, y] = w2s(e.x, e.y), b = body(e.id);
-      if (vines && b && b.side === vines.side) { vines.flash.push({ a: Math.atan2(e.y, e.x), t: 1 }); burst(x, y, 22, '#4ade80', 3); burst(x, y, 8, '#f0abfc', 2.5); RSND.snap(); RNG.shake = 6; }
+      if (vines && b && b.side === vines.side) { vines.flash.push({ a: Math.atan2(e.y * FL(), e.x * FL()), t: 1 }); burst(x, y, 22, '#4ade80', 3); burst(x, y, 8, '#f0abfc', 2.5); RSND.snap(); RNG.shake = 6; }
       else { burst(x, y, 18, PW_COL.bounce, 3.2); RNG.parts.push({ ring: true, x, y, col: PW_COL.bounce, size: 1.4, life: 1 }); RSND.boing(); }
     }
     if (e.t === 'eruption') {
@@ -1047,4 +1138,4 @@ const RFX = (() => {
   return { start, introStart, event, under, aura, emit, over, busy, reset, endTurn, isActive: id => active[id] };
 })();
 
-export { startRing, closeRing, startRingTuto, ringTutoSeen, powerText, ringStatsHTML, PW_COL, RT, rt, RNG, RFX, RSND };
+export { ringOnline, startRing, closeRing, startRingTuto, ringTutoSeen, powerText, ringStatsHTML, PW_COL, RT, rt, RNG, RFX, RSND };

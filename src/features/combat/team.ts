@@ -57,4 +57,3 @@ export function botTeam(myLevels: number[], rnd: () => number = Math.random) {
     variant: '',
   }));
 }
-export const rankOf = (elo: number) => [...RCFG.RANKS].reverse().find((r) => elo >= r.min) ?? RCFG.RANKS[0];

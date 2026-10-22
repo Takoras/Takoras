@@ -1,7 +1,7 @@
 import { useState, type CSSProperties } from 'react';
 import { Link } from 'react-router';
 import { useQuery } from '@tanstack/react-query';
-import { publicApi } from '@/api';
+import { combatApi, publicApi } from '@/api';
 import { useMe } from '@/api/queries';
 import { hexRGB, jetonOf, SERIES, texOf } from '@/data/jetons';
 import { useJn } from '@/lib/names';
@@ -9,14 +9,18 @@ import { locale, useSettings } from '@/lib/settings';
 import { useT } from '@/i18n/useT';
 import { Avatar } from '@/ui/Avatar';
 import { Segmented } from '@/ui/Segmented';
+import { RankBadge, useRankName } from '../combat/Ranked';
+import { rankOf } from '../combat/rankedApi';
 import s from './Board.module.css';
 
-// Classement : podium (top 3) + liste, par tirages, meilleur tirage, variantes ou collection, cette semaine ou depuis toujours
+// Classement : podium (top 3) + liste, par tirages, meilleur tirage, variantes ou collection, cette semaine ou depuis toujours,
+// et l'Elo du classé (Ring), qui n'a pas de période
 const KINDS = [
   ['ui.k_pulls', 'pulls'],
   ['ui.k_gain', 'gain'],
   ['ui.k_vars', 'variants'],
   ['ui.k_collec', 'collec'],
+  ['ui.k_elo', 'elo'],
 ] as const;
 type Period = 'week' | 'all';
 type Row = { pseudo: string; value: number; jeton: string; odds: number };
@@ -36,13 +40,26 @@ export default function Board() {
   const [kind, setKind] = useState(0);
   const [period, setPeriod] = useState<Period>('week');
   const id = KINDS[kind]?.[1] ?? 'pulls';
+  const rankName = useRankName();
   const q = useQuery({
-    queryKey: ['board', id, period],
-    queryFn: async () => (await publicApi.leaderboard(id, period === 'week' ? weekStart() : null, 50)) as Row[],
+    queryKey: ['board', id, id === 'elo' ? 'all' : period],
+    queryFn: async () =>
+      id === 'elo'
+        ? (await combatApi.rankedTop(50)).map((r) => ({ pseudo: r.pseudo, value: r.elo, jeton: '', odds: 0 }))
+        : ((await publicApi.leaderboard(id, period === 'week' ? weekStart() : null, 50)) as Row[]),
     refetchInterval: 60_000,
   });
   const fmt = (n: number) => Number(n).toLocaleString(locale(lang));
   const val = (r: Row) => {
+    if (id === 'elo') {
+      const rk = rankOf(r.value);
+      return (
+        <span className={s.gain}>
+          <RankBadge r={rk} size={18} />
+          {rankName(rk)} · {fmt(r.value)} Elo
+        </span>
+      );
+    }
     if (id === 'gain') {
       const j = jetonOf(r.jeton);
       return (
@@ -70,15 +87,17 @@ export default function Board() {
           <p className="eyebrow">{t('ui.board_tag')}</p>
           <h1>{t('ui.board_title')}</h1>
         </div>
-        <Segmented<Period>
-          label={t('ui.board_tag')}
-          value={period}
-          onChange={setPeriod}
-          options={[
-            ['week', t('ui.week')],
-            ['all', t('ui.all_time')],
-          ]}
-        />
+        {id === 'elo' ? null : (
+          <Segmented<Period>
+            label={t('ui.board_tag')}
+            value={period}
+            onChange={setPeriod}
+            options={[
+              ['week', t('ui.week')],
+              ['all', t('ui.all_time')],
+            ]}
+          />
+        )}
       </header>
       <div className={s.kinds} role="group" aria-label={t('ui.board_title')}>
         {KINDS.map(([k], i) => (

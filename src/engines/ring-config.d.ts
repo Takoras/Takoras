@@ -8,7 +8,8 @@ export const RCFG: {
   LEVEL_MAX: number; LEVEL_BONUS: number; LEVEL_COST: number[]; MUTATION: Record<string, number>;
   BUDGET: Record<string, number>; BUDGET_MAX: number;
   ELO: { start: number; kNew: number; k: number; newGames: number };
-  RANKS: { k: string; min: number; ico: string }[];
+  DIV: number;
+  RANKS: { k: string; min: number; col: string; divs: number }[];
   AI: Record<string, { shoots: boolean; smart?: boolean; aimErr?: number; forceErr?: number; tries?: number }>;
   TOKENS: Record<string, TokenKit>;
   DEFAULT_TOKEN: TokenKit;

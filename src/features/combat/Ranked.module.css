@@ -1,0 +1,211 @@
+/* Badge de rang : écusson pixel (bords en marches) à la couleur du rang */
+.badge {
+  --sz: 44px;
+  position: relative;
+  flex: none;
+  display: inline-grid;
+  place-items: center;
+  width: var(--sz);
+  height: calc(var(--sz) * 1.12);
+  background: linear-gradient(
+    160deg,
+    color-mix(in srgb, var(--rc) 85%, #fff),
+    var(--rc) 45%,
+    color-mix(in srgb, var(--rc) 45%, #000)
+  );
+  clip-path: polygon(50% 0, 100% 18%, 100% 62%, 50% 100%, 0 62%, 0 18%);
+  filter: drop-shadow(0 0 8px color-mix(in srgb, var(--rc) 55%, transparent));
+}
+.badge::after {
+  content: '';
+  position: absolute;
+  inset: 3px;
+  clip-path: inherit;
+  background: linear-gradient(160deg, color-mix(in srgb, var(--rc) 40%, #111), #0d0d12 70%);
+}
+.badge i {
+  position: relative;
+  z-index: 1;
+  font: 700 calc(var(--sz) * 0.34) / 1 var(--font-display);
+  font-style: normal;
+  color: var(--rc);
+  letter-spacing: 0.02em;
+}
+
+/* Carte du rang */
+.card {
+  display: flex;
+  align-items: center;
+  gap: var(--s-3);
+  padding: var(--s-3) var(--s-4);
+  border-radius: var(--r-lg);
+  background:
+    radial-gradient(circle at 0 50%, color-mix(in srgb, var(--rc) 18%, transparent), transparent 60%), var(--surface);
+  border: 1px solid color-mix(in srgb, var(--rc) 35%, var(--line));
+}
+.cardMain {
+  flex: 1;
+  min-width: 0;
+  display: grid;
+  gap: 3px;
+}
+.card small {
+  font-size: var(--fs-xs);
+  color: var(--muted);
+}
+.rankName {
+  font-family: var(--font-display);
+  font-size: var(--fs-xl);
+  color: var(--rc);
+}
+.bar {
+  height: 6px;
+  border-radius: 99px;
+  background: rgba(255, 255, 255, 0.08);
+  overflow: hidden;
+}
+.bar i {
+  display: block;
+  height: 100%;
+  border-radius: inherit;
+  background: var(--rc);
+}
+.elo {
+  display: grid;
+  justify-items: end;
+  text-align: right;
+}
+.elo b {
+  font-family: var(--font-display);
+  font-size: var(--fs-xl);
+}
+
+/* Route des rangs */
+.road {
+  display: grid;
+  gap: var(--s-2);
+  margin-top: var(--s-4);
+}
+.road h2 {
+  font-size: var(--fs-lg);
+}
+.road p {
+  font-size: var(--fs-sm);
+}
+.road ol {
+  list-style: none;
+  display: flex;
+  gap: var(--s-2);
+  overflow-x: auto;
+  padding: var(--s-2) 2px var(--s-3);
+  scroll-snap-type: x proximity;
+  scrollbar-width: thin;
+}
+.road li {
+  position: relative;
+  flex: none;
+  width: 86px;
+  display: grid;
+  justify-items: center;
+  gap: 4px;
+  padding: var(--s-3) var(--s-1) var(--s-2);
+  border-radius: var(--r-md);
+  background: var(--surface);
+  border: 1px solid var(--line);
+  text-align: center;
+  scroll-snap-align: center;
+}
+/* marches pas encore atteintes : écusson en retrait (le texte reste lisible) */
+.road li:not(.done, .here) > span {
+  opacity: 0.45;
+  filter: grayscale(0.6);
+}
+.road li b {
+  font-size: var(--fs-xs);
+}
+.road li small {
+  font-size: 11px;
+  color: var(--muted);
+}
+.road li.here {
+  opacity: 1;
+  border-color: var(--rc);
+  box-shadow:
+    0 0 0 1px var(--rc),
+    0 8px 24px -10px var(--rc);
+}
+.road li em {
+  position: absolute;
+  top: -9px;
+  padding: 1px 8px;
+  border-radius: 99px;
+  font: 700 10px/16px var(--font-body);
+  font-style: normal;
+  text-transform: uppercase;
+  background: var(--rc);
+  color: #0d0d12;
+}
+
+/* Recherche */
+.search {
+  display: grid;
+  justify-items: center;
+  gap: var(--s-3);
+  text-align: center;
+  padding: var(--s-2) 0;
+}
+.radar {
+  position: relative;
+  display: grid;
+  place-items: center;
+  width: 120px;
+  height: 120px;
+}
+.radar::before,
+.radar::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  border-radius: 50%;
+  border: 2px solid rgba(var(--glow), 0.5);
+  animation: ping 2s ease-out infinite;
+}
+.radar::after {
+  animation-delay: 1s;
+}
+@keyframes ping {
+  from {
+    transform: scale(0.45);
+    opacity: 1;
+  }
+  to {
+    transform: scale(1.1);
+    opacity: 0;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .radar::before,
+  .radar::after {
+    animation: none;
+    opacity: 0.4;
+  }
+}
+.clock {
+  font: 700 var(--fs-2xl) / 1 var(--font-display);
+  font-variant-numeric: tabular-nums;
+}
+
+/* Tuto obligatoire */
+.lock {
+  display: grid;
+  gap: var(--s-2);
+  padding: var(--s-4);
+  border-radius: var(--r-lg);
+  border: 1px dashed rgba(var(--glow), 0.6);
+  background: rgba(var(--glow), 0.08);
+  text-align: center;
+  justify-items: center;
+}
+.lock h2 {
+  font-size: var(--fs-lg);
+}

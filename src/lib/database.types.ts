@@ -246,6 +246,9 @@ export type Database = {
       my_levels: { Args: never; Returns: { jeton: string; lvl: number; serie: string }[] };
       my_quests: { Args: never; Returns: Json };
       profile_public: { Args: { p_pseudo: string }; Returns: Json };
+      ranked_me: { Args: never; Returns: Json };
+      ranked_tuto_done: { Args: never; Returns: undefined };
+      ranked_top: { Args: { n?: number }; Returns: { pseudo: string; elo: number; games: number; wins: number }[] };
       redeem_code: { Args: { p_code: string }; Returns: Json };
       refund_pulls: { Args: { ids: number[] }; Returns: Json };
       sell_pulls: { Args: { ids: number[] }; Returns: Json };
