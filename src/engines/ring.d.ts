@@ -1,7 +1,7 @@
 // Écran du Ring (ring-ui + ring-fx de l'ancien site, portés tels quels). Il crée lui-même son overlay plein écran.
 import type { RingState } from './ring-engine';
 type Team = { name: string; lvl?: number; variant?: string }[];
-export function startRing(teams: [Team, Team], opts?: { names?: [string, string]; ai?: string; tuto?: boolean; onEnd?: (r: 'again' | 'back') => void }): void;
+export function startRing(teams: [Team, Team], opts?: { names?: [string, string]; ai?: string; tuto?: boolean; map?: string; onEnd?: (r: 'again' | 'back') => void }): void;
 export function closeRing(): void;
 export function startRingTuto(onEnd?: (r: 'again' | 'back') => void): void;
 export function ringTutoSeen(): boolean;

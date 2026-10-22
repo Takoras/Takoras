@@ -30,6 +30,9 @@ const loadRing = async () => {
   return loaded;
 };
 
+// Une des 5 maps au hasard à chaque partie
+const randomMap = () => RCFG.MAPS[Math.floor(Math.random() * RCFG.MAPS.length)]?.id;
+
 // Lance le tuto du Ring (sans compte possible)
 export const playTuto = async (onEnd?: () => void) => {
   sfx.click();
@@ -83,6 +86,7 @@ export default function Combat() {
     R.startRing([mine, botTeam(mine.map((u) => u.lvl))], {
       names: [me.data?.pseudo ?? R.rt('you'), R.rt('bot')],
       ai: 'normal',
+      map: randomMap(),
       onEnd: (r) => {
         if (r === 'again') void train();
       },

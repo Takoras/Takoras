@@ -179,7 +179,7 @@ La commande doit renvoyer `{"missing": {}}`.
 - [x] Ring (partie complète testée au doigt en 375 px et à la souris, 60 images/s pendant les tirs) :
   - visée lance-pierre (n'importe où une fois le jeton choisi) ;
   - trajectoire prévue, jauge de force ;
-  - pouvoir, Valider, chrono 10 s ;
+  - pouvoir, Valider, chrono 30 s (départ dès que les deux ont validé) ;
   - « L'adversaire a validé » ;
   - révélation ;
   - animation : ralentis, traînées, rotation, chutes ;

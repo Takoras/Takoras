@@ -13,6 +13,7 @@ import './ring.css';
 // ---------- Textes (FR + EN)
 const RT = {
   fr: {
+    map_arene: 'Arène', map_jardin: 'Jardin', map_volcan: 'Volcan', map_glace: 'Glace', map_ruines: 'Ruines', foeTeam: 'Équipe adverse', scout: 'Leurs pouvoirs', scoutHint: 'Touche un jeton pour voir sa fiche. Le chrono est en pause pendant que tu regardes (entraînement).',
     pw: {
       grow: ['Gonfler', 'Plus gros et plus lourd ce tour.'],
       bounce: ['Rebond', 'Rebondit sur le bord au lieu de sortir.'],
@@ -45,6 +46,7 @@ const RT = {
     t6: 'Bien joué, tu es prêt pour le classé !', tOk: 'OK', tSkip: 'Passer', tEnd: 'Terminer',
   },
   en: {
+    map_arene: 'Arena', map_jardin: 'Garden', map_volcan: 'Volcano', map_glace: 'Ice', map_ruines: 'Ruins', foeTeam: 'Opponent team', scout: 'Their powers', scoutHint: 'Tap a token to see its card. The timer is paused while you look (training).',
     pw: {
       grow: ['Inflate', 'Bigger and heavier this turn.'],
       bounce: ['Bounce', 'Bounces off the edge instead of falling out.'],
@@ -97,7 +99,7 @@ const rgImg = name => {
 // teams : [[{ name, lvl, variant }×3] ×2]. opts : { names, ai, tuto, onEnd }
 function startRing(teams, opts = {}) {
   closeRing();
-  Object.assign(RNG, { st: RG.create(teams), phase: 'aim', sel: null, aim: null, pow: false, drag: null, prev: null, foe: null, foeOk: false, locked: false, play: null, parts: [], trails: {}, spin: {}, shake: 0,
+  Object.assign(RNG, { st: RG.create(teams, opts.map), phase: 'aim', sel: null, aim: null, pow: false, drag: null, prev: null, foe: null, foeOk: false, locked: false, play: null, parts: [], trails: {}, spin: {}, shake: 0,
     ai: opts.ai || 'normal', names: opts.names || [rt('you'), rt('bot')], onEnd: opts.onEnd || null, tuto: opts.tuto ? { step: 0 } : null, last: 0 });
   teams.flat().forEach(j => rgImg(j.name));
   const o = document.createElement('div');
@@ -108,7 +110,7 @@ function startRing(teams, opts = {}) {
       <div class="rg-score"><span class="me" id="rg-n0"></span><b id="rg-turn"></b><span class="foe" id="rg-n1"></span></div>
       <div class="rg-timer" id="rg-timer"><svg viewBox="0 0 36 36"><circle cx="18" cy="18" r="15.5"/><circle class="p" cx="18" cy="18" r="15.5" pathLength="100"/></svg><b></b></div>
     </div>
-    <div class="rg-names"><span>${esc(RNG.names[0])}</span><span class="rg-ok" id="rg-ok">${rt('foeOk')}</span><span>${esc(RNG.names[1])}</span></div>
+    <div class="rg-names"><span>${esc(RNG.names[0])}</span><span class="rg-ok" id="rg-ok">${rt('foeOk')}</span><span>${esc(RNG.names[1])} <button class="rg-scout" data-scout>👁 ${rt('scout')}</button></span></div>
     <div class="rg-stage" id="rg-stage"><canvas id="rg-cv"></canvas><div class="rg-banner" id="rg-banner"></div><div class="rg-team foe" id="rg-t1"></div><div class="rg-team me" id="rg-t0"></div></div>
     <p class="rg-hint" id="rg-hint"></p>
     <div class="rg-bot">
@@ -125,9 +127,11 @@ function startRing(teams, opts = {}) {
   addEventListener('pointermove', rgMove); addEventListener('pointerup', rgUp); addEventListener('pointercancel', rgUp);
   o.querySelectorAll('.rg-team').forEach(p => p.addEventListener('click', e => { const b = e.target.closest('[data-id]'); if (b) rgInfo(+b.dataset.id); }));
   o.querySelector('#rg-pw').onclick = rgTogglePow;
+  o.querySelector('[data-scout]').onclick = () => rgScout(1);
   o.querySelector('#rg-go').onclick = () => rgLock();
   o.querySelector('[data-quit]').onclick = async () => { if (RNG.st?.over || RNG.tuto || await host.ask(rt('quit'))) { if (!RNG.st) return; RNG.tuto = null; closeRing(); RNG.onEnd?.('back'); } };
   sfx.whoosh?.();
+  if (RNG.st.map) setTimeout(() => RNG.st && rgBanner(`${rt('map_' + RNG.st.map.id)}`, MAP_THEME[RNG.st.map.id]?.rim || '#c4b5fd', false, 1300), 350);
   rgTurnStart();
   RNG.raf = requestAnimationFrame(rgFrame);
 }
@@ -150,7 +154,7 @@ function rgResize() {
     const cv = RNG[k] || (RNG[k] = document.createElement('canvas'));
     cv.width = cv.height = low;
   }
-  RNG.view = { size, dpr, px, s: size / 2 / (RCFG.RING_R * 1.1) };
+  RNG.view = { size, dpr, px, s: size / 2 / ((RNG.st ? RG.ringR(RNG.st) : RCFG.RING_R) * 1.08) };
 }
 const w2s = (x, y) => [RNG.view.size / 2 + x * RNG.view.s, RNG.view.size / 2 + y * RNG.view.s];
 const s2w = (px, py) => [(px - RNG.view.size / 2) / RNG.view.s, (py - RNG.view.size / 2) / RNG.view.s];
@@ -159,7 +163,7 @@ const SIDE = [{ hi: '#ddd6fe', md: '#a78bfa', lo: '#4c1d95', rgb: '167,139,250' 
 // Filtres des variantes (les mêmes que sur tout le site)
 const VFILTER = { gold: 'sepia(1) saturate(2.6) hue-rotate(-12deg) brightness(1.12)', celeste: 'grayscale(.55) brightness(1.35) sepia(.15) hue-rotate(195deg) saturate(1.4)', ombre: 'grayscale(.6) brightness(.55) sepia(.45) hue-rotate(225deg) saturate(1.7) contrast(1.3)' };
 
-// ---------- Tour : visée (10 s), l'IA prépare son tir en même temps
+// ---------- Tour : visée (30 s, ou dès que les deux ont validé), l'IA prépare son tir en même temps
 function rgTurnStart() {
   const st = RNG.st;
   Object.assign(RNG, { phase: 'aim', aim: null, pow: false, prev: null, foe: null, foeOk: false, locked: false, drag: null });
@@ -336,6 +340,11 @@ function rgEvent(e) {
     rgSparks(x, y, big ? 22 : 9, big ? '#fde68a' : '#fff', big ? 4 : 2.5);
     if (big) { RNG.shake = Math.min(14, 6 + e.j / 400); P.slow = RCFG.SLOWMO_S; sfx.impact?.(); } else sfx.click?.();
   }
+  if (e.t === 'wall') {
+    const [x, y] = at(e.x, e.y), bump = e.k > 1;
+    rgSparks(x, y, bump ? 18 : 8, bump ? '#f9a8d4' : '#e7e5e4', bump ? 4 : 2.5);
+    if (bump) { rgRing(x, y, '#f472b6', 2.4); RNG.shake = Math.min(10, 4 + e.j / 500); sfx.impact?.(); } else sfx.click?.();
+  }
   if (e.t === 'out') {
     const b = body(e.id), [x, y] = at(e.x, e.y);
     P.fall.push({ b, x: e.x, y: e.y, vx: e.vx, vy: e.vy, t: 0 });
@@ -399,6 +408,62 @@ function rgFrame(now) {
 }
 
 // ---------- Dessin du ring
+// Ambiance de chaque map : sol (centre → bord), bord, plots, obstacles
+const MAP_THEME = {
+  arene: { floor: ['#2e2550', '#1d1736', '#140f26'], rim: '#c4b5fd', rimDark: '#2e1065', stud: '#7c3aed', rock: ['#6b6390', '#3b3459', '#a59ccf'] },
+  jardin: { floor: ['#1f3b2c', '#15291f', '#0d1a14'], rim: '#86efac', rimDark: '#14532d', stud: '#16a34a', rock: ['#6b7d5c', '#3c4a33', '#a3b896'] },
+  volcan: { floor: ['#3b1a14', '#26110d', '#170a08'], rim: '#fb923c', rimDark: '#7c2d12', stud: '#ea580c', rock: ['#5b4a46', '#2f2422', '#8f7a74'] },
+  glace: { floor: ['#1e3a52', '#142838', '#0b1824'], rim: '#a5f3fc', rimDark: '#155e75', stud: '#22d3ee', rock: ['#7aa6c2', '#3f6480', '#d6f3ff'] },
+  ruines: { floor: ['#3a3326', '#26211a', '#17140f'], rim: '#fde68a', rimDark: '#713f12', stud: '#ca8a04', rock: ['#8a7e66', '#4f4637', '#c2b594'] },
+};
+// Obstacles : rocher en pierre pixel (amortit) ou champignon lumineux qui pulse (renvoie plus fort)
+function rgObstacles(c, t) {
+  const obs = RNG.st?.map?.obs; if (!obs) return;
+  const V = RNG.view, px = V.px, T = MAP_THEME[RNG.st.map.id] || MAP_THEME.arene;
+  for (const o of obs) {
+    const [x, y] = w2s(o.x, o.y), r = o.r * V.s;
+    c.fillStyle = 'rgba(0,0,0,.45)'; c.beginPath(); c.ellipse(x + r * .12, y + r * .3, r * 1.02, r * .75, 0, 0, 7); c.fill();
+    if (o.k > 1) {
+      const p = 1 + .06 * Math.sin(t * 5 + o.x);
+      const g = c.createRadialGradient(x, y, r * .3, x, y, r * 1.6 * p); g.addColorStop(0, 'rgba(244,114,182,.45)'); g.addColorStop(1, 'rgba(244,114,182,0)');
+      c.fillStyle = g; c.beginPath(); c.arc(x, y, r * 1.6 * p, 0, 7); c.fill();
+      c.fillStyle = '#831843'; c.beginPath(); c.arc(x, y, r * p, 0, 7); c.fill();
+      c.fillStyle = '#ec4899'; c.beginPath(); c.arc(x, y, r * .82 * p, 0, 7); c.fill();
+      c.fillStyle = '#fbcfe8'; for (let k = 0; k < 6; k++) { const a = k / 6 * 6.283 + t * .4; c.fillRect(x + Math.cos(a) * r * .5 - px, y + Math.sin(a) * r * .5 - px, px * 2, px * 2); }
+      c.fillStyle = '#fff'; c.fillRect(x - px, y - px, px * 2, px * 2);
+    } else {
+      c.fillStyle = T.rock[1]; c.beginPath(); c.arc(x, y, r, 0, 7); c.fill();
+      c.fillStyle = T.rock[0]; c.beginPath(); c.arc(x - r * .1, y - r * .12, r * .82, 0, 7); c.fill();
+      c.fillStyle = T.rock[2]; c.beginPath(); c.arc(x - r * .3, y - r * .35, r * .3, 0, 7); c.fill();
+      c.fillStyle = T.rock[1]; c.fillRect(x + r * .1, y - r * .1, px * 3, px); c.fillRect(x + r * .1 + px * 2, y - r * .1 + px, px, px * 2); c.fillRect(x - r * .4, y + r * .3, px * 2, px);
+    }
+  }
+}
+// Équipe adverse (ou la tienne) : les 3 jetons d'un coup, pouvoir, état et stats, pour préparer son tir
+function rgScout(side) {
+  const st = RNG.st; if (!st) return;
+  RNG.el.querySelector('.rg-info')?.remove();
+  const o = document.createElement('div'); o.className = 'rg-info rg-scoutbox';
+  const card = b => {
+    const p = powerText(b.name), rd = RG.ready(b);
+    const state = !b.alive ? rt('koS') : p.pw === 'none' ? '' : rd ? rt('ready') : b.spent ? rt('used') : rt('inCd', { n: b.cd });
+    return `<div class="rg-sc${b.alive ? '' : ' ko'}" style="--g:${hexRGB(jetonOf(b.name).glow)};--c:${PW_COL[p.pw]}">
+      <div class="rg-ih"><img class="${vCls(b.variant)}" src="${texOf(jetonOf(b.name))}" alt=""><div><b>${jnH(b.name)} ${vTag(b.variant)}</b><small>${at('lvl')} ${b.lvl}</small></div>${state ? `<span class="rg-st${rd && b.alive ? ' on' : ''}">${state}</span>` : ''}</div>
+      ${p.pw === 'none' ? '' : `<p class="rg-sp"><b>✦ ${esc(p.name)}</b> ${esc(p.desc)}${p.when ? ` <small>· ${p.when}</small>` : ''}</p>`}
+      ${ringStatsHTML(b.name, b.lvl, b.variant, true)}
+    </div>`;
+  };
+  o.innerHTML = `<div class="rg-ic ${side ? 'foe' : 'me'} rg-scoutin">
+    <button class="rg-icx" aria-label="${t('close')}">✕</button>
+    <h3>👁 ${side ? rt('foeTeam') : esc(RNG.names[0])}</h3>
+    <small class="muted">${rt('scoutHint')}</small>
+    ${st.bodies.filter(b => b.side === side && !b.tmp).sort((a, b) => a.i - b.i).map(card).join('')}
+  </div>`;
+  RNG.el.appendChild(o); RNG.info = true; sfx.click();
+  o.animate([{ opacity: 0, transform: 'scale(.94)' }, { opacity: 1, transform: 'none' }], { duration: 180, easing: 'ease-out' });
+  o.onclick = e => { if (e.target === o || e.target.closest('.rg-icx')) { o.remove(); RNG.info = false; } };
+}
+
 // Sol du ring en pixel art : disque sombre tramé, cercles repères, bord épais en deux tons avec des plots, étoiles autour
 function rgFloor(c, mid, R, t) {
   const px = RNG.view.px;
@@ -408,8 +473,9 @@ function rgFloor(c, mid, R, t) {
     const x = mid + Math.cos(s.a) * R * s.d, y = mid + Math.sin(s.a) * R * s.d, on = .35 + .65 * Math.abs(Math.sin(t * 1.3 + s.k));
     c.fillStyle = `rgba(221,214,254,${on * .8})`; c.fillRect(Math.round(x / px) * px, Math.round(y / px) * px, px, px);
   }
+  const T = MAP_THEME[RNG.st?.map?.id] || MAP_THEME.arene;
   const g = c.createRadialGradient(mid, mid, R * .05, mid, mid, R);
-  g.addColorStop(0, '#2e2550'); g.addColorStop(.7, '#1d1736'); g.addColorStop(1, '#140f26');
+  g.addColorStop(0, T.floor[0]); g.addColorStop(.7, T.floor[1]); g.addColorStop(1, T.floor[2]);
   c.fillStyle = g; c.beginPath(); c.arc(mid, mid, R, 0, 7); c.fill();
   // trame en damier (un pixel sur deux, très léger) pour le grain pixel art
   c.save(); c.beginPath(); c.arc(mid, mid, R, 0, 7); c.clip();
@@ -423,13 +489,13 @@ function rgFloor(c, mid, R, t) {
   // centre : petit losange
   c.fillStyle = 'rgba(221,214,254,.35)'; c.beginPath(); c.moveTo(mid, mid - px * 3); c.lineTo(mid + px * 3, mid); c.lineTo(mid, mid + px * 3); c.lineTo(mid - px * 3, mid); c.fill();
   // bord : anneau sombre + anneau clair qui pulse
-  c.lineWidth = px * 3; c.strokeStyle = '#2e1065'; c.beginPath(); c.arc(mid, mid, R + px, 0, 7); c.stroke();
-  c.lineWidth = px * 1.4; c.strokeStyle = `rgba(196,181,253,${.6 + .25 * Math.sin(t * 2)})`; c.shadowColor = '#8b5cf6'; c.shadowBlur = 6;
-  c.beginPath(); c.arc(mid, mid, R, 0, 7); c.stroke(); c.shadowBlur = 0;
+  c.lineWidth = px * 3; c.strokeStyle = T.rimDark; c.beginPath(); c.arc(mid, mid, R + px, 0, 7); c.stroke();
+  c.globalAlpha = .6 + .25 * Math.sin(t * 2); c.lineWidth = px * 1.4; c.strokeStyle = T.rim; c.shadowColor = T.rim; c.shadowBlur = 6;
+  c.beginPath(); c.arc(mid, mid, R, 0, 7); c.stroke(); c.shadowBlur = 0; c.globalAlpha = 1;
   // plots sur le bord (16)
   for (let k = 0; k < 16; k++) {
     const a = k / 16 * 6.283 + t * .05, x = mid + Math.cos(a) * (R + px), y = mid + Math.sin(a) * (R + px);
-    c.fillStyle = k % 4 ? '#7c3aed' : '#fde68a'; c.fillRect(x - px, y - px, px * 2, px * 2);
+    c.fillStyle = k % 4 ? T.stud : '#fde68a'; c.fillRect(x - px, y - px, px * 2, px * 2);
   }
 }
 
@@ -453,7 +519,7 @@ function rgTeamMark(c, b, x, y, rr, t, live) {
 }
 
 function rgDraw(dt) {
-  const M = RNG.ctx, V = RNG.view, R = RCFG.RING_R * V.s, mid = V.size / 2, t = performance.now() / 1000;
+  const M = RNG.ctx, V = RNG.view, R = RG.ringR(RNG.st) * V.s, mid = V.size / 2, t = performance.now() / 1000;
   const lo = RNG.lo.getContext('2d'), hi = RNG.hi.getContext('2d');
   // tremblement de l'écran (le même décalage pour toutes les couches)
   let sx0 = 0, sy0 = 0;
@@ -465,6 +531,7 @@ function rgDraw(dt) {
   // ----- Couche basse (pixel) : sol, effets au sol, traînées, repères de camp, auras
   let c = lo;
   rgFloor(c, mid, R, t);
+  rgObstacles(c, t);
   // corps à afficher : pendant l'animation, les positions enregistrées ; sinon l'état du match
   const P = RNG.play;
   let list;
@@ -836,7 +903,7 @@ const RFX = (() => {
   }
   // Sol : traînée de glace de Glissade, ronces autour du ring
   function under(c, list, t, dt) {
-    const V = RNG.view, R = RCFG.RING_R * V.s, mid = V.size / 2;
+    const V = RNG.view, R = RG.ringR(RNG.st) * V.s, mid = V.size / 2;
     for (const b of list) if (active[b.id] === 'slide' && RNG.play) ground.push({ x: b.x, y: b.y, r: b.r, life: 1 });
     ground = ground.filter(g => (g.life -= dt * .35) > 0);
     for (const g of ground) { const [x, y] = w2s(g.x, g.y); c.fillStyle = `rgba(186,230,253,${g.life * .12})`; c.beginPath(); c.arc(x, y, g.r * V.s * .9, 0, 7); c.fill(); }

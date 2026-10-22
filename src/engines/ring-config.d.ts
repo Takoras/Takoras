@@ -1,6 +1,7 @@
 // Types de RCFG (valeurs d'équilibrage du Ring). Les valeurs sont dans ring-config.js.
 export type TokenKit = { mass: number; power: number; r: number; pw: string; cd: number; p: Record<string, number> };
 export const RCFG: {
+  MAPS: { id: string; R: number; fric: number; obs: { x: number; y: number; r: number; k: number }[] }[];
   RING_R: number; TURNS: number; AIM_S: number; START_Y: number; START_X: number[]; SUDDEN_Y: number;
   DT: number; FRICTION: number; DRAG: number; RESTITUTION: number; STOP_SPEED: number; MAX_SIM_S: number; QUANT: number; MIN_FORCE: number;
   BIG_HIT: number; SLOWMO: number; SLOWMO_S: number;

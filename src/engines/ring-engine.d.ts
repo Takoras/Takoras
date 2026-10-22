@@ -5,18 +5,21 @@ export type Body = {
   base: { mass: number; power: number; r: number }; mass: number; power: number; r: number;
   x: number; y: number; vx: number; vy: number; alive: boolean; cd: number; spent: boolean; tmp?: boolean;
 };
-export type RingState = { turn: number; over: boolean; winner: 0 | 1 | null; sudden: boolean; bodies: Body[] };
+export type Obstacle = { x: number; y: number; r: number; k: number };
+export type RingMap = { id: string; R: number; fric: number; obs: Obstacle[] };
+export type RingState = { turn: number; over: boolean; winner: 0 | 1 | null; sudden: boolean; bodies: Body[]; map?: RingMap };
 export type Shot = { i: number; ax: number; ay: number; f: number; pow: boolean };
 export type RingEvent = { t: string; at?: number; [k: string]: unknown };
 export type Resolved = { frames: ([number, number, number] | null)[][]; ev: RingEvent[]; ids?: number[]; firstHit?: number };
 export const RG: {
   kit(name: string): TokenKit;
   stats(name: string, lvl?: number, variant?: string): { mass: number; power: number; r: number };
-  create(teams: { name: string; lvl?: number; variant?: string }[][]): RingState;
+  create(teams: { name: string; lvl?: number; variant?: string }[][], mapId?: string): RingState;
   clone(st: RingState): RingState;
   alive(st: RingState, side?: 0 | 1): Body[];
   ready(b: Body): boolean;
   resolve(st: RingState, shots: (Shot | null)[], opts?: { preview?: number }): Resolved;
   aiShot(st: RingState, side: 0 | 1, level?: string, rnd?: () => number): Shot | null;
   len(x: number, y: number): number;
+  ringR(st: RingState): number;
 };

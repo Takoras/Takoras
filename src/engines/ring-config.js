@@ -1,14 +1,25 @@
-// Généré par scripts/port/engines.mjs depuis legacy/ring-config.js — ne pas modifier ici, modifier legacy/ puis relancer.
+// Valeurs du Ring (reprises de legacy/ring-config.js). Ce fichier est la référence depuis la phase 8 :
+// tour de 30 s et 5 maps. Sans map, le moteur reste identique à l'ancien site (test de rejeu).
 // « Ring » : toutes les valeurs d'équilibrage au même endroit. Change un chiffre ici, tout le jeu suit.
 // Unités : le ring a un rayon de 1000. Les vitesses sont en unités par seconde.
 const RCFG = {
   // ---------- Match
   RING_R: 1000,
   TURNS: 12,             // limite de tours (puis : plus de jetons restants, puis plus proches du centre)
-  AIM_S: 10,             // secondes pour viser
+  AIM_S: 30,             // secondes pour viser (le tour part dès que les deux ont validé)
   START_Y: 560,          // départ : tes jetons en bas (y = +560), ceux d'en face en haut
   START_X: [-360, 0, 360],
   SUDDEN_Y: 220,         // mort subite : 1 jeton chacun près du centre
+
+  // ---------- Maps (rayon du ring, glisse du sol, obstacles ronds fixes). Toutes symétriques haut/bas : équitables.
+  // Obstacle : { x, y, r, k } · k = rebond (0,8 rocher qui amortit · 1,35 champignon qui renvoie plus fort)
+  MAPS: [
+    { id: 'arene', R: 1200, fric: 1, obs: [{ x: 0, y: 0, r: 95, k: .8 }] },
+    { id: 'jardin', R: 1250, fric: 1, obs: [{ x: -500, y: 0, r: 120, k: .8 }, { x: 500, y: 0, r: 120, k: .8 }, { x: -230, y: -330, r: 60, k: .8 }, { x: 230, y: 330, r: 60, k: .8 }, { x: 230, y: -330, r: 60, k: .8 }, { x: -230, y: 330, r: 60, k: .8 }] },
+    { id: 'volcan', R: 1250, fric: 1, obs: [{ x: 0, y: 0, r: 150, k: 1.35 }, { x: -720, y: 0, r: 85, k: .8 }, { x: 720, y: 0, r: 85, k: .8 }] },
+    { id: 'glace', R: 1300, fric: .55, obs: [{ x: 0, y: -450, r: 85, k: .8 }, { x: 0, y: 450, r: 85, k: .8 }, { x: -680, y: 0, r: 75, k: 1.35 }, { x: 680, y: 0, r: 75, k: 1.35 }] },
+    { id: 'ruines', R: 1300, fric: 1, obs: [{ x: -580, y: -320, r: 85, k: .8 }, { x: 580, y: -320, r: 85, k: .8 }, { x: -580, y: 320, r: 85, k: .8 }, { x: 580, y: 320, r: 85, k: .8 }, { x: -260, y: 0, r: 70, k: .8 }, { x: 260, y: 0, r: 70, k: .8 }] },
+  ],
 
   // ---------- Physique (pas fixe, valeurs arrondies à chaque pas = 100 % déterministe)
   DT: 1 / 120,

@@ -3,9 +3,9 @@
 // Usage : node scripts/port/engines.mjs (à relancer si legacy/ change ; le test de rejeu vérifie l'identité)
 import fs from 'node:fs';
 
+// ring-config.js et ring-engine.js ne sont plus copiés (phase 8 : maps, obstacles, 30 s par tour).
+// Sans map, le moteur reste identique à l'ancien : le test de rejeu (replay.test.ts) le vérifie.
 const FILES = [
-  ['ring-config.js', '', 'export { RCFG };'],
-  ['ring-engine.js', "import { RCFG } from './ring-config.js';", 'export { RG };'],
   ['combat-engine.js', "import { RG } from './ring-engine.js';", 'export { CB };'],
 ];
 for (const [f, imp, exp] of FILES) {

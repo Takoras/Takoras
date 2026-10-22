@@ -34,8 +34,13 @@ function fight(E: typeof RG, seed: number) {
   return { log, winner: st.winner, turn: st.turn };
 }
 
-test('mêmes valeurs d’équilibrage', () => {
-  expect(JSON.stringify(RCFG)).toBe(JSON.stringify(legacy.RCFG));
+test('mêmes valeurs d’équilibrage (sauf changements voulus : 30 s par tour, maps)', () => {
+  const { AIM_S, MAPS, ...rest } = RCFG as typeof RCFG & { MAPS: unknown };
+  const { AIM_S: _a, ...old } = legacy.RCFG;
+  void _a;
+  expect(AIM_S).toBe(30);
+  expect(MAPS).toHaveLength(5);
+  expect(JSON.stringify(rest)).toBe(JSON.stringify(old));
   for (const n of Object.keys(RCFG.TOKENS)) expect(CB.elOf(n)).toBe(legacy.CB.elOf(n));
 });
 

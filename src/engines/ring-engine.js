@@ -1,4 +1,5 @@
-// Généré par scripts/port/engines.mjs depuis legacy/ring-engine.js — ne pas modifier ici, modifier legacy/ puis relancer.
+// Moteur du Ring (repris de legacy/ring-engine.js). Référence depuis la phase 8 : maps (taille, glisse, obstacles).
+// Sans map (create(teams)), le résultat est EXACTEMENT celui de l'ancien moteur : replay.test.ts le vérifie.
 import { RCFG } from './ring-config.js';
 // « Ring » : moteur physique maison (règles seulement, aucun affichage). Valeurs : ring-config.js (RCFG).
 //
@@ -17,15 +18,21 @@ const RG = (() => {
     return { mass: k.mass * m, power: k.power * m, r: k.r };
   }
   // teams : [[{ name, lvl, variant }×3] ×2]
-  function create(teams) {
+  // map (facultative) : un id de C.MAPS. Le terrain grandit avec la map, les départs aussi.
+  function create(teams, mapId) {
     const st = { turn: 1, over: false, winner: null, sudden: false, bodies: [] };
+    const map = mapId ? C.MAPS.find(m => m.id === mapId) : null;
+    if (map) st.map = { id: map.id, R: map.R, fric: map.fric, obs: map.obs.map(o => ({ ...o })) };
+    const k0 = map ? map.R / C.RING_R : 1;
     teams.forEach((team, side) => team.forEach((j, i) => {
       const s = stats(j.name, j.lvl, j.variant), k = kit(j.name);
       st.bodies.push({ id: side * 3 + i, side, i, name: j.name, lvl: j.lvl || 1, variant: j.variant || '', pw: k.pw, base: s, mass: s.mass, power: s.power, r: s.r,
-        x: C.START_X[i], y: side ? -C.START_Y : C.START_Y, vx: 0, vy: 0, alive: true, cd: 0, spent: false });
+        x: map ? q(C.START_X[i] * k0) : C.START_X[i], y: (side ? -1 : 1) * (map ? q(C.START_Y * k0) : C.START_Y), vx: 0, vy: 0, alive: true, cd: 0, spent: false });
     }));
     return st;
   }
+  const ringR = st => st.map ? st.map.R : C.RING_R;
+  const obsOf = st => st.map ? st.map.obs : [];
   const clone = st => JSON.parse(JSON.stringify(st));
   const alive = (st, side) => st.bodies.filter(b => b.alive && !b.tmp && (side == null || b.side === side));
   const ready = b => b.alive && b.pw !== 'none' && b.cd === 0 && !b.spent;
@@ -34,7 +41,7 @@ const RG = (() => {
   // shots : [tir du joueur 0 | null, tir du joueur 1 | null]. opts.preview : on s'arrête peu après le premier choc.
   function resolve(st, shots, opts = {}) {
     const B = st.bodies, ev = [], frames = [], start = [0, 1].map(s => alive(st, s).length);
-    const dt = C.DT;
+    const dt = C.DT, RR = ringR(st), OBS = obsOf(st), GF = st.map ? st.map.fric : 1;
     B.forEach(b => { b.t = { fric: 1, bounce: false, ghost: false, shield: false, anchor: false, shooter: false, v0: 0, hit: false, stopped: false, el: 0, pw: null }; });
     // pouvoirs et lancers
     const fired = [];
@@ -94,7 +101,7 @@ const RG = (() => {
         }
         b.x += b.vx * dt; b.y += b.vy * dt;
         // frottement
-        if (s > 0) { const ns = Math.max(0, s - C.FRICTION * T.fric * dt) * (1 - C.DRAG * dt), k = ns / s; b.vx *= k; b.vy *= k; }
+        if (s > 0) { const ns = Math.max(0, s - C.FRICTION * T.fric * GF * dt) * (1 - C.DRAG * dt), k = ns / s; b.vx *= k; b.vy *= k; }
       }
       // chocs entre jetons
       for (let a = 0; a < list.length; a++) for (let c = a + 1; c < list.length; c++) {
@@ -127,16 +134,31 @@ const RG = (() => {
         ev.push({ t: 'hit', a: A.id, b: Cc.id, j: Math.round(Math.abs(j)), x: q(A.x + nx * A.r), y: q(A.y + ny * A.r), at: tm });
         if (firstHit < 0) firstHit = steps;
       }
+      // obstacles (fixes) : le jeton rebondit dessus (k < 1 amortit, k > 1 renvoie plus fort)
+      if (OBS.length) for (const b of list) {
+        if (!b.alive) continue;
+        for (const o of OBS) {
+          const dx = b.x - o.x, dy = b.y - o.y, d = len(dx, dy), rr = b.r + o.r;
+          if (d >= rr) continue;
+          const nx = d ? dx / d : 0, ny = d ? dy / d : 1;
+          b.x = o.x + nx * rr; b.y = o.y + ny * rr;
+          const vn = b.vx * nx + b.vy * ny;
+          if (vn >= 0) continue;
+          b.vx -= (1 + o.k) * vn * nx; b.vy -= (1 + o.k) * vn * ny;
+          if (b.t.shooter) b.t.hit = true;
+          ev.push({ t: 'wall', id: b.id, x: q(o.x + nx * o.r), y: q(o.y + ny * o.r), k: o.k, j: Math.round(-vn), at: tm });
+        }
+      }
       // bord du ring
       for (const b of list) {
         if (!b.alive) continue;
         const d = len(b.x, b.y);
-        if (d <= C.RING_R) continue;
+        if (d <= RR) continue;
         const nx = b.x / d, ny = b.y / d;
         if (b.t.bounce && !b.tmp) {
           const vn = b.vx * nx + b.vy * ny;
-          if (vn > 0) { b.vx -= 2 * vn * nx; b.vy -= 2 * vn * ny; ev.push({ t: 'edge', id: b.id, x: q(nx * C.RING_R), y: q(ny * C.RING_R), at: tm }); }
-          b.x = nx * C.RING_R; b.y = ny * C.RING_R;
+          if (vn > 0) { b.vx -= 2 * vn * nx; b.vy -= 2 * vn * ny; ev.push({ t: 'edge', id: b.id, x: q(nx * RR), y: q(ny * RR), at: tm }); }
+          b.x = nx * RR; b.y = ny * RR;
         } else {
           b.alive = false;
           if (!b.tmp) ev.push({ t: 'out', id: b.id, x: q(b.x), y: q(b.y), vx: q(b.vx), vy: q(b.vy), at: tm });
@@ -177,7 +199,7 @@ const RG = (() => {
         const nx = d ? dx / d : 0, ny = d ? dy / d : 1, h = (rr - d) / 2 + .5;
         A.x = q(A.x - nx * h); A.y = q(A.y - ny * h); Cc.x = q(Cc.x + nx * h); Cc.y = q(Cc.y + ny * h);
       }
-      for (const b of list) { const d = len(b.x, b.y); if (d > C.RING_R) { b.alive = false; ev.push({ t: 'out', id: b.id, x: b.x, y: b.y, vx: 0, vy: 0, at: tm }); } }
+      for (const b of list) { const d = len(b.x, b.y); if (d > RR) { b.alive = false; ev.push({ t: 'out', id: b.id, x: b.x, y: b.y, vx: 0, vy: 0, at: tm }); } }
       if (!any) break;
     }
     if (opts.preview) return { frames, ev, firstHit };
@@ -201,7 +223,13 @@ const RG = (() => {
       if (st.sudden) return finish(st, null, ev, 'draw');
       // mort subite : 1 jeton chacun près du centre
       st.sudden = true;
-      [0, 1].forEach(s => { const b = st.bodies.find(x => x.side === s && x.i === 0) || st.bodies.find(x => x.side === s); Object.assign(b, { alive: true, x: 0, y: s ? -C.SUDDEN_Y : C.SUDDEN_Y, vx: 0, vy: 0 }); });
+      [0, 1].forEach(s => {
+        const b = st.bodies.find(x => x.side === s && x.i === 0) || st.bodies.find(x => x.side === s);
+        // sur une map : on recule le jeton tant qu'il touche un obstacle (toujours pareil, donc déterministe)
+        let y = C.SUDDEN_Y;
+        while (obsOf(st).some(o => len(0 - o.x, (s ? -y : y) - o.y) < b.base.r + o.r + 10)) y += 20;
+        Object.assign(b, { alive: true, x: 0, y: s ? -y : y, vx: 0, vy: 0 });
+      });
       ev.push({ t: 'sudden' });
       st.turn++;
       return;
@@ -233,8 +261,11 @@ const RG = (() => {
         if (s > bestS && alive(st, side).some(x => len(x.x, x.y) > 650)) { bestS = s; best = { i: b.i, ax: 0, ay: -1, f: 0, pow: true }; }
         continue;
       }
-      for (const foe of alive(st, 1 - side)) for (const f of [.55, .8, 1]) {
-        const shot = { i: b.i, ax: Math.round(foe.x - b.x), ay: Math.round(foe.y - b.y), f, pow };
+      // avec des obstacles, l'IA essaie aussi des tirs un peu de biais (bandes, contournements)
+      const tilts = obsOf(st).length ? [0, .22, -.22] : [0];
+      for (const foe of alive(st, 1 - side)) for (const f of [.55, .8, 1]) for (const tl of tilts) {
+        const dx0 = foe.x - b.x, dy0 = foe.y - b.y;
+        const shot = { i: b.i, ax: Math.round(dx0 - dy0 * tl), ay: Math.round(dy0 + dx0 * tl), f, pow };
         const sim = clone(st), sh = [null, null]; sh[side] = shot;
         resolve(sim, sh);
         const s = (sim.over ? (sim.winner === side ? 1e6 : sim.winner === 1 - side ? -1e6 : 0) : score(sim, side)) - (pow ? 120 : 0) + rnd() * 60;
@@ -249,7 +280,7 @@ const RG = (() => {
     return best;
   }
 
-  return { kit, stats, create, clone, alive, ready, resolve, aiShot, len };
+  return { kit, stats, create, clone, alive, ready, resolve, aiShot, len, ringR };
 })();
 
 export { RG };

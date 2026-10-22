@@ -85,3 +85,16 @@
 @keyframes rgPulse { to { transform: scale(1.12); } }
 @keyframes rgOn { 50% { box-shadow: 0 0 34px var(--c); } }
 @keyframes rgHl { 50% { outline-color: rgba(253, 230, 138, .25); } }
+/* Phase 8 : bouton « Leurs pouvoirs » et panneau de l'équipe adverse */
+.rg-scout { margin-left: 6px; padding: 3px 10px; border-radius: 999px; border: 1px solid rgba(251, 146, 60, .55); background: rgba(251, 146, 60, .12); color: #fdba74; font-size: 12px; font-weight: 700; vertical-align: middle; }
+.rg-scout:hover { background: rgba(251, 146, 60, .24); }
+.rg-scoutin { width: min(100%, 420px); max-height: calc(100dvh - 40px); overflow-y: auto; gap: 10px; }
+.rg-scoutin h3 { font-family: var(--font-display); font-size: 18px; }
+.rg-sc { display: grid; gap: 6px; padding: 10px 12px; border-radius: 14px; background: linear-gradient(180deg, rgba(var(--g), .14), rgba(255, 255, 255, .03)); border: 1px solid rgba(255, 255, 255, .08); }
+.rg-sc.ko { opacity: .45; filter: grayscale(.8); }
+.rg-sc .rg-ih img { width: 40px; height: 40px; }
+.rg-st { margin-left: auto; padding: 2px 8px; border-radius: 999px; background: rgba(255, 255, 255, .08); color: var(--muted); font-size: 11px; font-weight: 700; white-space: nowrap; }
+.rg-st.on { background: color-mix(in srgb, var(--c) 22%, transparent); color: var(--c); }
+.rg-sp { font-size: 13px; color: var(--text-2); line-height: 1.4; }
+.rg-sp b { color: var(--c); }
+.rg-sp small { color: var(--muted); }

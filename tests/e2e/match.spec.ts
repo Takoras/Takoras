@@ -45,6 +45,13 @@ test('Ring : partie complète contre l’IA, au doigt (375 px) et à la souris (
     const over = await page.evaluate(() => !window.__ring?.RNG.st || window.__ring.RNG.st.over);
     if (over) break;
     // captures pour vérifier la DA (visée, puis tir en cours)
+    if (turns === 0) {
+      // l'équipe adverse : pouvoirs et état, chrono en pause
+      await page.locator('.rg [data-scout]').click();
+      await expect(page.locator('.rg-scoutbox .rg-sc')).toHaveCount(3);
+      if (process.env.SHOT) await page.screenshot({ path: `${process.env.SHOT}/ring-scout-${isMobile ? 'm' : 'd'}.png` });
+      await page.locator('.rg-scoutbox .rg-icx').click();
+    }
     if (turns === 1 && process.env.SHOT) await page.screenshot({ path: `${process.env.SHOT}/ring-aim-${isMobile ? 'm' : 'd'}.png` });
     expect(await shoot(page, isMobile)).toBe('shot');
     if (turns === 1 && process.env.SHOT) { await page.waitForTimeout(500); await page.screenshot({ path: `${process.env.SHOT}/ring-play-${isMobile ? 'm' : 'd'}.png` }); }
