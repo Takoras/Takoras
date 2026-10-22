@@ -23,7 +23,7 @@ La commande doit renvoyer `{"missing": {}}`.
 
 ## Général
 
-- [ ] Écran de chargement (préchargement des images, 0,6 à 2,5 s).
+- [x] Écran de chargement (statique, affiché avant le JS ; React le remplace dès qu'il est prêt).
 - [ ] Barre du haut :
   - logo + puce bêta ;
   - liens Accueil, Inventaire, Boutique, Classement, Combat, Amis, avec soulignement animé ;

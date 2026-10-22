@@ -14,7 +14,22 @@ export default defineConfig({
       '@supabase/functions-js': fileURLToPath(new URL('./src/lib/stubs/supabase-functions.ts', import.meta.url)),
     },
   },
-  build: { target: 'es2022', sourcemap: true },
+  build: {
+    target: 'es2022',
+    sourcemap: true,
+    rolldownOptions: {
+      output: {
+        // Moins de petits fichiers au premier chargement (chacun coûte un aller-retour réseau) :
+        // les bibliothèques ensemble, et les petits outils partagés du site ensemble. Les pages et moteurs restent à part.
+        codeSplitting: {
+          groups: [
+            { name: 'vendor', test: /node_modules/ },
+            { name: 'shared', test: /src\/(api|lib|data|ui|i18n\/(index|useT|Rich|fr)|app\/ui-store|features\/(social\/social|eco\/eco|info\/store|beta\/store))[\/.]/ },
+          ],
+        },
+      },
+    },
+  },
   css: { modules: { localsConvention: 'camelCase' } },
   test: {
     environment: 'jsdom',
