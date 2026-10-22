@@ -226,6 +226,7 @@
   color: var(--muted);
 }
 .num {
+  z-index: 2;
   position: absolute;
   top: 6px;
   left: 8px;
@@ -234,6 +235,7 @@
   font-variant-numeric: tabular-nums;
 }
 .count {
+  z-index: 2;
   position: absolute;
   top: 5px;
   right: 6px;
@@ -244,6 +246,7 @@
   font-weight: 700;
 }
 .badge {
+  z-index: 2;
   position: absolute;
   top: 24px;
   right: 6px;

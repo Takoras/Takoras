@@ -130,6 +130,7 @@
   font-size: 11px;
 }
 .scV {
+  z-index: 2;
   position: absolute;
   top: 6px;
   left: 50%;
