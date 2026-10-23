@@ -47,7 +47,8 @@ export function predictEco(me: Record<string, unknown>, fetchedAt: number, now: 
     nextIn0 = Number(me.next_in ?? 0) * 1000;
   const e = now - fetchedAt;
   const gained = stock0 >= max ? 0 : e >= nextIn0 ? 1 + Math.floor((e - nextIn0) / step) : 0;
-  const stock = Math.min(max, stock0 + gained);
+  // la recharge s'arrête au stock max, mais un stock déjà au-dessus (codes, recharge éclair…) reste tel quel
+  const stock = stock0 >= max ? stock0 : Math.min(max, stock0 + gained);
   const full = stock >= max;
   const nextIn = full ? 0 : e < nextIn0 ? nextIn0 - e : step - ((e - nextIn0) % step);
   return {

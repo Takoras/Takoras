@@ -13,3 +13,9 @@ test('le stock remonte tout seul entre deux lectures du serveur', () => {
   expect(predictEco(me, 0, 30_000)).toMatchObject({ stock: 3, nextIn: 120_000 });
   expect(predictEco(me, 0, 30_000 + 3 * 120_000)).toMatchObject({ stock: 5, full: true, nextIn: 0 });
 });
+
+test('stock au-dessus du max (codes, recharge éclair) : affiché tel quel, pas ramené au max', () => {
+  const e = predictEco({ stock: 65, max: 50, step: 180, next_in: 0 }, 0, 10 * 60_000);
+  expect(e.stock).toBe(65);
+  expect(e.full).toBe(true);
+});
