@@ -1,5 +1,5 @@
-// Moteur du Ring (repris de legacy/ring-engine.js). Référence depuis la phase 8 : maps (taille, glisse, obstacles).
-// Sans map (create(teams)), le résultat est EXACTEMENT celui de l'ancien moteur : replay.test.ts le vérifie.
+// Moteur du Ring (repris de legacy/ring-engine.js, puis maps, ring qui rétrécit et rôles Combattant / Tank / Soutien).
+// 100 % déterministe : replay.test.ts le vérifie (même partie = même résultat, aussi après un passage en JSON).
 import { RCFG } from './ring-config.js';
 // « Ring » : moteur physique maison (règles seulement, aucun affichage). Valeurs : ring-config.js (RCFG).
 //
@@ -12,10 +12,18 @@ const RG = (() => {
   const C = RCFG, Q = C.QUANT, q = x => Math.round(x * Q) / Q;
   const kit = name => C.TOKENS[name] || C.DEFAULT_TOKEN;
   const len = (x, y) => Math.sqrt(x * x + y * y);
-  // Stats physiques : base × niveau × mutation (poids et puissance ; la taille ne change pas)
+  // Stats physiques : base × niveau × mutation × rôle (Combattant : puissance, Tank : poids ; la taille ne change pas)
+  const roleOf = name => kit(name).role || 'fighter';
   function stats(name, lvl = 1, variant = '') {
-    const k = kit(name), m = (1 + C.LEVEL_BONUS * (Math.max(1, lvl) - 1)) * (C.MUTATION[variant] || 1);
-    return { mass: k.mass * m, power: k.power * m, r: k.r };
+    const k = kit(name), m = (1 + C.LEVEL_BONUS * (Math.max(1, lvl) - 1)) * (C.MUTATION[variant] || 1), R = C.ROLES[roleOf(name)] || {};
+    return { mass: k.mass * m * (R.mass || 1), power: k.power * m * (R.power || 1), r: k.r };
+  }
+  // Bonus d'équipe : chaque Soutien donne +5 % (poids et puissance) à ses alliés, et le trio complet +5 % à tous
+  function teamBonus(team, i) {
+    const roles = team.map(j => roleOf(j.name));
+    const sup = roles.filter((r, k) => r === 'support' && k !== i).length;
+    const trio = ['fighter', 'tank', 'support'].every(r => roles.includes(r));
+    return Math.pow(C.ROLES.support.ally, sup) * (trio ? C.TRIO : 1);
   }
   // teams : [[{ name, lvl, variant }×3] ×2]
   // map (facultative) : un id de C.MAPS. Le terrain grandit avec la map, les départs aussi.
@@ -25,7 +33,8 @@ const RG = (() => {
     if (map) st.map = { id: map.id, R: map.R, R0: map.R, fric: map.fric, walls: map.walls.map(o => ({ ...o })), zones: map.zones.map(z => ({ ...z })) };
     const k0 = map ? map.R / C.RING_R : 1;
     teams.forEach((team, side) => team.forEach((j, i) => {
-      const s = stats(j.name, j.lvl, j.variant), k = kit(j.name);
+      const s0 = stats(j.name, j.lvl, j.variant), k = kit(j.name), tb = teamBonus(team, i);
+      const s = { mass: s0.mass * tb, power: s0.power * tb, r: s0.r };
       st.bodies.push({ id: side * 3 + i, side, i, name: j.name, lvl: j.lvl || 1, variant: j.variant || '', pw: k.pw, base: s, mass: s.mass, power: s.power, r: s.r,
         x: map ? q(C.START_X[i] * k0) : C.START_X[i], y: (side ? -1 : 1) * (map ? q(C.START_Y * k0) : C.START_Y), vx: 0, vy: 0, alive: true, cd: 0, spent: false });
     }));
@@ -70,6 +79,13 @@ const RG = (() => {
         if (b.pw === 'anchor') T.anchor = true;
         if (b.pw === 'shield') T.shield = true;
         if (b.pw === 'roots') alive(st, side).forEach(a => { a.t.bounce = true; });
+        // Coup de pouce (Soutien) : les pouvoirs de tes alliés reviennent plus vite
+        if (b.pw === 'haste') alive(st, side).forEach(a => { if (a !== b && a.cd > 0) { a.cd = Math.max(0, a.cd - k.p.cd); ev.push({ t: 'haste', id: a.id, by: b.id, at: 0 }); } });
+        // Bulle (Soutien) : ton allié le plus proche ne peut pas être poussé par les ennemis ce tour
+        if (b.pw === 'guard') {
+          const al = alive(st, side).filter(a => a !== b).sort((a, c) => len(a.x - b.x, a.y - b.y) - len(c.x - b.x, c.y - b.y))[0];
+          if (al) { al.t.shield = true; ev.push({ t: 'guard', id: al.id, by: b.id, at: 0 }); }
+        }
         if (b.pw === 'rescue') {
           const far = alive(st, side).filter(a => a !== b).sort((a, c) => len(c.x, c.y) - len(a.x, a.y))[0];
           if (far) { const d = len(far.x, far.y), m = Math.min(k.p.pull, d) / (d || 1); far.x = q(far.x - far.x * m); far.y = q(far.y - far.y * m); ev.push({ t: 'rescue', id: far.id, by: b.id, at: 0 }); }
@@ -340,7 +356,7 @@ const RG = (() => {
     return best;
   }
 
-  return { kit, stats, create, clone, alive, ready, resolve, aiShot, aiSmart, len, ringR, nearest, touchesWall };
+  return { kit, roleOf, stats, create, clone, alive, ready, resolve, aiShot, aiSmart, len, ringR, nearest, touchesWall };
 })();
 
 export { RG };

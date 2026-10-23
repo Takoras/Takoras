@@ -416,6 +416,13 @@ export const en: Dict = {
     "fr_need": "Log in to add friends, chat and challenge them."
   },
   "arena": {
+    "r_fighter": "Fighter",
+    "r_tank": "Tank",
+    "r_support": "Support",
+    "role": "Role",
+    "roleHelp": "⚔️ Fighter: +10% power · 🛡️ Tank: +15% weight · ✚ Support: +5% weight and power to its allies · Full trio (one of each): +5% for all 3",
+    "trio": "Full trio: +5% for all 3",
+    "trioMiss": "Tip: a Fighter, a Tank and a Support = +5% for all 3",
     "around": "Around you on the leaderboard",
     "aroundAll": "Full Elo leaderboard",
     "r_iron": "Iron",
@@ -488,7 +495,7 @@ export const en: Dict = {
     "els": "Elements",
     "elsHelp": "🔥 beats 🌿 · 🌿 beats 💧 · 💧 beats 🔥 · ✨ and 🌑 strong against each other (×1.3 damage)",
     "how": "How it works",
-    "howText": "A duel on a round ring, billiards × pétanque × sumo. Each turn, you and your opponent aim <b>at the same time</b> without seeing each other’s shot: tap one of your tokens, drag backwards like a slingshot (the further, the harder), then confirm. Both shots go off together. A token whose center leaves the ring is out, and <b>the ring shrinks every turn</b>: no hiding at the edge. The first player with no tokens left loses. Each token has a power and 3 stats: weight, power, size.",
+    "howText": "A duel on a round ring, billiards × pétanque × sumo. Each turn, you and your opponent aim <b>at the same time</b> without seeing each other’s shot: tap one of your tokens, drag backwards like a slingshot (the further, the harder), then confirm. Both shots go off together. A token whose center leaves the ring is out, and <b>the ring shrinks every turn</b>: no hiding at the edge. The first player with no tokens left loses. Each token has a <b>role</b> (Fighter, Tank or Support: one of each = trio bonus), a power and 3 stats: weight, power, size.",
     "round": "Round {n}",
     "step1": "Tap one of your tokens",
     "step2": "Tap or drag your token to a spot",
@@ -567,6 +574,8 @@ export const en: Dict = {
   },
   "ring": {
     "pw": {
+      "haste": ["Helping hand", "Your allies’ powers come back 1 turn sooner."],
+      "guard": ["Bubble", "Your closest ally can’t be pushed this turn."],
       "grow": [
         "Inflate",
         "Bigger and heavier this turn."

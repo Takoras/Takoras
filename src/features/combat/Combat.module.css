@@ -458,3 +458,15 @@
   font-size: 9px;
   padding: 1px 6px;
 }
+
+/* Trio complet (un Combattant, un Tank, un Soutien) */
+.trio {
+  margin: var(--s-1) 0 0;
+  font-size: var(--fs-xs);
+  color: var(--muted);
+  text-align: center;
+}
+.trioOn {
+  color: #4ade80;
+  font-weight: 700;
+}

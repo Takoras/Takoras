@@ -2,7 +2,7 @@ import { useRef, useState, type CSSProperties } from 'react';
 import { useQueryClient } from '@tanstack/react-query';
 import { combatApi, errorText } from '@/api';
 import { hexRGB, jetonOf, texOf, vImg } from '@/data/jetons';
-import { ELS, elOf, powerInfo, RING_MAX, ringStats, type El } from '@/data/kit';
+import { fullTrio, ROLES, roleOf, powerInfo, RING_MAX, ringStats, type Role } from '@/data/kit';
 import { RCFG } from '@/engines/ring-config.js';
 import { sfx } from '@/engines/sound.js';
 import { useAuth } from '@/lib/auth';
@@ -18,7 +18,7 @@ import { StatIcon } from '@/ui/StatIcon';
 import { TokenSheet } from './TokenSheet';
 import s from './Combat.module.css';
 
-const ELS_ORDER: ('all' | El)[] = ['all', 'fire', 'water', 'plant', 'light', 'shadow'];
+const ROLE_ORDER: ('all' | Role)[] = ['all', 'fighter', 'tank', 'support'];
 
 // Modifier l'équipe : ta collection en grille, toucher = ajouter / retirer.
 // En haut : les 3 places (toucher la pastille = changer de version). Plus de budget : n'importe quels 3 jetons.
@@ -46,14 +46,15 @@ export function TeamEditor({
     start.map((u) => (u && by.has(ownKey(u.serie, u.name)) ? { ...u } : null)),
   );
   const [serie, setSerie] = useState(series[0] ?? 'Takoras');
-  const [el, setEl] = useState<'all' | El>('all');
+  const [el, setEl] = useState<'all' | Role>('all');
   const [info, setInfo] = useState<Owned | null>(null);
   const [busy, setBusy] = useState(false);
+  const trio = team.every(Boolean) && fullTrio(team.map((u) => u?.name ?? ''));
   const slotsRef = useRef<HTMLUListElement>(null);
   const slots = dict.arena.slots;
   const inTeam = new Set(team.filter(Boolean).map((u) => ownKey(u?.serie ?? '', u?.name ?? '')));
   const vis = all
-    .filter((u) => u.serie === serie && (el === 'all' || elOf(u.name) === el))
+    .filter((u) => u.serie === serie && (el === 'all' || roleOf(u.name) === el))
     .sort((a, b) => b.odds - a.odds);
   const lvl = (o: { serie: string; name: string }) => lvlOf(levels, o.serie, o.name);
 
@@ -154,6 +155,7 @@ export function TeamEditor({
           );
         })}
       </ul>
+      <p className={`${s.trio} ${trio ? s.trioOn : ''}`}>{trio ? `✓ ${t('arena.trio')}` : t('arena.trioMiss')}</p>
       <div className={s.filters}>
         {series.length > 1 ? (
           <div className={s.chipsRow} role="group" aria-label={t('ui.bestiary')}>
@@ -172,8 +174,8 @@ export function TeamEditor({
             ))}
           </div>
         ) : null}
-        <div className={s.chipsRow} role="group" aria-label={t('arena.element')}>
-          {ELS_ORDER.map((e) => (
+        <div className={s.chipsRow} role="group" aria-label={t('arena.role')}>
+          {ROLE_ORDER.map((e) => (
             <button
               key={e}
               type="button"
@@ -183,11 +185,12 @@ export function TeamEditor({
                 setEl(e);
               }}
             >
-              {e === 'all' ? t('ui.all') : `${ELS[e].ico} ${ELS[e][lang]}`}
+              {e === 'all' ? t('ui.all') : `${ROLES[e].ico} ${ROLES[e][lang]}`}
             </button>
           ))}
         </div>
       </div>
+      <p className={s.legend}>{t('arena.roleHelp')}</p>
       <p className={s.legend}>
         {t('ring.statsLegend')
           .split(' · ')
@@ -202,7 +205,7 @@ export function TeamEditor({
         <ul className={s.teGrid}>
           {vis.map((o) => {
             const j = jetonOf(o.name, o.serie),
-              E = ELS[elOf(o.name)],
+              E = ROLES[roleOf(o.name)],
               k = powerInfo(o.name, lang),
               on = inTeam.has(o.k),
               L = lvl(o),

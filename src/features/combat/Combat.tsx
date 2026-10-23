@@ -3,7 +3,7 @@ import { useQueryClient } from '@tanstack/react-query';
 import { useMe } from '@/api/queries';
 import { combatApi } from '@/api';
 import { hexRGB, jetonOf, texOf, vImg } from '@/data/jetons';
-import { ELS, elOf, powerInfo } from '@/data/kit';
+import { fullTrio, ROLES, roleOf, powerInfo } from '@/data/kit';
 import { RCFG } from '@/engines/ring-config.js';
 import { sfx } from '@/engines/sound.js';
 import { openUI } from '@/app/ui-store';
@@ -251,6 +251,11 @@ export default function Combat() {
             ),
           )}
         </ul>
+        {full ? (
+          <p className={`${s.trio} ${fullTrio(team.map((u) => u?.name ?? '')) ? s.trioOn : ''}`}>
+            {fullTrio(team.map((u) => u?.name ?? '')) ? `✓ ${t('arena.trio')}` : t('arena.trioMiss')}
+          </p>
+        ) : null}
       </section>
 
       <details className={s.help}>
@@ -299,7 +304,7 @@ function TeamCard({ u, pos, lvl, onOpen }: { u: Member; pos: string; lvl: number
   const jn = useJn();
   const lang = useSettings((x) => x.lang);
   const j = jetonOf(u.name, u.serie),
-    el = ELS[elOf(u.name)],
+    el = ROLES[roleOf(u.name)],
     k = powerInfo(u.name, lang);
   return (
     <button

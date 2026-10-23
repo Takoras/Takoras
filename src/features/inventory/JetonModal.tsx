@@ -13,7 +13,7 @@ import {
   VARIANTS,
   type Variant,
 } from '@/data/jetons';
-import { ELS, elOf, LEVEL_MAX, powerInfo, RING_MAX, ringStats } from '@/data/kit';
+import { ROLES, roleOf, LEVEL_MAX, powerInfo, RING_MAX, ringStats } from '@/data/kit';
 import { statsOf, STAT_MAX } from '@/engines/env';
 import { useJn } from '@/lib/names';
 import { locale, reducedFx, useSettings } from '@/lib/settings';
@@ -179,8 +179,8 @@ export function CombatInfo({
 }) {
   const t = useT();
   const lang = useSettings((x) => x.lang);
-  const el = elOf(name),
-    E = ELS[el],
+  const el = roleOf(name),
+    E = ROLES[el],
     k = powerInfo(name, lang),
     rs = ringStats(name, lvl, variant);
   const fmt = (n: number) => n.toLocaleString(locale(lang));

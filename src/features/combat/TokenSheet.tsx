@@ -1,6 +1,6 @@
 import type { CSSProperties } from 'react';
 import { hexRGB, jetonOf, texOf, tierCol, tierKey, vImg } from '@/data/jetons';
-import { ELS, elOf } from '@/data/kit';
+import { ROLES, roleOf } from '@/data/kit';
 import { useJn } from '@/lib/names';
 import { useSettings } from '@/lib/settings';
 import { useT } from '@/i18n/useT';
@@ -27,7 +27,7 @@ export function TokenSheet({
   const jn = useJn();
   const lang = useSettings((x) => x.lang);
   const j = jetonOf(name, serie),
-    el = ELS[elOf(name)],
+    el = ROLES[roleOf(name)],
     tier = tierKey(j.odds);
   return (
     <Modal open onClose={onClose} title={jn(name)}>

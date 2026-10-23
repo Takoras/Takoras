@@ -14,6 +14,7 @@ export type RingEvent = { t: string; at?: number; [k: string]: unknown };
 export type Resolved = { frames: ([number, number, number] | null)[][]; ev: RingEvent[]; ids?: number[]; firstHit?: number };
 export const RG: {
   kit(name: string): TokenKit;
+  roleOf(name: string): 'fighter' | 'tank' | 'support';
   stats(name: string, lvl?: number, variant?: string): { mass: number; power: number; r: number };
   create(teams: { name: string; lvl?: number; variant?: string }[][], mapId?: string): RingState;
   clone(st: RingState): RingState;

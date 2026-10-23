@@ -1,6 +1,5 @@
 import { useQuery } from '@tanstack/react-query';
 import { combatApi } from '@/api';
-import { tierKey } from '@/data/jetons';
 import { RCFG } from '@/engines/ring-config.js';
 import { useAuth } from '@/lib/auth';
 import type { Group } from '../inventory/inv';
@@ -25,8 +24,6 @@ export function ownedTokens(groups: Group[]): Owned[] {
 }
 // Par défaut : la version la plus commune (normale d'abord)
 export const baseVariant = (o: Owned) => Object.keys(o.vars).sort((a, b) => (VRANK[a] ?? 0) - (VRANK[b] ?? 0))[0] ?? '';
-export const costOf = (odds: number) => RCFG.BUDGET[tierKey(odds)] ?? 1;
-export const points = (team: Team) => team.reduce((n, u) => n + (u ? costOf(u.odds) : 0), 0);
 type DeckRow = { id: number; jeton: string; lvl: number; odds: number; serie: string | null; variant: string | null };
 export function useDeck() {
   const uid = useAuth((s) => s.user?.id);

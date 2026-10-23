@@ -32,6 +32,8 @@ const RT = {
       shield: ['Bouclier', 'Les ennemis ne peuvent pas le pousser ce tour.'],
       void: ['Néant', 'Le premier ennemi touché est projeté vers le bord.'],
       split: ['Dédoublement', 'Se divise en deux en plein tir (le double disparaît après).'],
+      haste: ['Coup de pouce', 'Les pouvoirs de tes alliés reviennent 1 tour plus tôt.'],
+      guard: ['Bulle', 'Ton allié le plus proche ne peut pas être poussé ce tour.'],
       none: ['—', 'Pas de pouvoir.'],
     },
     once: '1 fois par match', every: 'recharge {n} tours', ready: 'Prêt', used: 'Utilisé', inCd: 'dans {n} tour(s)', pick: 'Choisis un jeton',
@@ -70,6 +72,8 @@ const RT = {
       shield: ['Shield', 'Enemies can’t push it this turn.'],
       void: ['Void', 'The first enemy it hits is flung toward the edge.'],
       split: ['Split', 'Splits in two mid-shot (the copy vanishes after).'],
+      haste: ['Helping hand', 'Your allies’ powers come back 1 turn sooner.'],
+      guard: ['Bubble', 'Your closest ally can’t be pushed this turn.'],
       none: ['—', 'No power.'],
     },
     once: 'once per match', every: '{n}-turn cooldown', ready: 'Ready', used: 'Used', inCd: 'in {n} turn(s)', pick: 'Pick a token',
@@ -92,7 +96,7 @@ const RT = {
 const rtL = () => RT[SETTINGS.lang] || RT.fr;
 const rt = (k, v = {}) => String(rtL()[k] ?? RT.fr[k]).replace(/\{(\w+)\}/g, (_, x) => v[x] ?? '');
 const PW_COL = { grow: '#7dd3fc', bounce: '#f9a8d4', scrap: '#fb923c', slide: '#a5f3fc', eruption: '#f97316', curve: '#60a5fa', double: '#f43f5e', ghost: '#c4b5fd',
-  rescue: '#4ade80', shrink: '#818cf8', magnet: '#fde68a', anchor: '#94a3b8', second: '#fb7185', roots: '#86efac', shield: '#f1f5f9', void: '#a855f7', split: '#ffffff', none: '#888' };
+  rescue: '#4ade80', shrink: '#818cf8', magnet: '#fde68a', anchor: '#94a3b8', second: '#fb7185', roots: '#86efac', shield: '#f1f5f9', void: '#a855f7', split: '#ffffff', haste: '#86efac', guard: '#7dd3fc', none: '#888' };
 function powerText(name) {
   const k = RG.kit(name), [n, d] = rtL().pw[k.pw] || rtL().pw.none;
   return { pw: k.pw, name: n, desc: d, cd: k.cd, when: k.pw === 'none' ? '' : k.cd ? rt('every', { n: k.cd }) : rt('once') };
@@ -1055,6 +1059,9 @@ const RFX = (() => {
       RNG.shake = 16; rgFlashCol('#3b0764'); RSND.blackhole();
     }
     if (e.t === 'split') { const b = body(e.id), [x, y] = w2s(b.x, b.y); burst(x, y, 40, '#fde68a', 4.5); for (let k = 0; k < 18; k++) part({ x, y, vx: rand(-3, 3), vy: rand(-3, 3), col: `hsl(${k * 20},90%,75%)`, size: 3 }); rgFlashCol('#fde68a'); RSND.split(); }
+    // Soutien : Coup de pouce (étincelles vertes sur les alliés), Bulle (bouclier bleu sur l'allié protégé)
+    if (e.t === 'haste') { const b = body(e.id); if (b) { const [x, y] = w2s(b.x, b.y); burst(x, y, 18, '#86efac', 3); RNG.parts.push({ text: '⏩', x, y: y - 10, col: '#86efac', size: 18, life: 1 }); } }
+    if (e.t === 'guard') { const b = body(e.id); if (b) { const [x, y] = w2s(b.x, b.y); RNG.parts.push({ hex: true, x, y, col: '#7dd3fc', life: 1, size: b.r * RNG.view.s * 1.3 }); burst(x, y, 16, '#7dd3fc', 2.5); RSND.chime?.(); } }
     if (e.t === 'boost') { const b = body(e.id), [x, y] = w2s(b.x, b.y); burst(x, y, 36, '#fb7185', 5); burst(x, y, 20, '#fdba74', 4); RNG.shake = 8; RSND.flame(); }
     if (e.t === 'hit') {
       for (const id of [e.a, e.b]) {

@@ -61,8 +61,6 @@ const RCFG = {
   MUTATION: { '': 1, gold: 1.05, celeste: 1.10, ombre: 1.20 }, // Doré, Céleste, Ombre (la plus rare du site = le plus gros bonus)
 
   // ---------- Classé
-  BUDGET: { r_common: 1, r_rare: 2, r_epic: 3, r_legend: 4, r_myth: 5 },
-  BUDGET_MAX: 8,
   ELO: { start: 1000, kNew: 40, k: 24, newGames: 10 }, // K = 40 les 10 premiers matchs, puis 24 (calculé par le serveur)
   // Rangs selon l'Elo : 3 divisions de 50 Elo par rang (Fer 1, Fer 2, Fer 3, Bronze 1…), puis Maître et Légende.
   // On commence à 1000 = Fer 1. Les couleurs servent aux badges.
@@ -81,29 +79,35 @@ const RCFG = {
     smart:  { shoots: true, smart: true, aimErr: .035, forceErr: .05 }, // entraînement : prédit ton tir, esquive au bord du vide
   },
 
+  // ---------- Rôles (remplacent les éléments) : chaque jeton est Combattant, Tank ou Soutien.
+  // Combattant : +10 % de puissance · Tank : +15 % de poids · Soutien : ses 2 alliés ont +5 % de poids et de puissance.
+  // Trio complet (un de chaque rôle dans l'équipe) : +5 % de poids et de puissance pour les 3.
+  ROLES: { fighter: { power: 1.10 }, tank: { mass: 1.15 }, support: { ally: 1.05 } },
+  TRIO: 1.05,
+
   // ---------- Jetons : stats de base (niveau 1, sans mutation) + UN pouvoir
   // mass : poids (dur à pousser, pousse fort) · power : vitesse max du tir · r : taille (rayon)
   // cd : tours de recharge après utilisation (0 = une seule fois par match). p : réglages du pouvoir.
   TOKENS: {
-    Mobu:     { mass: 1.30, power: 1750, r: 120, pw: 'grow',     cd: 3, p: { r: 1.4, mass: 1.7 } },
-    Pikko:    { mass: .75,  power: 2050, r: 91, pw: 'bounce',   cd: 2, p: {} },
-    Rouillé:  { mass: 1.55, power: 1650, r: 114, pw: 'scrap',    cd: 3, p: { mass: 2.2 } },
-    Givre:    { mass: 1.00, power: 1850, r: 107, pw: 'slide',    cd: 2, p: { friction: .3 } },
-    Soléo:    { mass: 1.05, power: 1850, r: 109, pw: 'eruption', cd: 3, p: { radius: 340, push: 1300 } },
-    Azura:    { mass: .95,  power: 1850, r: 104, pw: 'curve',    cd: 2, p: { turn: 2.2 } },
-    Carmin:   { mass: 1.10, power: 1900, r: 107, pw: 'double',   cd: 3, p: { mult: 2 } },
-    Vyolis:   { mass: .90,  power: 1900, r: 101, pw: 'ghost',    cd: 2, p: {} },
-    Lumis:    { mass: .90,  power: 1800, r: 104, pw: 'rescue',   cd: 3, p: { pull: 300 } },
-    Nyx:      { mass: .85,  power: 1950, r: 99, pw: 'shrink',   cd: 2, p: { r: .7, power: 1.35 } },
-    Astra:    { mass: .95,  power: 1850, r: 104, pw: 'magnet',   cd: 3, p: { radius: 420, pull: 1000 } },
-    Kraïos:   { mass: 1.50, power: 1650, r: 127, pw: 'anchor',   cd: 2, p: {} },
-    Koi:      { mass: .90,  power: 1950, r: 99, pw: 'second',   cd: 3, p: { at: .35, boost: .85 } },
-    Néphéris: { mass: 1.20, power: 1750, r: 117, pw: 'roots',    cd: 0, p: {} },
-    Zénith:   { mass: 1.10, power: 1800, r: 109, pw: 'shield',   cd: 2, p: {} },
-    Oblivion: { mass: 1.15, power: 1850, r: 109, pw: 'void',     cd: 0, p: { push: 1800 } },
-    Takoras:  { mass: 1.10, power: 1850, r: 109, pw: 'split',    cd: 0, p: { at: .25, spread: .22 } },
+    Mobu:     { role: 'tank', mass: 1.30, power: 1750, r: 120, pw: 'grow',     cd: 3, p: { r: 1.4, mass: 1.7 } },
+    Pikko:    { role: 'support', mass: .75,  power: 2050, r: 91, pw: 'haste',    cd: 3, p: { cd: 1 } },
+    Rouillé:  { role: 'tank', mass: 1.55, power: 1650, r: 114, pw: 'scrap',    cd: 3, p: { mass: 2.2 } },
+    Givre:    { role: 'fighter', mass: 1.00, power: 1850, r: 107, pw: 'slide',    cd: 2, p: { friction: .3 } },
+    Soléo:    { role: 'tank', mass: 1.05, power: 1850, r: 109, pw: 'eruption', cd: 3, p: { radius: 340, push: 1300 } },
+    Azura:    { role: 'support', mass: .95,  power: 1850, r: 104, pw: 'guard',    cd: 2, p: {} },
+    Carmin:   { role: 'fighter', mass: 1.10, power: 1900, r: 107, pw: 'double',   cd: 3, p: { mult: 2 } },
+    Vyolis:   { role: 'fighter', mass: .90,  power: 1900, r: 101, pw: 'ghost',    cd: 2, p: {} },
+    Lumis:    { role: 'support', mass: .90,  power: 1800, r: 104, pw: 'rescue',   cd: 3, p: { pull: 300 } },
+    Nyx:      { role: 'fighter', mass: .85,  power: 1950, r: 99, pw: 'shrink',   cd: 2, p: { r: .7, power: 1.35 } },
+    Astra:    { role: 'support', mass: .95,  power: 1850, r: 104, pw: 'magnet',   cd: 3, p: { radius: 420, pull: 1000 } },
+    Kraïos:   { role: 'tank', mass: 1.50, power: 1650, r: 127, pw: 'anchor',   cd: 2, p: {} },
+    Koi:      { role: 'fighter', mass: .90,  power: 1950, r: 99, pw: 'second',   cd: 3, p: { at: .35, boost: .85 } },
+    Néphéris: { role: 'support', mass: 1.20, power: 1750, r: 117, pw: 'roots',    cd: 0, p: {} },
+    Zénith:   { role: 'tank', mass: 1.10, power: 1800, r: 109, pw: 'shield',   cd: 2, p: {} },
+    Oblivion: { role: 'fighter', mass: 1.15, power: 1850, r: 109, pw: 'void',     cd: 0, p: { push: 1800 } },
+    Takoras:  { role: 'fighter', mass: 1.10, power: 1850, r: 109, pw: 'split',    cd: 0, p: { at: .25, spread: .22 } },
   },
-  DEFAULT_TOKEN: { mass: 1, power: 1800, r: 107, pw: 'none', cd: 0, p: {} }, // jeton d'une future collection sans pouvoir
+  DEFAULT_TOKEN: { role: 'fighter', mass: 1, power: 1800, r: 107, pw: 'none', cd: 0, p: {} }, // jeton d'une future collection sans pouvoir
   STAT_MAX: { mass: 2.6, power: 3400, r: 140 }, // barres des fiches à 100 %
 };
 

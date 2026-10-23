@@ -1,18 +1,19 @@
 import { RG } from '@/engines/ring-engine.js';
 import { RCFG } from '@/engines/ring-config.js';
-import { CB } from '@/engines/combat-engine.js';
 import { dictOf, type Lang } from '@/i18n';
 
-// Infos de combat d'un jeton (élément, pouvoir, stats du Ring) sans charger tout l'écran du Ring.
-export type El = 'fire' | 'water' | 'plant' | 'light' | 'shadow';
-export const ELS: Record<El, { ico: string; col: string; fr: string; en: string }> = {
-  fire: { ico: '🔥', col: '#fb923c', fr: 'Feu', en: 'Fire' },
-  water: { ico: '💧', col: '#38bdf8', fr: 'Eau', en: 'Water' },
-  plant: { ico: '🌿', col: '#4ade80', fr: 'Plante', en: 'Plant' },
-  light: { ico: '✨', col: '#fde68a', fr: 'Lumière', en: 'Light' },
-  shadow: { ico: '🌑', col: '#a78bfa', fr: 'Ténèbres', en: 'Dark' },
+// Infos de combat d'un jeton (rôle, pouvoir, stats du Ring) sans charger tout l'écran du Ring.
+// Les rôles remplacent les anciens éléments : Combattant, Tank, Soutien (bonus dans ring-config.js).
+export type Role = 'fighter' | 'tank' | 'support';
+export const ROLES: Record<Role, { ico: string; col: string; fr: string; en: string }> = {
+  fighter: { ico: '⚔️', col: '#fb7185', fr: 'Combattant', en: 'Fighter' },
+  tank: { ico: '🛡️', col: '#60a5fa', fr: 'Tank', en: 'Tank' },
+  support: { ico: '✚', col: '#4ade80', fr: 'Soutien', en: 'Support' },
 };
-export const elOf = (name: string) => CB.elOf(name) as El;
+export const roleOf = (name: string): Role => RG.roleOf(name);
+// Trio complet : un jeton de chaque rôle dans l'équipe
+export const fullTrio = (names: string[]) =>
+  (['fighter', 'tank', 'support'] as const).every((r) => names.some((n) => roleOf(n) === r));
 
 // Couleur de chaque pouvoir (mêmes valeurs que le Ring)
 export const PW_COL: Record<string, string> = {
@@ -33,6 +34,8 @@ export const PW_COL: Record<string, string> = {
   shield: '#f1f5f9',
   void: '#a855f7',
   split: '#ffffff',
+  haste: '#86efac',
+  guard: '#7dd3fc',
   none: '#888888',
 };
 

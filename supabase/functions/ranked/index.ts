@@ -16,8 +16,6 @@ const FIRST_MS = AIM_MS + 6000; // 1er tour : le temps d'ouvrir l'arène
 const ANIM_MS = 9000; // les tours suivants : le temps de voir l'animation
 const GRACE_MS = 2500; // un tir qui arrive juste après la fin du chrono compte encore
 const MAX_MISSES = 3; // 3 tours sans jouer d'affilée = abandon
-const TIERS = [[60, 'r_common'], [1000, 'r_rare'], [10000, 'r_epic'], [100000, 'r_legend'], [Infinity, 'r_myth']];
-const cost = (odds) => RCFG.BUDGET[TIERS.find(([m]) => odds < m)[1]] ?? 1;
 
 const CORS = {
   'Access-Control-Allow-Origin': '*',
@@ -95,7 +93,6 @@ async function join(uid) {
   if (!prof?.pseudo || prof.banned) return fail('not_allowed', 403);
   const { data: team } = await db.rpc('_ranked_team', { uid });
   if (!Array.isArray(team) || team.length !== 3) return fail('deck_size');
-  if (team.reduce((n, j) => n + cost(j.odds), 0) > RCFG.BUDGET_MAX) return fail('deck_budget');
   const mine = team.map(({ name, lvl, variant }) => ({ name, lvl, variant }));
   const elo = r.elo ?? 1000;
   const { data: p, error } = await db.rpc('_ranked_pair', { uid, p_elo: elo, p_team: mine });
