@@ -16,7 +16,7 @@ import { Button } from '@/ui/Button';
 import { toast } from '@/ui/toast';
 import { VTag } from '@/ui/VTag';
 import { lvlOf, useInventory } from '../inventory/inv';
-import { botTeam, points, useDeck, type Member } from './team';
+import { botTeam, useDeck, type Member } from './team';
 import { call, fetchMatch, toLocal, useRanked, watchMatch, type RankedMe } from './rankedApi';
 import { RankAround, RankCard, RankRoad, SearchModal } from './Ranked';
 import rs from './Ranked.module.css';
@@ -85,7 +85,6 @@ export default function Combat() {
   const rk = ranked.data;
   const elo = rk?.elo ?? RCFG.ELO.start;
   const tutoOk = !!rk?.tuto_done;
-  const budgetOk = points(team) <= RCFG.BUDGET_MAX;
   const slots = dict.arena.slots;
   const refresh = () => void qc.invalidateQueries({ queryKey: ['ranked'] });
 
@@ -188,14 +187,14 @@ export default function Combat() {
             <button
               type="button"
               className={s.play}
-              disabled={!full || !budgetOk}
+              disabled={!full}
               onClick={() => {
                 sfx.click();
                 setSearching(true);
               }}
             >
               <b>⚔️ {t('arena.play')}</b>
-              <small>{full && !budgetOk ? t('arena.errBudget') : t('arena.playRanked')}</small>
+              <small>{t('arena.playRanked')}</small>
             </button>
           )}
           <Button block disabled={!full} onClick={() => void train()}>

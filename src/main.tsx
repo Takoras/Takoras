@@ -16,6 +16,7 @@ import { configureSound, installSoundListeners } from './engines/sound';
 import { host } from './engines/env';
 import { loadEn } from './i18n';
 import { watchUpdates } from './lib/updates';
+import { installGridCss } from './lib/gridCss';
 import { confirm } from './ui/confirm';
 import './styles/global.css';
 import './styles/art.css';
@@ -37,6 +38,7 @@ useSettings.subscribe(applySettings);
 configureSound({ volume: () => useSettings.getState().volume, reduced: () => reducedFx() });
 installSoundListeners();
 initAuth();
+installGridCss();
 watchUpdates(); // nouvelle version en ligne → la page se recharge toute seule
 host.ask = (text) => confirm(text, { danger: true });
 

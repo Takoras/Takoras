@@ -55,3 +55,10 @@
 .rules p {
   font-size: var(--fs-sm);
 }
+
+/* jeton jamais trouvé : silhouette noire (pas de spoil) */
+.sil {
+  filter: brightness(0) drop-shadow(0 0 1px rgb(255 255 255 / 50%)) !important;
+  opacity: 0.75;
+  animation: none !important;
+}

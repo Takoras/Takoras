@@ -5,7 +5,15 @@ import { SERIES, sellValue, tierKey, vOdds } from './jetons';
 // Mêmes règles que l'ancien site (et donc que le serveur)
 const legacy = (() => {
   const ctx = vm.createContext({ Math, Object });
-  vm.runInContext(fs.readFileSync('legacy/ui.js', 'utf8').split('\n').filter((l) => /^const (TIER_NAMES|tierKey|sellValue) /.test(l)).join('\n') + '\nconst VARIANTS = { gold: { odds: 20, mult: 3 }, celeste: { odds: 200, mult: 10 }, ombre: { odds: 500, mult: 25 } };\nthis.f = { tierKey, sellValue };', ctx);
+  vm.runInContext(
+    fs
+      .readFileSync('legacy/ui.js', 'utf8')
+      .split('\n')
+      .filter((l) => /^const (TIER_NAMES|tierKey|sellValue) /.test(l))
+      .join('\n') +
+      '\nconst VARIANTS = { gold: { odds: 20, mult: 3 }, celeste: { odds: 200, mult: 10 }, ombre: { odds: 500, mult: 25 } };\nthis.f = { tierKey, sellValue };',
+    ctx,
+  );
   return (ctx as unknown as { f: { tierKey: typeof tierKey; sellValue: typeof sellValue } }).f;
 })();
 

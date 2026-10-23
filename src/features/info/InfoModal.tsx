@@ -8,6 +8,7 @@ import { locale, useSettings } from '@/lib/settings';
 import { Modal } from '@/ui/Modal';
 import { VTag } from '@/ui/VTag';
 import { useDict } from '@/i18n/useT';
+import { cKey, useInventory } from '../inventory/inv';
 import { useInfo } from './store';
 import s from './InfoModal.module.css';
 
@@ -23,8 +24,11 @@ export default function InfoModal() {
   const [luck, setLuck] = useState<number | null>(null);
   const L = luck ?? mine;
   const T = dict.info;
+  // anti-spoil : un jeton jamais trouvé reste en silhouette, sans son nom
+  const inv = useInventory();
+  const found = (name: string) => !!inv.data?.coll.get(cKey('Takoras', name));
   const n = (v: number) => v.toLocaleString(locale(lang));
-  const choices = [...new Set([1, 1.3, 2, 5, 10, 25, 100, 500, Number(mine.toFixed(2))])].sort((a, b) => a - b);
+  const choices = [...new Set([1, 1.3, 2, 5, 10, 25, 100, 500, 1000, Number(mine.toFixed(2))])].sort((a, b) => a - b);
   return (
     <Modal open={open} onClose={() => useInfo.setState({ open: false })} title={T.title} wide>
       <div className={s.luck} role="group" aria-label={T.luck}>
@@ -49,8 +53,8 @@ export default function InfoModal() {
             {realOdds(L).map(({ j, p }) => (
               <tr key={j.name}>
                 <td>
-                  <img className="px" src={texOf(j)} alt="" width={24} height={24} />
-                  <span className={tierKey(j.odds).replace('r_', 'r-')}>{jn(j.name)}</span>
+                  <img className={found(j.name) ? 'px' : `px ${s.sil}`} src={texOf(j)} alt="" width={24} height={24} />
+                  <span className={tierKey(j.odds).replace('r_', 'r-')}>{found(j.name) ? jn(j.name) : '???'}</span>
                 </td>
                 <td>1/{n(j.odds)}</td>
                 <td>

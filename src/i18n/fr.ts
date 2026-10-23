@@ -138,7 +138,7 @@ export const fr = {
     "it_potion": "Potion de chance ×{m}",
     "it_potion_d": "Ta chance est multipliée par {m} sur tes {n} prochains pulls.",
     "it_instant": "Recharge éclair",
-    "it_instant_d": "+1 pull tout de suite (si ton stock n’est pas plein).",
+    "it_instant_d": "+{n} pulls tout de suite, même au-delà de ton stock max.",
     "it_hourglass": "Sablier",
     "it_hourglass_d": "Tes pulls se rechargent 2× plus vite pendant {n} min.",
     "it_banner": "Bannière « {n} »",

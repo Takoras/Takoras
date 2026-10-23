@@ -14,4 +14,5 @@ export function realOdds(luck: number, list: Jeton[] = SERIES.Takoras ?? []) {
   if (last) last.p += rest;
   return out.reverse();
 }
-export const pct = (p: number, lang: 'fr' | 'en') => ((p * 100 >= 1 ? (p * 100).toFixed(1) : (p * 100).toPrecision(2)).replace('.', lang === 'fr' ? ',' : '.')) + ' %';
+export const pct = (p: number, lang: 'fr' | 'en') =>
+  (p * 100 >= 1 ? (p * 100).toFixed(1) : (p * 100).toPrecision(2)).replace('.', lang === 'fr' ? ',' : '.') + ' %';

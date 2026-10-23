@@ -828,7 +828,7 @@ function rgToken(c, b, t, fall) {
   const spin = RNG.spin[b.id] || 0, im = rgImg(b.name);
   c.translate(x, y); c.rotate(spin * .5); c.imageSmoothingEnabled = false;
   if (b.variant && VFILTER[b.variant]) c.filter = VFILTER[b.variant];
-  if (im.complete && im.naturalWidth) { const sz = rr * 2.08; c.drawImage(im, -sz / 2, -sz / 2, sz, sz); }
+  if (im.complete && im.naturalWidth) { const sz = rr * 2.08 * ((jetonOf(b.name).grid || 64) / 64); c.drawImage(im, -sz / 2, -sz / 2, sz, sz); }
   else { c.fillStyle = sideCol(b).md; c.beginPath(); c.arc(0, 0, rr, 0, 7); c.fill(); }
   c.filter = 'none';
   c.restore();

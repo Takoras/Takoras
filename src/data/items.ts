@@ -47,7 +47,7 @@ export function itemText(it: ShopItem, lang: Lang): [string, string] {
       t('it_potion', { m: dec(it.data.mult ?? 1, lang) }),
       t('it_potion_d', { m: dec(it.data.mult ?? 1, lang), n: it.data.rolls ?? 0 }),
     ];
-  if (it.kind === 'instant') return [t('it_instant'), t('it_instant_d')];
+  if (it.kind === 'instant') return [t('it_instant'), t('it_instant_d', { n: Number(it.data.pulls ?? 1) })];
   if (it.kind === 'hourglass') return [t('it_hourglass'), t('it_hourglass_d', { n: it.data.minutes ?? 0 })];
   if (it.kind === 'avatar') return [t('it_pp', { n: t('pp_' + it.id.slice(2)) }), t('it_pp_d')];
   return [t('it_banner', { n: bannerName(it.id.slice(2), lang) }), t('it_banner_d')];

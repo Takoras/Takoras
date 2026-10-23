@@ -140,7 +140,7 @@ export const en: Dict = {
     "it_potion": "Luck potion ×{m}",
     "it_potion_d": "Your luck is multiplied by {m} for your next {n} pulls.",
     "it_instant": "Instant refill",
-    "it_instant_d": "+1 pull right now (if your stock isn’t full).",
+    "it_instant_d": "+{n} pulls right now, even above your max stock.",
     "it_hourglass": "Hourglass",
     "it_hourglass_d": "Your pulls recharge 2× faster for {n} min.",
     "it_banner": "“{n}” banner",

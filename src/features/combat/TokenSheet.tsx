@@ -7,7 +7,6 @@ import { useT } from '@/i18n/useT';
 import { Modal } from '@/ui/Modal';
 import { VTag } from '@/ui/VTag';
 import { CombatInfo } from '../inventory/JetonModal';
-import { costOf } from './team';
 import s from './Combat.module.css';
 
 // Fiche complète d'un jeton pour le combat : rareté, élément, niveau, coût, pouvoir et stats du Ring
@@ -48,7 +47,6 @@ export function TokenSheet({
               <span style={{ color: el.col }}>
                 {el.ico} {el[lang]}
               </span>
-              <span>{t('arena.cost', { n: costOf(j.odds) })}</span>
             </div>
           </div>
         </div>

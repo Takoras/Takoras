@@ -13,7 +13,7 @@ import { Button } from '@/ui/Button';
 import { Modal } from '@/ui/Modal';
 import { toast } from '@/ui/toast';
 import { lvlOf, seriesList, type Group, type InvData } from '../inventory/inv';
-import { baseVariant, costOf, ownedTokens, ownKey, points, VRANK, type Owned, type Team } from './team';
+import { baseVariant, ownedTokens, ownKey, VRANK, type Owned, type Team } from './team';
 import { StatIcon } from '@/ui/StatIcon';
 import { TokenSheet } from './TokenSheet';
 import s from './Combat.module.css';
@@ -21,7 +21,7 @@ import s from './Combat.module.css';
 const ELS_ORDER: ('all' | El)[] = ['all', 'fire', 'water', 'plant', 'light', 'shadow'];
 
 // Modifier l'équipe : ta collection en grille, toucher = ajouter / retirer.
-// En haut : les 3 places (toucher la pastille = changer de version), le budget en points.
+// En haut : les 3 places (toucher la pastille = changer de version). Plus de budget : n'importe quels 3 jetons.
 export function TeamEditor({
   groups,
   levels,
@@ -51,8 +51,6 @@ export function TeamEditor({
   const [busy, setBusy] = useState(false);
   const slotsRef = useRef<HTMLUListElement>(null);
   const slots = dict.arena.slots;
-  const pts = points(team),
-    over = pts > RCFG.BUDGET_MAX;
   const inTeam = new Set(team.filter(Boolean).map((u) => ownKey(u?.serie ?? '', u?.name ?? '')));
   const vis = all
     .filter((u) => u.serie === serie && (el === 'all' || elOf(u.name) === el))
@@ -156,10 +154,6 @@ export function TeamEditor({
           );
         })}
       </ul>
-      <p className={s.budget}>
-        <b className={over ? s.over : undefined}>{t('arena.budget', { n: pts, m: RCFG.BUDGET_MAX })}</b>{' '}
-        <small className="muted">{over ? t('arena.budgetOver') : t('arena.budgetHint')}</small>
-      </p>
       <div className={s.filters}>
         {series.length > 1 ? (
           <div className={s.chipsRow} role="group" aria-label={t('ui.bestiary')}>
@@ -238,7 +232,6 @@ export function TeamEditor({
                     <i style={{ width: `${Math.min(100, (rs.power / RING_MAX.power) * 100)}%` }} />
                     <i style={{ width: `${Math.min(100, (rs.r / RING_MAX.r) * 100)}%` }} />
                   </span>
-                  <small className={s.cost}>{t('arena.cost', { n: costOf(o.odds) })}</small>
                   {on ? (
                     <span className={s.ok} aria-hidden>
                       ✓

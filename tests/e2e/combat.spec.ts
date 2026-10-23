@@ -1,16 +1,20 @@
 import { test, expect } from '@playwright/test';
 import { fakeSupabase } from './fake-supabase';
 
-test('combat : monter son équipe (ajouter, version, budget, enregistrer)', async ({ page }) => {
+test('combat : monter son équipe (ajouter, version, enregistrer, plus de budget)', async ({ page }) => {
   const { calls } = await fakeSupabase(page);
   await page.goto('/combat');
   await expect(page.getByText('Ton rang')).toBeVisible();
   await expect(page.getByRole('button', { name: /Entraînement/ })).toBeDisabled(); // pas encore 3 jetons
   await page.getByRole('button', { name: /Modifier/ }).click();
   const d = page.getByRole('dialog');
-  for (const n of ['Mobu', 'Pikko', 'Vyolis']) await d.getByRole('button', { name: new RegExp(`^.*${n}`) }).first().click();
+  for (const n of ['Mobu', 'Pikko', 'Vyolis'])
+    await d
+      .getByRole('button', { name: new RegExp(`^.*${n}`) })
+      .first()
+      .click();
   // un 4e jeton : équipe pleine (toast)
-  await expect(d.getByText(/Budget : \d+\/8 pts/)).toBeVisible();
+  await expect(d.getByText(/Budget/)).toHaveCount(0); // plus de limite de points
   // Mobu existe aussi en Doré : on change de version
   await d.getByRole('radio', { name: 'Doré' }).click();
   await expect(d.getByRole('radio', { name: 'Doré' })).toHaveAttribute('aria-checked', 'true');
