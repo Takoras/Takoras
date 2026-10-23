@@ -33,7 +33,11 @@ Chaque table et chaque fonction a une description dans Supabase (onglet Database
 | `announcements` | Annonces admin | body, fullscreen, banner |
 | `friendships` | Amitiés / demandes | a, b, status, requested_by |
 | `messages` | Chat privé | sender, receiver, body, read_at |
-| `battles` | Combats en ligne (gérés par la fonction Edge `battle`) | p1, p2, state, events, deadline, winner |
+| `battles` | **Ancien** combat en ligne (fonction Edge `battle`, retirée) : à supprimer après la bascule | p1, p2, state, events, deadline, winner |
+| `ranked` | Classé du Ring : Elo, bilan, meilleur Elo, tuto fait | user_id, elo, games, wins, losses, draws, best_elo, tuto_done |
+| `ranked_queue` | Classé : joueurs qui cherchent un adversaire (seulement la fonction Edge `ranked`) | user_id, elo, team, joined_at, seen_at |
+| `ranked_matches` | Classé : matchs en ligne, état calculé par le serveur, lisibles par les 2 joueurs | p1, p2, names, map, state, turn, ready1/2, misses1/2, last, deadline, status, winner, why, elo |
+| `ranked_shots` | Classé : tirs secrets du tour en cours (jamais lisibles par les joueurs) | match_id, turn, side, shot |
 | `promo_codes` / `promo_redeems` | Codes promo / qui les a utilisés | code, coins, pulls, items, max_uses… |
 | `patchnotes` | Patch notes FR + EN | title, lines, title_en, lines_en |
 | `feedback` | Retours des joueurs | kind, body, page, device, status |
@@ -51,12 +55,16 @@ le Bestiaire affiche un onglet par série dès qu'il y en a plus d'une (les sér
 
 ## Temps réel
 
-La publication `supabase_realtime` contient `announcements`, `messages`, `friendships`, `battles` et `price_changes`.
+La publication `supabase_realtime` contient `announcements`, `messages`, `friendships`, `battles`, `price_changes` et `ranked_matches`.
 
-## Fonction Edge
+## Fonctions Edge
 
-`functions/battle/` : combats entre amis, contre la triche. Elle fait sa propre authentification et utilise la clé service.
-`engine.js` est une copie de `public/battle-engine.js` (+ un `export`). Il faut la redéployer si le moteur change.
+- `functions/ranked/` : **classé du Ring**. Appariement par Elo (`join`, `cancel`), tirs secrets (`shoot`), calcul des tours
+  quand les deux ont tiré ou à la fin du chrono (`tick`), abandon (`forfeit`), Elo à la fin (`_ranked_end`).
+  Elle vérifie elle-même la connexion du joueur et utilise la clé service (jamais côté site).
+  `ring-engine.js` et `ring-config.js` sont des **copies exactes** de `src/engines` (un test le vérifie) :
+  si le moteur ou ses valeurs changent, recopier les deux fichiers ici et **redéployer la fonction**.
+- `functions/battle/` : ancien combat entre amis, retiré (répond 410). À supprimer par le propriétaire après la bascule.
 
 ## Fichiers du site (`public/`)
 

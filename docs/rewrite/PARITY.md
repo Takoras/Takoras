@@ -164,30 +164,26 @@ La commande doit renvoyer `{"missing": {}}`.
 ## Combat (Ring)
 
 - [x] Page Combat :
-  - rang + Elo, JOUER (classé bientôt) ;
-  - Entraînement ;
-  - équipe de 3 + fiches ;
-  - aide repliable ;
-  - « Essayer le tuto » sans compte.
+  - carte du rang (Fer 1 → Légende, Elo, bilan, place) et « Près de toi au classement » ;
+  - JOUER = classé en ligne (recherche par Elo, reprise d'un match en cours) ;
+  - Entraînement contre l'IA ;
+  - tuto du Ring obligatoire avant le premier match ;
+  - équipe de 3 + fiches ; route des rangs ; aide repliable ; « Essayer le tuto » sans compte.
 - [x] Éditeur d'équipe :
-  - séries, éléments ;
-  - ajouter / retirer ;
-  - mutation par place ;
-  - budget 8 pts, légende des stats ;
-  - fiche ⓘ ;
-  - sauvegarde.
+  - onglets de version (Normal, Doré, Céleste, Ombre) comme le bestiaire, filtre par rôle ;
+  - grosses cartes, stats en logos (poids, puissance, taille) ;
+  - ajouter / retirer, version par place, fiche ⓘ, sauvegarde ;
+  - plus de budget de points.
 - [x] Ring (partie complète testée au doigt en 375 px et à la souris, 60 images/s pendant les tirs) :
-  - visée lance-pierre (n'importe où une fois le jeton choisi) ;
-  - trajectoire prévue, jauge de force ;
-  - pouvoir, Valider, chrono 30 s (départ dès que les deux ont validé) ;
-  - « L'adversaire a validé » ;
-  - révélation ;
-  - animation : ralentis, traînées, rotation, chutes ;
-  - équipes dans les coins + fiche au toucher ;
-  - fin du match avec confettis ;
-  - abandon (confirmation maison, plus de `confirm()` natif).
-- [x] Les 17 pouvoirs avec intro, aura, effet et son.
-- [x] Tuto du Ring en 6 étapes.
+  - une arène vide qui rétrécit de 2 % par tour (plus de limite de 12 tours) ;
+  - visée lance-pierre, geste court pour la force max, trajectoire prévue ;
+  - plusieurs pouvoirs activables par tour, un seul jeton tire ; halo blanc sur les pouvoirs activés ;
+  - chrono 60 s (départ dès que les deux ont validé) ;
+  - toucher un jeton adverse = sa fiche, comparée à ton jeton choisi ; re-toucher ton jeton = le déselectionner ;
+  - révélation, animation (ralentis, traînées, chutes), fin du match (Elo gagné/perdu en classé), abandon.
+- [x] Rôles Combattant / Tank / Soutien (simple étiquette, visible dans les stats de base) ; 17 pouvoirs dont Coup de pouce et Bulle.
+- [x] Classé en ligne : le serveur calcule les tours (même moteur), chacun se voit en bas, 3 tours absent = défaite.
+- [x] Tuto du Ring (sélection, visée, validation, chrono, pouvoirs multiples, fiche adverse, classé).
 - [x] Monter de niveau (doublons).
 
 ## Bêta, avis, tuto

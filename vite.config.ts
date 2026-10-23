@@ -36,7 +36,8 @@ export default defineConfig({
         codeSplitting: {
           groups: [
             { name: 'vendor', test: /node_modules/ },
-            { name: 'shared', test: /src\/(api|lib|data|ui|i18n\/(index|useT|Rich|fr)|app\/ui-store|features\/(social\/social|eco\/eco|info\/store|beta\/store))[/.]/ },
+            // data/kit (infos de combat) tire le moteur du Ring : il reste hors du paquet commun chargé au démarrage
+            { name: 'shared', test: /src\/(api|lib|data\/(?!kit)|ui|i18n\/(index|useT|Rich|fr)|app\/ui-store|features\/(social\/social|eco\/eco|info\/store|beta\/store))[/.]/ },
           ],
         },
       },
