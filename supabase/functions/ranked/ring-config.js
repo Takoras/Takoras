@@ -6,7 +6,7 @@ const RCFG = {
   // ---------- Match
   RING_R: 1000,
   TURNS: 12,             // limite de tours (puis : plus de jetons restants, puis plus proches du centre)
-  AIM_S: 30,             // secondes pour viser (le tour part dès que les deux ont validé)
+  AIM_S: 60,             // secondes pour viser (le tour part dès que les deux ont validé)
   START_Y: 560,          // départ : tes jetons en bas (y = +560), ceux d'en face en haut
   START_X: [-360, 0, 360],
   SUDDEN_Y: 220,         // mort subite : 1 jeton chacun près du centre

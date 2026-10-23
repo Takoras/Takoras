@@ -106,3 +106,17 @@
 
 /* Logos des stats (puissance, taille) et tampons des mutations, en pixel art */
 .rs-ico { width: 1.15em; height: 1.15em; vertical-align: -.2em; }
+
+/* Comparaison de deux jetons (le mien en violet, le sien en orange) */
+.rg-cmp { display: flex; flex-direction: column; gap: 8px; }
+.rg-ch { display: flex; align-items: center; justify-content: space-between; gap: 8px; font-weight: 700; font-size: 14px; }
+.rg-ch span { display: flex; align-items: center; gap: 6px; } .rg-ch img { width: 28px; height: 28px; image-rendering: pixelated; }
+.rg-ch .me { color: #c4b5fd; } .rg-ch .foe { color: #fdba74; } .rg-ch > span:nth-child(2) { color: var(--muted); font-size: 12px; }
+.rg-cr { display: grid; grid-template-columns: 44px 1fr auto 1fr 44px; align-items: center; gap: 6px; font-size: 12px; }
+.rg-cr small { display: flex; align-items: center; justify-content: center; gap: 3px; color: var(--muted); white-space: nowrap; }
+.rg-cr b { font-variant-numeric: tabular-nums; } .rg-cr b.me { text-align: left; } .rg-cr b.foe { text-align: right; }
+.rg-cr.me b.me { color: #a78bfa; } .rg-cr.foe b.foe { color: #fb923c; }
+.rg-cb { height: 6px; border-radius: 99px; background: rgba(255, 255, 255, .08); overflow: hidden; display: flex; }
+.rg-cb i { display: block; height: 100%; border-radius: inherit; }
+.rg-cb.me { justify-content: flex-end; } .rg-cb.me i { background: #a78bfa; } .rg-cb.foe i { background: #fb923c; }
+.rg-cv { text-align: center; font-weight: 800; margin: 2px 0 0; }

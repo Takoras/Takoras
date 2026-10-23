@@ -146,7 +146,7 @@ test('Ring : toucher un jeton adverse montre sa fiche, même avec mon jeton choi
   await expect(page.locator('#rg-pw')).not.toHaveText(/Choisis un jeton/);
   await tap('foe'); // simple toucher sur un jeton d'en face : sa fiche
   await expect(page.locator('.rg-info .rg-ic.foe')).toBeVisible();
-  await expect(page.locator('.rg-info .rs')).toBeVisible(); // ses stats
+  await expect(page.locator('.rg-info .rg-cmp')).toBeVisible(); // ses stats comparées aux miennes
   await page.locator('.rg-info').click();
   // le tour passe : le ring rétrécit (pas de compteur « Tour n/12 »)
   await expect(page.locator('#rg-turn')).toHaveText('');

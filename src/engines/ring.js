@@ -46,10 +46,10 @@ const RT = {
     t1: 'Tape un de tes jetons pour le choisir.', t2: 'Glisse vers l’arrière pour viser. Plus tu tires loin, plus c’est fort. Regarde la trajectoire !',
     t3: 'Valide ! Ton adversaire tire en même temps que toi.', t4: 'Éjecte ses jetons du ring pour gagner.', t5: 'Chaque jeton a un pouvoir, essaie-le ! Active-le, vise, puis valide.',
     t6: 'Bien joué, tu es prêt pour le classé !', tOk: 'OK', tSkip: 'Passer', tEnd: 'Terminer',
-    shrink: 'Le ring rétrécit à chaque tour !',
-    tTimer: 'Le chrono : <b>30 s</b> pour viser à chaque tour. Si les deux valident avant, le tour part tout de suite. Et <b>le ring rétrécit à chaque tour</b> : reste loin du bord !',
+    shrink: 'Le ring rétrécit à chaque tour !', cmpWin: 'Avantage : toi', cmpEven: 'Assez équilibré', cmpLose: 'Avantage : lui', cmpHint: 'Plus lourd = dur à pousser · plus de puissance = tir plus fort.',
+    tTimer: 'Le chrono : <b>60 s</b> pour viser à chaque tour. Si les deux valident avant, le tour part tout de suite. Et <b>le ring rétrécit à chaque tour</b> : reste loin du bord !',
     tWalls: 'Les murs : les gris amortissent, les <b>roses renvoient plus fort</b>. Sers-t’en pour faire des bandes ou te protéger.',
-    tScout: 'Touche un <b>jeton adverse</b> (même si tu as déjà choisi le tien) ou <b>« Leurs pouvoirs »</b> pour voir ses stats et son pouvoir avant de tirer.',
+    tScout: 'Touche un <b>jeton adverse</b> pour voir sa fiche (stats, pouvoir). Si ton jeton est choisi, tu vois les <b>deux côte à côte</b> pour comparer. Re-touche ton jeton pour le déselectionner.',
     tRanked: '<b>Le classé</b> : tu affrontes un vrai joueur de ton niveau (Elo). Victoire = +Elo, défaite = −Elo. Monte de <b>Fer 1</b> jusqu’à <b>Légende</b> ! Si tu ne joues pas 3 tours de suite, tu perds le match.',
   },
   en: {
@@ -86,10 +86,10 @@ const RT = {
     t1: 'Tap one of your tokens to pick it.', t2: 'Drag backwards to aim. The further you pull, the harder the shot. Watch the path!',
     t3: 'Confirm! Your opponent shoots at the same time.', t4: 'Knock their tokens out of the ring to win.', t5: 'Every token has a power, try it! Turn it on, aim, then confirm.',
     t6: 'Well done, you’re ready for ranked!', tOk: 'OK', tSkip: 'Skip', tEnd: 'Finish',
-    shrink: 'The ring shrinks every turn!',
-    tTimer: 'The timer: <b>30 s</b> to aim each turn. If both confirm earlier, the turn starts right away. And <b>the ring shrinks every turn</b>: stay away from the edge!',
+    shrink: 'The ring shrinks every turn!', cmpWin: 'Advantage: you', cmpEven: 'Fairly even', cmpLose: 'Advantage: them', cmpHint: 'Heavier = harder to push · more power = stronger shot.',
+    tTimer: 'The timer: <b>60 s</b> to aim each turn. If both confirm earlier, the turn starts right away. And <b>the ring shrinks every turn</b>: stay away from the edge!',
     tWalls: 'Walls: grey ones absorb, <b>pink ones bounce you back harder</b>. Use them for bank shots or cover.',
-    tScout: 'Tap an <b>enemy token</b> (even with yours selected) or <b>“Their powers”</b> to see its stats and power before you shoot.',
+    tScout: 'Tap an <b>enemy token</b> to see its card (stats, power). With your token selected, you see <b>both side by side</b> to compare. Tap your token again to deselect it.',
     tRanked: '<b>Ranked</b>: you face a real player at your level (Elo). Win = +Elo, lose = −Elo. Climb from <b>Iron 1</b> up to <b>Legend</b>! Skip 3 turns in a row and you lose the match.',
   },
 };
@@ -132,7 +132,7 @@ function startRing(teams, opts = {}) {
       <div class="rg-score"><span class="me" id="rg-n0"></span><b id="rg-turn"></b><span class="foe" id="rg-n1"></span></div>
       <div class="rg-timer" id="rg-timer"><svg viewBox="0 0 36 36"><circle cx="18" cy="18" r="15.5"/><circle class="p" cx="18" cy="18" r="15.5" pathLength="100"/></svg><b></b></div>
     </div>
-    <div class="rg-names"><span>${esc(RNG.names[ME()])}</span><span class="rg-ok" id="rg-ok">${rt('foeOk')}</span><span>${esc(RNG.names[FOE()])} <button class="rg-scout" data-scout>👁 ${rt('scout')}</button></span></div>
+    <div class="rg-names"><span>${esc(RNG.names[ME()])}</span><span class="rg-ok" id="rg-ok">${rt('foeOk')}</span><span>${esc(RNG.names[FOE()])}</span></div>
     <div class="rg-stage" id="rg-stage"><canvas id="rg-cv"></canvas><div class="rg-banner" id="rg-banner"></div><div class="rg-team foe" id="rg-t1"></div><div class="rg-team me" id="rg-t0"></div></div>
     <p class="rg-hint" id="rg-hint"></p>
     <div class="rg-bot">
@@ -149,7 +149,6 @@ function startRing(teams, opts = {}) {
   addEventListener('pointermove', rgMove); addEventListener('pointerup', rgUp); addEventListener('pointercancel', rgUp);
   o.querySelectorAll('.rg-team').forEach(p => p.addEventListener('click', e => { const b = e.target.closest('[data-id]'); if (b) rgInfo(+b.dataset.id); }));
   o.querySelector('#rg-pw').onclick = rgTogglePow;
-  o.querySelector('[data-scout]').onclick = () => rgScout(FOE());
   o.querySelector('#rg-go').onclick = () => rgLock();
   o.querySelector('[data-quit]').onclick = async () => {
     if (RNG.st?.over || RNG.tuto || RNG.phase === 'end' || await host.ask(rt('quit'))) {
@@ -192,7 +191,7 @@ const SIDE = [{ hi: '#ddd6fe', md: '#a78bfa', lo: '#4c1d95', rgb: '167,139,250' 
 // Filtres des variantes (les mêmes que sur tout le site)
 const VFILTER = { gold: 'sepia(1) saturate(2.6) hue-rotate(-12deg) brightness(1.12)', celeste: 'grayscale(.55) brightness(1.35) sepia(.15) hue-rotate(195deg) saturate(1.4)', ombre: 'grayscale(.6) brightness(.55) sepia(.45) hue-rotate(225deg) saturate(1.7) contrast(1.3)' };
 
-// ---------- Tour : visée (30 s, ou dès que les deux ont validé), l'IA prépare son tir en même temps
+// ---------- Tour : visée (60 s, ou dès que les deux ont validé), l'IA prépare son tir en même temps
 // L'IA calcule dans un Worker (fil à part) ; sans Worker, on calcule ici (même résultat, juste un petit à-coup)
 let aiWorker = null, aiSeq = 0;
 function rgAiThink(st, level) {
@@ -279,16 +278,35 @@ function rgInfo(id) {
   RNG.el.querySelector('.rg-info')?.remove();
   const p = powerText(b.name), rd = RG.ready(b);
   const state = !b.alive ? rt('koS') : rd ? rt('ready') : b.spent ? rt('used') : rt('inCd', { n: b.cd });
+  // ton jeton choisi + un jeton adverse : on compare les deux
+  const mine = b.side !== ME() && RNG.st.bodies.find(x => x.id === RNG.sel && x.alive && x.side === ME());
   const o = document.createElement('div'); o.className = 'rg-info';
   o.innerHTML = `<div class="rg-ic ${b.side === ME() ? 'me' : 'foe'}" style="--g:${hexRGB(jetonOf(b.name).glow)}">
     <button class="rg-icx" aria-label="${t('close')}">✕</button>
     <div class="rg-ih"><img class="${vCls(b.variant)}" src="${texOf(jetonOf(b.name))}" alt=""><div><b>${jnH(b.name)} ${vTag(b.variant)}</b><small>${esc(RNG.names[b.side])} · ${at('lvl')} ${b.lvl}</small></div></div>
     <div class="rg-ip" style="--c:${PW_COL[p.pw]}"><b>✦ ${esc(p.name)}</b><p>${esc(p.desc)}</p><small>${state}${p.when ? ' · ' + p.when : ''}</small></div>
-    ${ringStatsHTML(b.name, b.lvl, b.variant)}
+    ${mine ? rgCompare(mine, b) : ringStatsHTML(b.name, b.lvl, b.variant)}
   </div>`;
   RNG.el.appendChild(o); RNG.info = true; sfx.click();
   o.animate([{ opacity: 0, transform: 'scale(.94)' }, { opacity: 1, transform: 'none' }], { duration: 180, easing: 'ease-out' });
   o.onclick = () => { o.remove(); RNG.info = false; };
+}
+
+// Comparaison : mes stats (avec bonus de rôle et d'équipe) contre les siennes, et qui gagne sur chaque stat
+function rgCompare(a, b) {
+  const M = RCFG.STAT_MAX, f = (v, k) => (k === 'mass' ? v.toFixed(2) : fmt(Math.round(v)));
+  const rows = [['mass', '⚖️', rt('mass')], ['power', '<img class="rs-ico" src="/img/stats/puissance.png" alt="">', rt('powerS')], ['r', '<img class="rs-ico" src="/img/stats/taille.png" alt="">', rt('size')]];
+  const wins = rows.filter(([k]) => a.base[k] > b.base[k]).length;
+  const bar = (v, k, side) => `<span class="rg-cb ${side}"><i style="width:${Math.min(100, v / M[k] * 100)}%"></i></span>`;
+  return `<div class="rg-cmp">
+    <div class="rg-ch"><span class="me"><img class="${vCls(a.variant)}" src="${texOf(jetonOf(a.name))}" alt="">${jnH(a.name)}</span><span>vs</span><span class="foe">${jnH(b.name)}<img class="${vCls(b.variant)}" src="${texOf(jetonOf(b.name))}" alt=""></span></div>
+    ${rows.map(([k, ico, l]) => {
+      const x = a.base[k], y = b.base[k], w = x > y ? 'me' : x < y ? 'foe' : '';
+      return `<div class="rg-cr ${w}"><b class="me">${f(x, k)}</b>${bar(x, k, 'me')}<small>${ico} ${l}</small>${bar(y, k, 'foe')}<b class="foe">${f(y, k)}</b></div>`;
+    }).join('')}
+    <p class="rg-cv">${rt(wins >= 2 ? 'cmpWin' : wins === 1 ? 'cmpEven' : 'cmpLose')}</p>
+    <small class="muted">${rt('cmpHint')}</small>
+  </div>`;
 }
 
 // ---------- Visée au lance-pierre : tape un jeton, puis glisse (depuis le jeton ou n'importe où) vers l'arrière
@@ -306,9 +324,11 @@ function rgDown(e) {
   if (RNG.phase !== 'aim' || RNG.locked) { const mine = !RNG.play && RG.alive(RNG.st, ME()).find(near); return mine && rgInfo(mine.id); }
   if (RNG.tuto?.block) return;
   const hit = RG.alive(RNG.st, ME()).find(b => RG.len(b.x - wx, b.y - wy) < b.r * 1.5 + 20);
+  // re-toucher ton jeton déjà choisi (sans glisser) le déselectionne (voir rgUp)
+  const again = !!hit && hit.id === RNG.sel;
   if (hit && hit.id !== RNG.sel) { RNG.sel = hit.id; RNG.aim = null; RNG.pow = false; RNG.prev = null; sfx.click(); rgHud(); RNG.tuto?.on?.('sel'); }
   if (RNG.sel == null) return;
-  RNG.drag = { x: px, y: py, id: e.pointerId };
+  RNG.drag = { x: px, y: py, id: e.pointerId, again };
 }
 function rgMove(e) {
   const d = RNG.drag; if (!d || e.pointerId !== d.id || RNG.locked) return;
@@ -325,6 +345,7 @@ function rgUp(e) {
   const d = RNG.drag; if (!d || e.pointerId !== d.id) return;
   RNG.drag = null;
   if (d.foe != null && !d.moved) return rgInfo(d.foe); // simple toucher sur un jeton adverse
+  if (d.again && !d.moved) { RNG.sel = null; RNG.aim = null; RNG.pow = false; RNG.prev = null; sfx.click(); return rgHud(); }
   if (RNG.aim && RNG.aim.f < RCFG.MIN_FORCE) { RNG.aim = null; RNG.prev = null; }
   rgHud();
   if (RNG.aim) RNG.tuto?.on?.('aim');
@@ -579,29 +600,6 @@ function rgWalls(c, t) {
   }
 }
 // Équipe adverse (ou la tienne) : les 3 jetons d'un coup, pouvoir, état et stats, pour préparer son tir
-function rgScout(side) {
-  const st = RNG.st; if (!st) return;
-  RNG.el.querySelector('.rg-info')?.remove();
-  const o = document.createElement('div'); o.className = 'rg-info rg-scoutbox';
-  const card = b => {
-    const p = powerText(b.name), rd = RG.ready(b);
-    const state = !b.alive ? rt('koS') : p.pw === 'none' ? '' : rd ? rt('ready') : b.spent ? rt('used') : rt('inCd', { n: b.cd });
-    return `<div class="rg-sc${b.alive ? '' : ' ko'}" style="--g:${hexRGB(jetonOf(b.name).glow)};--c:${PW_COL[p.pw]}">
-      <div class="rg-ih"><img class="${vCls(b.variant)}" src="${texOf(jetonOf(b.name))}" alt=""><div><b>${jnH(b.name)} ${vTag(b.variant)}</b><small>${at('lvl')} ${b.lvl}</small></div>${state ? `<span class="rg-st${rd && b.alive ? ' on' : ''}">${state}</span>` : ''}</div>
-      ${p.pw === 'none' ? '' : `<p class="rg-sp"><b>✦ ${esc(p.name)}</b> ${esc(p.desc)}${p.when ? ` <small>· ${p.when}</small>` : ''}</p>`}
-      ${ringStatsHTML(b.name, b.lvl, b.variant, true)}
-    </div>`;
-  };
-  o.innerHTML = `<div class="rg-ic ${side === ME() ? 'me' : 'foe'} rg-scoutin">
-    <button class="rg-icx" aria-label="${t('close')}">✕</button>
-    <h3>👁 ${side !== ME() ? rt('foeTeam') : esc(RNG.names[ME()])}</h3>
-    <small class="muted">${rt('scoutHint')}</small>
-    ${st.bodies.filter(b => b.side === side && !b.tmp).sort((a, b) => a.i - b.i).map(card).join('')}
-  </div>`;
-  RNG.el.appendChild(o); RNG.info = true; sfx.click();
-  o.animate([{ opacity: 0, transform: 'scale(.94)' }, { opacity: 1, transform: 'none' }], { duration: 180, easing: 'ease-out' });
-  o.onclick = e => { if (e.target === o || e.target.closest('.rg-icx')) { o.remove(); RNG.info = false; } };
-}
 
 // Sol du ring en pixel art : disque sombre tramé, cercles repères, bord épais en deux tons avec des plots, étoiles autour
 // R0 : sol de départ (en cache) · Rc : bord actuel (le ring rétrécit : au-delà, le vide)
@@ -912,7 +910,7 @@ function rgTuto() {
     if (n === 4) { rgTip(rt('t4'), 'top', [['ok', rt('tOk')]]); rgHl(null); tu.block = 'all'; tu.next = () => show(4.1); }
     if (n === 4.1) { rgTip(rt('tTimer'), 'top', [['ok', rt('tOk')]]); rgHl('#rg-timer'); tu.block = 'all'; tu.next = () => show(4.2); }
     if (n === 4.2) { rgTip(rt('tWalls'), 'top', [['ok', rt('tOk')]]); rgHl('#rg-stage'); tu.block = 'all'; tu.next = () => show(4.3); }
-    if (n === 4.3) { rgTip(rt('tScout'), 'top', [['ok', rt('tOk')]]); rgHl('[data-scout]'); tu.block = 'all'; tu.next = () => show(5); }
+    if (n === 4.3) { rgTip(rt('tScout'), 'top', [['ok', rt('tOk')]]); rgHl('#rg-stage'); tu.block = 'all'; tu.next = () => show(5); }
     if (n === 5) {
       const carmin = RNG.st.bodies.find(b => b.side === 0 && b.alive && RG.ready(b));
       if (!carmin) return show(6);

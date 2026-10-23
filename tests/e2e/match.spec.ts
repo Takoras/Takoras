@@ -46,11 +46,26 @@ test('Ring : partie complète contre l’IA, au doigt (375 px) et à la souris (
     if (over) break;
     // captures pour vérifier la DA (visée, puis tir en cours)
     if (turns === 0) {
-      // l'équipe adverse : pouvoirs et état, chrono en pause
-      await page.locator('.rg [data-scout]').click();
-      await expect(page.locator('.rg-scoutbox .rg-sc')).toHaveCount(3);
-      if (process.env.SHOT) await page.screenshot({ path: `${process.env.SHOT}/ring-scout-${isMobile ? 'm' : 'd'}.png` });
-      await page.locator('.rg-scoutbox .rg-icx').click();
+      // je choisis mon jeton puis je touche un jeton adverse : comparaison des deux ; re-toucher mon jeton le déselectionne
+      const tap = (side: 0 | 1) =>
+        page.evaluate((side) => {
+          const R = window.__ring?.RNG;
+          const b = R?.st?.bodies.find((x) => x.side === side && x.alive);
+          if (!R || !b) return;
+          const r = R.cv.getBoundingClientRect(), v = R.view;
+          const pt = { pointerId: 5, pointerType: 'mouse', isPrimary: true, bubbles: true, cancelable: true, clientX: r.left + v.size / 2 + b.x * v.s, clientY: r.top + v.size / 2 + b.y * v.s };
+          document.querySelector('#rg-stage')?.dispatchEvent(new PointerEvent('pointerdown', pt));
+          window.dispatchEvent(new PointerEvent('pointerup', pt));
+        }, side);
+      await expect(page.locator('.rg [data-scout]')).toHaveCount(0); // plus de bouton « Leurs pouvoirs »
+      await tap(0);
+      await tap(1);
+      await expect(page.locator('.rg-info .rg-cmp')).toBeVisible();
+      await expect(page.locator('.rg-cmp .rg-cr')).toHaveCount(3);
+      if (process.env.SHOT) await page.screenshot({ path: `${process.env.SHOT}/ring-compare-${isMobile ? 'm' : 'd'}.png` });
+      await page.locator('.rg-info').click();
+      await tap(0); // re-toucher : déselectionné
+      await expect(page.locator('#rg-pw')).toContainText('Choisis un jeton');
     }
     if (turns === 1 && process.env.SHOT) await page.screenshot({ path: `${process.env.SHOT}/ring-aim-${isMobile ? 'm' : 'd'}.png` });
     expect(await shoot(page, isMobile)).toBe('shot');
