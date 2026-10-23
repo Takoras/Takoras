@@ -320,7 +320,7 @@ function rgDown(e) {
   // Si tu glisses au lieu de toucher, c'est une visée comme d'habitude.
   const foe = !RNG.play && RG.alive(RNG.st, FOE()).find(near);
   if (foe && (RNG.sel == null || RNG.phase !== 'aim' || RNG.locked || RNG.tuto?.block)) return rgInfo(foe.id);
-  if (foe) { RNG.drag = { x: px, y: py, id: e.pointerId, foe: foe.id }; return; }
+  if (foe) { RNG.drag = { x: px, y: py, id: e.pointerId, foe: foe.id, aim0: RNG.aim }; return; }
   if (RNG.phase !== 'aim' || RNG.locked) { const mine = !RNG.play && RG.alive(RNG.st, ME()).find(near); return mine && rgInfo(mine.id); }
   if (RNG.tuto?.block) return;
   const hit = RG.alive(RNG.st, ME()).find(b => RG.len(b.x - wx, b.y - wy) < b.r * 1.5 + 20);
@@ -334,7 +334,8 @@ function rgMove(e) {
   const d = RNG.drag; if (!d || e.pointerId !== d.id || RNG.locked) return;
   const [px, py] = rgPt(e), dx = d.x - px, dy = d.y - py, L = Math.hypot(dx, dy);
   const full = Math.min(120, RNG.view.size * .3); // puissance max avec un geste court (jeton près du bord du téléphone)
-  if (L < 8) return;
+  // sur un jeton adverse, un doigt qui bouge un peu reste un « toucher » (sa fiche), pas une visée
+  if (L < (d.foe != null ? 26 : 8)) return;
   d.moved = true;
   const f = Math.round(Math.min(1, L / full) * 100) / 100;
   RNG.aim = { ax: Math.round(dx / L * 1000 * FL()) || 0, ay: Math.round(dy / L * 1000 * FL()) || 0, f }; // direction dans le monde (écran tourné si camp 1)
@@ -344,7 +345,7 @@ function rgMove(e) {
 function rgUp(e) {
   const d = RNG.drag; if (!d || e.pointerId !== d.id) return;
   RNG.drag = null;
-  if (d.foe != null && !d.moved) return rgInfo(d.foe); // simple toucher sur un jeton adverse
+  if (d.foe != null && !d.moved) { RNG.aim = d.aim0 ?? RNG.aim; return rgInfo(d.foe); } // simple toucher sur un jeton adverse
   if (d.again && !d.moved) { RNG.sel = null; RNG.aim = null; RNG.pow = false; RNG.prev = null; /* ses pouvoirs activés restent activés */ sfx.click(); return rgHud(); }
   if (RNG.aim && RNG.aim.f < RCFG.MIN_FORCE) { RNG.aim = null; RNG.prev = null; }
   rgHud();

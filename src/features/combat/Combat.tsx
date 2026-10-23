@@ -3,7 +3,7 @@ import { useQueryClient } from '@tanstack/react-query';
 import { useMe } from '@/api/queries';
 import { combatApi } from '@/api';
 import { hexRGB, jetonOf, texOf, vImg } from '@/data/jetons';
-import { fullTrio, ROLES, roleOf, powerInfo } from '@/data/kit';
+import { ROLES, roleOf, powerInfo } from '@/data/kit';
 import { RCFG } from '@/engines/ring-config.js';
 import { sfx } from '@/engines/sound.js';
 import { openUI } from '@/app/ui-store';
@@ -251,11 +251,6 @@ export default function Combat() {
             ),
           )}
         </ul>
-        {full ? (
-          <p className={`${s.trio} ${fullTrio(team.map((u) => u?.name ?? '')) ? s.trioOn : ''}`}>
-            {fullTrio(team.map((u) => u?.name ?? '')) ? `✓ ${t('arena.trio')}` : t('arena.trioMiss')}
-          </p>
-        ) : null}
       </section>
 
       <details className={s.help}>

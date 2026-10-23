@@ -3,7 +3,7 @@ import { RCFG } from '@/engines/ring-config.js';
 import { dictOf, type Lang } from '@/i18n';
 
 // Infos de combat d'un jeton (rôle, pouvoir, stats du Ring) sans charger tout l'écran du Ring.
-// Les rôles remplacent les anciens éléments : Combattant, Tank, Soutien (bonus dans ring-config.js).
+// Les rôles remplacent les anciens éléments : Combattant, Tank, Soutien. Simple étiquette, visible dans les stats de base.
 export type Role = 'fighter' | 'tank' | 'support';
 export const ROLES: Record<Role, { ico: string; col: string; fr: string; en: string }> = {
   fighter: { ico: '⚔️', col: '#fb7185', fr: 'Combattant', en: 'Fighter' },
@@ -11,9 +11,6 @@ export const ROLES: Record<Role, { ico: string; col: string; fr: string; en: str
   support: { ico: '✚', col: '#4ade80', fr: 'Soutien', en: 'Support' },
 };
 export const roleOf = (name: string): Role => RG.roleOf(name);
-// Trio complet : un jeton de chaque rôle dans l'équipe
-export const fullTrio = (names: string[]) =>
-  (['fighter', 'tank', 'support'] as const).every((r) => names.some((n) => roleOf(n) === r));
 
 // Couleur de chaque pouvoir (mêmes valeurs que le Ring)
 export const PW_COL: Record<string, string> = {

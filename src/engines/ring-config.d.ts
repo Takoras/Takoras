@@ -7,7 +7,6 @@ export const RCFG: {
   DT: number; FRICTION: number; DRAG: number; RESTITUTION: number; STOP_SPEED: number; MAX_SIM_S: number; QUANT: number; MIN_FORCE: number;
   BIG_HIT: number; SLOWMO: number; SLOWMO_S: number;
   LEVEL_MAX: number; LEVEL_BONUS: number; LEVEL_COST: number[]; MUTATION: Record<string, number>;
-  ROLES: { fighter: { power: number }; tank: { mass: number }; support: { ally: number } }; TRIO: number;
   ELO: { start: number; kNew: number; k: number; newGames: number };
   DIV: number;
   SHRINK: { step: number; min: number; maxTurns: number };

@@ -2,7 +2,7 @@ import { useRef, useState, type CSSProperties } from 'react';
 import { useQueryClient } from '@tanstack/react-query';
 import { combatApi, errorText } from '@/api';
 import { hexRGB, jetonOf, texOf, vImg } from '@/data/jetons';
-import { fullTrio, ROLES, roleOf, powerInfo, RING_MAX, ringStats, type Role } from '@/data/kit';
+import { ROLES, roleOf, powerInfo, RING_MAX, ringStats, type Role } from '@/data/kit';
 import { RCFG } from '@/engines/ring-config.js';
 import { sfx } from '@/engines/sound.js';
 import { useAuth } from '@/lib/auth';
@@ -47,14 +47,15 @@ export function TeamEditor({
   );
   const [serie, setSerie] = useState(series[0] ?? 'Takoras');
   const [el, setEl] = useState<'all' | Role>('all');
+  // version montrée (comme les onglets du bestiaire) : Normal, Doré, Céleste, Ombre
+  const [ver, setVer] = useState<string>('');
   const [info, setInfo] = useState<Owned | null>(null);
   const [busy, setBusy] = useState(false);
-  const trio = team.every(Boolean) && fullTrio(team.map((u) => u?.name ?? ''));
   const slotsRef = useRef<HTMLUListElement>(null);
   const slots = dict.arena.slots;
   const inTeam = new Set(team.filter(Boolean).map((u) => ownKey(u?.serie ?? '', u?.name ?? '')));
   const vis = all
-    .filter((u) => u.serie === serie && (el === 'all' || roleOf(u.name) === el))
+    .filter((u) => u.serie === serie && u.vars[ver] !== undefined && (el === 'all' || roleOf(u.name) === el))
     .sort((a, b) => b.odds - a.odds);
   const lvl = (o: { serie: string; name: string }) => lvlOf(levels, o.serie, o.name);
 
@@ -69,7 +70,7 @@ export function TeamEditor({
       sfx.deny();
       return toast(t('arena.teamFull'), true);
     }
-    const v = baseVariant(o);
+    const v = o.vars[ver] !== undefined ? ver : baseVariant(o);
     sfx.upgrade();
     setTeam(
       team.map((u, i) =>
@@ -155,8 +156,25 @@ export function TeamEditor({
           );
         })}
       </ul>
-      <p className={`${s.trio} ${trio ? s.trioOn : ''}`}>{trio ? `✓ ${t('arena.trio')}` : t('arena.trioMiss')}</p>
       <div className={s.filters}>
+        <div className={s.verTabs} role="tablist" aria-label={t('arena.version')}>
+          {(['', 'gold', 'celeste', 'ombre'] as const).map((v) => (
+            <button
+              key={v || 'none'}
+              type="button"
+              role="tab"
+              aria-selected={ver === v}
+              onClick={() => {
+                sfx.click();
+                setVer(v);
+              }}
+            >
+              <i className={`${s.sw} ${s[`sw_${v || 'none'}`] ?? ''}`} aria-hidden />
+              {v ? t(`ui.v_${v}`) : t('arena.normal')}
+              <small>{all.filter((o) => o.serie === serie && o.vars[v] !== undefined).length}</small>
+            </button>
+          ))}
+        </div>
         {series.length > 1 ? (
           <div className={s.chipsRow} role="group" aria-label={t('ui.bestiary')}>
             {series.map((sr) => (
@@ -190,17 +208,6 @@ export function TeamEditor({
           ))}
         </div>
       </div>
-      <p className={s.legend}>{t('arena.roleHelp')}</p>
-      <p className={s.legend}>
-        {t('ring.statsLegend')
-          .split(' · ')
-          .map((part, i) => (
-            <span key={i}>
-              {i ? ' · ' : ''}
-              <StatIcon k={(['mass', 'power', 'size'] as const)[i] ?? 'mass'} /> {part}
-            </span>
-          ))}
-      </p>
       {vis.length ? (
         <ul className={s.teGrid}>
           {vis.map((o) => {
@@ -209,7 +216,7 @@ export function TeamEditor({
               k = powerInfo(o.name, lang),
               on = inTeam.has(o.k),
               L = lvl(o),
-              rs = ringStats(o.name, L);
+              rs = ringStats(o.name, L, ver);
             return (
               <li
                 key={o.k}
@@ -217,23 +224,33 @@ export function TeamEditor({
                 style={{ '--g': hexRGB(j.glow), '--el': E.col } as CSSProperties}
               >
                 <button type="button" className={s.teCard} aria-pressed={on} onClick={() => toggle(o)}>
-                  <span className={s.tpEl} aria-label={E[lang]}>
-                    {E.ico}
-                  </span>
                   <span className={s.tpLv}>
                     {t('arena.lvl')}
                     {L}
                   </span>
-                  <img className={vImg('')} src={texOf(j)} alt="" />
+                  <img className={vImg(ver)} src={texOf(j)} alt="" />
                   <b>{jn(o.name)}</b>
+                  <small className={s.role} style={{ '--el': E.col } as CSSProperties}>
+                    {E.ico} {E[lang]}
+                  </small>
                   <small className={s.ab} style={{ '--c': k.col } as CSSProperties}>
                     ✦ {k.name}
                   </small>
-                  <small className={s.pd}>{k.desc}</small>
-                  <span className={s.mini} aria-hidden>
-                    <i style={{ width: `${Math.min(100, (rs.mass / RING_MAX.mass) * 100)}%` }} />
-                    <i style={{ width: `${Math.min(100, (rs.power / RING_MAX.power) * 100)}%` }} />
-                    <i style={{ width: `${Math.min(100, (rs.r / RING_MAX.r) * 100)}%` }} />
+                  <span className={s.stats}>
+                    {(
+                      [
+                        ['mass', rs.mass, RING_MAX.mass],
+                        ['power', rs.power, RING_MAX.power],
+                        ['size', rs.r, RING_MAX.r],
+                      ] as const
+                    ).map(([key, v, max]) => (
+                      <span key={key}>
+                        <StatIcon k={key} />
+                        <i>
+                          <b style={{ width: `${Math.min(100, (v / max) * 100)}%` }} />
+                        </i>
+                      </span>
+                    ))}
                   </span>
                   {on ? (
                     <span className={s.ok} aria-hidden>

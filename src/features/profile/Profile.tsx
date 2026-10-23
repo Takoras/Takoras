@@ -4,7 +4,7 @@ import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { accountApi, errorText, publicApi } from '@/api';
 import { useMe } from '@/api/queries';
 import { BANNER_IMG, bannerName } from '@/data/items';
-import { hexRGB, jetonOf, SERIES, texOf, tierCol, tierKey, vImg, VARIANTS } from '@/data/jetons';
+import { hexRGB, jetonOf, MYSTERE, SERIES, texOf, tierCol, tierKey, VARIANTS, vImg } from '@/data/jetons';
 import { sfx } from '@/engines/sound.js';
 import { openUI } from '@/app/ui-store';
 import { AVATARS, FREE_PP } from '@/lib/avatars';
@@ -277,7 +277,7 @@ function Collection({ pseudo, onOpen }: { pseudo: string; onOpen: (name: string,
                 }}
                 aria-label={c ? `${jn(j.name)} · 1/${fmt(j.odds)}` : `??? · 1/${fmt(j.odds)}`}
               >
-                <img className={c ? 'px' : `px ${s.sil}`} src={texOf(j)} alt="" />
+                <img className="px" src={c ? texOf(j) : MYSTERE} alt="" />
                 <small>1/{fmt(j.odds)}</small>
                 <span className={s.dots} aria-hidden>
                   {Object.keys(VARIANTS).map((v) => (

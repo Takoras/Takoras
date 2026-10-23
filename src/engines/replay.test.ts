@@ -44,20 +44,18 @@ test('40 combats rejoués : même résultat à chaque fois, aussi après un pass
   expect(turns).toBeGreaterThan(80); // des vrais combats, pas des matchs vides
 }, 240_000);
 
-test('rôles : Combattant +10 % puissance, Tank +15 % poids, Soutien +5 % aux alliés, trio +5 %', () => {
-  const k = (n: string) => RG.kit(n);
-  expect(RG.stats('Givre').power).toBeCloseTo(k('Givre').power * 1.1); // Combattant
-  expect(RG.stats('Mobu').mass).toBeCloseTo(k('Mobu').mass * 1.15); // Tank
-  expect(RG.stats('Pikko').mass).toBeCloseTo(k('Pikko').mass); // Soutien : rien pour lui-même
-  const team = (n: string[]) => n.map((name) => ({ name, lvl: 1, variant: '' }));
-  // trio complet : Givre (Combattant) + Mobu (Tank) + Pikko (Soutien)
-  const st = RG.create([team(['Givre', 'Mobu', 'Pikko']), team(['Carmin', 'Koi', 'Nyx'])], 'arene');
-  const b = (name: string, side = 0) =>
-    st.bodies.find((x) => x.name === name && x.side === side) as (typeof st.bodies)[number];
-  expect(b('Givre').power).toBeCloseTo(k('Givre').power * 1.1 * 1.05 * 1.05); // Soutien allié + trio
-  expect(b('Pikko').power).toBeCloseTo(k('Pikko').power * 1.05); // trio seulement
-  expect(b('Carmin', 1).power).toBeCloseTo(k('Carmin').power * 1.1); // 3 Combattants : pas de bonus d'équipe
-  for (const n of Object.keys(RCFG.TOKENS)) expect(['fighter', 'tank', 'support']).toContain(RG.roleOf(n));
+test('rôles = étiquettes qui se voient dans les stats : Tank gros, lourd et lent ; Soutien léger et rapide', () => {
+  const by = (r: string) => Object.keys(RCFG.TOKENS).filter((n) => RG.roleOf(n) === r).map((n) => RG.kit(n));
+  const avg = (l: ReturnType<typeof RG.kit>[], k: 'mass' | 'power' | 'r') => l.reduce((a, x) => a + x[k], 0) / l.length;
+  const T = by('tank'), S = by('support'), F = by('fighter');
+  expect(avg(T, 'mass')).toBeGreaterThan(avg(F, 'mass'));
+  expect(avg(F, 'mass')).toBeGreaterThan(avg(S, 'mass'));
+  expect(avg(S, 'power')).toBeGreaterThan(avg(F, 'power'));
+  expect(avg(F, 'power')).toBeGreaterThan(avg(T, 'power'));
+  expect(avg(T, 'r')).toBeGreaterThan(avg(S, 'r'));
+  // plus aucun bonus d'équipe : les stats en match = les stats de la fiche
+  const st = RG.create([[{ name: 'Givre' }, { name: 'Mobu' }, { name: 'Pikko' }], [{ name: 'Carmin' }, { name: 'Koi' }, { name: 'Nyx' }]], 'arene');
+  for (const b of st.bodies) expect(b.base.power).toBeCloseTo(RG.stats(b.name).power);
 });
 
 test('Soutien : Coup de pouce recharge les alliés, Bulle protège l’allié le plus proche', () => {

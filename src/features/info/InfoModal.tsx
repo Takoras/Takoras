@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { useMe } from '@/api/queries';
-import { jetonOf, sellValue, texOf, tierKey, VARIANTS, type Variant } from '@/data/jetons';
+import { jetonOf, MYSTERE, sellValue, texOf, tierKey, VARIANTS, type Variant } from '@/data/jetons';
 import { dec } from '@/data/items';
 import { pct, realOdds } from '@/data/odds';
 import { useJn } from '@/lib/names';
@@ -53,7 +53,7 @@ export default function InfoModal() {
             {realOdds(L).map(({ j, p }) => (
               <tr key={j.name}>
                 <td>
-                  <img className={found(j.name) ? 'px' : `px ${s.sil}`} src={texOf(j)} alt="" width={24} height={24} />
+                  <img className="px" src={found(j.name) ? texOf(j) : MYSTERE} alt="" width={24} height={24} />
                   <span className={tierKey(j.odds).replace('r_', 'r-')}>{found(j.name) ? jn(j.name) : '???'}</span>
                 </td>
                 <td>1/{n(j.odds)}</td>

@@ -296,9 +296,9 @@
 .teGrid {
   list-style: none;
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+  grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
   gap: var(--s-2);
-  max-height: 46dvh;
+  max-height: 52dvh;
   overflow-y: auto;
   padding: 2px;
 }
@@ -312,8 +312,8 @@
   display: grid;
   justify-items: center;
   align-content: start;
-  gap: 3px;
-  padding: var(--s-5) var(--s-2) var(--s-2);
+  gap: 4px;
+  padding: var(--s-6) var(--s-2) var(--s-3);
   border-radius: var(--r-md);
   background: radial-gradient(circle at 50% 22%, rgba(var(--g), 0.16), transparent 55%), var(--bg-raised);
   border: 1px solid var(--line);
@@ -324,11 +324,12 @@
   box-shadow: 0 0 0 2px rgb(167 139 250 / 35%);
 }
 .teCard img {
-  width: 56px;
-  height: 56px;
+  width: 84px;
+  height: 84px;
+  margin-bottom: 2px;
 }
 .teCard b {
-  font-size: var(--fs-sm);
+  font-size: var(--fs-md);
 }
 .teCard small {
   font-size: 11px;
@@ -459,14 +460,68 @@
   padding: 1px 6px;
 }
 
-/* Trio complet (un Combattant, un Tank, un Soutien) */
-.trio {
-  margin: var(--s-1) 0 0;
-  font-size: var(--fs-xs);
-  color: var(--muted);
-  text-align: center;
+/* Éditeur d'équipe : onglets de version (comme le bestiaire), grosses cartes, stats en logos */
+.verTabs {
+  display: flex;
+  gap: var(--s-1);
+  overflow-x: auto;
 }
-.trioOn {
-  color: #4ade80;
+.verTabs button {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 6px 12px;
+  border-radius: var(--r-pill);
+  border: 1px solid var(--line);
+  font-size: var(--fs-sm);
+  white-space: nowrap;
+}
+.verTabs button small {
+  color: var(--muted);
+  font-size: 11px;
+}
+.verTabs button[aria-selected='true'] {
+  border-color: var(--accent-hi);
+  background: rgb(139 92 246 / 18%);
+}
+.role {
+  color: var(--el);
   font-weight: 700;
+}
+.stats {
+  width: 100%;
+  display: grid;
+  gap: 4px;
+  margin-top: 4px;
+}
+.teCard .stats img {
+  width: 16px;
+  height: 16px;
+  margin: 0;
+}
+.verTabs .sw {
+  width: 12px;
+  height: 12px;
+  flex: none;
+  pointer-events: none;
+}
+.stats > span {
+  display: grid;
+  grid-template-columns: 16px 1fr;
+  align-items: center;
+  gap: 6px;
+  font-size: 12px;
+}
+.stats i {
+  display: block;
+  height: 5px;
+  border-radius: 99px;
+  background: rgb(255 255 255 / 8%);
+  overflow: hidden;
+}
+.stats i b {
+  display: block;
+  height: 100%;
+  border-radius: inherit;
+  background: var(--accent-hi);
 }

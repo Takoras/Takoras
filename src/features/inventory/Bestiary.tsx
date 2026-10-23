@@ -5,16 +5,17 @@ import { useQueryClient } from '@tanstack/react-query';
 import { combatApi, errorText, invApi } from '@/api';
 import {
   hexRGB,
+  MYSTERE,
   sellValue,
   SERIES,
   texOf,
   tierCol,
   tierKey,
-  vImg,
-  vOdds,
-  VARIANTS,
   type Tier,
   type Variant,
+  VARIANTS,
+  vImg,
+  vOdds,
 } from '@/data/jetons';
 import { statsOf, fmtLuck } from '@/engines/env';
 import { moPlay, moSnap } from '@/engines/motion.js';
@@ -449,7 +450,7 @@ function CardView({
             {badge[0]}
           </span>
         ) : null}
-        <img className={`${g || c.seen ? vImg(vtab) : `px ${s.sil}`}`} src={texOf(j)} alt="" />
+        <img className={g || c.seen ? vImg(vtab) : 'px'} src={g || c.seen ? texOf(j) : MYSTERE} alt="" />
         <b>{g || c.seen ? jn(j.name) : '???'}</b>
         <small>
           <span style={{ color: tierCol(tier) }}>1/{fmt(vOdds(j.odds, vtab))}</span>

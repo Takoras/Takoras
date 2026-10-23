@@ -1,4 +1,4 @@
-// Moteur du Ring (repris de legacy/ring-engine.js, puis maps, ring qui rétrécit et rôles Combattant / Tank / Soutien).
+// Moteur du Ring (repris de legacy/ring-engine.js, puis ring qui rétrécit, plusieurs pouvoirs par tour, rôles des jetons).
 // 100 % déterministe : replay.test.ts le vérifie (même partie = même résultat, aussi après un passage en JSON).
 import { RCFG } from './ring-config.js';
 // « Ring » : moteur physique maison (règles seulement, aucun affichage). Valeurs : ring-config.js (RCFG).
@@ -12,18 +12,12 @@ const RG = (() => {
   const C = RCFG, Q = C.QUANT, q = x => Math.round(x * Q) / Q;
   const kit = name => C.TOKENS[name] || C.DEFAULT_TOKEN;
   const len = (x, y) => Math.sqrt(x * x + y * y);
-  // Stats physiques : base × niveau × mutation × rôle (Combattant : puissance, Tank : poids ; la taille ne change pas)
+  // Stats physiques : base × niveau × mutation (poids et puissance ; la taille ne change pas).
+  // Le rôle (Combattant, Tank, Soutien) est juste une étiquette : il se voit dans les stats de base du jeton.
   const roleOf = name => kit(name).role || 'fighter';
   function stats(name, lvl = 1, variant = '') {
-    const k = kit(name), m = (1 + C.LEVEL_BONUS * (Math.max(1, lvl) - 1)) * (C.MUTATION[variant] || 1), R = C.ROLES[roleOf(name)] || {};
-    return { mass: k.mass * m * (R.mass || 1), power: k.power * m * (R.power || 1), r: k.r };
-  }
-  // Bonus d'équipe : chaque Soutien donne +5 % (poids et puissance) à ses alliés, et le trio complet +5 % à tous
-  function teamBonus(team, i) {
-    const roles = team.map(j => roleOf(j.name));
-    const sup = roles.filter((r, k) => r === 'support' && k !== i).length;
-    const trio = ['fighter', 'tank', 'support'].every(r => roles.includes(r));
-    return Math.pow(C.ROLES.support.ally, sup) * (trio ? C.TRIO : 1);
+    const k = kit(name), m = (1 + C.LEVEL_BONUS * (Math.max(1, lvl) - 1)) * (C.MUTATION[variant] || 1);
+    return { mass: k.mass * m, power: k.power * m, r: k.r };
   }
   // teams : [[{ name, lvl, variant }×3] ×2]
   // map (facultative) : un id de C.MAPS. Le terrain grandit avec la map, les départs aussi.
@@ -33,8 +27,7 @@ const RG = (() => {
     if (map) st.map = { id: map.id, R: map.R, R0: map.R, fric: map.fric, walls: map.walls.map(o => ({ ...o })), zones: map.zones.map(z => ({ ...z })) };
     const k0 = map ? map.R / C.RING_R : 1;
     teams.forEach((team, side) => team.forEach((j, i) => {
-      const s0 = stats(j.name, j.lvl, j.variant), k = kit(j.name), tb = teamBonus(team, i);
-      const s = { mass: s0.mass * tb, power: s0.power * tb, r: s0.r };
+      const s = stats(j.name, j.lvl, j.variant), k = kit(j.name);
       st.bodies.push({ id: side * 3 + i, side, i, name: j.name, lvl: j.lvl || 1, variant: j.variant || '', pw: k.pw, base: s, mass: s.mass, power: s.power, r: s.r,
         x: map ? q(C.START_X[i] * k0) : C.START_X[i], y: (side ? -1 : 1) * (map ? q(C.START_Y * k0) : C.START_Y), vx: 0, vy: 0, alive: true, cd: 0, spent: false });
     }));

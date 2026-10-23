@@ -3,15 +3,16 @@ import { StatIcon } from '@/ui/StatIcon';
 import {
   hexRGB,
   jetonOf,
-  tierCol,
-  vImg,
+  MYSTERE,
   sellValue,
   texOf,
   texScale,
+  tierCol,
   tierKey,
-  vOdds,
-  VARIANTS,
   type Variant,
+  VARIANTS,
+  vImg,
+  vOdds,
 } from '@/data/jetons';
 import { ROLES, roleOf, LEVEL_MAX, powerInfo, RING_MAX, ringStats } from '@/data/kit';
 import { statsOf, STAT_MAX } from '@/engines/env';
@@ -93,7 +94,7 @@ export function JetonModal({
               onPointerLeave={untilt}
               style={texScale(j) !== 1 ? { scale: String(texScale(j)) } : undefined}
             >
-              <img className={`${vImg(variant)} ${locked ? s.sil : ''}`} src={texOf(j)} alt="" />
+              <img className={locked ? 'px' : vImg(variant)} src={locked ? MYSTERE : texOf(j)} alt="" />
               {locked ? null : (
                 <i className={s.glare} style={{ maskImage: `url(${texOf(j)})`, WebkitMaskImage: `url(${texOf(j)})` }} />
               )}
