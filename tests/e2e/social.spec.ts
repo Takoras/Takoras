@@ -7,11 +7,18 @@ test('amis : pastille, accepter une demande, chat (lire, envoyer)', async ({ pag
   await expect(page.getByRole('heading', { level: 1 })).toBeVisible();
   // 1 demande + 2 messages non lus
   // sur téléphone, Amis est dans « Plus » : la pastille est sur le bouton Plus
-  await expect(isMobile ? page.getByRole('button', { name: /Plus/ }) : page.getByRole('link', { name: /Amis/ }).first()).toContainText('3');
+  await expect(
+    isMobile ? page.getByRole('button', { name: /Plus/ }) : page.getByRole('link', { name: /Amis/ }).first(),
+  ).toContainText('3');
   await page.getByRole('button', { name: /Accepter/ }).click();
   await expect(page.getByRole('status').getByText(/Nouveau/)).toBeVisible();
   // ouvrir le chat avec Ami
-  await page.getByRole('listitem').filter({ hasText: 'Ami' }).first().getByRole('button', { name: /Discuter|Chat/ }).click();
+  await page
+    .getByRole('listitem')
+    .filter({ hasText: 'Ami' })
+    .first()
+    .getByRole('button', { name: /Discuter|Chat/ })
+    .click();
   const dock = page.getByRole('region', { name: /Discussions|Messages|Chats/ });
   await expect(dock.getByText('Moi oui !')).toBeVisible();
   expect(calls).toContain('mark_read');
@@ -22,9 +29,9 @@ test('amis : pastille, accepter une demande, chat (lire, envoyer)', async ({ pag
 
 test('annonces : plein écran pour une annonce ratée, bandeau, historique', async ({ page }) => {
   const now = new Date().toISOString();
-  await fakeSupabase(page, {}, [], { ann: [
-    { id: 7, body: 'Nouvelle saison !', author: 'Admin', banner: true, fullscreen: true, created_at: now },
-  ] });
+  await fakeSupabase(page, {}, [], {
+    ann: [{ id: 7, body: 'Nouvelle saison !', author: 'Admin', banner: true, fullscreen: true, created_at: now }],
+  });
   await page.goto('/');
   const full = page.getByRole('dialog');
   await expect(full.getByText('Nouvelle saison !')).toBeVisible();

@@ -1,5 +1,5 @@
 // Valeurs du Ring (reprises de legacy/ring-config.js). Ce fichier est la référence depuis la phase 8 :
-// tour de 30 s et 5 maps. Sans map, le moteur reste identique à l'ancien site (test de rejeu).
+// tour de 60 s, une arène vide qui rétrécit, rôles des jetons.
 // « Ring » : toutes les valeurs d'équilibrage au même endroit. Change un chiffre ici, tout le jeu suit.
 // Unités : le ring a un rayon de 1000. Les vitesses sont en unités par seconde.
 const RCFG = {
@@ -10,33 +10,14 @@ const RCFG = {
   START_Y: 560,          // départ : tes jetons en bas (y = +560), ceux d'en face en haut
   START_X: [-360, 0, 360],
   SUDDEN_Y: 220,         // mort subite : 1 jeton chacun près du centre
-  // Sur une map : plus de limite de 12 tours, le ring RÉTRÉCIT à la fin de chaque tour (−4,5 % du rayon de départ,
-  // jusqu'à 38 %). Un jeton dont le centre se retrouve hors du bord tombe. Sécurité : 40 tours au plus.
-  SHRINK: { step: .045, min: .38, maxTurns: 40 },
+  // Sur une map : plus de limite de 12 tours, le ring RÉTRÉCIT doucement à la fin de chaque tour (−2 % du rayon de départ,
+  // jusqu'à 40 %). Un jeton dont le centre se retrouve hors du bord tombe. Sécurité : 60 tours au plus.
+  SHRINK: { step: .02, min: .4, maxTurns: 60 },
 
-  // ---------- Maps : rayon du ring et murs. Équilibrées par demi-tour : chaque mur a son jumeau en (−x, −y),
-  // donc les deux camps voient exactement le même terrain depuis leur côté.
-  // Mur : segment épais { x1, y1, x2, y2, w (épaisseur), k } · k = rebond (0,75 pierre qui amortit · 1,4 rebondisseur, renvoie plus vite)
-  // (Les zones au sol { x, y, w, h, fric } existent dans le moteur mais aucune map n'en a pour l'instant.)
+  // ---------- Map : pour l'instant UNE seule arène, vide (pas d'obstacle). Le moteur sait toujours gérer des murs
+  // { x1, y1, x2, y2, w, k } et des zones au sol { x, y, w, h, fric } si on en remet un jour.
   MAPS: [
-    { id: 'arene', R: 1450, fric: 1, zones: [],
-      walls: [{ x1: -260, y1: -120, x2: 260, y2: 120, w: 46, k: .75 },
-        { x1: -620, y1: -160, x2: -300, y2: -460, w: 44, k: .75 }, { x1: 620, y1: 160, x2: 300, y2: 460, w: 44, k: .75 },
-        { x1: -1020, y1: 280, x2: -820, y2: 580, w: 40, k: 1.4 }, { x1: 1020, y1: -280, x2: 820, y2: -580, w: 40, k: 1.4 }] },
-    { id: 'jardin', R: 1500, fric: 1, zones: [],
-      walls: [{ x1: -720, y1: -180, x2: -360, y2: -500, w: 44, k: .75 }, { x1: 720, y1: 180, x2: 360, y2: 500, w: 44, k: .75 },
-        { x1: 220, y1: -260, x2: 580, y2: -40, w: 44, k: .75 }, { x1: -220, y1: 260, x2: -580, y2: 40, w: 44, k: .75 },
-        { x1: -130, y1: 130, x2: 130, y2: -130, w: 40, k: 1.4 }] },
-    { id: 'volcan', R: 1500, fric: 1, zones: [],
-      walls: [{ x1: -330, y1: -230, x2: 330, y2: 230, w: 40, k: 1.4 }, { x1: -330, y1: 230, x2: 330, y2: -230, w: 40, k: 1.4 },
-        { x1: -1120, y1: -120, x2: -960, y2: 260, w: 44, k: .75 }, { x1: 1120, y1: 120, x2: 960, y2: -260, w: 44, k: .75 }] },
-    { id: 'glace', R: 1550, fric: 1, zones: [],
-      walls: [{ x1: -720, y1: -340, x2: -120, y2: -60, w: 44, k: .75 }, { x1: 720, y1: 340, x2: 120, y2: 60, w: 44, k: .75 },
-        { x1: -930, y1: 330, x2: -640, y2: 540, w: 40, k: 1.4 }, { x1: 930, y1: -330, x2: 640, y2: -540, w: 40, k: 1.4 }] },
-    { id: 'ruines', R: 1600, fric: 1, zones: [],
-      walls: [{ x1: -820, y1: -300, x2: -420, y2: -470, w: 46, k: .75 }, { x1: 820, y1: 300, x2: 420, y2: 470, w: 46, k: .75 },
-        { x1: -360, y1: -380, x2: 20, y2: -210, w: 46, k: .75 }, { x1: 360, y1: 380, x2: -20, y2: 210, w: 46, k: .75 },
-        { x1: -1170, y1: -240, x2: -1060, y2: 160, w: 40, k: 1.4 }, { x1: 1170, y1: 240, x2: 1060, y2: -160, w: 40, k: 1.4 }] },
+    { id: 'arene', R: 1450, fric: 1, zones: [], walls: [] },
   ],
 
   // ---------- Physique (pas fixe, valeurs arrondies à chaque pas = 100 % déterministe)

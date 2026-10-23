@@ -9,7 +9,10 @@ test('mon profil : stats, vitrine, modifier la bio et la photo', async ({ page }
   await expect(page.getByText('test@example.com')).toBeVisible(); // zone privée (seulement sur mon profil)
   // vitrine : case 1 → Vyolis
   await page.getByRole('button', { name: 'Vitrine · case 1' }).click();
-  await page.getByRole('dialog').getByRole('button', { name: /Vyolis/ }).click();
+  await page
+    .getByRole('dialog')
+    .getByRole('button', { name: /Vyolis/ })
+    .click();
   await expect(page.getByRole('button', { name: /Vyolis/ }).first()).toBeVisible();
   // modifier : bio + photo, sans bannière (envoyée comme null, pas '')
   await page.getByRole('button', { name: /Modifier le profil/ }).click();

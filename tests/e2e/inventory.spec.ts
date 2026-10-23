@@ -32,7 +32,10 @@ test('bestiaire : grille, filtres, fiche, vente, verrou, niveau', async ({ page 
 
   // verrouiller Vyolis
   await page.getByRole('button', { name: /×1 Vyolis/ }).click();
-  await page.getByRole('dialog').getByRole('button', { name: /Verrouiller/ }).click();
+  await page
+    .getByRole('dialog')
+    .getByRole('button', { name: /Verrouiller/ })
+    .click();
   expect(calls).toContain('lock_pulls');
 });
 

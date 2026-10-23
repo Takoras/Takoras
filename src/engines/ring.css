@@ -120,3 +120,7 @@
 .rg-cb i { display: block; height: 100%; border-radius: inherit; }
 .rg-cb.me { justify-content: flex-end; } .rg-cb.me i { background: #a78bfa; } .rg-cb.foe i { background: #fb923c; }
 .rg-cv { text-align: center; font-weight: 800; margin: 2px 0 0; }
+
+/* Pouvoir activé pour ce tour (on peut en activer plusieurs) */
+.rg-tc.on { box-shadow: 0 0 0 2px var(--c), 0 0 14px var(--c); }
+.rg-tc.on .rg-tcp { background: var(--c); color: #0d0d12; }

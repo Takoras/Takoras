@@ -168,3 +168,41 @@ test('Ring : toucher un jeton adverse montre sa fiche, même avec mon jeton choi
     await page.screenshot({ path: `${process.env.SHOT}/ring-shrink.png` });
   }
 });
+
+test('Ring : activer les pouvoirs de deux jetons dans le même tour (un seul tire)', async ({ page }) => {
+  await fakeSupabase(page, {}, [], { deck: [11, 16, 17] });
+  await page.goto('/combat');
+  await page.getByRole('button', { name: /Entraînement/ }).click();
+  await page.waitForFunction(() => (window as unknown as W).__ring?.RNG.phase === 'aim');
+  // toucher un de mes jetons dans le coin (panneau), puis son pouvoir ; même chose pour un 2e jeton
+  const pick = (i: number) =>
+    page.evaluate((i) => {
+      const R = (window as unknown as W).__ring?.RNG;
+      const b = R?.st?.bodies.filter((x) => x.side === R.me)[i];
+      if (!R || !b) return;
+      const v = R.view,
+        r = R.cv.getBoundingClientRect();
+      const pt = {
+        pointerId: 6,
+        pointerType: 'mouse',
+        isPrimary: true,
+        bubbles: true,
+        cancelable: true,
+        clientX: r.left + v.size / 2 + b.x * v.s,
+        clientY: r.top + v.size / 2 + b.y * v.s,
+      };
+      document.querySelector('#rg-stage')?.dispatchEvent(new PointerEvent('pointerdown', pt));
+      window.dispatchEvent(new PointerEvent('pointerup', pt));
+    }, i);
+  await pick(0);
+  await page.locator('#rg-pw').click();
+  await pick(1);
+  await page.locator('#rg-pw').click();
+  await expect(page.locator('#rg-t0 .rg-tc.on')).toHaveCount(2);
+  const shot = await page.evaluate(() => {
+    const R = (window as unknown as { __ring: { RNG: { pows: Set<number> } } }).__ring.RNG;
+    return R.pows.size;
+  });
+  expect(shot).toBe(2);
+  await expect(page.locator('#rg-go')).toHaveText('Valider');
+});

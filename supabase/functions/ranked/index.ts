@@ -27,15 +27,17 @@ const out = (body, status = 200) =>
 const fail = (error, status = 400) => out({ error }, status);
 const iso = (ms) => new Date(ms).toISOString();
 
-// Un tir valide : { i 0..2, ax, ay entiers, f 0..1 (au centième), pow }, ou null (passer)
+// Un tir valide : { i 0..2, ax, ay entiers, f 0..1 (au centième), pow, pows (autres jetons dont le pouvoir s'active) }, ou null (passer)
 function cleanShot(s) {
   if (s == null) return null;
   if (typeof s !== 'object') throw 'bad_shot';
-  const { i, ax, ay, f, pow } = s;
+  const { i, ax, ay, f, pow, pows } = s;
   if (![0, 1, 2].includes(i) || !Number.isInteger(ax) || !Number.isInteger(ay) || typeof f !== 'number' || typeof pow !== 'boolean') throw 'bad_shot';
   if (Math.abs(ax) > 100000 || Math.abs(ay) > 100000 || !(f >= 0 && f <= 1)) throw 'bad_shot';
   if (!ax && !ay && f > 0) throw 'bad_shot';
-  return { i, ax, ay, f: Math.round(f * 100) / 100, pow };
+  // pouvoirs des autres jetons activés ce tour (plusieurs pouvoirs possibles, un seul tireur)
+  if (pows != null && (!Array.isArray(pows) || pows.length > 3 || !pows.every((x) => [0, 1, 2].includes(x)))) throw 'bad_shot';
+  return { i, ax, ay, f: Math.round(f * 100) / 100, pow, pows: [...new Set(pows ?? [])].filter((x) => x !== i) };
 }
 
 const live = async (uid) =>

@@ -15,7 +15,9 @@ for (const path of ROUTES) {
     await page.goto(path);
     await expect(page.locator('main h1')).toBeVisible();
     const a11y = await new AxeBuilder({ page }).analyze();
-    expect(a11y.violations.filter((v) => v.impact === 'critical' || v.impact === 'serious').map((v) => v.id)).toEqual([]);
+    expect(a11y.violations.filter((v) => v.impact === 'critical' || v.impact === 'serious').map((v) => v.id)).toEqual(
+      [],
+    );
     expect(errors).toEqual([]);
   });
 }
@@ -49,6 +51,10 @@ for (const path of ['/inventaire', '/inventaire/objets', '/profil', '/profil/Ami
     await expect(page.locator('main h1')).toBeVisible();
     await page.waitForLoadState('networkidle');
     const a11y = await new AxeBuilder({ page }).analyze();
-    expect(a11y.violations.filter((v) => v.impact === 'critical' || v.impact === 'serious').map((v) => `${v.id}: ${v.nodes[0]?.html.slice(0, 120)}`)).toEqual([]);
+    expect(
+      a11y.violations
+        .filter((v) => v.impact === 'critical' || v.impact === 'serious')
+        .map((v) => `${v.id}: ${v.nodes[0]?.html.slice(0, 120)}`),
+    ).toEqual([]);
   });
 }

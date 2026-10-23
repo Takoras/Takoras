@@ -48,7 +48,7 @@ const RT = {
     t6: 'Bien joué, tu es prêt pour le classé !', tOk: 'OK', tSkip: 'Passer', tEnd: 'Terminer',
     shrink: 'Le ring rétrécit à chaque tour !', cmpWin: 'Avantage : toi', cmpEven: 'Assez équilibré', cmpLose: 'Avantage : lui', cmpHint: 'Plus lourd = dur à pousser · plus de puissance = tir plus fort.',
     tTimer: 'Le chrono : <b>60 s</b> pour viser à chaque tour. Si les deux valident avant, le tour part tout de suite. Et <b>le ring rétrécit à chaque tour</b> : reste loin du bord !',
-    tWalls: 'Les murs : les gris amortissent, les <b>roses renvoient plus fort</b>. Sers-t’en pour faire des bandes ou te protéger.',
+    tWalls: 'Pouvoirs : tu peux activer ceux de <b>plusieurs jetons</b> dans le même tour (choisis un jeton, touche son pouvoir, puis un autre…), mais <b>un seul jeton tire</b> : celui que tu vises.',
     tScout: 'Touche un <b>jeton adverse</b> pour voir sa fiche (stats, pouvoir). Si ton jeton est choisi, tu vois les <b>deux côte à côte</b> pour comparer. Re-touche ton jeton pour le déselectionner.',
     tRanked: '<b>Le classé</b> : tu affrontes un vrai joueur de ton niveau (Elo). Victoire = +Elo, défaite = −Elo. Monte de <b>Fer 1</b> jusqu’à <b>Légende</b> ! Si tu ne joues pas 3 tours de suite, tu perds le match.',
   },
@@ -88,7 +88,7 @@ const RT = {
     t6: 'Well done, you’re ready for ranked!', tOk: 'OK', tSkip: 'Skip', tEnd: 'Finish',
     shrink: 'The ring shrinks every turn!', cmpWin: 'Advantage: you', cmpEven: 'Fairly even', cmpLose: 'Advantage: them', cmpHint: 'Heavier = harder to push · more power = stronger shot.',
     tTimer: 'The timer: <b>60 s</b> to aim each turn. If both confirm earlier, the turn starts right away. And <b>the ring shrinks every turn</b>: stay away from the edge!',
-    tWalls: 'Walls: grey ones absorb, <b>pink ones bounce you back harder</b>. Use them for bank shots or cover.',
+    tWalls: 'Powers: you can turn on the powers of <b>several tokens</b> in the same turn (pick a token, tap its power, then another…), but <b>only one token shoots</b>: the one you aim with.',
     tScout: 'Tap an <b>enemy token</b> to see its card (stats, power). With your token selected, you see <b>both side by side</b> to compare. Tap your token again to deselect it.',
     tRanked: '<b>Ranked</b>: you face a real player at your level (Elo). Win = +Elo, lose = −Elo. Climb from <b>Iron 1</b> up to <b>Legend</b>! Skip 3 turns in a row and you lose the match.',
   },
@@ -207,7 +207,7 @@ function rgAiThink(st, level) {
 }
 function rgTurnStart() {
   const st = RNG.st;
-  Object.assign(RNG, { phase: 'aim', aim: null, pow: false, prev: null, foe: null, foeOk: false, locked: false, drag: null });
+  Object.assign(RNG, { phase: 'aim', aim: null, pow: false, pows: new Set(), prev: null, foe: null, foeOk: false, locked: false, drag: null });
   const mine = RG.alive(st, ME());
   if (!mine.some(b => b.id === RNG.sel)) RNG.sel = null;
   RNG.timer = RCFG.AIM_S;
@@ -241,7 +241,7 @@ function rgHud() {
     pwB.style.setProperty('--c', PW_COL[p.pw]);
     pwB.innerHTML = `<b>✦ ${esc(p.name)}</b><small>${RNG.pow ? rt('on') : rd ? esc(p.desc) : b.spent ? rt('used') : rt('inCd', { n: b.cd })}</small>`;
   } else { pwB.disabled = true; pwB.className = 'rg-pw'; pwB.innerHTML = `<b>✦ ${rt('power')}</b><small>${rt('pick')}</small>`; }
-  const canGo = RNG.phase === 'aim' && !RNG.locked && (RNG.aim || (RNG.pow && b));
+  const canGo = RNG.phase === 'aim' && !RNG.locked && rgHasMove();
   go.disabled = RNG.phase !== 'aim' || RNG.locked;
   go.className = 'rg-go' + (canGo ? ' ready' : '') + (RNG.locked ? ' done' : '');
   go.textContent = RNG.locked ? rt('validated') : canGo ? rt('validate') : rt('pass');
@@ -255,7 +255,7 @@ function rgPanels() {
     const box = RNG.el.querySelector('#rg-t' + (side === ME() ? 0 : 1));
     box.innerHTML = st.bodies.filter(b => b.side === side).map(b => {
       const p = powerText(b.name), rd = RG.ready(b);
-      return `<button class="rg-tc${b.alive ? '' : ' ko'}${b.id === RNG.sel ? ' sel' : ''}" data-id="${b.id}" style="--c:${PW_COL[p.pw]}" aria-label="${esc(jn(b.name))}">
+      return `<button class="rg-tc${b.alive ? '' : ' ko'}${b.id === RNG.sel ? ' sel' : ''}${RNG.pows?.has(b.id) ? ' on' : ''}" data-id="${b.id}" style="--c:${PW_COL[p.pw]}" aria-label="${esc(jn(b.name))}">
         <img class="${vCls(b.variant)}" src="${texOf(jetonOf(b.name))}" alt="">
         <span class="rg-tcp">${!b.alive ? '✕' : rd ? '✦' : b.spent ? '·' : b.cd}</span>
       </button>`;
@@ -326,7 +326,7 @@ function rgDown(e) {
   const hit = RG.alive(RNG.st, ME()).find(b => RG.len(b.x - wx, b.y - wy) < b.r * 1.5 + 20);
   // re-toucher ton jeton déjà choisi (sans glisser) le déselectionne (voir rgUp)
   const again = !!hit && hit.id === RNG.sel;
-  if (hit && hit.id !== RNG.sel) { RNG.sel = hit.id; RNG.aim = null; RNG.pow = false; RNG.prev = null; sfx.click(); rgHud(); RNG.tuto?.on?.('sel'); }
+  if (hit && hit.id !== RNG.sel) { RNG.sel = hit.id; RNG.aim = null; RNG.pow = !!RNG.pows?.has(hit.id); RNG.prev = null; sfx.click(); rgHud(); RNG.tuto?.on?.('sel'); }
   if (RNG.sel == null) return;
   RNG.drag = { x: px, y: py, id: e.pointerId, again };
 }
@@ -345,17 +345,27 @@ function rgUp(e) {
   const d = RNG.drag; if (!d || e.pointerId !== d.id) return;
   RNG.drag = null;
   if (d.foe != null && !d.moved) return rgInfo(d.foe); // simple toucher sur un jeton adverse
-  if (d.again && !d.moved) { RNG.sel = null; RNG.aim = null; RNG.pow = false; RNG.prev = null; sfx.click(); return rgHud(); }
+  if (d.again && !d.moved) { RNG.sel = null; RNG.aim = null; RNG.pow = false; RNG.prev = null; /* ses pouvoirs activés restent activés */ sfx.click(); return rgHud(); }
   if (RNG.aim && RNG.aim.f < RCFG.MIN_FORCE) { RNG.aim = null; RNG.prev = null; }
   rgHud();
   if (RNG.aim) RNG.tuto?.on?.('aim');
 }
+// Pouvoirs : tu peux en activer sur PLUSIEURS de tes jetons dans le même tour (un seul jeton tire : celui que tu vises)
 function rgTogglePow() {
   const b = RNG.st?.bodies.find(x => x.id === RNG.sel); if (!b || !RG.ready(b) || RNG.locked) return;
-  RNG.pow = !RNG.pow; RNG.prevDirty = true; sfx.next?.(); rgHud();
+  RNG.pows ??= new Set();
+  if (RNG.pows.has(b.id)) RNG.pows.delete(b.id); else RNG.pows.add(b.id);
+  RNG.pow = RNG.pows.has(b.id); RNG.prevDirty = true; sfx.next?.(); rgHud();
   if (RNG.pow) RNG.tuto?.on?.('pow');
 }
-function rgShot() { const b = RNG.st.bodies.find(x => x.id === RNG.sel); return b ? { i: b.i, ax: RNG.aim?.ax || 0, ay: RNG.aim?.ay || -FL(), f: RNG.aim?.f || 0, pow: RNG.pow } : null; }
+// Mon tir : le jeton choisi tire (s'il y a une visée) ; les pouvoirs activés des autres partent avec (pows)
+function rgShot() {
+  const pw = [...(RNG.pows || [])].map(id => RNG.st.bodies.find(x => x.id === id && x.alive)).filter(Boolean);
+  const b = RNG.st.bodies.find(x => x.id === RNG.sel && x.alive) || pw[0];
+  if (!b) return null;
+  return { i: b.i, ax: RNG.aim?.ax || 0, ay: RNG.aim?.ay || -FL(), f: RNG.aim && b.id === RNG.sel ? RNG.aim.f : 0, pow: RNG.pows?.has(b.id) || false, pows: pw.filter(x => x !== b).map(x => x.i) };
+}
+const rgHasMove = () => !!RNG.aim || !!RNG.pows?.size;
 // Trajectoire prévue : seulement ton tir, jusqu'un peu après le premier choc
 function rgPreview() {
   RNG.prevDirty = false;
@@ -375,7 +385,7 @@ function rgLock(auto) {
   sfx.upgrade?.(); rgHud();
   RNG.tuto?.on?.('go');
   // en ligne : on envoie le tir au serveur ; le tour part quand il a les deux (ou à la fin du chrono)
-  if (RNG.online) { RNG.online.sent = true; RNG.online.shoot(RNG.aim || RNG.pow ? rgShot() : null); return; }
+  if (RNG.online) { RNG.online.sent = true; RNG.online.shoot(rgHasMove() ? rgShot() : null); return; }
   // l'adversaire valide (au plus tard à la fin du chrono)
   const go = () => {
     if (!RNG.st) return;
@@ -445,7 +455,7 @@ function rgOnlineClock() {
 function rgReveal(srv) {
   const st = RNG.st; if (!st) return;
   RNG.phase = 'reveal'; rgHud();
-  const shots = srv || [RNG.aim || RNG.pow ? rgShot() : null, RNG.foe || null];
+  const mine = rgHasMove() ? rgShot() : null, shots = srv || (ME() ? [RNG.foe || null, mine] : [mine, RNG.foe || null]);
   RNG.reveal = shots.map((s, side) => s && { body: st.bodies.find(b => b.side === side && b.i === s.i), s });
   rgBanner(rt('reveal'), '#fde68a');
   sfx.riser?.(.6);
@@ -667,7 +677,7 @@ function rgTeamMark(c, b, x, y, rr, t, live) {
   c.lineWidth = px * 1.5; c.strokeStyle = S.md;
   for (let k = 0; k < 8; k++) { c.beginPath(); c.arc(x, y, rr + px * 2.5, rot + k * seg, rot + k * seg + seg * .62); c.stroke(); }
   // pouvoir activé pendant la visée : anneau de la couleur du pouvoir qui pulse
-  if (live && b.id === RNG.sel && RNG.pow && RNG.phase === 'aim') {
+  if (live && RNG.pows?.has(b.id) && RNG.phase === 'aim') {
     const pc = PW_COL[b.pw]; c.strokeStyle = pc; c.lineWidth = px * 1.5; c.globalAlpha = .6 + .4 * Math.sin(t * 8);
     c.beginPath(); c.arc(x, y, rr + px * 5, 0, 7); c.stroke(); c.globalAlpha = 1;
   }
@@ -914,7 +924,7 @@ function rgTuto() {
     if (n === 5) {
       const carmin = RNG.st.bodies.find(b => b.side === 0 && b.alive && RG.ready(b));
       if (!carmin) return show(6);
-      RNG.sel = carmin.id; RNG.pow = false; rgHud();
+      RNG.sel = carmin.id; RNG.pow = !!RNG.pows?.has(carmin.id); rgHud();
       rgTip(rt('t5'), 'top'); rgHl('#rg-pw');
     }
     if (n === 6) { rgTip(rt('tRanked'), 'top', [['ok', rt('tOk')]]); rgHl(null); tu.block = 'all'; tu.next = () => show(7); }

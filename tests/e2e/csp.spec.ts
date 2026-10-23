@@ -4,7 +4,8 @@ import { fakeSupabase } from './fake-supabase';
 
 // Porte de la phase 11 : la CSP de public/_headers, appliquée pour de vrai (bloquante) sur le site construit,
 // ne doit provoquer AUCUNE violation, sur toutes les pages et tous les moteurs (ouverture, Ring + IA, admin…).
-const csp = /Content-Security-Policy(?:-Report-Only)?: (.+)/.exec(fs.readFileSync('public/_headers', 'utf8'))?.[1] ?? '';
+const csp =
+  /Content-Security-Policy(?:-Report-Only)?: (.+)/.exec(fs.readFileSync('public/_headers', 'utf8'))?.[1] ?? '';
 
 async function enforce(page: Page) {
   expect(csp).toContain("script-src 'self'");
@@ -45,11 +46,23 @@ test('CSP : aucune violation sur tout le site', async ({ page, isMobile }) => {
     return ok;
   });
   expect(blocked).toBe(true);
-  await page.getByRole('button', { name: /Ouvrir 1/ }).first().click();
+  await page
+    .getByRole('button', { name: /Ouvrir 1/ })
+    .first()
+    .click();
   await page.waitForTimeout(1500);
   await page.keyboard.press('Escape');
   await check('accueil');
-  for (const path of ['/inventaire', '/inventaire/objets', '/boutique', '/profil', '/profil/Ami', '/amis', '/classement', '/admin']) {
+  for (const path of [
+    '/inventaire',
+    '/inventaire/objets',
+    '/boutique',
+    '/profil',
+    '/profil/Ami',
+    '/amis',
+    '/classement',
+    '/admin',
+  ]) {
     await page.goto(path);
     await expect(page.locator('main h1, main h2').first()).toBeVisible();
     await check(path);

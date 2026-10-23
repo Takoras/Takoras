@@ -12,7 +12,10 @@ test('joueur normal : /admin introuvable, le fichier admin n’est jamais télé
   await expect(page.getByRole('link', { name: 'Admin' })).toHaveCount(0); // pas de bouclier
 });
 
-test('admin : joueurs, don, ban avec confirmation, remise à zéro générale protégée par RESET', async ({ page, isMobile }) => {
+test('admin : joueurs, don, ban avec confirmation, remise à zéro générale protégée par RESET', async ({
+  page,
+  isMobile,
+}) => {
   test.skip(isMobile, 'même panel, testé sur PC');
   const { calls } = await fakeSupabase(page, {}, [], { admin: true });
   await page.goto('/');
@@ -83,5 +86,9 @@ test('admin : pas de problème d’accessibilité grave', async ({ page }) => {
   await page.getByRole('button', { name: 'Alice' }).click();
   await expect(page.getByText('alice@example.com')).toBeVisible();
   const a11y = await new AxeBuilder({ page }).analyze();
-  expect(a11y.violations.filter((v) => v.impact === 'critical' || v.impact === 'serious').map((v) => `${v.id}: ${v.nodes[0]?.html.slice(0, 120)}`)).toEqual([]);
+  expect(
+    a11y.violations
+      .filter((v) => v.impact === 'critical' || v.impact === 'serious')
+      .map((v) => `${v.id}: ${v.nodes[0]?.html.slice(0, 120)}`),
+  ).toEqual([]);
 });

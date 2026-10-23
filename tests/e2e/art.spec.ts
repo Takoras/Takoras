@@ -17,7 +17,9 @@ test('doodle partout et variantes visibles (vitrine, bestiaire)', async ({ page 
   const nyx = page.getByRole('button', { name: /Nyx/ }).first().locator('img'); // jeton normal de la vitrine
   expect(await applied(nyx)).toMatch(/url\(.*#dd\d.*drop-shadow/);
   // le logo reste fixe
-  expect(await page.locator('header img[src$="logo.png"]').evaluate((el) => getComputedStyle(el).animationName)).toBe('none');
+  expect(await page.locator('header img[src$="logo.png"]').evaluate((el) => getComputedStyle(el).animationName)).toBe(
+    'none',
+  );
   // les filtres SVG existent dans la page
   await expect(page.locator('filter#dd0')).toHaveCount(1);
   await page.goto('/inventaire');

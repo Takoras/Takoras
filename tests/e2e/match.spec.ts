@@ -4,24 +4,57 @@ import { fakeSupabase } from './fake-supabase';
 // Porte de la phase 8 : une partie complète d'entraînement, jouée avec de vrais gestes (glisser = lance-pierre),
 // au doigt en 375 px et à la souris sur PC, jusqu'à l'écran de fin. Mesure aussi la fluidité pendant les tirs.
 type Body = { id: number; side: number; x: number; y: number; alive: boolean };
-type Ring = { startRing: (t: unknown, o: unknown) => void; closeRing: () => void; RNG: { st: { over: boolean; bodies: Body[] } | null; phase: string; locked: boolean; play: unknown; cv: HTMLCanvasElement; view: { size: number; s: number } } };
-declare global { interface Window { __ring?: Ring } }
+type Ring = {
+  startRing: (t: unknown, o: unknown) => void;
+  closeRing: () => void;
+  RNG: {
+    st: { over: boolean; bodies: Body[] } | null;
+    phase: string;
+    locked: boolean;
+    play: unknown;
+    cv: HTMLCanvasElement;
+    view: { size: number; s: number };
+  };
+};
+declare global {
+  interface Window {
+    __ring?: Ring;
+  }
+}
 
 // Un tir : toucher un de ses jetons, tirer vers l'arrière (opposé au jeton adverse le plus proche), lâcher, valider
 async function shoot(page: Page, touch: boolean) {
   return page.evaluate((touch) => {
     const R = window.__ring?.RNG;
     if (!R?.st) return 'none';
-    const mine = R.st.bodies.filter((b) => b.side === 0 && b.alive), foes = R.st.bodies.filter((b) => b.side === 1 && b.alive);
-    const me = mine[0], foe = foes.sort((a, b) => Math.hypot(a.x - (me?.x ?? 0), a.y - (me?.y ?? 0)) - Math.hypot(b.x - (me?.x ?? 0), b.y - (me?.y ?? 0)))[0];
+    const mine = R.st.bodies.filter((b) => b.side === 0 && b.alive),
+      foes = R.st.bodies.filter((b) => b.side === 1 && b.alive);
+    const me = mine[0],
+      foe = foes.sort(
+        (a, b) =>
+          Math.hypot(a.x - (me?.x ?? 0), a.y - (me?.y ?? 0)) - Math.hypot(b.x - (me?.x ?? 0), b.y - (me?.y ?? 0)),
+      )[0];
     if (!me || !foe) return 'none';
-    const r = R.cv.getBoundingClientRect(), v = R.view;
-    const sx = r.left + v.size / 2 + me.x * v.s, sy = r.top + v.size / 2 + me.y * v.s;
-    const d = Math.hypot(foe.x - me.x, foe.y - me.y) || 1, ux = (foe.x - me.x) / d, uy = (foe.y - me.y) / d;
-    const pt = { pointerId: 7, pointerType: touch ? 'touch' : 'mouse', isPrimary: true, bubbles: true, cancelable: true };
+    const r = R.cv.getBoundingClientRect(),
+      v = R.view;
+    const sx = r.left + v.size / 2 + me.x * v.s,
+      sy = r.top + v.size / 2 + me.y * v.s;
+    const d = Math.hypot(foe.x - me.x, foe.y - me.y) || 1,
+      ux = (foe.x - me.x) / d,
+      uy = (foe.y - me.y) / d;
+    const pt = {
+      pointerId: 7,
+      pointerType: touch ? 'touch' : 'mouse',
+      isPrimary: true,
+      bubbles: true,
+      cancelable: true,
+    };
     const stage = document.querySelector('#rg-stage') as HTMLElement;
     stage.dispatchEvent(new PointerEvent('pointerdown', { ...pt, clientX: sx, clientY: sy }));
-    for (let k = 1; k <= 6; k++) window.dispatchEvent(new PointerEvent('pointermove', { ...pt, clientX: sx - ux * 22 * k, clientY: sy - uy * 22 * k }));
+    for (let k = 1; k <= 6; k++)
+      window.dispatchEvent(
+        new PointerEvent('pointermove', { ...pt, clientX: sx - ux * 22 * k, clientY: sy - uy * 22 * k }),
+      );
     window.dispatchEvent(new PointerEvent('pointerup', { ...pt, clientX: sx - ux * 132, clientY: sy - uy * 132 }));
     (document.querySelector('#rg-go') as HTMLButtonElement).click();
     return 'shot';
@@ -41,7 +74,14 @@ test('Ring : partie complète contre l’IA, au doigt (375 px) et à la souris (
   let turns = 0;
   for (; turns < 40; turns++) {
     // attendre la visée (ou la fin)
-    await page.waitForFunction(() => { const R = window.__ring?.RNG; return !R?.st || R.st.over || (R.phase === 'aim' && !R.locked && !R.play); }, null, { timeout: 30_000 });
+    await page.waitForFunction(
+      () => {
+        const R = window.__ring?.RNG;
+        return !R?.st || R.st.over || (R.phase === 'aim' && !R.locked && !R.play);
+      },
+      null,
+      { timeout: 30_000 },
+    );
     const over = await page.evaluate(() => !window.__ring?.RNG.st || window.__ring.RNG.st.over);
     if (over) break;
     // captures pour vérifier la DA (visée, puis tir en cours)
@@ -52,8 +92,17 @@ test('Ring : partie complète contre l’IA, au doigt (375 px) et à la souris (
           const R = window.__ring?.RNG;
           const b = R?.st?.bodies.find((x) => x.side === side && x.alive);
           if (!R || !b) return;
-          const r = R.cv.getBoundingClientRect(), v = R.view;
-          const pt = { pointerId: 5, pointerType: 'mouse', isPrimary: true, bubbles: true, cancelable: true, clientX: r.left + v.size / 2 + b.x * v.s, clientY: r.top + v.size / 2 + b.y * v.s };
+          const r = R.cv.getBoundingClientRect(),
+            v = R.view;
+          const pt = {
+            pointerId: 5,
+            pointerType: 'mouse',
+            isPrimary: true,
+            bubbles: true,
+            cancelable: true,
+            clientX: r.left + v.size / 2 + b.x * v.s,
+            clientY: r.top + v.size / 2 + b.y * v.s,
+          };
           document.querySelector('#rg-stage')?.dispatchEvent(new PointerEvent('pointerdown', pt));
           window.dispatchEvent(new PointerEvent('pointerup', pt));
         }, side);
@@ -62,40 +111,57 @@ test('Ring : partie complète contre l’IA, au doigt (375 px) et à la souris (
       await tap(1);
       await expect(page.locator('.rg-info .rg-cmp')).toBeVisible();
       await expect(page.locator('.rg-cmp .rg-cr')).toHaveCount(3);
-      if (process.env.SHOT) await page.screenshot({ path: `${process.env.SHOT}/ring-compare-${isMobile ? 'm' : 'd'}.png` });
+      if (process.env.SHOT)
+        await page.screenshot({ path: `${process.env.SHOT}/ring-compare-${isMobile ? 'm' : 'd'}.png` });
       await page.locator('.rg-info').click();
       await tap(0); // re-toucher : déselectionné
       await expect(page.locator('#rg-pw')).toContainText('Choisis un jeton');
     }
-    if (turns === 1 && process.env.SHOT) await page.screenshot({ path: `${process.env.SHOT}/ring-aim-${isMobile ? 'm' : 'd'}.png` });
+    if (turns === 1 && process.env.SHOT)
+      await page.screenshot({ path: `${process.env.SHOT}/ring-aim-${isMobile ? 'm' : 'd'}.png` });
     expect(await shoot(page, isMobile)).toBe('shot');
-    if (turns === 1 && process.env.SHOT) { await page.waitForTimeout(500); await page.screenshot({ path: `${process.env.SHOT}/ring-play-${isMobile ? 'm' : 'd'}.png` }); }
+    if (turns === 1 && process.env.SHOT) {
+      await page.waitForTimeout(500);
+      await page.screenshot({ path: `${process.env.SHOT}/ring-play-${isMobile ? 'm' : 'd'}.png` });
+    }
     // fluidité pendant l'animation du tir
     if (turns < 3)
-      fps.push(await page.evaluate(() => new Promise<number>((res) => {
-        let n = 0; const t0 = performance.now();
-        const f = () => { n++; if (performance.now() - t0 < 1500) requestAnimationFrame(f); else res((n * 1000) / (performance.now() - t0)); };
-        requestAnimationFrame(f);
-      })));
+      fps.push(
+        await page.evaluate(
+          () =>
+            new Promise<number>((res) => {
+              let n = 0;
+              const t0 = performance.now();
+              const f = () => {
+                n++;
+                if (performance.now() - t0 < 1500) requestAnimationFrame(f);
+                else res((n * 1000) / (performance.now() - t0));
+              };
+              requestAnimationFrame(f);
+            }),
+        ),
+      );
   }
   await expect(page.locator('.rg-res')).toBeVisible({ timeout: 30_000 });
   await expect(page.locator('.rg-res h2')).toHaveText(/Victoire|Défaite|Égalité/);
-  console.log(`[${isMobile ? 'mobile' : 'pc'}] partie terminée en ${turns} tours, fps pendant les tirs : ${fps.map((x) => x.toFixed(0)).join(' / ')}`);
+  console.log(
+    `[${isMobile ? 'mobile' : 'pc'}] partie terminée en ${turns} tours, fps pendant les tirs : ${fps.map((x) => x.toFixed(0)).join(' / ')}`,
+  );
   expect(errors).toEqual([]);
   // retour à la page Combat
   await page.locator('.rg-res [data-back]').click();
   await expect(page.locator('.rg, .rg-res')).toHaveCount(0);
 });
 
-// Captures des 5 maps (vérification visuelle du rendu)
-test('Ring : les 5 maps s’affichent', async ({ page, isMobile }) => {
+// Capture de l'arène (vérification visuelle du rendu)
+test('Ring : l’arène s’affiche', async ({ page, isMobile }) => {
   test.skip(!process.env.SHOT, 'seulement pour les captures');
   await fakeSupabase(page, {}, [], { deck: [11, 16, 17] });
   await page.addInitScript(() => localStorage.setItem('takoras-ring-tuto', '1'));
   await page.goto('/combat');
   await page.getByRole('button', { name: /Entraînement/ }).click();
   await page.waitForFunction(() => !!window.__ring?.RNG.st);
-  for (const map of ['arene', 'jardin', 'volcan', 'glace', 'ruines']) {
+  for (const map of ['arene']) {
     await page.evaluate((map) => {
       const T = (n: string[]) => n.map((name) => ({ name, lvl: 2, variant: '' }));
       window.__ring?.startRing([T(['Mobu', 'Pikko', 'Soléo']), T(['Kraïos', 'Azura', 'Carmin'])], { ai: 'still', map });

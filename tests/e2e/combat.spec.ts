@@ -20,7 +20,7 @@ test('combat : monter son équipe (ajouter, version, enregistrer, plus de budget
   await expect(d.getByRole('radio', { name: 'Doré' })).toHaveAttribute('aria-checked', 'true');
   await expect(d.getByText('+5 %', { exact: true })).toBeVisible();
   // Mobu (Tank) + Pikko (Soutien) + Vyolis (Combattant) : trio complet
-  await expect(d.getByText(/Trio complet/)).toBeVisible();
+  await expect(d.getByText(/✓ Trio complet/)).toBeVisible();
   await d.getByRole('button', { name: 'Valider l’équipe' }).click();
   await expect(d).toBeHidden();
   expect(calls).toContain('set_deck');

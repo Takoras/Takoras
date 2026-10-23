@@ -63,35 +63,43 @@ const RG = (() => {
     const dt = C.DT, RR = ringR(st), WALLS = wallsOf(st), ZONES = zonesOf(st), GF = st.map ? st.map.fric : 1;
     B.forEach(b => { b.t = { fric: 1, bounce: false, ghost: false, shield: false, anchor: false, shooter: false, v0: 0, hit: false, stopped: false, el: 0, pw: null }; });
     // pouvoirs et lancers
+    // Un tir : un seul jeton tire (s.i), mais on peut activer les pouvoirs de plusieurs jetons (s.pow pour le tireur,
+    // s.pows = les autres jetons de l'équipe). Chaque pouvoir prêt s'active une fois.
+    const act = (b, side) => {
+      const T = b.t, k = kit(b.name);
+      if (!ready(b) || T.pw) return;
+      T.pw = b.pw; ev.push({ t: 'power', id: b.id, pw: b.pw, at: 0 });
+      if (b.pw === 'grow') { b.r = b.base.r * k.p.r; b.mass = b.base.mass * k.p.mass; }
+      if (b.pw === 'scrap') b.mass = b.base.mass * k.p.mass;
+      if (b.pw === 'slide') T.fric = k.p.friction;
+      if (b.pw === 'bounce') T.bounce = true;
+      if (b.pw === 'ghost') T.ghost = true;
+      if (b.pw === 'shrink') b.r = b.base.r * k.p.r;
+      if (b.pw === 'anchor') T.anchor = true;
+      if (b.pw === 'shield') T.shield = true;
+      if (b.pw === 'roots') alive(st, side).forEach(a => { a.t.bounce = true; });
+      // Coup de pouce (Soutien) : les pouvoirs de tes alliés reviennent plus vite
+      if (b.pw === 'haste') alive(st, side).forEach(a => { if (a !== b && a.cd > 0) { a.cd = Math.max(0, a.cd - k.p.cd); ev.push({ t: 'haste', id: a.id, by: b.id, at: 0 }); } });
+      // Bulle (Soutien) : ton allié le plus proche ne peut pas être poussé par les ennemis ce tour
+      if (b.pw === 'guard') {
+        const al = alive(st, side).filter(a => a !== b).sort((a, c) => len(a.x - b.x, a.y - b.y) - len(c.x - b.x, c.y - b.y))[0];
+        if (al) { al.t.shield = true; ev.push({ t: 'guard', id: al.id, by: b.id, at: 0 }); }
+      }
+      if (b.pw === 'rescue') {
+        const far = alive(st, side).filter(a => a !== b).sort((a, c) => len(c.x, c.y) - len(a.x, a.y))[0];
+        if (far) { const d = len(far.x, far.y), m = Math.min(k.p.pull, d) / (d || 1); far.x = q(far.x - far.x * m); far.y = q(far.y - far.y * m); ev.push({ t: 'rescue', id: far.id, by: b.id, at: 0 }); }
+      }
+      b.cd = k.cd; if (!k.cd) b.spent = true;
+    };
     const fired = [];
     shots.forEach((s, side) => {
       if (!s) return;
-      const b = B.find(x => x.side === side && x.i === s.i && x.alive && !x.tmp); if (!b) return;
-      const T = b.t, k = kit(b.name), usePw = s.pow && ready(b);
-      if (usePw) {
-        T.pw = b.pw; ev.push({ t: 'power', id: b.id, pw: b.pw, at: 0 });
-        if (b.pw === 'grow') { b.r = b.base.r * k.p.r; b.mass = b.base.mass * k.p.mass; }
-        if (b.pw === 'scrap') b.mass = b.base.mass * k.p.mass;
-        if (b.pw === 'slide') T.fric = k.p.friction;
-        if (b.pw === 'bounce') T.bounce = true;
-        if (b.pw === 'ghost') T.ghost = true;
-        if (b.pw === 'shrink') b.r = b.base.r * k.p.r;
-        if (b.pw === 'anchor') T.anchor = true;
-        if (b.pw === 'shield') T.shield = true;
-        if (b.pw === 'roots') alive(st, side).forEach(a => { a.t.bounce = true; });
-        // Coup de pouce (Soutien) : les pouvoirs de tes alliés reviennent plus vite
-        if (b.pw === 'haste') alive(st, side).forEach(a => { if (a !== b && a.cd > 0) { a.cd = Math.max(0, a.cd - k.p.cd); ev.push({ t: 'haste', id: a.id, by: b.id, at: 0 }); } });
-        // Bulle (Soutien) : ton allié le plus proche ne peut pas être poussé par les ennemis ce tour
-        if (b.pw === 'guard') {
-          const al = alive(st, side).filter(a => a !== b).sort((a, c) => len(a.x - b.x, a.y - b.y) - len(c.x - b.x, c.y - b.y))[0];
-          if (al) { al.t.shield = true; ev.push({ t: 'guard', id: al.id, by: b.id, at: 0 }); }
-        }
-        if (b.pw === 'rescue') {
-          const far = alive(st, side).filter(a => a !== b).sort((a, c) => len(c.x, c.y) - len(a.x, a.y))[0];
-          if (far) { const d = len(far.x, far.y), m = Math.min(k.p.pull, d) / (d || 1); far.x = q(far.x - far.x * m); far.y = q(far.y - far.y * m); ev.push({ t: 'rescue', id: far.id, by: b.id, at: 0 }); }
-        }
-        b.cd = k.cd; if (!k.cd) b.spent = true;
-      }
+      const mine = i => B.find(x => x.side === side && x.i === i && x.alive && !x.tmp);
+      // pouvoirs des autres jetons d'abord (dans l'ordre 0, 1, 2), puis celui du tireur
+      [...new Set(s.pows || [])].filter(i => i !== s.i).sort((a, c) => a - c).forEach(i => { const o = mine(i); if (o) act(o, side); });
+      const b = mine(s.i); if (!b) return;
+      if (s.pow) act(b, side);
+      const T = b.t, k = kit(b.name);
       if (T.anchor) return; // l'ancre ne tire pas
       const f = Math.max(0, Math.min(1, s.f)), d = len(s.ax, s.ay);
       if (f < C.MIN_FORCE || !d) return;

@@ -9,7 +9,7 @@ export type Wall = { x1: number; y1: number; x2: number; y2: number; w: number; 
 export type Zone = { x: number; y: number; w: number; h: number; fric: number };
 export type RingMap = { id: string; R: number; fric: number; walls: Wall[]; zones: Zone[] };
 export type RingState = { turn: number; over: boolean; winner: 0 | 1 | null; sudden: boolean; bodies: Body[]; map?: RingMap };
-export type Shot = { i: number; ax: number; ay: number; f: number; pow: boolean };
+export type Shot = { i: number; ax: number; ay: number; f: number; pow: boolean; pows?: number[] }; // pows : pouvoirs des autres jetons activés ce tour
 export type RingEvent = { t: string; at?: number; [k: string]: unknown };
 export type Resolved = { frames: ([number, number, number] | null)[][]; ev: RingEvent[]; ids?: number[]; firstHit?: number };
 export const RG: {
