@@ -265,8 +265,8 @@ function ringStatsHTML(name, lvl = 1, variant = '', compact = false) {
   const row = (k, ico, label, v, max, txt, d) => `<div class="rs-row ${k}"><span class="rs-l">${ico} ${label}</span><span class="rs-b"><i style="width:${Math.min(100, v / max * 100)}%"></i></span><b>${txt}</b>${compact ? '' : `<small>${d}</small>`}</div>`;
   return `<div class="rs${compact ? ' compact' : ''}">
     ${row('mass', '⚖️', rt('mass'), s.mass, M.mass, s.mass.toFixed(2), rt('massD'))}
-    ${row('pow', '💥', rt('powerS'), s.power, M.power, fmt(Math.round(s.power)), rt('powD'))}
-    ${row('size', '⭕', rt('size'), s.r, M.r, s.r, rt('sizeD'))}
+    ${row('pow', '<img class="rs-ico" src="/img/stats/puissance.png" alt="">', rt('powerS'), s.power, M.power, fmt(Math.round(s.power)), rt('powD'))}
+    ${row('size', '<img class="rs-ico" src="/img/stats/taille.png" alt="">', rt('size'), s.r, M.r, s.r, rt('sizeD'))}
   </div>`;
 }
 // Fiche d'un jeton pendant le match (le chrono s'arrête en entraînement)

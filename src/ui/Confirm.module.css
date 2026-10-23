@@ -1,5 +1,13 @@
-.text { font-size: var(--fs-lg); margin-bottom: var(--s-5); padding-right: var(--s-6); }
-.row { display: flex; gap: var(--s-3); justify-content: flex-end; }
+.text {
+  font-size: var(--fs-lg);
+  margin-bottom: var(--s-5);
+  padding-right: var(--s-6);
+}
+.row {
+  display: flex;
+  gap: var(--s-3);
+  justify-content: flex-end;
+}
 
 .input {
   width: 100%;

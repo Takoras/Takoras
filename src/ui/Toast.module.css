@@ -21,8 +21,14 @@
   animation: in var(--t-med) var(--ease-spring);
 }
 
-.bad { border-color: var(--danger); color: #ffd5dd; }
+.bad {
+  border-color: var(--danger);
+  color: #ffd5dd;
+}
 
 @keyframes in {
-  from { opacity: 0; transform: translateY(10px) scale(0.96); }
+  from {
+    opacity: 0;
+    transform: translateY(10px) scale(0.96);
+  }
 }

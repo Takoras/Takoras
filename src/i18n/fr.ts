@@ -679,7 +679,7 @@ export const fr = {
     "massD": "Plus il est lourd, plus il est dur à pousser et plus il pousse fort.",
     "powD": "La force max de son tir : jusqu’où il peut aller.",
     "sizeD": "Plus il est gros, plus il touche facilement… mais plus il est facile à toucher.",
-    "statsLegend": "⚖️ Poids : dur à pousser, pousse fort · 💥 Puissance : force du tir · ⭕ Taille : touche plus facilement, mais cible plus facile",
+    "statsLegend": "Poids : dur à pousser, pousse fort · Puissance : force du tir · Taille : touche plus facilement, mais cible plus facile",
     "t1": "Tape un de tes jetons pour le choisir.",
     "t2": "Glisse vers l’arrière pour viser. Plus tu tires loin, plus c’est fort. Regarde la trajectoire !",
     "t3": "Valide ! Ton adversaire tire en même temps que toi.",

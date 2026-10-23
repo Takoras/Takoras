@@ -27,7 +27,13 @@ export function ConfirmHost() {
     <Modal open={!!ask} onClose={() => done(false)}>
       <p className={s.text}>{ask?.text}</p>
       {ask?.typed ? (
-        <input className={s.input} value={typed} onChange={(e) => setTyped(e.target.value)} placeholder={ask.typed} aria-label={ask.typed} />
+        <input
+          className={s.input}
+          value={typed}
+          onChange={(e) => setTyped(e.target.value)}
+          placeholder={ask.typed}
+          aria-label={ask.typed}
+        />
       ) : null}
       <div className={s.row}>
         <Button onClick={() => done(false)}>{t('ui.cancel')}</Button>

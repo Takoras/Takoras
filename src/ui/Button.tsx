@@ -10,7 +10,16 @@ type Props = ButtonHTMLAttributes<HTMLButtonElement> & {
 
 // Bouton du site. Primary = l'action principale de l'écran (une seule par écran), avec l'ombre « arcade »
 // qui s'enfonce au clic. Ghost = actions secondaires. Danger = actions destructives. Gold = dépenser des pièces.
-export function Button({ variant = 'ghost', size = 'md', loading, block, className, disabled, children, ...rest }: Props) {
+export function Button({
+  variant = 'ghost',
+  size = 'md',
+  loading,
+  block,
+  className,
+  disabled,
+  children,
+  ...rest
+}: Props) {
   return (
     <button
       type="button"

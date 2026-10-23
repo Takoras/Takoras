@@ -9,14 +9,18 @@
   overflow: visible;
 }
 
-.wide { width: min(100% - 2 * var(--gutter), 720px); }
+.wide {
+  width: min(100% - 2 * var(--gutter), 720px);
+}
 
 .dialog::backdrop {
   background: rgb(5 5 10 / 72%);
   backdrop-filter: blur(4px);
 }
 
-.dialog[open] { animation: rise var(--t-med) var(--ease-out); }
+.dialog[open] {
+  animation: rise var(--t-med) var(--ease-out);
+}
 
 .card {
   position: relative;
@@ -47,8 +51,14 @@
   color: var(--muted);
 }
 
-.close:hover { background: var(--surface-2); color: var(--text); }
+.close:hover {
+  background: var(--surface-2);
+  color: var(--text);
+}
 
 @keyframes rise {
-  from { opacity: 0; transform: translateY(12px) scale(0.98); }
+  from {
+    opacity: 0;
+    transform: translateY(12px) scale(0.98);
+  }
 }

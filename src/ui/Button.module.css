@@ -11,7 +11,11 @@
   font-weight: 600;
   font-size: var(--fs-md);
   white-space: nowrap;
-  transition: transform var(--t-fast) var(--ease-out), box-shadow var(--t-fast), background var(--t-med), color var(--t-med);
+  transition:
+    transform var(--t-fast) var(--ease-out),
+    box-shadow var(--t-fast),
+    background var(--t-med),
+    color var(--t-med);
   user-select: none;
 }
 
@@ -20,9 +24,19 @@
   cursor: not-allowed;
 }
 
-.sm { min-height: 36px; padding: 0 var(--s-3); font-size: var(--fs-sm); }
-.lg { min-height: 56px; padding: 0 var(--s-8); font-size: var(--fs-lg); }
-.block { width: 100%; }
+.sm {
+  min-height: 36px;
+  padding: 0 var(--s-3);
+  font-size: var(--fs-sm);
+}
+.lg {
+  min-height: 56px;
+  padding: 0 var(--s-8);
+  font-size: var(--fs-lg);
+}
+.block {
+  width: 100%;
+}
 
 /* Ombre dure façon borne d'arcade : le bouton s'enfonce au clic */
 .primary,
@@ -44,7 +58,9 @@
   box-shadow: var(--press) var(--accent-lo);
 }
 
-.primary:not(:disabled):hover { background: var(--accent-hover); }
+.primary:not(:disabled):hover {
+  background: var(--accent-hover);
+}
 
 .danger {
   background: var(--danger-bg);
@@ -85,5 +101,7 @@
 }
 
 @keyframes spin {
-  to { transform: rotate(360deg); }
+  to {
+    transform: rotate(360deg);
+  }
 }

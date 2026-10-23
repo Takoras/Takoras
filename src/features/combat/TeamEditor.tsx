@@ -14,6 +14,7 @@ import { Modal } from '@/ui/Modal';
 import { toast } from '@/ui/toast';
 import { lvlOf, seriesList, type Group, type InvData } from '../inventory/inv';
 import { baseVariant, costOf, ownedTokens, ownKey, points, VRANK, type Owned, type Team } from './team';
+import { StatIcon } from '@/ui/StatIcon';
 import { TokenSheet } from './TokenSheet';
 import s from './Combat.module.css';
 
@@ -193,7 +194,16 @@ export function TeamEditor({
           ))}
         </div>
       </div>
-      <p className={s.legend}>{t('ring.statsLegend')}</p>
+      <p className={s.legend}>
+        {t('ring.statsLegend')
+          .split(' · ')
+          .map((part, i) => (
+            <span key={i}>
+              {i ? ' · ' : ''}
+              <StatIcon k={(['mass', 'power', 'size'] as const)[i] ?? 'mass'} /> {part}
+            </span>
+          ))}
+      </p>
       {vis.length ? (
         <ul className={s.teGrid}>
           {vis.map((o) => {

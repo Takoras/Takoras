@@ -681,7 +681,7 @@ export const en: Dict = {
     "massD": "The heavier, the harder to push and the harder it pushes.",
     "powD": "Its max shot strength: how far it can go.",
     "sizeD": "The bigger, the easier it hits… but the easier it is to hit.",
-    "statsLegend": "⚖️ Weight: hard to push, pushes hard · 💥 Power: shot strength · ⭕ Size: hits more easily, but easier to hit",
+    "statsLegend": "Weight: hard to push, pushes hard · Power: shot strength · Size: hits more easily, but easier to hit",
     "t1": "Tap one of your tokens to pick it.",
     "t2": "Drag backwards to aim. The further you pull, the harder the shot. Watch the path!",
     "t3": "Confirm! Your opponent shoots at the same time.",

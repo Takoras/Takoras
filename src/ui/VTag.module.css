@@ -14,7 +14,29 @@
   white-space: nowrap;
   -webkit-text-fill-color: currentcolor;
 }
+/* tampon de la mutation, collé au début de l'étiquette */
+.stamp {
+  display: inline-block;
+  width: 14px;
+  height: 14px;
+  margin: 0 4px 0 -4px;
+  vertical-align: -3px;
+  filter: drop-shadow(0 0 2px rgb(0 0 0 / 50%));
+}
 
-.gold { color: #3b2400; background: linear-gradient(135deg, #fef08a, #f59e0b 60%, #fde68a); box-shadow: 0 0 12px -2px rgb(250 204 21 / 80%); }
-.celeste { color: #1e1b4b; background: linear-gradient(135deg, #fff, #e0e7ff 50%, #c7d2fe); box-shadow: 0 0 14px -2px rgb(224 231 255 / 90%); }
-.ombre { color: #e9d5ff; background: #0b0614; border: 1px solid #a855f7; box-shadow: 0 0 12px -2px rgb(168 85 247 / 90%); }
+.gold {
+  color: #3b2400;
+  background: linear-gradient(135deg, #fef08a, #f59e0b 60%, #fde68a);
+  box-shadow: 0 0 12px -2px rgb(250 204 21 / 80%);
+}
+.celeste {
+  color: #1e1b4b;
+  background: linear-gradient(135deg, #fff, #e0e7ff 50%, #c7d2fe);
+  box-shadow: 0 0 14px -2px rgb(224 231 255 / 90%);
+}
+.ombre {
+  color: #e9d5ff;
+  background: #0b0614;
+  border: 1px solid #a855f7;
+  box-shadow: 0 0 12px -2px rgb(168 85 247 / 90%);
+}

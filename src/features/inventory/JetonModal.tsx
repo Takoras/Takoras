@@ -1,4 +1,5 @@
 import { useEffect, useRef, type CSSProperties, type PointerEvent, type ReactNode } from 'react';
+import { StatIcon } from '@/ui/StatIcon';
 import {
   hexRGB,
   jetonOf,
@@ -184,9 +185,9 @@ export function CombatInfo({
     rs = ringStats(name, lvl, variant);
   const fmt = (n: number) => n.toLocaleString(locale(lang));
   const rows = [
-    ['⚖️', t('ring.mass'), rs.mass, RING_MAX.mass, rs.mass.toFixed(2)],
-    ['💥', t('ring.powerS'), rs.power, RING_MAX.power, fmt(Math.round(rs.power))],
-    ['⭕', t('ring.size'), rs.r, RING_MAX.r, String(rs.r)],
+    ['mass', t('ring.mass'), rs.mass, RING_MAX.mass, rs.mass.toFixed(2)],
+    ['power', t('ring.powerS'), rs.power, RING_MAX.power, fmt(Math.round(rs.power))],
+    ['size', t('ring.size'), rs.r, RING_MAX.r, String(rs.r)],
   ] as const;
   return (
     <section
@@ -219,7 +220,7 @@ export function CombatInfo({
           {rows.map(([ico, l, v, max, txt]) => (
             <div key={l}>
               <dt>
-                {ico} {l}
+                <StatIcon k={ico} /> {l}
               </dt>
               <dd>
                 <span className={s.bar}>
