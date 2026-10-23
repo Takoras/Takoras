@@ -750,7 +750,7 @@ export const en: Dict = {
       ],
       [
         "📦 Max stock",
-        "Upgradable from 5 to 50, +1 each time: 100 coins to reach 6, 950 for 10, 4,450 for 20, 9,050 for 30, 14,500 for 40 and 20,650 for 50. You can never hold more than 50 pulls."
+        "Upgradable from 5 to 50, +1 each time: 100 coins to reach 6, 950 for 10, 4,450 for 20, 9,050 for 30, 14,500 for 40 and 20,650 for 50. Refilling over time stops at your max stock, but promo codes, refunds and the instant refill can take you above 50 pulls."
       ],
       [
         "🪙 Selling",

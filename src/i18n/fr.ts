@@ -748,7 +748,7 @@ export const fr = {
       ],
       [
         "📦 Stock max",
-        "Améliorable de 5 à 50, +1 à chaque fois : 100 pièces pour passer à 6, 950 pour 10, 4 450 pour 20, 9 050 pour 30, 14 500 pour 40 et 20 650 pour 50. On ne peut jamais avoir plus de 50 pulls en stock."
+        "Améliorable de 5 à 50, +1 à chaque fois : 100 pièces pour passer à 6, 950 pour 10, 4 450 pour 20, 9 050 pour 30, 14 500 pour 40 et 20 650 pour 50. La recharge avec le temps s’arrête à ton stock max, mais les codes promo, les remboursements et la recharge éclair peuvent te faire dépasser 50 pulls."
       ],
       [
         "🪙 Revente",
