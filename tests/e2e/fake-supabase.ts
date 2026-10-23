@@ -64,6 +64,7 @@ export async function fakeSupabase(page: Page, state: Partial<FakeState> = {}, d
     calls.push(rpc ?? url);
     const json = (body: unknown) => route.fulfill({ status: 200, contentType: 'application/json', body: JSON.stringify(body) });
     if (rpc === 'ranked_me') return json({ elo: rk.elo, games: 4, wins: 3, losses: 1, draws: 0, best_elo: 1040, tuto_done: rk.tuto, top: 2, live: match?.status === 'live' ? match.id : null, queued: false });
+    if (rpc === 'ranked_around') return json([{ pos: 1, pseudo: 'Alpha', elo: 1480, me: false }, { pos: 2, pseudo: st.pseudo, elo: rk.elo, me: true }, { pos: 3, pseudo: 'Bravo', elo: 990, me: false }]);
     if (rpc === 'ranked_tuto_done') { rk.tuto = true; return json(null); }
     if (rpc === 'ranked_top') return json([{ pseudo: 'Alpha', elo: 1480, games: 30, wins: 22 }, { pseudo: 'Testeur', elo: 1060, games: 4, wins: 3 }, { pseudo: 'Bravo', elo: 990, games: 8, wins: 3 }]);
     if (url.includes('/functions/v1/ranked')) {

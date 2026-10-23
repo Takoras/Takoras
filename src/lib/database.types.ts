@@ -247,6 +247,7 @@ export type Database = {
       my_quests: { Args: never; Returns: Json };
       profile_public: { Args: { p_pseudo: string }; Returns: Json };
       ranked_me: { Args: never; Returns: Json };
+      ranked_around: { Args: never; Returns: { pos: number; pseudo: string; elo: number; me: boolean }[] };
       ranked_tuto_done: { Args: never; Returns: undefined };
       ranked_top: { Args: { n?: number }; Returns: { pseudo: string; elo: number; games: number; wins: number }[] };
       redeem_code: { Args: { p_code: string }; Returns: Json };

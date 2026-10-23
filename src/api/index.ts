@@ -46,6 +46,7 @@ export const combatApi = {
   setDeck: (ids: number[]) => rpc('set_deck', { ids }),
   levelUp: (p_jeton: string, p_serie: string) => rpc('level_up', { p_jeton, p_serie }),
   rankedMe: () => rpc('ranked_me'),
+  rankedAround: () => rpc('ranked_around'),
   rankedTutoDone: () => rpc('ranked_tuto_done'),
   rankedTop: (n = 50) => rpc('ranked_top', { n }),
 };

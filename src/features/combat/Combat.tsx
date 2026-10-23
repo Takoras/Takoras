@@ -18,7 +18,7 @@ import { VTag } from '@/ui/VTag';
 import { lvlOf, useInventory } from '../inventory/inv';
 import { botTeam, points, useDeck, type Member } from './team';
 import { call, fetchMatch, toLocal, useRanked, watchMatch, type RankedMe } from './rankedApi';
-import { RankCard, RankRoad, SearchModal } from './Ranked';
+import { RankAround, RankCard, RankRoad, SearchModal } from './Ranked';
 import rs from './Ranked.module.css';
 import { TeamEditor } from './TeamEditor';
 import { TokenSheet } from './TokenSheet';
@@ -204,6 +204,8 @@ export default function Combat() {
         </>
       )}
       {full ? null : <small className={`muted ${s.need}`}>{t('arena.need3')}</small>}
+
+      {tutoOk ? <RankAround elo={elo} /> : null}
 
       <section className={s.team} aria-labelledby="team-t">
         <header>

@@ -5,6 +5,10 @@ import { useT } from '@/i18n/useT';
 import { sfx } from '@/engines/sound.js';
 import { Button } from '@/ui/Button';
 import { Modal } from '@/ui/Modal';
+import { Link } from 'react-router';
+import { useQuery } from '@tanstack/react-query';
+import { combatApi } from '@/api';
+import { useAuth } from '@/lib/auth';
 import { call, rankOf, ROAD, type Rank, type RankedMe } from './rankedApi';
 import s from './Ranked.module.css';
 
@@ -170,5 +174,42 @@ export function SearchModal({
         <Button onClick={onClose}>{t('arena.cancel')}</Button>
       </div>
     </Modal>
+  );
+}
+
+// Près de toi : les 2 joueurs juste devant, toi, et les 2 juste derrière (classement Elo)
+export function RankAround({ elo }: { elo: number }) {
+  const t = useT();
+  const lang = useSettings((x) => x.lang);
+  const uid = useAuth((x) => x.user?.id);
+  const name = useRankName();
+  const q = useQuery({
+    queryKey: ['ranked-around', uid, elo],
+    enabled: !!uid,
+    queryFn: () => combatApi.rankedAround(),
+  });
+  const rows = q.data ?? [];
+  if (rows.length < 2) return null;
+  return (
+    <section className={s.around} aria-labelledby="around-t">
+      <h2 id="around-t">{t('arena.around')}</h2>
+      <ol>
+        {rows.map((r) => {
+          const rk = rankOf(r.elo);
+          return (
+            <li key={r.pos} className={r.me ? s.meRow : undefined} style={{ '--rc': rk.col } as CSSProperties}>
+              <span className={s.pos}>#{r.pos}</span>
+              <RankBadge r={rk} size={22} />
+              {r.me ? <b>{r.pseudo}</b> : <Link to={`/profil/${encodeURIComponent(r.pseudo)}`}>{r.pseudo}</Link>}
+              <small>{name(rk)}</small>
+              <b className={s.aroundElo}>{r.elo.toLocaleString(locale(lang))}</b>
+            </li>
+          );
+        })}
+      </ol>
+      <Link to="/classement" className={s.aroundAll}>
+        {t('arena.aroundAll')} →
+      </Link>
+    </section>
   );
 }

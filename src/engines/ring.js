@@ -36,7 +36,7 @@ const RT = {
     },
     once: '1 fois par match', every: 'recharge {n} tours', ready: 'Prêt', used: 'Utilisé', inCd: 'dans {n} tour(s)', pick: 'Choisis un jeton',
     power: 'Pouvoir', on: 'Activé', validate: 'Valider', validated: 'Validé ✓', pass: 'Passer le tour', turn: 'Tour {n}/{m}', sudden: 'Mort subite !', foeOk: '✓ L’adversaire a validé',
-    hSel: 'Tape un de tes jetons', hAim: 'Glisse vers l’arrière pour viser (n’importe où sur l’écran)', hVal: 'Valide quand tu es prêt', hWait: 'En attente de l’adversaire…',
+    hSel: 'Tape un de tes jetons', hAim: 'Glisse vers l’arrière pour viser : tu peux partir de n’importe où sur l’écran', hVal: 'Valide quand tu es prêt', hWait: 'En attente de l’adversaire…',
     reveal: 'Feu !', out: 'Éjecté !', win: 'Victoire !', lose: 'Défaite…', draw: 'Égalité', again: 'Rejouer', back: 'Retour', quit: 'Abandonner le match ?', you: 'Toi', bot: 'Robot',
     why: { forfeit: 'Abandon', afk: 'Absent 3 tours de suite', out: 'Tous ses jetons sont sortis du ring', count: 'Plus de jetons au dernier tour', turns: 'Plus de jetons restants à la fin', center: 'Jetons plus proches du centre', draw: 'Personne ne gagne' },
     turns: '{n} tours', mass: 'Poids', powerS: 'Puissance', size: 'Taille', koS: 'Éjecté',
@@ -74,7 +74,7 @@ const RT = {
     },
     once: 'once per match', every: '{n}-turn cooldown', ready: 'Ready', used: 'Used', inCd: 'in {n} turn(s)', pick: 'Pick a token',
     power: 'Power', on: 'On', validate: 'Confirm', validated: 'Confirmed ✓', pass: 'Skip turn', turn: 'Turn {n}/{m}', sudden: 'Sudden death!', foeOk: '✓ Opponent is ready',
-    hSel: 'Tap one of your tokens', hAim: 'Drag backwards to aim (anywhere on the screen)', hVal: 'Confirm when you’re ready', hWait: 'Waiting for the opponent…',
+    hSel: 'Tap one of your tokens', hAim: 'Drag backwards to aim: you can start anywhere on the screen', hVal: 'Confirm when you’re ready', hWait: 'Waiting for the opponent…',
     reveal: 'Go!', out: 'Out!', win: 'Victory!', lose: 'Defeat…', draw: 'Draw', again: 'Play again', back: 'Back', quit: 'Forfeit the match?', you: 'You', bot: 'Bot',
     why: { forfeit: 'Forfeit', afk: 'Away for 3 turns in a row', out: 'All their tokens left the ring', count: 'More tokens on the last turn', turns: 'More tokens left at the end', center: 'Tokens closer to the center', draw: 'Nobody wins' },
     turns: '{n} turns', mass: 'Weight', powerS: 'Power', size: 'Size', koS: 'Knocked out',
@@ -309,7 +309,7 @@ function rgDown(e) {
 function rgMove(e) {
   const d = RNG.drag; if (!d || e.pointerId !== d.id || RNG.locked) return;
   const [px, py] = rgPt(e), dx = d.x - px, dy = d.y - py, L = Math.hypot(dx, dy);
-  const full = Math.min(170, RNG.view.size * .42);
+  const full = Math.min(120, RNG.view.size * .3); // puissance max avec un geste court (jeton près du bord du téléphone)
   if (L < 8) return;
   d.moved = true;
   const f = Math.round(Math.min(1, L / full) * 100) / 100;

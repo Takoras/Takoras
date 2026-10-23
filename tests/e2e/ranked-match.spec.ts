@@ -71,6 +71,11 @@ test('classé : rang, route des rangs, recherche puis match en ligne jusqu’à 
   await expect(page.getByText('Fer 1', { exact: true }).first()).toBeVisible();
   await expect(page.getByText(/Encore 50 Elo pour Fer 2/)).toBeVisible();
   await expect(page.getByRole('heading', { name: 'Route des rangs' })).toBeVisible();
+  // près de toi au classement : devant / toi / derrière
+  const around = page.getByRole('region', { name: 'Près de toi au classement' });
+  await expect(around.getByText('#1')).toBeVisible();
+  await expect(around.getByRole('link', { name: 'Alpha' })).toBeVisible();
+  await expect(around.getByText('Bravo')).toBeVisible();
   await expect(page.locator('[aria-current="step"]')).toContainText('Fer 1');
   await expect(page.getByText('Légende', { exact: true })).toBeAttached();
   if (process.env.SHOT) await page.screenshot({ path: `${process.env.SHOT}/combat-ranked.png`, fullPage: true });

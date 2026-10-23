@@ -416,6 +416,8 @@ export const en: Dict = {
     "fr_need": "Log in to add friends, chat and challenge them."
   },
   "arena": {
+    "around": "Around you on the leaderboard",
+    "aroundAll": "Full Elo leaderboard",
     "r_iron": "Iron",
     "rankName": "{r} {d}",
     "eloTop": "#{n} on the leaderboard",
@@ -729,7 +731,7 @@ export const en: Dict = {
       ],
       [
         "🧪 Potions stack",
-        "Each potion adds its bonus: ×1.3 = +0.3, ×2 = +1, ×5 = +4. So ×2 + ×1.3 = ×2.3, and ×2 + ×1.3 + ×5 = ×6.3. Drinking a potion you already have extends its duration (two ×2 = ×2 for 6 pulls) instead of adding its bonus. Each potion counts its own pulls. Total luck is capped at ×500."
+        "Each potion adds its bonus: ×1.3 = +0.3, ×2 = +1, ×5 = +4. So ×2 + ×1.3 = ×2.3, and ×2 + ×1.3 + ×5 = ×6.3. Drinking a potion you already have extends its duration (two ×2 = ×2 for 6 pulls) instead of adding its bonus. Each potion counts its own pulls. Total luck is capped at ×1000."
       ],
       [
         "⏳ Recharge",

@@ -414,6 +414,8 @@ export const fr = {
     "fr_need": "Connecte-toi pour ajouter des amis, discuter et les défier."
   },
   "arena": {
+    "around": "Près de toi au classement",
+    "aroundAll": "Le classement Elo complet",
     "r_iron": "Fer",
     "rankName": "{r} {d}",
     "eloTop": "#{n} du classement",
@@ -727,7 +729,7 @@ export const fr = {
       ],
       [
         "🧪 Les potions se cumulent",
-        "Chaque potion ajoute son bonus : ×1,3 = +0,3, ×2 = +1, ×5 = +4. Donc ×2 + ×1,3 = ×2,3, et ×2 + ×1,3 + ×5 = ×6,3. Boire une potion que tu as déjà rallonge sa durée (deux ×2 = ×2 pendant 6 pulls) au lieu d’ajouter son bonus. Chaque potion compte ses pulls de son côté. La chance totale est plafonnée à ×500."
+        "Chaque potion ajoute son bonus : ×1,3 = +0,3, ×2 = +1, ×5 = +4. Donc ×2 + ×1,3 = ×2,3, et ×2 + ×1,3 + ×5 = ×6,3. Boire une potion que tu as déjà rallonge sa durée (deux ×2 = ×2 pendant 6 pulls) au lieu d’ajouter son bonus. Chaque potion compte ses pulls de son côté. La chance totale est plafonnée à ×1000."
       ],
       [
         "⏳ Recharge",
