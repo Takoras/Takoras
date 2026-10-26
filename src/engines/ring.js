@@ -475,12 +475,28 @@ function rgReveal(srv) {
     sfx.whooshOut?.();
   }, 700);
 }
+// Zoom « punch » vers un choc : monte en 60 ms, redescend en douceur (350 ms). Rien si les effets sont réduits.
+function rgPunch(x, y, a) {
+  if (reducedFx()) return;
+  const z = RNG.zoom, now = performance.now();
+  if (z && now - z.t0 < 120 && z.a >= a) return; // un plus gros zoom est déjà en cours
+  RNG.zoom = { x, y, a, t0: now };
+}
+function rgZoomK() {
+  const z = RNG.zoom; if (!z) return 1;
+  const e = (performance.now() - z.t0) / 1000;
+  if (e > .41) { RNG.zoom = null; return 1; }
+  const env = e < .06 ? e / .06 : 1 - ((e - .06) / .35) ** 2 * (3 - 2 * (e - .06) / .35) * 1; // montée rapide, descente lissée
+  return 1 + z.a * Math.max(0, Math.min(1, env));
+}
 function rgEvent(e) {
   const P = RNG.play, body = id => P.bodies.find(b => b.id === id);
   const at = (x, y) => w2s(x, y);
   if (e.t === 'hit') {
     const [x, y] = at(e.x, e.y), big = e.j > RCFG.BIG_HIT;
     rgSparks(x, y, big ? 22 : 9, big ? '#fde68a' : '#fff', big ? 4 : 2.5);
+    rgPunch(x, y, Math.min(.07, .02 + e.j / 40000)); // petit zoom vers le choc
+    if (!big) RNG.shake = Math.max(RNG.shake, Math.min(5, 1.5 + e.j / 600));
     if (big) { RNG.shake = Math.min(14, 6 + e.j / 400); P.slow = RCFG.SLOWMO_S; sfx.impact?.(); } else sfx.click?.();
   }
   if (e.t === 'wall') {
@@ -510,9 +526,9 @@ function rgFlashCol(col) {
   const f = document.createElement('div'); f.className = 'rg-flash'; f.style.background = col; RNG.el.appendChild(f);
   f.animate([{ opacity: .35 }, { opacity: 0 }], { duration: 380 }); setTimeout(() => f.remove(), 390);
 }
-function rgBanner(text, col, small, ms = 900) {
+function rgBanner(text, col, small, ms = 900, cls = '') {
   const b = RNG.el?.querySelector('#rg-banner'); if (!b) return;
-  b.innerHTML = text; b.style.setProperty('--c', col); b.className = 'rg-banner on' + (small ? ' sm' : '');
+  b.innerHTML = text; b.style.setProperty('--c', col); b.className = 'rg-banner on' + (small ? ' sm' : '') + (cls ? ' ' + cls : '');
   b.getAnimations().forEach(a => a.cancel());
   b.animate([{ opacity: 0, transform: 'translate(-50%, -50%) scale(1.7)' }, { opacity: 1, transform: 'translate(-50%, -50%) scale(1)', offset: .2 }, { opacity: 1, offset: .75 }, { opacity: 0, transform: 'translate(-50%, -50%) scale(.95)' }], { duration: ms, easing: 'ease-out', fill: 'forwards' });
 }
@@ -693,11 +709,13 @@ function rgDraw(dt) {
   const lo = RNG.lo.getContext('2d'), hi = RNG.hi.getContext('2d');
   // tremblement de l'écran (le même décalage pour toutes les couches)
   let sx0 = 0, sy0 = 0;
-  if (RNG.shake > 0) { sx0 = (Math.random() - .5) * RNG.shake; sy0 = (Math.random() - .5) * RNG.shake; RNG.shake = Math.max(0, RNG.shake - dt * 40); }
+  // tremblement doux : une oscillation qui s'amortit (au lieu de sauts au hasard)
+  if (RNG.shake > 0) { sx0 = Math.sin(t * 57) * RNG.shake * .5; sy0 = Math.cos(t * 43) * RNG.shake * .5; RNG.shake = Math.max(0, RNG.shake * Math.exp(-dt * 7) - dt * 4); }
   RNG.shakeX = sx0; RNG.shakeY = sy0;
   M.setTransform(V.dpr, 0, 0, V.dpr, 0, 0); M.clearRect(0, 0, V.size, V.size); M.translate(sx0, sy0);
   for (const L of [lo, hi]) { L.setTransform(1 / V.px, 0, 0, 1 / V.px, 0, 0); L.clearRect(0, 0, V.size, V.size); L.translate(sx0, sy0); }
-  const blit = L => { M.save(); M.setTransform(V.dpr, 0, 0, V.dpr, 0, 0); M.imageSmoothingEnabled = false; M.drawImage(L.canvas, 0, 0, L.canvas.width * V.px, L.canvas.height * V.px); M.restore(); };
+  const zk = rgZoomK(), zx = RNG.zoom?.x ?? 0, zy = RNG.zoom?.y ?? 0;
+  const blit = L => { M.save(); M.setTransform(V.dpr * zk, 0, 0, V.dpr * zk, V.dpr * zx * (1 - zk), V.dpr * zy * (1 - zk)); M.imageSmoothingEnabled = false; M.drawImage(L.canvas, 0, 0, L.canvas.width * V.px, L.canvas.height * V.px); M.restore(); };
 
   // ----- Couche basse (pixel) : sol, effets au sol, traînées, repères de camp, auras
   let c = lo;
@@ -1054,7 +1072,8 @@ const RFX = (() => {
     intro = { e, b, t: 0 };
     RSND.charge(); setTimeout(() => RSND[e.pw]?.(), 280);
     const [x, y] = w2s(b.x, b.y), col = PW_COL[e.pw];
-    rgBanner(`<small>${b.side !== ME() ? '⚠️ ' : ''}${jnH(b.name)}</small>✦ ${rtL().pw[e.pw][0]}`, col, false, 950);
+    // bandeau d'ult : bande en biais à la couleur du pouvoir, portrait du jeton, reflet qui balaie (même durée qu'avant)
+    rgBanner(`<img class="px${vCls(b.variant)}" src="${texOf(jetonOf(b.name))}" alt=""><span><small>${b.side !== ME() ? '⚠️ ' : ''}${jnH(b.name)}</small>${rtL().pw[e.pw][0]}</span>`, col, false, 950, 'ult');
     burst(x, y, 30, col, 3.5);
     if (e.pw === 'roots') vines = { side: b.side, t: 0, flash: [] };
     if (e.pw === 'anchor') { RNG.shake = 12; for (let k = 0; k < 24; k++) { const a = k / 24 * 6.283; part({ x, y, vx: Math.cos(a) * 3.2, vy: Math.sin(a) * 3.2, col: '#93c5fd', size: 4 }); } }
