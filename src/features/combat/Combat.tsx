@@ -16,6 +16,7 @@ import { Button } from '@/ui/Button';
 import { toast } from '@/ui/toast';
 import { VTag } from '@/ui/VTag';
 import { lvlOf, useInventory } from '../inventory/inv';
+import { CombatDex, EloTop } from './CombatSide';
 import { botTeam, useDeck, type Member } from './team';
 import { call, fetchMatch, toLocal, useRanked, watchMatch, type RankedMe } from './rankedApi';
 import { RankAround, RankCard, RankRoad, SearchModal } from './Ranked';
@@ -167,103 +168,109 @@ export default function Combat() {
 
   return (
     <section className={s.page}>
-      <RankCard me={rk} />
-      <h1 className="visually-hidden">{t('arena.title')}</h1>
-      {ranked.isPending ? null : !tutoOk ? (
-        <div className={rs.lock}>
-          <h2>🔒 {t('arena.tutoLock')}</h2>
-          <p className="muted">{t('arena.tutoLockTxt')}</p>
-          <Button variant="primary" onClick={() => void firstTuto()}>
-            {t('arena.tutoStart')}
-          </Button>
-        </div>
-      ) : (
-        <>
-          {rk?.live ? (
-            <button type="button" className={s.play} onClick={() => void enterMatch(rk.live ?? '')}>
-              <b>⚔️ {t('arena.resume')}</b>
-            </button>
-          ) : (
-            <button
-              type="button"
-              className={s.play}
-              disabled={!full}
+      <div className={s.colMain}>
+        <RankCard me={rk} />
+        <h1 className="visually-hidden">{t('arena.title')}</h1>
+        {ranked.isPending ? null : !tutoOk ? (
+          <div className={rs.lock}>
+            <h2>🔒 {t('arena.tutoLock')}</h2>
+            <p className="muted">{t('arena.tutoLockTxt')}</p>
+            <Button variant="primary" onClick={() => void firstTuto()}>
+              {t('arena.tutoStart')}
+            </Button>
+          </div>
+        ) : (
+          <>
+            {rk?.live ? (
+              <button type="button" className={s.play} onClick={() => void enterMatch(rk.live ?? '')}>
+                <b>⚔️ {t('arena.resume')}</b>
+              </button>
+            ) : (
+              <button
+                type="button"
+                className={s.play}
+                disabled={!full}
+                onClick={() => {
+                  sfx.click();
+                  setSearching(true);
+                }}
+              >
+                <b>⚔️ {t('arena.play')}</b>
+                <small>{t('arena.playRanked')}</small>
+              </button>
+            )}
+            <Button block disabled={!full} onClick={() => void train()}>
+              🤖 {t('arena.train')}
+            </Button>
+          </>
+        )}
+        {full ? null : <small className={`muted ${s.need}`}>{t('arena.need3')}</small>}
+
+        {tutoOk ? <RankAround elo={elo} /> : null}
+
+        <section className={s.team} aria-labelledby="team-t">
+          <header>
+            <h2 id="team-t">{t('arena.team')}</h2>
+            <Button
+              size="sm"
               onClick={() => {
                 sfx.click();
-                setSearching(true);
+                setEditing(true);
               }}
             >
-              <b>⚔️ {t('arena.play')}</b>
-              <small>{t('arena.playRanked')}</small>
-            </button>
-          )}
-          <Button block disabled={!full} onClick={() => void train()}>
-            🤖 {t('arena.train')}
+              ✏️ {t('arena.edit')}
+            </Button>
+          </header>
+          <ul>
+            {team.map((u, i) =>
+              u ? (
+                <li key={i}>
+                  <TeamCard
+                    u={u}
+                    pos={slots[i] ?? ''}
+                    lvl={lvl(u)}
+                    onOpen={() => {
+                      sfx.click();
+                      setSheet(u);
+                    }}
+                  />
+                </li>
+              ) : (
+                <li key={i}>
+                  <button
+                    type="button"
+                    className={`${s.slot} ${s.emptySlot}`}
+                    onClick={() => {
+                      sfx.click();
+                      setEditing(true);
+                    }}
+                  >
+                    <span className={s.pos}>{slots[i]}</span>
+                    <b aria-hidden>＋</b>
+                    <small>{t('arena.pick')}</small>
+                  </button>
+                </li>
+              ),
+            )}
+          </ul>
+        </section>
+
+        <details className={s.help}>
+          <summary>{t('arena.howTitle')}</summary>
+          <p className="muted">
+            <Rich text={t('arena.howText')} />
+          </p>
+          <Button size="sm" onClick={() => void playTuto()}>
+            🎓 {t('arena.tuto')}
           </Button>
-        </>
-      )}
-      {full ? null : <small className={`muted ${s.need}`}>{t('arena.need3')}</small>}
+        </details>
 
-      {tutoOk ? <RankAround elo={elo} /> : null}
-
-      <section className={s.team} aria-labelledby="team-t">
-        <header>
-          <h2 id="team-t">{t('arena.team')}</h2>
-          <Button
-            size="sm"
-            onClick={() => {
-              sfx.click();
-              setEditing(true);
-            }}
-          >
-            ✏️ {t('arena.edit')}
-          </Button>
-        </header>
-        <ul>
-          {team.map((u, i) =>
-            u ? (
-              <li key={i}>
-                <TeamCard
-                  u={u}
-                  pos={slots[i] ?? ''}
-                  lvl={lvl(u)}
-                  onOpen={() => {
-                    sfx.click();
-                    setSheet(u);
-                  }}
-                />
-              </li>
-            ) : (
-              <li key={i}>
-                <button
-                  type="button"
-                  className={`${s.slot} ${s.emptySlot}`}
-                  onClick={() => {
-                    sfx.click();
-                    setEditing(true);
-                  }}
-                >
-                  <span className={s.pos}>{slots[i]}</span>
-                  <b aria-hidden>＋</b>
-                  <small>{t('arena.pick')}</small>
-                </button>
-              </li>
-            ),
-          )}
-        </ul>
-      </section>
-
-      <details className={s.help}>
-        <summary>{t('arena.howTitle')}</summary>
-        <p className="muted">
-          <Rich text={t('arena.howText')} />
-        </p>
-        <Button size="sm" onClick={() => void playTuto()}>
-          🎓 {t('arena.tuto')}
-        </Button>
-      </details>
-
-      <RankRoad elo={elo} />
+        <RankRoad elo={elo} />
+      </div>
+      <aside className={s.colSide}>
+        <EloTop />
+        <CombatDex inv={inv.data} />
+      </aside>
 
       {searching ? (
         <SearchModal
