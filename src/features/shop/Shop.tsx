@@ -20,7 +20,7 @@ type Item = ShopItem & { price: number; base_price: number | null; stock: number
 type ShopData = { items: Item[]; reset_in: number };
 const CATS: [string, Key][] = [
   ['potion', 'ui.cat_potions'],
-  ['util', 'ui.cat_utils'],
+  ['util', 'ui.cat_pulls'],
   ['banner', 'ui.cat_cosm'],
 ];
 const catOf = (it: Item) =>
@@ -129,7 +129,7 @@ export default function Shop() {
       </header>
       {user ? <Effects /> : null}
       <div className={s.cats} role="group" aria-label={t('ui.shop_title')}>
-        {[['all', 'ui.all'] as [string, Key], ...CATS].map(([k, l]) => (
+        {[['all', 'ui.all'] as [string, Key], ...CATS, ['packs', 'ui.cat_packs'] as [string, Key]].map(([k, l]) => (
           <button key={k} type="button" aria-pressed={cat === k} onClick={() => setCat(k)}>
             {t(l)}
           </button>
@@ -153,6 +153,7 @@ export default function Shop() {
           </ul>
         </section>
       ))}
+      {cat === 'all' || cat === 'packs' ? <Packs /> : null}
       {user ? <Redeem items={shop.data.items} /> : <p className="muted">{t('ui.acc_need')}</p>}
     </section>
   );
@@ -187,15 +188,7 @@ function Card({
       className={`${s.card} ${out ? s.out : ''} ${it.kind === 'potion' && (it.data.mult ?? 0) >= 10 ? s.epic : ''}`}
       style={{ '--g': glowOf(it) } as React.CSSProperties}
     >
-      <span className={`${s.stock} ${it.owned ? s.ok : stockLeft ? '' : s.none}`}>
-        {it.owned ? t('ui.unlocked_b') : stockLeft ? t('ui.stock_n', { n: stockLeft }) : t('ui.sold_out')}
-      </span>
-      {changed ? (
-        <span className={`${s.deal} ${pct > 0 ? s.up : ''}`}>
-          {pct > 0 ? '+' : ''}
-          {pct}%
-        </span>
-      ) : null}
+      {/* gauche : le visuel ; droite : le nom en haut, stock + prix + Acheter en bas (carte large façon « Zenith Crate ») */}
       <div className={s.icon}>
         <img
           className={`px ${img.wide ? s.banner : ''}`}
@@ -204,27 +197,97 @@ function Card({
           style={img.tint ? ({ '--df': img.tint } as React.CSSProperties) : undefined}
         />
       </div>
-      <h3>{name}</h3>
-      <p className="muted">{desc}</p>
-      {it.owned ? (
-        <Button disabled block>
-          {t('ui.owned')}
-        </Button>
-      ) : out ? (
-        <Button disabled block>
-          {t('ui.back_in')} {hms(left)}
-        </Button>
-      ) : (
-        <Button
-          variant={coins >= it.price ? 'primary' : 'ghost'}
-          block
-          disabled={!logged}
-          onClick={() => ref.current && onBuy(it, ref.current)}
-        >
-          {t('ui.buy')} · {changed && it.base_price ? <s>{n(it.base_price)}</s> : null} {n(it.price)} <Coin />
-        </Button>
-      )}
+      <div className={s.body}>
+        <div>
+          <h3>{name}</h3>
+          <p className="muted">{desc}</p>
+        </div>
+        <div className={s.foot}>
+          <span className={s.meta}>
+            <span className={`${s.stock} ${it.owned ? s.ok : stockLeft ? '' : s.none}`}>
+              {it.owned ? t('ui.unlocked_b') : stockLeft ? t('ui.stock_n', { n: stockLeft }) : t('ui.sold_out')}
+            </span>
+            <b className={s.price}>
+              {changed && it.base_price ? <s>{n(it.base_price)}</s> : null} {n(it.price)} <Coin />
+              {changed ? (
+                <span className={`${s.deal} ${pct > 0 ? s.up : ''}`}>
+                  {pct > 0 ? '+' : ''}
+                  {pct}%
+                </span>
+              ) : null}
+            </b>
+          </span>
+          {it.owned ? (
+            <Button size="sm" disabled>
+              {t('ui.owned')}
+            </Button>
+          ) : out ? (
+            <Button size="sm" disabled>
+              {hms(left)}
+            </Button>
+          ) : (
+            <Button
+              size="sm"
+              variant={coins >= it.price ? 'primary' : 'ghost'}
+              disabled={!logged}
+              aria-label={`${t('ui.buy')} · ${name} · ${n(it.price)}`}
+              onClick={() => ref.current && onBuy(it, ref.current)}
+            >
+              {t('ui.buy')}
+            </Button>
+          )}
+        </div>
+      </div>
     </li>
+  );
+}
+
+// Packs en euros : seulement la vitrine pour l'instant (aucun paiement réel). Contenu connu à l'avance, jamais de hasard
+// payant (règles UE sur les monnaies virtuelles, loot boxes) : voir docs/achats.md avant d'activer quoi que ce soit.
+const PACKS: { id: string; eur: number; img: string; coins?: number; bonus?: number }[] = [
+  { id: 'coins_s', eur: 0.99, img: '/img/piece.png', coins: 1200 },
+  { id: 'coins_m', eur: 4.99, img: '/img/piece.png', coins: 6500, bonus: 8 },
+  { id: 'coins_l', eur: 9.99, img: '/img/piece.png', coins: 14000, bonus: 16 },
+  { id: 'potions', eur: 2.99, img: '/img/potions/chance-5.png' },
+  { id: 'starter', eur: 1.99, img: '/img/piece.png', coins: 3000 },
+  { id: 'pass', eur: 5, img: '/img/logo.png' },
+];
+function Packs() {
+  const t = useT();
+  const lang = useSettings((x) => x.lang);
+  const eur = (v: number) => v.toLocaleString(locale(lang), { style: 'currency', currency: 'EUR' });
+  return (
+    <section aria-labelledby="cat-packs">
+      <h2 id="cat-packs" className={s.h2}>
+        {t('ui.cat_packs')} <small className="muted">{t('ui.packs_soon')}</small>
+      </h2>
+      <ul className={s.grid}>
+        {PACKS.map((p) => (
+          <li key={p.id} className={`${s.card} ${s.pack}`} style={{ '--g': '249, 115, 22' } as React.CSSProperties}>
+            <div className={s.icon}>
+              <img className="px" src={p.img} alt="" />
+            </div>
+            <div className={s.body}>
+              <div>
+                <h3>{t(`ui.pk_${p.id}` as 'ui.pk_coins_s')}</h3>
+                <p className="muted">
+                  {t(`ui.pk_${p.id}_d` as 'ui.pk_coins_s_d', {
+                    n: (p.coins ?? 0).toLocaleString(locale(lang)),
+                    b: p.bonus ?? 0,
+                  })}
+                </p>
+              </div>
+              <div className={s.foot}>
+                <b className={s.price}>{eur(p.eur)}</b>
+                <Button size="sm" disabled title={t('ui.packs_soon')}>
+                  {t('ui.pk_soon')}
+                </Button>
+              </div>
+            </div>
+          </li>
+        ))}
+      </ul>
+    </section>
   );
 }
 

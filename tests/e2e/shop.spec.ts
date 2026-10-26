@@ -8,7 +8,7 @@ test('boutique : catégories, stock, achat, prix modifié, code promo', async ({
   await expect(page.getByText('+20%')).toBeVisible(); // potion ×10 plus chère que d'habitude
   await expect(page.getByText('Épuisé').first()).toBeVisible(); // sablier : 2/2 achetés
   // achat d'une potion ×1,3
-  await page.getByRole('button', { name: /Acheter · 300/ }).click();
+  await page.getByRole('button', { name: /Acheter · .* · 300$/ }).click();
   await expect(page.getByLabel('Solde')).toContainText('4 700');
   // filtre « Cosmétiques »
   await page.getByRole('button', { name: 'Cosmétiques' }).click();
