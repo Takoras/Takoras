@@ -15,10 +15,8 @@
   -webkit-text-fill-color: currentcolor;
 }
 /* tampon de la mutation, collé au début de l'étiquette */
-.stamp {
-  display: inline-block;
-  width: 14px;
-  height: 14px;
+.stampBox {
+  display: inline-flex;
   margin: 0 4px 0 -4px;
   vertical-align: -3px;
   filter: drop-shadow(0 0 2px rgb(0 0 0 / 50%));

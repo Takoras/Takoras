@@ -1,19 +1,6 @@
 import { useEffect, useRef, type CSSProperties, type PointerEvent, type ReactNode } from 'react';
 import { StatIcon } from '@/ui/StatIcon';
-import {
-  hexRGB,
-  jetonOf,
-  MYSTERE,
-  sellValue,
-  texOf,
-  texScale,
-  tierCol,
-  tierKey,
-  type Variant,
-  VARIANTS,
-  vImg,
-  vOdds,
-} from '@/data/jetons';
+import { hexRGB, jetonOf, MYSTERE, sellValue, texOf, texScale, tierCol, tierKey, vImg, vOdds } from '@/data/jetons';
 import { ROLES, roleOf, LEVEL_MAX, powerInfo, RING_MAX, ringStats } from '@/data/kit';
 import { statsOf, STAT_MAX } from '@/engines/env';
 import { useJn } from '@/lib/names';
@@ -85,7 +72,14 @@ export function JetonModal({
   return (
     <Modal open={!!name} onClose={onClose} wide>
       {name ? (
-        <div className={s.jm} style={{ '--g': hexRGB(j.glow), '--tier': tierCol(tier) } as CSSProperties}>
+        <div
+          className={s.jm}
+          style={
+            (locked
+              ? { '--g': '113, 113, 122', '--tier': 'var(--muted)' }
+              : { '--g': hexRGB(j.glow), '--tier': tierCol(tier) }) as CSSProperties
+          }
+        >
           <header className={s.jmHero}>
             <div
               ref={coin}
@@ -105,57 +99,54 @@ export function JetonModal({
               </b>
             ) : null}
             <div className={s.jmId}>
-              <span className={s.tier}>{t(`ui.${tier}`)}</span>
+              <span className={s.tier}>{locked ? '???' : t(`ui.${tier}`)}</span>
               <h2>
                 {locked ? '???' : jn(j.name)} <VTag v={variant} />
               </h2>
-              <p className={s.odds}>
-                1/{fmt(vOdds(j.odds, variant))}
-                {variant ? (
-                  <small className="muted">
-                    {' '}
-                    (1/{fmt(j.odds)} × {t(`ui.v_${variant as Variant}`)} 1/{fmt(VARIANTS[variant as Variant].odds)})
-                  </small>
-                ) : null}
-              </p>
+              {/* une seule chance combinée (jeton × mutation), ex. 1/1 200, jamais « 1/60 × 1/20 » */}
+              <p className={s.odds}>{locked ? '1/?' : `1/${fmt(vOdds(j.odds, variant))}`}</p>
             </div>
           </header>
-          <div className={s.jmBody}>
-            <dl className={s.facts}>
-              <div>
-                <dt>{t('ui.power')}</dt>
-                <dd className={s.pow}>{fmt(st.power)}</dd>
-              </div>
-              <div>
-                <dt>{t('arena.lvl')}</dt>
-                <dd>
-                  {st.lvl}
-                  <small>/{LEVEL_MAX}</small>
-                </dd>
-              </div>
-              <div>
-                <dt>{t('ui.sell_value')}</dt>
-                <dd>
-                  {fmt(sellValue(j.odds, variant))}{' '}
-                  <img className={`px ${s.coin}`} src="/img/piece.png" alt="" width={16} height={16} />
-                </dd>
-              </div>
-            </dl>
-            <dl className={s.stats}>
-              {(['s_mass', 's_pow', 's_size'] as const).map((k) => (
-                <div key={k}>
-                  <dt className="muted">{t(`ui.${k}`)}</dt>
+          {locked ? (
+            <p className="muted">{t('ui.bst_unknown')}</p>
+          ) : (
+            <div className={s.jmBody}>
+              <dl className={s.facts}>
+                <div>
+                  <dt>{t('ui.power')}</dt>
+                  <dd className={s.pow}>{fmt(st.power)}</dd>
+                </div>
+                <div>
+                  <dt>{t('arena.lvl')}</dt>
                   <dd>
-                    <span className={s.bar}>
-                      <i style={{ width: `${Math.min(100, (st[k] / STAT_MAX[k]) * 100)}%` }} />
-                    </span>
-                    <b>{st[k]}</b>
+                    {st.lvl}
+                    <small>/{LEVEL_MAX}</small>
                   </dd>
                 </div>
-              ))}
-            </dl>
-            {children}
-          </div>
+                <div>
+                  <dt>{t('ui.sell_value')}</dt>
+                  <dd>
+                    {fmt(sellValue(j.odds, variant))}{' '}
+                    <img className={`px ${s.coin}`} src="/img/piece.png" alt="" width={16} height={16} />
+                  </dd>
+                </div>
+              </dl>
+              <dl className={s.stats}>
+                {(['s_mass', 's_pow', 's_size'] as const).map((k) => (
+                  <div key={k}>
+                    <dt className="muted">{t(`ui.${k}`)}</dt>
+                    <dd>
+                      <span className={s.bar}>
+                        <i style={{ width: `${Math.min(100, (st[k] / STAT_MAX[k]) * 100)}%` }} />
+                      </span>
+                      <b>{st[k]}</b>
+                    </dd>
+                  </div>
+                ))}
+              </dl>
+              {children}
+            </div>
+          )}
         </div>
       ) : null}
     </Modal>

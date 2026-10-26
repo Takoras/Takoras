@@ -1,0 +1,18 @@
+.stamp {
+  display: inline-block;
+  flex: none;
+  background: center / contain no-repeat;
+  vertical-align: -0.2em;
+}
+.xs {
+  width: 16px;
+  height: 16px;
+}
+.sm {
+  width: 20px;
+  height: 20px;
+}
+.md {
+  width: 28px;
+  height: 28px;
+}

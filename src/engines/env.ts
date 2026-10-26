@@ -31,7 +31,7 @@ export const jnH = (name: string) => esc(jn(name));
 
 // Variantes : classe CSS et petite étiquette
 export const vCls = (v: string) => (v in VARIANTS ? ' v-' + v : '');
-export const vTag = (v: string) => (v in VARIANTS ? `<span class="vtag v-${v}"><img class="vstamp" src="/img/stamps/${v}.png" alt="">${esc(t('v_' + v))}</span>` : '');
+export const vTag = (v: string) => (v in VARIANTS ? `<span class="vtag v-${v}"><i class="vstamp" style="background-image:url(/img/stamps/${v}.png)" aria-hidden="true"></i>${esc(t('v_' + v))}</span>` : '');
 
 // ---------- Pour le moteur d'ouverture (opening + transitions de l'ancien site)
 import { sb } from '@/lib/supabase';

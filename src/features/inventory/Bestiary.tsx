@@ -423,6 +423,8 @@ function CardView({
     n = g?.ids.length ?? 0,
     locked = !!g && !g.free.length;
   const tier = tierKey(j.odds);
+  // jamais trouvé : mystère total (fond gris neutre, pas de numéro, pas de rareté, pas de nom)
+  const known = !!g || c.seen;
   const badge = g?.deck
     ? ['⚔️', t('ui.in_deck')]
     : g?.shown
@@ -434,7 +436,7 @@ function CardView({
     <li
       data-key={c.j.name}
       data-sig={`${n}|${locked}|${g?.deck ?? 0}|${g?.shown ?? 0}`}
-      style={{ '--g': hexRGB(j.glow) } as CSSProperties}
+      style={{ '--g': known ? hexRGB(j.glow) : '113, 113, 122' } as CSSProperties}
       className={[s.card, !g && (c.seen ? s.gone : s.unk), q && s.sel, locked && s.locked].filter(Boolean).join(' ')}
     >
       <button
@@ -443,7 +445,7 @@ function CardView({
         onClick={() => onTap(c)}
         aria-pressed={selecting && g ? q > 0 : undefined}
       >
-        <span className={s.num}>#{String(c.num).padStart(2, '0')}</span>
+        <span className={s.num}>#{known ? String(c.num).padStart(2, '0') : '?'}</span>
         {g ? <span className={s.count}>×{n}</span> : null}
         {badge ? (
           <span className={s.badge} title={badge[1]}>
@@ -452,10 +454,14 @@ function CardView({
         ) : null}
         <img className={g || c.seen ? vImg(vtab) : 'px'} src={g || c.seen ? texOf(j) : MYSTERE} alt="" />
         <b>{g || c.seen ? jn(j.name) : '???'}</b>
-        <small>
-          <span style={{ color: tierCol(tier) }}>1/{fmt(vOdds(j.odds, vtab))}</span>
-          {g ? ` · ⚡${fmt(statsOf(j.name, j.odds, vtab, lvl).power)}` : c.seen ? ' · ×0' : ''}
-        </small>
+        {known ? (
+          <small>
+            <span style={{ color: tierCol(tier) }}>1/{fmt(vOdds(j.odds, vtab))}</span>
+            {g ? ` · ⚡${fmt(statsOf(j.name, j.odds, vtab, lvl).power)}` : ' · ×0'}
+          </small>
+        ) : (
+          <small>?</small>
+        )}
       </button>
       {selecting && g && g.free.length ? (
         <div className={s.step}>
