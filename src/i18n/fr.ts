@@ -561,6 +561,7 @@ export const fr = {
     stSpd: 'Vitesse',
     cd: 'recharge {n} s',
     saveTeam: 'Valider l’équipe',
+    add: 'Ajouter à l’équipe',
     serie: 'Série',
     serieSoon: 'Nouvelle série · bientôt',
     budget: 'Budget : {n}/{m} pts',

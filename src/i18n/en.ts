@@ -559,6 +559,7 @@ export const en: Dict = {
     stSpd: 'Speed',
     cd: '{n} s cooldown',
     saveTeam: 'Save team',
+    add: 'Add to team',
     serie: 'Series',
     serieSoon: 'New series · soon',
     budget: 'Budget: {n}/{m} pts',

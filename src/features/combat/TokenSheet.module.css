@@ -1,0 +1,102 @@
+/* Grande fiche : 3 colonnes sur PC (stats · jeton · pouvoir), empilées sur téléphone */
+.sheet {
+  display: grid;
+  gap: var(--s-4);
+  align-items: center;
+}
+@media (min-width: 720px) {
+  .sheet {
+    grid-template-columns: minmax(0, 1fr) minmax(0, 1.1fr) minmax(0, 1.2fr);
+  }
+}
+.stats {
+  display: grid;
+  gap: var(--s-2);
+}
+.tier {
+  font-size: var(--fs-xs);
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+}
+.lvl {
+  font-size: var(--fs-md);
+}
+.stat {
+  display: grid;
+  gap: 4px;
+  font-size: var(--fs-sm);
+}
+.stat > span {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  color: var(--text-2);
+}
+.stat > span b {
+  margin-left: auto;
+  color: var(--text);
+  font-variant-numeric: tabular-nums;
+}
+.stat i {
+  height: 8px;
+  border-radius: var(--r-pill);
+  background: var(--surface-3);
+  overflow: hidden;
+}
+.stat i b {
+  display: block;
+  height: 100%;
+  background: var(--c);
+}
+/* le jeton sur son socle */
+.stage {
+  position: relative;
+  display: grid;
+  justify-items: center;
+  padding: var(--s-4) 0 var(--s-6);
+}
+.stage img {
+  position: relative;
+  z-index: 1;
+  width: min(100%, 190px);
+  aspect-ratio: 1;
+  image-rendering: pixelated;
+  --df: drop-shadow(0 0 22px rgba(var(--g), calc(0.6 * var(--ga, 0))));
+}
+.pedestal {
+  position: absolute;
+  bottom: var(--s-3);
+  width: min(90%, 220px);
+  height: 46px;
+  border-radius: 50%;
+  border: 2px solid var(--line-strong);
+  background: rgba(var(--g), 0.1);
+}
+.mut {
+  position: absolute;
+  top: var(--s-3);
+  right: 18%;
+  z-index: 2;
+}
+.power {
+  display: grid;
+  gap: var(--s-2);
+  justify-items: start;
+}
+.power h3 {
+  font-size: var(--fs-xl);
+}
+.power small {
+  color: var(--text-2);
+  font-size: var(--fs-xs);
+}
+.power p {
+  font-size: var(--fs-sm);
+  line-height: 1.45;
+}
+.foot {
+  display: flex;
+  justify-content: flex-end;
+  margin-top: var(--s-3);
+}

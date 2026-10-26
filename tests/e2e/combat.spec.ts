@@ -8,11 +8,13 @@ test('combat : monter son équipe (ajouter, version, enregistrer, plus de budget
   await expect(page.getByRole('button', { name: /Entraînement/ })).toBeDisabled(); // pas encore 3 jetons
   await page.getByRole('button', { name: /Modifier/ }).click();
   const d = page.getByRole('dialog');
-  for (const n of ['Mobu', 'Pikko', 'Vyolis'])
-    await d
-      .getByRole('button', { name: new RegExp(`^.*${n}`) })
-      .first()
-      .click();
+  // la carte ouvre la grande fiche (stats, jeton sur son socle, pouvoir + démo) ; on ajoute depuis la fiche
+  await d.getByRole('button', { name: 'Mobu', exact: true }).click();
+  const sheet = page.getByRole('dialog', { name: 'Mobu' });
+  await expect(sheet.locator('canvas')).toBeVisible();
+  await sheet.getByRole('button', { name: 'Ajouter à l’équipe' }).click();
+  // le petit « + » de la carte ajoute directement
+  for (const n of ['Pikko', 'Vyolis']) await d.getByRole('button', { name: `Ajouter à l’équipe ${n}` }).click();
   // un 4e jeton : équipe pleine (toast)
   await expect(d.getByText(/Budget/)).toHaveCount(0); // plus de limite de points
   // Mobu existe aussi en Doré : pris en Doré par défaut (la meilleure mutation), on peut repasser en normal avec les tampons

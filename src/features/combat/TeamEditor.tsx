@@ -2,7 +2,7 @@ import { useRef, useState, type CSSProperties } from 'react';
 import { useQueryClient } from '@tanstack/react-query';
 import { combatApi, errorText } from '@/api';
 import { glowVars, jetonOf, TEMPLATE, texOf, vImg } from '@/data/jetons';
-import { powerInfo } from '@/data/kit';
+import { powerInfo, RING_MAX, ringStats } from '@/data/kit';
 import { RCFG } from '@/engines/ring-config.js';
 import { sfx } from '@/engines/sound.js';
 import { useAuth } from '@/lib/auth';
@@ -15,6 +15,7 @@ import { MutationStamp } from '@/ui/MutationStamp';
 import { toast } from '@/ui/toast';
 import { lvlOf, seriesList, type Group, type InvData } from '../inventory/inv';
 import { baseVariant, ownedTokens, ownKey, VRANK, type Owned, type Team } from './team';
+import { TokenSheet } from './TokenSheet';
 import s from './TeamEditor.module.css';
 
 // Choisir son équipe, en simple :
@@ -45,6 +46,7 @@ export function TeamEditor({
   );
   const [serie, setSerie] = useState(series[0] ?? 'Takoras');
   const [busy, setBusy] = useState(false);
+  const [info, setInfo] = useState<Owned | null>(null);
   const slotsRef = useRef<HTMLUListElement>(null);
   const inTeam = new Set(team.filter(Boolean).map((u) => ownKey(u?.serie ?? '', u?.name ?? '')));
   const vis = all.filter((u) => u.serie === serie).sort((a, b) => b.odds - a.odds);
@@ -170,38 +172,48 @@ export function TeamEditor({
           {vis.map((o) => {
             const j = jetonOf(o.name, o.serie),
               k = powerInfo(o.name, lang),
-              on = inTeam.has(o.k);
+              on = inTeam.has(o.k),
+              rs = ringStats(o.name, lvl(o), baseVariant(o));
+            // carte : le jeton à gauche, ses 3 stats en barres à droite, une mini description dessous ; toucher = la grande fiche
             return (
-              <li key={o.k} style={glowVars(j) as CSSProperties}>
+              <li key={o.k} className={`${s.card} ${on ? s.on : ''}`} style={glowVars(j) as CSSProperties}>
+                <button type="button" className={s.cardBtn} onClick={() => setInfo(o)} aria-label={jn(o.name)}>
+                  <span className={s.cardTop}>
+                    <img className="px" src={texOf(j)} alt="" />
+                    <span className={s.bars}>
+                      {(
+                        [
+                          ['mass', rs.mass, RING_MAX.mass],
+                          ['power', rs.power, RING_MAX.power],
+                          ['size', rs.r, RING_MAX.r],
+                        ] as const
+                      ).map(([key, v, max]) => (
+                        <i key={key} className={s[`b_${key}`]}>
+                          <b style={{ width: `${Math.min(100, (v / max) * 100)}%` }} />
+                        </i>
+                      ))}
+                    </span>
+                  </span>
+                  <b className={s.cardName}>
+                    {jn(o.name)}
+                    {Object.keys(o.vars)
+                      .filter(Boolean)
+                      .map((v) => (
+                        <MutationStamp key={v} v={v} size="xs" />
+                      ))}
+                  </b>
+                  <small className={s.mini} style={{ '--c': k.col } as CSSProperties}>
+                    <b>{k.name}</b> · {k.desc}
+                  </small>
+                </button>
                 <button
                   type="button"
-                  className={`${s.row} ${on ? s.on : ''}`}
+                  className={s.quick}
                   aria-pressed={on}
+                  aria-label={`${on ? t('arena.remove') : t('arena.add')} ${jn(o.name)}`}
                   onClick={() => toggle(o)}
                 >
-                  <img className="px" src={texOf(j)} alt="" />
-                  <span className={s.txt}>
-                    <b>
-                      {jn(o.name)}{' '}
-                      <small>
-                        {t('arena.lvl')}
-                        {lvl(o)}
-                      </small>
-                      {Object.keys(o.vars)
-                        .filter(Boolean)
-                        .map((v) => (
-                          <MutationStamp key={v} v={v} size="xs" />
-                        ))}
-                    </b>
-                    <span className={s.pw} style={{ '--c': k.col } as CSSProperties}>
-                      {k.name}
-                      {k.when ? <small> · {k.when}</small> : null}
-                    </span>
-                    <small className={s.desc}>{k.desc}</small>
-                  </span>
-                  <span className={s.check} aria-hidden>
-                    {on ? '✓' : '+'}
-                  </span>
+                  {on ? '✓' : '+'}
                 </button>
               </li>
             );
@@ -210,6 +222,23 @@ export function TeamEditor({
       ) : (
         <p className="muted">{t('arena.none')}</p>
       )}
+      {info ? (
+        <TokenSheet
+          name={info.name}
+          serie={info.serie}
+          variant={baseVariant(info)}
+          lvl={lvl(info)}
+          onClose={() => setInfo(null)}
+          action={{
+            label: inTeam.has(info.k) ? t('arena.remove') : t('arena.add'),
+            primary: !inTeam.has(info.k),
+            onClick: () => {
+              toggle(info);
+              setInfo(null);
+            },
+          }}
+        />
+      ) : null}
       <div className={s.foot}>
         <Button variant="primary" loading={busy} onClick={() => void save()}>
           {t('arena.saveTeam')}
