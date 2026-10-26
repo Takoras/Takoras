@@ -82,18 +82,19 @@
       "name": "Néphéris",
       "odds": 100000,
       "glow": "#f0abfc",
-      "img": "/img/jetons/serie-takoras/nepheris.gif",
-      "grid": 74
+      "img": "/img/jetons/serie-takoras/nepheris.gif"
     },
     {
       "name": "Zénith",
       "odds": 250000,
-      "glow": "#e2e8f0"
+      "glow": "#e2e8f0",
+      "img": "/img/jetons/serie-takoras/zenith.gif"
     },
     {
       "name": "Oblivion",
       "odds": 500000,
-      "glow": "#fb7185"
+      "glow": "#fb7185",
+      "img": "/img/jetons/serie-takoras/oblivion.gif"
     },
     {
       "name": "Takoras",

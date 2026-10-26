@@ -81,7 +81,12 @@ export function Live() {
   const live = useLive();
   const online = useOnline((x) => x.n);
   // Seulement les vrais beaux tirages : plus rare que 1/5 000, ou une mutation (Doré et plus) qui vaut plus de 1/1 000
-  const rows = (live.data ?? []).filter((r) => r.odds > 5000 || (!!r.variant && vOdds(r.odds, r.variant) > 1000));
+  const all = live.data ?? [];
+  const good = all.filter((r) => r.odds > 5000 || (!!r.variant && vOdds(r.odds, r.variant) > 1000));
+  // jamais de bandeau vide : sans beau tirage récent, les 10 meilleurs des derniers tirages
+  const rows = good.length
+    ? good
+    : [...all].sort((a, b) => vOdds(b.odds, b.variant) - vOdds(a.odds, a.variant)).slice(0, 10);
   if (!rows.length && !online) return null;
   const loop = rows.length >= 6 ? [...rows, ...rows] : rows; // contenu doublé pour un défilement sans saut
   return (

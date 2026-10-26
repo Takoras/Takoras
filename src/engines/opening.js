@@ -173,9 +173,9 @@ const SERIES = {
     { name: 'Astra', odds: 10000, glow: '#f2c98f', img: '/img/jetons/serie-takoras/astra.png' },
     { name: 'Kraïos', odds: 25000, glow: '#4f46e5', img: '/img/jetons/serie-takoras/kraios.gif' },
     { name: 'Koi', odds: 50000, glow: '#ff5a3c', img: '/img/jetons/serie-takoras/koi.png' },
-    { name: 'Néphéris', odds: 100000, glow: '#f0abfc', img: '/img/jetons/serie-takoras/nepheris.gif', grid: 74 },
-    { name: 'Zénith', odds: 250000, glow: '#e2e8f0' },
-    { name: 'Oblivion', odds: 500000, glow: '#fb7185' },
+    { name: 'Néphéris', odds: 100000, glow: '#f0abfc', img: '/img/jetons/serie-takoras/nepheris.gif' },
+    { name: 'Zénith', odds: 250000, glow: '#e2e8f0', img: '/img/jetons/serie-takoras/zenith.gif' },
+    { name: 'Oblivion', odds: 500000, glow: '#fb7185', img: '/img/jetons/serie-takoras/oblivion.gif' },
     { name: 'Takoras', odds: 1000000, glow: '#ffffff' },
   ],
 };

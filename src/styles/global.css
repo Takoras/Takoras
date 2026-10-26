@@ -1,5 +1,4 @@
-@import '@fontsource-variable/inter';
-@import '@fontsource-variable/space-grotesk';
+@import '@fontsource-variable/outfit'; /* police libre (licence OFL) : grotesque géométrique, cahier de refonte § 3.1 */
 @import './tokens.css';
 
 *,
@@ -39,6 +38,10 @@ h4 {
   line-height: var(--lh-tight);
   font-weight: 700;
   letter-spacing: -0.01em;
+}
+/* Titre de page : toujours 32 px gras */
+main h1 {
+  font-size: var(--fs-2xl);
 }
 
 a {

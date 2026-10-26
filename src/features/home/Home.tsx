@@ -7,13 +7,19 @@ import { AutoConfig } from './AutoConfig';
 import { Live } from './Feeds';
 import { HeroCoin } from './HeroCoin';
 import { Quests } from '../quests/Quests';
+import { useAuth } from '@/lib/auth';
+import { Landing } from '../landing/Landing';
 import s from './Home.module.css';
 
 // Accueil : le pull Takoras au centre, l'ouverture auto à gauche, l'historique à droite, « En direct » en bas
 export default function Home() {
   const t = useT();
   const pull = PULLS[0] ?? { name: 'Takoras', img: '/img/jetons/takoras.png' };
+  const user = useAuth((x) => x.user);
+  const ready = useAuth((x) => x.ready);
   useEffect(installOpeningHost, []);
+  // visiteur (pas connecté) : la page de présentation
+  if (ready && !user) return <Landing />;
   return (
     <>
       <div className={s.stage}>

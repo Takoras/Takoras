@@ -848,7 +848,7 @@ function rgDraw(dt) {
       c.beginPath(); for (let i = 0; i < 16; i++) { const r = (i % 2 ? .35 : 1) * p.size * (.5 + k); const a = i / 16 * 6.283; i ? c.lineTo(Math.cos(a) * r, Math.sin(a) * r) : c.moveTo(Math.cos(a) * r, Math.sin(a) * r); } c.fill();
       p.life -= dt * 2.2;
     } else if (p.text) {
-      c.globalAlpha = Math.min(1, p.life * 2); c.fillStyle = p.col; c.font = `900 ${p.size}px "Space Grotesk Variable", sans-serif`; c.textAlign = 'center'; c.shadowColor = '#000'; c.shadowBlur = 8;
+      c.globalAlpha = Math.min(1, p.life * 2); c.fillStyle = p.col; c.font = `900 ${p.size}px "Outfit Variable", sans-serif`; c.textAlign = 'center'; c.shadowColor = '#000'; c.shadowBlur = 8;
       c.fillText(p.text, p.x, p.y - (1 - p.life) * 30); p.life -= dt * 1.2;
     } else if (p.bolt) { // éclair violet (Néant)
       const [ax, ay, bx, by] = p.bolt; c.globalAlpha = p.life; c.strokeStyle = p.col; c.lineWidth = V.px * 1.5;
@@ -1253,7 +1253,7 @@ const RFX = (() => {
     const R1 = rr * (1.5 + .5 * k);
     c.beginPath(); c.arc(x, y, R1, 0, 7); c.stroke();
     c.lineWidth = 1.5; c.beginPath(); c.arc(x, y, R1 + 9, 0, 7); c.stroke();
-    c.fillStyle = col; c.font = `bold ${Math.max(9, rr * .35)}px "Space Grotesk Variable", sans-serif`; c.textAlign = 'center'; c.textBaseline = 'middle';
+    c.fillStyle = col; c.font = `bold ${Math.max(9, rr * .35)}px "Outfit Variable", sans-serif`; c.textAlign = 'center'; c.textBaseline = 'middle';
     for (let i = 0; i < 12; i++) { const an = i / 12 * 6.283 + intro.t * 2.2; c.save(); c.translate(x + Math.cos(an) * (R1 + 4.5), y + Math.sin(an) * (R1 + 4.5)); c.rotate(an + 1.57); c.fillText('✦◆✧◇'[i % 4], 0, 0); c.restore(); }
     for (let i = 0; i < 8; i++) { const an = i / 8 * 6.283 - intro.t * 3; c.beginPath(); c.moveTo(x + Math.cos(an) * rr * 1.1, y + Math.sin(an) * rr * 1.1); c.lineTo(x + Math.cos(an) * R1 * .95, y + Math.sin(an) * R1 * .95); c.stroke(); }
     c.restore();
