@@ -270,17 +270,21 @@ function Collection({ pseudo, onOpen }: { pseudo: string; onOpen: (name: string,
         {all.map((j) => {
           const c = got.get(j.name);
           return (
-            <li key={j.name} style={{ '--g': hexRGB(j.glow) } as CSSProperties} className={c ? undefined : s.unk}>
+            <li
+              key={j.name}
+              style={{ '--g': c ? hexRGB(j.glow) : '113, 113, 122' } as CSSProperties}
+              className={c ? undefined : s.unk}
+            >
               <button
                 type="button"
                 onClick={() => {
                   sfx.click();
                   onOpen(j.name, !c);
                 }}
-                aria-label={c ? `${jn(j.name)} · 1/${fmt(j.odds)}` : `??? · 1/${fmt(j.odds)}`}
+                aria-label={c ? `${jn(j.name)} · 1/${fmt(j.odds)}` : '?'}
               >
                 <img className="px" src={c ? texOf(j) : MYSTERE} alt="" />
-                <small>1/{fmt(j.odds)}</small>
+                <small>{c ? `1/${fmt(j.odds)}` : '?'}</small>
                 <span className={s.dots} aria-hidden>
                   {Object.keys(VARIANTS).map((v) => (
                     <i key={v} className={`${s.dot} ${s[`d_${v}`]} ${c?.has(v) ? s.on : ''}`} />

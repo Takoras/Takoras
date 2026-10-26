@@ -132,3 +132,9 @@
   border: 1px dashed var(--line);
   opacity: 0.4;
 }
+
+.reward button {
+  min-height: 30px;
+  padding: 2px 10px;
+  font-size: 12px;
+}
