@@ -85,7 +85,22 @@ const RG = (() => {
       // Rempart (Rouillé) : ne tire pas, devient un mur fixe qui renvoie plus fort tout ennemi qui le touche
       if (b.pw === 'rampart') { T.anchor = true; T.reflect = k.p.mult; ev.push({ t: 'rampart', id: b.id, at: 0 }); }
       // Miroir (Lumis) : tes jetons ne bougent pas face à l'ennemi et le renvoient ×2
-      if (b.pw === 'mirror') { alive(st, side).forEach(a => { a.t.shield = true; a.t.reflect = k.p.mult; }); ev.push({ t: 'mirror', id: b.id, at: 0 }); }
+      if (b.pw === 'mirror') { alive(st, side).forEach(a => { if (len(a.x - b.x, a.y - b.y) > k.p.radius) return; a.t.shield = true; a.t.reflect = k.p.mult; }); ev.push({ t: 'mirror', id: b.id, at: 0 }); }
+      // Gravité solaire (Soléo) : ne tire pas, devient un petit soleil fixe ; ce tour, tout ce qui bouge près de lui est attiré
+      if (b.pw === 'sun') { T.anchor = true; T.sun = true; ev.push({ t: 'sun', id: b.id, at: 0 }); }
+      // Œil du cyclone (Zénith) : au lancer, les ennemis autour sont pris dans un tourbillon (ils tournent et sont projetés)
+      if (b.pw === 'cyclone') {
+        for (const o of alive(st, 1 - side)) {
+          if (o.t.anchor || o.t.shield) continue;
+          const dx = o.x - b.x, dy = o.y - b.y, d = len(dx, dy);
+          if (d > k.p.radius || !d) continue;
+          const w = (1 - d / k.p.radius) / o.mass;
+          o.vx += (-dy / d * k.p.spin + dx / d * k.p.push) * w; o.vy += (dx / d * k.p.spin + dy / d * k.p.push) * w;
+        }
+        ev.push({ t: 'cyclone', id: b.id, x: q(b.x), y: q(b.y), at: 0 });
+      }
+      // Avatar (Takoras) : devient géant, ne peut pas tomber ce tour, et chaque coup qu'il porte libère une onde de choc
+      if (b.pw === 'avatar') { b.r = b.base.r * k.p.r; b.mass = b.base.mass * k.p.mass; T.bounce = true; T.avatar = true; ev.push({ t: 'avatar', id: b.id, at: 0 }); }
       // Ombre (Nyx) : plus petit et traverse tout (la vitesse en plus est appliquée au tir)
       if (b.pw === 'shade') { b.r = b.base.r * k.p.r; T.ghost = true; }
       // Raz-de-marée (Azura) : au lancer, une vague repousse les ennemis proches loin d'elle
@@ -170,9 +185,10 @@ const RG = (() => {
       }
       const sp = f * b.power * (T.pw === 'shrink' || T.pw === 'shade' ? k.p.power : 1);
       b.vx = q(s.ax / d * sp); b.vy = q(s.ay / d * sp);
-      T.shooter = true; T.v0 = sp; fired.push(b.id);
+      T.shooter = true; T.v0 = sp; T.home = [b.x, b.y]; fired.push(b.id);
       ev.push({ t: 'shot', id: b.id, at: 0, f });
     });
+    const suns = B.filter(b => b.t.sun);
     let tm = 0, steps = 0, firstHit = -1;
     const maxSteps = Math.round(C.MAX_SIM_S / dt);
     const rec = () => frames.push(B.map(b => b.alive ? [b.x, b.y, b.r] : null));
@@ -187,7 +203,7 @@ const RG = (() => {
           const foe = alive(st, 1 - b.side).sort((a, c) => len(a.x - b.x, a.y - b.y) - len(c.x - b.x, c.y - b.y))[0];
           if (foe) { const dx = foe.x - b.x, dy = foe.y - b.y, dd = len(dx, dy) || 1, k = kit(b.name).p.turn * dt; const nx = b.vx / s + dx / dd * k, ny = b.vy / s + dy / dd * k, nn = len(nx, ny); b.vx = nx / nn * s; b.vy = ny / nn * s; }
         }
-        if ((T.pw === 'split' || T.pw === 'yinyang') && !T.split && T.shooter && tm >= kit(b.name).p.at) {
+        if (T.pw === 'split' && !T.split && T.shooter && tm >= kit(b.name).p.at) {
           T.split = true;
           const sp = kit(b.name).p.spread, px = -b.vy, py = b.vx;
           const c = { ...b, id: 100 + b.id, tmp: true, t: { ...T, split: true } };
@@ -198,7 +214,11 @@ const RG = (() => {
         if (T.pw === 'second' && !T.boost && T.shooter && s > 0 && s < T.v0 * kit(b.name).p.at) {
           T.boost = true; const k = T.v0 * kit(b.name).p.boost / s; b.vx *= k; b.vy *= k; s = len(b.vx, b.vy); ev.push({ t: 'boost', id: b.id, at: tm });
         }
-        if (T.pw === 'icetrail' && T.shooter && s > C.STOP_SPEED && steps % kit(b.name).p.every === 0) { (st.ice ||= []).push([q(b.x), q(b.y)]); if (!st.iceNew) ev.push({ t: 'ice', id: b.id, at: tm }); st.iceNew = true; }
+        // attiré par un soleil (Soléo) tant qu'il bouge
+        if (s > C.STOP_SPEED && !T.anchor) for (const S of suns) { if (S === b || !S.alive) continue; const dx = S.x - b.x, dy = S.y - b.y, d = len(dx, dy), p = kit(S.name).p; if (d > p.radius || d < S.r) continue; const g = p.g * dt * (1 - d / p.radius); b.vx += dx / d * g; b.vy += dy / d * g; }
+        // Faille (Oblivion) : la trajectoire se fissure
+        if (T.pw === 'rift' && T.shooter && s > C.STOP_SPEED && steps % 5 === 0) { if (!st.rift || st.rift.armed) st.rift = { pts: [], side: b.side, armed: false }; st.rift.pts.push([q(b.x), q(b.y), steps]); if (st.rift.pts.length === 1) ev.push({ t: 'rift', id: b.id, at: tm }); }
+        if (T.pw === 'icetrail' && T.shooter && s > C.STOP_SPEED && steps % kit(b.name).p.every === 0) { (st.ice ||= []).push([q(b.x), q(b.y), steps]); if (!st.iceNew) ev.push({ t: 'ice', id: b.id, at: tm }); st.iceNew = true; }
         if (st.ice && s > C.STOP_SPEED && !b.tmp) { for (const [ix, iy] of st.ice) if (len(b.x - ix, b.y - iy) < b.r + 40) { T.fric = Math.min(T.fric, C.ICE_FRIC); break; } }
         b.x += b.vx * dt; b.y += b.vy * dt;
         // frottement
@@ -223,6 +243,12 @@ const RG = (() => {
         if (vrel >= 0) continue;
         const j = -(1 + C.RESTITUTION) * vrel / (iA + iC) * (A.t.pw === 'jelly' || Cc.t.pw === 'jelly' ? kit((A.t.pw === 'jelly' ? A : Cc).name).p.bounce : 1);
         A.vx -= j * iA * nx; A.vy -= j * iA * ny; Cc.vx += j * iC * nx; Cc.vy += j * iC * ny;
+        // Avatar (Takoras) : chaque coup sur un ennemi libère une onde de choc autour du point d'impact
+        for (const [X, O] of [[A, Cc], [Cc, A]]) if (X.t.avatar && O.side !== X.side && !O.tmp && (X.t.wave || 0) < 4) {
+          X.t.wave = (X.t.wave || 0) + 1; const p = kit(X.name).p, ix = (A.x + Cc.x) / 2, iy = (A.y + Cc.y) / 2;
+          for (const o of B) { if (!o.alive || o.tmp || o.side === X.side || o.t.anchor || o.t.shield) continue; const dx = o.x - ix, dy = o.y - iy, dd = len(dx, dy); if (dd > p.radius || !dd) continue; const g = p.push * (1 - dd / p.radius) / o.mass; o.vx += dx / dd * g; o.vy += dy / dd * g; }
+          ev.push({ t: 'avatarhit', id: X.id, x: q(ix), y: q(iy), at: tm });
+        }
         // Rempart / Miroir : l'ennemi qui touche est renvoyé plus fort
         if (A.t.reflect && Cc.side !== A.side && !A.tmp) { const g = (A.t.reflect - 1) * j / Cc.mass; Cc.vx += g * nx; Cc.vy += g * ny; ev.push({ t: 'reflect', id: A.id, to: Cc.id, at: tm }); }
         if (Cc.t.reflect && A.side !== Cc.side && !Cc.tmp) { const g = (Cc.t.reflect - 1) * j / A.mass; A.vx -= g * nx; A.vy -= g * ny; ev.push({ t: 'reflect', id: Cc.id, to: A.id, at: tm }); }
@@ -232,6 +258,8 @@ const RG = (() => {
           const iO = O === Cc ? iC : iA;
           // Trou noir (Oblivion) : s'ouvre au point du premier choc, aspire tout de suite puis au début des 2 tours suivants
           if (S.t.pw === 'blackhole') { const p = kit(S.name).p, h = { x: q(S.x + nx * S.r * sg), y: q(S.y + ny * S.r * sg), r: p.radius, pull: p.pull, core: p.radius * p.core, left: p.turns, owner: S.id }; (st.holes ||= []).push(h); holePull(h, .6); ev.push({ t: 'hole', id: S.id, x: h.x, y: h.y, at: tm }); }
+          // Contre-courant (Koi) : après son premier coup, repart vers son point de départ
+          if (S.t.pw === 'current' && !S.t.back) { S.t.back = true; const hx = S.t.home[0] - S.x, hy = S.t.home[1] - S.y, hd = len(hx, hy); if (hd > 1) { const v = S.t.v0 * kit(S.name).p.back; S.vx = hx / hd * v; S.vy = hy / hd * v; ev.push({ t: 'current', id: S.id, at: tm }); } }
           // Regard (Zénith) : le premier ennemi touché est paralysé, il ne pourra pas tirer au tour suivant
           if (S.t.pw === 'stun' && O.side !== S.side && !O.tmp) { O.stunNext = true; ev.push({ t: 'stun', id: S.id, to: O.id, at: tm }); }
           // Gel (Givre) : le premier ennemi touché gèle, il glisse comme sur de la glace jusqu'à la fin du tour
@@ -272,7 +300,7 @@ const RG = (() => {
           if (vn >= 0) continue;
           b.vx -= (1 + o.k) * vn * nx; b.vy -= (1 + o.k) * vn * ny;
           if (b.t.shooter) b.t.hit = true;
-          ev.push({ t: 'wall', id: b.id, x: q(cx + nx * o.w / 2), y: q(cy + ny * o.w / 2), k: o.k, j: Math.round(-vn), at: tm });
+          ev.push({ t: 'wall', id: b.id, w: st.map.walls.indexOf(o), x: q(cx + nx * o.w / 2), y: q(cy + ny * o.w / 2), k: o.k, j: Math.round(-vn), at: tm });
           // obstacle destructible : chaque vrai choc l'abîme, au 5e il casse (et disparaît pour le reste du match)
           if (-vn > C.WALL_HIT && o.hp != null && --o.hp <= 0) { o.dead = true; ev.push({ t: 'break', w: st.map.walls.indexOf(o), x: q((o.x1 + o.x2) / 2), y: q((o.y1 + o.y2) / 2), at: tm }); }
         }
@@ -347,16 +375,6 @@ const RG = (() => {
     // Yin-Yang (Koi) : les liens du tour précédent — si l'un des deux est tombé, l'autre tombe aussi
     for (const b of B) if (b.link != null && !b.tmp) { const o = B.find(x => x.id === b.link); if (o && b.alive !== o.alive && (b.alive || o.alive)) { const v = b.alive ? b : o; v.alive = false; ev.push({ t: 'out', id: v.id, x: v.x, y: v.y, vx: 0, vy: 0, at: tm, linked: true }); } }
     for (const b of B) delete b.link;
-    // nouveaux liens : un ennemi pris entre les deux moitiés de Koi est lié à lui pour le tour suivant
-    for (const b of B) {
-      if (b.tmp || !b.alive || b.t?.pw !== 'yinyang') continue;
-      const c = B.find(x => x.id === 100 + b.id && x.alive); if (!c) continue;
-      const ex = c.x - b.x, ey = c.y - b.y, L2 = ex * ex + ey * ey || 1;
-      for (const o of alive(st, 1 - b.side)) {
-        const u = Math.max(0, Math.min(1, ((o.x - b.x) * ex + (o.y - b.y) * ey) / L2));
-        if (len(o.x - (b.x + ex * u), o.y - (b.y + ey * u)) < o.r) { b.link = o.id; o.link = b.id; ev.push({ t: 'link', id: b.id, to: o.id, at: tm }); break; }
-      }
-    }
     st.bodies = B.filter(b => !b.tmp);
     st.bodies.forEach(b => {
       b.r = b.base.r; b.mass = b.base.mass; b.vx = 0; b.vy = 0;
@@ -364,6 +382,13 @@ const RG = (() => {
       b.stun = b.stunNext ? 1 : 0; delete b.stunNext; // paralysé seulement au tour suivant
       delete b.t;
     });
+    // Faille (Oblivion) : elle s'ouvre à la fin du tour SUIVANT — les ennemis restés dessus tombent dedans (on a un tour pour s'écarter)
+    if (st.rift) {
+      if (st.rift.armed) {
+        for (const b of alive(st, 1 - st.rift.side)) if (st.rift.pts.some(([x, y]) => len(b.x - x, b.y - y) < b.r * .6 + 40)) { b.alive = false; ev.push({ t: 'out', id: b.id, x: b.x, y: b.y, vx: 0, vy: 0, at: tm, rift: true }); }
+        ev.push({ t: 'riftopen', at: tm }); delete st.rift;
+      } else st.rift.armed = true;
+    }
     // la patinoire de Givre reste 2 tours puis fond
     if (st.ice) { st.iceLeft = st.iceNew ? 2 : (st.iceLeft || 1) - 1; delete st.iceNew; if (st.iceLeft <= 0) { delete st.ice; delete st.iceLeft; } }
     if (st.holes) { st.holes.forEach(h => { h.left--; }); st.holes = st.holes.filter(h => h.left > 0); if (!st.holes.length) delete st.holes; }

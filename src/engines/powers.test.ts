@@ -132,18 +132,6 @@ test('Tentacules (Kraïos) : agrippe l’ennemi et part avec son élan — il pe
   expect(out).toContain(d.a().id); // … et Kraïos avec lui (sacrifice)
 });
 
-test('Yin-Yang (Koi) : se coupe en deux ; l’ennemi pris entre les moitiés est lié, si Koi tombe il tombe aussi', () => {
-  const d = duel('Koi', 'Carmin', [0, 500, 0, -150]);
-  const r = RG.resolve(d.st, [shot(0, -1000, 0.75), null]);
-  expect(evs(r, 'split')).toBe(1);
-  if (evs(r, 'link')) {
-    expect(d.a().link).toBe(d.o().id);
-    d.a().x = 5000; // Koi poussé dehors au tour suivant (on le place hors de l'arène)
-    RG.resolve(d.st, [null, null]);
-    expect(d.o().alive).toBe(false);
-  }
-});
-
 test('Télékinésie (Néphéris) : ne bouge pas, ton tir pousse l’ennemi visé', () => {
   const d = duel('Néphéris', 'Carmin', [0, 600, 100, 0]);
   const r = RG.resolve(d.st, [shot(0, -1000, 0.8), null]);
@@ -152,21 +140,51 @@ test('Télékinésie (Néphéris) : ne bouge pas, ton tir pousse l’ennemi vis�
   expect(d.o().y).toBeLessThan(-200);
 });
 
-test('Regard (Zénith) : l’ennemi touché ne peut pas tirer au tour suivant (2 fois par match)', () => {
-  const d = duel('Zénith');
-  RG.resolve(d.st, [shot(0, -1000, 0.4), null]);
-  expect(d.o().stun).toBe(1);
-  const r = RG.resolve(d.st, [null, { i: 0, ax: 0, ay: 1000, f: 1, pow: false }]);
-  expect(evs(r, 'stunned')).toBe(1);
-  expect(evs(r, 'shot')).toBe(0);
-  expect(d.o().stun).toBe(0);
+test('Gravité solaire (Soléo) : ne bouge pas, et le tir ennemi est dévié vers lui', () => {
+  const run = (pow: boolean) => {
+    const d = duel('Soléo', 'Carmin', [500, 0, 0, -600]);
+    RG.resolve(d.st, [shot(0, -1, 0, pow), { i: 0, ax: 0, ay: 1000, f: 0.8, pow: false }]);
+    return { me: d.a(), foe: d.o() };
+  };
+  const a = run(false),
+    b = run(true);
+  expect(b.me.x).toBe(500); // le soleil reste en place
+  expect(b.foe.x).not.toBe(a.foe.x); // le tir ennemi est courbé vers lui
 });
 
-test('Trou noir (Oblivion) : s’ouvre au premier choc, puis se referme après 2 tours', () => {
-  const d = duel('Oblivion');
-  const r = RG.resolve(d.st, [shot(0, -1000, 0.5), null]);
-  expect(evs(r, 'hole')).toBe(1);
-  RG.resolve(d.st, [null, null]);
-  RG.resolve(d.st, [null, null]);
-  expect(d.st.holes).toBeUndefined();
+test('Œil du cyclone (Zénith) : les ennemis autour tournent et sont projetés', () => {
+  const d = duel('Zénith', 'Carmin', [0, 300, 200, 0]);
+  const r = RG.resolve(d.st, [shot(0, 1000, 0.2), null]);
+  expect(evs(r, 'cyclone')).toBe(1);
+  expect(Math.round(d.o().x)).not.toBe(200);
+});
+
+test('Faille (Oblivion) : la trajectoire se fissure ; au tour suivant, l’ennemi resté dessus tombe', () => {
+  const d = duel('Oblivion', 'Carmin', [0, 600, 600, -600]);
+  const r = RG.resolve(d.st, [shot(0, -1000, 0.7), null]);
+  expect(evs(r, 'rift')).toBe(1);
+  expect(d.st.rift?.armed).toBe(true);
+  const [x, y] = d.st.rift?.pts[3] ?? [0, 0];
+  d.o().x = x;
+  d.o().y = y; // l'ennemi se place sur la faille et n'en bouge pas
+  const r2 = RG.resolve(d.st, [null, null]);
+  expect(evs(r2, 'riftopen')).toBe(1);
+  expect(d.o().alive).toBe(false);
+  expect(d.st.rift).toBeUndefined();
+});
+
+test('Contre-courant (Koi) : frappe puis repart vers son point de départ', () => {
+  const d = duel('Koi', 'Carmin', [0, 300, 0, 0]);
+  const r = RG.resolve(d.st, [shot(0, -1000, 0.8), null]);
+  expect(evs(r, 'current')).toBe(1);
+  expect(d.a().y).toBeGreaterThan(150); // revenu vers chez lui
+});
+
+test('Avatar (Takoras) : géant, ne tombe pas, et ses coups libèrent des ondes de choc', () => {
+  const d = duel('Takoras', 'Carmin', [0, 300, 0, 0]);
+  const r = RG.resolve(d.st, [shot(0, -1000, 1), null]);
+  expect(evs(r, 'avatar')).toBe(1);
+  expect(evs(r, 'avatarhit')).toBeGreaterThan(0);
+  expect(d.a().alive).toBe(true);
+  expect(RG.ready(d.a())).toBe(false); // une seule fois par match
 });

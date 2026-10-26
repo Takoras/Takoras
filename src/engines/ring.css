@@ -140,3 +140,11 @@
   transform: translateX(-120%); animation: rgSweep .55s .12s ease-out forwards; }
 @keyframes rgSweep { to { transform: translateX(120%); } }
 @media (prefers-reduced-motion: reduce) { .rg-banner.ult::after { animation: none; } }
+
+/* Intro d'un pouvoir : toute la page s'assombrit (le canvas fait pareil sur l'arène, donc pas de carré visible) */
+.rg::after { content: ''; position: fixed; inset: 0; background: rgb(5 3 12); opacity: var(--dim, 0); pointer-events: none; z-index: 2; }
+.rg-stage { z-index: 3; }
+/* Charges d'un pouvoir : petits carrés (comme les vies), un s'éteint à chaque utilisation */
+.rg-pips { display: inline-flex; gap: 3px; margin-left: 6px; vertical-align: middle; }
+.rg-pips i { width: 8px; height: 8px; background: currentColor; }
+.rg-pips i.off { background: transparent; box-shadow: inset 0 0 0 1px currentColor; opacity: .5; }

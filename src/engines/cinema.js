@@ -32,11 +32,11 @@ const CINE = (() => {
     'Lumis':    { c: ['#16050f', '#a33a76', '#f7a8d8', '#fff0f8'], scene: ['dust', 'diamonds'],          root: 261.6, scale: [0, 2, 4, 7, 9],  chord: [0, 4, 7, 11],        bpm: 100, voice: 'ep' },
     'Nyx':      { c: ['#05051a', '#2f2a8f', '#7c8cf8', '#dbe4ff'], scene: ['stars', 'shardring'],        root: 146.8, scale: [0, 3, 5, 7, 10], chord: [0, 7, 10, 15],       bpm: 70,  voice: 'pad' },
     'Astra':    { c: ['#06071a', '#2b3a67', '#f6d39a', '#ffffff'], scene: ['stars', 'comets'],           root: 164.8, scale: [0, 2, 4, 7, 9],  chord: [0, 4, 7, 14],        bpm: 112, voice: 'bell' },
-    'Kraïos':   { c: ['#02030c', '#1a1a5c', '#3d3fa8', '#a8b4ff'], scene: ['deep', 'shadowfish', 'bubbles'], root: 185, scale: [0, 3, 5, 7, 10], chord: [0, 7, 12],          bpm: 128, voice: 'pluck' },
+    'Kraïos':   { c: ['#02030c', '#1a1a5c', '#3d3fa8', '#a8b4ff'], scene: ['deep', 'tentacles', 'bubbles'], root: 185, scale: [0, 3, 5, 7, 10], chord: [0, 7, 12],          bpm: 128, voice: 'pluck' },
     'Koi':      { c: ['#08050d', '#2b2433', '#f0453a', '#fff4ee'], scene: ['ripples', 'koipair'],        root: 196,   scale: [0, 2, 4, 7, 9],  chord: [0, 4, 7, 11, 14],    bpm: 96,  voice: 'bell' },
     'Néphéris': { c: ['#140a05', '#7a3a14', '#f08a3c', '#fff6ea'], scene: ['dust', 'atom'],              root: 233.1, scale: [0, 3, 5, 7, 10], chord: [0, 3, 7, 10, 14],    bpm: 84,  voice: 'choir' },
-    'Zénith':   { c: ['#120306', '#6e1424', '#d9364f', '#ffd6dc'], scene: ['veins', 'eye'],              root: 293.7, scale: [0, 1, 5, 7, 8],  chord: [0, 4, 7, 11, 14],    bpm: 76,  voice: 'choir' },
-    'Oblivion': { c: ['#020b0d', '#14524f', '#3fc7b6', '#e6fffb'], scene: ['stars', 'planet', 'rift'],   root: 138.6, scale: [0, 1, 5, 7, 8],  chord: [0, 6, 12],           bpm: 64,  voice: 'pad', sub: true },
+    'Zénith':   { c: ['#120306', '#6e1424', '#d9364f', '#ffd6dc'], scene: ['embers', 'emberstorm'],     root: 293.7, scale: [0, 1, 5, 7, 8],  chord: [0, 4, 7, 11, 14],    bpm: 76,  voice: 'choir' },
+    'Oblivion': { c: ['#020b0d', '#14524f', '#3fc7b6', '#e6fffb'], scene: ['stars', 'vortex', 'disk', 'glitch'], root: 138.6, scale: [0, 1, 5, 7, 8], chord: [0, 6, 12],     bpm: 64,  voice: 'pad', sub: true },
     'Takoras':  { c: ['#02040f', '#2a3f9e', '#9fb6ff', '#ffffff'], scene: ['galaxy', 'orbiters', 'pillar'], root: 130.8, scale: [0, 2, 4, 7, 9], chord: [0, 4, 7, 12, 16, 19], bpm: 88, voice: 'choir', epic: true },
   };
   const DEFAULT = j => ({ c: ['#05050a', '#312e81', j.glow || '#a78bfa', '#ffffff'], scene: ['stars', 'rays', 'sparkles'], root: 196, scale: [0, 2, 4, 7, 9], chord: [0, 4, 7, 12], bpm: 96, voice: 'ep' });
@@ -213,7 +213,7 @@ const CINE = (() => {
     shardring(x, w, h, t, k, th) { const cx = w / 2, cy = h / 2, R = Math.min(w, h) * (.4 - .1 * k); for (let i = 0; i < 9; i++) { const a = t * (.4 + k * 1.6) + i / 9 * Math.PI * 2, X = cx + Math.cos(a) * R, Y = cy + Math.sin(a) * R, s = 5 + (i % 3) * 2; x.fillStyle = rgba(i % 2 ? th.c[2] : th.c[3], .55 + .4 * k); x.beginPath(); x.moveTo(X + Math.cos(a) * s * 1.6, Y + Math.sin(a) * s * 1.6); x.lineTo(X + Math.cos(a + 2.2) * s * .6, Y + Math.sin(a + 2.2) * s * .6); x.lineTo(X - Math.cos(a) * s * .4, Y - Math.sin(a) * s * .4); x.lineTo(X + Math.cos(a - 2.2) * s * .6, Y + Math.sin(a - 2.2) * s * .6); x.fill(); } },
     // Astra : grandes comètes dorées en diagonale, traînées longues et propres
     comets(x, w, h, t, k, th, st) { if (Math.random() < .05 + k * .2) st.meteors.push({ x: rnd(w * .3, w * 1.3), y: rnd(-20, h * .3), v: rnd(2.5, 4) * (1 + k) }); st.meteors = st.meteors.filter(m => { m.x -= m.v; m.y += m.v * .55; const L = 34; for (let i = 0; i < L; i++) { const a = 1 - i / L; px(x, m.x + i, m.y - i * .55, i < 3 ? 2 : 1, rgba(i < 4 ? th.c[3] : th.c[2], a * .9)); } return m.x > -40 && m.y < h + 20; }); },
-    // Kraïos : eau très sombre, et une immense ombre de poisson qui passe derrière
+    // Kraïos : eau très sombre, et des tentacules qui montent des profondeurs et ondulent
     deep(x, w, h, t, k, th) { for (let y = 0; y < h; y += 2) { const a = .04 + .05 * Math.sin(y * .08 + t * 1.2); x.fillStyle = rgba(th.c[1], Math.max(0, a * (1 + k))); x.fillRect(0, y, w, 1); } },
     shadowfish(x, w, h, t, k, th) { const L = Math.min(w, h) * .9, p = ((t * .12) % 1.4) - .2, cx = lerp(-L, w + L, p), cy = h * .55 + Math.sin(t * .8) * 6; x.fillStyle = rgba(th.c[1], .7 + .2 * k); x.strokeStyle = rgba(th.c[2], .5 + .3 * k); x.lineWidth = 1; x.beginPath(); x.ellipse(cx, cy, L * .5, L * .16, 0, 0, 7); x.fill(); x.stroke(); x.beginPath(); x.moveTo(cx - L * .45, cy); x.lineTo(cx - L * .75, cy - L * .18); x.lineTo(cx - L * .75, cy + L * .18); x.closePath(); x.fill(); x.stroke(); px(x, cx + L * .36, cy - L * .04, 2, rgba(th.c[3], .5 + .5 * k)); },
     // Koi : deux carpes (rouge et blanche) qui tournent l'une autour de l'autre, comme le yin-yang du jeton
@@ -221,12 +221,30 @@ const CINE = (() => {
     koipair(x, w, h, t, k, th) { const cx = w / 2, cy = h / 2, R = Math.min(w, h) * (.3 - .08 * k); [[th.c[2], 0], [th.c[3], Math.PI]].forEach(([col, off]) => { for (let i = 0; i < 26; i++) { const a = t * (1 + k * 2.5) + off - i * .07, r = R + Math.sin(i * .5) * 2, s = Math.max(1, 5 - i * .18); x.fillStyle = rgba(col, 1 - i / 30); x.fillRect(Math.round(cx + Math.cos(a) * r - s / 2), Math.round(cy + Math.sin(a) * r - s / 2), Math.ceil(s), Math.ceil(s)); } }); },
     // Néphéris : un atome, trois anneaux orange qui se croisent, électrons crème
     atom(x, w, h, t, k, th) { const cx = w / 2, cy = h / 2, R = Math.min(w, h) * .38; for (let o = 0; o < 3; o++) { const tilt = o * Math.PI / 3 + t * .1; x.strokeStyle = rgba(th.c[2], .6 + .4 * k); x.lineWidth = 2; x.beginPath(); x.ellipse(cx, cy, R, R * .3, tilt, 0, 7); x.stroke(); const a = t * (2 + k * 4) + o * 2.1; px(x, cx + Math.cos(a) * R * Math.cos(tilt) - Math.sin(a) * R * .3 * Math.sin(tilt) - 1, cy + Math.cos(a) * R * Math.sin(tilt) + Math.sin(a) * R * .3 * Math.cos(tilt) - 1, 3, th.c[3]); } },
-    // Zénith : un œil géant qui s'ouvre pendant la tension (l'œil du jeton), veines rouges autour
+    // Zénith : braises rouges qui tourbillonnent et se resserrent en cyclone autour du jeton
     veins(x, w, h, t, k, th) { x.strokeStyle = rgba(th.c[1], .5 + .4 * k); x.lineWidth = 1; for (let i = 0; i < 12; i++) { let X = i % 2 ? 0 : w, Y = (i / 12) * h; x.beginPath(); x.moveTo(X, Y); for (let s = 0; s < 14; s++) { X += (i % 2 ? 1 : -1) * (3 + k * 2); Y += Math.sin(s * .9 + i) * 2; x.lineTo(X, Y); } x.stroke(); } },
     eye(x, w, h, t, k, th) { const cx = w / 2, cy = h * .24, W = Math.min(w, h) * .42, open = clamp(k * 1.3) * W * .26; x.fillStyle = rgba(th.c[3], .9); x.beginPath(); x.moveTo(cx - W / 2, cy); x.quadraticCurveTo(cx, cy - open * 2, cx + W / 2, cy); x.quadraticCurveTo(cx, cy + open * 2, cx - W / 2, cy); x.fill(); if (open > 2) { x.fillStyle = '#1f6f78'; x.beginPath(); x.arc(cx + Math.sin(t) * 3, cy, Math.min(open, W * .14), 0, 7); x.fill(); x.fillStyle = '#0a0a12'; x.beginPath(); x.arc(cx + Math.sin(t) * 3, cy, Math.min(open, W * .14) * .5, 0, 7); x.fill(); } x.strokeStyle = th.c[2]; x.lineWidth = 2; x.beginPath(); x.moveTo(cx - W / 2, cy); x.quadraticCurveTo(cx, cy - open * 2, cx + W / 2, cy); x.quadraticCurveTo(cx, cy + open * 2, cx - W / 2, cy); x.stroke(); },
     // Oblivion : horizon d'une planète turquoise, et une faille de lumière qui la fend
     planet(x, w, h, t, k, th) { const R = w * 1.1, cy = h + R * .78; x.fillStyle = th.c[1]; x.beginPath(); x.arc(w / 2, cy, R, 0, 7); x.fill(); x.strokeStyle = rgba(th.c[2], .8); x.lineWidth = 2; x.beginPath(); x.arc(w / 2, cy, R, Math.PI * 1.15, Math.PI * 1.85); x.stroke(); },
     rift(x, w, h, t, k, th) { if (k < .15) return; const L = h * clamp((k - .15) * 1.6); x.strokeStyle = rgba(th.c[3], .9); x.lineWidth = 1 + k * 2; x.beginPath(); let X = w / 2, Y = 0; x.moveTo(X, Y); for (let s = 0; s < 16 && Y < L; s++) { X += Math.sin(s * 2.3) * 4; Y += L / 16; x.lineTo(X, Y); } x.stroke(); const g = x.createLinearGradient(w / 2 - 20, 0, w / 2 + 20, 0); g.addColorStop(0, 'rgba(0,0,0,0)'); g.addColorStop(.5, rgba(th.c[2], .25 * k)); g.addColorStop(1, 'rgba(0,0,0,0)'); x.fillStyle = g; x.fillRect(w / 2 - 20, 0, 40, L); },
+    tentacles(x, w, h, t, k, th) {
+      const N = 6;
+      for (let i = 0; i < N; i++) {
+        const bx = (i + .5) / N * w + Math.sin(i * 7.3) * 8, len = h * (.35 + .35 * k) * (.75 + (i % 3) * .15), seg = 22;
+        let X = bx, Y = h + 4, a = -Math.PI / 2;
+        for (let s = 0; s < seg; s++) {
+          const f = s / seg, wv = Math.sin(t * (1.6 + i * .2) + s * .35 + i) * (.18 + .25 * f);
+          a = -Math.PI / 2 + wv + (bx < w / 2 ? .25 : -.25) * f * f; // les pointes s'enroulent vers le centre
+          const nx = X + Math.cos(a) * len / seg, ny = Y + Math.sin(a) * len / seg, wd = Math.max(1, (1 - f) * 7);
+          x.strokeStyle = rgba(th.c[1], .95); x.lineWidth = wd + 2; x.lineCap = 'round'; x.beginPath(); x.moveTo(X, Y); x.lineTo(nx, ny); x.stroke();
+          x.strokeStyle = rgba(th.c[2], .9); x.lineWidth = wd; x.beginPath(); x.moveTo(X, Y); x.lineTo(nx, ny); x.stroke();
+          if (s % 3 === 1 && wd > 2) px(x, nx + Math.cos(a + 1.57) * wd * .4, ny + Math.sin(a + 1.57) * wd * .4, 1, rgba(th.c[3], .8)); // ventouses
+          X = nx; Y = ny;
+        }
+      }
+    },
+    embers(x, w, h, t, k, th) { for (let i = 0; i < 40; i++) { const X = (i * 53.7 + t * (6 + i % 5)) % w, Y = h - ((i * 31.3 + t * (10 + i % 7) * (1 + k)) % h); px(x, X, Y, i % 4 ? 1 : 2, rgba(i % 3 ? th.c[2] : th.c[3], .35 + .4 * ((i * 13) % 10) / 10)); } },
+    emberstorm(x, w, h, t, k, th) { const cx = w / 2, cy = h / 2, M = Math.min(w, h) * .55; for (let i = 0; i < 420; i++) { const p = (i / 420 + t * (.06 + k * .18)) % 1, r = M * (1 - p) * (.35 + .65 * (1 - k * .5)), a = i * 2.399 + t * (1.5 + k * 4) + (1 - p) * 4; const col = i % 5 === 0 ? th.c[3] : i % 2 ? th.c[2] : th.c[1]; px(x, cx + Math.cos(a) * r, cy + Math.sin(a) * r * .9, i % 7 === 0 ? 2 : 1, rgba(col, .4 + .6 * p)); } x.strokeStyle = rgba(th.c[2], .25 + .35 * k); x.lineWidth = 1; x.beginPath(); x.arc(cx, cy, M * (.3 + .1 * Math.sin(t * 3)), 0, 7); x.stroke(); },
     // pilier de lumière divine
     pillar(x, w, h, t, k, th) { const W = 6 + k * 26, g = x.createLinearGradient(w / 2 - W, 0, w / 2 + W, 0); g.addColorStop(0, 'rgba(255,255,255,0)'); g.addColorStop(.5, `rgba(255,255,255,${.15 + .5 * k})`); g.addColorStop(1, 'rgba(255,255,255,0)'); x.fillStyle = g; x.fillRect(w / 2 - W, 0, W * 2, h); },
   };
@@ -288,16 +306,19 @@ const CINE = (() => {
         const cx = w / 2, cy = h / 2;
         if (p >= .08 && p < .94) {
           const size = lerp(10, Math.min(w, h) * .42, ease(clamp((p - .08) / .8))) * (1 - suck * .9);
-          const spin = tt * (.8 + tense * 5), sx = Math.cos(spin) * .6 + .4 * Math.sign(Math.cos(spin) || 1); // ne devient jamais un trait
+          const spin = tt * (1 + tense * 6), sx = Math.cos(spin); // vraie rotation sur lui-même
           // halo qui bat avec la tension
           const beat = tense ? (Math.sin(tt * (6 + tense * 14)) * .5 + .5) : .3;
           const gr = x.createRadialGradient(cx, cy, 0, cx, cy, size * (1 + .4 * beat));
           gr.addColorStop(0, rgba(th.c[2], .25 + .45 * k * beat)); gr.addColorStop(1, rgba(th.c[2], 0));
           x.fillStyle = gr; x.fillRect(0, 0, w, h);
-          x.save(); x.translate(cx, cy); x.scale(Math.max(.06, Math.abs(sx)), 1);
-          // rien ne se devine avant la fin : on ne voit que le jeton mystère « ? », teinté aux couleurs de la scène
+          x.save(); x.translate(cx, cy); x.scale(Math.max(.04, Math.abs(sx)), 1);
+          // rien ne se devine avant la fin : un « ? » sur les DEUX faces (le dos est un peu plus sombre)
           x.drawImage(mys.complete && mys.naturalWidth ? mys : sil, -size / 2, -size / 2, size, size);
+          if (sx < 0) { x.globalAlpha = .28; x.fillStyle = '#000'; x.beginPath(); x.arc(0, 0, size * .47, 0, 7); x.fill(); x.globalAlpha = 1; }
           x.restore();
+          // tranche du jeton quand il est vu de profil
+          if (Math.abs(sx) < .35) { x.fillStyle = rgba(th.c[2], .8 * (1 - Math.abs(sx) / .35)); x.fillRect(Math.round(cx - 1), Math.round(cy - size * .45), 2, Math.round(size * .9)); }
           // contour lumineux de la silhouette (petits pixels autour)
           for (let i = 0; i < 24 * k; i++) { const a = rnd(0, 7), r = size * .5 * (.95 + Math.random() * .1); px(x, cx + Math.cos(a) * r * Math.abs(sx), cy + Math.sin(a) * r, 1, rgba(th.c[3], .8)); }
         }

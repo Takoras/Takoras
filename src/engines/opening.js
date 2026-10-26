@@ -593,7 +593,10 @@ function updateActions() {
   $('op-next').hidden = last;
   $('op-next').innerHTML = t('next', { a: sess.idx + 2, b: sess.total });
   $('op-recap').hidden = !(last && multi);
-  $('op-again').hidden = $('op-back').hidden = !(last && !multi);
+  // un par un : seulement « Retour » (on rouvre en cliquant au milieu, sur le jeton) ; plus de bouton « Ouvrir encore »
+  $('op-again').hidden = true;
+  $('op-back').hidden = !(last && !multi);
+  if (last && !multi) $('op-hint').textContent = t('tap_next');
 }
 const spinning = () => run && performance.now() < (run.spinEnd || 0);
 function next() {
@@ -741,6 +744,8 @@ function addToHistory(j, variant = '', luck = +(sess?.lucks || [])[sess?.results
 }
 
 function tap() {
+  // un par un : une fois le jeton révélé, toucher le jeton ouvre le pull suivant (il n'y a plus de bouton « Ouvrir encore »)
+  if (run?.done && sess && sess.total === 1 && opening.classList.contains('revealed') && !spinning()) return openPulls(1);
   if (!run || run.done) return;
   if (run.holding) { if (run.canReveal) (run.result.odds >= RARE && SETTINGS.speed !== 'instant' ? cine() : reveal()); return; }
   if (!run.queue.length) return; // entre le dernier palier et la pause

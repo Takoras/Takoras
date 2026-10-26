@@ -102,19 +102,19 @@ const RCFG = {
     Pikko:    { mass: .75, power: 2100, r: 92, pw: 'pinball',    cd: 0, uses: 3, p: { boost: 1.15, max: 3 } },      // balle : flipper sur les bords
     Rouillé:  { mass: 1.65, power: 1580, r: 122, pw: 'rampart',  cd: 3, p: { mult: 1.6 } },               // ferraille : rempart qui renvoie
     Givre:    { mass: 1.00, power: 1880, r: 106, pw: 'icetrail', cd: 0, uses: 3, p: { every: 6 } },                // glace : patinoire derrière lui
-    Soléo:    { mass: 1.60, power: 1620, r: 120, pw: 'flare',    cd: 3, p: { radius: 360, push: 1500 } }, // soleil : explosion à l'impact
+    Soléo:    { mass: 1.60, power: 1620, r: 120, pw: 'sun',      cd: 3, p: { radius: 900, g: 2600 } },     // soleil : gravité, tout ce qui bouge est attiré
     Azura:    { mass: .80, power: 2080, r: 96, pw: 'surf',       cd: 3, p: { radius: 700, push: 1500, cone: .82 } }, // eau : ressac dans la direction visée
-    Carmin:   { mass: 1.10, power: 1920, r: 108, pw: 'ora',      cd: 3, p: { mult: 2, friction: .2 } },   // Ora Ora : frappe ×2, l'ennemi glisse
+    Carmin:   { mass: 1.10, power: 1920, r: 108, pw: 'ora',      cd: 4, p: { mult: 1.6, friction: .55 } }, // poing : rafale (×1,6)
     Vyolis:   { mass: .95, power: 1940, r: 104, pw: 'blink',     cd: 0, uses: 3, p: { range: 900 } },              // orbites : téléportation
-    Lumis:    { mass: .82, power: 2100, r: 96, pw: 'mirror',     cd: 3, p: { mult: 2 } },                 // lumière : miroir
+    Lumis:    { mass: .82, power: 2100, r: 96, pw: 'mirror',     cd: 4, p: { mult: 1.5, radius: 450 } },  // lumière : miroir autour d'elle
     Nyx:      { mass: .95, power: 1960, r: 102, pw: 'shade',     cd: 2, p: { r: .75, power: 1.3 } },      // nuit : ombre qui traverse
     Astra:    { mass: .85, power: 2120, r: 98, pw: 'starfall',   cd: 0, uses: 3, p: { range: 1100, radius: 320, push: 1300 } }, // étoiles filantes : pluie ciblée
-    Kraïos:   { mass: 1.80, power: 1600, r: 130, pw: 'grab',     cd: 3, p: {} },                          // kraken : tentacules qui agrippent
-    Koi:      { mass: 1.00, power: 1970, r: 104, pw: 'yinyang',  cd: 0, uses: 2, p: { at: .12, spread: .4 } }, // yin-yang : se coupe en deux, lie l'ennemi pris entre
-    Néphéris: { mass: .90, power: 2150, r: 100, pw: 'telekinesis', cd: 0, uses: 2, p: { mult: 1.1 } },    // psychique : télékinésie
-    Zénith:   { mass: 1.75, power: 1650, r: 126, pw: 'stun',     cd: 0, uses: 2, p: {} },                          // œil : regard paralysant
-    Oblivion: { mass: 1.15, power: 1980, r: 110, pw: 'blackhole', cd: 0, p: { radius: 520, pull: 900, core: .2, turns: 2 } }, // planète fissurée : trou noir
-    Takoras:  { mass: 1.15, power: 2000, r: 110, pw: 'split',    cd: 0, p: { at: .25, spread: .22 } },    // se dédouble
+    Kraïos:   { mass: 1.80, power: 1600, r: 130, pw: 'grab',     cd: 0, p: {} },                          // kraken : tentacules (1 fois par match)
+    Koi:      { mass: 1.00, power: 1970, r: 104, pw: 'current',  cd: 0, uses: 3, p: { back: .75 } },     // poisson : frappe puis repart vers son départ
+    Néphéris: { mass: .90, power: 2150, r: 100, pw: 'telekinesis', cd: 0, p: { mult: .75 } },             // psychique : télékinésie (1 fois par match)
+    Zénith:   { mass: 1.75, power: 1650, r: 126, pw: 'cyclone',  cd: 3, p: { radius: 480, spin: 1500, push: 500 } }, // œil : œil du cyclone
+    Oblivion: { mass: 1.15, power: 1980, r: 110, pw: 'rift',     cd: 0, p: {} },                          // planète fissurée : faille qui s'ouvre au tour suivant
+    Takoras:  { mass: 1.15, power: 2000, r: 110, pw: 'avatar',   cd: 0, p: { r: 1.5, mass: 2, radius: 320, push: 1150 } }, // avatar géant, ondes de choc
   },
   DEFAULT_TOKEN: { role: 'fighter', mass: 1, power: 1800, r: 107, pw: 'none', cd: 0, p: {} }, // jeton d'une future collection sans pouvoir
   STAT_MAX: { mass: 3, power: 3400, r: 140 }, // barres des fiches à 100 %

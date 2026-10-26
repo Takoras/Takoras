@@ -11,7 +11,7 @@ export type RingMap = { id: string; R: number; fric: number; walls: Wall[]; zone
 export type Hole = { x: number; y: number; r: number; pull: number; core: number; left: number; owner: number };
 export type RingState = {
   turn: number; over: boolean; winner: 0 | 1 | null; sudden: boolean; bodies: Body[]; map?: RingMap;
-  holes?: Hole[]; ice?: [number, number][]; // trous noirs d'Oblivion encore ouverts · patinoire de Givre (pendant un tour)
+  holes?: Hole[]; ice?: [number, number][]; rift?: { pts: [number, number][]; side: 0 | 1; armed: boolean }; // trous noirs d'Oblivion encore ouverts · patinoire de Givre (pendant un tour)
 };
 export type Shot = { i: number; ax: number; ay: number; f: number; pow: boolean; pows?: number[] }; // pows : pouvoirs des autres jetons activés ce tour
 export type RingEvent = { t: string; at?: number; [k: string]: unknown };
