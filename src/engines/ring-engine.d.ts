@@ -3,12 +3,16 @@ import type { TokenKit } from './ring-config';
 export type Body = {
   id: number; side: 0 | 1; i: number; name: string; lvl: number; variant: string; pw: string;
   base: { mass: number; power: number; r: number }; mass: number; power: number; r: number;
-  x: number; y: number; vx: number; vy: number; alive: boolean; cd: number; spent: boolean; tmp?: boolean;
+  x: number; y: number; vx: number; vy: number; alive: boolean; cd: number; spent: boolean; tmp?: boolean; stun?: number; left?: number; link?: number;
 };
 export type Wall = { x1: number; y1: number; x2: number; y2: number; w: number; k: number; hp?: number; dead?: boolean };
 export type Zone = { x: number; y: number; w: number; h: number; fric: number };
 export type RingMap = { id: string; R: number; fric: number; walls: Wall[]; zones: Zone[] };
-export type RingState = { turn: number; over: boolean; winner: 0 | 1 | null; sudden: boolean; bodies: Body[]; map?: RingMap };
+export type Hole = { x: number; y: number; r: number; pull: number; core: number; left: number; owner: number };
+export type RingState = {
+  turn: number; over: boolean; winner: 0 | 1 | null; sudden: boolean; bodies: Body[]; map?: RingMap;
+  holes?: Hole[]; ice?: [number, number][]; // trous noirs d'Oblivion encore ouverts · patinoire de Givre (pendant un tour)
+};
 export type Shot = { i: number; ax: number; ay: number; f: number; pow: boolean; pows?: number[] }; // pows : pouvoirs des autres jetons activés ce tour
 export type RingEvent = { t: string; at?: number; [k: string]: unknown };
 export type Resolved = { frames: ([number, number, number] | null)[][]; ev: RingEvent[]; ids?: number[]; firstHit?: number };

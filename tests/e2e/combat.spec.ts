@@ -21,7 +21,7 @@ test('combat : monter son équipe (ajouter, version, enregistrer, plus de budget
   await d.getByRole('radio', { name: 'Normal' }).click();
   await expect(d.getByRole('radio', { name: 'Normal' })).toHaveAttribute('aria-checked', 'true');
   // chaque jeton montre ce que fait son pouvoir
-  await expect(d.getByText('Gonfler').first()).toBeVisible();
+  await expect(d.getByText('Gélatine').first()).toBeVisible();
   await d.getByRole('button', { name: 'Valider l’équipe' }).click();
   await expect(d).toBeHidden();
   expect(calls).toContain('set_deck');

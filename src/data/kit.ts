@@ -14,6 +14,21 @@ export const PW_COL: Record<string, string> = {
   eruption: '#f97316',
   flare: '#fb923c',
   zerog: '#93c5fd',
+  jelly: '#7dd3fc',
+  pinball: '#f9a8d4',
+  rampart: '#d97706',
+  icetrail: '#a5f3fc',
+  surf: '#38bdf8',
+  ora: '#f43f5e',
+  blink: '#c9a6f2',
+  mirror: '#f7a8d8',
+  shade: '#7c8cf8',
+  starfall: '#f6d39a',
+  grab: '#6366f1',
+  yinyang: '#f0453a',
+  telekinesis: '#f08a3c',
+  stun: '#d9364f',
+  blackhole: '#3fc7b6',
   freeze: '#a5f3fc',
   wave: '#38bdf8',
   curve: '#60a5fa',
@@ -39,7 +54,14 @@ export function powerInfo(name: string, lang: Lang) {
     r = dictOf(lang).ring;
   const pw = r.pw as unknown as PwDict;
   const [n, d] = pw[k.pw] ?? pw.none ?? ['', ''];
-  const when = k.pw === 'none' ? '' : k.cd ? r.every.replace('{n}', String(k.cd)) : r.once;
+  const when =
+    k.pw === 'none'
+      ? ''
+      : k.uses
+        ? r.uses.replace('{n}', String(k.uses))
+        : k.cd
+          ? r.every.replace('{n}', String(k.cd))
+          : r.once;
   return { pw: k.pw, name: n, desc: d, when, col: PW_COL[k.pw] ?? '#888888' };
 }
 

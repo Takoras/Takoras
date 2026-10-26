@@ -18,6 +18,7 @@ const RCFG = {
   // Les 5 arènes de match : 1,4× plus grandes, chacune son style et ses obstacles.
   // Mur { x1, y1, x2, y2, w (épaisseur), k (< 1 amortit, > 1 renvoie plus vite), hp (coups avant de casser) }.
   // Placement symétrique par le centre (les deux camps ont exactement le même terrain), loin des départs (y = ±1120).
+  ICE_FRIC: .15,          // frottement sur la patinoire de Givre
   WALL_HP: 5, WALL_HIT: 120,  // un mur casse au 5e vrai choc (vitesse d'impact > 120)
   MAPS: [
     { id: 'arene', R: 1450, fric: 1, zones: [], walls: [], pool: false },
@@ -94,24 +95,25 @@ const RCFG = {
   // ---------- Jetons : stats de base (niveau 1, sans mutation) + UN pouvoir, en lien avec le dessin du jeton.
   // Plus de catégories (combattant, tank…) : chaque jeton a son style de jeu par son poids, sa vitesse, sa taille et son pouvoir.
   // mass : poids (dur à pousser, pousse fort) · power : vitesse max du tir · r : taille (rayon)
-  // cd : tours de recharge après utilisation (0 = une seule fois par match). p : réglages du pouvoir.
+  // cd : tours de recharge après utilisation (0 = une seule fois par match) · uses : nombre d'utilisations par match (pas de recharge).
+  // p : réglages du pouvoir. Aucun pouvoir ne se déclenche « à l'arrêt » : tout part au lancer ou au premier choc.
   TOKENS: {
-    Mobu:     { mass: 1.55, power: 1600, r: 124, pw: 'grow',     cd: 3, p: { r: 1.4, mass: 1.7 } },       // blob : gonfle
-    Pikko:    { mass: .75, power: 2100, r: 92, pw: 'bounce',     cd: 2, p: {} },                          // balle rebondissante : rebondit sur le bord
-    Rouillé:  { mass: 1.65, power: 1580, r: 122, pw: 'scrap',    cd: 3, p: { mass: 2.2 } },               // ferraille : devient très lourd
-    Givre:    { mass: 1.00, power: 1880, r: 106, pw: 'freeze',   cd: 2, p: { friction: .18 } },           // glace : gèle l'ennemi touché
+    Mobu:     { mass: 1.55, power: 1600, r: 124, pw: 'jelly',    cd: 3, p: { r: 1.35, mass: 1.5, bounce: 1.5 } }, // blob : gélatine qui renvoie tout
+    Pikko:    { mass: .75, power: 2100, r: 92, pw: 'pinball',    cd: 0, uses: 3, p: { boost: 1.15, max: 3 } },      // balle : flipper sur les bords
+    Rouillé:  { mass: 1.65, power: 1580, r: 122, pw: 'rampart',  cd: 3, p: { mult: 1.6 } },               // ferraille : rempart qui renvoie
+    Givre:    { mass: 1.00, power: 1880, r: 106, pw: 'icetrail', cd: 0, uses: 3, p: { every: 6 } },                // glace : patinoire derrière lui
     Soléo:    { mass: 1.60, power: 1620, r: 120, pw: 'flare',    cd: 3, p: { radius: 360, push: 1500 } }, // soleil : explosion à l'impact
-    Azura:    { mass: .80, power: 2080, r: 96, pw: 'wave',       cd: 3, p: { radius: 520, push: 900 } },  // eau : raz-de-marée au lancer
-    Carmin:   { mass: 1.10, power: 1920, r: 108, pw: 'double',   cd: 3, p: { mult: 2 } },                 // coup de poing ×2
-    Vyolis:   { mass: .95, power: 1940, r: 104, pw: 'ghost',     cd: 2, p: {} },                          // spectre : traverse
-    Lumis:    { mass: .82, power: 2100, r: 96, pw: 'rescue',     cd: 3, p: { pull: 300 } },               // lumière : ramène un allié
-    Nyx:      { mass: .95, power: 1960, r: 102, pw: 'shrink',    cd: 2, p: { r: .7, power: 1.35 } },      // nuit : petit et rapide
-    Astra:    { mass: .85, power: 2120, r: 98, pw: 'curve',      cd: 2, p: { turn: 2.6 } },               // étoile filante : tête chercheuse
-    Kraïos:   { mass: 1.80, power: 1600, r: 130, pw: 'magnet',   cd: 3, p: { radius: 520, pull: 1300 } }, // kraken : tentacules qui attirent
-    Koi:      { mass: 1.00, power: 1970, r: 104, pw: 'second',   cd: 3, p: { at: .35, boost: .85 } },     // poisson : 2e élan
-    Néphéris: { mass: .90, power: 2150, r: 100, pw: 'roots',     cd: 0, p: {} },                          // psychique : barrière
-    Zénith:   { mass: 1.75, power: 1650, r: 126, pw: 'zerog',    cd: 3, p: { friction: .35 } },           // ciel : apesanteur
-    Oblivion: { mass: 1.15, power: 1980, r: 110, pw: 'void',     cd: 0, p: { push: 1800 } },              // trou noir : éjecte
+    Azura:    { mass: .80, power: 2080, r: 96, pw: 'surf',       cd: 3, p: { radius: 700, push: 1500, cone: .82 } }, // eau : ressac dans la direction visée
+    Carmin:   { mass: 1.10, power: 1920, r: 108, pw: 'ora',      cd: 3, p: { mult: 2, friction: .2 } },   // Ora Ora : frappe ×2, l'ennemi glisse
+    Vyolis:   { mass: .95, power: 1940, r: 104, pw: 'blink',     cd: 0, uses: 3, p: { range: 900 } },              // orbites : téléportation
+    Lumis:    { mass: .82, power: 2100, r: 96, pw: 'mirror',     cd: 3, p: { mult: 2 } },                 // lumière : miroir
+    Nyx:      { mass: .95, power: 1960, r: 102, pw: 'shade',     cd: 2, p: { r: .75, power: 1.3 } },      // nuit : ombre qui traverse
+    Astra:    { mass: .85, power: 2120, r: 98, pw: 'starfall',   cd: 0, uses: 3, p: { range: 1100, radius: 320, push: 1300 } }, // étoiles filantes : pluie ciblée
+    Kraïos:   { mass: 1.80, power: 1600, r: 130, pw: 'grab',     cd: 3, p: {} },                          // kraken : tentacules qui agrippent
+    Koi:      { mass: 1.00, power: 1970, r: 104, pw: 'yinyang',  cd: 0, uses: 2, p: { at: .12, spread: .4 } }, // yin-yang : se coupe en deux, lie l'ennemi pris entre
+    Néphéris: { mass: .90, power: 2150, r: 100, pw: 'telekinesis', cd: 0, uses: 2, p: { mult: 1.1 } },    // psychique : télékinésie
+    Zénith:   { mass: 1.75, power: 1650, r: 126, pw: 'stun',     cd: 0, uses: 2, p: {} },                          // œil : regard paralysant
+    Oblivion: { mass: 1.15, power: 1980, r: 110, pw: 'blackhole', cd: 0, p: { radius: 520, pull: 900, core: .2, turns: 2 } }, // planète fissurée : trou noir
     Takoras:  { mass: 1.15, power: 2000, r: 110, pw: 'split',    cd: 0, p: { at: .25, spread: .22 } },    // se dédouble
   },
   DEFAULT_TOKEN: { role: 'fighter', mass: 1, power: 1800, r: 107, pw: 'none', cd: 0, p: {} }, // jeton d'une future collection sans pouvoir

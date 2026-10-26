@@ -54,30 +54,3 @@ test('plus de rôles : les stats en match = les stats de la fiche (aucun bonus d
   );
   for (const b of st.bodies) expect(b.base.power).toBeCloseTo(RG.stats(b.name).power);
 });
-
-test('Gel (Givre) : l’ennemi touché glisse plus loin ; Raz-de-marée (Azura) repousse les ennemis proches', () => {
-  const team = (n: string[]) => n.map((name) => ({ name, lvl: 1, variant: '' }));
-  const place = (st: ReturnType<typeof RG.create>) => {
-    for (const b of st.bodies) b.alive = b.i === 0;
-    const me = st.bodies.find((b) => b.side === 0 && b.i === 0),
-      foe = st.bodies.find((b) => b.side === 1 && b.i === 0);
-    if (me && foe) [me.x, me.y, foe.x, foe.y] = [0, 300, 0, 0];
-    return foe;
-  };
-  const far = (pow: boolean) => {
-    const st = RG.create([team(['Givre', 'Mobu', 'Pikko']), team(['Carmin', 'Koi', 'Nyx'])], 'arene');
-    place(st);
-    const res = RG.resolve(st, [{ i: 0, ax: 0, ay: -1000, f: 0.6, pow }, null]);
-    return { y: st.bodies.find((b) => b.side === 1 && b.i === 0)?.y ?? 0, ev: res.ev };
-  };
-  const a = far(false),
-    b = far(true);
-  expect(b.ev.some((e) => e.t === 'freeze')).toBe(true);
-  expect(b.y).toBeLessThan(a.y); // gelé : il part bien plus loin vers le haut
-  const st = RG.create([team(['Azura', 'Mobu', 'Pikko']), team(['Carmin', 'Koi', 'Nyx'])], 'arene');
-  const foe = place(st);
-  const y0 = foe?.y ?? 0;
-  const res = RG.resolve(st, [{ i: 0, ax: 1000, ay: 0, f: 0.2, pow: true }, null]);
-  expect(res.ev.some((e) => e.t === 'wave')).toBe(true);
-  expect(st.bodies.find((x) => x.side === 1 && x.i === 0)?.y ?? 0).toBeLessThan(y0); // repoussé vers le haut
-});

@@ -18,7 +18,7 @@ test('bestiaire : grille, filtres, fiche, vente, verrou, niveau', async ({ page 
   // fiche de Mobu : vendre 1, puis monter de niveau
   await page.getByRole('button', { name: /×4 Mobu/ }).click();
   const dlg = page.getByRole('dialog');
-  await expect(dlg.getByText('Gonfler')).toBeVisible();
+  await expect(dlg.getByText('Gélatine')).toBeVisible();
   await dlg.getByRole('button', { name: /Vendre 1/ }).click();
   // la fiche reste ouverte et se met à jour
   await expect(dlg.getByText('Tu en as 3')).toBeVisible();

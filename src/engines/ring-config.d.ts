@@ -1,6 +1,6 @@
 // Types de RCFG (valeurs d'équilibrage du Ring). Les valeurs sont dans ring-config.js.
 export type Role = 'fighter' | 'tank' | 'support';
-export type TokenKit = { role?: Role; mass: number; power: number; r: number; pw: string; cd: number; p: Record<string, number> };
+export type TokenKit = { role?: Role; mass: number; power: number; r: number; pw: string; cd: number; uses?: number; p: Record<string, number> };
 export const RCFG: {
   MAPS: { id: string; R: number; fric: number; walls: { x1: number; y1: number; x2: number; y2: number; w: number; k: number; hp?: number; dead?: boolean }[]; zones: { x: number; y: number; w: number; h: number; fric: number }[]; pool?: boolean }[];
   WALL_HP: number; WALL_HIT: number;
