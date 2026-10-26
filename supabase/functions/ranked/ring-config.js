@@ -14,10 +14,37 @@ const RCFG = {
   // jusqu'à 40 %). Un jeton dont le centre se retrouve hors du bord tombe. Sécurité : 60 tours au plus.
   SHRINK: { step: .02, min: .4, maxTurns: 60 },
 
-  // ---------- Map : pour l'instant UNE seule arène, vide (pas d'obstacle). Le moteur sait toujours gérer des murs
-  // { x1, y1, x2, y2, w, k } et des zones au sol { x, y, w, h, fric } si on en remet un jour.
+  // ---------- Maps. « arene » : vide, pour le tuto (pool: false = jamais tirée au sort).
+  // Les 5 arènes de match : 1,4× plus grandes, chacune son style et ses obstacles.
+  // Mur { x1, y1, x2, y2, w (épaisseur), k (< 1 amortit, > 1 renvoie plus vite), hp (coups avant de casser) }.
+  // Placement symétrique par le centre (les deux camps ont exactement le même terrain), loin des départs (y = ±1120).
+  WALL_HP: 5, WALL_HIT: 120,  // un mur casse au 5e vrai choc (vitesse d'impact > 120)
   MAPS: [
-    { id: 'arene', R: 1450, fric: 1, zones: [], walls: [] },
+    { id: 'arene', R: 1450, fric: 1, zones: [], walls: [], pool: false },
+    // Ruines du Jardin : 4 murets de pierre sur les côtés
+    { id: 'jardin', R: 2000, fric: 1, zones: [], walls: [
+      { x1: -900, y1: -420, x2: -600, y2: -420, w: 60, k: .6 }, { x1: 600, y1: 420, x2: 900, y2: 420, w: 60, k: .6 },
+      { x1: -900, y1: 420, x2: -600, y2: 420, w: 60, k: .6 }, { x1: 600, y1: -420, x2: 900, y2: -420, w: 60, k: .6 },
+    ] },
+    // Sanctuaire Psychique : 2 parois psychiques en biais qui renvoient plus vite
+    { id: 'psy', R: 2000, fric: 1, zones: [], walls: [
+      { x1: -1150, y1: -320, x2: -900, y2: 320, w: 50, k: 1.25 }, { x1: 1150, y1: 320, x2: 900, y2: -320, w: 50, k: 1.25 },
+    ] },
+    // Forge Solaire : 4 enclumes en croix autour du centre
+    { id: 'forge', R: 2000, fric: 1, zones: [], walls: [
+      { x1: -380, y1: -130, x2: -380, y2: 130, w: 70, k: .7 }, { x1: 380, y1: 130, x2: 380, y2: -130, w: 70, k: .7 },
+      { x1: -130, y1: -380, x2: 130, y2: -380, w: 70, k: .7 }, { x1: 130, y1: 380, x2: -130, y2: 380, w: 70, k: .7 },
+    ] },
+    // Observatoire Astral : 6 piliers en hexagone
+    { id: 'astral', R: 2000, fric: 1, zones: [], walls: [
+      { x1: 720, y1: 0, x2: 720, y2: 0, w: 110, k: .85 }, { x1: -720, y1: 0, x2: -720, y2: 0, w: 110, k: .85 },
+      { x1: 360, y1: 620, x2: 360, y2: 620, w: 110, k: .85 }, { x1: -360, y1: -620, x2: -360, y2: -620, w: 110, k: .85 },
+      { x1: -360, y1: 620, x2: -360, y2: 620, w: 110, k: .85 }, { x1: 360, y1: -620, x2: 360, y2: -620, w: 110, k: .85 },
+    ] },
+    // Abysse d'Ombre : 2 longues failles en diagonale
+    { id: 'abysse', R: 2000, fric: 1, zones: [], walls: [
+      { x1: -1300, y1: -160, x2: -450, y2: 260, w: 55, k: .7 }, { x1: 1300, y1: 160, x2: 450, y2: -260, w: 55, k: .7 },
+    ] },
   ],
 
   // ---------- Physique (pas fixe, valeurs arrondies à chaque pas = 100 % déterministe)

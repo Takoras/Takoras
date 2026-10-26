@@ -36,7 +36,8 @@ const loadRing = async () => {
 };
 
 // Une des 5 maps au hasard à chaque partie
-const randomMap = () => RCFG.MAPS[Math.floor(Math.random() * RCFG.MAPS.length)]?.id;
+const POOL = RCFG.MAPS.filter((m) => m.pool !== false);
+const randomMap = () => POOL[Math.floor(Math.random() * POOL.length)]?.id;
 
 // Lance le tuto du Ring (sans compte possible)
 export const playTuto = async (onEnd?: () => void) => {

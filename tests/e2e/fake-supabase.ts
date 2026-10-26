@@ -548,6 +548,8 @@ export async function fakeSupabase(
       deck = (JSON.parse(route.request().postData() ?? '{}') as { ids: number[] }).ids;
       return json(null);
     }
+    if (rpc === 'leaderboard_time')
+      return json(['Alpha', 'Testeur'].map((pseudo, i) => ({ pseudo, value: 7500 - i * 3000 })));
     if (rpc === 'leaderboard') {
       const kind = (JSON.parse(route.request().postData() ?? '{}') as { kind: string }).kind;
       return json(

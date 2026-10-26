@@ -13,7 +13,7 @@ import './ring.css';
 // ---------- Textes (FR + EN)
 const RT = {
   fr: {
-    map_arene: 'Arène', map_jardin: 'Jardin', map_volcan: 'Volcan', map_glace: 'Glace', map_ruines: 'Ruines', foeTeam: 'Équipe adverse', scout: 'Leurs pouvoirs', scoutHint: 'Touche un jeton pour voir sa fiche. Le chrono est en pause pendant que tu regardes (entraînement).',
+    map_arene: 'Arène', map_jardin: 'Ruines du Jardin', map_psy: 'Sanctuaire Psychique', map_forge: 'Forge Solaire', map_astral: 'Observatoire Astral', map_abysse: 'Abysse d’Ombre', map_volcan: 'Volcan', map_glace: 'Glace', map_ruines: 'Ruines', foeTeam: 'Équipe adverse', scout: 'Leurs pouvoirs', scoutHint: 'Touche un jeton pour voir sa fiche. Le chrono est en pause pendant que tu regardes (entraînement).',
     pw: {
       grow: ['Gonfler', 'Plus gros et plus lourd ce tour.'],
       bounce: ['Rebond', 'Rebondit sur le bord au lieu de sortir.'],
@@ -55,7 +55,7 @@ const RT = {
     tRanked: '<b>Le classé</b> : tu affrontes un vrai joueur de ton niveau (Elo). Victoire = +Elo, défaite = −Elo. Monte de <b>Bois 1</b> jusqu’à <b>Takoras</b> ! Si tu ne joues pas 3 tours de suite, tu perds le match.',
   },
   en: {
-    map_arene: 'Arena', map_jardin: 'Garden', map_volcan: 'Volcano', map_glace: 'Ice', map_ruines: 'Ruins', foeTeam: 'Opponent team', scout: 'Their powers', scoutHint: 'Tap a token to see its card. The timer is paused while you look (training).',
+    map_arene: 'Arena', map_jardin: 'Garden Ruins', map_psy: 'Psychic Sanctuary', map_forge: 'Solar Forge', map_astral: 'Astral Observatory', map_abysse: 'Shadow Abyss', map_volcan: 'Volcano', map_glace: 'Ice', map_ruines: 'Ruins', foeTeam: 'Opponent team', scout: 'Their powers', scoutHint: 'Tap a token to see its card. The timer is paused while you look (training).',
     pw: {
       grow: ['Inflate', 'Bigger and heavier this turn.'],
       bounce: ['Bounce', 'Bounces off the edge instead of falling out.'],
@@ -504,6 +504,13 @@ function rgEvent(e) {
     rgSparks(x, y, bump ? 18 : 8, bump ? '#f9a8d4' : '#e7e5e4', bump ? 4 : 2.5);
     if (bump) { rgRing(x, y, '#f472b6', 2.4); RNG.shake = Math.min(10, 4 + e.j / 500); sfx.impact?.(); } else sfx.click?.();
   }
+  // obstacle cassé : gerbe de débris, il disparaît
+  if (e.t === 'break') {
+    const [x, y] = at(e.x, e.y), T = MAP_THEME[RNG.st?.map?.id] || MAP_THEME.arene, o = RNG.st?.map?.walls[e.w];
+    if (o) o.dead = true;
+    rgSparks(x, y, 34, T.rock[0], 5); rgSparks(x, y, 16, T.rock[2], 3.5); rgRing(x, y, T.rim, 2.6);
+    RNG.shake = Math.max(RNG.shake, 12); rgPunch(x, y, .06); sfx.impact?.();
+  }
   if (e.t === 'out') {
     const b = body(e.id), [x, y] = at(e.x, e.y);
     P.fall.push({ b, x: e.x, y: e.y, vx: e.vx, vy: e.vy, t: 0 });
@@ -581,6 +588,11 @@ const MAP_THEME = {
   volcan: { floor: ['#3b1a14', '#26110d', '#170a08'], rim: '#fb923c', rimDark: '#7c2d12', stud: '#ea580c', rock: ['#5b4a46', '#2f2422', '#8f7a74'] },
   glace: { floor: ['#1e3a52', '#142838', '#0b1824'], rim: '#a5f3fc', rimDark: '#155e75', stud: '#22d3ee', rock: ['#7aa6c2', '#3f6480', '#d6f3ff'] },
   ruines: { floor: ['#3a3326', '#26211a', '#17140f'], rim: '#fde68a', rimDark: '#713f12', stud: '#ca8a04', rock: ['#8a7e66', '#4f4637', '#c2b594'] },
+  // 5 arènes de match, 5 directions artistiques
+  psy: { floor: ['#3b1d4f', '#261236', '#170a22'], rim: '#f0abfc', rimDark: '#701a75', stud: '#d946ef', rock: ['#a78bfa', '#5b21b6', '#ede9fe'] },
+  forge: { floor: ['#40220f', '#2a160a', '#190c05'], rim: '#fbbf24', rimDark: '#7c2d12', stud: '#f97316', rock: ['#57534e', '#292524', '#a8a29e'] },
+  astral: { floor: ['#14224a', '#0c1633', '#060c1f'], rim: '#93c5fd', rimDark: '#1e3a8a', stud: '#60a5fa', rock: ['#94a3b8', '#334155', '#e2e8f0'] },
+  abysse: { floor: ['#16121f', '#0e0b15', '#06040a'], rim: '#a78bfa', rimDark: '#2e1065', stud: '#7c3aed', rock: ['#3f3a4f', '#1c1828', '#6d6585'] },
 };
 // Zones au sol : boue qui bouillonne (ralentit) ou glace qui brille (fait filer)
 function rgZones(c, t) {
@@ -609,6 +621,7 @@ function rgWalls(c, t) {
   const W = RNG.st?.map?.walls; if (!W?.length) return;
   const V = RNG.view, px = V.px, T = MAP_THEME[RNG.st.map.id] || MAP_THEME.arene;
   for (const o of W) {
+    if (o.dead) continue;
     const [ax, ay] = w2s(o.x1, o.y1), [bx, by] = w2s(o.x2, o.y2), w = o.w * V.s, L = Math.hypot(bx - ax, by - ay) || 1, ux = (bx - ax) / L, uy = (by - ay) / L;
     const seg = (col, lw, dx = 0, dy = 0) => { c.strokeStyle = col; c.lineWidth = lw; c.lineCap = 'round'; c.beginPath(); c.moveTo(ax + dx, ay + dy); c.lineTo(bx + dx, by + dy); c.stroke(); };
     seg('rgba(0,0,0,.45)', w + px * 2, w * .15, w * .3); // ombre
@@ -627,6 +640,15 @@ function rgWalls(c, t) {
       // joints de briques
       c.strokeStyle = T.rock[1]; c.lineWidth = Math.max(1, px);
       for (let d = 18, k = 0; d < L - 6; d += 22, k++) { const cx = ax + ux * d, cy = ay + uy * d, h = w * .38, o2 = k % 2 ? h * .5 : -h * .5; c.beginPath(); c.moveTo(cx - uy * (o2 > 0 ? 0 : h), cy + ux * (o2 > 0 ? 0 : h)); c.lineTo(cx + uy * (o2 > 0 ? h : 0), cy - ux * (o2 > 0 ? h : 0)); c.stroke(); }
+    }
+    // obstacle abîmé : une fissure de plus à chaque coup (5 coups = cassé)
+    const dmg = (RCFG.WALL_HP || 5) - (o.hp ?? RCFG.WALL_HP);
+    if (dmg > 0) {
+      c.strokeStyle = 'rgba(0,0,0,.75)'; c.lineWidth = Math.max(1, px);
+      for (let k = 0; k < dmg; k++) {
+        const f = (k + .5) / dmg, cx = ax + (bx - ax) * f + (k % 2 ? 3 : -3), cy = ay + (by - ay) * f, s2 = w * .45;
+        c.beginPath(); c.moveTo(cx - s2 * .6, cy - s2); c.lineTo(cx + s2 * .2, cy - s2 * .1); c.lineTo(cx - s2 * .3, cy + s2 * .3); c.lineTo(cx + s2 * .5, cy + s2); c.stroke();
+      }
     }
   }
 }

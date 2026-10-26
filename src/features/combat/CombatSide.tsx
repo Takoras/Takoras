@@ -40,7 +40,6 @@ export function CombatDex({ inv }: { inv: InvData | undefined }) {
                 disabled={!k}
                 onClick={() => setOpen(j.name)}
                 style={{ '--g': k ? hexRGB(j.glow) : '113, 113, 122' } as CSSProperties}
-                aria-label={k ? jn(j.name) : '?'}
               >
                 <img className="px" src={k ? texOf(j) : MYSTERE} alt="" width={44} height={44} />
                 <b>{k ? jn(j.name) : '?'}</b>

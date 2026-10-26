@@ -111,7 +111,8 @@ async function join(uid) {
   if (!p.foe) return out({ queued: true, window: p.window, elo });
   // adversaire trouvé : celui qui attendait est le joueur 1 (en haut côté serveur ; chacun se voit en bas)
   const { data: foe } = await db.from('profiles').select('pseudo').eq('id', p.foe).single();
-  const map = RCFG.MAPS[Math.floor(Math.random() * RCFG.MAPS.length)].id;
+  const pool = RCFG.MAPS.filter((m) => m.pool !== false); // les 5 arènes de match (pas celle du tuto)
+  const map = pool[Math.floor(Math.random() * pool.length)].id;
   const state = RG.create([p.foe_team, mine], map);
   const { data: row, error: e2 } = await db
     .from('ranked_matches')

@@ -5,7 +5,7 @@ export type Body = {
   base: { mass: number; power: number; r: number }; mass: number; power: number; r: number;
   x: number; y: number; vx: number; vy: number; alive: boolean; cd: number; spent: boolean; tmp?: boolean;
 };
-export type Wall = { x1: number; y1: number; x2: number; y2: number; w: number; k: number };
+export type Wall = { x1: number; y1: number; x2: number; y2: number; w: number; k: number; hp?: number; dead?: boolean };
 export type Zone = { x: number; y: number; w: number; h: number; fric: number };
 export type RingMap = { id: string; R: number; fric: number; walls: Wall[]; zones: Zone[] };
 export type RingState = { turn: number; over: boolean; winner: 0 | 1 | null; sudden: boolean; bodies: Body[]; map?: RingMap };

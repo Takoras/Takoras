@@ -22,14 +22,44 @@ function fight(mapId: string, seed: number) {
   return { log, winner: st.winner };
 }
 
-test('une seule arène, vide (pas d’obstacle), plus grande que l’ancien ring', () => {
-  expect(RCFG.MAPS.map((m) => m.id)).toEqual(['arene']);
-  const m = RCFG.MAPS[0];
-  expect(m?.walls).toEqual([]);
-  expect(m?.zones).toEqual([]);
-  const st = RG.create([A, B], 'arene');
-  expect(RG.ringR(st)).toBe(1450);
+test('tuto : arène vide ; matchs : 5 arènes 1,4× plus grandes, avec obstacles symétriques', () => {
+  expect(RCFG.MAPS.map((m) => m.id)).toEqual(['arene', 'jardin', 'psy', 'forge', 'astral', 'abysse']);
+  expect(RCFG.MAPS[0]?.walls).toEqual([]);
+  expect(RG.ringR(RG.create([A, B], 'arene'))).toBe(1450);
+  for (const m of RCFG.MAPS.filter((x) => x.pool !== false)) {
+    expect(m.R).toBe(2000);
+    expect(m.walls.length).toBeGreaterThan(0);
+    // même terrain pour les deux camps : chaque mur a son reflet par le centre
+    for (const w of m.walls)
+      expect(
+        m.walls.some(
+          (o) =>
+            (o.x1 === -w.x1 && o.y1 === -w.y1 && o.x2 === -w.x2 && o.y2 === -w.y2) ||
+            (o.x1 === -w.x2 && o.y1 === -w.y2 && o.x2 === -w.x1 && o.y2 === -w.y1),
+        ),
+      ).toBe(true);
+    // aucun jeton ne démarre dans un mur
+    const st = RG.create([A, B], m.id);
+    for (const b of st.bodies) expect(RG.touchesWall(st, b.x, b.y, b.r + 20)).toBe(false);
+  }
 });
+
+test('un obstacle casse au 5e vrai choc', () => {
+  const st = RG.create([A, B], 'arene');
+  st.map?.walls.push({ x1: -300, y1: 0, x2: 300, y2: 0, w: 46, k: 0.75, hp: 1 });
+  const res = RG.resolve(st, [{ i: 1, ax: 0, ay: -1000, f: 1, pow: false }, null]);
+  expect(res.ev.some((e) => e.t === 'break')).toBe(true);
+  expect(st.map?.walls[0]?.dead).toBe(true);
+  expect(RG.touchesWall(st, 0, 0, 10)).toBe(false); // il ne bloque plus rien
+  expect(RG.create([A, B], 'jardin').map?.walls[0]?.hp).toBe(5);
+});
+
+for (const id of ['jardin', 'psy', 'forge', 'astral', 'abysse'])
+  test(`${id} : déterministe, et aucun jeton coincé dans un mur`, () => {
+    const a = fight(id, 3),
+      b = fight(id, 3);
+    expect(a.log).toEqual(b.log);
+  }, 60_000);
 
 test('arène : déterministe (même partie = même résultat)', () => {
   const a = fight('arene', 7),

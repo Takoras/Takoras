@@ -27,7 +27,7 @@ const RG = (() => {
   function create(teams, mapId) {
     const st = { turn: 1, over: false, winner: null, sudden: false, bodies: [] };
     const map = mapId ? C.MAPS.find(m => m.id === mapId) : null;
-    if (map) st.map = { id: map.id, R: map.R, R0: map.R, fric: map.fric, walls: map.walls.map(o => ({ ...o })), zones: map.zones.map(z => ({ ...z })) };
+    if (map) st.map = { id: map.id, R: map.R, R0: map.R, fric: map.fric, walls: map.walls.map(o => ({ ...o, hp: o.hp ?? C.WALL_HP })), zones: map.zones.map(z => ({ ...z })) };
     const k0 = map ? map.R / C.RING_R : 1;
     teams.forEach((team, side) => team.forEach((j, i) => {
       const s = stats(j.name, j.lvl, j.variant), k = kit(j.name);
@@ -37,7 +37,7 @@ const RG = (() => {
     return st;
   }
   const ringR = st => st.map ? st.map.R : C.RING_R;
-  const wallsOf = st => st.map ? st.map.walls : [];
+  const wallsOf = st => st.map ? st.map.walls.filter(o => !o.dead) : []; // les murs cassés ne comptent plus
   const zonesOf = st => st.map ? st.map.zones : [];
   // Mur = segment épais (capsule) de (x1, y1) à (x2, y2), épaisseur w. Point du mur le plus proche de (px, py).
   function nearest(o, px, py) {
@@ -181,6 +181,7 @@ const RG = (() => {
       if (WALLS.length) for (const b of list) {
         if (!b.alive) continue;
         for (const o of WALLS) {
+          if (o.dead) continue;
           const [cx, cy] = nearest(o, b.x, b.y), dx = b.x - cx, dy = b.y - cy, d = len(dx, dy), rr = b.r + o.w / 2;
           if (d >= rr) continue;
           const nx = d ? dx / d : 0, ny = d ? dy / d : 1;
@@ -190,6 +191,8 @@ const RG = (() => {
           b.vx -= (1 + o.k) * vn * nx; b.vy -= (1 + o.k) * vn * ny;
           if (b.t.shooter) b.t.hit = true;
           ev.push({ t: 'wall', id: b.id, x: q(cx + nx * o.w / 2), y: q(cy + ny * o.w / 2), k: o.k, j: Math.round(-vn), at: tm });
+          // obstacle destructible : chaque vrai choc l'abîme, au 5e il casse (et disparaît pour le reste du match)
+          if (-vn > C.WALL_HIT && o.hp != null && --o.hp <= 0) { o.dead = true; ev.push({ t: 'break', w: st.map.walls.indexOf(o), x: q((o.x1 + o.x2) / 2), y: q((o.y1 + o.y2) / 2), at: tm }); }
         }
       }
       // bord du ring

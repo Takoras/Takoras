@@ -2,7 +2,8 @@
 export type Role = 'fighter' | 'tank' | 'support';
 export type TokenKit = { role?: Role; mass: number; power: number; r: number; pw: string; cd: number; p: Record<string, number> };
 export const RCFG: {
-  MAPS: { id: string; R: number; fric: number; walls: { x1: number; y1: number; x2: number; y2: number; w: number; k: number }[]; zones: { x: number; y: number; w: number; h: number; fric: number }[] }[];
+  MAPS: { id: string; R: number; fric: number; walls: { x1: number; y1: number; x2: number; y2: number; w: number; k: number; hp?: number; dead?: boolean }[]; zones: { x: number; y: number; w: number; h: number; fric: number }[]; pool?: boolean }[];
+  WALL_HP: number; WALL_HIT: number;
   RING_R: number; TURNS: number; AIM_S: number; START_Y: number; START_X: number[]; SUDDEN_Y: number;
   DT: number; FRICTION: number; DRAG: number; RESTITUTION: number; STOP_SPEED: number; MAX_SIM_S: number; QUANT: number; MIN_FORCE: number;
   BIG_HIT: number; SLOWMO: number; SLOWMO_S: number;

@@ -18,7 +18,7 @@ test('combat : monter son équipe (ajouter, version, enregistrer, plus de budget
   // Mobu existe aussi en Doré : on change de version
   await d.getByRole('radio', { name: 'Doré' }).click();
   await expect(d.getByRole('radio', { name: 'Doré' })).toHaveAttribute('aria-checked', 'true');
-  await expect(d.getByText('+5 %', { exact: true })).toBeVisible();
+  await expect(d.getByText('+3 %', { exact: true })).toBeVisible();
   // onglet de version comme le bestiaire : « Doré » ne montre que les jetons possédés en Doré
   await d.getByRole('tab', { name: /Doré/ }).click();
   await expect(d.locator('[class*="teGrid"] li')).toHaveCount(1);
@@ -28,7 +28,10 @@ test('combat : monter son équipe (ajouter, version, enregistrer, plus de budget
   expect(calls).toContain('set_deck');
   await expect(page.getByRole('button', { name: /Entraînement/ })).toBeEnabled();
   // fiche d'un jeton de l'équipe
-  await page.getByRole('button', { name: /Vyolis/ }).click();
+  await page
+    .getByRole('region', { name: 'Équipe' })
+    .getByRole('button', { name: /Vyolis/ })
+    .click();
   await expect(page.getByRole('dialog').getByText(/Niv\. 1\/10/)).toBeVisible();
 });
 
