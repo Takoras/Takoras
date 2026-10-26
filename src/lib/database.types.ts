@@ -249,6 +249,8 @@ export type Database = {
       ranked_me: { Args: never; Returns: Json };
       ranked_around: { Args: never; Returns: { pos: number; pseudo: string; elo: number; me: boolean }[] };
       ranked_tuto_done: { Args: never; Returns: undefined };
+      leaderboard_time: { Args: { n?: number }; Returns: { pseudo: string; value: number }[] };
+      play_ping: { Args: never; Returns: undefined };
       ranked_top: { Args: { n?: number }; Returns: { pseudo: string; elo: number; games: number; wins: number }[] };
       redeem_code: { Args: { p_code: string }; Returns: Json };
       refund_pulls: { Args: { ids: number[] }; Returns: Json };

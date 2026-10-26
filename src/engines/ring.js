@@ -50,7 +50,7 @@ const RT = {
     tTimer: 'Le chrono : <b>60 s</b> pour viser à chaque tour. Si les deux valident avant, le tour part tout de suite. Et <b>le ring rétrécit à chaque tour</b> : reste loin du bord !',
     tWalls: 'Pouvoirs : tu peux activer ceux de <b>plusieurs jetons</b> dans le même tour (choisis un jeton, touche son pouvoir, puis un autre…), mais <b>un seul jeton tire</b> : celui que tu vises.',
     tScout: 'Touche un <b>jeton adverse</b> pour voir sa fiche (stats, pouvoir). Si ton jeton est choisi, tu vois les <b>deux côte à côte</b> pour comparer. Re-touche ton jeton pour le déselectionner.',
-    tRanked: '<b>Le classé</b> : tu affrontes un vrai joueur de ton niveau (Elo). Victoire = +Elo, défaite = −Elo. Monte de <b>Fer 1</b> jusqu’à <b>Légende</b> ! Si tu ne joues pas 3 tours de suite, tu perds le match.',
+    tRanked: '<b>Le classé</b> : tu affrontes un vrai joueur de ton niveau (Elo). Victoire = +Elo, défaite = −Elo. Monte de <b>Bois 1</b> jusqu’à <b>Takoras</b> ! Si tu ne joues pas 3 tours de suite, tu perds le match.',
   },
   en: {
     map_arene: 'Arena', map_jardin: 'Garden', map_volcan: 'Volcano', map_glace: 'Ice', map_ruines: 'Ruins', foeTeam: 'Opponent team', scout: 'Their powers', scoutHint: 'Tap a token to see its card. The timer is paused while you look (training).',
@@ -90,7 +90,7 @@ const RT = {
     tTimer: 'The timer: <b>60 s</b> to aim each turn. If both confirm earlier, the turn starts right away. And <b>the ring shrinks every turn</b>: stay away from the edge!',
     tWalls: 'Powers: you can turn on the powers of <b>several tokens</b> in the same turn (pick a token, tap its power, then another…), but <b>only one token shoots</b>: the one you aim with.',
     tScout: 'Tap an <b>enemy token</b> to see its card (stats, power). With your token selected, you see <b>both side by side</b> to compare. Tap your token again to deselect it.',
-    tRanked: '<b>Ranked</b>: you face a real player at your level (Elo). Win = +Elo, lose = −Elo. Climb from <b>Iron 1</b> up to <b>Legend</b>! Skip 3 turns in a row and you lose the match.',
+    tRanked: '<b>Ranked</b>: you face a real player at your level (Elo). Win = +Elo, lose = −Elo. Climb from <b>Wood 1</b> up to <b>Takoras</b>! Skip 3 turns in a row and you lose the match.',
   },
 };
 const rtL = () => RT[SETTINGS.lang] || RT.fr;

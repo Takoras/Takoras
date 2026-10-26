@@ -48,7 +48,7 @@ export function useRanked() {
   });
 }
 
-// ---------- Rangs : Fer 1-2-3, Bronze 1-2-3 … Diamant 3, puis Maître et Légende (RCFG.RANKS, 50 Elo par division)
+// ---------- Rangs : Bois 1-2-3, Pierre 1-2-3 … Rubis 3, puis Maître et Takoras (RCFG.RANKS, 50 Elo par division)
 export type Rank = { k: string; col: string; div: number; divs: number; min: number; max: number | null; idx: number };
 const RANKS = RCFG.RANKS,
   DIV = RCFG.DIV;

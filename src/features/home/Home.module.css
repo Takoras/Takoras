@@ -341,3 +341,10 @@
 .info:hover {
   color: var(--text);
 }
+
+/* Grand écran : les deux côtés s'élargissent */
+@media (min-width: 1400px) {
+  .stage {
+    grid-template-columns: 340px 1fr 380px;
+  }
+}

@@ -12,22 +12,35 @@ import { useAuth } from '@/lib/auth';
 import { call, rankOf, ROAD, type Rank, type RankedMe } from './rankedApi';
 import s from './Ranked.module.css';
 
-const ROMAN = ['', 'I', 'II', 'III'];
-
-// Nom d'un rang : « Fer 2 », « Maître », « Légende »
+// Nom d'un rang : « Bois 2 », « Maître », « Takoras »
 export function useRankName() {
   const t = useT();
   return (r: Rank) => {
-    const name = t(`arena.r_${r.k}` as 'arena.r_iron');
+    const name = t(`arena.r_${r.k}` as 'arena.r_wood');
     return r.divs > 1 ? t('arena.rankName', { r: name, d: r.div }) : name;
   };
 }
 
-// Badge d'un rang : écusson à la couleur du rang, division en chiffres romains (★ pour Maître et Légende)
+// Badge d'un rang : sprite pixel (Bois 1 → Rubis 3 = rank1..rank18), écusson dessiné pour Maître et Takoras
 export function RankBadge({ r, size = 44 }: { r: Rank; size?: number }) {
+  if (r.divs > 1)
+    return (
+      <img
+        className={`px ${s.sprite}`}
+        src={`/img/ranks/rank${r.idx + 1}.png`}
+        alt=""
+        width={size}
+        height={size}
+        style={{ '--sz': `${size}px` } as CSSProperties}
+      />
+    );
   return (
-    <span className={s.badge} style={{ '--rc': r.col, '--sz': `${size}px` } as CSSProperties} aria-hidden>
-      <i>{r.divs > 1 ? ROMAN[r.div] : '★'}</i>
+    <span
+      className={`${s.badge} ${r.k === 'takoras' ? s.top : ''}`}
+      style={{ '--rc': r.col, '--sz': `${size}px` } as CSSProperties}
+      aria-hidden
+    >
+      <i>★</i>
     </span>
   );
 }
@@ -73,7 +86,7 @@ export function RankCard({ me }: { me: RankedMe | undefined }) {
   );
 }
 
-// Route des rangs : toutes les marches de Fer 1 à Légende, la tienne mise en avant
+// Route des rangs : toutes les marches de Bois 1 à Takoras, la tienne mise en avant
 export function RankRoad({ elo }: { elo: number }) {
   const t = useT();
   const name = useRankName();

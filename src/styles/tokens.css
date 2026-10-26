@@ -82,7 +82,7 @@
   --s-10: 40px;
   --s-12: 48px;
   --gutter: 16px;
-  --page-max: 1280px;
+  --page-max: 1680px; /* PC : on utilise toute la largeur (3 zones), jusqu’aux très grands écrans */
 
   /* Rayons : petits et nets (pixel art), le rond est réservé aux avatars et aux pastilles */
   --r-xs: 4px;

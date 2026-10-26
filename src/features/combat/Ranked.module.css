@@ -32,6 +32,22 @@
   letter-spacing: 0.02em;
 }
 
+/* Sprite de rang (rank1..18) */
+.sprite {
+  flex: none;
+  width: var(--sz);
+  height: var(--sz);
+  image-rendering: pixelated;
+  object-fit: contain;
+}
+/* Takoras : le plus haut rang, écusson doré qui brille */
+.top {
+  filter: drop-shadow(0 0 12px color-mix(in srgb, var(--rc) 80%, transparent));
+}
+.top i {
+  color: #fff7d6;
+}
+
 /* Carte du rang */
 .card {
   display: flex;

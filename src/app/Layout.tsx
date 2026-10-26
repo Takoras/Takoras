@@ -12,6 +12,7 @@ import { Announcements, openAnnHistory, unreadAnn, useAnn } from '@/features/soc
 import { SocialLayer } from '@/features/social/SocialLayer';
 import { BetaChip, BetaLayer, openPatchnotes, openTester } from '@/features/beta/Beta';
 import { badgeOf, useFriends } from '@/features/social/social';
+import { publicApi } from '@/api';
 import { Icon } from './Icon';
 import { NAV } from './nav';
 import { openUI, useUI } from './ui-store';
@@ -60,6 +61,16 @@ export function Layout() {
     sfx.setMuted(!muted);
     setMuted(!muted);
   };
+  // Temps de jeu : une minute comptée par le serveur tant que l'onglet est visible
+  useEffect(() => {
+    if (!user) return;
+    const ping = () => {
+      if (document.visibilityState === 'visible') void publicApi.playPing().catch(() => undefined);
+    };
+    ping();
+    const id = setInterval(ping, 60_000);
+    return () => clearInterval(id);
+  }, [user]);
   const fr = useFriends();
   const frN = user ? badgeOf(fr.data).req + badgeOf(fr.data).unread : 0;
   const annN = useAnn(unreadAnn);

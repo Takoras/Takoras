@@ -43,14 +43,14 @@ const RCFG = {
 
   // ---------- Classé
   ELO: { start: 1000, kNew: 40, k: 24, newGames: 10 }, // K = 40 les 10 premiers matchs, puis 24 (calculé par le serveur)
-  // Rangs selon l'Elo : 3 divisions de 50 Elo par rang (Fer 1, Fer 2, Fer 3, Bronze 1…), puis Maître et Légende.
-  // On commence à 1000 = Fer 1. Les couleurs servent aux badges.
+  // Rangs selon l'Elo : 3 divisions de 50 Elo par rang (Bois 1, Bois 2, Bois 3, Pierre 1…), puis Maître et Takoras.
+  // On commence à 1000 = Bois 1. Badges : sprites /img/ranks/rank1..18 (Maître et Takoras : badge dessiné).
   DIV: 50,
   RANKS: [
-    { k: 'iron', min: 0, col: '#9ca3af', divs: 3 }, { k: 'bronze', min: 1150, col: '#d97706', divs: 3 },
-    { k: 'silver', min: 1300, col: '#cbd5e1', divs: 3 }, { k: 'gold', min: 1450, col: '#facc15', divs: 3 },
-    { k: 'plat', min: 1600, col: '#2dd4bf', divs: 3 }, { k: 'diam', min: 1750, col: '#60a5fa', divs: 3 },
-    { k: 'master', min: 1900, col: '#c084fc', divs: 1 }, { k: 'legend', min: 2100, col: '#fb7185', divs: 1 },
+    { k: 'wood', min: 0, col: '#c08552', divs: 3 }, { k: 'stone', min: 1150, col: '#a8a29e', divs: 3 },
+    { k: 'silver', min: 1300, col: '#d6d3f0', divs: 3 }, { k: 'topaz', min: 1450, col: '#f5b041', divs: 3 },
+    { k: 'emerald', min: 1600, col: '#34d399', divs: 3 }, { k: 'ruby', min: 1750, col: '#f43f5e', divs: 3 },
+    { k: 'master', min: 1900, col: '#c084fc', divs: 1 }, { k: 'takoras', min: 2100, col: '#fbbf24', divs: 1 },
   ],
 
   // ---------- IA

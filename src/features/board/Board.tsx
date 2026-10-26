@@ -1,10 +1,9 @@
-import { useState, type CSSProperties } from 'react';
+import { useState } from 'react';
 import { Link } from 'react-router';
 import { useQuery } from '@tanstack/react-query';
 import { combatApi, publicApi } from '@/api';
 import { useMe } from '@/api/queries';
-import { hexRGB, jetonOf, SERIES, texOf } from '@/data/jetons';
-import { useJn } from '@/lib/names';
+import { SERIES } from '@/data/jetons';
 import { locale, useSettings } from '@/lib/settings';
 import { useT } from '@/i18n/useT';
 import { Avatar } from '@/ui/Avatar';
@@ -13,15 +12,21 @@ import { RankBadge, useRankName } from '../combat/Ranked';
 import { rankOf } from '../combat/rankedApi';
 import s from './Board.module.css';
 
-// Classement : podium (top 3) + liste, par tirages, meilleur tirage, variantes ou collection, cette semaine ou depuis toujours,
-// et l'Elo du classé (Ring), qui n'a pas de période
+// Classement : podium (top 3) + liste. Collection, Elo du classé, pulls ouverts (cette semaine ou depuis toujours)
+// et temps de jeu.
 const KINDS = [
-  ['ui.k_pulls', 'pulls'],
-  ['ui.k_gain', 'gain'],
-  ['ui.k_vars', 'variants'],
   ['ui.k_collec', 'collec'],
   ['ui.k_elo', 'elo'],
+  ['ui.k_pulls', 'pulls'],
+  ['ui.k_time', 'time'],
 ] as const;
+// Elo et temps de jeu : depuis toujours (pas de période)
+const NO_PERIOD = new Set(['elo', 'time']);
+export const playTime = (sec: number, lang: string) => {
+  const h = Math.floor(sec / 3600),
+    m = Math.floor((sec % 3600) / 60);
+  return h ? `${h.toLocaleString(lang)} h ${String(m).padStart(2, '0')}` : `${m} min`;
+};
 type Period = 'week' | 'all';
 type Row = { pseudo: string; value: number; jeton: string; odds: number };
 // Lundi 0 h de la semaine en cours (heure locale, comme l'ancien site)
@@ -34,7 +39,6 @@ export function weekStart(now = new Date()) {
 
 export default function Board() {
   const t = useT();
-  const jn = useJn();
   const lang = useSettings((x) => x.lang);
   const me = useMe();
   const [kind, setKind] = useState(0);
@@ -42,11 +46,13 @@ export default function Board() {
   const id = KINDS[kind]?.[1] ?? 'pulls';
   const rankName = useRankName();
   const q = useQuery({
-    queryKey: ['board', id, id === 'elo' ? 'all' : period],
+    queryKey: ['board', id, NO_PERIOD.has(id) ? 'all' : period],
     queryFn: async () =>
       id === 'elo'
         ? (await combatApi.rankedTop(50)).map((r) => ({ pseudo: r.pseudo, value: r.elo, jeton: '', odds: 0 }))
-        : ((await publicApi.leaderboard(id, period === 'week' ? weekStart() : null, 50)) as Row[]),
+        : id === 'time'
+          ? (await publicApi.leaderboardTime(50)).map((r) => ({ ...r, jeton: '', odds: 0 }))
+          : ((await publicApi.leaderboard(id, period === 'week' ? weekStart() : null, 50)) as Row[]),
     refetchInterval: 60_000,
   });
   const fmt = (n: number) => Number(n).toLocaleString(locale(lang));
@@ -60,17 +66,9 @@ export default function Board() {
         </span>
       );
     }
-    if (id === 'gain') {
-      const j = jetonOf(r.jeton);
-      return (
-        <span className={s.gain} style={{ '--g': hexRGB(j.glow) } as CSSProperties}>
-          <img className="px" src={texOf(j)} alt="" width={20} height={20} />
-          {jn(r.jeton)} · 1/{fmt(r.value)}
-        </span>
-      );
-    }
+    if (id === 'time') return playTime(r.value, locale(lang));
     if (id === 'collec') return t('ui.u_collec', { n: fmt(r.value), t: SERIES.Takoras?.length ?? 0 });
-    return t(id === 'pulls' ? 'ui.u_pulls' : 'ui.u_vars', { n: fmt(r.value) });
+    return t('ui.u_pulls', { n: fmt(r.value) });
   };
   const mine = (r: Row) => !!me.data?.pseudo && r.pseudo === me.data.pseudo;
   const name = (r: Row) => (
@@ -87,7 +85,7 @@ export default function Board() {
           <p className="eyebrow">{t('ui.board_tag')}</p>
           <h1>{t('ui.board_title')}</h1>
         </div>
-        {id === 'elo' ? null : (
+        {NO_PERIOD.has(id) ? null : (
           <Segmented<Period>
             label={t('ui.board_tag')}
             value={period}
