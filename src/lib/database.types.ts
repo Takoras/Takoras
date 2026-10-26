@@ -56,6 +56,7 @@ export type Database = {
       friendships: T<{ a: string; b: string; created_at: string; requested_by: string; status: string }>;
       jetons: T<{ name: string; odds: number; serie: string }>;
       messages: T<{ body: string; created_at: string; id: number; read_at: string | null; receiver: string; sender: string }>;
+      credits: T<{ id: number; kind: string; title: string; file: string | null; author: string; source: string; license: string; url: string | null; used_for: string | null; added_at: string }>;
       patchnotes: T<{ created_at: string; id: number; lines: Json; lines_en: Json | null; title: string; title_en: string | null }>;
       pending_pulls: T<{
         created_at: string;

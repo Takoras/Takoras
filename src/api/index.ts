@@ -130,4 +130,5 @@ export const tables = {
   betaSetting: () => sb.from('site_settings').select('v').eq('k', 'beta').maybeSingle(),
   shopItems: () => sb.from('shop_items').select('id, kind, price, data').eq('active', true),
   patchnotes: () => sb.from('patchnotes').select('*').order('created_at', { ascending: false }),
+  credits: () => sb.from('credits').select('*').order('kind').order('title'),
 };

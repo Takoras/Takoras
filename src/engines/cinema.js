@@ -1,5 +1,6 @@
 // Généré par scripts/port/canvas.mjs depuis legacy/cinema.js — ne pas modifier ici, modifier legacy/ puis relancer.
 import { SERIES, sfx, speed, texOf, t } from './env';
+import FILES from '../data/sounds.json';
 import './cinema.css';
 
 // Cinématiques des jetons rares (1/1000 et plus) : coupure au noir, puis une vraie mise en scène propre à chaque jeton.
@@ -42,6 +43,15 @@ const CINE = (() => {
   // =====================================================================
   // Musique
   // =====================================================================
+  function trackOf(name, D) {
+    const url = FILES.music?.[name], A = sfx.audio();
+    if (!url || !A.ok) return null;
+    const el = new Audio(url), src = A.ctx.createMediaElementSource(el), g = A.ctx.createGain();
+    g.gain.value = 1; src.connect(g).connect(A.out);
+    void el.play().catch(() => {});
+    const t = setTimeout(() => g.gain.linearRampToValueAtTime(0, A.ctx.currentTime + .6), Math.max(0, D * 1000 - 600));
+    return { stop() { clearTimeout(t); el.pause(); } };
+  }
   function music(th, D) {
     const A = sfx.audio(); if (!A.ok) return { stop() {} };
     const { ctx, out } = A, t0 = ctx.currentTime + .02, nodes = [];
@@ -221,7 +231,8 @@ const CINE = (() => {
       const sil = document.createElement('canvas'); sil.width = sil.height = G;
       img.onload = () => { const s = sil.getContext('2d'); s.imageSmoothingEnabled = false; s.drawImage(img, 0, 0, G, G); s.globalCompositeOperation = 'source-in'; s.fillStyle = th.c[0]; s.fillRect(0, 0, G, G); };
       if (th.scene.includes('orbiters')) cine.orbit = SERIES.Takoras.filter(o => o.name !== j.name && o.img).map(o => { const im = new Image(); im.src = o.img; return im; });
-      const mus = music(th, D);
+      // musique sous licence du jeton si elle existe (src/data/sounds.json), sinon la musique générée
+      const mus = trackOf(j.name, D) || music(th, D);
       const t0 = performance.now();
       let ended = false, skipAt = t0 + 2000, jumped = false;
       requestAnimationFrame(() => root.classList.add('on'));

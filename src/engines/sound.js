@@ -1,6 +1,9 @@
-// Sons du site, 100 % synthétisés (Web Audio). Porté tel quel depuis legacy/sound.js :
+// Sons du site (Web Audio). Synthétisés, OU un fichier sous licence vérifiée quand il est déclaré dans src/data/sounds.json
+// (dossier public/sfx) : le fichier remplace alors le son synthétisé. Porté depuis legacy/sound.js :
 // seul le branchement change (le volume et le mode allégé viennent des réglages React, via configureSound).
 // Les écouteurs globaux (clic sur un bouton, survol) sont posés par installSoundListeners() au démarrage.
+
+import FILES from '../data/sounds.json';
 
 const env_ = { volume: () => 70, reduced: () => false };
 export function configureSound(o) { Object.assign(env_, o); }
@@ -49,6 +52,20 @@ const sfx = (() => {
   addEventListener('keydown', init, { capture: true });
 
   const ok = () => ctx && !muted;
+  // Fichiers audio : chargés à la première utilisation ; tant qu'ils ne sont pas prêts (ou absents), son synthétisé
+  const buffers = {}, loading = {};
+  function file(group, key, gain = 1) {
+    const url = FILES[group]?.[key];
+    if (!url || !ok()) return false;
+    const b = buffers[url];
+    if (!b) {
+      if (!loading[url]) loading[url] = fetch(url).then(r => r.arrayBuffer()).then(a => ctx.decodeAudioData(a)).then(x => { buffers[url] = x; }).catch(() => {});
+      return false;
+    }
+    const src = ctx.createBufferSource(), g = ctx.createGain();
+    src.buffer = b; g.gain.value = gain; src.connect(g).connect(bus); src.start();
+    return true;
+  }
   const now = () => ctx.currentTime;
 
   // Enveloppe douce : petite attaque, longue extinction
@@ -110,7 +127,8 @@ const sfx = (() => {
 
   // Gamme pentatonique majeure à partir de do grave (rien ne dépasse ~1 kHz)
   const NOTE = n => 196 * 2 ** ([0, 2, 4, 7, 9][((n % 5) + 5) % 5] / 12 + Math.floor(n / 5));
-  let lastHover = 0;
+  let lastHover = 0, lastClick = 0;
+  const tierOf = odds => (odds >= 100000 ? 'mythic' : odds >= 10000 ? 'legend' : odds >= 1000 ? 'epic' : odds >= 100 ? 'rare' : 'common');
 
   return {
     // Pour les cinématiques : accès au son du site (même volume, même filtre)
@@ -119,8 +137,9 @@ const sfx = (() => {
     setVolume(v) { if (master && !muted) master.gain.value = .8 * v; },
     get muted() { return muted; },
 
-    click() { mar(NOTE(3 + Math.floor(Math.random() * 2)), { vol: .08, dur: .22 }); },
-    hover() { const t = performance.now(); if (t - lastHover < 90) return; lastHover = t; mar(NOTE(5), { vol: .022, dur: .12 }); },
+    // Sons d'interface : bas (≈ −18 dB sous la musique) et UN seul par interaction (un 2e clic dans les 80 ms est ignoré)
+    click() { const t = performance.now(); if (t - lastClick < 80) return; lastClick = t; if (!file('ui', 'click', .35)) mar(NOTE(3 + Math.floor(Math.random() * 2)), { vol: .05, dur: .22 }); },
+    hover() { const t = performance.now(); if (t - lastHover < 90) return; lastHover = t; if (!file('ui', 'hover', .2)) mar(NOTE(5), { vol: .015, dur: .12 }); },
     whoosh() { air({ dur: .45, vol: .14, from: 180, to: 1300 }); ep(NOTE(2), { vol: .05, dur: .5 }); },
     whooshOut() { air({ dur: .45, vol: .12, from: 1300, to: 160 }); },
     // Transition pixel : petit arpège lo-fi qui descend + crépitement de vinyle
@@ -148,23 +167,24 @@ const sfx = (() => {
 
     // Révélation : arpège de piano électrique, plus long selon la rareté, avec une nappe pour les rares
     reveal(odds) {
+      if (file('reveal', tierOf(odds))) return;
       const lvl = Math.min(7, Math.floor(Math.log10(odds) * 1.2));
       for (let i = 0; i <= 2 + lvl; i++) ep(NOTE(i * 2), { vol: .09, dur: .9, delay: i * .07 });
       if (odds >= 1000) pad([NOTE(0), NOTE(2), NOTE(4), NOTE(5)], { vol: .035, dur: 2.2 });
     },
     impact() { thump(120, { vol: .6, dur: .8, to: 32 }); air({ dur: .7, vol: .14, from: 900, to: 90 }); },
     riser(dur = 1.8) { air({ dur, vol: .16, from: 120, to: 2600, rise: true, q: 2 }); if (ok()) osc('triangle', 55, now(), dur, .06, dur * .9, bus, 330); },
-    next() { ep(NOTE(4), { vol: .07, dur: .4 }); ep(NOTE(6), { vol: .07, dur: .5, delay: .07 }); },
+    next() { if (file('ui', 'next', .4)) return; ep(NOTE(4), { vol: .07, dur: .4 }); ep(NOTE(6), { vol: .07, dur: .5, delay: .07 }); },
     regen() { ep(NOTE(5), { vol: .08, dur: .6 }); ep(NOTE(7), { vol: .07, dur: .8, delay: .1 }); },
-    upgrade() { [0, 2, 4, 5].forEach((n, i) => ep(NOTE(n + 3), { vol: .08, dur: .7, delay: i * .08 })); },
+    upgrade() { if (file('ui', 'upgrade', .5)) return; [0, 2, 4, 5].forEach((n, i) => ep(NOTE(n + 3), { vol: .08, dur: .7, delay: i * .08 })); },
     // Annonce de l'admin : accord chaud + coup sourd
     announce() { thump(70, { vol: .4, dur: .6 }); [0, 2, 4, 7].forEach((n, i) => ep(NOTE(n + 2), { vol: .08, dur: 1.2, delay: .06 + i * .12 })); pad([NOTE(0), NOTE(2), NOTE(4)], { vol: .04, dur: 2 }); },
     // Message d'un ami : petit « ploc » à deux notes
-    message() { mar(NOTE(5), { vol: .1, dur: .3 }); mar(NOTE(7), { vol: .1, dur: .4, delay: .08 }); },
+    message() { if (file('ui', 'message', .5)) return; mar(NOTE(5), { vol: .1, dur: .3 }); mar(NOTE(7), { vol: .1, dur: .4, delay: .08 }); },
     // Refus : « bonk » grave et mat
     // Mode turbo : petite note qui monte à chaque jeton (la gamme recommence tous les 15)
     combo(n) { const k = (n - 1) % 15; mar(NOTE(k), { vol: .09, dur: .18 }); if (k === 14) ep(NOTE(15), { vol: .07, dur: .6 }); },
-    deny() { mar(110, { vol: .12, dur: .25 }); mar(104, { vol: .08, dur: .25, delay: .06 }); },
+    deny() { if (file('ui', 'deny', .4)) return; mar(110, { vol: .12, dur: .25 }); mar(104, { vol: .08, dur: .25, delay: .06 }); },
   };
 })();
 

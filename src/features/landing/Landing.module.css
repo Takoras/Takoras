@@ -222,7 +222,12 @@
   color: var(--text-2);
   text-decoration: underline;
 }
-.foot p {
+.credits {
   flex-basis: 100%;
+  display: grid;
+  gap: var(--s-1);
   font-size: var(--fs-xs);
+}
+.credits ul {
+  list-style: none;
 }

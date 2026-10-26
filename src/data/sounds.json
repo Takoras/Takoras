@@ -1,0 +1,31 @@
+{
+  "_comment": "Sons en fichiers (dossier public/sfx). null = pas encore de fichier : le son synthétisé actuel est joué à la place. N'ajouter un fichier qu'avec sa licence vérifiée, et le noter dans la table audio_credits (page Crédits).",
+  "ui": {
+    "hover": null,
+    "click": null,
+    "select": null,
+    "deny": null,
+    "message": null,
+    "upgrade": null,
+    "next": null
+  },
+  "reveal": {
+    "common": null,
+    "rare": null,
+    "epic": null,
+    "legend": null,
+    "mythic": null
+  },
+  "music": {
+    "Vyolis": null,
+    "Lumis": null,
+    "Nyx": null,
+    "Astra": null,
+    "Kraïos": null,
+    "Koi": null,
+    "Néphéris": null,
+    "Zénith": null,
+    "Oblivion": null,
+    "Takoras": null
+  }
+}

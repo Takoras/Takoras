@@ -1,4 +1,5 @@
 import { useEffect, useState, type CSSProperties } from 'react';
+import { useQuery } from '@tanstack/react-query';
 import { hexRGB, MYSTERE, SERIES, texOf, vImg } from '@/data/jetons';
 import { useJn } from '@/lib/names';
 import { useOnline } from '@/lib/online';
@@ -7,6 +8,7 @@ import { useT } from '@/i18n/useT';
 import { openUI } from '@/app/ui-store';
 import { openPatchnotes } from '@/features/beta/store';
 import { Button } from '@/ui/Button';
+import { tables } from '@/api';
 import { Live } from '../home/Feeds';
 import { openInfo } from '../info/store';
 import s from './Landing.module.css';
@@ -56,9 +58,7 @@ export function Landing() {
         </button>
         <a href="#credits">{t('ui.land_credits')}</a>
         <span className="muted">{t('ui.land_legal')}</span>
-        <p id="credits" className="muted">
-          {t('ui.land_credits_txt')}
-        </p>
+        <Credits />
       </footer>
     </div>
   );
@@ -162,5 +162,35 @@ function AutoDemo() {
         <p className="muted">{t('ui.land_auto_txt')}</p>
       </div>
     </section>
+  );
+}
+
+// Crédits : chaque musique, son, police avec sa licence (table « credits »)
+function Credits() {
+  const t = useT();
+  const q = useQuery({
+    queryKey: ['credits'],
+    queryFn: async () => (await tables.credits()).data ?? [],
+    staleTime: 3_600_000,
+  });
+  return (
+    <div id="credits" className={s.credits}>
+      <b>{t('ui.land_credits')}</b>
+      <ul>
+        {(q.data ?? []).map((c) => (
+          <li key={c.id}>
+            {c.title} · {c.author} ·{' '}
+            {c.url ? (
+              <a href={c.url} rel="noreferrer noopener" target="_blank">
+                {c.license}
+              </a>
+            ) : (
+              c.license
+            )}
+          </li>
+        ))}
+      </ul>
+      <p className="muted">{t('ui.land_credits_txt')}</p>
+    </div>
   );
 }
