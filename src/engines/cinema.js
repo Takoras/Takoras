@@ -1,5 +1,5 @@
 // Généré par scripts/port/canvas.mjs depuis legacy/cinema.js — ne pas modifier ici, modifier legacy/ puis relancer.
-import { SERIES, sfx, speed, texOf, t } from './env';
+import { LOCALE, SERIES, jn, sfx, speed, texOf, t } from './env';
 const MYSTERE = '/img/jetons/mystere.png';
 import FILES from '../data/sounds.json';
 import './cinema.css';
@@ -17,7 +17,7 @@ import './cinema.css';
 //   .94 → 1   flash, le jeton apparaît en couleur avec une onde de choc → la fiche normale prend le relais
 
 const CINE = (() => {
-  const S = 4; // taille d'un pixel à l'écran
+  const S = 3; // taille d'un pixel à l'écran (plus fin qu'avant : rendu plus net)
   const rnd = (a, b) => a + Math.random() * (b - a);
   const pick = a => a[Math.floor(Math.random() * a.length)];
   const lerp = (a, b, k) => a + (b - a) * k;
@@ -28,16 +28,16 @@ const CINE = (() => {
   // ---------- Thèmes : couleurs (fond, sombre, accent, clair), décor, musique
   // root = note de base (Hz), scale = gamme (demi-tons), chord = accord de la nappe, voice = instrument de l'arpège
   const THEMES = {
-    'Vyolis':   { c: ['#0d0517', '#4c1d95', '#c45cf0', '#f5d0fe'], scene: ['fog', 'shards', 'cracks'],        root: 220,   scale: [0, 3, 5, 7, 10], chord: [0, 7, 12, 15],       bpm: 92,  voice: 'pluck' },
-    'Lumis':    { c: ['#16050f', '#9d174d', '#f39ad8', '#fff1f9'], scene: ['prism', 'rays', 'sparkles'],      root: 261.6, scale: [0, 2, 4, 7, 9],  chord: [0, 4, 7, 11],        bpm: 100, voice: 'ep' },
-    'Nyx':      { c: ['#020208', '#1e1b4b', '#5b5fd6', '#c7d2fe'], scene: ['stars', 'eclipse', 'tendrils'],   root: 146.8, scale: [0, 3, 5, 7, 10], chord: [0, 7, 10, 15],       bpm: 70,  voice: 'pad' },
-    'Astra':    { c: ['#07061a', '#2e2a63', '#f2c98f', '#fff7e6'], scene: ['stars', 'meteors', 'bigstar'],    root: 164.8, scale: [0, 2, 4, 7, 9],  chord: [0, 4, 7, 14],        bpm: 112, voice: 'bell' },
-    'Kraïos':   { c: ['#03040f', '#1e1b6b', '#4f46e5', '#c7d2fe'], scene: ['clouds', 'rain', 'lightning'],    root: 185,   scale: [0, 3, 5, 7, 10], chord: [0, 7, 12],           bpm: 128, voice: 'pluck', thunder: true },
-    'Koi':      { c: ['#07040f', '#3b1d4a', '#ff5a3c', '#fff1ec'], scene: ['water', 'bubbles', 'spiral'],    root: 196,   scale: [0, 2, 4, 7, 9],  chord: [0, 4, 7, 11, 14],    bpm: 96,  voice: 'bell' },
-    'Néphéris': { c: ['#12030f', '#86198f', '#f0abfc', '#fdf4ff'], scene: ['nebula', 'runes', 'spiral'],      root: 233.1, scale: [0, 3, 5, 7, 10], chord: [0, 3, 7, 10, 14],    bpm: 84,  voice: 'choir' },
-    'Zénith':   { c: ['#0b1120', '#64748b', '#e2e8f0', '#ffffff'], scene: ['skyup', 'sunrays', 'feathers'],   root: 293.7, scale: [0, 2, 4, 7, 9],  chord: [0, 4, 7, 11, 14],    bpm: 96,  voice: 'choir' },
-    'Oblivion': { c: ['#010001', '#4c0519', '#fb7185', '#ffe4e6'], scene: ['vortex', 'disk', 'glitch'],       root: 138.6, scale: [0, 1, 5, 7, 8],  chord: [0, 6, 12],           bpm: 64,  voice: 'pad', sub: true },
-    'Takoras':  { c: ['#000000', '#312e81', '#ffffff', '#fef3c7'], scene: ['galaxy', 'orbiters', 'pillar'],   root: 130.8, scale: [0, 2, 4, 7, 9],  chord: [0, 4, 7, 12, 16, 19], bpm: 88, voice: 'choir', epic: true },
+    'Vyolis':   { c: ['#0e0718', '#5b3a8c', '#c9a6f2', '#ffffff'], scene: ['dust', 'orbitals'],          root: 220,   scale: [0, 3, 5, 7, 10], chord: [0, 7, 12, 15],       bpm: 92,  voice: 'pluck' },
+    'Lumis':    { c: ['#16050f', '#a33a76', '#f7a8d8', '#fff0f8'], scene: ['dust', 'diamonds'],          root: 261.6, scale: [0, 2, 4, 7, 9],  chord: [0, 4, 7, 11],        bpm: 100, voice: 'ep' },
+    'Nyx':      { c: ['#05051a', '#2f2a8f', '#7c8cf8', '#dbe4ff'], scene: ['stars', 'shardring'],        root: 146.8, scale: [0, 3, 5, 7, 10], chord: [0, 7, 10, 15],       bpm: 70,  voice: 'pad' },
+    'Astra':    { c: ['#06071a', '#2b3a67', '#f6d39a', '#ffffff'], scene: ['stars', 'comets'],           root: 164.8, scale: [0, 2, 4, 7, 9],  chord: [0, 4, 7, 14],        bpm: 112, voice: 'bell' },
+    'Kraïos':   { c: ['#02030c', '#1a1a5c', '#3d3fa8', '#a8b4ff'], scene: ['deep', 'shadowfish', 'bubbles'], root: 185, scale: [0, 3, 5, 7, 10], chord: [0, 7, 12],          bpm: 128, voice: 'pluck' },
+    'Koi':      { c: ['#08050d', '#2b2433', '#f0453a', '#fff4ee'], scene: ['ripples', 'koipair'],        root: 196,   scale: [0, 2, 4, 7, 9],  chord: [0, 4, 7, 11, 14],    bpm: 96,  voice: 'bell' },
+    'Néphéris': { c: ['#140a05', '#7a3a14', '#f08a3c', '#fff6ea'], scene: ['dust', 'atom'],              root: 233.1, scale: [0, 3, 5, 7, 10], chord: [0, 3, 7, 10, 14],    bpm: 84,  voice: 'choir' },
+    'Zénith':   { c: ['#120306', '#6e1424', '#d9364f', '#ffd6dc'], scene: ['veins', 'eye'],              root: 293.7, scale: [0, 1, 5, 7, 8],  chord: [0, 4, 7, 11, 14],    bpm: 76,  voice: 'choir' },
+    'Oblivion': { c: ['#020b0d', '#14524f', '#3fc7b6', '#e6fffb'], scene: ['stars', 'planet', 'rift'],   root: 138.6, scale: [0, 1, 5, 7, 8],  chord: [0, 6, 12],           bpm: 64,  voice: 'pad', sub: true },
+    'Takoras':  { c: ['#02040f', '#2a3f9e', '#9fb6ff', '#ffffff'], scene: ['galaxy', 'orbiters', 'pillar'], root: 130.8, scale: [0, 2, 4, 7, 9], chord: [0, 4, 7, 12, 16, 19], bpm: 88, voice: 'choir', epic: true },
   };
   const DEFAULT = j => ({ c: ['#05050a', '#312e81', j.glow || '#a78bfa', '#ffffff'], scene: ['stars', 'rays', 'sparkles'], root: 196, scale: [0, 2, 4, 7, 9], chord: [0, 4, 7, 12], bpm: 96, voice: 'ep' });
 
@@ -204,6 +204,29 @@ const CINE = (() => {
     galaxy(x, w, h, t, k, th) { const cols = ['#c4b5fd', '#f0abfc', '#93c5fd', '#fde68a', '#86efac', '#fda4af', '#ffffff']; for (let i = 0; i < 500; i++) { const arm = i % 3, d = (i / 500) * Math.min(w, h) * .6, a = arm * 2.09 + d * .06 + t * .3; px(x, w / 2 + Math.cos(a) * d + Math.sin(i) * 3, h / 2 + Math.sin(a) * d * .6 + Math.cos(i) * 3, 1, rgba(cols[i % cols.length], .5 * (1 - d / (Math.min(w, h) * .6)) + .15)); } },
     // tous les autres jetons tournent autour (Takoras)
     orbiters(x, w, h, t, k, th, st, cine) { const imgs = cine.orbit; if (!imgs) return; imgs.forEach((im, i) => { if (!im.complete || !im.naturalWidth) return; const a = t * (.6 + k) + i / imgs.length * Math.PI * 2, R = Math.min(w, h) * (.42 - .12 * k), s = 12; x.globalAlpha = .85; x.drawImage(im, Math.round(w / 2 + Math.cos(a) * R - s / 2), Math.round(h / 2 + Math.sin(a) * R * .55 - s / 2), s, s); x.globalAlpha = 1; }); },
+    // ---------- Scènes « signature » : chacune reprend le motif dessiné sur le jeton ----------
+    // Vyolis : orbites blanches qui tournent autour de la sphère, avec des comètes au bout
+    orbitals(x, w, h, t, k, th) { const cx = w / 2, cy = h / 2, R = Math.min(w, h) * .36; for (let o = 0; o < 3; o++) { const tilt = o * 1.05 + t * .15, sp = t * (1.2 + k * 3) + o * 2; x.strokeStyle = rgba(o === 1 ? th.c[3] : th.c[2], .55 + .4 * k); x.lineWidth = 2; x.beginPath(); for (let i = 0; i <= 80; i++) { const a = i / 80 * Math.PI * 2, X = Math.cos(a) * R, Y = Math.sin(a) * R * .32; x.lineTo(cx + X * Math.cos(tilt) - Y * Math.sin(tilt), cy + X * Math.sin(tilt) + Y * Math.cos(tilt)); } x.stroke(); for (let tr = 0; tr < 8; tr++) { const a = sp - tr * .06, X = Math.cos(a) * R, Y = Math.sin(a) * R * .32; px(x, cx + X * Math.cos(tilt) - Y * Math.sin(tilt), cy + X * Math.sin(tilt) + Y * Math.cos(tilt), tr ? 1 : 2, rgba(th.c[3], 1 - tr / 8)); } } },
+    // Lumis : losanges concentriques, nets, qui battent comme le motif du jeton
+    diamonds(x, w, h, t, k, th) { const cx = w / 2, cy = h / 2, M = Math.min(w, h) * .55; for (let i = 0; i < 7; i++) { const r = ((t * 14 * (1 + k * 2) + i * M / 7) % M); x.strokeStyle = rgba(i % 2 ? th.c[2] : th.c[3], (1 - r / M) * (.4 + .5 * k)); x.lineWidth = i % 2 ? 1 : 2; x.beginPath(); x.moveTo(cx, cy - r); x.lineTo(cx + r, cy); x.lineTo(cx, cy + r); x.lineTo(cx - r, cy); x.closePath(); x.stroke(); } },
+    // Nyx : éclats anguleux (comme les cristaux du jeton) qui tournent en couronne
+    shardring(x, w, h, t, k, th) { const cx = w / 2, cy = h / 2, R = Math.min(w, h) * (.4 - .1 * k); for (let i = 0; i < 9; i++) { const a = t * (.4 + k * 1.6) + i / 9 * Math.PI * 2, X = cx + Math.cos(a) * R, Y = cy + Math.sin(a) * R, s = 5 + (i % 3) * 2; x.fillStyle = rgba(i % 2 ? th.c[2] : th.c[3], .55 + .4 * k); x.beginPath(); x.moveTo(X + Math.cos(a) * s * 1.6, Y + Math.sin(a) * s * 1.6); x.lineTo(X + Math.cos(a + 2.2) * s * .6, Y + Math.sin(a + 2.2) * s * .6); x.lineTo(X - Math.cos(a) * s * .4, Y - Math.sin(a) * s * .4); x.lineTo(X + Math.cos(a - 2.2) * s * .6, Y + Math.sin(a - 2.2) * s * .6); x.fill(); } },
+    // Astra : grandes comètes dorées en diagonale, traînées longues et propres
+    comets(x, w, h, t, k, th, st) { if (Math.random() < .05 + k * .2) st.meteors.push({ x: rnd(w * .3, w * 1.3), y: rnd(-20, h * .3), v: rnd(2.5, 4) * (1 + k) }); st.meteors = st.meteors.filter(m => { m.x -= m.v; m.y += m.v * .55; const L = 34; for (let i = 0; i < L; i++) { const a = 1 - i / L; px(x, m.x + i, m.y - i * .55, i < 3 ? 2 : 1, rgba(i < 4 ? th.c[3] : th.c[2], a * .9)); } return m.x > -40 && m.y < h + 20; }); },
+    // Kraïos : eau très sombre, et une immense ombre de poisson qui passe derrière
+    deep(x, w, h, t, k, th) { for (let y = 0; y < h; y += 2) { const a = .04 + .05 * Math.sin(y * .08 + t * 1.2); x.fillStyle = rgba(th.c[1], Math.max(0, a * (1 + k))); x.fillRect(0, y, w, 1); } },
+    shadowfish(x, w, h, t, k, th) { const L = Math.min(w, h) * .9, p = ((t * .12) % 1.4) - .2, cx = lerp(-L, w + L, p), cy = h * .55 + Math.sin(t * .8) * 6; x.fillStyle = rgba(th.c[1], .7 + .2 * k); x.strokeStyle = rgba(th.c[2], .5 + .3 * k); x.lineWidth = 1; x.beginPath(); x.ellipse(cx, cy, L * .5, L * .16, 0, 0, 7); x.fill(); x.stroke(); x.beginPath(); x.moveTo(cx - L * .45, cy); x.lineTo(cx - L * .75, cy - L * .18); x.lineTo(cx - L * .75, cy + L * .18); x.closePath(); x.fill(); x.stroke(); px(x, cx + L * .36, cy - L * .04, 2, rgba(th.c[3], .5 + .5 * k)); },
+    // Koi : deux carpes (rouge et blanche) qui tournent l'une autour de l'autre, comme le yin-yang du jeton
+    ripples(x, w, h, t, k, th) { for (let i = 0; i < 5; i++) { const r = ((t * 10 + i * 18) % 90) * Math.min(w, h) / 90; x.strokeStyle = rgba(th.c[3], (1 - r / Math.min(w, h)) * .25); x.lineWidth = 1; x.beginPath(); x.arc(w / 2, h / 2, r, 0, 7); x.stroke(); } },
+    koipair(x, w, h, t, k, th) { const cx = w / 2, cy = h / 2, R = Math.min(w, h) * (.3 - .08 * k); [[th.c[2], 0], [th.c[3], Math.PI]].forEach(([col, off]) => { for (let i = 0; i < 26; i++) { const a = t * (1 + k * 2.5) + off - i * .07, r = R + Math.sin(i * .5) * 2, s = Math.max(1, 5 - i * .18); x.fillStyle = rgba(col, 1 - i / 30); x.fillRect(Math.round(cx + Math.cos(a) * r - s / 2), Math.round(cy + Math.sin(a) * r - s / 2), Math.ceil(s), Math.ceil(s)); } }); },
+    // Néphéris : un atome, trois anneaux orange qui se croisent, électrons crème
+    atom(x, w, h, t, k, th) { const cx = w / 2, cy = h / 2, R = Math.min(w, h) * .38; for (let o = 0; o < 3; o++) { const tilt = o * Math.PI / 3 + t * .1; x.strokeStyle = rgba(th.c[2], .6 + .4 * k); x.lineWidth = 2; x.beginPath(); x.ellipse(cx, cy, R, R * .3, tilt, 0, 7); x.stroke(); const a = t * (2 + k * 4) + o * 2.1; px(x, cx + Math.cos(a) * R * Math.cos(tilt) - Math.sin(a) * R * .3 * Math.sin(tilt) - 1, cy + Math.cos(a) * R * Math.sin(tilt) + Math.sin(a) * R * .3 * Math.cos(tilt) - 1, 3, th.c[3]); } },
+    // Zénith : un œil géant qui s'ouvre pendant la tension (l'œil du jeton), veines rouges autour
+    veins(x, w, h, t, k, th) { x.strokeStyle = rgba(th.c[1], .5 + .4 * k); x.lineWidth = 1; for (let i = 0; i < 12; i++) { let X = i % 2 ? 0 : w, Y = (i / 12) * h; x.beginPath(); x.moveTo(X, Y); for (let s = 0; s < 14; s++) { X += (i % 2 ? 1 : -1) * (3 + k * 2); Y += Math.sin(s * .9 + i) * 2; x.lineTo(X, Y); } x.stroke(); } },
+    eye(x, w, h, t, k, th) { const cx = w / 2, cy = h * .24, W = Math.min(w, h) * .42, open = clamp(k * 1.3) * W * .26; x.fillStyle = rgba(th.c[3], .9); x.beginPath(); x.moveTo(cx - W / 2, cy); x.quadraticCurveTo(cx, cy - open * 2, cx + W / 2, cy); x.quadraticCurveTo(cx, cy + open * 2, cx - W / 2, cy); x.fill(); if (open > 2) { x.fillStyle = '#1f6f78'; x.beginPath(); x.arc(cx + Math.sin(t) * 3, cy, Math.min(open, W * .14), 0, 7); x.fill(); x.fillStyle = '#0a0a12'; x.beginPath(); x.arc(cx + Math.sin(t) * 3, cy, Math.min(open, W * .14) * .5, 0, 7); x.fill(); } x.strokeStyle = th.c[2]; x.lineWidth = 2; x.beginPath(); x.moveTo(cx - W / 2, cy); x.quadraticCurveTo(cx, cy - open * 2, cx + W / 2, cy); x.quadraticCurveTo(cx, cy + open * 2, cx - W / 2, cy); x.stroke(); },
+    // Oblivion : horizon d'une planète turquoise, et une faille de lumière qui la fend
+    planet(x, w, h, t, k, th) { const R = w * 1.1, cy = h + R * .78; x.fillStyle = th.c[1]; x.beginPath(); x.arc(w / 2, cy, R, 0, 7); x.fill(); x.strokeStyle = rgba(th.c[2], .8); x.lineWidth = 2; x.beginPath(); x.arc(w / 2, cy, R, Math.PI * 1.15, Math.PI * 1.85); x.stroke(); },
+    rift(x, w, h, t, k, th) { if (k < .15) return; const L = h * clamp((k - .15) * 1.6); x.strokeStyle = rgba(th.c[3], .9); x.lineWidth = 1 + k * 2; x.beginPath(); let X = w / 2, Y = 0; x.moveTo(X, Y); for (let s = 0; s < 16 && Y < L; s++) { X += Math.sin(s * 2.3) * 4; Y += L / 16; x.lineTo(X, Y); } x.stroke(); const g = x.createLinearGradient(w / 2 - 20, 0, w / 2 + 20, 0); g.addColorStop(0, 'rgba(0,0,0,0)'); g.addColorStop(.5, rgba(th.c[2], .25 * k)); g.addColorStop(1, 'rgba(0,0,0,0)'); x.fillStyle = g; x.fillRect(w / 2 - 20, 0, 40, L); },
     // pilier de lumière divine
     pillar(x, w, h, t, k, th) { const W = 6 + k * 26, g = x.createLinearGradient(w / 2 - W, 0, w / 2 + W, 0); g.addColorStop(0, 'rgba(255,255,255,0)'); g.addColorStop(.5, `rgba(255,255,255,${.15 + .5 * k})`); g.addColorStop(1, 'rgba(255,255,255,0)'); x.fillStyle = g; x.fillRect(w / 2 - W, 0, W * 2, h); },
   };
@@ -218,7 +241,10 @@ const CINE = (() => {
       const D = Math.max(2.2, (4 + 8 * (L - 3) / 3) * Math.max(.5, speed() || 1)); // secondes
       const root = document.createElement('div');
       root.className = 'cine';
-      root.innerHTML = `<canvas class="cine-cv"></canvas><div class="cine-flash"></div><div class="cine-skip">${t('cine_skip')}</div>`;
+      root.innerHTML = `<canvas class="cine-cv"></canvas><div class="cine-flash"></div><div class="cine-title"><b></b><small></small></div><div class="cine-skip">${t('cine_skip')}</div>`;
+      root.style.setProperty('--cc', th.c[2]);
+      root.querySelector('.cine-title b').textContent = jn(j.name);
+      root.querySelector('.cine-title small').textContent = '1/' + j.odds.toLocaleString(LOCALE());
       document.body.appendChild(root);
       const cv = root.querySelector('canvas'), fl = root.querySelector('.cine-flash'), skip = root.querySelector('.cine-skip');
       const w = Math.ceil(innerWidth / S), h = Math.ceil(innerHeight / S);
@@ -256,13 +282,13 @@ const CINE = (() => {
           th.scene.forEach(n => { x.save(); SCENES[n]?.(x, w, h, tt, k, th, st, cine); x.restore(); });
           x.globalAlpha = 1;
           // vignette
-          const g = x.createRadialGradient(w / 2, h / 2, Math.min(w, h) * .2, w / 2, h / 2, Math.max(w, h) * .7); g.addColorStop(0, 'rgba(0,0,0,0)'); g.addColorStop(1, rgba(th.c[0], .85)); x.fillStyle = g; x.fillRect(0, 0, w, h);
+          const g = x.createRadialGradient(w / 2, h / 2, Math.min(w, h) * .2, w / 2, h / 2, Math.max(w, h) * .7); g.addColorStop(0, 'rgba(0,0,0,0)'); g.addColorStop(1, rgba(th.c[0], .6)); x.fillStyle = g; x.fillRect(0, 0, w, h);
         }
         // le jeton au centre : silhouette qui tourne (de plus en plus vite), puis vrai jeton
         const cx = w / 2, cy = h / 2;
         if (p >= .08 && p < .94) {
           const size = lerp(10, Math.min(w, h) * .42, ease(clamp((p - .08) / .8))) * (1 - suck * .9);
-          const spin = tt * (1.2 + tense * 9), sx = Math.cos(spin);
+          const spin = tt * (.8 + tense * 5), sx = Math.cos(spin) * .6 + .4 * Math.sign(Math.cos(spin) || 1); // ne devient jamais un trait
           // halo qui bat avec la tension
           const beat = tense ? (Math.sin(tt * (6 + tense * 14)) * .5 + .5) : .3;
           const gr = x.createRadialGradient(cx, cy, 0, cx, cy, size * (1 + .4 * beat));
@@ -276,21 +302,22 @@ const CINE = (() => {
           for (let i = 0; i < 24 * k; i++) { const a = rnd(0, 7), r = size * .5 * (.95 + Math.random() * .1); px(x, cx + Math.cos(a) * r * Math.abs(sx), cy + Math.sin(a) * r, 1, rgba(th.c[3], .8)); }
         }
         if (p >= .94) {
+          const ry = h * .42; // un peu plus haut : le nom s'affiche dessous
           // révélation : le jeton en couleur, grand, avec onde de choc
-          const q = clamp((p - .94) / .06), size = Math.min(w, h) * (.5 + .1 * ease(q));
-          if (!cine.revealed) { cine.revealed = true; cine.flash = 1; }
+          const q = clamp((now - (cine.revAt ?? now)) / 450), size = Math.min(w, h) * (.5 + .1 * ease(q));
+          if (!cine.revealed) { cine.revealed = true; cine.revAt = now; cine.flash = 1; root.classList.add('named'); }
           x.fillStyle = th.c[0]; x.fillRect(0, 0, w, h);
-          const gr = x.createRadialGradient(cx, cy, 0, cx, cy, size * 1.6); gr.addColorStop(0, rgba(th.c[2], .7)); gr.addColorStop(1, rgba(th.c[0], 0)); x.fillStyle = gr; x.fillRect(0, 0, w, h);
-          x.strokeStyle = rgba(th.c[3], 1 - q); x.lineWidth = 2; x.beginPath(); x.arc(cx, cy, size * (.6 + q * 2.2), 0, 7); x.stroke();
-          for (let i = 0; i < 60; i++) { const a = i / 60 * Math.PI * 2 + i, r = size * (.5 + q * 1.8 + (i % 5) * .08); px(x, cx + Math.cos(a) * r, cy + Math.sin(a) * r, 1, rgba(i % 2 ? th.c[2] : th.c[3], 1 - q)); }
-          x.drawImage(img, cx - size * TS / 2, cy - size * TS / 2, size * TS, size * TS);
+          const gr = x.createRadialGradient(cx, ry, 0, cx, ry, size * 1.6); gr.addColorStop(0, rgba(th.c[2], .7)); gr.addColorStop(1, rgba(th.c[0], 0)); x.fillStyle = gr; x.fillRect(0, 0, w, h);
+          x.strokeStyle = rgba(th.c[3], 1 - q); x.lineWidth = 2; x.beginPath(); x.arc(cx, ry, size * (.6 + q * 2.2), 0, 7); x.stroke();
+          for (let i = 0; i < 60; i++) { const a = i / 60 * Math.PI * 2 + i, r = size * (.5 + q * 1.8 + (i % 5) * .08); px(x, cx + Math.cos(a) * r, ry + Math.sin(a) * r, 1, rgba(i % 2 ? th.c[2] : th.c[3], 1 - q)); }
+          x.drawImage(img, cx - size * TS / 2, ry - size * TS / 2, size * TS, size * TS);
         }
         // tremblement pendant la tension
         const sh = tense * (1 - suck) * 3;
         cv.style.transform = sh ? `translate(${rnd(-sh, sh)}px, ${rnd(-sh, sh)}px) scale(1.02)` : '';
         // flash (éclairs, révélation)
         if (cine.flash > 0) { fl.style.opacity = cine.flash; fl.style.background = cine.revealed ? '#fff' : th.c[3]; cine.flash = Math.max(0, cine.flash - .06); } else fl.style.opacity = 0;
-        if (p >= 1) return finish();
+        if (p >= 1 && now - (cine.revAt ?? now) > 1100) return finish(); // on garde le jeton et son nom un instant à l'écran
         requestAnimationFrame(frame);
       }
       function finish() {

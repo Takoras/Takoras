@@ -45,61 +45,61 @@
     {
       "name": "Vyolis",
       "odds": 1000,
-      "glow": "#c45cf0",
+      "glow": "#c9a6f2",
       "img": "/img/jetons/serie-takoras/vyolis.png"
     },
     {
       "name": "Lumis",
       "odds": 2500,
-      "glow": "#f39ad8",
+      "glow": "#f7a8d8",
       "img": "/img/jetons/serie-takoras/lumis.png"
     },
     {
       "name": "Nyx",
       "odds": 5000,
-      "glow": "#5b5fd6",
+      "glow": "#7c8cf8",
       "img": "/img/jetons/serie-takoras/nyx.png"
     },
     {
       "name": "Astra",
       "odds": 10000,
-      "glow": "#f2c98f",
+      "glow": "#f6d39a",
       "img": "/img/jetons/serie-takoras/astra.png"
     },
     {
       "name": "Kraïos",
       "odds": 25000,
-      "glow": "#4f46e5",
+      "glow": "#3d3fa8",
       "img": "/img/jetons/serie-takoras/kraios.gif"
     },
     {
       "name": "Koi",
       "odds": 50000,
-      "glow": "#ff5a3c",
+      "glow": "#f0453a",
       "img": "/img/jetons/serie-takoras/koi.png"
     },
     {
       "name": "Néphéris",
       "odds": 100000,
-      "glow": "#f0abfc",
+      "glow": "#f08a3c",
       "img": "/img/jetons/serie-takoras/nepheris.gif"
     },
     {
       "name": "Zénith",
       "odds": 250000,
-      "glow": "#e2e8f0",
+      "glow": "#d9364f",
       "img": "/img/jetons/serie-takoras/zenith.gif"
     },
     {
       "name": "Oblivion",
       "odds": 500000,
-      "glow": "#fb7185",
+      "glow": "#3fc7b6",
       "img": "/img/jetons/serie-takoras/oblivion.gif"
     },
     {
       "name": "Takoras",
       "odds": 1000000,
-      "glow": "#ffffff"
+      "glow": "#9fb6ff"
     }
   ]
 }
