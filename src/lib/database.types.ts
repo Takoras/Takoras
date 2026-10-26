@@ -255,6 +255,11 @@ export type Database = {
       ranked_of: { Args: { p_pseudo: string }; Returns: Json };
       bp_state: { Args: never; Returns: Json };
       bp_claim: { Args: { p_tier: number; p_prem?: boolean }; Returns: Json };
+      starter_choices: { Args: never; Returns: Json };
+      starter_pick: { Args: { p_jeton: string }; Returns: Json };
+      starter_quest_claim: { Args: never; Returns: Json };
+      my_weekly: { Args: never; Returns: Json };
+      claim_weekly: { Args: { p_id: string }; Returns: Json };
       ranked_top: { Args: { n?: number }; Returns: { pseudo: string; elo: number; games: number; wins: number }[] };
       redeem_code: { Args: { p_code: string }; Returns: Json };
       refund_pulls: { Args: { ids: number[] }; Returns: Json };

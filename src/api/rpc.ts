@@ -54,6 +54,7 @@ const ERR: Record<string, Key> = {
   bp_locked: 'ui.err_bp_locked',
   bp_premium: 'ui.err_bp_premium',
   bp_claimed: 'ui.err_bp_claimed',
+  starter_done: 'ui.err_bp_claimed',
   feedback_short: 'ui.fb_short',
   busy: 'ui.err_busy',
   invite_expired: 'ui.err_inv_exp',

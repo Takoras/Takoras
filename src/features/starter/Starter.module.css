@@ -1,0 +1,72 @@
+.box {
+  display: grid;
+  gap: var(--s-3);
+  padding: var(--s-4);
+  border-radius: var(--r-lg);
+  background: var(--surface);
+  border: 1px solid var(--accent);
+}
+.box h2 {
+  font-size: var(--fs-lg);
+}
+.choices {
+  list-style: none;
+  display: grid;
+  gap: var(--s-2);
+}
+.choices button {
+  width: 100%;
+  display: grid;
+  grid-template-columns: 48px minmax(0, 1fr);
+  grid-template-rows: auto auto auto;
+  column-gap: var(--s-3);
+  padding: var(--s-2) var(--s-3);
+  border-radius: var(--r-md);
+  border: 1px solid var(--line);
+  background: var(--bg-raised);
+  text-align: left;
+}
+.choices button:hover {
+  border-color: var(--accent);
+}
+.choices img {
+  grid-row: 1 / 4;
+  width: 48px;
+  height: 48px;
+  image-rendering: pixelated;
+}
+.choices small {
+  font-size: var(--fs-xs);
+  color: var(--text-2);
+}
+.choices .pw {
+  font-weight: 600;
+}
+.steps {
+  list-style: none;
+  display: grid;
+  gap: var(--s-1);
+  font-size: var(--fs-sm);
+}
+.steps li {
+  display: flex;
+  align-items: center;
+  gap: var(--s-2);
+}
+.steps span {
+  display: grid;
+  place-items: center;
+  width: 20px;
+  height: 20px;
+  border-radius: 50%;
+  border: 1px solid var(--line-strong);
+  font-size: 12px;
+}
+.ok span {
+  background: var(--ok);
+  border-color: var(--ok);
+  color: #04120a;
+}
+.ok {
+  color: var(--text-2);
+}

@@ -7,6 +7,7 @@ import { AutoConfig } from './AutoConfig';
 import { Live } from './Feeds';
 import { HeroCoin } from './HeroCoin';
 import { Quests } from '../quests/Quests';
+import { Starter } from '../starter/Starter';
 import { useAuth } from '@/lib/auth';
 import { Landing } from '../landing/Landing';
 import s from './Home.module.css';
@@ -31,6 +32,7 @@ export default function Home() {
           <Actions />
         </div>
         <div className={`${s.side} ${s.stack}`}>
+          <Starter />
           <Quests />
         </div>
         <div className={s.side}>

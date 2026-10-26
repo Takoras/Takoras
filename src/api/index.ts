@@ -57,6 +57,11 @@ export const combatApi = {
 };
 
 export const passApi = {
+  weekly: () => rpc('my_weekly'),
+  claimWeekly: (p_id: string) => rpc('claim_weekly', { p_id }),
+  starter: () => rpc('starter_choices'),
+  starterPick: (p_jeton: string) => rpc('starter_pick', { p_jeton }),
+  starterQuest: () => rpc('starter_quest_claim'),
   state: () => rpc('bp_state'),
   claim: (p_tier: number, p_prem: boolean) => rpc('bp_claim', { p_tier, p_prem }),
 };

@@ -142,6 +142,7 @@ export default function Pass() {
         <li>{t('ui.bp_how_pull')}</li>
         <li>{t('ui.bp_how_quest')}</li>
       </ul>
+      <Weekly />
       <div className={s.premium}>
         <div>
           <b>{t('ui.bp_prem')}</b>
@@ -168,6 +169,71 @@ export default function Pass() {
         ))}
       </ol>
       <p className="muted">{t('ui.bp_fair')}</p>
+    </section>
+  );
+}
+
+type Wk = {
+  quests: { id: 'pulls' | 'wins' | 'quests'; target: number; value: number; coins: number; claimed: boolean }[];
+};
+// Quêtes de la semaine : 3 objectifs, des pièces + 667 XP de passe chacun
+function Weekly() {
+  const t = useT();
+  const lang = useSettings((x) => x.lang);
+  const uid = useAuth((x) => x.user?.id);
+  const qc = useQueryClient();
+  const q = useQuery({
+    queryKey: ['weekly', uid],
+    enabled: !!uid,
+    queryFn: async () => (await passApi.weekly()) as unknown as Wk,
+  });
+  if (!q.data) return null;
+  const n = (v: number) => v.toLocaleString(locale(lang));
+  const claim = async (id: string) => {
+    try {
+      qc.setQueryData(['me', uid], await passApi.claimWeekly(id));
+      sfx.upgrade();
+      toast(t('ui.bp_got'));
+      void q.refetch();
+      void qc.invalidateQueries({ queryKey: ['pass'] });
+    } catch (e) {
+      sfx.deny();
+      toast(errorText(e, lang), true);
+    }
+  };
+  return (
+    <section className={s.weekly} aria-labelledby="wk-t">
+      <h2 id="wk-t">{t('ui.wk_title')}</h2>
+      <ul>
+        {q.data.quests.map((x) => {
+          const ok = x.value >= x.target;
+          return (
+            <li key={x.id}>
+              <span>
+                <b>{t(`ui.wk_${x.id}`, { n: x.target })}</b>
+                <small>{t('ui.wk_reward', { c: n(x.coins) })}</small>
+              </span>
+              <span
+                className={s.wkBar}
+                role="progressbar"
+                aria-valuemin={0}
+                aria-valuemax={x.target}
+                aria-valuenow={x.value}
+                aria-label={t(`ui.wk_${x.id}`, { n: x.target })}
+              >
+                <i style={{ width: `${(x.value / x.target) * 100}%` }} />
+              </span>
+              {x.claimed ? (
+                <b className={s.ok}>✓</b>
+              ) : (
+                <Button size="sm" variant={ok ? 'primary' : 'ghost'} disabled={!ok} onClick={() => void claim(x.id)}>
+                  {ok ? t('ui.bp_claim') : `${x.value}/${x.target}`}
+                </Button>
+              )}
+            </li>
+          );
+        })}
+      </ul>
     </section>
   );
 }
