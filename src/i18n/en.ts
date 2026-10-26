@@ -458,6 +458,7 @@ export const en: Dict = {
     fr_pending: 'Requests sent',
     fr_accept: 'Accept',
     fr_chat: 'Chat',
+    fr_pick: 'Pick a friend to chat with.',
     fr_remove: 'Remove friend',
     fr_remove_q: 'Remove {n} from your friends?',
     fr_empty: 'No friends yet. Add someone with their username!',

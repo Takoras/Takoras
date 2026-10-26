@@ -460,6 +460,7 @@ export const fr = {
     fr_pending: 'Demandes envoyées',
     fr_accept: 'Accepter',
     fr_chat: 'Discuter',
+    fr_pick: 'Choisis un ami pour discuter.',
     fr_remove: 'Retirer des amis',
     fr_remove_q: 'Retirer {n} de tes amis ?',
     fr_empty: 'Pas encore d’amis. Ajoute quelqu’un avec son pseudo !',

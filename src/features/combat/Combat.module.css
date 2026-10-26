@@ -665,3 +665,12 @@
   color: var(--text-2);
   font-size: var(--fs-xs);
 }
+
+/* PC : le bestiaire défile dans sa colonne, la page reste en place */
+@media (min-width: 1000px) {
+  .dex ul {
+    max-height: calc(100dvh - 520px);
+    min-height: 240px;
+    overflow-y: auto;
+  }
+}

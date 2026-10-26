@@ -48,7 +48,12 @@ test('mutations : vrais tampons dans l’éditeur d’équipe, onglets colorés 
   await page.goto('/combat');
   await page.getByRole('button', { name: /Modifier/ }).click();
   const b = page.getByRole('dialog').getByRole('radio', { name: 'Doré' });
-  expect(await b.locator('span').first().evaluate((el) => getComputedStyle(el).backgroundImage)).toContain('stamps/gold.png');
+  expect(
+    await b
+      .locator('span')
+      .first()
+      .evaluate((el) => getComputedStyle(el).backgroundImage),
+  ).toContain('stamps/gold.png');
   await page.keyboard.press('Escape');
   await page.goto('/inventaire');
   const tab = page.getByRole('tab', { name: /Doré/ });

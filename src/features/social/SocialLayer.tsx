@@ -181,7 +181,7 @@ function ChatDock() {
   );
 }
 
-function Conversation({ f, min }: { f: Friend; min: boolean }) {
+export function Conversation({ f, min, inline = false }: { f: Friend; min: boolean; inline?: boolean }) {
   const t = useT();
   const lang = useSettings((x) => x.lang);
   const uid = useAuth((x) => x.user?.id);
@@ -229,27 +229,36 @@ function Conversation({ f, min }: { f: Friend; min: boolean }) {
   let last = '';
   return (
     <>
-      <header className={s.dockHead}>
-        <button type="button" className={s.x} onClick={() => openChat(null)} aria-label={t('ui.back')}>
-          ‹
-        </button>
-        <Avatar pseudo={f.pseudo} size={28} />
-        <Link to={`/profil/${encodeURIComponent(f.pseudo)}`} className={s.dockName}>
-          {f.pseudo}
-        </Link>
-        <button
-          type="button"
-          className={s.x}
-          onClick={() => useChat.setState({ min: !min })}
-          aria-label={min ? '▢' : '–'}
-          aria-expanded={!min}
-        >
-          {min ? '▢' : '–'}
-        </button>
-        <button type="button" className={s.x} onClick={closeChat} aria-label={t('ui.close')}>
-          ✕
-        </button>
-      </header>
+      {inline ? (
+        <header className={s.dockHead}>
+          <Avatar pseudo={f.pseudo} size={28} />
+          <Link to={`/profil/${encodeURIComponent(f.pseudo)}`} className={s.dockName}>
+            {f.pseudo}
+          </Link>
+        </header>
+      ) : (
+        <header className={s.dockHead}>
+          <button type="button" className={s.x} onClick={() => openChat(null)} aria-label={t('ui.back')}>
+            ‹
+          </button>
+          <Avatar pseudo={f.pseudo} size={28} />
+          <Link to={`/profil/${encodeURIComponent(f.pseudo)}`} className={s.dockName}>
+            {f.pseudo}
+          </Link>
+          <button
+            type="button"
+            className={s.x}
+            onClick={() => useChat.setState({ min: !min })}
+            aria-label={min ? '▢' : '–'}
+            aria-expanded={!min}
+          >
+            {min ? '▢' : '–'}
+          </button>
+          <button type="button" className={s.x} onClick={closeChat} aria-label={t('ui.close')}>
+            ✕
+          </button>
+        </header>
+      )}
       {min ? null : (
         <>
           <div ref={box} className={s.msgs} role="log" aria-live="polite">

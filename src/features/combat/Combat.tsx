@@ -310,12 +310,7 @@ function TeamCard({ u, pos, lvl, onOpen }: { u: Member; pos: string; lvl: number
   const j = jetonOf(u.name, u.serie),
     k = powerInfo(u.name, lang);
   return (
-    <button
-      type="button"
-      className={s.slot}
-      onClick={onOpen}
-      style={glowVars(j, u.variant) as CSSProperties}
-    >
+    <button type="button" className={s.slot} onClick={onOpen} style={glowVars(j, u.variant) as CSSProperties}>
       <span className={s.pos}>{pos}</span>
       <img className={vImg(u.variant)} src={texOf(j)} alt="" />
       {u.variant ? (

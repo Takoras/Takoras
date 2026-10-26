@@ -19,7 +19,8 @@ test('amis : pastille, accepter une demande, chat (lire, envoyer)', async ({ pag
     .first()
     .getByRole('button', { name: /Discuter|Chat/ })
     .click();
-  const dock = page.getByRole('region', { name: /Discussions|Messages|Chats/ });
+  // PC : la conversation s'ouvre à droite de la liste ; téléphone : fenêtre de chat
+  const dock = page.getByRole(isMobile ? 'region' : 'complementary', { name: /Discussions|Messages|Chats/ });
   await expect(dock.getByText('Moi oui !')).toBeVisible();
   expect(calls).toContain('mark_read');
   await dock.getByRole('textbox').fill('Pas encore');

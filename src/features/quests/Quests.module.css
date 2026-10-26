@@ -20,19 +20,21 @@
 
 .daily.on {
   border-color: var(--gold);
-  box-shadow:
-    0 0 0 1px rgb(249 115 22 / 25%),
-    0 0 24px rgb(249 115 22 / 12%);
 }
 .daily small {
   display: block;
   font-size: var(--fs-xs);
 }
+/* titre à gauche, chrono à droite, sur la même ligne */
 .head {
   display: flex;
-  align-items: baseline;
+  align-items: center;
   justify-content: space-between;
   gap: var(--s-2);
+}
+.head small {
+  margin-left: auto;
+  font-variant-numeric: tabular-nums;
 }
 .head h2 {
   font-size: var(--fs-lg);
@@ -59,8 +61,10 @@
 }
 .top {
   display: flex;
+  align-items: center;
   justify-content: space-between;
   gap: var(--s-2);
+  line-height: 1.3;
 }
 .rew {
   display: inline-flex;

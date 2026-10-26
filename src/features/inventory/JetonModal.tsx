@@ -192,11 +192,7 @@ export function CombatInfo({
     ['size', t('ring.size'), rs.r, RING_MAX.r, String(rs.r)],
   ] as const;
   return (
-    <section
-      className={s.combat}
-      style={{ '--pw': hexRGB(k.col) } as CSSProperties}
-      aria-label={t('ui.nav_combat')}
-    >
+    <section className={s.combat} style={{ '--pw': hexRGB(k.col) } as CSSProperties} aria-label={t('ui.nav_combat')}>
       <header>
         <span>{t('ring.power')}</span>
         {showLvl ? (

@@ -342,3 +342,36 @@
     top: 64px;
   }
 }
+
+/* Amis sur PC : liste à gauche, conversation à droite, la page tient dans l'écran */
+.split {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1.3fr);
+  gap: var(--s-6);
+  align-items: start;
+}
+.colList {
+  display: grid;
+  gap: var(--s-4);
+  min-width: 0;
+}
+.colChat {
+  position: sticky;
+  top: var(--s-4);
+  display: grid;
+  grid-template-rows: auto minmax(0, 1fr) auto;
+  height: calc(100dvh - 140px);
+  border-radius: var(--r-lg);
+  border: 1px solid var(--line);
+  background: var(--surface);
+  overflow: hidden;
+}
+.colChat > p {
+  place-self: center;
+}
+.colChat .msgs {
+  height: auto;
+  max-height: none;
+  min-height: 0;
+  overflow-y: auto;
+}
