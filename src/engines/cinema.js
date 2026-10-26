@@ -1,5 +1,6 @@
 // Généré par scripts/port/canvas.mjs depuis legacy/cinema.js — ne pas modifier ici, modifier legacy/ puis relancer.
 import { SERIES, sfx, speed, texOf, t } from './env';
+const MYSTERE = '/img/jetons/mystere.png';
 import FILES from '../data/sounds.json';
 import './cinema.css';
 
@@ -228,8 +229,9 @@ const CINE = (() => {
       // le jeton : vraie image + silhouette (même dessin, rempli de la couleur sombre du thème)
       const img = new Image(); img.src = texOf(j);
       const G = j.grid || 64, TS = G / 64; // dessin plus grand (74×74) : silhouette à sa vraie grille, affiché un peu plus grand
+      const mys = new Image(); mys.src = MYSTERE;
       const sil = document.createElement('canvas'); sil.width = sil.height = G;
-      img.onload = () => { const s = sil.getContext('2d'); s.imageSmoothingEnabled = false; s.drawImage(img, 0, 0, G, G); s.globalCompositeOperation = 'source-in'; s.fillStyle = th.c[0]; s.fillRect(0, 0, G, G); };
+      { const s = sil.getContext('2d'); s.fillStyle = th.c[1]; s.beginPath(); s.arc(G / 2, G / 2, G * .45, 0, 7); s.fill(); } // repli : un disque, jamais la forme du jeton
       if (th.scene.includes('orbiters')) cine.orbit = SERIES.Takoras.filter(o => o.name !== j.name && o.img).map(o => { const im = new Image(); im.src = o.img; return im; });
       // musique sous licence du jeton si elle existe (src/data/sounds.json), sinon la musique générée
       const mus = trackOf(j.name, D) || music(th, D);
@@ -267,7 +269,8 @@ const CINE = (() => {
           gr.addColorStop(0, rgba(th.c[2], .25 + .45 * k * beat)); gr.addColorStop(1, rgba(th.c[2], 0));
           x.fillStyle = gr; x.fillRect(0, 0, w, h);
           x.save(); x.translate(cx, cy); x.scale(Math.max(.06, Math.abs(sx)), 1);
-          x.drawImage(tense > .85 ? img : sil, -size * TS / 2, -size * TS / 2, size * TS, size * TS); // le dessin se devine juste avant l'explosion
+          // rien ne se devine avant la fin : on ne voit que le jeton mystère « ? », teinté aux couleurs de la scène
+          x.drawImage(mys.complete && mys.naturalWidth ? mys : sil, -size / 2, -size / 2, size, size);
           x.restore();
           // contour lumineux de la silhouette (petits pixels autour)
           for (let i = 0; i < 24 * k; i++) { const a = rnd(0, 7), r = size * .5 * (.95 + Math.random() * .1); px(x, cx + Math.cos(a) * r * Math.abs(sx), cy + Math.sin(a) * r, 1, rgba(th.c[3], .8)); }
