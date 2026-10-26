@@ -594,6 +594,14 @@ export const fr = {
         "Glissade",
         "Presque aucun frottement : file beaucoup plus loin."
       ],
+      "flare": [
+        "Éruption solaire",
+        "Au premier choc : explosion qui repousse tous les ennemis autour."
+      ],
+      "zerog": [
+        "Apesanteur",
+        "Ce tour, les ennemis glissent comme sur la glace : ils volent bien plus loin."
+      ],
       "eruption": [
         "Éruption",
         "À l’arrêt : onde de choc qui repousse tout autour."
@@ -631,8 +639,8 @@ export const fr = {
         "Repart une 2e fois quand il ralentit."
       ],
       "roots": [
-        "Racines",
-        "Aucun de tes jetons ne peut sortir ce tour."
+        "Barrière psychique",
+        "Un mur psychique entoure l’arène : aucun de tes jetons ne peut sortir ce tour."
       ],
       "shield": [
         "Bouclier",

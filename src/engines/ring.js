@@ -20,6 +20,8 @@ const RT = {
       scrap: ['Ferraille', 'Deux fois plus lourd ce tour : pousse fort, bouge peu.'],
       slide: ['Glissade', 'Presque aucun frottement : file beaucoup plus loin.'],
       eruption: ['Éruption', 'À l’arrêt : onde de choc qui repousse tout autour.'],
+      flare: ['Éruption solaire', 'Au premier choc : explosion qui repousse tous les ennemis autour.'],
+      zerog: ['Apesanteur', 'Ce tour, les ennemis glissent comme sur la glace : ils volent bien plus loin.'],
       curve: ['Courant', 'Sa trajectoire se courbe vers l’ennemi le plus proche.'],
       double: ['Frappe ×2', 'Son premier choc pousse deux fois plus fort.'],
       ghost: ['Fantôme', 'Traverse les jetons jusqu’à s’arrêter.'],
@@ -28,7 +30,7 @@ const RT = {
       magnet: ['Aimant', 'À l’arrêt : attire les ennemis proches.'],
       anchor: ['Ancre', 'Ne tire pas, mais impossible à pousser ce tour.'],
       second: ['Second souffle', 'Repart une 2e fois quand il ralentit.'],
-      roots: ['Racines', 'Aucun de tes jetons ne peut sortir ce tour.'],
+      roots: ['Barrière psychique', 'Un mur psychique entoure l’arène : aucun de tes jetons ne peut sortir ce tour.'],
       shield: ['Bouclier', 'Les ennemis ne peuvent pas le pousser ce tour.'],
       void: ['Néant', 'Le premier ennemi touché est projeté vers le bord.'],
       split: ['Dédoublement', 'Se divise en deux en plein tir (le double disparaît après).'],
@@ -60,6 +62,8 @@ const RT = {
       scrap: ['Scrap metal', 'Twice as heavy this turn: pushes hard, barely moves.'],
       slide: ['Slide', 'Almost no friction: travels much further.'],
       eruption: ['Eruption', 'When it stops: shockwave that pushes everything away.'],
+      flare: ['Solar flare', 'On its first hit: an explosion pushes every nearby enemy away.'],
+      zerog: ['Zero gravity', 'This turn, enemies slide like on ice: they fly much further.'],
       curve: ['Current', 'Its path curves toward the nearest enemy.'],
       double: ['Double hit', 'Its first hit pushes twice as hard.'],
       ghost: ['Ghost', 'Goes through tokens until it stops.'],
@@ -68,7 +72,7 @@ const RT = {
       magnet: ['Magnet', 'When it stops: pulls nearby enemies.'],
       anchor: ['Anchor', 'Doesn’t shoot, but can’t be pushed this turn.'],
       second: ['Second wind', 'Speeds up again once when it slows down.'],
-      roots: ['Roots', 'None of your tokens can fall out this turn.'],
+      roots: ['Psychic barrier', 'A psychic wall surrounds the arena: none of your tokens can fall out this turn.'],
       shield: ['Shield', 'Enemies can’t push it this turn.'],
       void: ['Void', 'The first enemy it hits is flung toward the edge.'],
       split: ['Split', 'Splits in two mid-shot (the copy vanishes after).'],
@@ -95,8 +99,8 @@ const RT = {
 };
 const rtL = () => RT[SETTINGS.lang] || RT.fr;
 const rt = (k, v = {}) => String(rtL()[k] ?? RT.fr[k]).replace(/\{(\w+)\}/g, (_, x) => v[x] ?? '');
-const PW_COL = { grow: '#7dd3fc', bounce: '#f9a8d4', scrap: '#fb923c', slide: '#a5f3fc', eruption: '#f97316', curve: '#60a5fa', double: '#f43f5e', ghost: '#c4b5fd',
-  rescue: '#4ade80', shrink: '#818cf8', magnet: '#fde68a', anchor: '#94a3b8', second: '#fb7185', roots: '#86efac', shield: '#f1f5f9', void: '#a855f7', split: '#ffffff', haste: '#86efac', guard: '#7dd3fc', none: '#888' };
+const PW_COL = { grow: '#7dd3fc', bounce: '#f9a8d4', scrap: '#fb923c', slide: '#a5f3fc', eruption: '#f97316', flare: '#fb923c', zerog: '#93c5fd', curve: '#60a5fa', double: '#f43f5e', ghost: '#c4b5fd',
+  rescue: '#4ade80', shrink: '#818cf8', magnet: '#fde68a', anchor: '#94a3b8', second: '#fb7185', roots: '#e879f9', shield: '#f1f5f9', void: '#a855f7', split: '#ffffff', haste: '#86efac', guard: '#7dd3fc', none: '#888' };
 function powerText(name) {
   const k = RG.kit(name), [n, d] = rtL().pw[k.pw] || rtL().pw.none;
   return { pw: k.pw, name: n, desc: d, cd: k.cd, when: k.pw === 'none' ? '' : k.cd ? rt('every', { n: k.cd }) : rt('once') };
@@ -494,7 +498,7 @@ function rgEvent(e) {
     sfx.evaporate?.(); sfx.impact?.();
   }
   RFX.event(e, P); // pouvoirs : effets, sons et ralentis propres à chacun (ring-fx.js)
-  if (e.t === 'void' || e.t === 'double' || e.t === 'eruption') P.slow = RCFG.SLOWMO_S;
+  if (e.t === 'void' || e.t === 'double' || e.t === 'eruption' || e.t === 'flare') P.slow = RCFG.SLOWMO_S;
   if (e.t === 'sudden') setTimeout(() => rgBanner(rt('sudden'), '#fb7185', false, 1600), 500);
 }
 
@@ -1062,7 +1066,7 @@ const RFX = (() => {
     const body = id => P.bodies.find(b => b.id === id);
     if (e.t === 'edge') {
       const [x, y] = w2s(e.x, e.y), b = body(e.id);
-      if (vines && b && b.side === vines.side) { vines.flash.push({ a: Math.atan2(e.y * FL(), e.x * FL()), t: 1 }); burst(x, y, 22, '#4ade80', 3); burst(x, y, 8, '#f0abfc', 2.5); RSND.snap(); RNG.shake = 6; }
+      if (vines && b && b.side === vines.side) { vines.flash.push({ a: Math.atan2(e.y * FL(), e.x * FL()), t: 1 }); burst(x, y, 22, '#e879f9', 3); burst(x, y, 10, '#ffffff', 2.5); RSND.snap(); RNG.shake = 6; }
       else { burst(x, y, 18, PW_COL.bounce, 3.2); RNG.parts.push({ ring: true, x, y, col: PW_COL.bounce, size: 1.4, life: 1 }); RSND.boing(); }
     }
     if (e.t === 'eruption') {
@@ -1070,6 +1074,19 @@ const RFX = (() => {
       RNG.parts.push({ wave: true, x, y, col: '#f97316', rad, life: 1 });
       burst(x, y, 60, '#fb923c', 6); burst(x, y, 30, '#fde047', 4.5); burst(x, y, 20, '#7f1d1d', 3, { size: 6 });
       RNG.shake = 16; rgFlashCol('#f97316'); RSND.eruption();
+    }
+    // Éruption solaire : explosion au point d'impact (onde orange, braises, flash)
+    if (e.t === 'flare') {
+      const [x, y] = w2s(e.x, e.y), rad = RG.kit(body(e.id).name).p.radius * RNG.view.s;
+      RNG.parts.push({ wave: true, x, y, col: '#fb923c', rad, life: 1 });
+      RNG.parts.push({ star: true, x, y, col: '#fde047', life: 1, size: 46 });
+      burst(x, y, 55, '#fb923c', 6); burst(x, y, 30, '#fde047', 4.5); burst(x, y, 16, '#7f1d1d', 3, { size: 6 });
+      RNG.shake = 18; rgFlashCol('#f97316'); RSND.eruption();
+    }
+    // Apesanteur : les ennemis se couvrent de givre bleu et flottent
+    if (e.t === 'zerog') {
+      for (const o of P.bodies) if (o.alive && o.side !== body(e.id)?.side) { const [x, y] = w2s(o.x, o.y); burst(x, y, 14, '#bfdbfe', 2.5); RNG.parts.push({ ring: true, x, y, col: '#93c5fd', size: 1.2, life: 1 }); }
+      RSND.hum();
     }
     if (e.t === 'magnet') {
       const [x, y] = w2s(e.x, e.y), rad = RG.kit(body(e.id).name).p.radius * RNG.view.s;
@@ -1113,26 +1130,36 @@ const RFX = (() => {
     for (const g of ground) { const [x, y] = w2s(g.x, g.y); c.fillStyle = `rgba(186,230,253,${g.life * .12})`; c.beginPath(); c.arc(x, y, g.r * V.s * .9, 0, 7); c.fill(); }
     if (vines) drawVines(c, ox, oy, R, t, dt);
   }
-  // Les ronces poussent tout autour du bord : tige ondulée, épines, fleurs, lueur verte
+  // Barrière psychique (Néphéris) : un mur d'énergie rose-violet se referme tout autour du bord.
+  // Alvéoles qui pulsent, ondes qui courent le long du mur, et une onde de choc là où un jeton s'y cogne.
   function drawVines(c, ox, oy, R, t, dt) {
     vines.t += dt;
     if (vines.out != null && (vines.out += dt) > .6) { vines = null; return; }
-    const grow = Math.min(1, vines.t / .7) * (vines.out != null ? 1 - vines.out / .6 : 1), end = grow * 6.2832, N = 140;
+    const grow = Math.min(1, vines.t / .45) * (vines.out != null ? 1 - vines.out / .6 : 1), end = grow * 6.2832;
     c.save(); c.lineCap = 'round';
-    for (const [w, col, blur] of [[9, 'rgba(22,101,52,.9)', 0], [4, '#4ade80', 14]]) {
-      c.lineWidth = w; c.strokeStyle = col; c.shadowColor = '#22c55e'; c.shadowBlur = blur;
-      c.beginPath();
-      for (let k = 0; k <= N; k++) { const a = -1.5708 + k / N * end, rr = R + Math.sin(k * .9 + t * 3) * 4 + Math.sin(k * .37) * 3; const x = ox + Math.cos(a) * rr, y = oy + Math.sin(a) * rr; k ? c.lineTo(x, y) : c.moveTo(x, y); }
-      c.stroke();
+    // halo + mur (deux traits) qui se referme depuis le haut
+    for (const [w, col, blur, al] of [[16, '#a855f7', 22, .25], [5, '#f0abfc', 14, .9], [1.5, '#ffffff', 0, .9]]) {
+      c.globalAlpha = al * grow; c.lineWidth = w; c.strokeStyle = col; c.shadowColor = '#d946ef'; c.shadowBlur = blur;
+      c.beginPath(); c.arc(ox, oy, R + 2, -1.5708, -1.5708 + end); c.stroke();
     }
     c.shadowBlur = 0;
-    for (let k = 0; k < 48; k++) {
-      const a = -1.5708 + k / 48 * 6.2832; if (a + 1.5708 > end) break;
-      const fl = vines.flash.reduce((m, f) => Math.max(m, f.t * Math.max(0, 1 - Math.abs(Math.atan2(Math.sin(a - f.a), Math.cos(a - f.a))) * 3)), 0);
-      const out = k % 2 ? 1 : -1, len = 9 + fl * 10, bx = ox + Math.cos(a) * R, by = oy + Math.sin(a) * R, nx = Math.cos(a) * out, ny = Math.sin(a) * out;
-      c.fillStyle = fl > .1 ? '#bbf7d0' : '#15803d';
-      c.beginPath(); c.moveTo(bx - Math.sin(a) * 4, by + Math.cos(a) * 4); c.lineTo(bx + Math.sin(a) * 4, by - Math.cos(a) * 4); c.lineTo(bx + nx * len, by + ny * len); c.fill();
-      if (k % 6 === 3) { c.fillStyle = '#f0abfc'; c.beginPath(); c.arc(bx + nx * 3, by + ny * 3, 3.5 + Math.sin(t * 4 + k) * .8, 0, 7); c.fill(); }
+    // alvéoles hexagonales sur le mur, qui s'allument par vagues
+    const N = 40;
+    for (let k = 0; k < N; k++) {
+      const a = -1.5708 + (k + .5) / N * 6.2832; if (a + 1.5708 > end) break;
+      const fl = vines.flash.reduce((m, f) => Math.max(m, f.t * Math.max(0, 1 - Math.abs(Math.atan2(Math.sin(a - f.a), Math.cos(a - f.a))) * 2.5)), 0);
+      const pulse = .35 + .35 * Math.sin(t * 5 - k * .6), hx = ox + Math.cos(a) * (R + 2), hy = oy + Math.sin(a) * (R + 2), hs = 6 + fl * 6;
+      c.globalAlpha = Math.min(1, (pulse + fl) * grow);
+      c.strokeStyle = fl > .1 ? '#ffffff' : '#e879f9'; c.lineWidth = 1.5;
+      c.beginPath();
+      for (let v = 0; v <= 6; v++) { const va = a + v / 6 * 6.2832; v ? c.lineTo(hx + Math.cos(va) * hs, hy + Math.sin(va) * hs) : c.moveTo(hx + Math.cos(va) * hs, hy + Math.sin(va) * hs); }
+      c.stroke();
+    }
+    // ondes de choc aux impacts : arcs qui s'écartent du mur
+    for (const f of vines.flash) {
+      const k = 1 - f.t;
+      c.globalAlpha = f.t; c.strokeStyle = '#fdf4ff'; c.lineWidth = 2;
+      for (const d of [0, 10]) { c.beginPath(); c.arc(ox, oy, R - 8 - k * 40 - d, f.a - .35 - k * .3, f.a + .35 + k * .3); c.stroke(); }
     }
     vines.flash.forEach(f => { f.t -= dt * 1.5; }); vines.flash = vines.flash.filter(f => f.t > 0);
     c.restore();
@@ -1142,8 +1169,8 @@ const RFX = (() => {
     const pw = active[b.id]; if (!pw || !RNG.play) return;
     const col = PW_COL[pw];
     c.save();
-    if (pw === 'eruption' || pw === 'second') { for (let k = 0; k < 12; k++) { const a = k / 12 * 6.283 + t * 2, f = 1.25 + .2 * Math.sin(t * 20 + k * 3); c.fillStyle = k % 2 ? '#fb923c' : '#fde047'; c.beginPath(); c.moveTo(x + Math.cos(a - .2) * rr, y + Math.sin(a - .2) * rr); c.lineTo(x + Math.cos(a) * rr * f, y + Math.sin(a) * rr * f); c.lineTo(x + Math.cos(a + .2) * rr, y + Math.sin(a + .2) * rr); c.fill(); } }
-    if (pw === 'magnet' || pw === 'split') { for (let k = 0; k < 5; k++) { const a = t * 2.5 + k * 1.257; c.fillStyle = pw === 'split' ? `hsl(${(t * 120 + k * 72) % 360},90%,75%)` : '#fde68a'; c.beginPath(); c.arc(x + Math.cos(a) * rr * 1.45, y + Math.sin(a) * rr * 1.45, 2.6, 0, 7); c.fill(); } }
+    if (pw === 'eruption' || pw === 'flare' || pw === 'second') { for (let k = 0; k < 12; k++) { const a = k / 12 * 6.283 + t * 2, f = 1.25 + .2 * Math.sin(t * 20 + k * 3); c.fillStyle = k % 2 ? '#fb923c' : '#fde047'; c.beginPath(); c.moveTo(x + Math.cos(a - .2) * rr, y + Math.sin(a - .2) * rr); c.lineTo(x + Math.cos(a) * rr * f, y + Math.sin(a) * rr * f); c.lineTo(x + Math.cos(a + .2) * rr, y + Math.sin(a + .2) * rr); c.fill(); } }
+    if (pw === 'magnet' || pw === 'zerog' || pw === 'split') { for (let k = 0; k < 5; k++) { const a = t * 2.5 + k * 1.257; c.fillStyle = pw === 'split' ? `hsl(${(t * 120 + k * 72) % 360},90%,75%)` : '#fde68a'; c.beginPath(); c.arc(x + Math.cos(a) * rr * 1.45, y + Math.sin(a) * rr * 1.45, 2.6, 0, 7); c.fill(); } }
     if (pw === 'shield') { c.strokeStyle = 'rgba(248,250,252,.85)'; c.lineWidth = 2; c.shadowColor = '#fff'; c.shadowBlur = 12; c.beginPath(); for (let k = 0; k <= 6; k++) { const a = k / 6 * 6.283 + t * .8; const px = x + Math.cos(a) * rr * 1.45, py = y + Math.sin(a) * rr * 1.45; k ? c.lineTo(px, py) : c.moveTo(px, py); } c.stroke(); c.fillStyle = 'rgba(248,250,252,.08)'; c.fill(); }
     if (pw === 'anchor') { c.strokeStyle = '#94a3b8'; c.lineWidth = 3; c.setLineDash([5, 4]); c.lineDashOffset = -t * 20; c.beginPath(); c.arc(x, y, rr * 1.35, 0, 7); c.stroke(); c.setLineDash([]); c.font = `${rr}px serif`; c.textAlign = 'center'; c.textBaseline = 'middle'; c.globalAlpha = .9; c.fillText('⚓', x, y - rr * 1.6); }
     if (pw === 'void') { const g = c.createRadialGradient(x, y, rr * .5, x, y, rr * 2); g.addColorStop(0, 'rgba(10,0,25,.9)'); g.addColorStop(1, 'rgba(88,28,135,0)'); c.fillStyle = g; c.beginPath(); c.arc(x, y, rr * 2, 0, 7); c.fill(); c.strokeStyle = '#a855f7'; c.lineWidth = 2; for (let k = 0; k < 3; k++) { c.beginPath(); c.arc(x, y, rr * (1.2 + k * .25), t * (3 + k) + k * 2, t * (3 + k) + k * 2 + 2.2); c.stroke(); } }
@@ -1163,7 +1190,7 @@ const RFX = (() => {
     if (pw === 'grow') part({ x: x + j(), y: y + j(), vx: 0, vy: -rand(.5, 1.4), col: 'rgba(186,230,253,.9)', size: rand(2, 5), bubble: true });
     if (pw === 'scrap' && moving) part({ x: x + j(.6), y: y + j(.6), vx: rand(-1.5, 1.5), vy: rand(-1.5, 1.5), col: Math.random() < .5 ? '#fb923c' : '#fde047', size: 2 });
     if (pw === 'slide' && moving) part({ x: x + j(), y: y + j(), vx: rand(-.4, .4), vy: rand(-.4, .4), col: '#e0f2fe', size: rand(1.5, 3) });
-    if ((pw === 'eruption' || pw === 'second') && moving) part({ x: x + j(.5), y: y + j(.5), vx: rand(-1, 1), vy: rand(-1, 1), col: Math.random() < .5 ? '#f97316' : '#fde047', size: rand(2, 4) });
+    if ((pw === 'eruption' || pw === 'flare' || pw === 'second') && moving) part({ x: x + j(.5), y: y + j(.5), vx: rand(-1, 1), vy: rand(-1, 1), col: Math.random() < .5 ? '#f97316' : '#fde047', size: rand(2, 4) });
     if (pw === 'curve' && moving) part({ x: x + j(), y: y + j(), vx: rand(-.6, .6), vy: rand(-.6, .6), col: '#93c5fd', size: rand(2, 3.5) });
     if (pw === 'shrink' && moving) part({ x: x + j(.7), y: y + j(.7), vx: rand(-.3, .3), vy: rand(-.3, .3), col: 'rgba(76,29,149,.8)', size: rand(4, 8) });
     if (pw === 'ghost') part({ x: x + j(), y: y + j(), vx: 0, vy: -rand(.3, .8), col: 'rgba(196,181,253,.8)', size: rand(2, 4) });

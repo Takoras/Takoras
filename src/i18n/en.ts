@@ -596,6 +596,14 @@ export const en: Dict = {
         "Slide",
         "Almost no friction: travels much further."
       ],
+      "flare": [
+        "Solar flare",
+        "On its first hit: an explosion pushes every nearby enemy away."
+      ],
+      "zerog": [
+        "Zero gravity",
+        "This turn, enemies slide like on ice: they fly much further."
+      ],
       "eruption": [
         "Eruption",
         "When it stops: shockwave that pushes everything away."
@@ -633,8 +641,8 @@ export const en: Dict = {
         "Speeds up again once when it slows down."
       ],
       "roots": [
-        "Roots",
-        "None of your tokens can fall out this turn."
+        "Psychic barrier",
+        "A psychic wall surrounds the arena: none of your tokens can fall out this turn."
       ],
       "shield": [
         "Shield",

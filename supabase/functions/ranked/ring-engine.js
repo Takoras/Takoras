@@ -74,6 +74,8 @@ const RG = (() => {
       if (b.pw === 'anchor') T.anchor = true;
       if (b.pw === 'shield') T.shield = true;
       if (b.pw === 'roots') alive(st, side).forEach(a => { a.t.bounce = true; });
+      // Apesanteur (Astra) : ce tour, les ennemis glissent comme sur de la glace (ils volent bien plus loin quand on les tape)
+      if (b.pw === 'zerog') { alive(st, 1 - side).forEach(a => { a.t.fric = Math.min(a.t.fric, k.p.friction); }); ev.push({ t: 'zerog', id: b.id, at: 0 }); }
       // Coup de pouce (Soutien) : les pouvoirs de tes alliés reviennent plus vite
       if (b.pw === 'haste') alive(st, side).forEach(a => { if (a !== b && a.cd > 0) { a.cd = Math.max(0, a.cd - k.p.cd); ev.push({ t: 'haste', id: a.id, by: b.id, at: 0 }); } });
       // Bulle (Soutien) : ton allié le plus proche ne peut pas être poussé par les ennemis ce tour
@@ -157,6 +159,17 @@ const RG = (() => {
           if (S.t.hit || !S.t.shooter) continue;
           const iO = O === Cc ? iC : iA;
           if (S.t.pw === 'double') { const k = (kit(S.name).p.mult - 1) * j * iO * sg; O.vx += k * nx; O.vy += k * ny; ev.push({ t: 'double', id: S.id, to: O.id, at: tm }); }
+          // Éruption solaire (Soléo) : au premier choc, explosion qui repousse les ENNEMIS autour du point d'impact
+          if (S.t.pw === 'flare') {
+            const p = kit(S.name).p, ix = S.x + nx * S.r * sg, iy = S.y + ny * S.r * sg;
+            for (const o of B) {
+              if (!o.alive || o.tmp || o.side === S.side || o.t.anchor || o.t.shield) continue;
+              const dx = o.x - ix, dy = o.y - iy, d = len(dx, dy);
+              if (d > p.radius || !d) continue;
+              const k = p.push * (1 - d / p.radius) / o.mass; o.vx += dx / d * k; o.vy += dy / d * k;
+            }
+            ev.push({ t: 'flare', id: S.id, x: q(ix), y: q(iy), at: tm });
+          }
           if (S.t.pw === 'void' && O.side !== S.side && iO) { const dd = len(O.x, O.y) || 1, k = kit(S.name).p.push / O.mass; O.vx = O.x / dd * k; O.vy = O.y / dd * k; ev.push({ t: 'void', id: S.id, to: O.id, at: tm }); }
           S.t.hit = true;
         }
