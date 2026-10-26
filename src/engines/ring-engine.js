@@ -12,11 +12,14 @@ const RG = (() => {
   const C = RCFG, Q = C.QUANT, q = x => Math.round(x * Q) / Q;
   const kit = name => C.TOKENS[name] || C.DEFAULT_TOKEN;
   const len = (x, y) => Math.sqrt(x * x + y * y);
-  // Stats physiques : base × niveau × mutation (poids et puissance ; la taille ne change pas).
-  // Le rôle (Combattant, Tank, Soutien) est juste une étiquette : il se voit dans les stats de base du jeton.
+  // Stats physiques : base × (1 + bonus), bonus = niveau (rendements décroissants) + mutation, plafonné (C.POWER_CAP).
+  // Poids et puissance ; la taille ne change pas. Le rôle (Combattant, Tank, Soutien) est juste une étiquette.
+  // Arrondi au millionième : Math.exp pourrait différer d'un poil selon le navigateur, l'arrondi rend le résultat identique partout.
+  const RG_bonus = (lvl = 1, variant = '') =>
+    Math.round(Math.min(C.POWER_CAP, C.LEVEL_BONUS * (1 - Math.exp(-(Math.max(1, lvl) - 1) / C.LEVEL_CURVE)) + ((C.MUTATION[variant] || 1) - 1)) * 1e6) / 1e6;
   const roleOf = name => kit(name).role || 'fighter';
   function stats(name, lvl = 1, variant = '') {
-    const k = kit(name), m = (1 + C.LEVEL_BONUS * (Math.max(1, lvl) - 1)) * (C.MUTATION[variant] || 1);
+    const k = kit(name), m = 1 + RG_bonus(lvl, variant);
     return { mass: k.mass * m, power: k.power * m, r: k.r };
   }
   // teams : [[{ name, lvl, variant }×3] ×2]
@@ -357,7 +360,7 @@ const RG = (() => {
     return best;
   }
 
-  return { kit, roleOf, stats, create, clone, alive, ready, resolve, aiShot, aiSmart, len, ringR, nearest, touchesWall };
+  return { kit, roleOf, bonus: RG_bonus, stats, create, clone, alive, ready, resolve, aiShot, aiSmart, len, ringR, nearest, touchesWall };
 })();
 
 export { RG };

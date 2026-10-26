@@ -37,9 +37,13 @@ const RCFG = {
 
   // ---------- Progression
   LEVEL_MAX: 10,
-  LEVEL_BONUS: .04,                                  // +4 % de poids et de puissance par niveau
+  // Bonus de niveau à rendements décroissants : bonus(n) = 12 % × (1 − e^(−n/4)), n = niveaux gagnés (niv. 10 → +11 %).
+  // Simulé (800 matchs, visée « humaine ») : niv. 10 contre niv. 1 ≈ 62 % de victoires, niv. 10 Ombre ≈ 67 %.
+  // (Avec +40 % / plafond +45 % comme prévu au départ, un jeton à fond gagnait ~80 % : beaucoup trop.)
+  LEVEL_BONUS: .12, LEVEL_CURVE: 4,
+  POWER_CAP: .15,                                    // niveau + mutation : jamais plus de +15 % au total
   LEVEL_COST: [1, 1, 2, 2, 3, 3, 4, 4, 5],           // doublons pour passer au niveau 2, 3, … 10 (25 au total)
-  MUTATION: { '': 1, gold: 1.05, celeste: 1.10, ombre: 1.20 }, // Doré, Céleste, Ombre (la plus rare du site = le plus gros bonus)
+  MUTATION: { '': 1, gold: 1.03, celeste: 1.05, ombre: 1.08 }, // Doré +3 %, Céleste +5 %, Ombre +8 % (s'ajoutent au bonus de niveau)
 
   // ---------- Classé
   ELO: { start: 1000, kNew: 40, k: 24, newGames: 10 }, // K = 40 les 10 premiers matchs, puis 24 (calculé par le serveur)

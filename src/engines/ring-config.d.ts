@@ -6,7 +6,7 @@ export const RCFG: {
   RING_R: number; TURNS: number; AIM_S: number; START_Y: number; START_X: number[]; SUDDEN_Y: number;
   DT: number; FRICTION: number; DRAG: number; RESTITUTION: number; STOP_SPEED: number; MAX_SIM_S: number; QUANT: number; MIN_FORCE: number;
   BIG_HIT: number; SLOWMO: number; SLOWMO_S: number;
-  LEVEL_MAX: number; LEVEL_BONUS: number; LEVEL_COST: number[]; MUTATION: Record<string, number>;
+  LEVEL_MAX: number; LEVEL_BONUS: number; LEVEL_CURVE: number; POWER_CAP: number; LEVEL_COST: number[]; MUTATION: Record<string, number>;
   ELO: { start: number; kNew: number; k: number; newGames: number };
   DIV: number;
   SHRINK: { step: number; min: number; maxTurns: number };
