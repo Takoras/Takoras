@@ -95,7 +95,6 @@ export function PassLink() {
       <span aria-hidden></span>
       <span>
         <b>{t('ui.bp_title')}</b>
-        <small>{t('ui.bp_how_win')}</small>
       </span>
       <span aria-hidden>→</span>
     </Link>

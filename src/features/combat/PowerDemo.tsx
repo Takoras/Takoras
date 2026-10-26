@@ -24,7 +24,7 @@ function scenario(name: string) {
         { i: 0, ax: 0, ay: -1, f: 0, pow: true },
         { i: 0, ax: 0, ay: 1000, f: 0.85, pow: false },
       ]
-    : pw === 'telekinesis' || pw === 'surf' || pw === 'starfall' || pw === 'blink'
+    : pw === 'telekinesis' || pw === 'surf' || pw === 'beam' || pw === 'starfall' || pw === 'blink'
       ? [{ i: 0, ax: 0, ay: -1000, f: pw === 'starfall' ? 0.55 : pw === 'blink' ? 0.6 : 0.85, pow: true }, null]
       : [{ i: 0, ax: 0, ay: -1000, f: 0.8, pow: true }, null];
   const before = RG.clone(st);

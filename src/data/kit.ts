@@ -16,6 +16,8 @@ export const PW_COL: Record<string, string> = {
   zerog: '#93c5fd',
   sun: '#fbbf24',
   cyclone: '#d9364f',
+  beam: '#ff4d6a',
+  devour: '#9fb6ff',
   rift: '#3fc7b6',
   current: '#f0453a',
   avatar: '#9fb6ff',

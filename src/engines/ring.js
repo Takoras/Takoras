@@ -24,7 +24,7 @@ const RT = {
       pinball: ['Flipper', 'Rebondit sur le bord au lieu de sortir, et repart plus vite (3 rebonds).'],
       rampart: ['Rempart', 'Ne tire pas : devient un mur fixe qui renvoie ×1,6 l’ennemi qui le touche.'],
       icetrail: ['Patinoire', 'Laisse une traînée de glace qui reste 2 tours : tout ce qui passe dessus glisse loin.'],
-      surf: ['Ressac', 'Ne bouge pas : envoie une vague en cône dans la direction visée.'],
+      surf: ['Ressac', 'Ne bouge pas : une grosse vague en cône emporte les ennemis dans la direction visée.'],
       ora: ['Rafale', 'Frappe ×1,6 : l’ennemi touché part loin. Longue recharge.'],
       blink: ['Téléportation', 'Ne roule pas : apparaît directement là où tu vises.'],
       mirror: ['Miroir', 'Tes jetons proches de Lumis ne bougent pas face à l’ennemi et le renvoient ×1,5.'],
@@ -37,6 +37,8 @@ const RT = {
       blackhole: ['Trou noir', 'Au premier choc, ouvre un trou noir qui aspire tout pendant 2 tours. Son cœur avale les jetons.'],
       sun: ['Gravité solaire', 'Ne tire pas : devient un petit soleil. Ce tour, tout ce qui bouge près de lui est attiré, même le tir ennemi.'],
       cyclone: ['Œil du cyclone', 'Au lancer, les ennemis autour sont pris dans un tourbillon et projetés.'],
+      beam: ['Rayon', 'Ne bouge pas : un rayon traverse l’arène là où tu vises et pousse tous les ennemis sur la ligne (2 fois par match).'],
+      devour: ['Dévoreur', 'Une fois par match : se coupe en deux et se referme comme une mâchoire. L’ennemi pris entre les moitiés est avalé, et le prochain tir de Takoras le recrache là où tu vises (sinon il ressort seul après 2 tours).'],
       rift: ['Faille', 'Une fois par match : son trajet se fissure. Au tour suivant la faille s’ouvre et avale les ennemis restés dessus.'],
       current: ['Contre-courant', 'Après son premier coup, repart vers sa place de départ (3 fois par match).'],
       avatar: ['Avatar', 'Une fois par match : devient géant, ne peut pas tomber ce tour, et chaque coup libère une onde de choc.'],
@@ -88,7 +90,7 @@ const RT = {
       pinball: ['Pinball', 'Bounces off the edge instead of falling, faster each time (3 bounces).'],
       rampart: ['Rampart', 'Doesn’t shoot: becomes a fixed wall that sends enemies back ×1.6.'],
       icetrail: ['Ice rink', 'Leaves an ice trail for 2 turns: anything crossing it slides far.'],
-      surf: ['Backwash', 'Doesn’t move: sends a cone-shaped wave where you aim.'],
+      surf: ['Backwash', 'Doesn’t move: a big cone-shaped wave sweeps enemies away where you aim.'],
       ora: ['Barrage', 'Hits ×1.6: the enemy flies far. Long cooldown.'],
       blink: ['Teleport', 'Doesn’t roll: appears right where you aim.'],
       mirror: ['Mirror', 'Your tokens near Lumis can’t be pushed by enemies and send them back ×1.5.'],
@@ -101,6 +103,8 @@ const RT = {
       blackhole: ['Black hole', 'On first hit, opens a black hole that pulls everything for 2 turns. Its core swallows tokens.'],
       sun: ['Solar gravity', 'Doesn’t shoot: becomes a small sun. This turn, anything moving nearby is pulled in, even the enemy shot.'],
       cyclone: ['Eye of the storm', 'On launch, nearby enemies are caught in a whirlwind and thrown.'],
+      beam: ['Eye beam', 'Doesn’t move: a beam crosses the arena where you aim and pushes every enemy on the line (twice per match).'],
+      devour: ['Devourer', 'Once per match: splits in two and snaps shut like jaws. An enemy caught between the halves is swallowed, and Takoras’s next shot spits it out where you aim (or it comes out by itself after 2 turns).'],
       rift: ['Rift', 'Once per match: its path cracks. Next turn the rift opens and swallows enemies still on it.'],
       current: ['Backflow', 'After its first hit, swims back to where it started (3 times per match).'],
       avatar: ['Avatar', 'Once per match: becomes giant, can’t fall this turn, and every hit releases a shockwave.'],
@@ -143,7 +147,7 @@ const RT = {
 };
 const rtL = () => RT[SETTINGS.lang] || RT.fr;
 const rt = (k, v = {}) => String(rtL()[k] ?? RT.fr[k]).replace(/\{(\w+)\}/g, (_, x) => v[x] ?? '');
-const PW_COL = { grow: '#7dd3fc', bounce: '#f9a8d4', scrap: '#fb923c', slide: '#a5f3fc', eruption: '#f97316', flare: '#fb923c', zerog: '#93c5fd', sun: '#fbbf24', cyclone: '#d9364f', rift: '#3fc7b6', current: '#f0453a', avatar: '#9fb6ff', jelly: '#7dd3fc', pinball: '#f9a8d4', rampart: '#d97706', icetrail: '#a5f3fc', surf: '#38bdf8', ora: '#f43f5e', blink: '#c9a6f2', mirror: '#f7a8d8', shade: '#7c8cf8', starfall: '#f6d39a', grab: '#6366f1', yinyang: '#f0453a', telekinesis: '#f08a3c', stun: '#d9364f', blackhole: '#3fc7b6', freeze: '#a5f3fc', wave: '#38bdf8', curve: '#60a5fa', double: '#f43f5e', ghost: '#c4b5fd',
+const PW_COL = { beam: '#ff4d6a', devour: '#9fb6ff', grow: '#7dd3fc', bounce: '#f9a8d4', scrap: '#fb923c', slide: '#a5f3fc', eruption: '#f97316', flare: '#fb923c', zerog: '#93c5fd', sun: '#fbbf24', cyclone: '#d9364f', rift: '#3fc7b6', current: '#f0453a', avatar: '#9fb6ff', jelly: '#7dd3fc', pinball: '#f9a8d4', rampart: '#d97706', icetrail: '#a5f3fc', surf: '#38bdf8', ora: '#f43f5e', blink: '#c9a6f2', mirror: '#f7a8d8', shade: '#7c8cf8', starfall: '#f6d39a', grab: '#6366f1', yinyang: '#f0453a', telekinesis: '#f08a3c', stun: '#d9364f', blackhole: '#3fc7b6', freeze: '#a5f3fc', wave: '#38bdf8', curve: '#60a5fa', double: '#f43f5e', ghost: '#c4b5fd',
   rescue: '#4ade80', shrink: '#818cf8', magnet: '#fde68a', anchor: '#94a3b8', second: '#fb7185', roots: '#e879f9', shield: '#f1f5f9', void: '#a855f7', split: '#ffffff', haste: '#86efac', guard: '#7dd3fc', none: '#888' };
 // charges restantes : petits carrés pleins / vides
 const rgPips = b => { const u = RG.kit(b.name).uses; if (!u) return ''; const l = b.left ?? u; return `<span class="rg-pips">${'<i></i>'.repeat(l)}${'<i class="off"></i>'.repeat(Math.max(0, u - l))}</span>`; };
@@ -305,9 +309,9 @@ function rgPanels() {
     const box = RNG.el.querySelector('#rg-t' + (side === ME() ? 0 : 1));
     box.innerHTML = st.bodies.filter(b => b.side === side).map(b => {
       const p = powerText(b.name), rd = RG.ready(b);
-      return `<button class="rg-tc${b.alive ? '' : ' ko'}${b.id === RNG.sel ? ' sel' : ''}${RNG.pows?.has(b.id) ? ' on' : ''}" data-id="${b.id}" style="--c:${PW_COL[p.pw]}" aria-label="${esc(jn(b.name))}">
+      return `<button class="rg-tc${b.alive ? '' : b.held ? ' held' : ' ko'}${b.id === RNG.sel ? ' sel' : ''}${RNG.pows?.has(b.id) ? ' on' : ''}" data-id="${b.id}" style="--c:${PW_COL[p.pw]}" aria-label="${esc(jn(b.name))}">
         <img class="px${vCls(b.variant)}" src="${texOf(jetonOf(b.name))}" alt="">
-        <span class="rg-tcp">${!b.alive ? '✕' : b.stun ? '!' : rd ? (b.left != null ? rgPips(b) : '✦') : b.spent || b.left === 0 ? '·' : b.cd}</span>
+        <span class="rg-tcp">${b.held ? b.held.left : !b.alive ? '✕' : b.stun ? '!' : rd ? (b.left != null ? rgPips(b) : '✦') : b.spent || b.left === 0 ? '·' : b.cd}</span>
       </button>`;
     }).join('');
   });
@@ -669,7 +673,7 @@ function rgZones(c, t) {
 }
 // Murs : pierre en briques (amortit) ou mur rebondisseur rose lumineux, chevrons qui défilent (renvoie plus vite)
 // Visée en forme d'effet : Téléportation (destination), Ressac (cône), Pluie d'étoiles (zone), Télékinésie (cible)
-const SHAPE_PW = new Set(['blink', 'surf', 'starfall', 'telekinesis']);
+const SHAPE_PW = new Set(['blink', 'surf', 'starfall', 'telekinesis', 'beam']);
 function rgShapeAim(c, sel, sx, sy, col, t) {
   if (!RNG.pows?.has(sel.id)) return false;
   const k = RG.kit(sel.name), pw = k.pw; if (!SHAPE_PW.has(pw)) return false;
@@ -689,6 +693,18 @@ function rgShapeAim(c, sel, sx, sy, col, t) {
     c.fillStyle = `rgba(56,189,248,${.12 + .15 * f})`; c.strokeStyle = '#7dd3fc'; c.lineWidth = px * 2;
     c.beginPath(); c.moveTo(sx, sy); c.arc(sx, sy, R, a0 - half, a0 + half); c.closePath(); c.fill(); c.stroke();
     for (let i = 1; i <= 3; i++) { const rr = R * (((t * .8 + i / 3) % 1)); c.strokeStyle = `rgba(224,242,254,${.5 * (1 - rr / R)})`; c.beginPath(); c.arc(sx, sy, rr, a0 - half, a0 + half); c.stroke(); }
+  } else if (pw === 'beam') {
+    // Rayon : une bande rouge jusqu'au bord, les ennemis sur la ligne sont entourés
+    const R = RG.ringR(RNG.st), bx = sel.x, by = sel.y, b2 = bx * wx + by * wy, L = Math.min(k.p.range, -b2 + Math.sqrt(Math.max(0, b2 * b2 - (bx * bx + by * by - R * R))));
+    const ex = sx + ux * L * V.s, ey = sy + uy * L * V.s, wd = k.p.width * V.s;
+    c.lineCap = 'round'; c.strokeStyle = `rgba(255,77,106,${.14 + .14 * f})`; c.lineWidth = wd * 2.2; c.beginPath(); c.moveTo(sx, sy); c.lineTo(ex, ey); c.stroke();
+    c.strokeStyle = 'rgba(255,214,220,.75)'; c.lineWidth = Math.max(px, wd * .35); c.setLineDash([px * 4, px * 3]); c.lineDashOffset = -t * 40; c.beginPath(); c.moveTo(sx, sy); c.lineTo(ex, ey); c.stroke(); c.setLineDash([]);
+    for (const o of RNG.st.bodies) {
+      if (!o.alive || o.side === sel.side) continue;
+      const dx = o.x - bx, dy = o.y - by, al = dx * wx + dy * wy;
+      if (al <= 0 || al > L || Math.abs(dx * wy - dy * wx) > o.r + k.p.width / 2) continue;
+      const [x, y] = w2s(o.x, o.y); c.strokeStyle = '#ff4d6a'; c.lineWidth = px * 2; c.beginPath(); c.arc(x, y, o.r * V.s + px * 4 + Math.sin(t * 8) * px, 0, 7); c.stroke();
+    }
   } else if (pw === 'telekinesis') {
     const foes = RNG.st.bodies.filter(o => o.alive && o.side !== sel.side && (o.x - sel.x) * wx + (o.y - sel.y) * wy > 0);
     const tg = foes.sort((a, b) => Math.abs((a.x - sel.x) * wy - (a.y - sel.y) * wx) - Math.abs((b.x - sel.x) * wy - (b.y - sel.y) * wx))[0];
@@ -811,7 +827,7 @@ function rgFloor(c, ox, oy, R, Rc, t) {
   c.save(); c.setTransform(1, 0, 0, 1, (RNG.shakeX || 0) / px, (RNG.shakeY || 0) / px); c.drawImage(RNG.floor.cv, 0, 0); c.restore();
   // partie du sol déjà avalée : le vide, avec un liseré rouge qui s'effrite au bord
   if (Rc < R - .5) {
-    c.fillStyle = 'rgba(6,4,12,.88)'; c.beginPath(); c.arc(ox, oy, R + px * 2, 0, 7); c.arc(ox, oy, Rc, 0, 7, true); c.fill();
+    c.fillStyle = 'rgba(6,4,12,.88)'; c.beginPath(); c.arc(ox, oy, R + px * 2, 0, Math.PI * 2); c.moveTo(ox + Rc, oy); c.arc(ox, oy, Rc, 0, Math.PI * 2, true); c.fill();
     c.fillStyle = `rgba(251,113,133,${.35 + .2 * Math.sin(t * 3)})`;
     for (let k = 0; k < 72; k++) { const a = k / 72 * 6.283, d = Rc + px * (2 + (k * 7 % 5)); if (k % 3) c.fillRect(Math.round((ox + Math.cos(a) * d) / px) * px, Math.round((oy + Math.sin(a) * d) / px) * px, px, px); }
   }
@@ -1045,6 +1061,11 @@ function rgToken(c, b, t, fall) {
   else { c.fillStyle = sideCol(b).md; c.beginPath(); c.arc(0, 0, rr, 0, 7); c.fill(); }
   c.filter = 'none';
   c.restore();
+  // Takoras a un ennemi dans le ventre : petite bulle avec son portrait (son prochain tir le recrache)
+  if (fall === false && !b.tmp && RNG.phase === 'aim') {
+    const live = RNG.st?.bodies.find(z => z.id === b.id), held = live?.full != null ? RNG.st.bodies.find(z => z.id === live.full) : null;
+    if (held) { const hi = rgImg(held.name), br = Math.max(9, rr * .42), bx = x - rr * .7, by = y - rr * .9; c.save(); c.fillStyle = 'rgba(11,9,20,.85)'; c.strokeStyle = '#9fb6ff'; c.lineWidth = 2; c.beginPath(); c.arc(bx, by, br, 0, 7); c.fill(); c.stroke(); if (hi.complete && hi.naturalWidth) { c.imageSmoothingEnabled = false; c.drawImage(hi, bx - br * .8, by - br * .8, br * 1.6, br * 1.6); } c.restore(); }
+  }
   // pouvoir prêt (pendant la visée) : petite gemme pixel
   if (fall === false && !b.tmp && RNG.phase === 'aim') {
     const live = RNG.st?.bodies.find(z => z.id === b.id);
@@ -1205,7 +1226,7 @@ const RSND = (() => {
   return S;
 })();
 RSND.freeze = RSND.slide; RSND.wave = RSND.curve; // sons des nouveaux pouvoirs
-Object.assign(RSND, { sun: RSND.shield, cyclone: RSND.curve, rift: RSND.blackhole, current: RSND.boing, avatar: RSND.split, jelly: RSND.grow, pinball: RSND.bounce, rampart: RSND.anchor, icetrail: RSND.slide, surf: RSND.curve, ora: RSND.double, blink: RSND.ghost, mirror: RSND.shield, shade: RSND.shrink, starfall: RSND.split, grab: RSND.magnet, yinyang: RSND.split, telekinesis: RSND.curve, stun: RSND.anchor });
+Object.assign(RSND, { beam: RSND.curve, devour: RSND.split, sun: RSND.shield, cyclone: RSND.curve, rift: RSND.blackhole, current: RSND.boing, avatar: RSND.split, jelly: RSND.grow, pinball: RSND.bounce, rampart: RSND.anchor, icetrail: RSND.slide, surf: RSND.curve, ora: RSND.double, blink: RSND.ghost, mirror: RSND.shield, shade: RSND.shrink, starfall: RSND.split, grab: RSND.magnet, yinyang: RSND.split, telekinesis: RSND.curve, stun: RSND.anchor });
 
 // ---------- Effets visuels des pouvoirs
 const RFX = (() => {
@@ -1221,7 +1242,7 @@ const RFX = (() => {
     P.intros = P.r.ev.filter(e => e.t === 'power');
     P.intros.forEach(e => { active[e.id] = e.pw; });
     // les doubles de Dédoublement gardent l'aura dorée
-    P.r.ev.filter(e => e.t === 'split').forEach(e => { active[e.cid] = 'split'; });
+    P.r.ev.filter(e => e.t === 'split' || e.t === 'cut').forEach(e => { active[e.cid] = e.t === 'cut' ? 'devour' : 'split'; });
   }
   // Intro d'un pouvoir : temps figé ~0,8 s, cercle de runes, nom du pouvoir, son
   function introStart(e, P) {
@@ -1259,7 +1280,13 @@ const RFX = (() => {
     if (e.t === 'rampart') { const p = at2(e.id); if (p) { burst(p[0], p[1], 30, '#d97706', 4); RNG.parts.push({ ring: true, x: p[0], y: p[1], col: '#fbbf24', size: 1.8, life: 1 }); RNG.shake = 10; RSND.anchor?.(); } }
     if (e.t === 'mirror') { for (const o of P.bodies) if (o.alive && o.side === body(e.id)?.side) { const [x, y] = w2s(o.x, o.y); RNG.parts.push({ ring: true, x, y, col: '#f7a8d8', size: 1.3, life: 1 }); burst(x, y, 10, '#fff0f8', 2.5); } RSND.shield?.(); }
     if (e.t === 'reflect') { const p = at2(e.to); if (p) { burst(p[0], p[1], 24, '#f9a8d4', 4.5); rgPunch(p[0], p[1], .05); RNG.shake = Math.max(RNG.shake, 10); RSND.boing?.(); } }
-    if (e.t === 'surf') { const b = body(e.id); if (b) { const [x, y] = w2s(b.x, b.y), n = Math.hypot(e.ax, e.ay) || 1, ux = e.ax / n * FL(), uy = e.ay / n * FL(); for (let k = 0; k < 46; k++) { const a = Math.atan2(uy, ux) + (Math.random() - .5) * 1.2, v = 4 + Math.random() * 6 * (e.f || 1); part({ x, y, vx: Math.cos(a) * v, vy: Math.sin(a) * v, col: k % 3 ? '#38bdf8' : '#e0f2fe', size: 3 + Math.random() * 3 }); } RNG.shake = 10; RSND.eruption?.(); } }
+    if (e.t === 'beam') { const b = body(e.id); if (b) { const [x, y] = w2s(b.x, b.y), n = Math.hypot(e.ax, e.ay) || 1, ux = e.ax / n * FL(), uy = e.ay / n * FL(), L = RNG.view.size * 1.5; for (let d = b.r * RNG.view.s; d < L; d += 3) { for (const [w, col, sz] of [[0, '#ffffff', 4], [6, '#ff4d6a', 5], [-6, '#ff4d6a', 5]]) { const j = w + (Math.random() - .5) * 2; part({ x: x + ux * d - uy * j, y: y + uy * d + ux * j, vx: -uy * j * .08, vy: ux * j * .08, col, size: sz + Math.random() * 1.5 }); } } burst(x, y, 24, '#ff4d6a', 4); rgFlashCol('#ff4d6a'); RNG.shake = 14; RSND.eruption?.(); } }
+    if (e.t === 'beamhit') { const p = at2(e.to); if (p) { burst(p[0], p[1], 22, '#ffd6dc', 5); rgPunch(p[0], p[1], .06); } }
+    if (e.t === 'cut') { const p = at2(e.id); if (p) { burst(p[0], p[1], 30, '#c7d2fe', 4.5); rgFlashCol('#9fb6ff'); RNG.shake = 10; RSND.split?.(); } }
+    if (e.t === 'devour') { const p = at2(e.to); const [x, y] = p || w2s(e.x, e.y); for (let k = 0; k < 40; k++) { const a = k / 40 * 6.283, r0 = 40 + Math.random() * 30; part({ x: x + Math.cos(a) * r0, y: y + Math.sin(a) * r0, vx: -Math.cos(a) * 3, vy: -Math.sin(a) * 3, col: k % 2 ? '#9fb6ff' : '#ffffff', size: 3.5 }); } RNG.parts.push({ ring: true, x, y, col: '#9fb6ff', size: 2.6, life: 1 }); rgPunch(x, y, .1); RNG.shake = 18; RSND.blackhole?.(); }
+    if (e.t === 'join') { const p = at2(e.id); if (p) { RNG.parts.push({ ring: true, x: p[0], y: p[1], col: '#e0e7ff', size: 1.6, life: 1 }); burst(p[0], p[1], 14, '#e0e7ff', 3); } }
+    if (e.t === 'spit') { const p = at2(e.to); if (p) { burst(p[0], p[1], e.free ? 18 : 40, '#9fb6ff', e.free ? 3 : 6); if (!e.free) { rgFlashCol('#9fb6ff'); RNG.shake = 16; RSND.eruption?.(); } } }
+    if (e.t === 'surf') { const b = body(e.id); if (b) { const [x, y] = w2s(b.x, b.y), n = Math.hypot(e.ax, e.ay) || 1, ux = e.ax / n * FL(), uy = e.ay / n * FL(); for (let k = 0; k < 46; k++) { const a = Math.atan2(uy, ux) + (Math.random() - .5) * 1.2, v = 4 + Math.random() * 6 * (e.f || 1); part({ x, y, vx: Math.cos(a) * v, vy: Math.sin(a) * v, col: k % 3 ? '#38bdf8' : '#e0f2fe', size: 3 + Math.random() * 3 }); } { const R = RG.kit(b.name).p.radius * RNG.view.s, h = Math.acos(RG.kit(b.name).p.cone), a0 = Math.atan2(uy, ux); for (let w = 1; w <= 3; w++) for (let k = 0; k < 24; k++) { const a = a0 - h + 2 * h * k / 23, rr = R * w / 6, v = 5 + w * 1.5; part({ x: x + Math.cos(a) * rr, y: y + Math.sin(a) * rr, vx: Math.cos(a) * v, vy: Math.sin(a) * v, col: w === 2 ? '#e0f2fe' : '#38bdf8', size: 4.5 - w * .5 }); } } RNG.shake = 14; RSND.eruption?.(); } }
     if (e.t === 'starfall') { const [x, y] = w2s(e.x, e.y); for (let k = 0; k < 7; k++) setTimeout(() => { const ox = x + (Math.random() - .5) * 60, oy = y + (Math.random() - .5) * 60; RNG.parts.push({ star: true, x: ox, y: oy, col: '#f6d39a', life: 1, size: 26 }); burst(ox, oy, 10, '#fff7e6', 3); }, k * 45); RNG.parts.push({ wave: true, x, y, col: '#f6d39a', rad: 320 * RNG.view.s, life: 1 }); rgFlashCol('#f6d39a'); RNG.shake = 14; rgPunch(x, y, .06); RSND.split?.(); }
     if (e.t === 'tk') { const a = at2(e.id), b = at2(e.to); if (a && b) { RNG.parts.push({ bolt: [a[0], a[1], b[0], b[1]], col: '#f08a3c', life: 1 }); burst(b[0], b[1], 26, '#f08a3c', 4); RNG.parts.push({ ring: true, x: b[0], y: b[1], col: '#fff6ea', size: 1.5, life: 1 }); RNG.shake = 8; RSND.curve?.(); } }
     if (e.t === 'grab') { const a = at2(e.id), b = at2(e.to); if (a && b) { RNG.parts.push({ bolt: [a[0], a[1], b[0], b[1]], col: '#6366f1', life: 1 }); burst(b[0], b[1], 22, '#a8b4ff', 3.5); RNG.shake = 9; RSND.magnet?.(); } }

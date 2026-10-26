@@ -70,6 +70,8 @@
 .rg-tc img { width: 100%; height: 100%; border-radius: 50%; image-rendering: pixelated; object-fit: cover; }
 .rg-tc:hover { transform: scale(1.08); } .rg-tc.sel { box-shadow: 0 0 0 3px #fff, 0 0 14px rgba(255, 255, 255, .5); }
 .rg-tc.ko { filter: grayscale(1) brightness(.4); }
+.rg-tc.held { opacity: .6; outline: 2px dashed #9fb6ff; outline-offset: 2px; }
+.rg-tc.held .rg-tcp { background: #9fb6ff; color: #0b0914; }
 .rg-tcp { position: absolute; right: -4px; bottom: -4px; min-width: 18px; height: 18px; padding: 0 4px; border-radius: var(--r-sm); display: grid; place-items: center; font-size: 10.5px; font-weight: 800; color: #0b0914; background: var(--c); box-shadow: 0 0 8px var(--c); }
 .rg-tc.ko .rg-tcp { background: #444; color: #fff; box-shadow: none; }
 .rg-info { position: fixed; inset: 0; z-index: 8; display: grid; place-items: center; padding: 20px; background: rgba(5, 3, 12, .6); backdrop-filter: blur(3px); }

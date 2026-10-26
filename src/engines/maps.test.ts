@@ -110,7 +110,7 @@ test('plusieurs pouvoirs dans le même tour, mais un seul jeton tire', () => {
   // Carmin tire avec sa rafale, Mobu devient gélatine et Zénith lance son cyclone en même temps
   const res = RG.resolve(st, [{ i: 2, ax: 0, ay: -1000, f: 1, pow: true, pows: [0, 1] }, null]);
   const used = res.ev.filter((e) => e.t === 'power').map((e) => e.pw);
-  expect(used.sort()).toEqual(['cyclone', 'jelly', 'ora']);
+  expect(used.sort()).toEqual(['beam', 'jelly', 'ora']);
   expect(res.ev.filter((e) => e.t === 'shot')).toHaveLength(1); // un seul tireur
   const mine = st.bodies.filter((b) => b.side === 0);
   expect(mine.every((b) => b.cd > 0 || b.left === 1)).toBe(true); // en recharge, ou une charge en moins (Zénith : 2 par match)

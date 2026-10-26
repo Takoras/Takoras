@@ -15,7 +15,6 @@ export function AutoConfig() {
       <h2 id="ac-t" className={s.panelT}>
         {t('ui.ac_title')}
       </h2>
-      <p className="muted">{t('ui.ac_sub')}</p>
       <fieldset className={s.chips}>
         <legend>{t('ui.ac_min')}</legend>
         {MINS.map((m) => (

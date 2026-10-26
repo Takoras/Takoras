@@ -13,6 +13,7 @@ import { useSettings } from '@/lib/settings';
 import { Rich } from '@/i18n/Rich';
 import { useDict, useT } from '@/i18n/useT';
 import { Button } from '@/ui/Button';
+import { Segmented } from '@/ui/Segmented';
 import { toast } from '@/ui/toast';
 import { MutationStamp } from '@/ui/MutationStamp';
 import { lvlOf, useInventory } from '../inventory/inv';
@@ -57,6 +58,7 @@ export default function Combat() {
   const ranked = useRanked();
   const qc = useQueryClient();
   const [editing, setEditing] = useState(false);
+  const [ptab, setPtab] = useState<'play' | 'rank' | 'dex'>('play');
   const [searching, setSearching] = useState(false);
   const [sheet, setSheet] = useState<Member | null>(null);
   // Quitter la page ferme le Ring (plus de boucle d'animation ni d'écouteur qui traîne)
@@ -168,7 +170,20 @@ export default function Combat() {
   };
 
   return (
-    <section className={s.page}>
+    <section className={`${s.page} ${s['t_' + ptab]}`}>
+      {/* téléphone : 3 onglets au lieu d'une longue page */}
+      <div className={s.mtabs}>
+        <Segmented
+          value={ptab}
+          onChange={setPtab}
+          label={t('arena.title')}
+          options={[
+            ['play', t('arena.tab_play')],
+            ['rank', t('arena.tab_rank')],
+            ['dex', t('arena.tab_dex')],
+          ]}
+        />
+      </div>
       <div className={s.colMain}>
         <RankCard me={rk} />
         <h1 className="visually-hidden">{t('arena.title')}</h1>
@@ -200,7 +215,6 @@ export default function Combat() {
                 }}
               >
                 <b>{t('arena.play')}</b>
-                <small>{t('arena.playRanked')}</small>
               </button>
             )}
           </div>
@@ -269,9 +283,13 @@ export default function Combat() {
         <RankRoad elo={elo} />
       </div>
       <aside className={s.colSide}>
-        <PassLink />
-        <EloTop />
-        <CombatDex inv={inv.data} />
+        <div className={s.sideRank}>
+          <PassLink />
+          <EloTop />
+        </div>
+        <div className={s.sideDex}>
+          <CombatDex inv={inv.data} />
+        </div>
       </aside>
 
       {searching ? (

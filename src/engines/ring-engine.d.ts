@@ -3,7 +3,7 @@ import type { TokenKit } from './ring-config';
 export type Body = {
   id: number; side: 0 | 1; i: number; name: string; lvl: number; variant: string; pw: string;
   base: { mass: number; power: number; r: number }; mass: number; power: number; r: number;
-  x: number; y: number; vx: number; vy: number; alive: boolean; cd: number; spent: boolean; tmp?: boolean; stun?: number; left?: number; link?: number;
+  x: number; y: number; vx: number; vy: number; alive: boolean; cd: number; spent: boolean; tmp?: boolean; stun?: number; left?: number; link?: number; held?: { by: number; left: number }; full?: number;
 };
 export type Wall = { x1: number; y1: number; x2: number; y2: number; w: number; k: number; hp?: number; dead?: boolean };
 export type Zone = { x: number; y: number; w: number; h: number; fric: number };

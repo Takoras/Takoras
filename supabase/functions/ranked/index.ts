@@ -24,7 +24,10 @@ const CORS = {
   'Access-Control-Allow-Methods': 'POST, OPTIONS',
 };
 const out = (body, status = 200) =>
-  new Response(JSON.stringify({ ...body, now: Date.now() }), { status, headers: { ...CORS, 'Content-Type': 'application/json' } });
+  new Response(JSON.stringify({ ...body, now: Date.now() }), {
+    status,
+    headers: { ...CORS, 'Content-Type': 'application/json' },
+  });
 const fail = (error, status = 400) => out({ error }, status);
 const iso = (ms) => new Date(ms).toISOString();
 
@@ -33,21 +36,41 @@ function cleanShot(s) {
   if (s == null) return null;
   if (typeof s !== 'object') throw 'bad_shot';
   const { i, ax, ay, f, pow, pows } = s;
-  if (![0, 1, 2].includes(i) || !Number.isInteger(ax) || !Number.isInteger(ay) || typeof f !== 'number' || typeof pow !== 'boolean') throw 'bad_shot';
+  if (
+    ![0, 1, 2].includes(i) ||
+    !Number.isInteger(ax) ||
+    !Number.isInteger(ay) ||
+    typeof f !== 'number' ||
+    typeof pow !== 'boolean'
+  )
+    throw 'bad_shot';
   if (Math.abs(ax) > 100000 || Math.abs(ay) > 100000 || !(f >= 0 && f <= 1)) throw 'bad_shot';
   if (!ax && !ay && f > 0) throw 'bad_shot';
   // pouvoirs des autres jetons activés ce tour (plusieurs pouvoirs possibles, un seul tireur)
-  if (pows != null && (!Array.isArray(pows) || pows.length > 3 || !pows.every((x) => [0, 1, 2].includes(x)))) throw 'bad_shot';
+  if (pows != null && (!Array.isArray(pows) || pows.length > 3 || !pows.every((x) => [0, 1, 2].includes(x))))
+    throw 'bad_shot';
   return { i, ax, ay, f: Math.round(f * 100) / 100, pow, pows: [...new Set(pows ?? [])].filter((x) => x !== i) };
 }
 
 const live = async (uid) =>
-  (await db.from('ranked_matches').select('*').eq('status', 'live').or(`p1.eq.${uid},p2.eq.${uid}`).order('created_at', { ascending: false }).limit(1)).data?.[0] ?? null;
+  (
+    await db
+      .from('ranked_matches')
+      .select('*')
+      .eq('status', 'live')
+      .or(`p1.eq.${uid},p2.eq.${uid}`)
+      .order('created_at', { ascending: false })
+      .limit(1)
+  ).data?.[0] ?? null;
 // Match abandonné par les deux (plus personne là depuis longtemps) : fermé sans gagnant ni Elo.
 // Avant, on le reprenait au retour d'un joueur et ses tours « absents » d'avant le faisaient perdre d'un coup.
 const stale = (m) => Date.now() > Date.parse(m.deadline) + GRACE_MS + STALE_MS;
 async function drop(m) {
-  await db.from('ranked_matches').update({ status: 'done', winner: null, why: 'stale', updated_at: iso(Date.now()) }).eq('id', m.id).eq('status', 'live');
+  await db
+    .from('ranked_matches')
+    .update({ status: 'done', winner: null, why: 'stale', updated_at: iso(Date.now()) })
+    .eq('id', m.id)
+    .eq('status', 'live');
   await db.from('ranked_shots').delete().eq('match_id', m.id);
 }
 const sideOf = (m, uid) => (m.p1 === uid ? 0 : m.p2 === uid ? 1 : -1);
@@ -63,10 +86,14 @@ async function resolve(m) {
   const has = [0, 1].map((s) => rows?.find((r) => r.side === s));
   const shots = has.map((r) => r?.shot ?? null);
   const misses = [m.misses1, m.misses2].map((n, s) => (has[s] ? 0 : n + 1));
-  const before = m.state, st = RG.clone(before);
+  const before = m.state,
+    st = RG.clone(before);
   let over = null;
   if (misses[0] >= MAX_MISSES || misses[1] >= MAX_MISSES) {
-    over = misses[0] >= MAX_MISSES && misses[1] >= MAX_MISSES ? { w: null, why: 'afk' } : { w: misses[0] >= MAX_MISSES ? 1 : 0, why: 'afk' };
+    over =
+      misses[0] >= MAX_MISSES && misses[1] >= MAX_MISSES
+        ? { w: null, why: 'afk' }
+        : { w: misses[0] >= MAX_MISSES ? 1 : 0, why: 'afk' };
   } else {
     const { ev } = RG.resolve(st, shots);
     if (st.over) over = { w: st.winner, why: ev.find((e) => e.t === 'end')?.why ?? 'turns' };
@@ -116,7 +143,14 @@ async function join(uid) {
   const state = RG.create([p.foe_team, mine], map);
   const { data: row, error: e2 } = await db
     .from('ranked_matches')
-    .insert({ p1: p.foe, p2: uid, names: [foe?.pseudo ?? '?', prof.pseudo], map, state, deadline: iso(Date.now() + FIRST_MS) })
+    .insert({
+      p1: p.foe,
+      p2: uid,
+      names: [foe?.pseudo ?? '?', prof.pseudo],
+      map,
+      state,
+      deadline: iso(Date.now() + FIRST_MS),
+    })
     .select('id')
     .single();
   if (e2) return fail(e2.message, 500);
@@ -138,8 +172,16 @@ async function shoot(uid, body) {
   if (Date.now() > Date.parse(m.deadline) + GRACE_MS) return fail('too_late', 409);
   const { error } = await db.from('ranked_shots').upsert({ match_id: m.id, turn: m.turn, side, shot });
   if (error) return fail(error.message, 500);
-  await db.from('ranked_matches').update({ [side ? 'ready2' : 'ready1']: true }).eq('id', m.id).eq('turn', m.turn);
-  const { count } = await db.from('ranked_shots').select('side', { count: 'exact', head: true }).eq('match_id', m.id).eq('turn', m.turn);
+  await db
+    .from('ranked_matches')
+    .update({ [side ? 'ready2' : 'ready1']: true })
+    .eq('id', m.id)
+    .eq('turn', m.turn);
+  const { count } = await db
+    .from('ranked_shots')
+    .select('side', { count: 'exact', head: true })
+    .eq('match_id', m.id)
+    .eq('turn', m.turn);
   if (count === 2) await resolve({ ...m });
   return out({ ok: true });
 }
@@ -153,7 +195,8 @@ async function tick(uid, body) {
     await drop(m);
     return out({ ok: true });
   }
-  if (Date.now() <= Date.parse(m.deadline) + GRACE_MS) return out({ ok: false, wait: Date.parse(m.deadline) + GRACE_MS - Date.now() });
+  if (Date.now() <= Date.parse(m.deadline) + GRACE_MS)
+    return out({ ok: false, wait: Date.parse(m.deadline) + GRACE_MS - Date.now() });
   await resolve(m);
   return out({ ok: true });
 }

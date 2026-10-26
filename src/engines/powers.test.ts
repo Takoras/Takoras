@@ -152,11 +152,16 @@ test('Gravité solaire (Soléo) : ne bouge pas, et le tir ennemi est dévié ver
   expect(b.foe.x).not.toBe(a.foe.x); // le tir ennemi est courbé vers lui
 });
 
-test('Œil du cyclone (Zénith) : les ennemis autour tournent et sont projetés', () => {
-  const d = duel('Zénith', 'Carmin', [0, 300, 200, 0]);
-  const r = RG.resolve(d.st, [shot(0, 1000, 0.2), null]);
-  expect(evs(r, 'cyclone')).toBe(1);
-  expect(Math.round(d.o().x)).not.toBe(200);
+test('Rayon (Zénith) : ne bouge pas, pousse tous les ennemis sur la ligne, 2 fois par match', () => {
+  const d = duel('Zénith', 'Carmin', [0, 900, 30, 300], true);
+  d.o2().x = -40;
+  d.o2().y = -300;
+  const r = RG.resolve(d.st, [shot(0, -1000, 1), null]);
+  expect(evs(r, 'beam')).toBe(1);
+  expect(evs(r, 'beamhit')).toBe(2);
+  expect(d.a().y).toBe(900);
+  expect(d.o().y).toBeLessThan(0);
+  expect(d.a().left).toBe(1);
 });
 
 test('Faille (Oblivion) : la trajectoire se fissure ; au tour suivant, l’ennemi resté dessus tombe', () => {
@@ -180,11 +185,33 @@ test('Contre-courant (Koi) : frappe puis repart vers son point de départ', () =
   expect(d.a().y).toBeGreaterThan(150); // revenu vers chez lui
 });
 
-test('Avatar (Takoras) : géant, ne tombe pas, et ses coups libèrent des ondes de choc', () => {
-  const d = duel('Takoras', 'Carmin', [0, 300, 0, 0]);
+test('Dévoreur (Takoras) : avale l’ennemi pris dans la mâchoire, puis le recrache au tir suivant', () => {
+  const d = duel('Takoras', 'Carmin', [0, 600, 0, 0], true);
+  d.o2().x = 900;
+  d.o2().y = -900;
   const r = RG.resolve(d.st, [shot(0, -1000, 1), null]);
-  expect(evs(r, 'avatar')).toBe(1);
-  expect(evs(r, 'avatarhit')).toBeGreaterThan(0);
-  expect(d.a().alive).toBe(true);
-  expect(RG.ready(d.a())).toBe(false); // une seule fois par match
+  expect(evs(r, 'cut')).toBe(1);
+  expect(evs(r, 'devour')).toBe(1);
+  expect(d.o().alive).toBe(false);
+  expect(d.o().held).toBeTruthy();
+  expect(d.st.over).toBe(false); // l'avalé compte encore dans son équipe
+  expect(RG.ready(d.a())).toBe(false);
+  const x0 = d.a().x;
+  const r2 = RG.resolve(d.st, [shot(1000, 0, 1, false), null]);
+  expect(evs(r2, 'spit')).toBe(1);
+  expect(d.a().x).toBe(x0); // Takoras ne bouge pas quand il recrache
+  expect(d.o().held).toBeUndefined();
+  expect(d.o().x).toBeGreaterThan(x0 + 300);
+});
+
+test('Dévoreur : sans tir de Takoras, l’avalé ressort tout seul au bout de 2 tours', () => {
+  const d = duel('Takoras', 'Carmin', [0, 600, 0, 0], true);
+  d.o2().x = 900;
+  d.o2().y = -900;
+  RG.resolve(d.st, [shot(0, -1000, 1), null]);
+  RG.resolve(d.st, [null, null]);
+  expect(d.o().alive).toBe(false);
+  const r = RG.resolve(d.st, [null, null]);
+  expect(evs(r, 'spit')).toBe(1);
+  expect(d.o().alive).toBe(true);
 });

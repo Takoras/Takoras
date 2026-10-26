@@ -52,6 +52,16 @@ const RG = (() => {
   const alive = (st, side) => st.bodies.filter(b => b.alive && !b.tmp && (side == null || b.side === side));
   // pouvoir prêt : à recharge (cd tours), à charges (uses fois par match, b.left restantes) ou une seule fois (cd 0)
   const ready = b => b.alive && b.pw !== 'none' && b.cd === 0 && !b.spent && (b.left == null || b.left > 0);
+  // remet en jeu un jeton avalé par Takoras, à l'intérieur du ring et sans chevaucher personne
+  function placeFree(st, o, x, y) {
+    const R = ringR(st) - o.r - 10; let d = len(x, y); if (d > R) { x = x / d * R; y = y / d * R; d = R; }
+    for (let it = 0; it < 60; it++) {
+      const hit = st.bodies.some(b => b !== o && b.alive && !b.tmp && len(b.x - x, b.y - y) < b.r + o.r) || touchesWall(st, x, y, o.r);
+      if (!hit) break;
+      const k = d > 40 ? (d - 30) / d : 1; x = x * k + (it % 2 ? 30 : -30) * (d > 40 ? 0 : 1); y = y * k; d = len(x, y);
+    }
+    o.x = q(x); o.y = q(y);
+  }
   const STOP_PW = new Set(['eruption', 'magnet']); // anciens pouvoirs « à l'arrêt » (plus utilisés par les jetons)
 
   // ---------- Un tour : les deux tirs partent en même temps. Renvoie { frames, ev } pour l'animation.
@@ -128,6 +138,7 @@ const RG = (() => {
       if (k.uses) b.left = (b.left ?? k.uses) - 1; // à charges : pas de recharge, juste un nombre d'utilisations
       else { b.cd = k.cd; if (!k.cd) b.spent = true; }
     };
+    const release = (o, x, y) => { const h = B.find(b => b.id === o.held?.by); if (h) delete h.full; delete o.held; o.alive = true; placeFree(st, o, x, y); o.vx = 0; o.vy = 0; };
     const fired = [];
     shots.forEach((s, side) => {
       if (!s) return;
@@ -136,6 +147,18 @@ const RG = (() => {
       [...new Set(s.pows || [])].filter(i => i !== s.i).sort((a, c) => a - c).forEach(i => { const o = mine(i); if (o) act(o, side); });
       const b = mine(s.i); if (!b) return;
       if (b.stun) { ev.push({ t: 'stunned', id: b.id, at: 0 }); return; } // paralysé (Regard de Zénith) : ne tire pas ce tour
+      // Takoras a avalé un ennemi : son prochain tir le recrache (il ne bouge pas, l'ennemi part dans la direction visée)
+      if (b.full != null) {
+        const o = B.find(x => x.id === b.full), f0 = Math.max(0, Math.min(1, s.f)), d0 = len(s.ax, s.ay);
+        if (o && d0) {
+          const ux = s.ax / d0, uy = s.ay / d0, gap = b.r + o.r + 6;
+          release(o, b.x + ux * gap, b.y + uy * gap);
+          const v = Math.max(C.MIN_FORCE, f0) * b.power * kit(b.name).p.spit; o.vx = q(ux * v); o.vy = q(uy * v);
+          o.t.spat = true; ev.push({ t: 'spit', id: b.id, to: o.id, at: 0 });
+        }
+        b.t.anchor = true;
+        return;
+      }
       if (s.pow) act(b, side);
       const T = b.t, k = kit(b.name);
       if (T.anchor) return; // l'ancre ne tire pas
@@ -154,12 +177,25 @@ const RG = (() => {
       if (T.pw === 'surf') {
         const ux = s.ax / d, uy = s.ay / d;
         for (const o of B) {
-          if (o === b || !o.alive || o.tmp || o.t.anchor || (o.t.shield && o.side !== b.side)) continue;
+          if (o.side === b.side || !o.alive || o.tmp || o.t.anchor || o.t.shield) continue;
           const dx = o.x - b.x, dy = o.y - b.y, dd = len(dx, dy);
           if (!dd || dd > k.p.radius || (dx * ux + dy * uy) / dd < k.p.cone) continue;
-          const g = k.p.push * f * (1 - dd / k.p.radius) / o.mass; o.vx += ux * g; o.vy += uy * g;
+          const g = k.p.push * (.35 + .65 * f) * (1 - .55 * dd / k.p.radius) / o.mass; o.vx += ux * g; o.vy += uy * g;
         }
         ev.push({ t: 'surf', id: b.id, ax: q(ux * 1000), ay: q(uy * 1000), f, at: 0 });
+        return;
+      }
+      // Rayon (Zénith) : ne bouge pas, un rayon traverse l'arène dans la direction visée et pousse tous les ennemis sur la ligne
+      if (T.pw === 'beam') {
+        const ux = s.ax / d, uy = s.ay / d;
+        for (const o of B) {
+          if (o.side === b.side || !o.alive || o.tmp || o.t.anchor || o.t.shield) continue;
+          const dx = o.x - b.x, dy = o.y - b.y, al = dx * ux + dy * uy;
+          if (al <= 0 || al > k.p.range || Math.abs(dx * uy - dy * ux) > o.r + k.p.width / 2) continue;
+          const g = k.p.push * (.4 + .6 * f) * (1 - .3 * al / k.p.range) / o.mass; o.vx += ux * g; o.vy += uy * g;
+          ev.push({ t: 'beamhit', id: b.id, to: o.id, at: 0 });
+        }
+        ev.push({ t: 'beam', id: b.id, ax: q(ux * 1000), ay: q(uy * 1000), f, at: 0 });
         return;
       }
       // Pluie d'étoiles (Astra) : ne bouge pas, les étoiles tombent là où on vise (plus loin avec plus de force) et repoussent tout
@@ -186,6 +222,15 @@ const RG = (() => {
       const sp = f * b.power * (T.pw === 'shrink' || T.pw === 'shade' ? k.p.power : 1);
       b.vx = q(s.ax / d * sp); b.vy = q(s.ay / d * sp);
       T.shooter = true; T.v0 = sp; T.home = [b.x, b.y]; fired.push(b.id);
+      // Dévoreur (Takoras) : se coupe en deux moitiés qui s'écartent puis se referment comme une mâchoire
+      if (T.pw === 'devour') {
+        const ux = s.ax / d, uy = s.ay / d, sp2 = k.p.spread, dir = sg => { const nx = ux - uy * sp2 * sg, ny = uy + ux * sp2 * sg, n = len(nx, ny); return [nx / n, ny / n]; };
+        const c = { ...b, id: 100 + b.id, tmp: true, t: { ...T, half: true } };
+        const [ax, ay] = dir(1), [cx, cy] = dir(-1);
+        b.vx = q(ax * sp); b.vy = q(ay * sp); c.vx = q(cx * sp); c.vy = q(cy * sp);
+        T.ghost = true; c.t.ghost = true; T.cut = { c, u: [ux, uy], dir, closed: false };
+        B.push(c); ev.push({ t: 'cut', id: b.id, cid: c.id, at: 0 });
+      }
       ev.push({ t: 'shot', id: b.id, at: 0, f });
     });
     const suns = B.filter(b => b.t.sun);
@@ -223,6 +268,27 @@ const RG = (() => {
         b.x += b.vx * dt; b.y += b.vy * dt;
         // frottement
         if (s > 0) { const zf = ZONES.length ? zoneFric(ZONES, b.x, b.y) : 1, ns = Math.max(0, s - C.FRICTION * T.fric * GF * zf * dt) * (1 - C.DRAG * dt), k = ns / s; b.vx *= k; b.vy *= k; }
+      }
+      // Dévoreur : la mâchoire s'ouvre, se referme, et avale l'ennemi pris entre les deux moitiés
+      for (const b of list) {
+        const cut = b.t.cut; if (!cut || !b.alive) continue;
+        const c = cut.c, p = kit(b.name).p, sp = len(b.vx, b.vy);
+        if (!cut.closed && tm >= p.open) { cut.closed = true; const [ax, ay] = cut.dir(-1), [cx, cy] = cut.dir(1), sc = len(c.vx, c.vy); b.vx = ax * sp; b.vy = ay * sp; c.vx = cx * sc; c.vy = cy * sc; }
+        const ex = c.x - b.x, ey = c.y - b.y, L = len(ex, ey);
+        if (!b.t.ate && c.alive && L > 1) for (const o of B) {
+          if (!o.alive || o.tmp || o.side === b.side || o.t.anchor || o.t.shield || o.held) continue;
+          const u = ((o.x - b.x) * ex + (o.y - b.y) * ey) / (L * L);
+          if (u <= 0 || u >= 1 || L < o.r * 1.1 || Math.abs((o.x - b.x) * ey - (o.y - b.y) * ex) / L > o.r * .7) continue;
+          b.t.ate = true; o.alive = false; o.vx = 0; o.vy = 0; o.held = { by: b.id, left: kit(b.name).p.turns }; b.full = o.id;
+          ev.push({ t: 'devour', id: b.id, to: o.id, x: q(o.x), y: q(o.y), at: tm }); break;
+        }
+        // les deux moitiés se rejoignent : Takoras redevient entier au milieu, et continue tout droit
+        const across = cut.closed && ((c.x - b.x) * cut.u[1] - (c.y - b.y) * cut.u[0]) * ((cut.c0 ?? ((cut.c0 = (c.x - b.x) * cut.u[1] - (c.y - b.y) * cut.u[0])))) <= 0;
+        if (!c.alive || (cut.closed && (L < b.r * .3 || across)) || tm > p.open * 3.5 || sp <= C.STOP_SPEED) {
+          if (c.alive) { b.x = (b.x + c.x) / 2; b.y = (b.y + c.y) / 2; }
+          const v = (sp + (c.alive ? len(c.vx, c.vy) : sp)) / 2; b.vx = cut.u[0] * v; b.vy = cut.u[1] * v;
+          c.alive = false; b.t.ghost = false; b.t.cut = null; ev.push({ t: 'join', id: b.id, at: tm });
+        }
       }
       // chocs entre jetons
       for (let a = 0; a < list.length; a++) for (let c = a + 1; c < list.length; c++) {
@@ -382,6 +448,12 @@ const RG = (() => {
       b.stun = b.stunNext ? 1 : 0; delete b.stunNext; // paralysé seulement au tour suivant
       delete b.t;
     });
+    // Dévoreur : si Takoras est tombé, l'avalé ressort ; sinon il est recraché tout seul au bout de 2 tours
+    for (const o of st.bodies) if (o.held) {
+      const h = st.bodies.find(b => b.id === o.held.by);
+      if (!h || !h.alive) { const d = h ? len(h.x, h.y) || 1 : 1, R = ringR(st) * .6; release(o, h ? h.x / d * Math.min(d, R) : 0, h ? h.y / d * Math.min(d, R) : 0); ev.push({ t: 'spit', id: h ? h.id : -1, to: o.id, free: true, at: tm }); continue; }
+      if (--o.held.left <= 0) { const d = len(h.x, h.y) || 1, gap = h.r + o.r + 8; release(o, h.x - h.x / d * gap, h.y - h.y / d * gap); ev.push({ t: 'spit', id: h.id, to: o.id, free: true, at: tm }); }
+    }
     // Faille (Oblivion) : elle s'ouvre à la fin du tour SUIVANT — les ennemis restés dessus tombent dedans (on a un tour pour s'écarter)
     if (st.rift) {
       if (st.rift.armed) {
@@ -404,7 +476,7 @@ const RG = (() => {
 
   // ---------- Fin de tour : victoire, mort subite, limite de tours
   function endTurn(st, start, ev) {
-    const n = [0, 1].map(s => alive(st, s).length);
+    const n = [0, 1].map(s => st.bodies.filter(b => b.side === s && !b.tmp && (b.alive || b.held)).length);
     if (!n[0] || !n[1]) {
       if (n[0] || n[1]) return finish(st, n[0] ? 0 : 1, ev, 'out');
       if (start[0] !== start[1]) return finish(st, start[0] > start[1] ? 0 : 1, ev, 'count');
@@ -416,6 +488,7 @@ const RG = (() => {
         // sur une map : on recule le jeton tant qu'il touche un obstacle (toujours pareil, donc déterministe)
         let y = C.SUDDEN_Y;
         while (touchesWall(st, 0, s ? -y : y, b.base.r + 10) && y + 20 < ringR(st) * .7) y += 20;
+        st.bodies.forEach(o => { delete o.held; delete o.full; });
         Object.assign(b, { alive: true, x: 0, y: s ? -y : y, vx: 0, vy: 0 });
       });
       ev.push({ t: 'sudden' });

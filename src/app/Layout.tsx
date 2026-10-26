@@ -169,6 +169,39 @@ export function Layout() {
         <Outlet />
       </main>
 
+      <footer className={s.foot}>
+        <div className={s.footIn}>
+          <div className={s.footBrand}>
+            <img className="px still" src="/img/logo.png" alt="" width={40} height={40} />
+            <b>Takoras</b>
+            <small>{t('ui.foot_tag')}</small>
+          </div>
+          <nav className={s.footCol} aria-label={t('ui.foot_play')}>
+            <b>{t('ui.foot_play')}</b>
+            <NavLink to="/">{t('ui.nav_home')}</NavLink>
+            <NavLink to="/inventaire">{t('ui.nav_inv')}</NavLink>
+            <NavLink to="/combat">{t('ui.nav_combat')}</NavLink>
+            <NavLink to="/passe">{t('ui.bp_title')}</NavLink>
+          </nav>
+          <nav className={s.footCol} aria-label={t('ui.foot_more')}>
+            <b>{t('ui.foot_more')}</b>
+            <NavLink to="/boutique">{t('ui.nav_shop')}</NavLink>
+            <NavLink to="/classement">{t('ui.nav_board')}</NavLink>
+            <NavLink to="/amis">{t('ui.nav_friends')}</NavLink>
+          </nav>
+          <div className={s.footCol}>
+            <b>{t('ui.foot_beta')}</b>
+            <button type="button" onClick={openPatchnotes}>
+              {t('ui.foot_news')}
+            </button>
+            <NavLink to="/profil">{t('app.account')}</NavLink>
+          </div>
+        </div>
+        <small className={s.copy}>
+          © {new Date().getFullYear()} Takoras · {t('ui.foot_art')}
+        </small>
+      </footer>
+
       <nav className={s.tabbar} aria-label={t('app.main_nav')}>
         {NAV.filter((n) => n.tab).map((n) => (
           <NavLink key={n.to} to={n.to} end={n.to === '/'} className={({ isActive }) => (isActive ? s.on : undefined)}>

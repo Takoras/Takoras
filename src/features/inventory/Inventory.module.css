@@ -51,6 +51,45 @@
   color: #fff;
 }
 
+/* Étagères des séries (pulls) */
+.shelves {
+  display: flex;
+  gap: var(--s-3);
+  overflow-x: auto;
+  padding: 2px;
+}
+.shelf {
+  display: flex;
+  align-items: center;
+  gap: var(--s-3);
+  min-width: 220px;
+  padding: var(--s-3) var(--s-4);
+  border-radius: var(--r-md);
+  background: var(--surface);
+  border: 2px solid var(--line);
+  color: var(--text);
+  text-align: left;
+}
+.shelf img {
+  width: 48px;
+  height: 48px;
+  image-rendering: pixelated;
+}
+.shelf span {
+  display: grid;
+}
+.shelf small {
+  color: var(--muted);
+}
+.shelf[aria-pressed='true'] {
+  border-color: var(--accent-hi);
+  background: color-mix(in srgb, var(--accent) 16%, var(--surface));
+}
+.shelfSoon {
+  opacity: 0.55;
+  border-style: dashed;
+}
+
 /* Progression */
 .progress {
   display: grid;
@@ -59,9 +98,10 @@
 }
 .progress > div {
   padding: var(--s-3) var(--s-4);
-  border-radius: var(--r-md);
-  background: var(--surface);
-  border: 1px solid var(--line);
+  border: 3px solid transparent;
+  border-image: url('/img/ui/box-9.png') 14 fill / 28px stretch;
+  background: none;
+  image-rendering: pixelated;
   font-size: var(--fs-sm);
 }
 .progress b {

@@ -103,7 +103,7 @@ const RCFG = {
     Rouillé:  { mass: 1.65, power: 1580, r: 122, pw: 'rampart',  cd: 3, p: { mult: 1.6 } },               // ferraille : rempart qui renvoie
     Givre:    { mass: 1.00, power: 1880, r: 106, pw: 'icetrail', cd: 0, uses: 3, p: { every: 6 } },                // glace : patinoire derrière lui
     Soléo:    { mass: 1.60, power: 1620, r: 120, pw: 'sun',      cd: 3, p: { radius: 900, g: 2600 } },     // soleil : gravité, tout ce qui bouge est attiré
-    Azura:    { mass: .80, power: 2080, r: 96, pw: 'surf',       cd: 3, p: { radius: 700, push: 1500, cone: .82 } }, // eau : ressac dans la direction visée
+    Azura:    { mass: .80, power: 2080, r: 96, pw: 'surf',       cd: 3, p: { radius: 1300, push: 2700, cone: .55 } }, // eau : ressac en cône (ennemis seulement)
     Carmin:   { mass: 1.10, power: 1920, r: 108, pw: 'ora',      cd: 4, p: { mult: 1.6, friction: .55 } }, // poing : rafale (×1,6)
     Vyolis:   { mass: .95, power: 1940, r: 104, pw: 'blink',     cd: 0, uses: 3, p: { range: 900 } },              // orbites : téléportation
     Lumis:    { mass: .82, power: 2100, r: 96, pw: 'mirror',     cd: 4, p: { mult: 1.5, radius: 450 } },  // lumière : miroir autour d'elle
@@ -112,9 +112,9 @@ const RCFG = {
     Kraïos:   { mass: 1.80, power: 1600, r: 130, pw: 'grab',     cd: 0, p: {} },                          // kraken : tentacules (1 fois par match)
     Koi:      { mass: 1.00, power: 1970, r: 104, pw: 'current',  cd: 0, uses: 3, p: { back: .75 } },     // poisson : frappe puis repart vers son départ
     Néphéris: { mass: .90, power: 2150, r: 100, pw: 'telekinesis', cd: 0, p: { mult: .75 } },             // psychique : télékinésie (1 fois par match)
-    Zénith:   { mass: 1.75, power: 1650, r: 126, pw: 'cyclone',  cd: 3, p: { radius: 480, spin: 1500, push: 500 } }, // œil : œil du cyclone
+    Zénith:   { mass: 1.75, power: 1650, r: 126, pw: 'beam',     cd: 0, uses: 2, p: { range: 2600, width: 70, push: 2100 } }, // œil : rayon qui traverse et pousse tous les ennemis sur la ligne
     Oblivion: { mass: 1.15, power: 1980, r: 110, pw: 'rift',     cd: 0, p: {} },                          // planète fissurée : faille qui s'ouvre au tour suivant
-    Takoras:  { mass: 1.15, power: 2000, r: 110, pw: 'avatar',   cd: 0, p: { r: 1.5, mass: 2, radius: 320, push: 1150 } }, // avatar géant, ondes de choc
+    Takoras:  { mass: 1.15, power: 2000, r: 110, pw: 'devour',   cd: 0, p: { spread: .55, open: .34, spit: .9, turns: 3 } }, // se coupe en deux, avale l'ennemi pris entre les moitiés, le recrache
   },
   DEFAULT_TOKEN: { role: 'fighter', mass: 1, power: 1800, r: 107, pw: 'none', cd: 0, p: {} }, // jeton d'une future collection sans pouvoir
   STAT_MAX: { mass: 3, power: 3400, r: 140 }, // barres des fiches à 100 %

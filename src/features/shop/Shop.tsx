@@ -204,8 +204,7 @@ function Card({
       </div>
       <div className={s.body}>
         <div>
-          <h3>{name}</h3>
-          <p className="muted">{desc}</p>
+          <h3 title={desc}>{name}</h3>
         </div>
         <div className={s.foot}>
           <span className={s.meta}>
@@ -366,7 +365,6 @@ function Redeem({ items }: { items: Item[] }) {
         <h2 id="promo-t" className={s.h2}>
           {t('ui.promo_title')}
         </h2>
-        <p className="muted">{t('ui.promo_hint')}</p>
       </div>
       <form onSubmit={(e) => void submit(e)} className={s.form}>
         <input

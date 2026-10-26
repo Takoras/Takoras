@@ -158,9 +158,10 @@
   display: grid;
   gap: var(--s-3);
   padding: var(--s-5);
-  border-radius: var(--r-lg);
-  background: var(--surface);
-  border: 1px solid var(--line);
+  border: 3px solid transparent;
+  border-image: url('/img/ui/box-9.png') 14 fill / 28px stretch;
+  background: none;
+  image-rendering: pixelated;
 }
 
 .panelT {

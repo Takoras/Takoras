@@ -16,6 +16,8 @@ import {
   vImg,
   vOdds,
   glowVars,
+  jetonOf,
+  TEMPLATE,
 } from '@/data/jetons';
 import { statsOf, fmtLuck } from '@/engines/env';
 import { moPlay, moSnap } from '@/engines/motion.js';
@@ -198,23 +200,42 @@ export default function Bestiary() {
         </Button>
       </header>
       <InvTabs />
-      {series.length > 1 ? (
-        <div className={s.chips} role="group" aria-label={t('ui.bestiary')}>
-          {series.map((x) => (
+      {/* étagères : une carte par série (pull) + la prochaine série à venir */}
+      <div className={s.shelves} role="group" aria-label={t('arena.serie')}>
+        {series.map((x) => {
+          const js = SERIES[x] ?? [],
+            f = d ? js.filter((j) => d.coll.has(cKey(x, j.name))).length : 0;
+          return (
             <button
               key={x}
               type="button"
+              className={s.shelf}
               aria-pressed={x === view.serie}
               onClick={() => {
                 setSel(new Map());
                 set({ serie: x });
               }}
             >
-              {x}
+              <img
+                className="px"
+                src={x === 'Takoras' ? '/img/jetons/takoras.png' : texOf(js[0] ?? jetonOf('Mobu'))}
+                alt=""
+              />
+              <span>
+                <b>{t('ui.bst_pull', { n: x })}</b>
+                <small>{`${f} / ${js.length}`}</small>
+              </span>
             </button>
-          ))}
+          );
+        })}
+        <div className={`${s.shelf} ${s.shelfSoon}`} aria-disabled="true">
+          <img className="px" src={TEMPLATE} alt="" />
+          <span>
+            <b>{t('ui.bst_next')}</b>
+            <small>{t('ui.pk_soon')}</small>
+          </span>
         </div>
-      ) : null}
+      </div>
       <div className={s.progress}>
         <div>
           <b>

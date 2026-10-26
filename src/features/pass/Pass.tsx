@@ -1,4 +1,4 @@
-import { useEffect, useRef, type CSSProperties } from 'react';
+import { useEffect, useRef, useState, type CSSProperties } from 'react';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { errorText, passApi } from '@/api';
 import { itemImg, itemText, type ShopItem } from '@/data/items';
@@ -8,6 +8,7 @@ import { locale, useSettings } from '@/lib/settings';
 import { useT } from '@/i18n/useT';
 import { NeedLogin } from '@/app/NeedLogin';
 import { Button } from '@/ui/Button';
+import { Segmented } from '@/ui/Segmented';
 import { toast } from '@/ui/toast';
 import s from './Pass.module.css';
 
@@ -23,28 +24,33 @@ type PassState = {
   tiers: { t: number; free: Reward; prem: Reward }[];
 };
 const XP_TIER = 1000;
-// Objets que le passe peut donner (pour leur nom et leur image)
-const ITEMS: Record<string, ShopItem> = {
-  potion1: { id: 'potion1', kind: 'potion', data: { mult: 1.3, rolls: 10 } },
-  potion2: { id: 'potion2', kind: 'potion', data: { mult: 2, rolls: 6 } },
-  potion3: { id: 'potion3', kind: 'potion', data: { mult: 5, rolls: 3 } },
-  potion10: { id: 'potion10', kind: 'potion', data: { mult: 10, rolls: 4 } },
-  potion25: { id: 'potion25', kind: 'potion', data: { mult: 25, rolls: 5 } },
-  potion50: { id: 'potion50', kind: 'potion', data: { mult: 50, rolls: 6 } },
-  instant: { id: 'instant', kind: 'instant', data: { pulls: 15 } },
-  hourglass: { id: 'hourglass', kind: 'hourglass', data: { minutes: 60 } },
-  b_doodle: { id: 'b_doodle', kind: 'banner', data: {} },
-  a_etoile: { id: 'a_etoile', kind: 'avatar', data: { anim: true } },
+// Objets que le passe peut donner (nom, image, et prix boutique pour estimer la valeur de chaque piste)
+const ITEMS: Record<string, ShopItem & { price: number }> = {
+  potion1: { id: 'potion1', kind: 'potion', data: { mult: 1.3, rolls: 10 }, price: 100 },
+  potion2: { id: 'potion2', kind: 'potion', data: { mult: 2, rolls: 6 }, price: 200 },
+  potion3: { id: 'potion3', kind: 'potion', data: { mult: 5, rolls: 3 }, price: 400 },
+  potion10: { id: 'potion10', kind: 'potion', data: { mult: 10, rolls: 4 }, price: 1200 },
+  potion25: { id: 'potion25', kind: 'potion', data: { mult: 25, rolls: 5 }, price: 4000 },
+  potion50: { id: 'potion50', kind: 'potion', data: { mult: 50, rolls: 6 }, price: 9500 },
+  potion100: { id: 'potion100', kind: 'potion', data: { mult: 100, rolls: 10 }, price: 31000 },
+  instant: { id: 'instant', kind: 'instant', data: { pulls: 15 }, price: 500 },
+  hourglass: { id: 'hourglass', kind: 'hourglass', data: { minutes: 60 }, price: 700 },
+  b_plaine: { id: 'b_plaine', kind: 'banner', data: {}, price: 1000 },
+  b_doodle: { id: 'b_doodle', kind: 'banner', data: {}, price: 2500 },
+  a_etoile: { id: 'a_etoile', kind: 'avatar', data: { anim: true }, price: 25000 },
 };
+const worth = (r: Reward) => (!r ? 0 : r.coins ? r.coins : (ITEMS[r.item ?? '']?.price ?? 0) * (r.qty ?? 1));
+const isCosmetic = (r: Reward) => !!r?.item && (r.item.startsWith('b_') || r.item.startsWith('a_'));
 
-// Passe de combat : 50 paliers de 1 000 XP par saison de 42 jours. XP surtout en combat (classé), un peu en ouvrant des pulls.
-// Piste gratuite (tous les 3 paliers) et piste premium (les autres paliers), premium pas encore achetable.
+// Passe de combat façon Brawl : 50 paliers, une piste premium (en haut, dorée) et une gratuite (en bas).
+// Chaque palier se récupère en touchant sa case. XP surtout en combat, un peu en ouvrant des pulls (onglet Missions).
 export default function Pass() {
   const t = useT();
   const lang = useSettings((x) => x.lang);
   const user = useAuth((x) => x.user);
   const qc = useQueryClient();
   const list = useRef<HTMLOListElement>(null);
+  const [tab, setTab] = useState<'rewards' | 'missions'>('rewards');
   const q = useQuery({
     queryKey: ['pass', user?.id],
     enabled: !!user,
@@ -52,11 +58,11 @@ export default function Pass() {
   });
   const d = q.data;
   const tier = d ? Math.min(50, Math.floor(d.xp / XP_TIER)) : 0;
-  // le palier en cours est visible sans chercher
+  // le palier en cours est au milieu de l'écran, sans chercher
   useEffect(() => {
     const el = list.current?.querySelector<HTMLElement>('[aria-current]');
     if (el && list.current) list.current.scrollLeft = el.offsetLeft - list.current.clientWidth / 2;
-  }, [tier]);
+  }, [tier, tab, d]);
   if (!user) return <NeedLogin title={t('ui.bp_title')} />;
   if (!d)
     return (
@@ -87,88 +93,183 @@ export default function Pass() {
       toast(errorText(e, lang), true);
     }
   };
-  const cell = (tr: number, r: Reward, prem: boolean) => {
-    if (!r) return <span className={s.empty} aria-hidden />;
+  const vFree = d.tiers.reduce((x, r) => x + worth(r.free), 0),
+    vPrem = d.tiers.reduce((x, r) => x + worth(r.prem), 0);
+  const ready = (prem: boolean) =>
+    d.tiers.filter((x) => x.t <= tier && (prem ? x.prem : x.free) && !(prem ? d.pclaimed : d.claimed).includes(x.t))
+      .length;
+  const tile = (tr: number, r: Reward, prem: boolean) => {
+    if (!r) return <span className={`${s.tile} ${s.none} ${prem ? s.gold : ''}`} aria-hidden />;
     const got = (prem ? d.pclaimed : d.claimed).includes(tr),
       open = tr <= tier,
-      can = open && !got && (!prem || d.premium);
-    return (
-      <div className={`${s.reward} ${got ? s.got : ''} ${can ? s.ready : ''} ${prem ? s.prem : ''}`}>
-        <img className="px" src={icon(r)} alt="" width={36} height={36} />
-        <small>{label(r)}</small>
+      locked = prem && !d.premium,
+      can = open && !got && !locked;
+    const qty = r.coins ? n(r.coins) : (r.qty ?? 1) > 1 ? `×${r.qty}` : '';
+    const cls = `${s.tile} ${prem ? s.gold : ''} ${got ? s.got : ''} ${can ? s.ready : ''} ${isCosmetic(r) ? s.rare : ''} ${!open ? s.future : ''}`;
+    const body = (
+      <>
+        <img className={`px ${isCosmetic(r) && r.item?.startsWith('b_') ? s.wide : ''}`} src={icon(r)} alt="" />
+        {qty ? <b className={s.qty}>{qty}</b> : null}
         {got ? (
-          <b className={s.ok}>✓</b>
+          <i className={s.check} aria-hidden>
+            ✓
+          </i>
+        ) : locked ? (
+          <i className={s.lock} aria-hidden />
         ) : can ? (
-          <Button size="sm" variant="primary" onClick={() => void claim(tr, prem)}>
-            {t('ui.bp_claim')}
-          </Button>
-        ) : prem && open ? (
-          <small className="muted"></small>
+          <i className={s.bang} aria-hidden>
+            !
+          </i>
         ) : null}
-      </div>
+      </>
+    );
+    return can ? (
+      <button
+        type="button"
+        className={cls}
+        onClick={() => void claim(tr, prem)}
+        aria-label={`${t('ui.bp_claim')} · ${label(r)}`}
+      >
+        {body}
+      </button>
+    ) : (
+      <span className={cls} role="img" aria-label={label(r)}>
+        {body}
+      </span>
     );
   };
+  const pct = tier >= 50 ? 100 : ((d.xp % XP_TIER) / XP_TIER) * 100;
   return (
     <section className={s.page}>
       <header className={s.head}>
-        <div>
+        <div className={s.season}>
+          <small>{t('ui.bp_season', { n: d.season })}</small>
           <h1>{t('ui.bp_title')}</h1>
-          <p className="muted">
-            {t('ui.bp_season', { n: d.season })} · {t('ui.bp_ends', { n: days })}
-          </p>
+          <small className={s.ends}>{t('ui.bp_ends', { n: days })}</small>
         </div>
-        <div className={s.level}>
-          <b>{tier}</b>
-          <small>/ 50</small>
+        <div className={s.xp}>
+          <span className={s.badge} aria-label={`${tier} / 50`}>
+            {tier}
+          </span>
+          <div className={s.xpCol}>
+            <div
+              className={s.bar}
+              role="progressbar"
+              aria-label={t('ui.bp_xp')}
+              aria-valuemin={0}
+              aria-valuemax={XP_TIER}
+              aria-valuenow={d.xp % XP_TIER}
+            >
+              <i style={{ width: `${pct}%` }} />
+              <span>
+                {tier >= 50 ? XP_TIER : d.xp % XP_TIER} / {XP_TIER}
+              </span>
+            </div>
+            <small className="muted">
+              {tier >= 50 ? t('ui.bp_done') : t('ui.bp_next', { n: n(XP_TIER - (d.xp % XP_TIER)), t: tier + 1 })}
+            </small>
+          </div>
+          <span className={s.next}>{Math.min(50, tier + 1)}</span>
         </div>
       </header>
-      <div
-        className={s.bar}
-        role="progressbar"
-        aria-label={t('ui.bp_xp')}
-        aria-valuemin={0}
-        aria-valuemax={XP_TIER}
-        aria-valuenow={d.xp % XP_TIER}
-      >
-        <i style={{ width: `${tier >= 50 ? 100 : ((d.xp % XP_TIER) / XP_TIER) * 100}%` }} />
+
+      <div className={s.tabs}>
+        <Segmented
+          value={tab}
+          onChange={setTab}
+          label={t('ui.bp_title')}
+          options={[
+            ['rewards', t('ui.bp_tab_rewards')],
+            ['missions', t('ui.bp_tab_missions')],
+          ]}
+        />
       </div>
-      <p className="muted">
-        {tier >= 50 ? t('ui.bp_done') : t('ui.bp_next', { n: n(XP_TIER - (d.xp % XP_TIER)), t: tier + 1 })} ·{' '}
-        {t('ui.bp_pulls', { n: d.pull_xp })}
-      </p>
-      <ul className={s.how}>
-        <li>{t('ui.bp_how_win')}</li>
-        <li>{t('ui.bp_how_lose')}</li>
-        <li>{t('ui.bp_how_pull')}</li>
-        <li>{t('ui.bp_how_quest')}</li>
-      </ul>
-      <Weekly />
-      <div className={s.premium}>
-        <div>
-          <b>{t('ui.bp_prem')}</b>
-          <small className="muted">{t('ui.bp_prem_txt')}</small>
+
+      {tab === 'rewards' ? (
+        <>
+          <div className={s.board}>
+            <div className={s.rail}>
+              <div className={`${s.ticket} ${s.ticketGold}`}>
+                <b>{t('ui.bp_prem_short')}</b>
+                {ready(true) && d.premium ? <i className={s.dot}>{ready(true)}</i> : null}
+              </div>
+              <div className={s.ticket}>
+                <b>{t('ui.bp_free')}</b>
+                {ready(false) ? <i className={s.dot}>{ready(false)}</i> : null}
+              </div>
+            </div>
+            {/* les 50 paliers : premium en haut, numéro sur la ligne de progression, gratuit en bas */}
+            {/* eslint-disable-next-line jsx-a11y/no-noninteractive-tabindex -- liste qui défile au clavier */}
+            <ol ref={list} className={s.track} tabIndex={0} aria-label={t('ui.bp_title')}>
+              {d.tiers.map((x) => (
+                <li
+                  key={x.t}
+                  className={x.t <= tier ? s.reached : undefined}
+                  aria-current={x.t === Math.min(50, tier + 1) ? 'step' : undefined}
+                  style={{ '--i': x.t } as CSSProperties}
+                >
+                  {tile(x.t, x.prem, true)}
+                  <span className={s.num}>{x.t}</span>
+                  {tile(x.t, x.free, false)}
+                </li>
+              ))}
+            </ol>
+          </div>
+
+          <div className={s.premium}>
+            <div className={s.premTxt}>
+              <b>{t('ui.bp_prem')}</b>
+              <div className={s.compare}>
+                <span>
+                  <small>{t('ui.bp_free')}</small>
+                  <b>
+                    <img className="px" src="/img/piece.png" alt="" width={18} height={18} /> {n(vFree)}
+                  </b>
+                </span>
+                <span className={s.vs} aria-hidden>
+                  →
+                </span>
+                <span className={s.big}>
+                  <small>{t('ui.bp_prem_short')}</small>
+                  <b>
+                    <img className="px" src="/img/piece.png" alt="" width={22} height={22} /> {n(vPrem)}
+                  </b>
+                </span>
+                <span className={s.mult}>×{Math.max(1, Math.round(vPrem / Math.max(1, vFree)))}</span>
+              </div>
+            </div>
+            {d.premium ? (
+              <b className={s.owned}>✓ {t('ui.bp_prem_owned')}</b>
+            ) : (
+              <Button variant="primary" disabled title={t('ui.packs_soon')}>
+                5,00 € · {t('ui.pk_soon')}
+              </Button>
+            )}
+          </div>
+        </>
+      ) : (
+        <div className={s.missions}>
+          <ul className={s.how} aria-label={t('ui.bp_xp_from')}>
+            <li>
+              <b>+120</b>
+              {t('ui.bp_src_win')}
+            </li>
+            <li>
+              <b>+60</b>
+              {t('ui.bp_src_lose')}
+            </li>
+            <li>
+              <b>+15</b>
+              {t('ui.bp_src_pull')} <small>{d.pull_xp}/600</small>
+            </li>
+            <li>
+              <b>+134</b>
+              {t('ui.bp_src_quest')}
+            </li>
+          </ul>
+          <Weekly />
         </div>
-        <Button disabled title={t('ui.packs_soon')}>
-          5,00 € · {t('ui.pk_soon')}
-        </Button>
-      </div>
-      {/* les 50 paliers : piste gratuite en haut, premium en bas */}
-      {/* eslint-disable-next-line jsx-a11y/no-noninteractive-tabindex -- liste qui défile au clavier */}
-      <ol ref={list} className={s.track} tabIndex={0} aria-label={t('ui.bp_title')}>
-        {d.tiers.map((x) => (
-          <li
-            key={x.t}
-            className={x.t <= tier ? s.reached : undefined}
-            aria-current={x.t === Math.min(50, tier + 1) ? 'step' : undefined}
-            style={{ '--i': x.t } as CSSProperties}
-          >
-            <span className={s.num}>{x.t}</span>
-            {cell(x.t, x.free, false)}
-            {cell(x.t, x.prem, true)}
-          </li>
-        ))}
-      </ol>
-      <p className="muted">{t('ui.bp_fair')}</p>
+      )}
     </section>
   );
 }
@@ -208,7 +309,7 @@ function Weekly() {
         {q.data.quests.map((x) => {
           const ok = x.value >= x.target;
           return (
-            <li key={x.id}>
+            <li key={x.id} className={x.claimed ? s.wkDone : undefined}>
               <span>
                 <b>{t(`ui.wk_${x.id}`, { n: x.target })}</b>
                 <small>{t('ui.wk_reward', { c: n(x.coins) })}</small>
@@ -221,7 +322,7 @@ function Weekly() {
                 aria-valuenow={x.value}
                 aria-label={t(`ui.wk_${x.id}`, { n: x.target })}
               >
-                <i style={{ width: `${(x.value / x.target) * 100}%` }} />
+                <i style={{ width: `${Math.min(100, (x.value / x.target) * 100)}%` }} />
               </span>
               {x.claimed ? (
                 <b className={s.ok}>✓</b>
