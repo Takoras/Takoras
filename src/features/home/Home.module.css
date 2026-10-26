@@ -348,3 +348,9 @@
     grid-template-columns: 340px 1fr 380px;
   }
 }
+
+/* Joueurs en ligne, à côté de « En direct » */
+.online {
+  color: var(--text-2);
+  font-weight: 500;
+}

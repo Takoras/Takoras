@@ -22,6 +22,8 @@ import { JetonModal } from '../inventory/JetonModal';
 import { useInventory } from '../inventory/inv';
 import { NeedLogin } from '@/app/NeedLogin';
 import { FriendButton } from '../social/FriendButton';
+import { RankBadge, useRankName } from '../combat/Ranked';
+import { rankOf } from '../combat/rankedApi';
 import s from './Profile.module.css';
 
 type Shown = { id: number; jeton: string; odds: number; variant: string | null } | null;
@@ -112,8 +114,14 @@ export default function Profile() {
               </span>
             ) : null}
           </h1>
+          {p.beta ? (
+            <span className={s.betaChip} title={t('ui.beta_thanks')}>
+              🧪 {t('ui.beta_tester')}
+            </span>
+          ) : null}
           <p className="muted">{p.bio || (mine ? t('ui.bio_empty_me') : '')}</p>
         </div>
+        <EloBox pseudo={p.pseudo} />
         {mine ? (
           <Button onClick={() => setEdit(true)}>✏️ {t('ui.edit_profile')}</Button>
         ) : user ? (
@@ -132,9 +140,12 @@ export default function Profile() {
           </dt>
           <dd>
             {bp ? (
-              <>
-                {jn(bp.jeton)} <VTag v={bp.variant} />
-              </>
+              <span className={s.best} style={{ '--g': hexRGB(jetonOf(bp.jeton).glow) } as CSSProperties}>
+                <img className={vImg(bp.variant)} src={texOf(jetonOf(bp.jeton))} alt="" width={40} height={40} />
+                <span>
+                  {jn(bp.jeton)} <VTag v={bp.variant} />
+                </span>
+              </span>
             ) : (
               '—'
             )}
@@ -190,15 +201,6 @@ export default function Profile() {
         })}
       </ul>
       <Collection pseudo={p.pseudo} onOpen={(name, locked) => setJeton({ name, variant: '', locked })} />
-      {p.beta ? (
-        <div className={s.beta}>
-          <span aria-hidden>🧪</span>
-          <div>
-            <b>{t('ui.beta_tester')}</b>
-            <small>{t('ui.beta_thanks')}</small>
-          </div>
-        </div>
-      ) : null}
       <p className="muted">
         {t('ui.joined', { d: new Date(p.joined).toLocaleDateString(locale(lang)) })}
         {p.wins || p.losses ? ` · ${t('ui.battles_rec', { w: p.wins || 0, l: p.losses || 0 })}` : ''}
@@ -523,5 +525,29 @@ function EditProfile({ p, onClose }: { p: Prof; onClose: () => void }) {
         </div>
       </form>
     </Modal>
+  );
+}
+
+// Elo du classé, en haut du profil : badge du rang, nom et Elo
+function EloBox({ pseudo }: { pseudo: string }) {
+  const t = useT();
+  const lang = useSettings((x) => x.lang);
+  const name = useRankName();
+  const q = useQuery({
+    queryKey: ['ranked-of', pseudo],
+    queryFn: async () => (await publicApi.rankedOf(pseudo)) as unknown as { elo: number; games: number } | null,
+  });
+  if (!q.data) return null;
+  const r = rankOf(q.data.elo);
+  return (
+    <div className={s.elo} style={{ '--rc': r.col } as CSSProperties}>
+      <RankBadge r={r} size={48} />
+      <div>
+        <b>{q.data.elo.toLocaleString(locale(lang))}</b>
+        <small>
+          {name(r)} · Elo{q.data.games ? '' : ` · ${t('ui.elo_none')}`}
+        </small>
+      </div>
+    </div>
   );
 }

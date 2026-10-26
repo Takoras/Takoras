@@ -1,5 +1,6 @@
 import { Link } from 'react-router';
 import { useHistory, useLive, useMe } from '@/api/queries';
+import { useOnline } from '@/lib/online';
 import { jetonOf, texOf, vOdds, VARIANTS } from '@/data/jetons';
 import { useAuth } from '@/lib/auth';
 import { useJn } from '@/lib/names';
@@ -78,14 +79,17 @@ export function Live() {
   const lang = useSettings((x) => x.lang);
   const me = useMe();
   const live = useLive();
-  const rows = (live.data ?? []).filter((r) => vOdds(r.odds, r.variant) >= 100);
-  if (!rows.length) return null;
+  const online = useOnline((x) => x.n);
+  // Seulement les vrais beaux tirages : plus rare que 1/5 000, ou une mutation (Doré et plus) qui vaut plus de 1/1 000
+  const rows = (live.data ?? []).filter((r) => r.odds > 5000 || (!!r.variant && vOdds(r.odds, r.variant) > 1000));
+  if (!rows.length && !online) return null;
   const loop = rows.length >= 6 ? [...rows, ...rows] : rows; // contenu doublé pour un défilement sans saut
   return (
     <section className={s.live} aria-label={t('ui.live')}>
       <div className={s.liveHead}>
         <span className={s.dot} aria-hidden />
         {t('ui.live')}
+        {online ? <span className={s.online}>· {t('ui.online', { n: online })}</span> : null}
       </div>
       <div className={s.ticker}>
         <ul className={`${s.track} ${rows.length >= 6 ? s.scroll : ''}`}>
@@ -98,7 +102,8 @@ export function Live() {
                 <span>
                   {mine ? <b>{t('ui.you')}</b> : <Link to={`/profil/${encodeURIComponent(r.pseudo)}`}>{r.pseudo}</Link>}{' '}
                   <span className="muted">{t('ui.got')}</span> {jn(r.jeton)}
-                  <VTag v={r.variant} /> <span className="muted">· 1/{r.odds.toLocaleString(locale(lang))}</span>
+                  <VTag v={r.variant} />{' '}
+                  <span className="muted">· 1/{vOdds(r.odds, r.variant).toLocaleString(locale(lang))}</span>
                 </span>
                 <img className={vCls(r.variant)} src={texOf(j)} alt="" width={22} height={22} />
               </li>

@@ -45,7 +45,7 @@ export function useHistory() {
 
 // En direct : les beaux tirages de tous les joueurs, toutes les 15 s
 export function useLive() {
-  return useQuery({ queryKey: ['live'], queryFn: () => publicApi.liveFeed(20), refetchInterval: 15_000 });
+  return useQuery({ queryKey: ['live'], queryFn: () => publicApi.liveFeed(50), refetchInterval: 15_000 });
 }
 
 import { questApi } from './index';

@@ -13,6 +13,7 @@ export const publicApi = {
   leaderboardTime: (n = 50) => rpc('leaderboard_time', { n }),
   playPing: () => rpc('play_ping'),
   profile: (p_pseudo: string) => rpc('profile_public', { p_pseudo }),
+  rankedOf: (p_pseudo: string) => rpc('ranked_of', { p_pseudo }),
   collectionOf: (p_pseudo: string) => rpc('collection_of', { p_pseudo }),
   avatarsOf: (p: string[]) => rpc('avatars_of', { p }),
   betaOf: (p: string[]) => rpc('beta_of', { p }),

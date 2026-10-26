@@ -13,6 +13,7 @@ import { SocialLayer } from '@/features/social/SocialLayer';
 import { BetaChip, BetaLayer, openPatchnotes, openTester } from '@/features/beta/Beta';
 import { badgeOf, useFriends } from '@/features/social/social';
 import { publicApi } from '@/api';
+import { useOnlinePresence } from '@/lib/online';
 import { Icon } from './Icon';
 import { NAV } from './nav';
 import { openUI, useUI } from './ui-store';
@@ -71,6 +72,7 @@ export function Layout() {
     const id = setInterval(ping, 60_000);
     return () => clearInterval(id);
   }, [user]);
+  useOnlinePresence(user?.id);
   const fr = useFriends();
   const frN = user ? badgeOf(fr.data).req + badgeOf(fr.data).unread : 0;
   const annN = useAnn(unreadAnn);

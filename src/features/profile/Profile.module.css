@@ -198,21 +198,50 @@
   background: #a855f7;
 }
 
-.beta {
-  display: flex;
-  gap: var(--s-3);
+/* Bêta-testeur : petite pastille discrète sous le pseudo */
+.betaChip {
+  display: inline-flex;
   align-items: center;
-  padding: var(--s-3) var(--s-4);
-  border-radius: var(--r-md);
-  border: 1px solid rgb(74 222 128 / 35%);
-  background: rgb(74 222 128 / 6%);
+  gap: 4px;
+  width: fit-content;
+  padding: 1px 8px;
+  border-radius: var(--r-pill);
+  border: 1px solid rgb(74 222 128 / 30%);
+  color: rgb(134 239 172);
+  font-size: 11px;
+  font-weight: 600;
 }
-.beta span {
-  font-size: var(--fs-xl);
+
+/* Elo du classé, bien visible en haut du profil */
+.elo {
+  display: flex;
+  align-items: center;
+  gap: var(--s-2);
+  padding: var(--s-2) var(--s-3);
+  border-radius: var(--r-lg);
+  border: 1px solid color-mix(in srgb, var(--rc) 45%, var(--line));
+  background: color-mix(in srgb, var(--rc) 10%, var(--surface));
 }
-.beta small {
+.elo b {
   display: block;
+  font: 700 var(--fs-xl) / 1 var(--font-display);
+}
+.elo small {
   color: var(--text-2);
+  font-size: var(--fs-xs);
+}
+
+/* Meilleur jeton : son sprite à côté du nom */
+.best {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--s-2);
+}
+.best img {
+  width: 40px;
+  height: 40px;
+  image-rendering: pixelated;
+  --df: drop-shadow(0 0 8px rgba(var(--g), 0.6));
 }
 
 .private {
