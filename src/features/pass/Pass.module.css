@@ -1,0 +1,134 @@
+.page {
+  display: grid;
+  gap: var(--s-3);
+}
+.head {
+  display: flex;
+  justify-content: space-between;
+  align-items: end;
+  gap: var(--s-3);
+}
+.level {
+  display: grid;
+  justify-items: end;
+}
+.level b {
+  font: 700 var(--fs-3xl) / 1 var(--font-display);
+}
+.level small {
+  color: var(--text-2);
+}
+.bar {
+  height: 10px;
+  border-radius: var(--r-pill);
+  background: var(--surface-3);
+  overflow: hidden;
+}
+.bar i {
+  display: block;
+  height: 100%;
+  background: var(--accent);
+}
+.how {
+  list-style: none;
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--s-2);
+  font-size: var(--fs-sm);
+}
+.how li {
+  padding: 4px var(--s-2);
+  border-radius: var(--r-pill);
+  background: var(--surface);
+  border: 1px solid var(--line);
+}
+.premium {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: var(--s-3);
+  padding: var(--s-3) var(--s-4);
+  border-radius: var(--r-lg);
+  border: 1px dashed rgb(251 191 36 / 50%);
+  background: rgb(251 191 36 / 6%);
+}
+.premium div {
+  display: grid;
+}
+
+/* 50 paliers côte à côte, qui défilent */
+.track {
+  list-style: none;
+  display: flex;
+  gap: var(--s-2);
+  overflow-x: auto;
+  padding: var(--s-2) 2px var(--s-3);
+  scroll-snap-type: x proximity;
+}
+.track li {
+  flex: none;
+  width: 116px;
+  display: grid;
+  grid-template-rows: auto 1fr 1fr;
+  gap: var(--s-2);
+  scroll-snap-align: center;
+}
+.num {
+  justify-self: center;
+  min-width: 30px;
+  padding: 2px 8px;
+  border-radius: var(--r-pill);
+  text-align: center;
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+  background: var(--surface-3);
+  color: var(--text-2);
+}
+.reached .num {
+  background: var(--accent);
+  color: #fff;
+}
+.track li[aria-current] .num {
+  outline: 2px solid var(--accent-hi);
+}
+.reward,
+.empty {
+  min-height: 132px;
+  border-radius: var(--r-md);
+}
+.reward {
+  display: grid;
+  justify-items: center;
+  align-content: center;
+  gap: 4px;
+  padding: var(--s-2);
+  text-align: center;
+  background: var(--surface);
+  border: 1px solid var(--line);
+}
+.reward img {
+  width: 36px;
+  height: 36px;
+  image-rendering: pixelated;
+}
+.reward small {
+  font-size: 11px;
+  line-height: 1.2;
+}
+.reward.prem {
+  border-color: rgb(251 191 36 / 35%);
+  background: rgb(251 191 36 / 5%);
+}
+.reward.ready {
+  border-color: var(--accent);
+}
+.reward.got {
+  opacity: 0.55;
+}
+.ok {
+  color: var(--ok);
+}
+.empty {
+  border: 1px dashed var(--line);
+  opacity: 0.4;
+}

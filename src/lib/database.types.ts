@@ -252,6 +252,8 @@ export type Database = {
       leaderboard_time: { Args: { n?: number }; Returns: { pseudo: string; value: number }[] };
       play_ping: { Args: never; Returns: undefined };
       ranked_of: { Args: { p_pseudo: string }; Returns: Json };
+      bp_state: { Args: never; Returns: Json };
+      bp_claim: { Args: { p_tier: number; p_prem?: boolean }; Returns: Json };
       ranked_top: { Args: { n?: number }; Returns: { pseudo: string; elo: number; games: number; wins: number }[] };
       redeem_code: { Args: { p_code: string }; Returns: Json };
       refund_pulls: { Args: { ids: number[] }; Returns: Json };

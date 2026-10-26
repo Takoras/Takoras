@@ -86,3 +86,18 @@ export function EloTop() {
     </section>
   );
 }
+
+// Lien vers le passe de combat (les matchs classés font monter ses paliers)
+export function PassLink() {
+  const t = useT();
+  return (
+    <Link to="/passe" className={s.passLink}>
+      <span aria-hidden>🎟️</span>
+      <span>
+        <b>{t('ui.bp_title')}</b>
+        <small>{t('ui.bp_how_win')}</small>
+      </span>
+      <span aria-hidden>→</span>
+    </Link>
+  );
+}

@@ -43,6 +43,7 @@ export const router = createBrowserRouter([
         ),
       },
       { path: '/amis', lazy: page(() => import('@/features/social/Friends')) },
+      { path: '/passe', lazy: page(() => import('@/features/pass/Pass')) },
       { path: '/profil', lazy: profile },
       { path: '/profil/:pseudo', lazy: profile },
       { path: '/admin', element: <AdminGate /> },

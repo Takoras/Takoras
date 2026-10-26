@@ -54,6 +54,11 @@ export const combatApi = {
   rankedTop: (n = 50) => rpc('ranked_top', { n }),
 };
 
+export const passApi = {
+  state: () => rpc('bp_state'),
+  claim: (p_tier: number, p_prem: boolean) => rpc('bp_claim', { p_tier, p_prem }),
+};
+
 export const shopApi = {
   buy: (p_item: string) => rpc('buy_item', { p_item }),
   redeem: (p_code: string) => rpc('redeem_code', { p_code }),

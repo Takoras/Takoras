@@ -548,6 +548,25 @@ export async function fakeSupabase(
       deck = (JSON.parse(route.request().postData() ?? '{}') as { ids: number[] }).ids;
       return json(null);
     }
+    if (rpc === 'bp_state')
+      return json({
+        season: 1,
+        xp: 3500,
+        premium: false,
+        claimed: [],
+        pclaimed: [],
+        pull_xp: 120,
+        ends_in: 40 * 86400,
+        tiers: Array.from({ length: 50 }, (_, i) => ({
+          t: i + 1,
+          free: (i + 1) % 3 ? null : { coins: 500 },
+          prem: (i + 1) % 3 ? { item: 'potion1', qty: 3 } : null,
+        })),
+      });
+    if (rpc === 'bp_claim') {
+      st.coins += 500;
+      return json({ reward: { coins: 500 }, state: st });
+    }
     if (rpc === 'leaderboard_time')
       return json(['Alpha', 'Testeur'].map((pseudo, i) => ({ pseudo, value: 7500 - i * 3000 })));
     if (rpc === 'leaderboard') {

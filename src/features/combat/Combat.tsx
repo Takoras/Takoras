@@ -16,7 +16,7 @@ import { Button } from '@/ui/Button';
 import { toast } from '@/ui/toast';
 import { VTag } from '@/ui/VTag';
 import { lvlOf, useInventory } from '../inventory/inv';
-import { CombatDex, EloTop } from './CombatSide';
+import { CombatDex, EloTop, PassLink } from './CombatSide';
 import { botTeam, useDeck, type Member } from './team';
 import { call, fetchMatch, toLocal, useRanked, watchMatch, type RankedMe } from './rankedApi';
 import { RankAround, RankCard, RankRoad, SearchModal } from './Ranked';
@@ -269,6 +269,7 @@ export default function Combat() {
         <RankRoad elo={elo} />
       </div>
       <aside className={s.colSide}>
+        <PassLink />
         <EloTop />
         <CombatDex inv={inv.data} />
       </aside>

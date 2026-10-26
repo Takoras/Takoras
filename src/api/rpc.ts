@@ -27,7 +27,7 @@ const ERR: Record<string, Key> = {
   not_enough_coins: 'ui.err_coins', limit_reached: 'ui.err_limit', potion_active: 'ui.err_potion', stock_full: 'ui.err_stock_full',
   owned: 'ui.err_owned', not_in_shop: 'ui.err_shop', banned: 'ui.err_banned', not_friends: 'ui.err_not_friends', slow_down: 'ui.err_slow',
   unknown_player: 'ui.err_unknown', self: 'ui.err_self', pseudo_taken: 'ui.err_pseudo_taken', bad_pseudo: 'ui.err_pseudo',
-  pseudo_cooldown: 'ui.err_pseudo_cd', deck_incomplete: 'ui.err_deck', quest_not_done: 'ui.err_quest', feedback_short: 'ui.fb_short',
+  pseudo_cooldown: 'ui.err_pseudo_cd', deck_incomplete: 'ui.err_deck', quest_not_done: 'ui.err_quest', bp_locked: 'ui.err_bp_locked', bp_premium: 'ui.err_bp_premium', bp_claimed: 'ui.err_bp_claimed', feedback_short: 'ui.fb_short',
   busy: 'ui.err_busy', invite_expired: 'ui.err_inv_exp', not_your_turn: 'ui.err_turn', code_invalid: 'ui.err_code_invalid',
   code_expired: 'ui.err_code_expired', code_used_up: 'ui.err_code_used_up', code_already: 'ui.err_code_already', bad_code: 'ui.err_bad_code',
 };

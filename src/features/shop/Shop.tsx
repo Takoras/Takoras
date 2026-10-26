@@ -1,4 +1,5 @@
 import { useRef, useState, type FormEvent } from 'react';
+import { Link } from 'react-router';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { errorText, publicApi, shopApi } from '@/api';
 import { useMe } from '@/api/queries';
@@ -123,9 +124,14 @@ export default function Shop() {
             {t('ui.shop_reset')} <b className={s.timer}>{hms(left)}</b>
           </p>
         </div>
-        <Button size="sm" onClick={openInfo}>
-          {t('ui.odds_info')}
-        </Button>
+        <div className={s.headBtns}>
+          <Link to="/passe" className={s.passBtn}>
+            🎟️ {t('ui.bp_title')}
+          </Link>
+          <Button size="sm" onClick={openInfo}>
+            {t('ui.odds_info')}
+          </Button>
+        </div>
       </header>
       {user ? <Effects /> : null}
       <div className={s.cats} role="group" aria-label={t('ui.shop_title')}>
