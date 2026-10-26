@@ -16,6 +16,7 @@ const FIRST_MS = AIM_MS + 6000; // 1er tour : le temps d'ouvrir l'arène
 const ANIM_MS = 9000; // les tours suivants : le temps de voir l'animation
 const GRACE_MS = 2500; // un tir qui arrive juste après la fin du chrono compte encore
 const MAX_MISSES = 3; // 3 tours sans jouer d'affilée = abandon
+const STALE_MS = 3 * 60 * 1000; // chrono dépassé de 3 min sans que personne ne calcule le tour : les deux sont partis
 
 const CORS = {
   'Access-Control-Allow-Origin': '*',
@@ -42,6 +43,13 @@ function cleanShot(s) {
 
 const live = async (uid) =>
   (await db.from('ranked_matches').select('*').eq('status', 'live').or(`p1.eq.${uid},p2.eq.${uid}`).order('created_at', { ascending: false }).limit(1)).data?.[0] ?? null;
+// Match abandonné par les deux (plus personne là depuis longtemps) : fermé sans gagnant ni Elo.
+// Avant, on le reprenait au retour d'un joueur et ses tours « absents » d'avant le faisaient perdre d'un coup.
+const stale = (m) => Date.now() > Date.parse(m.deadline) + GRACE_MS + STALE_MS;
+async function drop(m) {
+  await db.from('ranked_matches').update({ status: 'done', winner: null, why: 'stale', updated_at: iso(Date.now()) }).eq('id', m.id).eq('status', 'live');
+  await db.from('ranked_shots').delete().eq('match_id', m.id);
+}
 const sideOf = (m, uid) => (m.p1 === uid ? 0 : m.p2 === uid ? 1 : -1);
 
 async function end(m, winner, why) {
@@ -88,7 +96,8 @@ async function resolve(m) {
 
 async function join(uid) {
   const m = await live(uid);
-  if (m) return out({ match: m.id });
+  if (m && stale(m)) await drop(m);
+  else if (m) return out({ match: m.id });
   const { data: r } = await db.from('ranked').select('elo, tuto_done').eq('user_id', uid).maybeSingle();
   if (!r?.tuto_done) return fail('tuto_required');
   const { data: prof } = await db.from('profiles').select('pseudo, banned').eq('id', uid).single();
@@ -139,6 +148,10 @@ async function tick(uid, body) {
   const { data: m } = await db.from('ranked_matches').select('*').eq('id', body.match).maybeSingle();
   if (!m || m.status !== 'live') return out({ ok: true });
   if (sideOf(m, uid) < 0) return fail('not_player', 403);
+  if (stale(m)) {
+    await drop(m);
+    return out({ ok: true });
+  }
   if (Date.now() <= Date.parse(m.deadline) + GRACE_MS) return out({ ok: false, wait: Date.parse(m.deadline) + GRACE_MS - Date.now() });
   await resolve(m);
   return out({ ok: true });

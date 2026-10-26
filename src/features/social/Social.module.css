@@ -73,26 +73,7 @@
   font-style: normal;
 }
 
-/* Bulle de chat et fenêtre */
-.fab {
-  position: fixed;
-  z-index: 45;
-  right: var(--gutter);
-  bottom: calc(var(--tabh) + env(safe-area-inset-bottom) + var(--s-4));
-  width: 52px;
-  height: 52px;
-  border-radius: 50%;
-  display: grid;
-  place-items: center;
-  background: var(--accent);
-  color: #fff;
-  box-shadow: 0 10px 30px rgb(124 58 237 / 45%);
-}
-.fab .badge {
-  position: absolute;
-  top: -4px;
-  right: -4px;
-}
+/* Fenêtre de chat */
 .dock {
   position: fixed;
   z-index: 46;

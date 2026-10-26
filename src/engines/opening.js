@@ -229,11 +229,11 @@ function spawn() {
 // Jeton en volume : la face devant, quelques copies assombries derrière pour la tranche, et un dos.
 // Ce ne sont que des images empilées en 3D (pas de calcul), donc ça ne fait pas ramer le navigateur.
 const DEPTH = 8; // nombre de couches de la tranche
-function coin3D(src, alt, style = '') {
+function coin3D(src, alt, style = '', cls = '') {
   let edge = '';
   for (let i = 1; i <= DEPTH; i++) edge += `<img class="edge" src="${src}" alt="" style="transform:translateZ(${-i * 2}px)">`;
   // reflet et éclat posés sur la face : ils tournent avec le jeton
-  return `<img class="face" src="${src}" alt="${alt}" style="${style}"><i class="glare"></i><i class="shine"></i>${edge}<img class="back" src="${src}" alt="" style="transform:translateZ(${-(DEPTH + 1) * 2}px) rotateY(180deg)">`;
+  return `<img class="face${cls}" src="${src}" alt="${alt}" style="${style}"><i class="glare"></i><i class="shine"></i>${edge}<img class="back${cls}" src="${src}" alt="" style="transform:translateZ(${-(DEPTH + 1) * 2}px) rotateY(180deg)">`;
 }
 function setGlareMask(src) {
   opCoin.querySelectorAll('.glare, .shine').forEach(g => { g.style.webkitMaskImage = g.style.maskImage = `url(${src})`; });
@@ -360,7 +360,7 @@ function fillInfo(j, variant = '') {
   const stat = (k, base) => { const v = Math.round(base * (.35 + lvl * .65) * (.85 + Math.random() * .3)); return [k, v, Math.min(100, v / base * 100)]; };
   $('op-name').innerHTML = jnH(j.name) + vTag(variant);
   const lk = +(sess.lucks || [])[sess.idx] || 0; // chance active quand ce jeton a été tiré
-  $('op-rarity').innerHTML = '1/' + j.odds.toLocaleString(LOCALE()) + (variant ? ` <small>× ${t('v_' + variant)} 1/${fmt(VARIANTS[variant].odds)}</small>` : '') + (lk > 1 ? ` <span class="op-luck">🍀 ×${fmtLuck(lk)}</span>` : '');
+  $('op-rarity').innerHTML = '1/' + vOdds(j.odds, variant).toLocaleString(LOCALE()) + (lk > 1 ? ` <span class="op-luck">🍀 ×${fmtLuck(lk)}</span>` : '');
   // Mêmes stats que dans l'inventaire (stables pour un même jeton)
   const S = statsOf(j.name, j.odds);
   sess.cur.stats = ['s_mass', 's_pow', 's_size'].map(k => [k, S[k], Math.min(100, S[k] / STAT_MAX[k] * 100)]);
@@ -499,7 +499,7 @@ function reveal(restored, quiet = false) {
   opening.style.setProperty('--tier', hexRGB(j.glow));
   startBg(j);
   const spin = opCoin.querySelector('.spin');
-  spin.innerHTML = coin3D(texOf(j), j.name);
+  spin.innerHTML = coin3D(texOf(j), j.name, '', vCls(r.variant)); // la mutation se voit dès la rotation
   spin.style.scale = texScale(j) === 1 ? '' : texScale(j); // face, reflet et tranche ensemble // pas d'ombre sur l'image (elle serait coupée en carré en 3D) : le halo est derrière
   setGlareMask(texOf(j));
   // Le jeton se retourne très vite puis ralentit longtemps (plus il est rare, plus ça dure)
@@ -542,14 +542,14 @@ function reveal(restored, quiet = false) {
     setTimeout(() => { if (run === r) shake(j.odds >= RARE ? .8 : .45); }, 300); // impact à l'arrivée
   }
   addToHistory(j, r.variant);
-  if (r.variant) setTimeout(() => { if (run === r) variantFx(r.variant); }, 650); // jeton spécial : deuxième effet
+  if (r.variant) setTimeout(() => { if (run === r) variantFx(r.variant, j.odds); }, 650); // jeton spécial : deuxième effet
 }
 
 // Variante (Doré, Glitch, Prisme) : bandeau qui claque, flash et étincelles à sa couleur, petit jingle
-function variantFx(v) {
+function variantFx(v, odds = 1) {
   const d = document.createElement('div');
   d.className = 'v-pop v-' + v;
-  d.innerHTML = `<i></i><b>${t('v_' + v)}</b><small>1/${fmt(VARIANTS[v].odds)}</small>`;
+  d.innerHTML = `<i></i><b>${t('v_' + v)}</b><small>1/${fmt(vOdds(odds, v))}</small>`;
   opening.querySelectorAll('.v-pop').forEach(x => x.remove());
   opening.appendChild(d);
   setTimeout(() => d.remove(), 1800);
@@ -600,6 +600,7 @@ function next() {
   sess.idx++;
   sfx.next();
   sess.cur = null;
+  if (sess.autoResume) { sess.autoResume = false; sess.auto = true; } // l'auto-ouverture reprend après le bon jeton
   save();
   startOpening();
 
@@ -648,7 +649,7 @@ function autoRun() {
   if (sess.recap) { sess.auto = false; turbo(false); return renderAuto(); }
   if (!run.done) {
     if (isSpecial(run.result, run.variant)) { // on s'arrête : à toi de jouer
-      sess.auto = false; save(); renderAuto(); turbo(false);
+      sess.auto = false; sess.autoResume = true; save(); renderAuto(); turbo(false);
       sfx.hold(); toast('✨ ' + t('auto_special'));
       return;
     }
@@ -683,13 +684,13 @@ function turbo(on) {
   opening.classList.toggle('turbo', on);
   if (!on) { combo = 0; const c = $('op-combo'); if (c) c.hidden = true; }
 }
-function turboHit(j) {
+function turboHit(j, v = '') {
   combo++;
   sfx.combo?.(combo);
   let c = $('op-combo');
   if (!c) { c = document.createElement('div'); c.id = 'op-combo'; c.className = 'op-combo'; opening.appendChild(c); }
   c.hidden = false;
-  $('op-odds').textContent = '1/' + j.odds.toLocaleString(LOCALE());
+  $('op-odds').textContent = '1/' + vOdds(j.odds, v).toLocaleString(LOCALE());
   c.style.setProperty('--cg', hexRGB(j.glow));
   c.innerHTML = `<b>×${combo}</b><small>${jnH(j.name)}</small>`;
   c.classList.remove('pop'); void c.offsetWidth; c.classList.add('pop');
@@ -700,7 +701,7 @@ function turboHit(j) {
 $('op-auto')?.addEventListener('click', e => {
   e.stopPropagation();
   if (!sess) return;
-  sess.auto = !sess.auto; save(); sfx.click(); renderAuto();
+  sess.auto = !sess.auto; sess.autoResume = false; save(); sfx.click(); renderAuto();
   if (sess.auto) autoRun();
 });
 

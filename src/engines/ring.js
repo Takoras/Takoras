@@ -40,7 +40,7 @@ const RT = {
     power: 'Pouvoir', on: 'Activé', validate: 'Valider', validated: 'Validé ✓', pass: 'Passer le tour', turn: 'Tour {n}/{m}', sudden: 'Mort subite !', foeOk: '✓ L’adversaire a validé',
     hSel: 'Tape un de tes jetons', hAim: 'Glisse vers l’arrière pour viser : tu peux partir de n’importe où sur l’écran', hVal: 'Valide quand tu es prêt', hWait: 'En attente de l’adversaire…',
     reveal: 'Feu !', out: 'Éjecté !', win: 'Victoire !', lose: 'Défaite…', draw: 'Égalité', again: 'Rejouer', back: 'Retour', quit: 'Abandonner le match ?', you: 'Toi', bot: 'Robot',
-    why: { forfeit: 'Abandon', afk: 'Absent 3 tours de suite', out: 'Tous ses jetons sont sortis du ring', count: 'Plus de jetons au dernier tour', turns: 'Plus de jetons restants à la fin', center: 'Jetons plus proches du centre', draw: 'Personne ne gagne' },
+    why: { forfeit: 'Abandon', stale: 'Match fermé (les deux joueurs étaient partis) · Elo inchangé', afk: 'Absent 3 tours de suite', out: 'Tous ses jetons sont sortis du ring', count: 'Plus de jetons au dernier tour', turns: 'Plus de jetons restants à la fin', center: 'Jetons plus proches du centre', draw: 'Personne ne gagne' },
     turns: '{n} tours', mass: 'Poids', powerS: 'Puissance', size: 'Taille', koS: 'Éjecté',
     massD: 'Plus il est lourd, plus il est dur à pousser et plus il pousse fort.', powD: 'La force max de son tir : jusqu’où il peut aller.', sizeD: 'Plus il est gros, plus il touche facilement… mais plus il est facile à toucher.', statsLegend: '⚖️ Poids : dur à pousser, pousse fort · 💥 Puissance : force du tir · ⭕ Taille : touche plus facilement, mais cible plus facile',
     t1: 'Tape un de tes jetons pour le choisir.', t2: 'Glisse vers l’arrière pour viser. Plus tu tires loin, plus c’est fort. Regarde la trajectoire !',
@@ -80,7 +80,7 @@ const RT = {
     power: 'Power', on: 'On', validate: 'Confirm', validated: 'Confirmed ✓', pass: 'Skip turn', turn: 'Turn {n}/{m}', sudden: 'Sudden death!', foeOk: '✓ Opponent is ready',
     hSel: 'Tap one of your tokens', hAim: 'Drag backwards to aim: you can start anywhere on the screen', hVal: 'Confirm when you’re ready', hWait: 'Waiting for the opponent…',
     reveal: 'Go!', out: 'Out!', win: 'Victory!', lose: 'Defeat…', draw: 'Draw', again: 'Play again', back: 'Back', quit: 'Forfeit the match?', you: 'You', bot: 'Bot',
-    why: { forfeit: 'Forfeit', afk: 'Away for 3 turns in a row', out: 'All their tokens left the ring', count: 'More tokens on the last turn', turns: 'More tokens left at the end', center: 'Tokens closer to the center', draw: 'Nobody wins' },
+    why: { forfeit: 'Forfeit', stale: 'Match closed (both players had left) · Elo unchanged', afk: 'Away for 3 turns in a row', out: 'All their tokens left the ring', count: 'More tokens on the last turn', turns: 'More tokens left at the end', center: 'Tokens closer to the center', draw: 'Nobody wins' },
     turns: '{n} turns', mass: 'Weight', powerS: 'Power', size: 'Size', koS: 'Knocked out',
     massD: 'The heavier, the harder to push and the harder it pushes.', powD: 'Its max shot strength: how far it can go.', sizeD: 'The bigger, the easier it hits… but the easier it is to hit.', statsLegend: '⚖️ Weight: hard to push, pushes hard · 💥 Power: shot strength · ⭕ Size: hits more easily, but easier to hit',
     t1: 'Tap one of your tokens to pick it.', t2: 'Drag backwards to aim. The further you pull, the harder the shot. Watch the path!',
@@ -256,7 +256,7 @@ function rgPanels() {
     box.innerHTML = st.bodies.filter(b => b.side === side).map(b => {
       const p = powerText(b.name), rd = RG.ready(b);
       return `<button class="rg-tc${b.alive ? '' : ' ko'}${b.id === RNG.sel ? ' sel' : ''}${RNG.pows?.has(b.id) ? ' on' : ''}" data-id="${b.id}" style="--c:${PW_COL[p.pw]}" aria-label="${esc(jn(b.name))}">
-        <img class="${vCls(b.variant)}" src="${texOf(jetonOf(b.name))}" alt="">
+        <img class="px${vCls(b.variant)}" src="${texOf(jetonOf(b.name))}" alt="">
         <span class="rg-tcp">${!b.alive ? '✕' : rd ? '✦' : b.spent ? '·' : b.cd}</span>
       </button>`;
     }).join('');
@@ -268,8 +268,8 @@ function ringStatsHTML(name, lvl = 1, variant = '', compact = false) {
   const row = (k, ico, label, v, max, txt, d) => `<div class="rs-row ${k}"><span class="rs-l">${ico} ${label}</span><span class="rs-b"><i style="width:${Math.min(100, v / max * 100)}%"></i></span><b>${txt}</b>${compact ? '' : `<small>${d}</small>`}</div>`;
   return `<div class="rs${compact ? ' compact' : ''}">
     ${row('mass', '⚖️', rt('mass'), s.mass, M.mass, s.mass.toFixed(2), rt('massD'))}
-    ${row('pow', '<img class="rs-ico" src="/img/stats/puissance.png" alt="">', rt('powerS'), s.power, M.power, fmt(Math.round(s.power)), rt('powD'))}
-    ${row('size', '<img class="rs-ico" src="/img/stats/taille.png" alt="">', rt('size'), s.r, M.r, s.r, rt('sizeD'))}
+    ${row('pow', '<img class="px rs-ico" src="/img/stats/puissance.png" alt="">', rt('powerS'), s.power, M.power, fmt(Math.round(s.power)), rt('powD'))}
+    ${row('size', '<img class="px rs-ico" src="/img/stats/taille.png" alt="">', rt('size'), s.r, M.r, s.r, rt('sizeD'))}
   </div>`;
 }
 // Fiche d'un jeton pendant le match (le chrono s'arrête en entraînement)
@@ -283,7 +283,7 @@ function rgInfo(id) {
   const o = document.createElement('div'); o.className = 'rg-info';
   o.innerHTML = `<div class="rg-ic ${b.side === ME() ? 'me' : 'foe'}" style="--g:${hexRGB(jetonOf(b.name).glow)}">
     <button class="rg-icx" aria-label="${t('close')}">✕</button>
-    <div class="rg-ih"><img class="${vCls(b.variant)}" src="${texOf(jetonOf(b.name))}" alt=""><div><b>${jnH(b.name)} ${vTag(b.variant)}</b><small>${esc(RNG.names[b.side])} · ${at('lvl')} ${b.lvl}</small></div></div>
+    <div class="rg-ih"><img class="px${vCls(b.variant)}" src="${texOf(jetonOf(b.name))}" alt=""><div><b>${jnH(b.name)} ${vTag(b.variant)}</b><small>${esc(RNG.names[b.side])} · ${at('lvl')} ${b.lvl}</small></div></div>
     <div class="rg-ip" style="--c:${PW_COL[p.pw]}"><b>✦ ${esc(p.name)}</b><p>${esc(p.desc)}</p><small>${state}${p.when ? ' · ' + p.when : ''}</small></div>
     ${mine ? rgCompare(mine, b) : ringStatsHTML(b.name, b.lvl, b.variant)}
   </div>`;
@@ -295,11 +295,11 @@ function rgInfo(id) {
 // Comparaison : mes stats (avec bonus de rôle et d'équipe) contre les siennes, et qui gagne sur chaque stat
 function rgCompare(a, b) {
   const M = RCFG.STAT_MAX, f = (v, k) => (k === 'mass' ? v.toFixed(2) : fmt(Math.round(v)));
-  const rows = [['mass', '⚖️', rt('mass')], ['power', '<img class="rs-ico" src="/img/stats/puissance.png" alt="">', rt('powerS')], ['r', '<img class="rs-ico" src="/img/stats/taille.png" alt="">', rt('size')]];
+  const rows = [['mass', '⚖️', rt('mass')], ['power', '<img class="px rs-ico" src="/img/stats/puissance.png" alt="">', rt('powerS')], ['r', '<img class="px rs-ico" src="/img/stats/taille.png" alt="">', rt('size')]];
   const wins = rows.filter(([k]) => a.base[k] > b.base[k]).length;
   const bar = (v, k, side) => `<span class="rg-cb ${side}"><i style="width:${Math.min(100, v / M[k] * 100)}%"></i></span>`;
   return `<div class="rg-cmp">
-    <div class="rg-ch"><span class="me"><img class="${vCls(a.variant)}" src="${texOf(jetonOf(a.name))}" alt="">${jnH(a.name)}</span><span>vs</span><span class="foe">${jnH(b.name)}<img class="${vCls(b.variant)}" src="${texOf(jetonOf(b.name))}" alt=""></span></div>
+    <div class="rg-ch"><span class="me"><img class="px${vCls(a.variant)}" src="${texOf(jetonOf(a.name))}" alt="">${jnH(a.name)}</span><span>vs</span><span class="foe">${jnH(b.name)}<img class="px${vCls(b.variant)}" src="${texOf(jetonOf(b.name))}" alt=""></span></div>
     ${rows.map(([k, ico, l]) => {
       const x = a.base[k], y = b.base[k], w = x > y ? 'me' : x < y ? 'foe' : '';
       return `<div class="rg-cr ${w}"><b class="me">${f(x, k)}</b>${bar(x, k, 'me')}<small>${ico} ${l}</small>${bar(y, k, 'foe')}<b class="foe">${f(y, k)}</b></div>`;
@@ -831,6 +831,29 @@ function rgDraw(dt) {
 }
 // Un jeton vu de dessus : son dessin en pixel art (avec l'effet de sa variante), qui tourne quand il roule.
 // Le camp se lit à l'anneau pixel dessous (violet = toi, orange = lui). Gemme = pouvoir prêt.
+// Effet « doodle » sur les jetons du Ring, comme partout sur le site : 3 dessins légèrement déformés (filtres SVG #dd0-2)
+// préparés une seule fois par jeton, qui s'enchaînent à ~3 images/s. Sans filtres (Safari, effets réduits) : dessin fixe.
+const DOODLE = {};
+function rgDoodle(im, name) {
+  const h = document.documentElement;
+  if (h.classList.contains('reduce-fx') || h.classList.contains('no-svgfx')) return null;
+  let f = DOODLE[name];
+  if (!f) {
+    f = DOODLE[name] = [];
+    const w = im.naturalWidth, pad = Math.ceil(w * .06);
+    for (let i = 0; i < 3; i++) {
+      const cv = document.createElement('canvas'), x = cv.getContext('2d');
+      cv.width = cv.height = w + pad * 2;
+      if (!x || !('filter' in x)) return (DOODLE[name] = null);
+      x.imageSmoothingEnabled = false;
+      x.filter = `url(#dd${i})`;
+      x.drawImage(im, pad, pad, w, w);
+      cv.k = (w + pad * 2) / w;
+      f.push(cv);
+    }
+  }
+  return f ? f[Math.floor(performance.now() / 300) % 3] : null;
+}
 function rgToken(c, b, t, fall) {
   const V = RNG.view, [x, y] = w2s(b.x, b.y), rr = b.r * V.s * (fall === false ? 1 : .4 + .6 * fall);
   if (rr <= .5) return;
@@ -841,7 +864,7 @@ function rgToken(c, b, t, fall) {
   const spin = RNG.spin[b.id] || 0, im = rgImg(b.name);
   c.translate(x, y); c.rotate(spin * .5); c.imageSmoothingEnabled = false;
   if (b.variant && VFILTER[b.variant]) c.filter = VFILTER[b.variant];
-  if (im.complete && im.naturalWidth) { const sz = rr * 2.08 * ((jetonOf(b.name).grid || 64) / 64); c.drawImage(im, -sz / 2, -sz / 2, sz, sz); }
+  if (im.complete && im.naturalWidth) { const sz = rr * 2.08 * ((jetonOf(b.name).grid || 64) / 64), d = rgDoodle(im, b.name), k = d ? sz * d.k : sz; c.drawImage(d || im, -k / 2, -k / 2, k, k); }
   else { c.fillStyle = sideCol(b).md; c.beginPath(); c.arc(0, 0, rr, 0, 7); c.fill(); }
   c.filter = 'none';
   c.restore();
@@ -867,7 +890,7 @@ function rgResult(e) {
   box.innerHTML = `<div class="rg-rbox">
     <h2>${draw ? rt('draw') : me ? rt('win') : rt('lose')}</h2>
     <small class="muted">${rtL().why[e?.why] || ''}</small>
-    <div class="rg-rleft"><span class="me">${RG.alive(st, ME()).map(b => `<img src="${texOf(jetonOf(b.name))}" alt="">`).join('') || '—'}</span><b>vs</b><span class="foe">${RG.alive(st, FOE()).map(b => `<img src="${texOf(jetonOf(b.name))}" alt="">`).join('') || '—'}</span></div>
+    <div class="rg-rleft"><span class="me">${RG.alive(st, ME()).map(b => `<img class="px${vCls(b.variant)}" src="${texOf(jetonOf(b.name))}" alt="">`).join('') || '—'}</span><b>vs</b><span class="foe">${RG.alive(st, FOE()).map(b => `<img class="px${vCls(b.variant)}" src="${texOf(jetonOf(b.name))}" alt="">`).join('') || '—'}</span></div>
     <small class="muted">${rt('turns', { n: st.map ? st.turn - 1 : Math.min(st.turn, RCFG.TURNS + 3) })}</small>
     ${dElo == null ? '' : `<p class="rg-elo ${dElo >= 0 ? 'up' : 'down'}"><b>${dElo >= 0 ? '+' : ''}${dElo} Elo</b><small>${fmt(elo.after[ME()])}</small></p>`}
     <div class="rg-rbtn"><button class="btn primary" data-again>${rt('again')}</button><button class="btn ghost" data-back>${rt('back')}</button></div>

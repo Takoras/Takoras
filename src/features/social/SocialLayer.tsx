@@ -11,17 +11,16 @@ import { useT } from '@/i18n/useT';
 import { Avatar } from '@/ui/Avatar';
 import { toast } from '@/ui/toast';
 import { closeChat, openChat, useChat } from './chatStore';
-import { badgeOf, dismiss, notify, timeOf, useFriends, useNotifs, type Friend, type Msg } from './social';
+import { dismiss, notify, timeOf, useFriends, useNotifs, type Friend, type Msg } from './social';
 import s from './Social.module.css';
 
-// Tout ce qui est social et en direct, présent sur toutes les pages : fenêtre de chat, bulle, notifications,
+// Tout ce qui est social et en direct, présent sur toutes les pages : fenêtre de chat (ouverte depuis Amis), notifications,
 // et les abonnements temps réel (messages, demandes d'ami, prix de la boutique).
 export function SocialLayer() {
   useSocialRealtime();
   usePriceRealtime();
   return (
     <>
-      <ChatFab />
       <ChatDock />
       <Notifs />
     </>
@@ -143,36 +142,6 @@ function usePriceRealtime() {
       .subscribe();
     return () => void sb.removeChannel(ch);
   }, [qc]);
-}
-
-// Bulle en bas à droite : ouvre la liste des conversations
-function ChatFab() {
-  const t = useT();
-  const user = useAuth((x) => x.user);
-  const fr = useFriends();
-  const dock = useChat((x) => x.dock);
-  const list = fr.data ?? [];
-  if (!user || !list.some((f) => f.status === 'accepted')) return null;
-  const { unread } = badgeOf(list);
-  return (
-    <button type="button" className={s.fab} aria-expanded={dock} onClick={() => (dock ? closeChat() : openChat(null))}>
-      <svg
-        viewBox="0 0 24 24"
-        width="24"
-        height="24"
-        fill="none"
-        stroke="currentColor"
-        strokeWidth="2"
-        strokeLinecap="round"
-        strokeLinejoin="round"
-        aria-hidden
-      >
-        <path d="M21 12a8 8 0 0 1-11.6 7.1L4 21l1.9-5.4A8 8 0 1 1 21 12z" />
-      </svg>
-      <span className="visually-hidden">{t('ui.fr_chats')}</span>
-      {unread ? <i className={s.badge}>{unread > 9 ? '9+' : unread}</i> : null}
-    </button>
-  );
 }
 
 function ChatDock() {

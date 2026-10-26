@@ -4,7 +4,7 @@ import { useMe } from '@/api/queries';
 // Coûts identiques au serveur (_upgrade_cost, _regen_cost) : affichage seulement, le serveur décide.
 export const BASE_MAX = 5,
   TOP_MAX = 50,
-  MAX_OPEN = 50;
+  MAX_OPEN = 1000;
 export const nextMax = (m: number) => Math.min(TOP_MAX, m + 1);
 export const upgradeCost = (target: number) =>
   Math.max(100, Math.round((100 * Math.max(1, target - BASE_MAX) ** 1.4) / 50) * 50);

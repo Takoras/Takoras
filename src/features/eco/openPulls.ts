@@ -20,7 +20,7 @@ const eco = () => {
 };
 
 let busy = false;
-// Ouvre 1 pull ou tout le stock (max 50) : le serveur retire les pulls et tire les jetons, on joue l'animation
+// Ouvre 1 pull ou tout le stock (max 1000) : le serveur retire les pulls et tire les jetons, on joue l'animation
 export async function openPulls(n: number | 'all') {
   const user = useAuth.getState().user;
   if (!user) return openUI('account');
