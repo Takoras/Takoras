@@ -43,12 +43,12 @@ test('effets réduits : images fixes mais la variante garde sa couleur', async (
 });
 
 // Les classes de variante des CSS Modules existent bien (une config les renommait en camelCase et les vidait)
-test('pastilles de variante colorées (éditeur d’équipe, Bestiaire)', async ({ page }) => {
+test('mutations : vrais tampons dans l’éditeur d’équipe, onglets colorés dans le Bestiaire', async ({ page }) => {
   await fakeSupabase(page, {}, [], { deck: [15, 16, 17] });
   await page.goto('/combat');
   await page.getByRole('button', { name: /Modifier/ }).click();
   const b = page.getByRole('dialog').getByRole('radio', { name: 'Doré' });
-  expect(await b.evaluate((el) => getComputedStyle(el).backgroundImage)).toContain('gradient');
+  expect(await b.locator('span').first().evaluate((el) => getComputedStyle(el).backgroundImage)).toContain('stamps/gold.png');
   await page.keyboard.press('Escape');
   await page.goto('/inventaire');
   const tab = page.getByRole('tab', { name: /Doré/ });

@@ -8,6 +8,17 @@ export function StatIcon({ k }: { k: StatKey }) {
   return src ? (
     <img className={s.ico} src={src} alt="" aria-hidden width={16} height={16} />
   ) : (
-    <span aria-hidden>⚖️</span>
+    // poids : petit sac de lest (en attendant son dessin pixel art)
+    <svg
+      className={s.ico}
+      viewBox="0 0 16 16"
+      width={16}
+      height={16}
+      fill="currentColor"
+      aria-hidden
+      shapeRendering="crispEdges"
+    >
+      <path d="M6 2h4v2h2l2 10H2L4 4h2z" />
+    </svg>
   );
 }

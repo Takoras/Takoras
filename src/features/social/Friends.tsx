@@ -87,7 +87,6 @@ export default function Friends() {
   return (
     <section className={s.page}>
       <header>
-        <p className="eyebrow">{t('ui.nav_friends')}</p>
         <h1>{t('ui.fr_title')}</h1>
       </header>
       <form className={s.add} onSubmit={(e) => void add(e)}>
@@ -100,7 +99,7 @@ export default function Friends() {
           aria-label={t('ui.fr_add_ph')}
         />
         <Button type="submit" variant="primary" loading={busy}>
-          ➕ {t('ui.fr_add')}
+          {t('ui.fr_add')}
         </Button>
       </form>
       {!fr.data ? (
@@ -142,7 +141,7 @@ export default function Friends() {
                     f,
                     <>
                       <Button size="sm" variant="primary" onClick={() => openChat(f.id)}>
-                        💬 {t('ui.fr_chat')}
+                        {t('ui.fr_chat')}
                       </Button>
                       <Button size="sm" onClick={() => void remove(f)} aria-label={`${t('ui.fr_remove')} ${f.pseudo}`}>
                         ✕

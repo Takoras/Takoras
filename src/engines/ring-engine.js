@@ -74,6 +74,15 @@ const RG = (() => {
       if (b.pw === 'anchor') T.anchor = true;
       if (b.pw === 'shield') T.shield = true;
       if (b.pw === 'roots') alive(st, side).forEach(a => { a.t.bounce = true; });
+      // Raz-de-marée (Azura) : au lancer, une vague repousse les ennemis proches loin d'elle
+      if (b.pw === 'wave') {
+        for (const o of alive(st, 1 - side)) {
+          const dx = o.x - b.x, dy = o.y - b.y, d = len(dx, dy);
+          if (d > k.p.radius || !d) continue;
+          const f = k.p.push * (1 - d / k.p.radius) / o.mass; o.vx += dx / d * f; o.vy += dy / d * f;
+        }
+        ev.push({ t: 'wave', id: b.id, x: q(b.x), y: q(b.y), at: 0 });
+      }
       // Apesanteur (Astra) : ce tour, les ennemis glissent comme sur de la glace (ils volent bien plus loin quand on les tape)
       if (b.pw === 'zerog') { alive(st, 1 - side).forEach(a => { a.t.fric = Math.min(a.t.fric, k.p.friction); }); ev.push({ t: 'zerog', id: b.id, at: 0 }); }
       // Coup de pouce (Soutien) : les pouvoirs de tes alliés reviennent plus vite
@@ -158,6 +167,8 @@ const RG = (() => {
         for (const [S, O, sg] of [[A, Cc, 1], [Cc, A, -1]]) {
           if (S.t.hit || !S.t.shooter) continue;
           const iO = O === Cc ? iC : iA;
+          // Gel (Givre) : le premier ennemi touché gèle, il glisse comme sur de la glace jusqu'à la fin du tour
+          if (S.t.pw === 'freeze' && O.side !== S.side) { O.t.fric = Math.min(O.t.fric, kit(S.name).p.friction); ev.push({ t: 'freeze', id: S.id, to: O.id, at: tm }); }
           if (S.t.pw === 'double') { const k = (kit(S.name).p.mult - 1) * j * iO * sg; O.vx += k * nx; O.vy += k * ny; ev.push({ t: 'double', id: S.id, to: O.id, at: tm }); }
           // Éruption solaire (Soléo) : au premier choc, explosion qui repousse les ENNEMIS autour du point d'impact
           if (S.t.pw === 'flare') {

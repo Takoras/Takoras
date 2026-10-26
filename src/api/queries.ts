@@ -49,7 +49,16 @@ export function useLive() {
 }
 
 import { questApi } from './index';
-export type Quest = { id: string; stat: string; target: number; value: number; claimed: boolean; coins: number; item: string | null; qty: number };
+export type Quest = {
+  id: string;
+  stat: string;
+  target: number;
+  value: number;
+  claimed: boolean;
+  coins: number;
+  item: string | null;
+  qty: number;
+};
 export type Daily = { available: boolean; amount: number; next_streak: number; tomorrow: number };
 // Quêtes du jour + bonus quotidien (connecté)
 export function useQuests() {

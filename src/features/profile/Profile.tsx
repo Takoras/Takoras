@@ -110,20 +110,20 @@ export default function Profile() {
             {p.streak > 0 ? (
               <span className={s.streak} title={t('ui.streak_ok', { n: p.streak })}>
                 {' '}
-                🔥 {p.streak}
+                {p.streak}
               </span>
             ) : null}
           </h1>
           {p.beta ? (
             <span className={s.betaChip} title={t('ui.beta_thanks')}>
-              🧪 {t('ui.beta_tester')}
+              {t('ui.beta_tester')}
             </span>
           ) : null}
           <p className="muted">{p.bio || (mine ? t('ui.bio_empty_me') : '')}</p>
         </div>
         <EloBox pseudo={p.pseudo} />
         {mine ? (
-          <Button onClick={() => setEdit(true)}>✏️ {t('ui.edit_profile')}</Button>
+          <Button onClick={() => setEdit(true)}>{t('ui.edit_profile')}</Button>
         ) : user ? (
           <FriendButton pseudo={p.pseudo} />
         ) : null}
@@ -162,9 +162,7 @@ export default function Profile() {
           <dd>{fmt(p.owned)}</dd>
         </div>
       </dl>
-      <h2 className={s.h2}>
-        {t('ui.showcase')} {mine ? <small className="muted">{t('ui.showcase_click')}</small> : null}
-      </h2>
+      <h2 className={s.h2}>{t('ui.showcase')}</h2>
       <ul className={s.showcase}>
         {Array.from({ length: 5 }, (_, i) => {
           const x = show[i];
@@ -208,7 +206,7 @@ export default function Profile() {
       {mine ? (
         <section className={s.private} aria-labelledby="pv-t">
           <h2 id="pv-t" className={s.h2}>
-            🔒 {t('ui.private_zone')} <small className="muted">{t('ui.private_hint')}</small>
+            {t('ui.private_zone')} <small className="muted">{t('ui.private_hint')}</small>
           </h2>
           <div className={s.row}>
             <span>{t('ui.pv_login')}</span>
@@ -515,7 +513,7 @@ function EditProfile({ p, onClose }: { p: Prof; onClose: () => void }) {
                   ) : (
                     <img className="px" src={AVATARS[a]} alt="" />
                   )}
-                  {owned ? null : <i aria-hidden>🔒</i>}
+                  {owned ? null : <i aria-hidden></i>}
                 </button>
               );
             })}

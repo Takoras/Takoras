@@ -188,7 +188,6 @@ export default function Bestiary() {
     <section className={`${s.page} ${selecting ? s.withBar : ''}`}>
       <header className={s.head}>
         <div>
-          <p className="eyebrow">{t('ui.nav_inv')}</p>
           <h1>{t('ui.bst_title')}</h1>
           <p className="muted">
             {t('ui.inv_count', { n: fmt(count), k: groups.length })} · {t('ui.inv_value')} {fmt(value)} <Coin />
@@ -359,7 +358,7 @@ export default function Bestiary() {
           onClose={() => setOpen(null)}
         >
           {!og && !oc ? (
-            <p className="muted">🔒 {t('ui.bst_unknown')}</p>
+            <p className="muted">{t('ui.bst_unknown')}</p>
           ) : (
             <Sheet
               g={og}
@@ -384,7 +383,7 @@ export default function Bestiary() {
                 try {
                   const r = (await combatApi.levelUp(open.name, view.serie)) as { lvl: number };
                   sfx.upgrade();
-                  toast(`⬆️ ${t('arena.lvlOk', { j: jn(open.name), n: r.lvl })}`);
+                  toast(`${t('arena.lvlOk', { j: jn(open.name), n: r.lvl })}`);
                   await refresh(true);
                   setLvlUp((n) => n + 1); // la pièce de la fiche fête la montée de niveau
                 } catch (e) {
@@ -426,11 +425,11 @@ function CardView({
   // jamais trouvé : mystère total (fond gris neutre, pas de numéro, pas de rareté, pas de nom)
   const known = !!g || c.seen;
   const badge = g?.deck
-    ? ['⚔️', t('ui.in_deck')]
+    ? ['', t('ui.in_deck')]
     : g?.shown
-      ? ['📌', t('ui.in_showcase')]
+      ? ['', t('ui.in_showcase')]
       : locked
-        ? ['🔒', t('ui.lock')]
+        ? ['', t('ui.lock')]
         : null;
   return (
     <li
@@ -457,7 +456,7 @@ function CardView({
         {known ? (
           <small>
             <span style={{ color: tierCol(tier) }}>1/{fmt(vOdds(j.odds, vtab))}</span>
-            {g ? ` · ⚡${fmt(statsOf(j.name, j.odds, vtab, lvl).power)}` : ' · ×0'}
+            {g ? ` · ${fmt(statsOf(j.name, j.odds, vtab, lvl).power)}` : ' · ×0'}
           </small>
         ) : (
           <small>?</small>
@@ -519,9 +518,9 @@ function Sheet({
       <ul className={s.owned}>
         <li>{t('ui.inv_have', { n: g?.ids.length ?? 0 })}</li>
         {c ? <li>{t('ui.bst_got', { n: c.total })}</li> : null}
-        {g?.shown ? <li>📌 {t('ui.shown_n', { n: g.shown })}</li> : null}
-        {g?.deck ? <li>⚔️ {t('ui.in_deck')}</li> : null}
-        {g && g.luck > 1 ? <li>🍀 {t('ui.best_luck', { l: fmtLuck(g.luck) })}</li> : null}
+        {g?.shown ? <li>{t('ui.shown_n', { n: g.shown })}</li> : null}
+        {g?.deck ? <li>{t('ui.in_deck')}</li> : null}
+        {g && g.luck > 1 ? <li>{t('ui.best_luck', { l: fmtLuck(g.luck) })}</li> : null}
       </ul>
       {c ? (
         <ul className={s.vlist} aria-label={t('ui.bst_variants')}>
@@ -545,7 +544,7 @@ function Sheet({
           ) : (
             <>
               <Button size="sm" disabled={!lv.can} loading={busy === 'lvl'} onClick={run('lvl', onLevel)}>
-                ⬆️ {t('arena.lvlUp', { n: lv.L + 1 })} · {t('arena.lvlCost', { n: lv.L })}
+                {t('arena.lvlUp', { n: lv.L + 1 })} · {t('arena.lvlCost', { n: lv.L })}
               </Button>
               {lv.can ? null : <small className="muted">{t('arena.lvlNeed', { n: lv.L, h: lv.have })}</small>}
             </>
@@ -569,7 +568,7 @@ function Sheet({
             </Button>
           ) : null}
           <Button loading={busy === 'lock'} onClick={run('lock', () => onLock(g, !allLocked))}>
-            {allLocked ? `🔓 ${t('ui.unlock')}` : `🔒 ${t('ui.lock')}`}
+            {allLocked ? `${t('ui.unlock')}` : `${t('ui.lock')}`}
           </Button>
         </div>
       ) : null}

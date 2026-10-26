@@ -88,14 +88,14 @@ function useSocialRealtime() {
             const x = l.find((y) => y.id === f.requested_by);
             if (x) {
               sfx.message();
-              toast(`📨 ${say('ui.fr_got', x.pseudo)}`);
+              toast(`${say('ui.fr_got', x.pseudo)}`);
             }
           }
           if (eventType === 'UPDATE' && f.status === 'accepted' && f.requested_by === uid) {
             const x = l.find((y) => y.status === 'accepted' && !before.has(y.id));
             if (x) {
               sfx.upgrade();
-              toast(`🤝 ${say('ui.fr_now', x.pseudo)}`);
+              toast(`${say('ui.fr_now', x.pseudo)}`);
             }
           }
           void qc.invalidateQueries({ queryKey: ['friend'] });
@@ -129,7 +129,7 @@ function usePriceRealtime() {
             f = (v: number) => v.toLocaleString(locale(lang));
           notify(
             {
-              title: `💰 ${title(down)}`,
+              title: `${title(down)}`,
               body: `${itemText(it, lang)[0]} : ${f(c.old_price)} → ${f(c.new_price)}`,
               tone: down ? 'down' : 'up',
               img: itemImg(it),
@@ -158,7 +158,7 @@ function ChatDock() {
       ) : (
         <>
           <header className={s.dockHead}>
-            <b>💬 {t('ui.fr_chats')}</b>
+            <b>{t('ui.fr_chats')}</b>
             <button type="button" className={s.x} onClick={closeChat} aria-label={t('ui.close')}>
               ✕
             </button>

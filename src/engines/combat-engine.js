@@ -20,7 +20,7 @@ const CB = (() => {
   }
   // ---------- Stats affichées (fiches, équipe) : les mêmes que le Ring (ring-config.js), avec niveau et mutation
   const stats = (name, odds, lvl = 1, variant = '') => RG.stats(name, lvl, variant);
-  const power = s => Math.round(s.mass * 300 + s.power / 4 + s.r * 2); // note globale « ⚡ » des cartes
+  const power = s => Math.round(s.mass * 300 + s.power / 4 + s.r * 2); // note globale « » des cartes
 
   return { EL, elOf, elMult, stats, power };
 })();

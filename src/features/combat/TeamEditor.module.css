@@ -1,0 +1,180 @@
+/* Sélection d'équipe : 3 places en haut, liste lisible en dessous (un jeton par ligne, son pouvoir expliqué) */
+.slots {
+  list-style: none;
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: var(--s-2);
+}
+.slots li {
+  position: relative;
+  display: grid;
+  justify-items: center;
+  align-content: start;
+  gap: 4px;
+  min-height: 150px;
+  padding: var(--s-3) var(--s-2);
+  border-radius: var(--r-md);
+  background: var(--surface);
+  border: 1px solid var(--line);
+  text-align: center;
+}
+.slots img {
+  width: 64px;
+  height: 64px;
+  image-rendering: pixelated;
+  --df: drop-shadow(0 0 10px rgba(var(--g), calc(0.6 * var(--ga, 0))));
+}
+.slots b {
+  font-size: var(--fs-sm);
+}
+.slots small {
+  font-size: var(--fs-xs);
+  color: var(--text-2);
+}
+.empty {
+  place-content: center;
+  border-style: dashed !important;
+}
+.empty span {
+  font: 700 var(--fs-xl) / 1 var(--font-display);
+  color: var(--text-2);
+}
+.rm {
+  position: absolute;
+  top: 4px;
+  right: 4px;
+  width: 28px;
+  height: 28px;
+  border-radius: var(--r-sm);
+  color: var(--text-2);
+}
+.muts {
+  display: flex;
+  gap: 4px;
+}
+.muts button {
+  display: grid;
+  place-items: center;
+  width: 30px;
+  height: 30px;
+  border-radius: var(--r-sm);
+  border: 1px solid var(--line);
+}
+.muts button[aria-checked='true'] {
+  border-color: var(--text);
+  background: var(--surface-3);
+}
+.plain {
+  width: 12px;
+  height: 12px;
+  border-radius: 50%;
+  border: 2px solid var(--text-2);
+}
+
+/* Onglets de série */
+.tabs {
+  display: flex;
+  gap: var(--s-2);
+  margin: var(--s-4) 0 var(--s-2);
+  overflow-x: auto;
+}
+.tabs button {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 6px var(--s-3);
+  border-radius: var(--r-sm);
+  border: 1px solid var(--line);
+  font-size: var(--fs-sm);
+  white-space: nowrap;
+}
+.tabs button[aria-selected='true'] {
+  background: var(--accent);
+  border-color: var(--accent);
+  color: #fff;
+}
+.soon {
+  opacity: 0.6;
+  border-style: dashed !important;
+}
+
+/* Liste des jetons */
+.list {
+  list-style: none;
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(min(100%, 300px), 1fr));
+  gap: var(--s-2);
+  max-height: min(48vh, 520px);
+  overflow-y: auto;
+  padding-right: 2px;
+}
+.row {
+  width: 100%;
+  display: grid;
+  grid-template-columns: 52px minmax(0, 1fr) 28px;
+  align-items: center;
+  gap: var(--s-3);
+  padding: var(--s-2) var(--s-3);
+  border-radius: var(--r-md);
+  background: var(--surface);
+  border: 1px solid var(--line);
+  text-align: left;
+}
+.row.on {
+  border-color: var(--accent);
+  background: color-mix(in srgb, var(--accent) 10%, var(--surface));
+}
+.row img {
+  width: 52px;
+  height: 52px;
+  image-rendering: pixelated;
+}
+.txt {
+  display: grid;
+  gap: 2px;
+  min-width: 0;
+}
+.txt b {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: var(--fs-md);
+}
+.txt b small {
+  color: var(--text-2);
+  font-weight: 500;
+  font-size: var(--fs-xs);
+}
+.pw {
+  font-size: var(--fs-sm);
+  font-weight: 600;
+  color: var(--c);
+}
+.pw small {
+  color: var(--text-2);
+  font-weight: 400;
+}
+.desc {
+  font-size: var(--fs-xs);
+  color: var(--text-2);
+  line-height: 1.35;
+}
+.check {
+  display: grid;
+  place-items: center;
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  border: 1px solid var(--line-strong);
+  font-weight: 700;
+}
+.on .check {
+  background: var(--accent);
+  border-color: var(--accent);
+  color: #fff;
+}
+.foot {
+  display: flex;
+  justify-content: flex-end;
+  margin-top: var(--s-3);
+}

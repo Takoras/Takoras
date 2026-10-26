@@ -6,9 +6,7 @@ export function Rich({ text }: { text: string }) {
   const parts = text.split(/(<b>.*?<\/b>)/g);
   return (
     <>
-      {parts.map((p, i) =>
-        p.startsWith('<b>') ? <b key={i}>{p.slice(3, -4)}</b> : <Fragment key={i}>{p}</Fragment>,
-      )}
+      {parts.map((p, i) => (p.startsWith('<b>') ? <b key={i}>{p.slice(3, -4)}</b> : <Fragment key={i}>{p}</Fragment>))}
     </>
   );
 }

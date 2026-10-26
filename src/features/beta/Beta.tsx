@@ -81,7 +81,7 @@ function FeedbackFab() {
         openFeedback();
       }}
     >
-      <span aria-hidden>💡</span>
+      <span aria-hidden></span>
       <span className={s.fabTxt}>{t('ui.fb_btn')}</span>
     </button>
   );

@@ -38,9 +38,7 @@ export default function Items() {
     <section className={s.page}>
       <header className={s.head}>
         <div>
-          <p className="eyebrow">{t('ui.nav_inv')}</p>
           <h1>{t('ui.inv_items_title')}</h1>
-          <p className="muted">{t('ui.inv_items_sub')}</p>
         </div>
       </header>
       <InvTabs />

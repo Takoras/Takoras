@@ -22,8 +22,10 @@ const ESC: Record<string, string> = { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"
 export const esc = (s: unknown) => String(s ?? '').replace(/[&<>"']/g, (c) => ESC[c] ?? c);
 
 // Textes : t('cle') → espace « ui », at('cle') → espace « arena » (comme l'ancien site)
-export const t = (k: string, v?: Record<string, string | number>) => translate(useSettings.getState().lang, `ui.${k}` as Key, v);
-export const at = (k: string, v?: Record<string, string | number>) => translate(useSettings.getState().lang, `arena.${k}` as Key, v);
+export const t = (k: string, v?: Record<string, string | number>) =>
+  translate(useSettings.getState().lang, `ui.${k}` as Key, v);
+export const at = (k: string, v?: Record<string, string | number>) =>
+  translate(useSettings.getState().lang, `arena.${k}` as Key, v);
 
 // Noms des jetons (quelques-uns sont traduits en anglais)
 export const jn = (name: string) => (useSettings.getState().lang === 'en' && dictOf('en').names[name]) || name;
@@ -31,7 +33,10 @@ export const jnH = (name: string) => esc(jn(name));
 
 // Variantes : classe CSS et petite étiquette
 export const vCls = (v: string) => (v in VARIANTS ? ' v-' + v : '');
-export const vTag = (v: string) => (v in VARIANTS ? `<span class="vtag v-${v}"><i class="vstamp" style="background-image:url(/img/stamps/${v}.png)" aria-hidden="true"></i>${esc(t('v_' + v))}</span>` : '');
+export const vTag = (v: string) =>
+  v in VARIANTS
+    ? `<span class="vtag v-${v}"><i class="vstamp" style="background-image:url(/img/stamps/${v}.png)" aria-hidden="true"></i>${esc(t('v_' + v))}</span>`
+    : '';
 
 // ---------- Pour le moteur d'ouverture (opening + transitions de l'ancien site)
 import { sb } from '@/lib/supabase';
@@ -57,16 +62,28 @@ export const saveSettings = () => undefined; // les réglages se sauvegardent to
 // Le joueur, vu par les moteurs : session (useAuth) + état serveur (cache ['me'])
 const me = () => qc.getQueryData<Me>(['me', useAuth.getState().user?.id]);
 export const ACC = {
-  get user() { return useAuth.getState().user; },
-  get pseudo() { return me()?.pseudo ?? null; },
-  get isAdmin() { return !!me()?.admin; },
-  get tester() { return !!me()?.tester; },
-  get beta() { return !!me()?.beta; },
+  get user() {
+    return useAuth.getState().user;
+  },
+  get pseudo() {
+    return me()?.pseudo ?? null;
+  },
+  get isAdmin() {
+    return !!me()?.admin;
+  },
+  get tester() {
+    return !!me()?.tester;
+  },
+  get beta() {
+    return !!me()?.beta;
+  },
   hist: [] as unknown[],
 };
 
 // Le seul type de pull (même objet que l'ancien site)
-export const PULLS = [{ group: '', name: 'Takoras', color: 'takoras', price: 100, free: true, img: '/img/jetons/takoras.png' }];
+export const PULLS = [
+  { group: '', name: 'Takoras', color: 'takoras', price: 100, free: true, img: '/img/jetons/takoras.png' },
+];
 
 // Stats affichées dans la fiche d'un jeton (même calcul que l'ancien ui.js)
 export const STAT_MAX = { s_mass: RCFG.STAT_MAX.mass, s_pow: RCFG.STAT_MAX.power, s_size: RCFG.STAT_MAX.r };
@@ -77,10 +94,18 @@ export function statsOf(name: string, odds: number, variant = '', lvl = 1) {
 
 // Crochets : ce que le moteur demande au reste du site (économie, historique…). React les branche au démarrage.
 export const host = {
-  openPulls: (n: number | 'all') => { void n; },
-  applyState: (st: unknown) => { void st; },
+  openPulls: (n: number | 'all') => {
+    void n;
+  },
+  applyState: (st: unknown) => {
+    void st;
+  },
   ecoDecorate: (): void => undefined,
-  accRecordPull: (j: unknown, serie?: string) => { void j; void serie; return false; },
+  accRecordPull: (j: unknown, serie?: string) => {
+    void j;
+    void serie;
+    return false;
+  },
   loadLocalHist: (): unknown[] => [],
   renderHist: (): void => undefined,
   toggleAdmin: (): void => undefined,

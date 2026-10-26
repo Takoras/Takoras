@@ -25,7 +25,6 @@ export default function Home() {
       <div className={s.stage}>
         <div className={s.center}>
           <HeroCoin img={pull.img} label={pull.name} />
-          <p className="eyebrow">{t('ui.permanent')}</p>
           <h1 className={s.title}>
             {t('ui.pull')} {pull.name}
           </h1>

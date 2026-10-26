@@ -1,8 +1,6 @@
 import type { CSSProperties } from 'react';
 import { glowVars, jetonOf, texOf, tierCol, tierKey, vImg } from '@/data/jetons';
-import { ROLES, roleOf } from '@/data/kit';
 import { useJn } from '@/lib/names';
-import { useSettings } from '@/lib/settings';
 import { useT } from '@/i18n/useT';
 import { Modal } from '@/ui/Modal';
 import { VTag } from '@/ui/VTag';
@@ -25,13 +23,11 @@ export function TokenSheet({
 }) {
   const t = useT();
   const jn = useJn();
-  const lang = useSettings((x) => x.lang);
   const j = jetonOf(name, serie),
-    el = ROLES[roleOf(name)],
     tier = tierKey(j.odds);
   return (
     <Modal open onClose={onClose} title={jn(name)}>
-      <div className={s.sheet} style={{ ...glowVars(j, variant), '--el': el.col } as CSSProperties}>
+      <div className={s.sheet} style={glowVars(j, variant) as CSSProperties}>
         <div className={s.sheetTop}>
           <div className={s.sheetImg}>
             <img className={vImg(variant)} src={texOf(j)} alt="" />
@@ -43,11 +39,6 @@ export function TokenSheet({
             <p className={s.sheetName}>
               {jn(name)} <VTag v={variant} />
             </p>
-            <div className={s.chips}>
-              <span style={{ color: el.col }}>
-                {el.ico} {el[lang]}
-              </span>
-            </div>
           </div>
         </div>
         <CombatInfo name={name} lvl={lvl} variant={variant} stats />

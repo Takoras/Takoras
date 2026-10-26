@@ -14,6 +14,7 @@ export function initAuth() {
 }
 
 // Connexion Discord uniquement (comme l'ancien site). Retour sur la page d'accueil.
-export const signInDiscord = () => sb.auth.signInWithOAuth({ provider: 'discord', options: { redirectTo: `${location.origin}/` } });
+export const signInDiscord = () =>
+  sb.auth.signInWithOAuth({ provider: 'discord', options: { redirectTo: `${location.origin}/` } });
 export const signOut = () => sb.auth.signOut();
 export const PSEUDO_RE = /^[A-Za-z0-9_.-]{3,16}$/;

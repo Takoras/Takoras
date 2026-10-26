@@ -19,12 +19,12 @@
   --text: #f2f2f5;
   --text-2: #b8b8c6;
   --muted: #8d8da0;
-  --faint: #5c5c6e;     /* décoratif seulement (pas pour du texte) */
+  --faint: #5c5c6e; /* décoratif seulement (pas pour du texte) */
 
   /* Accent (action principale) et secondaire (monnaie, urgence) */
-  --accent: #7c3aed;     /* fond des boutons principaux : blanc dessus = 5,7:1 */
+  --accent: #7c3aed; /* fond des boutons principaux : blanc dessus = 5,7:1 */
   --accent-hover: #6d28d9;
-  --accent-hi: #a78bfa;  /* violet clair pour du texte sur fond sombre */
+  --accent-hi: #a78bfa; /* violet clair pour du texte sur fond sombre */
   --accent-lo: #4c1d95;
   --accent-ink: #ffffff;
   --gold: #f97316;
@@ -62,13 +62,13 @@
   /* Outfit partout (OFL). Échelle du cahier : H1 32/700, H2 22/700, texte 15-16, petit 13 */
   --font-display: 'Outfit Variable', 'Outfit', system-ui, sans-serif;
   --font-body: 'Outfit Variable', 'Outfit', system-ui, sans-serif;
-  --fs-xs: 0.75rem;   /* 12 */
+  --fs-xs: 0.75rem; /* 12 */
   --fs-sm: 0.8125rem; /* 13 */
   --fs-md: 0.9375rem; /* 15 */
-  --fs-lg: 1.125rem;  /* 18 */
-  --fs-xl: 1.375rem;  /* 22 */
-  --fs-2xl: 2rem;     /* 32 */
-  --fs-3xl: 2.75rem;  /* 44 */
+  --fs-lg: 1.125rem; /* 18 */
+  --fs-xl: 1.375rem; /* 22 */
+  --fs-2xl: 2rem; /* 32 */
+  --fs-3xl: 2.75rem; /* 44 */
   --lh-tight: 1.1;
   --lh: 1.5;
   --tracking-caps: 0.12em;
@@ -125,7 +125,9 @@
 }
 
 @media (max-width: 759px) {
-  :root { --tabh: 64px; }
+  :root {
+    --tabh: 64px;
+  }
 }
 
 @media (prefers-reduced-motion: reduce) {

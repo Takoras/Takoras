@@ -46,11 +46,11 @@ export function FriendButton({ pseudo }: { pseudo: string }) {
     void qc.invalidateQueries({ queryKey: ['friend', pseudo] });
     void qc.invalidateQueries({ queryKey: ['friends'] });
   };
-  if (st === 'sent') return <Button disabled>⏳ {t('ui.fr_sent')}</Button>;
+  if (st === 'sent') return <Button disabled>{t('ui.fr_sent')}</Button>;
   if (st === 'chat')
     return (
       <Button variant="primary" onClick={() => openChat(s.id)}>
-        💬 {t('ui.fr_chat')}
+        {t('ui.fr_chat')}
       </Button>
     );
   if (st === 'accept')
@@ -79,7 +79,7 @@ export function FriendButton({ pseudo }: { pseudo: string }) {
         done();
       }}
     >
-      ➕ {t('ui.fr_add')}
+      {t('ui.fr_add')}
     </Button>
   );
 }

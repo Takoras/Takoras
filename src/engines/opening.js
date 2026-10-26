@@ -360,7 +360,7 @@ function fillInfo(j, variant = '') {
   const stat = (k, base) => { const v = Math.round(base * (.35 + lvl * .65) * (.85 + Math.random() * .3)); return [k, v, Math.min(100, v / base * 100)]; };
   $('op-name').innerHTML = jnH(j.name) + vTag(variant);
   const lk = +(sess.lucks || [])[sess.idx] || 0; // chance active quand ce jeton a été tiré
-  $('op-rarity').innerHTML = '1/' + vOdds(j.odds, variant).toLocaleString(LOCALE()) + (lk > 1 ? ` <span class="op-luck">🍀 ×${fmtLuck(lk)}</span>` : '');
+  $('op-rarity').innerHTML = '1/' + vOdds(j.odds, variant).toLocaleString(LOCALE()) + (lk > 1 ? ` <span class="op-luck">×${fmtLuck(lk)}</span>` : '');
   // Mêmes stats que dans l'inventaire (stables pour un même jeton)
   const S = statsOf(j.name, j.odds);
   sess.cur.stats = ['s_mass', 's_pow', 's_size'].map(k => [k, S[k], Math.min(100, S[k] / STAT_MAX[k] * 100)]);
@@ -615,7 +615,7 @@ function renderAuto() {
   const show = sess && sess.total > 1 && !sess.recap && (sess.idx < sess.total - 1 || !opening.classList.contains('revealed'));
   b.hidden = !show;
   b.classList.toggle('on', !!sess?.auto);
-  b.textContent = sess?.auto ? '⏸ ' + t('auto_stop') : '⏩ ' + t('auto_go');
+  b.textContent = sess?.auto ? '' + t('auto_stop') : '' + t('auto_go');
   const s = $('op-skip');
   s.hidden = !show;
   s.textContent = '✕ ' + t('auto_quit');
@@ -639,7 +639,7 @@ async function quitAll() {
   sess.recap = true; // on a le droit de partir
   await leave();
   quitAll.busy = false;
-  if (back) toast('🎒 ' + t('auto_quit_ok', { n: back }));
+  if (back) toast('' + t('auto_quit_ok', { n: back }));
 }
 $('op-skip')?.addEventListener('click', e => { e.stopPropagation(); quitAll(); });
 // Mode turbo : environ 0,25 s par jeton, lignes de vitesse, compteur de combo, notes qui montent
@@ -650,7 +650,7 @@ function autoRun() {
   if (!run.done) {
     if (isSpecial(run.result, run.variant)) { // on s'arrête : à toi de jouer
       sess.auto = false; sess.autoResume = true; save(); renderAuto(); turbo(false);
-      sfx.hold(); toast('✨ ' + t('auto_special'));
+      sfx.hold(); toast('' + t('auto_special'));
       return;
     }
     turbo(true);
@@ -719,7 +719,7 @@ function showRecap() {
   list.forEach((j, i) => { const k = j.name + '|' + (vars[i] || ''); const x = g.get(k) || { j, v: vars[i] || '', n: 0, lk: 0 }; x.n++; x.lk = Math.max(x.lk, +(sess.lucks || [])[i] || 0); g.set(k, x); });
   const cards = [...g.values()].sort((a, b) => vOdds(b.j.odds, b.v) - vOdds(a.j.odds, a.v));
   $('op-recap-grid').innerHTML = cards.map(({ j, v, n, lk }, i) =>
-    `<div class="rc${i === 0 ? ' best' : ''}" style="--g:${hexRGB(j.glow)};animation-delay:${Math.min(i, 20) * 45}ms">${i === 0 ? `<span class="rc-tag">${t('best')}</span>` : ''}${n > 1 ? `<span class="rc-n">×${n}</span>` : ''}${jetonHTML(j, 72, v)}<b>${jnH(j.name)}${vTag(v)}</b><small>1/${vOdds(j.odds, v).toLocaleString(LOCALE())}${lk > 1 ? ` · 🍀×${fmtLuck(lk)}` : ''}</small></div>`).join('');
+    `<div class="rc${i === 0 ? ' best' : ''}" style="--g:${hexRGB(j.glow)};animation-delay:${Math.min(i, 20) * 45}ms">${i === 0 ? `<span class="rc-tag">${t('best')}</span>` : ''}${n > 1 ? `<span class="rc-n">×${n}</span>` : ''}${jetonHTML(j, 72, v)}<b>${jnH(j.name)}${vTag(v)}</b><small>1/${vOdds(j.odds, v).toLocaleString(LOCALE())}${lk > 1 ? ` · ×${fmtLuck(lk)}` : ''}</small></div>`).join('');
   $('op-recap-tag').textContent = t('recap_tag', { n: sess.total });
   $('op-recap-title').textContent = t('recap_title', { n: sess.total });
   if (typeof ecoDecorate === 'function') ecoDecorate();
@@ -893,7 +893,7 @@ const AC_MINS = [100, 500, 1000, 5000, 25000, 100000, 0]; // 0 = jamais
 function renderAutoCfg() {
   const box = $('auto-cfg'); if (!box) return;
   const min = SETTINGS.autoMin || 0, vars = SETTINGS.autoVars || [];
-  box.innerHTML = `<h4>⏩ ${t('ac_title')}</h4><p>${t('ac_sub')}</p>
+  box.innerHTML = `<h4>${t('ac_title')}</h4><p>${t('ac_sub')}</p>
     <div class="ac-lbl">${t('ac_min')}</div>
     <div class="ac-row" data-ac="min">${AC_MINS.map(m => `<button data-v="${m}" class="${m === min ? 'on' : ''}">${m ? '1/' + m.toLocaleString(LOCALE()) : t('ac_never')}</button>`).join('')}</div>
     <div class="ac-lbl">${t('ac_vars')}</div>

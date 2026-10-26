@@ -91,28 +91,28 @@ const RCFG = {
     smart:  { shoots: true, smart: true, aimErr: .035, forceErr: .05 }, // entraînement : prédit ton tir, esquive au bord du vide
   },
 
-  // ---------- Jetons : rôle + stats de base (niveau 1, sans mutation) + UN pouvoir
-  // Le rôle se voit dans les stats : Tank = gros et lourd mais lent · Soutien = léger et rapide · Combattant = entre les deux, frappe fort.
+  // ---------- Jetons : stats de base (niveau 1, sans mutation) + UN pouvoir, en lien avec le dessin du jeton.
+  // Plus de catégories (combattant, tank…) : chaque jeton a son style de jeu par son poids, sa vitesse, sa taille et son pouvoir.
   // mass : poids (dur à pousser, pousse fort) · power : vitesse max du tir · r : taille (rayon)
   // cd : tours de recharge après utilisation (0 = une seule fois par match). p : réglages du pouvoir.
   TOKENS: {
-    Mobu:     { role: 'tank', mass: 1.55, power: 1600, r: 124, pw: 'grow',     cd: 3, p: { r: 1.4, mass: 1.7 } },
-    Pikko:    { role: 'support', mass: .75, power: 2100, r: 92, pw: 'haste',    cd: 3, p: { cd: 1 } },
-    Rouillé:  { role: 'tank', mass: 1.65, power: 1580, r: 122, pw: 'scrap',    cd: 3, p: { mass: 2.2 } },
-    Givre:    { role: 'fighter', mass: 1.00, power: 1880, r: 106, pw: 'slide',    cd: 2, p: { friction: .3 } },
-    Soléo:    { role: 'tank', mass: 1.60, power: 1620, r: 120, pw: 'flare',    cd: 3, p: { radius: 360, push: 1500 } },
-    Azura:    { role: 'support', mass: .80, power: 2080, r: 96, pw: 'guard',    cd: 2, p: {} },
-    Carmin:   { role: 'fighter', mass: 1.10, power: 1920, r: 108, pw: 'double',   cd: 3, p: { mult: 2 } },
-    Vyolis:   { role: 'fighter', mass: .95, power: 1940, r: 104, pw: 'ghost',    cd: 2, p: {} },
-    Lumis:    { role: 'support', mass: .82, power: 2100, r: 96, pw: 'rescue',   cd: 3, p: { pull: 300 } },
-    Nyx:      { role: 'fighter', mass: .95, power: 1960, r: 102, pw: 'shrink',   cd: 2, p: { r: .7, power: 1.35 } },
-    Astra:    { role: 'support', mass: .85, power: 2120, r: 98, pw: 'zerog',    cd: 3, p: { friction: .35 } },
-    Kraïos:   { role: 'tank', mass: 1.80, power: 1600, r: 130, pw: 'anchor',   cd: 2, p: {} },
-    Koi:      { role: 'fighter', mass: 1.00, power: 1970, r: 104, pw: 'second',   cd: 3, p: { at: .35, boost: .85 } },
-    Néphéris: { role: 'support', mass: .90, power: 2150, r: 100, pw: 'roots',    cd: 0, p: {} },
-    Zénith:   { role: 'tank', mass: 1.75, power: 1650, r: 126, pw: 'shield',   cd: 2, p: {} },
-    Oblivion: { role: 'fighter', mass: 1.15, power: 1980, r: 110, pw: 'void',     cd: 0, p: { push: 1800 } },
-    Takoras:  { role: 'fighter', mass: 1.15, power: 2000, r: 110, pw: 'split',    cd: 0, p: { at: .25, spread: .22 } },
+    Mobu:     { mass: 1.55, power: 1600, r: 124, pw: 'grow',     cd: 3, p: { r: 1.4, mass: 1.7 } },       // blob : gonfle
+    Pikko:    { mass: .75, power: 2100, r: 92, pw: 'bounce',     cd: 2, p: {} },                          // balle rebondissante : rebondit sur le bord
+    Rouillé:  { mass: 1.65, power: 1580, r: 122, pw: 'scrap',    cd: 3, p: { mass: 2.2 } },               // ferraille : devient très lourd
+    Givre:    { mass: 1.00, power: 1880, r: 106, pw: 'freeze',   cd: 2, p: { friction: .18 } },           // glace : gèle l'ennemi touché
+    Soléo:    { mass: 1.60, power: 1620, r: 120, pw: 'flare',    cd: 3, p: { radius: 360, push: 1500 } }, // soleil : explosion à l'impact
+    Azura:    { mass: .80, power: 2080, r: 96, pw: 'wave',       cd: 3, p: { radius: 520, push: 900 } },  // eau : raz-de-marée au lancer
+    Carmin:   { mass: 1.10, power: 1920, r: 108, pw: 'double',   cd: 3, p: { mult: 2 } },                 // coup de poing ×2
+    Vyolis:   { mass: .95, power: 1940, r: 104, pw: 'ghost',     cd: 2, p: {} },                          // spectre : traverse
+    Lumis:    { mass: .82, power: 2100, r: 96, pw: 'rescue',     cd: 3, p: { pull: 300 } },               // lumière : ramène un allié
+    Nyx:      { mass: .95, power: 1960, r: 102, pw: 'shrink',    cd: 2, p: { r: .7, power: 1.35 } },      // nuit : petit et rapide
+    Astra:    { mass: .85, power: 2120, r: 98, pw: 'curve',      cd: 2, p: { turn: 2.6 } },               // étoile filante : tête chercheuse
+    Kraïos:   { mass: 1.80, power: 1600, r: 130, pw: 'magnet',   cd: 3, p: { radius: 520, pull: 1300 } }, // kraken : tentacules qui attirent
+    Koi:      { mass: 1.00, power: 1970, r: 104, pw: 'second',   cd: 3, p: { at: .35, boost: .85 } },     // poisson : 2e élan
+    Néphéris: { mass: .90, power: 2150, r: 100, pw: 'roots',     cd: 0, p: {} },                          // psychique : barrière
+    Zénith:   { mass: 1.75, power: 1650, r: 126, pw: 'zerog',    cd: 3, p: { friction: .35 } },           // ciel : apesanteur
+    Oblivion: { mass: 1.15, power: 1980, r: 110, pw: 'void',     cd: 0, p: { push: 1800 } },              // trou noir : éjecte
+    Takoras:  { mass: 1.15, power: 2000, r: 110, pw: 'split',    cd: 0, p: { at: .25, spread: .22 } },    // se dédouble
   },
   DEFAULT_TOKEN: { role: 'fighter', mass: 1, power: 1800, r: 107, pw: 'none', cd: 0, p: {} }, // jeton d'une future collection sans pouvoir
   STAT_MAX: { mass: 3, power: 3400, r: 140 }, // barres des fiches à 100 %

@@ -107,10 +107,10 @@ test('le ring rétrécit doucement à chaque tour et fait tomber ceux restés au
 test('plusieurs pouvoirs dans le même tour, mais un seul jeton tire', () => {
   const T = (n: string[]) => n.map((name) => ({ name, lvl: 1, variant: '' }));
   const st = RG.create([T(['Mobu', 'Zénith', 'Carmin']), T(['Pikko', 'Givre', 'Nyx'])], 'arene');
-  // Carmin tire avec Frappe ×2, Mobu gonfle et Zénith met son Bouclier en même temps
+  // Carmin tire avec Frappe ×2, Mobu gonfle et Zénith lance l'Apesanteur en même temps
   const res = RG.resolve(st, [{ i: 2, ax: 0, ay: -1000, f: 1, pow: true, pows: [0, 1] }, null]);
   const used = res.ev.filter((e) => e.t === 'power').map((e) => e.pw);
-  expect(used.sort()).toEqual(['double', 'grow', 'shield']);
+  expect(used.sort()).toEqual(['double', 'grow', 'zerog']);
   expect(res.ev.filter((e) => e.t === 'shot')).toHaveLength(1); // un seul tireur
   const mine = st.bodies.filter((b) => b.side === 0);
   expect(mine.every((b) => b.cd > 0)).toBe(true); // les 3 pouvoirs sont en recharge

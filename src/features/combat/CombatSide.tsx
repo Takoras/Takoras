@@ -3,7 +3,7 @@ import { Link } from 'react-router';
 import { useQuery } from '@tanstack/react-query';
 import { combatApi } from '@/api';
 import { MYSTERE, SERIES, texOf, glowVars } from '@/data/jetons';
-import { ROLES, roleOf } from '@/data/kit';
+import { powerInfo } from '@/data/kit';
 import { useJn } from '@/lib/names';
 import { locale, useSettings } from '@/lib/settings';
 import { useT } from '@/i18n/useT';
@@ -32,7 +32,7 @@ export function CombatDex({ inv }: { inv: InvData | undefined }) {
       <ul>
         {list.map((j) => {
           const k = known(j.name),
-            role = ROLES[roleOf(j.name)];
+            pw = powerInfo(j.name, lang);
           return (
             <li key={j.name}>
               <button
@@ -43,7 +43,7 @@ export function CombatDex({ inv }: { inv: InvData | undefined }) {
               >
                 <img className="px" src={k ? texOf(j) : MYSTERE} alt="" width={44} height={44} />
                 <b>{k ? jn(j.name) : '?'}</b>
-                <small style={k ? { color: role.col } : undefined}>{k ? `${role.ico} ${role[lang]}` : '?'}</small>
+                <small style={k ? { color: pw.col } : undefined}>{k ? pw.name : '?'}</small>
               </button>
             </li>
           );
@@ -62,7 +62,7 @@ export function EloTop() {
   const rows = q.data ?? [];
   return (
     <section className={s.eloTop} aria-labelledby="elotop-t">
-      <h2 id="elotop-t">🏆 {t('arena.eloTop10')}</h2>
+      <h2 id="elotop-t">{t('arena.eloTop10')}</h2>
       {rows.length ? (
         <ol>
           {rows.map((r, i) => {
@@ -92,7 +92,7 @@ export function PassLink() {
   const t = useT();
   return (
     <Link to="/passe" className={s.passLink}>
-      <span aria-hidden>🎟️</span>
+      <span aria-hidden></span>
       <span>
         <b>{t('ui.bp_title')}</b>
         <small>{t('ui.bp_how_win')}</small>

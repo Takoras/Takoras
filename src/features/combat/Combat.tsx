@@ -3,7 +3,7 @@ import { useQueryClient } from '@tanstack/react-query';
 import { useMe } from '@/api/queries';
 import { combatApi } from '@/api';
 import { jetonOf, texOf, vImg, glowVars } from '@/data/jetons';
-import { ROLES, roleOf, powerInfo } from '@/data/kit';
+import { powerInfo } from '@/data/kit';
 import { RCFG } from '@/engines/ring-config.js';
 import { sfx } from '@/engines/sound.js';
 import { openUI } from '@/app/ui-store';
@@ -14,7 +14,7 @@ import { Rich } from '@/i18n/Rich';
 import { useDict, useT } from '@/i18n/useT';
 import { Button } from '@/ui/Button';
 import { toast } from '@/ui/toast';
-import { VTag } from '@/ui/VTag';
+import { MutationStamp } from '@/ui/MutationStamp';
 import { lvlOf, useInventory } from '../inventory/inv';
 import { CombatDex, EloTop, PassLink } from './CombatSide';
 import { botTeam, useDeck, type Member } from './team';
@@ -76,7 +76,7 @@ export default function Combat() {
           <Button variant="primary" onClick={() => openUI('account')}>
             {t('ui.login')}
           </Button>
-          <Button onClick={() => void playTuto()}>🎓 {t('arena.tryTuto')}</Button>
+          <Button onClick={() => void playTuto()}>{t('arena.tryTuto')}</Button>
         </div>
       </section>
     );
@@ -174,7 +174,7 @@ export default function Combat() {
         <h1 className="visually-hidden">{t('arena.title')}</h1>
         {ranked.isPending ? null : !tutoOk ? (
           <div className={rs.lock}>
-            <h2>🔒 {t('arena.tutoLock')}</h2>
+            <h2>{t('arena.tutoLock')}</h2>
             <p className="muted">{t('arena.tutoLockTxt')}</p>
             <Button variant="primary" onClick={() => void firstTuto()}>
               {t('arena.tutoStart')}
@@ -183,11 +183,11 @@ export default function Combat() {
         ) : (
           <div className={s.playRow}>
             <button type="button" className={`${s.play} ${s.ghost}`} disabled={!full} onClick={() => void train()}>
-              <b>🤖 {t('arena.train')}</b>
+              <b>{t('arena.train')}</b>
             </button>
             {rk?.live ? (
               <button type="button" className={s.play} onClick={() => void enterMatch(rk.live ?? '')}>
-                <b>⚔️ {t('arena.resume')}</b>
+                <b>{t('arena.resume')}</b>
               </button>
             ) : (
               <button
@@ -199,7 +199,7 @@ export default function Combat() {
                   setSearching(true);
                 }}
               >
-                <b>⚔️ {t('arena.play')}</b>
+                <b>{t('arena.play')}</b>
                 <small>{t('arena.playRanked')}</small>
               </button>
             )}
@@ -219,7 +219,7 @@ export default function Combat() {
                 setEditing(true);
               }}
             >
-              ✏️ {t('arena.edit')}
+              {t('arena.edit')}
             </Button>
           </header>
           <ul>
@@ -262,7 +262,7 @@ export default function Combat() {
             <Rich text={t('arena.howText')} />
           </p>
           <Button size="sm" onClick={() => void playTuto()}>
-            🎓 {t('arena.tuto')}
+            {t('arena.tuto')}
           </Button>
         </details>
 
@@ -302,29 +302,25 @@ export default function Combat() {
   );
 }
 
-// Mini carte d'un jeton de l'équipe : image, élément, niveau, pouvoir
+// Mini carte d'un jeton de l'équipe : image, mutation, niveau, pouvoir
 function TeamCard({ u, pos, lvl, onOpen }: { u: Member; pos: string; lvl: number; onOpen: () => void }) {
   const t = useT();
   const jn = useJn();
   const lang = useSettings((x) => x.lang);
   const j = jetonOf(u.name, u.serie),
-    el = ROLES[roleOf(u.name)],
     k = powerInfo(u.name, lang);
   return (
     <button
       type="button"
       className={s.slot}
       onClick={onOpen}
-      style={{ ...glowVars(j, u.variant), '--el': el.col } as CSSProperties}
+      style={glowVars(j, u.variant) as CSSProperties}
     >
       <span className={s.pos}>{pos}</span>
-      <span className={s.el} title={el[lang]} aria-label={el[lang]}>
-        {el.ico}
-      </span>
       <img className={vImg(u.variant)} src={texOf(j)} alt="" />
       {u.variant ? (
         <span className={s.vtag}>
-          <VTag v={u.variant} />
+          <MutationStamp v={u.variant} size="sm" />
         </span>
       ) : null}
       <b>{jn(u.name)}</b>
@@ -332,7 +328,7 @@ function TeamCard({ u, pos, lvl, onOpen }: { u: Member; pos: string; lvl: number
         {t('arena.lvl')} {lvl}
       </small>
       <small className={s.ab} style={{ '--c': k.col } as CSSProperties}>
-        ✦ {k.name}
+        {k.name}
       </small>
     </button>
   );

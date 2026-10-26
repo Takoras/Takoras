@@ -158,7 +158,7 @@ function AutoDemo() {
         style={glowVars(j, stop ? 'gold' : '') as CSSProperties}
       >
         <img className={vImg(stop ? 'gold' : '')} src={texOf(j)} alt="" />
-        <b>{stop ? `⏸ ${jn(j.name)} · 1/${(j.odds * 20).toLocaleString(locale(lang))}` : `×${k + 1}`}</b>
+        <b>{stop ? `${jn(j.name)} · 1/${(j.odds * 20).toLocaleString(locale(lang))}` : `×${k + 1}`}</b>
       </div>
       <div>
         <h2>{t('ui.land_auto')}</h2>

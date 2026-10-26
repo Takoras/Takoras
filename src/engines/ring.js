@@ -16,18 +16,20 @@ const RT = {
     map_arene: 'Arène', map_jardin: 'Ruines du Jardin', map_psy: 'Sanctuaire Psychique', map_forge: 'Forge Solaire', map_astral: 'Observatoire Astral', map_abysse: 'Abysse d’Ombre', map_volcan: 'Volcan', map_glace: 'Glace', map_ruines: 'Ruines', foeTeam: 'Équipe adverse', scout: 'Leurs pouvoirs', scoutHint: 'Touche un jeton pour voir sa fiche. Le chrono est en pause pendant que tu regardes (entraînement).',
     pw: {
       grow: ['Gonfler', 'Plus gros et plus lourd ce tour.'],
-      bounce: ['Rebond', 'Rebondit sur le bord au lieu de sortir.'],
+      bounce: ['Super-rebond', 'Ce tour, il rebondit sur le bord au lieu de sortir : fonce sans peur.'],
       scrap: ['Ferraille', 'Deux fois plus lourd ce tour : pousse fort, bouge peu.'],
       slide: ['Glissade', 'Presque aucun frottement : file beaucoup plus loin.'],
       eruption: ['Éruption', 'À l’arrêt : onde de choc qui repousse tout autour.'],
       flare: ['Éruption solaire', 'Au premier choc : explosion qui repousse tous les ennemis autour.'],
+      freeze: ['Gel', 'Le premier ennemi touché gèle : il glisse comme sur la glace jusqu’à la fin du tour.'],
+      wave: ['Raz-de-marée', 'En partant, une vague repousse loin les ennemis autour.'],
       zerog: ['Apesanteur', 'Ce tour, les ennemis glissent comme sur la glace : ils volent bien plus loin.'],
-      curve: ['Courant', 'Sa trajectoire se courbe vers l’ennemi le plus proche.'],
+      curve: ['Étoile filante', 'Son tir suit l’ennemi le plus proche, comme une tête chercheuse.'],
       double: ['Frappe ×2', 'Son premier choc pousse deux fois plus fort.'],
       ghost: ['Fantôme', 'Traverse les jetons jusqu’à s’arrêter.'],
-      rescue: ['Sauvetage', 'Ramène ton jeton le plus au bord vers le centre.'],
+      rescue: ['Lumière guide', 'Ramène vers le centre ton jeton le plus près du bord.'],
       shrink: ['Ombre', 'Plus petit et beaucoup plus rapide.'],
-      magnet: ['Aimant', 'À l’arrêt : attire les ennemis proches.'],
+      magnet: ['Tentacules', 'À l’arrêt, attrape et tire vers lui les ennemis autour.'],
       anchor: ['Ancre', 'Ne tire pas, mais impossible à pousser ce tour.'],
       second: ['Second souffle', 'Repart une 2e fois quand il ralentit.'],
       roots: ['Barrière psychique', 'Un mur psychique entoure l’arène : aucun de tes jetons ne peut sortir ce tour.'],
@@ -44,7 +46,7 @@ const RT = {
     reveal: 'Feu !', out: 'Éjecté !', win: 'Victoire !', lose: 'Défaite…', draw: 'Égalité', again: 'Rejouer', back: 'Retour', quit: 'Abandonner le match ?', you: 'Toi', bot: 'Robot',
     why: { forfeit: 'Abandon', stale: 'Match fermé (les deux joueurs étaient partis) · Elo inchangé', afk: 'Absent 3 tours de suite', out: 'Tous ses jetons sont sortis du ring', count: 'Plus de jetons au dernier tour', turns: 'Plus de jetons restants à la fin', center: 'Jetons plus proches du centre', draw: 'Personne ne gagne' },
     turns: '{n} tours', mass: 'Poids', powerS: 'Puissance', size: 'Taille', koS: 'Éjecté',
-    massD: 'Plus il est lourd, plus il est dur à pousser et plus il pousse fort.', powD: 'La force max de son tir : jusqu’où il peut aller.', sizeD: 'Plus il est gros, plus il touche facilement… mais plus il est facile à toucher.', statsLegend: '⚖️ Poids : dur à pousser, pousse fort · 💥 Puissance : force du tir · ⭕ Taille : touche plus facilement, mais cible plus facile',
+    massD: 'Plus il est lourd, plus il est dur à pousser et plus il pousse fort.', powD: 'La force max de son tir : jusqu’où il peut aller.', sizeD: 'Plus il est gros, plus il touche facilement… mais plus il est facile à toucher.', statsLegend: 'Poids : dur à pousser, pousse fort · Puissance : force du tir · ⭕ Taille : touche plus facilement, mais cible plus facile',
     t1: 'Tape un de tes jetons pour le choisir.', t2: 'Glisse vers l’arrière pour viser. Plus tu tires loin, plus c’est fort. Regarde la trajectoire !',
     t3: 'Valide ! Ton adversaire tire en même temps que toi.', t4: 'Éjecte ses jetons du ring pour gagner.', t5: 'Chaque jeton a un pouvoir, essaie-le ! Active-le, vise, puis valide.',
     t6: 'Bien joué, tu es prêt pour le classé !', tOk: 'OK', tSkip: 'Passer', tEnd: 'Terminer',
@@ -58,18 +60,20 @@ const RT = {
     map_arene: 'Arena', map_jardin: 'Garden Ruins', map_psy: 'Psychic Sanctuary', map_forge: 'Solar Forge', map_astral: 'Astral Observatory', map_abysse: 'Shadow Abyss', map_volcan: 'Volcano', map_glace: 'Ice', map_ruines: 'Ruins', foeTeam: 'Opponent team', scout: 'Their powers', scoutHint: 'Tap a token to see its card. The timer is paused while you look (training).',
     pw: {
       grow: ['Inflate', 'Bigger and heavier this turn.'],
-      bounce: ['Bounce', 'Bounces off the edge instead of falling out.'],
+      bounce: ['Super bounce', 'This turn it bounces off the edge instead of falling: charge without fear.'],
       scrap: ['Scrap metal', 'Twice as heavy this turn: pushes hard, barely moves.'],
       slide: ['Slide', 'Almost no friction: travels much further.'],
       eruption: ['Eruption', 'When it stops: shockwave that pushes everything away.'],
       flare: ['Solar flare', 'On its first hit: an explosion pushes every nearby enemy away.'],
+      freeze: ['Freeze', 'The first enemy hit freezes: it slides like on ice until the end of the turn.'],
+      wave: ['Tidal wave', 'As it launches, a wave pushes nearby enemies far away.'],
       zerog: ['Zero gravity', 'This turn, enemies slide like on ice: they fly much further.'],
-      curve: ['Current', 'Its path curves toward the nearest enemy.'],
+      curve: ['Shooting star', 'Its shot homes in on the nearest enemy.'],
       double: ['Double hit', 'Its first hit pushes twice as hard.'],
       ghost: ['Ghost', 'Goes through tokens until it stops.'],
-      rescue: ['Rescue', 'Pulls your token closest to the edge back toward the center.'],
+      rescue: ['Guiding light', 'Pulls your token closest to the edge back toward the center.'],
       shrink: ['Shadow', 'Smaller and much faster.'],
-      magnet: ['Magnet', 'When it stops: pulls nearby enemies.'],
+      magnet: ['Tentacles', 'When it stops, grabs and pulls nearby enemies toward it.'],
       anchor: ['Anchor', 'Doesn’t shoot, but can’t be pushed this turn.'],
       second: ['Second wind', 'Speeds up again once when it slows down.'],
       roots: ['Psychic barrier', 'A psychic wall surrounds the arena: none of your tokens can fall out this turn.'],
@@ -86,7 +90,7 @@ const RT = {
     reveal: 'Go!', out: 'Out!', win: 'Victory!', lose: 'Defeat…', draw: 'Draw', again: 'Play again', back: 'Back', quit: 'Forfeit the match?', you: 'You', bot: 'Bot',
     why: { forfeit: 'Forfeit', stale: 'Match closed (both players had left) · Elo unchanged', afk: 'Away for 3 turns in a row', out: 'All their tokens left the ring', count: 'More tokens on the last turn', turns: 'More tokens left at the end', center: 'Tokens closer to the center', draw: 'Nobody wins' },
     turns: '{n} turns', mass: 'Weight', powerS: 'Power', size: 'Size', koS: 'Knocked out',
-    massD: 'The heavier, the harder to push and the harder it pushes.', powD: 'Its max shot strength: how far it can go.', sizeD: 'The bigger, the easier it hits… but the easier it is to hit.', statsLegend: '⚖️ Weight: hard to push, pushes hard · 💥 Power: shot strength · ⭕ Size: hits more easily, but easier to hit',
+    massD: 'The heavier, the harder to push and the harder it pushes.', powD: 'Its max shot strength: how far it can go.', sizeD: 'The bigger, the easier it hits… but the easier it is to hit.', statsLegend: 'Weight: hard to push, pushes hard · Power: shot strength · ⭕ Size: hits more easily, but easier to hit',
     t1: 'Tap one of your tokens to pick it.', t2: 'Drag backwards to aim. The further you pull, the harder the shot. Watch the path!',
     t3: 'Confirm! Your opponent shoots at the same time.', t4: 'Knock their tokens out of the ring to win.', t5: 'Every token has a power, try it! Turn it on, aim, then confirm.',
     t6: 'Well done, you’re ready for ranked!', tOk: 'OK', tSkip: 'Skip', tEnd: 'Finish',
@@ -99,7 +103,7 @@ const RT = {
 };
 const rtL = () => RT[SETTINGS.lang] || RT.fr;
 const rt = (k, v = {}) => String(rtL()[k] ?? RT.fr[k]).replace(/\{(\w+)\}/g, (_, x) => v[x] ?? '');
-const PW_COL = { grow: '#7dd3fc', bounce: '#f9a8d4', scrap: '#fb923c', slide: '#a5f3fc', eruption: '#f97316', flare: '#fb923c', zerog: '#93c5fd', curve: '#60a5fa', double: '#f43f5e', ghost: '#c4b5fd',
+const PW_COL = { grow: '#7dd3fc', bounce: '#f9a8d4', scrap: '#fb923c', slide: '#a5f3fc', eruption: '#f97316', flare: '#fb923c', zerog: '#93c5fd', freeze: '#a5f3fc', wave: '#38bdf8', curve: '#60a5fa', double: '#f43f5e', ghost: '#c4b5fd',
   rescue: '#4ade80', shrink: '#818cf8', magnet: '#fde68a', anchor: '#94a3b8', second: '#fb7185', roots: '#e879f9', shield: '#f1f5f9', void: '#a855f7', split: '#ffffff', haste: '#86efac', guard: '#7dd3fc', none: '#888' };
 function powerText(name) {
   const k = RG.kit(name), [n, d] = rtL().pw[k.pw] || rtL().pw.none;
@@ -271,7 +275,7 @@ function ringStatsHTML(name, lvl = 1, variant = '', compact = false) {
   const s = RG.stats(name, lvl, variant), M = RCFG.STAT_MAX;
   const row = (k, ico, label, v, max, txt, d) => `<div class="rs-row ${k}"><span class="rs-l">${ico} ${label}</span><span class="rs-b"><i style="width:${Math.min(100, v / max * 100)}%"></i></span><b>${txt}</b>${compact ? '' : `<small>${d}</small>`}</div>`;
   return `<div class="rs${compact ? ' compact' : ''}">
-    ${row('mass', '⚖️', rt('mass'), s.mass, M.mass, s.mass.toFixed(2), rt('massD'))}
+    ${row('mass', '<svg viewBox="0 0 16 16" width="16" height="16" fill="currentColor" aria-hidden="true"><path d="M6 2h4v2h2l2 10H2L4 4h2z" shape-rendering="crispEdges"/></svg>', rt('mass'), s.mass, M.mass, s.mass.toFixed(2), rt('massD'))}
     ${row('pow', '<img class="px rs-ico" src="/img/stats/puissance.png" alt="">', rt('powerS'), s.power, M.power, fmt(Math.round(s.power)), rt('powD'))}
     ${row('size', '<img class="px rs-ico" src="/img/stats/taille.png" alt="">', rt('size'), s.r, M.r, s.r, rt('sizeD'))}
   </div>`;
@@ -299,7 +303,7 @@ function rgInfo(id) {
 // Comparaison : mes stats (avec bonus de rôle et d'équipe) contre les siennes, et qui gagne sur chaque stat
 function rgCompare(a, b) {
   const M = RCFG.STAT_MAX, f = (v, k) => (k === 'mass' ? v.toFixed(2) : fmt(Math.round(v)));
-  const rows = [['mass', '⚖️', rt('mass')], ['power', '<img class="px rs-ico" src="/img/stats/puissance.png" alt="">', rt('powerS')], ['r', '<img class="px rs-ico" src="/img/stats/taille.png" alt="">', rt('size')]];
+  const rows = [['mass', '<svg viewBox="0 0 16 16" width="16" height="16" fill="currentColor" aria-hidden="true"><path d="M6 2h4v2h2l2 10H2L4 4h2z" shape-rendering="crispEdges"/></svg>', rt('mass')], ['power', '<img class="px rs-ico" src="/img/stats/puissance.png" alt="">', rt('powerS')], ['r', '<img class="px rs-ico" src="/img/stats/taille.png" alt="">', rt('size')]];
   const wins = rows.filter(([k]) => a.base[k] > b.base[k]).length;
   const bar = (v, k, side) => `<span class="rg-cb ${side}"><i style="width:${Math.min(100, v / M[k] * 100)}%"></i></span>`;
   return `<div class="rg-cmp">
@@ -833,7 +837,11 @@ function rgDraw(dt) {
   for (const p of RNG.parts) {
     c = p.text ? M : hi;
     c.save();
-    if (p.ring) {
+    if (p.echo) { // écho du jeton : son propre dessin qui grandit et s'efface (ult à l'image du jeton)
+      const k = 1 - p.life, sz = p.size * (1 + k * 1.6);
+      if (p.im.complete && p.im.naturalWidth) { c.globalAlpha = p.life * .55; c.imageSmoothingEnabled = false; c.drawImage(p.im, p.x - sz / 2, p.y - sz / 2, sz, sz); }
+      p.life -= dt * 2.2;
+    } else if (p.ring) {
       const k = 1 - p.life, rad = (p.inward ? 1 - k : k) * p.size * 30 + 6;
       c.strokeStyle = p.col; c.globalAlpha = p.life; c.lineWidth = V.px * 1.5; c.beginPath(); c.arc(p.x, p.y, rad, 0, 7); c.stroke();
       p.life -= dt * 1.8;
@@ -1071,6 +1079,7 @@ const RSND = (() => {
   };
   return S;
 })();
+RSND.freeze = RSND.slide; RSND.wave = RSND.curve; // sons des nouveaux pouvoirs
 
 // ---------- Effets visuels des pouvoirs
 const RFX = (() => {
@@ -1093,10 +1102,12 @@ const RFX = (() => {
     const b = P.bodies.find(x => x.id === e.id); if (!b) return;
     intro = { e, b, t: 0 };
     RSND.charge(); setTimeout(() => RSND[e.pw]?.(), 280);
-    const [x, y] = w2s(b.x, b.y), col = PW_COL[e.pw];
+    // l'ult prend les couleurs du jeton (son halo) : bandeau, éclats et échos de son dessin
+    const [x, y] = w2s(b.x, b.y), col = jetonOf(b.name).glow || PW_COL[e.pw], pc = PW_COL[e.pw];
     // bandeau d'ult : bande en biais à la couleur du pouvoir, portrait du jeton, reflet qui balaie (même durée qu'avant)
-    rgBanner(`<img class="px${vCls(b.variant)}" src="${texOf(jetonOf(b.name))}" alt=""><span><small>${b.side !== ME() ? '⚠️ ' : ''}${jnH(b.name)}</small>${rtL().pw[e.pw][0]}</span>`, col, false, 950, 'ult');
-    burst(x, y, 30, col, 3.5);
+    rgBanner(`<img class="px${vCls(b.variant)}" src="${texOf(jetonOf(b.name))}" alt=""><span><small>${b.side !== ME() ? '' : ''}${jnH(b.name)}</small>${rtL().pw[e.pw][0]}</span>`, col, false, 950, 'ult');
+    burst(x, y, 30, col, 3.5); burst(x, y, 14, pc, 2.5);
+    if (!reducedFx()) { const im = rgImg(b.name), sz = b.r * RNG.view.s * 2.1; RNG.parts.push({ echo: true, im, x, y, size: sz, life: 1 }); setTimeout(() => RNG.parts.push({ echo: true, im, x, y, size: sz, life: .8 }), 140); }
     if (e.pw === 'roots') vines = { side: b.side, t: 0, flash: [] };
     if (e.pw === 'anchor') { RNG.shake = 12; for (let k = 0; k < 24; k++) { const a = k / 24 * 6.283; part({ x, y, vx: Math.cos(a) * 3.2, vy: Math.sin(a) * 3.2, col: '#93c5fd', size: 4 }); } }
     if (e.pw === 'rescue') { const r = P.r.ev.find(z => z.t === 'rescue'); if (r) intro.rescue = P.bodies.find(z => z.id === r.id); }
@@ -1124,6 +1135,16 @@ const RFX = (() => {
       burst(x, y, 55, '#fb923c', 6); burst(x, y, 30, '#fde047', 4.5); burst(x, y, 16, '#7f1d1d', 3, { size: 6 });
       RNG.shake = 18; rgFlashCol('#f97316'); RSND.eruption();
     }
+    // Gel : l'ennemi touché se couvre de cristaux de glace
+    if (e.t === 'freeze') {
+      const o = body(e.to); if (o) { const [x, y] = w2s(o.x, o.y); burst(x, y, 30, '#e0f2fe', 4); burst(x, y, 14, '#67e8f9', 3); RNG.parts.push({ ring: true, x, y, col: '#a5f3fc', size: 1.6, life: 1 }); RNG.shake = 10; RSND.slide?.(); }
+    }
+    // Raz-de-marée : un anneau d'eau part du jeton
+    if (e.t === 'wave') {
+      const [x, y] = w2s(e.x, e.y), rad = RG.kit(body(e.id).name).p.radius * RNG.view.s;
+      RNG.parts.push({ wave: true, x, y, col: '#38bdf8', rad, life: 1 }); RNG.parts.push({ wave: true, x, y, col: '#e0f2fe', rad: rad * .7, life: .8 });
+      burst(x, y, 40, '#7dd3fc', 5); burst(x, y, 20, '#ffffff', 3.5); RNG.shake = 12; RSND.eruption?.();
+    }
     // Apesanteur : les ennemis se couvrent de givre bleu et flottent
     if (e.t === 'zerog') {
       for (const o of P.bodies) if (o.alive && o.side !== body(e.id)?.side) { const [x, y] = w2s(o.x, o.y); burst(x, y, 14, '#bfdbfe', 2.5); RNG.parts.push({ ring: true, x, y, col: '#93c5fd', size: 1.2, life: 1 }); }
@@ -1150,7 +1171,7 @@ const RFX = (() => {
     }
     if (e.t === 'split') { const b = body(e.id), [x, y] = w2s(b.x, b.y); burst(x, y, 40, '#fde68a', 4.5); for (let k = 0; k < 18; k++) part({ x, y, vx: rand(-3, 3), vy: rand(-3, 3), col: `hsl(${k * 20},90%,75%)`, size: 3 }); rgFlashCol('#fde68a'); RSND.split(); }
     // Soutien : Coup de pouce (étincelles vertes sur les alliés), Bulle (bouclier bleu sur l'allié protégé)
-    if (e.t === 'haste') { const b = body(e.id); if (b) { const [x, y] = w2s(b.x, b.y); burst(x, y, 18, '#86efac', 3); RNG.parts.push({ text: '⏩', x, y: y - 10, col: '#86efac', size: 18, life: 1 }); } }
+    if (e.t === 'haste') { const b = body(e.id); if (b) { const [x, y] = w2s(b.x, b.y); burst(x, y, 18, '#86efac', 3); } }
     if (e.t === 'guard') { const b = body(e.id); if (b) { const [x, y] = w2s(b.x, b.y); RNG.parts.push({ hex: true, x, y, col: '#7dd3fc', life: 1, size: b.r * RNG.view.s * 1.3 }); burst(x, y, 16, '#7dd3fc', 2.5); RSND.chime?.(); } }
     if (e.t === 'boost') { const b = body(e.id), [x, y] = w2s(b.x, b.y); burst(x, y, 36, '#fb7185', 5); burst(x, y, 20, '#fdba74', 4); RNG.shake = 8; RSND.flame(); }
     if (e.t === 'hit') {

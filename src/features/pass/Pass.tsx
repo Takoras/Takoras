@@ -68,7 +68,7 @@ export default function Pass() {
   const days = Math.max(0, Math.ceil(d.ends_in / 86400));
   const label = (r: Reward) => {
     if (!r) return '';
-    if (r.coins) return `${n(r.coins)} 🪙`;
+    if (r.coins) return t('ui.bp_coins', { n: n(r.coins) });
     const it = ITEMS[r.item ?? ''];
     return `${it ? itemText(it, lang)[0] : r.item}${(r.qty ?? 1) > 1 ? ` ×${r.qty}` : ''}`;
   };
@@ -79,7 +79,7 @@ export default function Pass() {
       const res = (await passApi.claim(tr, prem)) as { state: unknown };
       qc.setQueryData(['me', user.id], res.state);
       sfx.upgrade();
-      toast(`🎁 ${t('ui.bp_got')}`);
+      toast(`${t('ui.bp_got')}`);
       void q.refetch();
       void qc.invalidateQueries({ queryKey: ['items'] });
     } catch (e) {
@@ -103,7 +103,7 @@ export default function Pass() {
             {t('ui.bp_claim')}
           </Button>
         ) : prem && open ? (
-          <small className="muted">🔒</small>
+          <small className="muted"></small>
         ) : null}
       </div>
     );
@@ -112,9 +112,10 @@ export default function Pass() {
     <section className={s.page}>
       <header className={s.head}>
         <div>
-          <p className="eyebrow">{t('ui.bp_season', { n: d.season })}</p>
           <h1>{t('ui.bp_title')}</h1>
-          <p className="muted">{t('ui.bp_ends', { n: days })}</p>
+          <p className="muted">
+            {t('ui.bp_season', { n: d.season })} · {t('ui.bp_ends', { n: days })}
+          </p>
         </div>
         <div className={s.level}>
           <b>{tier}</b>
@@ -136,10 +137,10 @@ export default function Pass() {
         {t('ui.bp_pulls', { n: d.pull_xp })}
       </p>
       <ul className={s.how}>
-        <li>⚔️ {t('ui.bp_how_win')}</li>
-        <li>🛡️ {t('ui.bp_how_lose')}</li>
-        <li>🎲 {t('ui.bp_how_pull')}</li>
-        <li>📜 {t('ui.bp_how_quest')}</li>
+        <li>{t('ui.bp_how_win')}</li>
+        <li>{t('ui.bp_how_lose')}</li>
+        <li>{t('ui.bp_how_pull')}</li>
+        <li>{t('ui.bp_how_quest')}</li>
       </ul>
       <div className={s.premium}>
         <div>

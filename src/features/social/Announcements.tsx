@@ -71,7 +71,7 @@ export function Announcements() {
           useAnn.setState({ full: { a, more: [] } });
         } else {
           sfx.message();
-          toast(`📢 ${a.body}`);
+          toast(`${a.body}`);
         }
       })
       .on('postgres_changes', { event: 'DELETE', schema: 'public', table: 'announcements' }, ({ old }) => {
@@ -88,7 +88,7 @@ export function Announcements() {
     <>
       {bar && bar.id > closed ? (
         <div className={s.annBar} role="region" aria-label={t('ui.ann_title')}>
-          <span aria-hidden>📢</span>
+          <span aria-hidden></span>
           <p>{bar.body}</p>
           <small className="muted">{who(bar)}</small>
           <button
@@ -114,7 +114,7 @@ export function Announcements() {
       >
         {full ? (
           <div className={s.annFull}>
-            <p className={s.annTag}>📢 {t('ui.ann_title')}</p>
+            <p className={s.annTag}>{t('ui.ann_title')}</p>
             <p className={s.annBody}>{full.a.body}</p>
             <small className="muted">{who(full.a)}</small>
             {full.more.length ? (
@@ -148,7 +148,7 @@ export function Announcements() {
           markSeen();
           useAnn.setState({ hist: false });
         }}
-        title={`📢 ${t('ui.ann_hist')}`}
+        title={`${t('ui.ann_hist')}`}
       >
         <ul className={s.annHist}>
           {list.map((a) => (

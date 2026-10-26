@@ -44,29 +44,40 @@ test('40 combats rejoués : même résultat à chaque fois, aussi après un pass
   expect(turns).toBeGreaterThan(80); // des vrais combats, pas des matchs vides
 }, 240_000);
 
-test('rôles = étiquettes qui se voient dans les stats : Tank gros, lourd et lent ; Soutien léger et rapide', () => {
-  const by = (r: string) => Object.keys(RCFG.TOKENS).filter((n) => RG.roleOf(n) === r).map((n) => RG.kit(n));
-  const avg = (l: ReturnType<typeof RG.kit>[], k: 'mass' | 'power' | 'r') => l.reduce((a, x) => a + x[k], 0) / l.length;
-  const T = by('tank'), S = by('support'), F = by('fighter');
-  expect(avg(T, 'mass')).toBeGreaterThan(avg(F, 'mass'));
-  expect(avg(F, 'mass')).toBeGreaterThan(avg(S, 'mass'));
-  expect(avg(S, 'power')).toBeGreaterThan(avg(F, 'power'));
-  expect(avg(F, 'power')).toBeGreaterThan(avg(T, 'power'));
-  expect(avg(T, 'r')).toBeGreaterThan(avg(S, 'r'));
-  // plus aucun bonus d'équipe : les stats en match = les stats de la fiche
-  const st = RG.create([[{ name: 'Givre' }, { name: 'Mobu' }, { name: 'Pikko' }], [{ name: 'Carmin' }, { name: 'Koi' }, { name: 'Nyx' }]], 'arene');
+test('plus de rôles : les stats en match = les stats de la fiche (aucun bonus d’équipe)', () => {
+  const st = RG.create(
+    [
+      [{ name: 'Givre' }, { name: 'Mobu' }, { name: 'Pikko' }],
+      [{ name: 'Carmin' }, { name: 'Koi' }, { name: 'Nyx' }],
+    ],
+    'arene',
+  );
   for (const b of st.bodies) expect(b.base.power).toBeCloseTo(RG.stats(b.name).power);
 });
 
-test('Soutien : Coup de pouce recharge les alliés, Bulle protège l’allié le plus proche', () => {
+test('Gel (Givre) : l’ennemi touché glisse plus loin ; Raz-de-marée (Azura) repousse les ennemis proches', () => {
   const team = (n: string[]) => n.map((name) => ({ name, lvl: 1, variant: '' }));
-  const st = RG.create([team(['Pikko', 'Carmin', 'Azura']), team(['Mobu', 'Givre', 'Rouillé'])], 'arene');
-  const carmin = st.bodies.find((x) => x.name === 'Carmin') as (typeof st.bodies)[number];
-  carmin.cd = 3;
-  const res = RG.resolve(st, [{ i: 0, ax: 0, ay: -1, f: 0, pow: true }, null]);
-  expect(res.ev.some((e) => e.t === 'haste' && e.id === carmin.id)).toBe(true);
-  expect(st.bodies.find((x) => x.name === 'Carmin')?.cd).toBe(1); // −1 (Coup de pouce) puis −1 (fin du tour)
-  const st2 = RG.create([team(['Mobu', 'Givre', 'Azura']), team(['Carmin', 'Koi', 'Nyx'])], 'arene');
-  const res2 = RG.resolve(st2, [{ i: 2, ax: 0, ay: -1, f: 0, pow: true }, null]);
-  expect(res2.ev.some((e) => e.t === 'guard')).toBe(true);
+  const place = (st: ReturnType<typeof RG.create>) => {
+    for (const b of st.bodies) b.alive = b.i === 0;
+    const me = st.bodies.find((b) => b.side === 0 && b.i === 0),
+      foe = st.bodies.find((b) => b.side === 1 && b.i === 0);
+    if (me && foe) [me.x, me.y, foe.x, foe.y] = [0, 300, 0, 0];
+    return foe;
+  };
+  const far = (pow: boolean) => {
+    const st = RG.create([team(['Givre', 'Mobu', 'Pikko']), team(['Carmin', 'Koi', 'Nyx'])], 'arene');
+    place(st);
+    const res = RG.resolve(st, [{ i: 0, ax: 0, ay: -1000, f: 0.6, pow }, null]);
+    return { y: st.bodies.find((b) => b.side === 1 && b.i === 0)?.y ?? 0, ev: res.ev };
+  };
+  const a = far(false),
+    b = far(true);
+  expect(b.ev.some((e) => e.t === 'freeze')).toBe(true);
+  expect(b.y).toBeLessThan(a.y); // gelé : il part bien plus loin vers le haut
+  const st = RG.create([team(['Azura', 'Mobu', 'Pikko']), team(['Carmin', 'Koi', 'Nyx'])], 'arene');
+  const foe = place(st);
+  const y0 = foe?.y ?? 0;
+  const res = RG.resolve(st, [{ i: 0, ax: 1000, ay: 0, f: 0.2, pow: true }, null]);
+  expect(res.ev.some((e) => e.t === 'wave')).toBe(true);
+  expect(st.bodies.find((x) => x.side === 1 && x.i === 0)?.y ?? 0).toBeLessThan(y0); // repoussé vers le haut
 });

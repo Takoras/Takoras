@@ -9,7 +9,14 @@ export type Variant = 'gold' | 'celeste' | 'ombre';
 export type Settings = { speed: Speed; lang: Lang; volume: number; fx: Fx; autoMin: number; autoVars: Variant[] };
 
 const KEY = 'takoras-settings';
-export const DEFAULTS: Settings = { speed: 'normal', lang: 'fr', volume: 70, fx: 'auto', autoMin: 1000, autoVars: ['gold', 'celeste', 'ombre'] };
+export const DEFAULTS: Settings = {
+  speed: 'normal',
+  lang: 'fr',
+  volume: 70,
+  fx: 'auto',
+  autoMin: 1000,
+  autoVars: ['gold', 'celeste', 'ombre'],
+};
 
 function load(): Settings {
   try {
@@ -33,7 +40,11 @@ export const useSettings = create<Store>((set, get) => ({
     set(patch);
     const { set: _omit, ...data } = get();
     void _omit;
-    try { localStorage.setItem(KEY, JSON.stringify(data)); } catch { /* navigation privée : on garde en mémoire */ }
+    try {
+      localStorage.setItem(KEY, JSON.stringify(data));
+    } catch {
+      /* navigation privée : on garde en mémoire */
+    }
   },
 }));
 

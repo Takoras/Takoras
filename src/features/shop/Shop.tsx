@@ -118,7 +118,6 @@ export default function Shop() {
     <section className={s.page}>
       <header className={s.head}>
         <div>
-          <p className="eyebrow">{t('ui.nav_shop')}</p>
           <h1>{t('ui.shop_title')}</h1>
           <p className="muted">
             {t('ui.shop_reset')} <b className={s.timer}>{hms(left)}</b>
@@ -126,7 +125,7 @@ export default function Shop() {
         </div>
         <div className={s.headBtns}>
           <Link to="/passe" className={s.passBtn}>
-            🎟️ {t('ui.bp_title')}
+            {t('ui.bp_title')}
           </Link>
           <Button size="sm" onClick={openInfo}>
             {t('ui.odds_info')}

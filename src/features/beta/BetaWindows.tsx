@@ -31,10 +31,10 @@ export default function BetaWindow({ win }: { win: Win }) {
 }
 
 const PN_GROUPS = [
-  ['new', '✅', 'ui.pn_new'],
-  ['change', '🔄', 'ui.pn_change'],
-  ['fix', '🔧', 'ui.pn_fix'],
-  ['removed', '❌', 'ui.pn_removed'],
+  ['new', '', 'ui.pn_new'],
+  ['change', '', 'ui.pn_change'],
+  ['fix', '', 'ui.pn_fix'],
+  ['removed', '', 'ui.pn_removed'],
 ] as const;
 function NoteBody({ n }: { n: Note }) {
   const t = useT();
@@ -68,7 +68,7 @@ function Patchnotes() {
   const notes = usePatchnotes();
   useEffect(() => markSeen(notes.data), [notes.data]);
   return (
-    <Modal open onClose={close} title={`📜 ${t('ui.pn_title')}`} wide>
+    <Modal open onClose={close} title={`${t('ui.pn_title')}`} wide>
       <div className={s.pn}>
         {notes.data?.map((n, i) => (
           <article key={n.id} className={i === 0 ? s.latest : undefined}>
@@ -106,13 +106,13 @@ function PatchPopup() {
   return (
     <Modal open onClose={close}>
       <div className={s.pop}>
-        <p className={s.tag}>✨ {t('ui.pn_newtag')}</p>
+        <p className={s.tag}>{t('ui.pn_newtag')}</p>
         <h2>{noteTitle(last, lang)}</h2>
         <div className={s.popBody}>
           <NoteBody n={last} />
         </div>
         <div className={s.btns}>
-          <Button onClick={openPatchnotes}>📜 {t('ui.pn_all')}</Button>
+          <Button onClick={openPatchnotes}>{t('ui.pn_all')}</Button>
           <Button variant="primary" onClick={close}>
             {t('ui.pn_ok')}
           </Button>
@@ -197,10 +197,10 @@ function Tuto() {
 
 // Donner un avis (bug, idée, ajout, autre) : l'admin les lit dans son panel
 const FB_KINDS = [
-  ['bug', '🐞'],
-  ['idea', '💡'],
-  ['add', '✨'],
-  ['other', '💬'],
+  ['bug', ''],
+  ['idea', ''],
+  ['add', ''],
+  ['other', ''],
 ] as const;
 type FbKind = (typeof FB_KINDS)[number][0];
 function Feedback() {
@@ -222,7 +222,7 @@ function Feedback() {
     try {
       await socialApi.feedback({ p_kind: kind, p_body: body, p_page: pathname, p_device: device });
       sfx.upgrade();
-      toast(`💜 ${t('ui.fb_thanks')}`);
+      toast(`${t('ui.fb_thanks')}`);
       close();
     } catch (e) {
       sfx.deny();
@@ -298,7 +298,7 @@ function Tester() {
       const st = await betaApi.give(args);
       qc.setQueryData(['me', user?.id], st);
       sfx.upgrade();
-      toast(`🧪 ${label}`);
+      toast(`${label}`);
       void qc.invalidateQueries({ queryKey: ['inv'] });
       void qc.invalidateQueries({ queryKey: ['items'] });
     } catch (e) {
@@ -310,7 +310,7 @@ function Tester() {
   const jetons = SERIES.Takoras ?? [];
   const clamp = (v: number, max: number) => Math.max(1, Math.min(max, v || 1));
   return (
-    <Modal open onClose={close} title={`🧪 ${t('ui.tester_menu')}`} wide>
+    <Modal open onClose={close} title={`${t('ui.tester_menu')}`} wide>
       <div className={s.ts}>
         <p className="muted">{t('ui.tester_sub')}</p>
         <section>

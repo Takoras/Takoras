@@ -82,7 +82,6 @@ export default function Board() {
     <section className={s.page}>
       <header className={s.head}>
         <div>
-          <p className="eyebrow">{t('ui.board_tag')}</p>
           <h1>{t('ui.board_title')}</h1>
         </div>
         {NO_PERIOD.has(id) ? null : (

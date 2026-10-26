@@ -13,7 +13,7 @@ import {
   vOdds,
   glowVars,
 } from '@/data/jetons';
-import { ROLES, roleOf, LEVEL_MAX, powerInfo, RING_MAX, ringStats } from '@/data/kit';
+import { LEVEL_MAX, powerInfo, RING_MAX, ringStats } from '@/data/kit';
 import { statsOf, STAT_MAX } from '@/engines/env';
 import { useJn } from '@/lib/names';
 import { locale, reducedFx, useSettings } from '@/lib/settings';
@@ -183,9 +183,7 @@ export function CombatInfo({
 }) {
   const t = useT();
   const lang = useSettings((x) => x.lang);
-  const el = roleOf(name),
-    E = ROLES[el],
-    k = powerInfo(name, lang),
+  const k = powerInfo(name, lang),
     rs = ringStats(name, lvl, variant);
   const fmt = (n: number) => n.toLocaleString(locale(lang));
   const rows = [
@@ -196,13 +194,11 @@ export function CombatInfo({
   return (
     <section
       className={s.combat}
-      style={{ '--el': E.col, '--pw': hexRGB(k.col) } as CSSProperties}
+      style={{ '--pw': hexRGB(k.col) } as CSSProperties}
       aria-label={t('ui.nav_combat')}
     >
       <header>
-        <span>
-          {E.ico} {E[lang]}
-        </span>
+        <span>{t('ring.power')}</span>
         {showLvl ? (
           <b>
             {t('arena.lvl')} {lvl}/{LEVEL_MAX}
@@ -212,7 +208,7 @@ export function CombatInfo({
       {k.pw !== 'none' ? (
         <div className={s.kit}>
           <small>
-            ✦ {t('ring.power')}
+            {t('ring.power')}
             {k.when ? ` · ${k.when}` : ''}
           </small>
           <b>{k.name}</b>

@@ -15,14 +15,13 @@ test('combat : monter son équipe (ajouter, version, enregistrer, plus de budget
       .click();
   // un 4e jeton : équipe pleine (toast)
   await expect(d.getByText(/Budget/)).toHaveCount(0); // plus de limite de points
-  // Mobu existe aussi en Doré : on change de version
-  await d.getByRole('radio', { name: 'Doré' }).click();
+  // Mobu existe aussi en Doré : pris en Doré par défaut (la meilleure mutation), on peut repasser en normal avec les tampons
   await expect(d.getByRole('radio', { name: 'Doré' })).toHaveAttribute('aria-checked', 'true');
-  await expect(d.getByText('+3 %', { exact: true })).toBeVisible();
-  // onglet de version comme le bestiaire : « Doré » ne montre que les jetons possédés en Doré
-  await d.getByRole('tab', { name: /Doré/ }).click();
-  await expect(d.locator('[class*="teGrid"] li')).toHaveCount(1);
-  await d.getByRole('tab', { name: /Normal/ }).click();
+  await expect(d.getByText('Doré +3 %')).toBeVisible();
+  await d.getByRole('radio', { name: 'Normal' }).click();
+  await expect(d.getByRole('radio', { name: 'Normal' })).toHaveAttribute('aria-checked', 'true');
+  // chaque jeton montre ce que fait son pouvoir
+  await expect(d.getByText('Gonfler').first()).toBeVisible();
   await d.getByRole('button', { name: 'Valider l’équipe' }).click();
   await expect(d).toBeHidden();
   expect(calls).toContain('set_deck');
