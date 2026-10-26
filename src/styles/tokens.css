@@ -56,6 +56,7 @@
 
   /* Lueur d'un jeton : triplet RGB réécrit par composant (style="--g: 139, 92, 246") */
   --g: 139, 92, 246;
+  --ga: 0; /* halo éteint par défaut ; glowVars() l'allume pour les jetons très rares et les mutations */
 
   /* Typo */
   /* Outfit partout (OFL). Échelle du cahier : H1 32/700, H2 22/700, texte 15-16, petit 13 */
@@ -86,10 +87,10 @@
   --page-max: 1680px; /* PC : on utilise toute la largeur (3 zones), jusqu’aux très grands écrans */
 
   /* Rayons : petits et nets (pixel art), le rond est réservé aux avatars et aux pastilles */
-  --r-xs: 4px;
+  --r-xs: 8px; /* 3 rayons seulement : 8 / 12 / 20 (cahier § 3.3) */
   --r-sm: 8px;
   --r-md: 12px;
-  --r-lg: 16px;
+  --r-lg: 20px;
   --r-pill: 999px;
 
   /* Ombres : une ombre « arcade » dure sous les boutons, des lueurs pour les jetons */

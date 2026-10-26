@@ -4,7 +4,6 @@ import { NeedLogin } from '@/app/NeedLogin';
 import { useQueryClient } from '@tanstack/react-query';
 import { combatApi, errorText, invApi } from '@/api';
 import {
-  hexRGB,
   MYSTERE,
   sellValue,
   SERIES,
@@ -16,6 +15,7 @@ import {
   VARIANTS,
   vImg,
   vOdds,
+  glowVars,
 } from '@/data/jetons';
 import { statsOf, fmtLuck } from '@/engines/env';
 import { moPlay, moSnap } from '@/engines/motion.js';
@@ -436,7 +436,7 @@ function CardView({
     <li
       data-key={c.j.name}
       data-sig={`${n}|${locked}|${g?.deck ?? 0}|${g?.shown ?? 0}`}
-      style={{ '--g': known ? hexRGB(j.glow) : '113, 113, 122' } as CSSProperties}
+      style={(known ? glowVars(j) : { '--g': '113, 113, 122' }) as CSSProperties}
       className={[s.card, !g && (c.seen ? s.gone : s.unk), q && s.sel, locked && s.locked].filter(Boolean).join(' ')}
     >
       <button

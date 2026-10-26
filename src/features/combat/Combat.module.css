@@ -150,24 +150,33 @@
   text-align: right;
 }
 
-/* Gros bouton JOUER (classé, bientôt) */
+/* Entraînement (à gauche) et Jouer (à droite) : même taille, seul l'aplat d'accent distingue Jouer */
+.playRow {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: var(--s-2);
+}
 .play {
   display: grid;
-  justify-items: center;
-  gap: 2px;
-  padding: var(--s-5);
-  border-radius: var(--r-lg);
-  background: linear-gradient(135deg, var(--accent), var(--accent-lo));
+  place-items: center;
+  min-height: 56px;
+  padding: var(--s-2) var(--s-3);
+  border-radius: var(--r-md);
+  background: var(--accent);
   color: #fff;
-  box-shadow: 0 10px 30px -10px rgba(var(--glow), 0.9);
+  font-weight: 700;
+}
+.play.ghost {
+  background: var(--surface);
+  border: 1px solid var(--line-strong);
+  color: var(--text);
 }
 .play b {
-  font-family: var(--font-display);
-  font-size: var(--fs-2xl);
-  letter-spacing: 0.04em;
+  font-size: var(--fs-md);
 }
 .play small {
-  font-size: var(--fs-sm);
+  font-size: var(--fs-xs);
+  font-weight: 500;
   opacity: 0.85;
 }
 .play:disabled {
@@ -209,7 +218,9 @@
   gap: 2px;
   padding: var(--s-5) var(--s-2) var(--s-3);
   border-radius: var(--r-md);
-  background: radial-gradient(circle at 50% 38%, rgba(var(--g, 139, 92, 246), 0.18), transparent 62%), var(--surface);
+  background:
+    radial-gradient(circle at 50% 38%, rgba(var(--g, 139, 92, 246), calc(0.18 * var(--ga, 0))), transparent 62%),
+    var(--surface);
   border: 1px solid var(--line);
   text-align: center;
 }
@@ -219,7 +230,7 @@
 .slot img {
   width: 64px;
   height: 64px;
-  --df: drop-shadow(0 0 10px rgba(var(--g), 0.5));
+  --df: drop-shadow(0 0 10px rgba(var(--g), calc(0.5 * var(--ga, 0))));
 }
 .slot b {
   font-size: var(--fs-sm);
@@ -286,7 +297,7 @@
   display: grid;
   place-items: center;
   border-radius: 50%;
-  background: radial-gradient(closest-side, rgba(var(--g), 0.4), transparent);
+  background: radial-gradient(closest-side, rgba(var(--g), calc(0.4 * var(--ga, 0))), transparent);
 }
 .sheetImg img {
   width: 84px;
@@ -330,7 +341,9 @@
   gap: 4px;
   padding: var(--s-3) var(--s-2);
   border-radius: var(--r-md);
-  background: radial-gradient(circle at 50% 35%, rgba(var(--g, 139, 92, 246), 0.16), transparent 65%), var(--bg-raised);
+  background:
+    radial-gradient(circle at 50% 35%, rgba(var(--g, 139, 92, 246), calc(0.16 * var(--ga, 0))), transparent 65%),
+    var(--bg-raised);
   border: 1px solid var(--line);
   text-align: center;
   min-height: 128px;
@@ -420,7 +433,8 @@
   gap: 4px;
   padding: var(--s-6) var(--s-2) var(--s-3);
   border-radius: var(--r-md);
-  background: radial-gradient(circle at 50% 22%, rgba(var(--g), 0.16), transparent 55%), var(--bg-raised);
+  background:
+    radial-gradient(circle at 50% 22%, rgba(var(--g), calc(0.16 * var(--ga, 0))), transparent 55%), var(--bg-raised);
   border: 1px solid var(--line);
   text-align: center;
 }

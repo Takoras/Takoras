@@ -66,7 +66,7 @@
   height: 100%;
   perspective: 700px;
   cursor: pointer;
-  filter: drop-shadow(0 24px 40px rgba(var(--glow), 0.45));
+  filter: drop-shadow(0 16px 24px rgb(0 0 0 / 45%)); /* ombre portée, pas de halo */
   animation: bob 5s ease-in-out infinite;
 }
 
@@ -253,7 +253,6 @@
   height: 8px;
   border-radius: 50%;
   background: var(--danger);
-  box-shadow: 0 0 10px var(--danger);
   animation: pulse 1.6s infinite;
 }
 .ticker {

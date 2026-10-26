@@ -1,6 +1,6 @@
 import { useEffect, useState, type CSSProperties } from 'react';
 import { useQuery } from '@tanstack/react-query';
-import { hexRGB, MYSTERE, SERIES, texOf, vImg } from '@/data/jetons';
+import { MYSTERE, SERIES, texOf, vImg, glowVars } from '@/data/jetons';
 import { useJn } from '@/lib/names';
 import { useOnline } from '@/lib/online';
 import { locale, useSettings } from '@/lib/settings';
@@ -77,7 +77,7 @@ function Blueprint() {
     [t('ui.land_bp_power'), t('ui.land_bp_power_v')],
   ];
   return (
-    <section className={s.blueprint} style={{ '--g': hexRGB(j.glow) } as CSSProperties}>
+    <section className={s.blueprint} style={glowVars(j) as CSSProperties}>
       <div className={s.bpStage}>
         <img className={`px ${s.bpToken}`} src={texOf(j)} alt="" />
         {notes.map(([k, v], i) => (
@@ -153,7 +153,10 @@ function AutoDemo() {
   if (!j) return null;
   return (
     <section className={s.auto}>
-      <div className={`${s.autoCoin} ${stop ? s.autoStop : ''}`} style={{ '--g': hexRGB(j.glow) } as CSSProperties}>
+      <div
+        className={`${s.autoCoin} ${stop ? s.autoStop : ''}`}
+        style={glowVars(j, stop ? 'gold' : '') as CSSProperties}
+      >
         <img className={vImg(stop ? 'gold' : '')} src={texOf(j)} alt="" />
         <b>{stop ? `⏸ ${jn(j.name)} · 1/${(j.odds * 20).toLocaleString(locale(lang))}` : `×${k + 1}`}</b>
       </div>

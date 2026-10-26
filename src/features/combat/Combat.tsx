@@ -2,7 +2,7 @@ import { useEffect, useState, type CSSProperties } from 'react';
 import { useQueryClient } from '@tanstack/react-query';
 import { useMe } from '@/api/queries';
 import { combatApi } from '@/api';
-import { hexRGB, jetonOf, texOf, vImg } from '@/data/jetons';
+import { jetonOf, texOf, vImg, glowVars } from '@/data/jetons';
 import { ROLES, roleOf, powerInfo } from '@/data/kit';
 import { RCFG } from '@/engines/ring-config.js';
 import { sfx } from '@/engines/sound.js';
@@ -181,7 +181,10 @@ export default function Combat() {
             </Button>
           </div>
         ) : (
-          <>
+          <div className={s.playRow}>
+            <button type="button" className={`${s.play} ${s.ghost}`} disabled={!full} onClick={() => void train()}>
+              <b>🤖 {t('arena.train')}</b>
+            </button>
             {rk?.live ? (
               <button type="button" className={s.play} onClick={() => void enterMatch(rk.live ?? '')}>
                 <b>⚔️ {t('arena.resume')}</b>
@@ -200,10 +203,7 @@ export default function Combat() {
                 <small>{t('arena.playRanked')}</small>
               </button>
             )}
-            <Button block disabled={!full} onClick={() => void train()}>
-              🤖 {t('arena.train')}
-            </Button>
-          </>
+          </div>
         )}
         {full ? null : <small className={`muted ${s.need}`}>{t('arena.need3')}</small>}
 
@@ -315,7 +315,7 @@ function TeamCard({ u, pos, lvl, onOpen }: { u: Member; pos: string; lvl: number
       type="button"
       className={s.slot}
       onClick={onOpen}
-      style={{ '--g': hexRGB(j.glow), '--el': el.col } as CSSProperties}
+      style={{ ...glowVars(j, u.variant), '--el': el.col } as CSSProperties}
     >
       <span className={s.pos}>{pos}</span>
       <span className={s.el} title={el[lang]} aria-label={el[lang]}>

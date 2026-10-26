@@ -1,6 +1,18 @@
 import { useEffect, useRef, type CSSProperties, type PointerEvent, type ReactNode } from 'react';
 import { StatIcon } from '@/ui/StatIcon';
-import { hexRGB, jetonOf, MYSTERE, sellValue, texOf, texScale, tierCol, tierKey, vImg, vOdds } from '@/data/jetons';
+import {
+  hexRGB,
+  jetonOf,
+  MYSTERE,
+  sellValue,
+  texOf,
+  texScale,
+  tierCol,
+  tierKey,
+  vImg,
+  vOdds,
+  glowVars,
+} from '@/data/jetons';
 import { ROLES, roleOf, LEVEL_MAX, powerInfo, RING_MAX, ringStats } from '@/data/kit';
 import { statsOf, STAT_MAX } from '@/engines/env';
 import { useJn } from '@/lib/names';
@@ -77,7 +89,7 @@ export function JetonModal({
           style={
             (locked
               ? { '--g': '113, 113, 122', '--tier': 'var(--muted)' }
-              : { '--g': hexRGB(j.glow), '--tier': tierCol(tier) }) as CSSProperties
+              : { ...glowVars(j, variant), '--tier': tierCol(tier) }) as unknown as CSSProperties
           }
         >
           <header className={s.jmHero}>

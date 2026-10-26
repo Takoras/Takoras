@@ -2,7 +2,7 @@ import { useState, type CSSProperties } from 'react';
 import { Link } from 'react-router';
 import { useQuery } from '@tanstack/react-query';
 import { combatApi } from '@/api';
-import { hexRGB, MYSTERE, SERIES, texOf } from '@/data/jetons';
+import { MYSTERE, SERIES, texOf, glowVars } from '@/data/jetons';
 import { ROLES, roleOf } from '@/data/kit';
 import { useJn } from '@/lib/names';
 import { locale, useSettings } from '@/lib/settings';
@@ -39,7 +39,7 @@ export function CombatDex({ inv }: { inv: InvData | undefined }) {
                 type="button"
                 disabled={!k}
                 onClick={() => setOpen(j.name)}
-                style={{ '--g': k ? hexRGB(j.glow) : '113, 113, 122' } as CSSProperties}
+                style={(k ? glowVars(j) : { '--g': '113, 113, 122' }) as CSSProperties}
               >
                 <img className="px" src={k ? texOf(j) : MYSTERE} alt="" width={44} height={44} />
                 <b>{k ? jn(j.name) : '?'}</b>

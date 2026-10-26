@@ -193,7 +193,8 @@
   position: relative;
   display: grid;
   border-radius: var(--r-md);
-  background: radial-gradient(circle at 50% 38%, rgba(var(--g), 0.16), transparent 62%), var(--surface);
+  background:
+    radial-gradient(circle at 50% 38%, rgba(var(--g), calc(0.16 * var(--ga, 0))), transparent 62%), var(--surface);
   border: 1px solid var(--line);
   transition:
     border-color var(--t-fast),
@@ -214,7 +215,7 @@
   width: 72px;
   height: 72px;
   margin-bottom: var(--s-1);
-  --df: drop-shadow(0 0 10px rgba(var(--g), 0.45));
+  --df: drop-shadow(0 0 10px rgba(var(--g), calc(0.45 * var(--ga, 0))));
 }
 .cardBtn b {
   font-size: var(--fs-sm);
@@ -465,7 +466,7 @@
   width: 72px;
   height: 72px;
   object-fit: contain;
-  --df: drop-shadow(0 6px 14px rgba(var(--g), 0.45));
+  --df: drop-shadow(0 6px 14px rgba(var(--g), calc(0.45 * var(--ga, 0))));
 }
 .use {
   display: flex;
@@ -588,7 +589,7 @@
   display: grid;
   place-items: center;
   transition: transform var(--t-fast);
-  background: radial-gradient(closest-side, rgba(var(--g), 0.45), transparent);
+  background: radial-gradient(closest-side, rgba(var(--g), calc(0.45 * var(--ga, 0))), transparent);
   cursor: grab;
   touch-action: none;
 }

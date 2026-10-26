@@ -1,5 +1,5 @@
 import type { CSSProperties } from 'react';
-import { hexRGB, jetonOf, texOf, tierCol, tierKey, vImg } from '@/data/jetons';
+import { glowVars, jetonOf, texOf, tierCol, tierKey, vImg } from '@/data/jetons';
 import { ROLES, roleOf } from '@/data/kit';
 import { useJn } from '@/lib/names';
 import { useSettings } from '@/lib/settings';
@@ -31,7 +31,7 @@ export function TokenSheet({
     tier = tierKey(j.odds);
   return (
     <Modal open onClose={onClose} title={jn(name)}>
-      <div className={s.sheet} style={{ '--g': hexRGB(j.glow), '--el': el.col } as CSSProperties}>
+      <div className={s.sheet} style={{ ...glowVars(j, variant), '--el': el.col } as CSSProperties}>
         <div className={s.sheetTop}>
           <div className={s.sheetImg}>
             <img className={vImg(variant)} src={texOf(j)} alt="" />

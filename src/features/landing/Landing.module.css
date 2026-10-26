@@ -86,7 +86,7 @@
   inset: 25%;
   width: 50%;
   height: 50%;
-  --df: drop-shadow(0 0 22px rgba(var(--g), 0.6));
+  --df: drop-shadow(0 0 22px rgba(var(--g), calc(0.6 * var(--ga, 0))));
 }
 .note {
   position: absolute;
@@ -200,7 +200,7 @@
   border-color: rgba(var(--g), 0.8);
 }
 .autoStop img {
-  --df: drop-shadow(0 0 20px rgba(var(--g), 0.7));
+  --df: drop-shadow(0 0 20px rgba(var(--g), calc(0.7 * var(--ga, 0))));
 }
 
 .final {

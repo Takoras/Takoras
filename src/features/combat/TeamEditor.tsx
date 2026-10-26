@@ -1,7 +1,7 @@
 import { useRef, useState, type CSSProperties } from 'react';
 import { useQueryClient } from '@tanstack/react-query';
 import { combatApi, errorText } from '@/api';
-import { hexRGB, jetonOf, texOf, vImg } from '@/data/jetons';
+import { jetonOf, texOf, vImg, glowVars } from '@/data/jetons';
 import { ROLES, roleOf, powerInfo, RING_MAX, ringStats, type Role } from '@/data/kit';
 import { RCFG } from '@/engines/ring-config.js';
 import { sfx } from '@/engines/sound.js';
@@ -115,7 +115,7 @@ export function TeamEditor({
           const j = jetonOf(u.name, u.serie),
             o = by.get(ownKey(u.serie, u.name));
           return (
-            <li key={i} style={{ '--g': hexRGB(j.glow) } as CSSProperties}>
+            <li key={i} style={glowVars(j, u?.variant) as CSSProperties}>
               <button
                 type="button"
                 className={s.teRm}
@@ -221,7 +221,7 @@ export function TeamEditor({
               <li
                 key={o.k}
                 className={on ? s.sel : undefined}
-                style={{ '--g': hexRGB(j.glow), '--el': E.col } as CSSProperties}
+                style={{ ...glowVars(j), '--el': E.col } as CSSProperties}
               >
                 <button type="button" className={s.teCard} aria-pressed={on} onClick={() => toggle(o)}>
                   <span className={s.tpLv}>

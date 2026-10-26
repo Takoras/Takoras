@@ -4,7 +4,7 @@ import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { accountApi, errorText, publicApi } from '@/api';
 import { useMe } from '@/api/queries';
 import { BANNER_IMG, bannerName } from '@/data/items';
-import { hexRGB, jetonOf, MYSTERE, SERIES, texOf, tierCol, tierKey, VARIANTS, vImg } from '@/data/jetons';
+import { hexRGB, jetonOf, MYSTERE, SERIES, texOf, tierCol, tierKey, VARIANTS, vImg, glowVars } from '@/data/jetons';
 import { sfx } from '@/engines/sound.js';
 import { openUI } from '@/app/ui-store';
 import { AVATARS, FREE_PP } from '@/lib/avatars';
@@ -140,7 +140,7 @@ export default function Profile() {
           </dt>
           <dd>
             {bp ? (
-              <span className={s.best} style={{ '--g': hexRGB(jetonOf(bp.jeton).glow) } as CSSProperties}>
+              <span className={s.best} style={glowVars(jetonOf(bp.jeton), bp.variant) as CSSProperties}>
                 <img className={vImg(bp.variant)} src={texOf(jetonOf(bp.jeton))} alt="" width={40} height={40} />
                 <span>
                   {jn(bp.jeton)} <VTag v={bp.variant} />
@@ -180,7 +180,7 @@ export default function Profile() {
             );
           const j = jetonOf(x.jeton);
           return (
-            <li key={`${i}:${x.id}`} className={s.sc} style={{ '--g': hexRGB(j.glow) } as CSSProperties}>
+            <li key={`${i}:${x.id}`} className={s.sc} style={glowVars(j, x.variant) as CSSProperties}>
               <button
                 type="button"
                 onClick={() =>
@@ -272,7 +272,7 @@ function Collection({ pseudo, onOpen }: { pseudo: string; onOpen: (name: string,
           return (
             <li
               key={j.name}
-              style={{ '--g': c ? hexRGB(j.glow) : '113, 113, 122' } as CSSProperties}
+              style={(c ? glowVars(j) : { '--g': '113, 113, 122' }) as CSSProperties}
               className={c ? undefined : s.unk}
             >
               <button

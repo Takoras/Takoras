@@ -252,7 +252,7 @@
   align-items: center;
   gap: var(--s-3);
   padding: var(--s-2) var(--gutter);
-  background: linear-gradient(90deg, rgb(249 115 22 / 18%), rgb(124 58 237 / 14%));
+  background: rgb(249 115 22 / 12%);
   border-bottom: 1px solid var(--line);
   font-size: var(--fs-sm);
 }

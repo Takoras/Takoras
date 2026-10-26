@@ -37,6 +37,10 @@ export const VARIANTS: Record<Variant, { odds: number; mult: number; col: string
   ombre: { odds: 500, mult: 25, col: '168, 85, 247' },
 };
 const isVariant = (v: string | null | undefined): v is Variant => !!v && v in VARIANTS;
+// Variables CSS d'un jeton : sa couleur (--g) et si son halo s'allume (--ga). Le halo est une récompense :
+// seulement pour les jetons très rares (1/100 000 et plus) et les mutations (cahier de refonte § 3.3).
+export const glowVars = (j: { glow: string; odds: number }, v?: string | null) =>
+  ({ '--g': hexRGB(j.glow), '--ga': j.odds >= 100000 || isVariant(v) ? 1 : 0 }) as Record<string, string | number>;
 export const vOdds = (odds: number, v?: string | null) => odds * (isVariant(v) ? VARIANTS[v].odds : 1);
 // Valeur de revente : même règle que le serveur (_sell_value × multiplicateur de variante)
 export const sellValue = (odds: number, v?: string | null) =>

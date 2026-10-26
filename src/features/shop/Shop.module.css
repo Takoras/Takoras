@@ -96,7 +96,7 @@
   width: 76px;
   height: 76px;
   object-fit: contain;
-  --df: drop-shadow(0 0 12px rgba(var(--g), 0.45));
+  --df: drop-shadow(0 0 12px rgba(var(--g), calc(0.45 * var(--ga, 0))));
 }
 .icon img.banner {
   width: 100%;
