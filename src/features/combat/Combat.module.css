@@ -111,14 +111,16 @@
   gap: var(--s-2);
 }
 .dex button {
+  border: 3px solid transparent;
+  border-radius: 14px;
+  border-image: url('/img/ui/box-card.png?v=3') 12 fill / 24px stretch;
+  background: linear-gradient(#222034, #222034) center / calc(100% - 16px) calc(100% - 16px) no-repeat;
+  image-rendering: pixelated;
   width: 100%;
   display: grid;
   justify-items: center;
   gap: 2px;
   padding: var(--s-2) var(--s-1);
-  border-radius: var(--r-md);
-  background: var(--surface);
-  border: 1px solid rgba(var(--g), 0.35);
   text-align: center;
 }
 .dex button:disabled {
@@ -358,10 +360,12 @@
   font-size: var(--fs-xs);
 }
 .chips span {
+  border: 3px solid transparent;
+  border-radius: 10px;
+  border-image: url('/img/ui/box-card.png?v=3') 12 fill / 12px stretch;
+  background: linear-gradient(#222034, #222034) center / calc(100% - 16px) calc(100% - 16px) no-repeat;
+  image-rendering: pixelated;
   padding: 2px var(--s-2);
-  border-radius: var(--r-pill);
-  background: var(--bg-raised);
-  border: 1px solid var(--line);
 }
 
 /* Éditeur d'équipe */

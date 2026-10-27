@@ -18,10 +18,12 @@
   gap: var(--s-3);
 }
 .pn article {
+  border: 3px solid transparent;
+  border-radius: 14px;
+  border-image: url('/img/ui/box-card-in.png?v=3') 12 fill / 24px stretch;
+  background: linear-gradient(#222034, #222034) center / calc(100% - 16px) calc(100% - 16px) no-repeat;
+  image-rendering: pixelated;
   padding: var(--s-4);
-  border-radius: var(--r-md);
-  background: var(--bg-raised);
-  border: 1px solid var(--line);
   display: grid;
   gap: var(--s-2);
 }
@@ -144,13 +146,15 @@
   gap: var(--s-2);
 }
 .kinds button {
+  border: 3px solid transparent;
+  border-radius: 10px;
+  border-image: url('/img/ui/box-card-in.png?v=3') 12 fill / 12px stretch;
+  background: linear-gradient(#222034, #222034) center / calc(100% - 16px) calc(100% - 16px) no-repeat;
+  image-rendering: pixelated;
   display: grid;
   justify-items: center;
   gap: 2px;
   padding: var(--s-2);
-  border-radius: var(--r-md);
-  background: var(--bg-raised);
-  border: 1px solid var(--line);
   font-size: var(--fs-xs);
   font-weight: 600;
 }
@@ -158,8 +162,7 @@
   font-size: var(--fs-lg);
 }
 .kinds button[aria-checked='true'] {
-  border-color: var(--accent-hi);
-  background: rgb(124 58 237 / 16%);
+  border-image-source: url('/img/ui/box-sel.png?v=3');
 }
 .fb textarea,
 .ts select,
@@ -179,6 +182,11 @@
   align-items: center;
 }
 .fab {
+  border: 3px solid transparent;
+  border-radius: 14px;
+  border-image: url('/img/ui/box-card.png?v=3') 12 fill / 24px stretch;
+  background: linear-gradient(#222034, #222034) center / calc(100% - 16px) calc(100% - 16px) no-repeat;
+  image-rendering: pixelated;
   position: fixed;
   z-index: 44;
   left: var(--gutter);
@@ -188,12 +196,8 @@
   gap: var(--s-2);
   min-height: 44px;
   padding: 0 var(--s-4);
-  border-radius: var(--r-pill);
-  background: var(--surface-2);
-  border: 1px solid var(--line-strong);
   font-size: var(--fs-sm);
   font-weight: 600;
-  box-shadow: var(--shadow-pop);
 }
 .fab:hover {
   border-color: var(--accent-hi);
@@ -230,17 +234,18 @@
   min-width: 56px;
 }
 .pill {
+  border: 3px solid transparent;
+  border-radius: 10px;
+  border-image: url('/img/ui/box-card-in.png?v=3') 12 fill / 12px stretch;
+  background: linear-gradient(#222034, #222034) center / calc(100% - 16px) calc(100% - 16px) no-repeat;
+  image-rendering: pixelated;
   min-height: 32px;
   padding: 0 var(--s-3);
-  border-radius: var(--r-pill);
-  background: var(--bg-raised);
-  border: 1px solid var(--line);
   font-size: var(--fs-xs);
   font-weight: 700;
 }
 .pill[aria-checked='true'] {
-  border-color: var(--accent-hi);
-  background: rgb(124 58 237 / 20%);
+  border-image-source: url('/img/ui/box-sel.png?v=3');
 }
 
 /* Téléphone : bulle ronde 💡 en bas à gauche, au-dessus de la barre d'onglets (la bulle de chat est à droite) */

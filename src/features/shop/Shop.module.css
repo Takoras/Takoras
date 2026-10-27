@@ -193,13 +193,15 @@
 }
 
 .form input {
+  border: 3px solid transparent;
+  border-radius: 10px;
+  border-image: url('/img/ui/box-card-in.png?v=3') 12 fill / 12px stretch;
+  background: linear-gradient(#222034, #222034) center / calc(100% - 16px) calc(100% - 16px) no-repeat;
+  image-rendering: pixelated;
   flex: 1;
   min-width: 180px;
   min-height: 44px;
   padding: 0 var(--s-3);
-  border-radius: var(--r-sm);
-  border: 1px solid var(--line-strong);
-  background: var(--bg-raised);
   font-family: var(--font-display);
   letter-spacing: 0.08em;
   text-transform: uppercase;

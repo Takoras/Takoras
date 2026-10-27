@@ -220,11 +220,13 @@
 }
 .right input,
 .right select {
+  border: 3px solid transparent;
+  border-radius: 10px;
+  border-image: url('/img/ui/box-card.png?v=3') 12 fill / 12px stretch;
+  background: linear-gradient(#222034, #222034) center / calc(100% - 16px) calc(100% - 16px) no-repeat;
+  image-rendering: pixelated;
   min-height: 40px;
   padding: 0 var(--s-3);
-  border-radius: var(--r-sm);
-  border: 1px solid var(--line-strong);
-  background: var(--bg-raised);
   font-size: var(--fs-sm);
 }
 .right input {
@@ -440,12 +442,14 @@
   padding: 0;
 }
 .combat {
+  border: 3px solid transparent;
+  border-radius: 14px;
+  border-image: url('/img/ui/box-card-in.png?v=3') 12 fill / 24px stretch;
+  background: linear-gradient(#222034, #222034) center / calc(100% - 16px) calc(100% - 16px) no-repeat;
+  image-rendering: pixelated;
   display: grid;
   gap: var(--s-2);
   padding: var(--s-3);
-  border-radius: var(--r-md);
-  background: var(--bg-raised);
-  border: 1px solid var(--line);
   border-left: 3px solid var(--el);
 }
 .combat header {
@@ -458,10 +462,12 @@
   font-weight: 700;
 }
 .kit {
+  border: 3px solid transparent;
+  border-radius: 14px;
+  border-image: url('/img/ui/box-card.png?v=3') 12 fill / 24px stretch;
+  background: linear-gradient(#222034, #222034) center / calc(100% - 16px) calc(100% - 16px) no-repeat;
+  image-rendering: pixelated;
   padding: var(--s-2) var(--s-3);
-  border-radius: var(--r-sm);
-  background: rgba(var(--pw), 0.08);
-  border: 1px solid rgba(var(--pw), 0.3);
 }
 .kit small {
   color: var(--muted);
@@ -546,11 +552,14 @@
   font-weight: 700;
 }
 .stepper input {
+  border: 3px solid transparent;
+  border-radius: 10px;
+  border-image: url('/img/ui/box-card-in.png?v=3') 12 fill / 12px stretch;
+  background: linear-gradient(#222034, #222034) center / calc(100% - 16px) calc(100% - 16px) no-repeat;
+  image-rendering: pixelated;
   width: 48px;
   height: 36px;
   text-align: center;
-  background: var(--bg-raised);
-  border: 0;
   font-variant-numeric: tabular-nums;
   appearance: textfield;
 }
@@ -727,13 +736,15 @@
   gap: var(--s-2);
 }
 .facts div {
+  border: 3px solid transparent;
+  border-radius: 14px;
+  border-image: url('/img/ui/box-card-in.png?v=3') 12 fill / 24px stretch;
+  background: linear-gradient(#222034, #222034) center / calc(100% - 16px) calc(100% - 16px) no-repeat;
+  image-rendering: pixelated;
   display: flex;
   flex-direction: column-reverse;
   gap: 2px;
   padding: var(--s-3);
-  border-radius: var(--r-md);
-  background: var(--bg-raised);
-  border: 1px solid var(--line);
 }
 .facts dt {
   font-size: 11px;
@@ -765,9 +776,12 @@
   font-size: var(--fs-sm);
 }
 .owned li {
+  border: 3px solid transparent;
+  border-radius: 14px;
+  border-image: url('/img/ui/box-card-in.png?v=3') 12 fill / 24px stretch;
+  background: linear-gradient(#222034, #222034) center / calc(100% - 16px) calc(100% - 16px) no-repeat;
+  image-rendering: pixelated;
   padding: 4px var(--s-3);
-  border-radius: var(--r-pill);
-  background: var(--surface-2);
   color: var(--text-2);
 }
 .owned li:first-child {
@@ -783,7 +797,7 @@
   flex-wrap: wrap;
   margin: 0 calc(-1 * var(--s-6)) calc(-1 * var(--s-6));
   padding: var(--s-3) var(--s-6) var(--s-4);
-  background: linear-gradient(180deg, transparent, var(--surface) 30%);
+  background: linear-gradient(180deg, transparent, #39374f 30%); /* même couleur que la fenêtre */
 }
 .actions > :first-child {
   flex: 1 1 100%;

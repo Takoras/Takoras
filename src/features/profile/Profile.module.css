@@ -75,13 +75,15 @@
   gap: var(--s-2);
 }
 .stats div {
+  border: 3px solid transparent;
+  border-radius: 14px;
+  border-image: url('/img/ui/box-card.png?v=3') 12 fill / 24px stretch;
+  background: linear-gradient(#222034, #222034) center / calc(100% - 16px) calc(100% - 16px) no-repeat;
+  image-rendering: pixelated;
   display: flex;
   flex-direction: column-reverse;
   gap: 2px;
   padding: var(--s-3) var(--s-4);
-  border-radius: var(--r-md);
-  background: var(--surface);
-  border: 1px solid var(--line);
 }
 .stats dt {
   font-size: var(--fs-xs);
@@ -104,10 +106,13 @@
 .sc {
   position: relative;
   min-height: 150px;
-  border-radius: var(--r-md);
+  border: 3px solid transparent;
+  border-radius: 14px;
+  border-image: url('/img/ui/box-card.png?v=3') 12 / 24px stretch;
   background:
-    radial-gradient(circle at 50% 40%, rgba(var(--g), calc(0.18 * var(--ga, 0))), transparent 65%), var(--surface);
-  border: 1px solid var(--line);
+    radial-gradient(circle at 50% 40%, rgba(var(--g), calc(0.18 * var(--ga, 0))), transparent 65%) padding-box,
+    linear-gradient(#222034, #222034) center / calc(100% - 16px) calc(100% - 16px) no-repeat;
+  image-rendering: pixelated;
 }
 .sc > button {
   width: 100%;
@@ -153,14 +158,16 @@
   gap: var(--s-2);
 }
 .coll button {
+  border: 3px solid transparent;
+  border-radius: 14px;
+  border-image: url('/img/ui/box-card.png?v=3') 12 fill / 24px stretch;
+  background: linear-gradient(#222034, #222034) center / calc(100% - 16px) calc(100% - 16px) no-repeat;
+  image-rendering: pixelated;
   width: 100%;
   display: grid;
   justify-items: center;
   gap: 2px;
   padding: var(--s-2);
-  border-radius: var(--r-md);
-  background: var(--surface);
-  border: 1px solid var(--line);
 }
 .coll img {
   width: 48px;
@@ -215,13 +222,15 @@
 
 /* Elo du classé, bien visible en haut du profil */
 .elo {
+  border: 3px solid transparent;
+  border-radius: 14px;
+  border-image: url('/img/ui/box-card.png?v=3') 12 fill / 24px stretch;
+  background: linear-gradient(#222034, #222034) center / calc(100% - 16px) calc(100% - 16px) no-repeat;
+  image-rendering: pixelated;
   display: flex;
   align-items: center;
   gap: var(--s-2);
   padding: var(--s-2) var(--s-3);
-  border-radius: var(--r-lg);
-  border: 1px solid color-mix(in srgb, var(--rc) 45%, var(--line));
-  background: color-mix(in srgb, var(--rc) 10%, var(--surface));
 }
 .elo b {
   display: block;
@@ -246,12 +255,14 @@
 }
 
 .private {
+  border: 3px solid transparent;
+  border-radius: 14px;
+  border-image: url('/img/ui/box-card.png?v=3') 12 fill / 24px stretch;
+  background: linear-gradient(#222034, #222034) center / calc(100% - 16px) calc(100% - 16px) no-repeat;
+  image-rendering: pixelated;
   display: grid;
   gap: var(--s-2);
   padding: var(--s-4);
-  border-radius: var(--r-lg);
-  background: var(--surface);
-  border: 1px solid var(--line);
   justify-items: start;
 }
 .row {
@@ -279,11 +290,13 @@
 .pkTools select,
 .pe input,
 .pe textarea {
+  border: 3px solid transparent;
+  border-radius: 10px;
+  border-image: url('/img/ui/box-card-in.png?v=3') 12 fill / 12px stretch;
+  background: linear-gradient(#222034, #222034) center / calc(100% - 16px) calc(100% - 16px) no-repeat;
+  image-rendering: pixelated;
   min-height: 40px;
   padding: 0 var(--s-3);
-  border-radius: var(--r-sm);
-  border: 1px solid var(--line-strong);
-  background: var(--bg-raised);
   font-size: var(--fs-sm);
 }
 .pkTools input {
@@ -300,14 +313,16 @@
   margin-bottom: var(--s-3);
 }
 .pk button {
+  border: 3px solid transparent;
+  border-radius: 10px;
+  border-image: url('/img/ui/box-card-in.png?v=3') 12 fill / 12px stretch;
+  background: linear-gradient(#222034, #222034) center / calc(100% - 16px) calc(100% - 16px) no-repeat;
+  image-rendering: pixelated;
   width: 100%;
   display: grid;
   justify-items: center;
   gap: 2px;
   padding: var(--s-3) var(--s-2);
-  border-radius: var(--r-md);
-  background: var(--bg-raised);
-  border: 1px solid var(--line);
 }
 .pk button:hover {
   border-color: rgba(var(--g), 0.6);
@@ -355,12 +370,14 @@
   flex-wrap: wrap;
 }
 .banners button {
+  border: 3px solid transparent;
+  border-radius: 10px;
+  border-image: url('/img/ui/box-card-in.png?v=3') 12 fill / 12px stretch;
+  background: linear-gradient(#222034, #222034) center / calc(100% - 16px) calc(100% - 16px) no-repeat;
+  image-rendering: pixelated;
   width: 120px;
   height: 44px;
-  border-radius: var(--r-sm);
   overflow: hidden;
-  background: var(--bg-raised);
-  border: 2px solid var(--line);
   font-size: var(--fs-xs);
 }
 .banners img {
@@ -370,7 +387,7 @@
 }
 .banners button[aria-pressed='true'],
 .pps button[aria-pressed='true'] {
-  border-color: var(--accent-hi);
+  border-image-source: url('/img/ui/box-sel.png?v=3');
 }
 .pps {
   display: flex;
@@ -378,13 +395,15 @@
   flex-wrap: wrap;
 }
 .pps button {
+  border: 3px solid transparent;
+  border-radius: 10px;
+  border-image: url('/img/ui/box-card-in.png?v=3') 12 fill / 12px stretch;
+  background: linear-gradient(#222034, #222034) center / calc(100% - 16px) calc(100% - 16px) no-repeat;
+  image-rendering: pixelated;
   position: relative;
   width: 52px;
   height: 52px;
-  border-radius: 50%;
   overflow: hidden;
-  background: var(--surface-3);
-  border: 2px solid var(--line);
   display: grid;
   place-items: center;
   font-weight: 700;

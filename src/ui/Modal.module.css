@@ -23,14 +23,15 @@
 }
 
 .card {
+  border: 3px solid transparent;
+  border-radius: 14px;
+  border-image: url('/img/ui/box-9.png?v=3') 14 fill / 28px stretch;
+  background: linear-gradient(#39374f, #39374f) center / calc(100% - 16px) calc(100% - 16px) no-repeat;
+  image-rendering: pixelated;
   position: relative;
   max-height: inherit;
   overflow-y: auto;
   padding: var(--s-6);
-  background: var(--surface);
-  border: 1px solid var(--line);
-  border-radius: var(--r-lg);
-  box-shadow: var(--shadow-pop);
 }
 
 .title {

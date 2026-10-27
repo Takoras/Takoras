@@ -11,11 +11,12 @@
 }
 
 .toast {
+  border: 3px solid transparent;
+  border-radius: 10px;
+  border-image: url('/img/ui/box-9.png?v=3') 14 fill / 14px stretch;
+  background: linear-gradient(#39374f, #39374f) center / calc(100% - 16px) calc(100% - 16px) no-repeat;
+  image-rendering: pixelated;
   padding: var(--s-3) var(--s-4);
-  border-radius: var(--r-md);
-  background: var(--surface-3);
-  border: 1px solid var(--line-strong);
-  box-shadow: var(--shadow-pop);
   font-size: var(--fs-sm);
   text-align: center;
   animation: in var(--t-med) var(--ease-spring);

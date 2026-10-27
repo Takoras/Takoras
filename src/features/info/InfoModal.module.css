@@ -6,16 +6,17 @@
   margin-bottom: var(--s-4);
 }
 .luck button {
+  border: 3px solid transparent;
+  border-radius: 10px;
+  border-image: url('/img/ui/box-card-in.png?v=3') 12 fill / 12px stretch;
+  background: linear-gradient(#222034, #222034) center / calc(100% - 16px) calc(100% - 16px) no-repeat;
+  image-rendering: pixelated;
   min-height: 32px;
   padding: 0 var(--s-3);
-  border-radius: var(--r-sm);
-  background: var(--bg-raised);
-  border: 1px solid var(--line);
   font-size: var(--fs-sm);
 }
 .luck button[aria-pressed='true'] {
-  border-color: var(--accent-hi);
-  background: rgb(124 58 237 / 18%);
+  border-image-source: url('/img/ui/box-sel.png?v=3');
 }
 .table {
   overflow-x: auto;

@@ -270,13 +270,15 @@
 }
 
 .track li {
+  border: 3px solid transparent;
+  border-radius: 10px;
+  border-image: url('/img/ui/box-card.png?v=3') 12 fill / 12px stretch;
+  background: linear-gradient(#222034, #222034) center / calc(100% - 16px) calc(100% - 16px) no-repeat;
+  image-rendering: pixelated;
   display: flex;
   align-items: center;
   gap: var(--s-2);
   padding: 6px var(--s-3) 6px 6px;
-  border-radius: var(--r-md);
-  background: var(--surface);
-  border: 1px solid var(--line);
   font-size: var(--fs-sm);
   white-space: nowrap;
 }
@@ -317,10 +319,12 @@
   justify-content: center;
 }
 .fx li {
+  border: 3px solid transparent;
+  border-radius: 10px;
+  border-image: url('/img/ui/box-card.png?v=3') 12 fill / 12px stretch;
+  background: linear-gradient(#222034, #222034) center / calc(100% - 16px) calc(100% - 16px) no-repeat;
+  image-rendering: pixelated;
   padding: 4px var(--s-3);
-  border-radius: var(--r-pill);
-  background: var(--surface-2);
-  border: 1px solid var(--line);
   font-size: var(--fs-xs);
 }
 .fx .fxTotal {

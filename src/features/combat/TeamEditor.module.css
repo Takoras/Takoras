@@ -8,7 +8,7 @@
 .slots li {
   border: 3px solid transparent;
   border-radius: 14px;
-  border-image: url('/img/ui/box-card.png?v=3') 12 fill / 24px stretch;
+  border-image: url('/img/ui/box-card-in.png?v=3') 12 fill / 24px stretch;
   background: linear-gradient(#222034, #222034) center / calc(100% - 16px) calc(100% - 16px) no-repeat;
   image-rendering: pixelated;
   position: relative;
@@ -57,7 +57,7 @@
 .muts button {
   border: 3px solid transparent;
   border-radius: 10px;
-  border-image: url('/img/ui/box-card.png?v=3') 12 fill / 12px stretch;
+  border-image: url('/img/ui/box-card-in.png?v=3') 12 fill / 12px stretch;
   background: linear-gradient(#222034, #222034) center / calc(100% - 16px) calc(100% - 16px) no-repeat;
   image-rendering: pixelated;
   display: grid;
@@ -66,8 +66,7 @@
   height: 30px;
 }
 .muts button[aria-checked='true'] {
-  border-color: var(--text);
-  background: var(--surface-3);
+  border-image-source: url('/img/ui/box-sel.png?v=3');
 }
 .plain {
   width: 12px;
@@ -86,7 +85,7 @@
 .tabs button {
   border: 3px solid transparent;
   border-radius: 10px;
-  border-image: url('/img/ui/box-card.png?v=3') 12 fill / 12px stretch;
+  border-image: url('/img/ui/box-card-in.png?v=3') 12 fill / 12px stretch;
   background: linear-gradient(#222034, #222034) center / calc(100% - 16px) calc(100% - 16px) no-repeat;
   image-rendering: pixelated;
   display: inline-flex;
@@ -123,14 +122,13 @@
 .card {
   border: 3px solid transparent;
   border-radius: 14px;
-  border-image: url('/img/ui/box-card.png?v=3') 12 fill / 24px stretch;
+  border-image: url('/img/ui/box-card-in.png?v=3') 12 fill / 24px stretch;
   background: linear-gradient(#222034, #222034) center / calc(100% - 16px) calc(100% - 16px) no-repeat;
   image-rendering: pixelated;
   position: relative;
 }
 .card.on {
   border-image-source: url('/img/ui/box-sel.png?v=3');
-  background: color-mix(in srgb, var(--accent) 10%, var(--surface));
 }
 .cardBtn {
   width: 100%;

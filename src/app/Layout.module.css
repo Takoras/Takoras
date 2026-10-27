@@ -132,12 +132,17 @@
 }
 
 .main {
+  /* la page occupe tout l'écran et son contenu est au milieu (comme l'ancien Takoras), pas collé en haut */
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
   max-width: var(--page-max);
   margin: 0 auto;
   min-height: calc(100dvh - 60px);
-  padding: var(--s-10) var(--gutter-page) var(--s-12);
+  padding: clamp(32px, 6vh, 72px) var(--gutter-page) clamp(48px, 8vh, 96px);
   animation: page-in var(--t-slow) var(--ease-out);
 }
+
 
 /* fondu seulement : un glissement placerait les boîtes en pixel art entre deux pixels (fines lignes entre les morceaux) */
 @keyframes page-in {

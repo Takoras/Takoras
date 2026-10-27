@@ -1,11 +1,13 @@
 .seg {
+  border: 3px solid transparent;
+  border-radius: 10px;
+  border-image: url('/img/ui/box-card.png?v=3') 12 fill / 12px stretch;
+  background: linear-gradient(#222034, #222034) center / calc(100% - 16px) calc(100% - 16px) no-repeat;
+  image-rendering: pixelated;
   display: inline-flex;
   flex-wrap: wrap;
   gap: 2px;
   padding: 3px;
-  border-radius: var(--r-md);
-  background: var(--bg-raised);
-  border: 1px solid var(--line);
 }
 
 .seg button {
@@ -24,7 +26,6 @@
   color: var(--text);
 }
 .seg .on {
-  background: var(--surface-3);
+  border-image-source: url('/img/ui/box-sel.png?v=3');
   color: var(--text);
-  box-shadow: inset 0 -2px 0 var(--accent);
 }
