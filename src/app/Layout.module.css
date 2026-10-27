@@ -139,10 +139,10 @@
   animation: page-in var(--t-slow) var(--ease-out);
 }
 
+/* fondu seulement : un glissement placerait les boîtes en pixel art entre deux pixels (fines lignes entre les morceaux) */
 @keyframes page-in {
   from {
     opacity: 0;
-    transform: translateY(14px);
   }
 }
 
