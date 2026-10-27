@@ -10,7 +10,8 @@ export { rpc, RpcError, errorText } from './rpc';
 export const publicApi = {
   liveFeed: (n = 20) => rpc('live_feed', { n }),
   leaderboard: (kind: string, since: string | null, n = 50) => rpc('leaderboard', { kind, since, n }),
-  leaderboardTime: (n = 50) => rpc('leaderboard_time', { n }),
+  leaderboardTime: (since: string | null, n = 50) => rpc('leaderboard_time', { n, since }),
+  leaderboardElo: (since: string | null, n = 50) => rpc('leaderboard_elo', { n, since }),
   playPing: () => rpc('play_ping'),
   profile: (p_pseudo: string) => rpc('profile_public', { p_pseudo }),
   rankedOf: (p_pseudo: string) => rpc('ranked_of', { p_pseudo }),

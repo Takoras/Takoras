@@ -567,6 +567,8 @@ export async function fakeSupabase(
       st.coins += 500;
       return json({ reward: { coins: 500 }, state: st });
     }
+    if (rpc === 'leaderboard_elo')
+      return json(['Alpha', 'Testeur', 'Bravo'].map((pseudo, i) => ({ pseudo, value: 1480 - i * 420 })));
     if (rpc === 'leaderboard_time')
       return json(['Alpha', 'Testeur'].map((pseudo, i) => ({ pseudo, value: 7500 - i * 3000 })));
     if (rpc === 'leaderboard') {

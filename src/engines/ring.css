@@ -34,7 +34,7 @@
 .rg-pw.on small { color: #0b0914; font-weight: 700; }
 .rg-pw:disabled { opacity: .5; cursor: default; }
 .rg-go { font-family: var(--font-display); font-size: 20px; font-weight: 800; background: rgba(255, 255, 255, .08); color: var(--muted); }
-.rg-go.ready { color: #fff; border: 3px solid transparent; border-radius: 14px; border-image: url('/img/ui/btn-violet.png') 12 fill / 24px stretch; background: linear-gradient(#7d48d9, #7d48d9) center / calc(100% - 16px) calc(100% - 16px) no-repeat; image-rendering: pixelated; box-shadow: none; filter: drop-shadow(0 3px 0 #4c1d95); text-shadow: 0 1px 0 rgba(40, 10, 80, .7); }
+.rg-go.ready { color: #fff; border: 3px solid transparent; border-radius: 14px; border-image: url('/img/ui/btn-violet.png?v=3') 12 fill / 24px stretch; background: linear-gradient(#7d48d9, #7d48d9) center / calc(100% - 16px) calc(100% - 16px) no-repeat; image-rendering: pixelated; box-shadow: none; filter: drop-shadow(0 3px 0 #4c1d95); text-shadow: 0 1px 0 rgba(40, 10, 80, .7); }
 .rg-go.done { background: rgba(74, 222, 128, .15); color: #86efac; }
 .rg-go:not(:disabled):active, .rg-pw:not(:disabled):active { transform: scale(.95); }
 .rg-flash { position: fixed; inset: 0; pointer-events: none; mix-blend-mode: screen; z-index: 3; }

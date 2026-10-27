@@ -309,7 +309,7 @@ function Weekly() {
         {q.data.quests.map((x) => {
           const ok = x.value >= x.target;
           return (
-            <li key={x.id} className={x.claimed ? s.wkDone : undefined}>
+            <li key={x.id} className={x.claimed ? s.wkDone : ok ? s.wkReady : undefined}>
               <span>
                 <b>{t(`ui.wk_${x.id}`, { n: x.target })}</b>
                 <small>{t('ui.wk_reward', { c: n(x.coins) })}</small>

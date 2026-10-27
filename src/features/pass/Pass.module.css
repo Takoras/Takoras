@@ -1,5 +1,5 @@
 /* Passe de combat façon Brawl : bandeau saison + XP, piste premium dorée en haut, gratuite en bas, numéros sur la ligne.
-   Les cases utilisent les textures dessinées à la main (/img/ui/box-gold.png, box-dark.png). */
+   Les cases utilisent les textures dessinées à la main (/img/ui/box-gold.png?v=3, box-dark.png). */
 .page {
   display: grid;
   gap: var(--s-6);
@@ -63,7 +63,7 @@
   flex: none;
   font-size: var(--fs-xl);
   font-weight: 800;
-  background: url('/img/ui/box-gold.png') center / 100% 100% no-repeat;
+  background: url('/img/ui/box-gold.png?v=3') center / 100% 100% no-repeat;
   image-rendering: pixelated;
   color: #5a2a06;
 }
@@ -71,7 +71,7 @@
   width: 40px;
   height: 40px;
   font-size: var(--fs-md);
-  background-image: url('/img/ui/box-dark.png');
+  background-image: url('/img/ui/box-dark.png?v=3');
   color: var(--text);
 }
 .bar {
@@ -138,7 +138,7 @@
 }
 /* étiquette premium : boîte pêche à rayures dessinée à la main */
 .ticketGold {
-  background: #ffe0b4 url('/img/ui/box-peach.png') center / 100% 100% no-repeat;
+  background: #ffe0b4 url('/img/ui/box-peach.png?v=3') center / 100% 100% no-repeat;
   image-rendering: pixelated;
   color: #7a3a06;
 }
@@ -197,18 +197,18 @@
   place-items: center;
   width: 42px;
   height: 42px;
-  background: url('/img/ui/num-next.png') center / 42px 42px no-repeat;
+  background: url('/img/ui/num-next.png?v=3') center / 42px 42px no-repeat;
   image-rendering: pixelated;
   font-weight: 800;
   font-size: var(--fs-sm);
   color: var(--text-2);
 }
 .reached .num {
-  background-image: url('/img/ui/num-done.png');
+  background-image: url('/img/ui/num-done.png?v=3');
   color: #2b1300;
 }
 li[aria-current] .num {
-  background-image: url('/img/ui/num-now.png');
+  background-image: url('/img/ui/num-now.png?v=3');
   color: #2b1300;
 }
 
@@ -222,14 +222,14 @@ li[aria-current] .num {
   border: 0;
   font: inherit;
   color: var(--text);
-  background: url('/img/ui/box-dark.png') center / 100% 100% no-repeat;
+  background: url('/img/ui/box-dark.png?v=3') center / 100% 100% no-repeat;
   image-rendering: pixelated;
   transition:
     transform 0.15s,
     filter 0.15s;
 }
 .tile.gold {
-  background-image: url('/img/ui/box-gold.png');
+  background-image: url('/img/ui/box-gold.png?v=3');
   color: #3b1a02;
 }
 .tile img {
@@ -404,7 +404,7 @@ button.tile:focus-visible {
 .how li {
   border: 3px solid transparent;
   border-radius: 14px;
-  border-image: url('/img/ui/box-card.png') 12 fill / 24px stretch;
+  border-image: url('/img/ui/box-card.png?v=3') 12 fill / 24px stretch;
   background: linear-gradient(#222034, #222034) center / calc(100% - 16px) calc(100% - 16px) no-repeat;
   image-rendering: pixelated;
   display: grid;
@@ -434,7 +434,7 @@ button.tile:focus-visible {
 .weekly li {
   border: 3px solid transparent;
   border-radius: 14px;
-  border-image: url('/img/ui/box-card.png') 12 fill / 24px stretch;
+  border-image: url('/img/ui/box-card.png?v=3') 12 fill / 24px stretch;
   background: linear-gradient(#222034, #222034) center / calc(100% - 16px) calc(100% - 16px) no-repeat;
   image-rendering: pixelated;
   display: grid;
@@ -448,6 +448,9 @@ button.tile:focus-visible {
 }
 .weekly small {
   color: var(--muted);
+}
+.wkReady {
+  border-image-source: url('/img/ui/box-green.png?v=3');
 }
 .wkDone {
   opacity: 0.6;

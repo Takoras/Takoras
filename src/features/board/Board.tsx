@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { Link } from 'react-router';
 import { useQuery } from '@tanstack/react-query';
-import { combatApi, publicApi } from '@/api';
+import { publicApi } from '@/api';
 import { useMe } from '@/api/queries';
 import { SERIES } from '@/data/jetons';
 import { locale, useSettings } from '@/lib/settings';
@@ -20,8 +20,6 @@ const KINDS = [
   ['ui.k_pulls', 'pulls'],
   ['ui.k_time', 'time'],
 ] as const;
-// Elo et temps de jeu : depuis toujours (pas de période)
-const NO_PERIOD = new Set(['elo', 'time']);
 export const playTime = (sec: number, lang: string) => {
   const h = Math.floor(sec / 3600),
     m = Math.floor((sec % 3600) / 60);
@@ -46,13 +44,19 @@ export default function Board() {
   const id = KINDS[kind]?.[1] ?? 'pulls';
   const rankName = useRankName();
   const q = useQuery({
-    queryKey: ['board', id, NO_PERIOD.has(id) ? 'all' : period],
-    queryFn: async () =>
-      id === 'elo'
-        ? (await combatApi.rankedTop(50)).map((r) => ({ pseudo: r.pseudo, value: r.elo, jeton: '', odds: 0 }))
-        : id === 'time'
-          ? (await publicApi.leaderboardTime(50)).map((r) => ({ ...r, jeton: '', odds: 0 }))
-          : ((await publicApi.leaderboard(id, period === 'week' ? weekStart() : null, 50)) as Row[]),
+    queryKey: ['board', id, period],
+    // toutes les catégories : cette semaine ou depuis toujours (Elo depuis toujours = meilleur Elo jamais atteint)
+    queryFn: async () => {
+      const since = period === 'week' ? weekStart() : null;
+      if (id === 'elo' || id === 'time')
+        return (await (id === 'elo' ? publicApi.leaderboardElo : publicApi.leaderboardTime)(since, 50)).map((r) => ({
+          pseudo: r.pseudo,
+          value: Number(r.value),
+          jeton: '',
+          odds: 0,
+        }));
+      return (await publicApi.leaderboard(id, since, 50)) as Row[];
+    },
     refetchInterval: 60_000,
   });
   const fmt = (n: number) => Number(n).toLocaleString(locale(lang));
@@ -84,17 +88,15 @@ export default function Board() {
         <div>
           <h1>{t('ui.board_title')}</h1>
         </div>
-        {NO_PERIOD.has(id) ? null : (
-          <Segmented<Period>
-            label={t('ui.board_tag')}
-            value={period}
-            onChange={setPeriod}
-            options={[
-              ['week', t('ui.week')],
-              ['all', t('ui.all_time')],
-            ]}
-          />
-        )}
+        <Segmented<Period>
+          label={t('ui.board_tag')}
+          value={period}
+          onChange={setPeriod}
+          options={[
+            ['week', t('ui.week')],
+            ['all', t('ui.all_time')],
+          ]}
+        />
       </header>
       <div className={s.kinds} role="group" aria-label={t('ui.board_title')}>
         {KINDS.map(([k], i) => (

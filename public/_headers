@@ -17,6 +17,10 @@
 /assets/*
   Cache-Control: public, max-age=31536000, immutable
 
+# Textures dessinées de l'interface : toujours vérifiées (on les retouche souvent, l'ancienne ne doit jamais rester)
+/img/ui/*
+  Cache-Control: no-cache
+
 # Images : elles gardent leur nom quand on les redessine → 1 jour, puis mise à jour en arrière-plan (comme l'ancien site)
 /img/*
   Cache-Control: public, max-age=86400, stale-while-revalidate=604800

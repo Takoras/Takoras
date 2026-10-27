@@ -4,7 +4,7 @@
   padding: var(--s-5);
   border: 3px solid transparent;
   border-radius: 16px;
-  border-image: url('/img/ui/box-9.png') 14 fill / 28px stretch;
+  border-image: url('/img/ui/box-9.png?v=3') 14 fill / 28px stretch;
   background: linear-gradient(#39374f, #39374f) center / calc(100% - 16px) calc(100% - 16px) no-repeat;
   image-rendering: pixelated;
 }
@@ -12,7 +12,7 @@
 .daily {
   border: 3px solid transparent;
   border-radius: 14px;
-  border-image: url('/img/ui/box-card-in.png') 12 fill / 24px stretch;
+  border-image: url('/img/ui/box-card-in.png?v=3') 12 fill / 24px stretch;
   background: linear-gradient(#222034, #222034) center / calc(100% - 16px) calc(100% - 16px) no-repeat;
   image-rendering: pixelated;
   display: flex;
@@ -23,8 +23,7 @@
 }
 
 .daily.on {
-  outline: 2px solid var(--gold);
-  outline-offset: 1px;
+  border-image-source: url('/img/ui/box-orange.png?v=3');
 }
 .daily small {
   display: block;
@@ -52,7 +51,7 @@
 .list li {
   border: 3px solid transparent;
   border-radius: 14px;
-  border-image: url('/img/ui/box-card-in.png') 12 fill / 24px stretch;
+  border-image: url('/img/ui/box-card-in.png?v=3') 12 fill / 24px stretch;
   background: linear-gradient(#222034, #222034) center / calc(100% - 16px) calc(100% - 16px) no-repeat;
   image-rendering: pixelated;
   display: grid;
@@ -61,8 +60,7 @@
   font-size: var(--fs-sm);
 }
 .list li.ok {
-  outline: 2px solid var(--ok);
-  outline-offset: 1px;
+  border-image-source: url('/img/ui/box-green.png?v=3');
 }
 .list li.claimed {
   opacity: 0.55;
