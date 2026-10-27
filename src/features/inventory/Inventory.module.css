@@ -88,8 +88,7 @@
   color: var(--muted);
 }
 .shelf[aria-pressed='true'] {
-  outline: 2px solid var(--accent-hi);
-  outline-offset: 1px;
+  border-image-source: url('/img/ui/box-sel.png');
   background: color-mix(in srgb, var(--accent) 16%, var(--surface));
 }
 .shelfSoon {
@@ -167,8 +166,7 @@
 }
 .vtabs button[aria-selected='true'] {
   color: var(--text);
-  outline: 2px solid var(--accent-hi);
-  outline-offset: 1px;
+  border-image-source: url('/img/ui/box-sel.png');
   background: rgb(124 58 237 / 16%);
 }
 .vtabs .v_gold[aria-selected='true'] {
@@ -210,8 +208,7 @@
 }
 .chips button[aria-pressed='true'] {
   color: var(--text);
-  outline: 2px solid var(--accent-hi);
-  outline-offset: 1px;
+  border-image-source: url('/img/ui/box-sel.png');
   background: rgb(124 58 237 / 18%);
 }
 .right {
@@ -325,8 +322,7 @@
   animation: none !important;
 }
 .sel {
-  outline: 2px solid var(--accent-hi);
-  outline-offset: 1px;
+  border-image-source: url('/img/ui/box-sel.png');
   box-shadow:
     0 0 0 2px rgb(167 139 250 / 35%),
     0 0 22px rgb(124 58 237 / 25%);

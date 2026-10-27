@@ -67,7 +67,8 @@
 }
 .step {
   /* marches du podium : textures dessinées à la main (le chiffre est dans le dessin) */
-  width: min(100%, 160px);
+  max-width: 100%;
+  aspect-ratio: 64 / 42;
   margin-top: var(--s-2);
   background: center bottom / 100% 100% no-repeat;
   image-rendering: pixelated;
@@ -78,21 +79,21 @@
   --ring: #f59e0b;
 }
 .p1 .step {
-  aspect-ratio: 64 / 84;
+  width: 192px;
   background-image: url('/img/ui/podium-1.png');
 }
 .p2 {
   --ring: #a78bfa;
 }
 .p2 .step {
-  aspect-ratio: 64 / 62;
+  width: 160px;
   background-image: url('/img/ui/podium-2.png');
 }
 .p3 {
   --ring: #ea580c;
 }
 .p3 .step {
-  aspect-ratio: 64 / 48;
+  width: 128px;
   background-image: url('/img/ui/podium-3.png');
 }
 

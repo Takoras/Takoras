@@ -210,29 +210,23 @@
 .chips button {
   min-height: 36px;
   padding: 0 var(--s-3);
-  border-radius: var(--r-sm);
-  background: var(--bg-raised);
-  border: 1px solid var(--line);
+  border: 3px solid transparent;
+  border-radius: 10px;
+  border-image: url('/img/ui/box-card-in.png') 12 fill / 12px stretch;
+  background: linear-gradient(#222034, #222034) center / calc(100% - 16px) calc(100% - 16px) no-repeat;
+  image-rendering: pixelated;
   color: var(--text-2);
   font-size: var(--fs-sm);
 }
 
+/* choisi : ta boîte claire à bords violets */
 .chips button[aria-pressed='true'] {
-  border-color: var(--accent-hi);
+  border-image-source: url('/img/ui/box-sel-light.png');
+  background-image: linear-gradient(#39374f, #39374f);
   color: var(--text);
-  background: rgb(124 58 237 / 18%);
 }
 .chips small {
   color: var(--muted);
-}
-.v_gold[aria-pressed='true'] {
-  border-color: var(--v-gold);
-}
-.v_celeste[aria-pressed='true'] {
-  border-color: var(--v-celeste);
-}
-.v_ombre[aria-pressed='true'] {
-  border-color: var(--v-ombre);
 }
 
 /* En direct */

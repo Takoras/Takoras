@@ -35,8 +35,7 @@
 }
 .cats button[aria-pressed='true'] {
   color: var(--text);
-  outline: 2px solid var(--accent-hi);
-  outline-offset: 1px;
+  border-image-source: url('/img/ui/box-sel.png');
   background: rgb(124 58 237 / 18%);
 }
 .h2 {
@@ -136,8 +135,23 @@
   color: var(--text-2);
   font-weight: 400;
 }
-.pack {
-  border-style: dashed;
+/* Packs en euros (achats intégrés) : ta boîte pêche à rayures, texte foncé */
+.card.pack {
+  border-image-source: url('/img/ui/box-peach.png');
+  border-image-slice: 12 fill;
+  border-image-width: 24px;
+  background-image: linear-gradient(#ffe0b4, #ffe0b4);
+  color: #4a2306;
+}
+.pack h3,
+.pack .price {
+  color: #4a2306;
+}
+.pack :global(.muted) {
+  color: #8a4b16;
+}
+.pack .icon {
+  background: rgb(255 255 255 / 45%);
 }
 
 /* stock (petit texte) et variation de prix (pastille) : dans le bas de la carte */

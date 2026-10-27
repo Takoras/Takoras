@@ -442,8 +442,7 @@
 }
 .chipsRow button[aria-pressed='true'] {
   color: var(--text);
-  outline: 2px solid var(--accent-hi);
-  outline-offset: 1px;
+  border-image-source: url('/img/ui/box-sel.png');
   background: rgb(124 58 237 / 18%);
 }
 .legend {
@@ -482,8 +481,7 @@
   text-align: center;
 }
 .sel .teCard {
-  outline: 2px solid var(--accent-hi);
-  outline-offset: 1px;
+  border-image-source: url('/img/ui/box-sel.png');
   box-shadow: 0 0 0 2px rgb(167 139 250 / 35%);
 }
 .teCard img {
@@ -647,8 +645,7 @@
   font-size: 11px;
 }
 .verTabs button[aria-selected='true'] {
-  outline: 2px solid var(--accent-hi);
-  outline-offset: 1px;
+  border-image-source: url('/img/ui/box-sel.png');
   background: rgb(139 92 246 / 18%);
 }
 .role {

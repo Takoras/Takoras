@@ -129,8 +129,7 @@
   position: relative;
 }
 .card.on {
-  outline: 2px solid var(--accent);
-  outline-offset: 1px;
+  border-image-source: url('/img/ui/box-sel.png');
   background: color-mix(in srgb, var(--accent) 10%, var(--surface));
 }
 .cardBtn {
