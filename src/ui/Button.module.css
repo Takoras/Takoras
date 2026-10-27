@@ -52,14 +52,30 @@
   box-shadow: none;
 }
 
+/* Bouton principal : texture dessinée à la main (9 morceaux), éclaircie au survol, assombrie à l'appui */
 .primary {
-  background: var(--accent);
+  min-height: 48px;
   color: var(--accent-ink);
-  box-shadow: var(--press) var(--accent-lo);
+  background: none;
+  border: 2px solid transparent;
+  border-image: url('/img/ui/btn-violet.png') 12 fill / 24px stretch;
+  image-rendering: pixelated;
+  text-shadow: 0 1px 0 rgb(40 10 80 / 70%);
+  filter: drop-shadow(0 3px 0 var(--accent-lo));
+}
+.primary.sm {
+  min-height: 36px;
+  border-image-width: 12px;
+}
+.primary.lg {
+  min-height: 56px;
 }
 
 .primary:not(:disabled):hover {
-  background: var(--accent-hover);
+  filter: brightness(1.12) drop-shadow(0 3px 0 var(--accent-lo));
+}
+.primary:not(:disabled):active {
+  filter: brightness(0.88);
 }
 
 .danger {

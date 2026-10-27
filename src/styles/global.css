@@ -136,3 +136,26 @@ html.lock body {
   margin: 0 0.3em 0 -0.35em;
   vertical-align: -0.28em;
 }
+
+/* Boutons violets des écrans de jeu (Ring, ouverture) : même texture dessinée que les boutons du site */
+:root .btn.primary {
+  background: none;
+  border: 2px solid transparent;
+  border-image: url('/img/ui/btn-violet.png') 12 fill / 24px stretch;
+  border-radius: 0;
+  image-rendering: pixelated;
+  box-shadow: none;
+  color: #fff;
+  text-shadow: 0 1px 0 rgb(40 10 80 / 70%);
+  filter: drop-shadow(0 3px 0 #4c1d95);
+}
+:root .btn.primary.sm {
+  border-image-width: 12px;
+}
+:root .btn.primary:not(:disabled):hover {
+  filter: brightness(1.12) drop-shadow(0 3px 0 #4c1d95);
+}
+:root .btn.primary:not(:disabled):active {
+  filter: brightness(0.88);
+  transform: translateY(2px);
+}
