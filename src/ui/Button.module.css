@@ -56,7 +56,7 @@
 .primary {
   min-height: 48px;
   color: var(--accent-ink);
-  background: #7d48d9 padding-box; /* même couleur que le centre : pas de fines lignes entre les morceaux */
+  background: linear-gradient(#7d48d9, #7d48d9) center / calc(100% - 16px) calc(100% - 16px) no-repeat; /* même couleur que le centre : pas de fines lignes entre les morceaux */
   border: 2px solid transparent;
   border-radius: 12px;
   border-image: url('/img/ui/btn-violet.png') 12 fill / 24px stretch;
@@ -91,15 +91,25 @@
   box-shadow: var(--press) #9a3412;
 }
 
+/* Bouton sombre : la boîte sombre dessinée à la main */
 .ghost {
-  background: var(--surface-2);
   color: var(--text);
-  border: 1px solid var(--line);
+  background: linear-gradient(#222034, #222034) center / calc(100% - 16px) calc(100% - 16px) no-repeat;
+  border: 2px solid transparent;
+  border-radius: 12px;
+  border-image: url('/img/ui/box-card.png') 12 fill / 24px stretch;
+  image-rendering: pixelated;
+}
+.ghost.sm {
+  border-image-width: 12px;
 }
 
 .ghost:not(:disabled):hover {
-  background: var(--surface-3);
-  border-color: var(--line-strong);
+  filter: brightness(1.25);
+}
+.ghost:not(:disabled):active {
+  filter: brightness(0.9);
+  transform: translateY(1px);
 }
 
 .label {

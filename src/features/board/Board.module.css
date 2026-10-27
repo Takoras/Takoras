@@ -66,36 +66,34 @@
   font-size: var(--fs-sm);
 }
 .step {
-  width: 100%;
+  /* marches du podium : textures dessinées à la main (le chiffre est dans le dessin) */
+  width: min(100%, 160px);
   margin-top: var(--s-2);
-  display: grid;
-  place-items: center;
-  border-radius: var(--r-md) var(--r-md) 0 0;
-  background: color-mix(in srgb, var(--ring) 14%, var(--surface));
-  border: 1px solid color-mix(in srgb, var(--ring) 45%, transparent);
-  border-bottom: 0;
-  font-family: var(--font-display);
-  font-weight: 800;
-  font-size: var(--fs-2xl);
-  color: var(--ring);
+  background: center bottom / 100% 100% no-repeat;
+  image-rendering: pixelated;
+  color: transparent;
+  font-size: 0;
 }
 .p1 {
   --ring: #f59e0b;
 }
 .p1 .step {
-  height: 170px;
+  aspect-ratio: 64 / 84;
+  background-image: url('/img/ui/podium-1.png');
 }
 .p2 {
-  --ring: #cbd5e1;
+  --ring: #a78bfa;
 }
 .p2 .step {
-  height: 120px;
+  aspect-ratio: 64 / 62;
+  background-image: url('/img/ui/podium-2.png');
 }
 .p3 {
-  --ring: #d97706;
+  --ring: #ea580c;
 }
 .p3 .step {
-  height: 90px;
+  aspect-ratio: 64 / 48;
+  background-image: url('/img/ui/podium-3.png');
 }
 
 .list {
@@ -113,7 +111,7 @@
   border: 3px solid transparent;
   border-radius: 16px;
   border-image: url('/img/ui/box-9.png') 14 fill / 28px stretch;
-  background: #39374f padding-box;
+  background: linear-gradient(#39374f, #39374f) center / calc(100% - 16px) calc(100% - 16px) no-repeat;
   image-rendering: pixelated;
 }
 .list li.me {
@@ -155,15 +153,6 @@
   }
   .podium {
     gap: var(--s-2);
-  }
-  .p1 .step {
-    height: 120px;
-  }
-  .p2 .step {
-    height: 86px;
-  }
-  .p3 .step {
-    height: 64px;
   }
   .pod b {
     font-size: var(--fs-sm);

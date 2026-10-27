@@ -139,7 +139,7 @@ html.lock body {
 
 /* Boutons violets des écrans de jeu (Ring, ouverture) : même texture dessinée que les boutons du site */
 :root .btn.primary {
-  background: #7d48d9 padding-box;
+  background: linear-gradient(#7d48d9, #7d48d9) center / calc(100% - 16px) calc(100% - 16px) no-repeat;
   border: 2px solid transparent;
   border-image: url('/img/ui/btn-violet.png') 12 fill / 24px stretch;
   border-radius: 12px;
@@ -158,4 +158,41 @@ html.lock body {
 :root .btn.primary:not(:disabled):active {
   filter: brightness(0.88);
   transform: translateY(2px);
+}
+
+/* Boutons sombres des écrans de jeu : même boîte sombre dessinée que le site */
+:root .btn.ghost {
+  background: linear-gradient(#222034, #222034) center / calc(100% - 16px) calc(100% - 16px) no-repeat;
+  border: 2px solid transparent;
+  border-image: url('/img/ui/box-card.png') 12 fill / 24px stretch;
+  border-radius: 12px;
+  image-rendering: pixelated;
+}
+:root .btn.ghost:not(:disabled):hover {
+  filter: brightness(1.25);
+}
+
+/* Barres de défilement maison (plus celle du navigateur) : fine, violette, carrée façon pixel art */
+* {
+  scrollbar-width: thin;
+  scrollbar-color: #5b4a8a transparent;
+}
+::-webkit-scrollbar {
+  width: 10px;
+  height: 10px;
+}
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+::-webkit-scrollbar-thumb {
+  background: #5b4a8a;
+  border: 2px solid #0d0d12;
+  border-radius: 0;
+  box-shadow: inset 2px 2px 0 #7d6ab8;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: #7d48d9;
+}
+::-webkit-scrollbar-corner {
+  background: transparent;
 }

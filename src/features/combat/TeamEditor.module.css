@@ -9,7 +9,7 @@
   border: 3px solid transparent;
   border-radius: 14px;
   border-image: url('/img/ui/box-card.png') 12 fill / 24px stretch;
-  background: #222034 padding-box;
+  background: linear-gradient(#222034, #222034) center / calc(100% - 16px) calc(100% - 16px) no-repeat;
   image-rendering: pixelated;
   position: relative;
   display: grid;
@@ -58,7 +58,7 @@
   border: 3px solid transparent;
   border-radius: 10px;
   border-image: url('/img/ui/box-card.png') 12 fill / 12px stretch;
-  background: #222034 padding-box;
+  background: linear-gradient(#222034, #222034) center / calc(100% - 16px) calc(100% - 16px) no-repeat;
   image-rendering: pixelated;
   display: grid;
   place-items: center;
@@ -87,7 +87,7 @@
   border: 3px solid transparent;
   border-radius: 10px;
   border-image: url('/img/ui/box-card.png') 12 fill / 12px stretch;
-  background: #222034 padding-box;
+  background: linear-gradient(#222034, #222034) center / calc(100% - 16px) calc(100% - 16px) no-repeat;
   image-rendering: pixelated;
   display: inline-flex;
   align-items: center;
@@ -100,7 +100,7 @@
   border: 3px solid transparent;
   border-radius: 10px;
   border-image: url('/img/ui/btn-violet.png') 12 fill / 12px stretch;
-  background: #7d48d9 padding-box;
+  background: linear-gradient(#7d48d9, #7d48d9) center / calc(100% - 16px) calc(100% - 16px) no-repeat;
   image-rendering: pixelated;
   border-color: var(--accent);
   color: #fff;
@@ -124,7 +124,7 @@
   border: 3px solid transparent;
   border-radius: 14px;
   border-image: url('/img/ui/box-card.png') 12 fill / 24px stretch;
-  background: #222034 padding-box;
+  background: linear-gradient(#222034, #222034) center / calc(100% - 16px) calc(100% - 16px) no-repeat;
   image-rendering: pixelated;
   position: relative;
 }

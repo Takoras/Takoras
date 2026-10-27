@@ -161,7 +161,7 @@
   border: 3px solid transparent;
   border-radius: 16px;
   border-image: url('/img/ui/box-9.png') 14 fill / 28px stretch;
-  background: #39374f padding-box;
+  background: linear-gradient(#39374f, #39374f) center / calc(100% - 16px) calc(100% - 16px) no-repeat;
   image-rendering: pixelated;
 }
 
