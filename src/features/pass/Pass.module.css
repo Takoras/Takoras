@@ -136,9 +136,11 @@
   font-weight: 800;
   text-align: center;
 }
+/* étiquette premium : boîte pêche à rayures dessinée à la main */
 .ticketGold {
-  background: linear-gradient(160deg, #f59e0b, #b45309);
-  color: #2b1300;
+  background: #ffe0b4 url('/img/ui/box-peach.png') center / 100% 100% no-repeat;
+  image-rendering: pixelated;
+  color: #7a3a06;
 }
 .dot {
   position: absolute;
@@ -188,27 +190,26 @@
 .track li.reached::before {
   background: linear-gradient(180deg, #fdba74, var(--gold));
 }
+/* numéros des paliers : ronds dessinés à la main (à venir, atteint, palier en cours) */
 .num {
   position: relative;
   display: grid;
   place-items: center;
-  width: 36px;
-  height: 36px;
-  border-radius: 50%;
-  background: #24243a;
-  border: 3px solid #0d0d12;
+  width: 42px;
+  height: 42px;
+  background: url('/img/ui/num-next.png') center / 42px 42px no-repeat;
+  image-rendering: pixelated;
   font-weight: 800;
   font-size: var(--fs-sm);
   color: var(--text-2);
 }
 .reached .num {
-  background: var(--gold);
+  background-image: url('/img/ui/num-done.png');
   color: #2b1300;
 }
 li[aria-current] .num {
-  background: #fff;
+  background-image: url('/img/ui/num-now.png');
   color: #2b1300;
-  box-shadow: 0 0 0 3px var(--gold);
 }
 
 .tile {
@@ -401,12 +402,14 @@ button.tile:focus-visible {
   gap: var(--s-3);
 }
 .how li {
+  border: 3px solid transparent;
+  border-radius: 14px;
+  border-image: url('/img/ui/box-card.png') 12 fill / 24px stretch;
+  background: #222034 padding-box;
+  image-rendering: pixelated;
   display: grid;
   gap: 2px;
   padding: var(--s-4);
-  border-radius: var(--r-sm);
-  background: var(--surface);
-  border: 1px solid var(--line);
   color: var(--text-2);
 }
 .how b {
@@ -429,14 +432,16 @@ button.tile:focus-visible {
   gap: var(--s-3);
 }
 .weekly li {
+  border: 3px solid transparent;
+  border-radius: 14px;
+  border-image: url('/img/ui/box-card.png') 12 fill / 24px stretch;
+  background: #222034 padding-box;
+  image-rendering: pixelated;
   display: grid;
   grid-template-columns: 1fr minmax(80px, 160px) auto;
   align-items: center;
   gap: var(--s-4);
   padding: var(--s-4);
-  border-radius: var(--r-sm);
-  background: var(--surface);
-  border: 1px solid var(--line);
 }
 .weekly li span:first-child {
   display: grid;

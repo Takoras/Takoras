@@ -3,24 +3,28 @@
   gap: var(--s-3);
   padding: var(--s-5);
   border: 3px solid transparent;
+  border-radius: 16px;
   border-image: url('/img/ui/box-9.png') 14 fill / 28px stretch;
-  background: none;
+  background: #39374f padding-box;
   image-rendering: pixelated;
 }
 
 .daily {
+  border: 3px solid transparent;
+  border-radius: 14px;
+  border-image: url('/img/ui/box-card.png') 12 fill / 24px stretch;
+  background: #222034 padding-box;
+  image-rendering: pixelated;
   display: flex;
   align-items: center;
   justify-content: space-between;
   gap: var(--s-3);
   padding: var(--s-3);
-  border-radius: var(--r-md);
-  background: var(--bg-raised);
-  border: 1px solid var(--line);
 }
 
 .daily.on {
-  border-color: var(--gold);
+  outline: 2px solid var(--gold);
+  outline-offset: 1px;
 }
 .daily small {
   display: block;
@@ -46,16 +50,19 @@
   gap: var(--s-2);
 }
 .list li {
+  border: 3px solid transparent;
+  border-radius: 14px;
+  border-image: url('/img/ui/box-card.png') 12 fill / 24px stretch;
+  background: #222034 padding-box;
+  image-rendering: pixelated;
   display: grid;
   gap: var(--s-2);
   padding: var(--s-3);
-  border-radius: var(--r-md);
-  background: var(--bg-raised);
-  border: 1px solid var(--line);
   font-size: var(--fs-sm);
 }
 .list li.ok {
-  border-color: var(--ok);
+  outline: 2px solid var(--ok);
+  outline-offset: 1px;
 }
 .list li.claimed {
   opacity: 0.55;

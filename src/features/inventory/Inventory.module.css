@@ -47,7 +47,11 @@
   text-decoration: none;
 }
 .tabs a[aria-current='page'] {
-  background: var(--accent);
+  border: 3px solid transparent;
+  border-radius: 10px;
+  border-image: url('/img/ui/btn-violet.png') 12 fill / 12px stretch;
+  background: #7d48d9 padding-box;
+  image-rendering: pixelated;
   color: #fff;
 }
 
@@ -59,14 +63,16 @@
   padding: 2px;
 }
 .shelf {
+  border: 3px solid transparent;
+  border-radius: 14px;
+  border-image: url('/img/ui/box-card.png') 12 fill / 24px stretch;
+  background: #222034 padding-box;
+  image-rendering: pixelated;
   display: flex;
   align-items: center;
   gap: var(--s-3);
   min-width: 220px;
   padding: var(--s-3) var(--s-4);
-  border-radius: var(--r-md);
-  background: var(--surface);
-  border: 2px solid var(--line);
   color: var(--text);
   text-align: left;
 }
@@ -82,7 +88,8 @@
   color: var(--muted);
 }
 .shelf[aria-pressed='true'] {
-  border-color: var(--accent-hi);
+  outline: 2px solid var(--accent-hi);
+  outline-offset: 1px;
   background: color-mix(in srgb, var(--accent) 16%, var(--surface));
 }
 .shelfSoon {
@@ -99,8 +106,9 @@
 .progress > div {
   padding: var(--s-3) var(--s-4);
   border: 3px solid transparent;
+  border-radius: 16px;
   border-image: url('/img/ui/box-9.png') 14 fill / 28px stretch;
-  background: none;
+  background: #39374f padding-box;
   image-rendering: pixelated;
   font-size: var(--fs-sm);
 }
@@ -135,15 +143,17 @@
   scrollbar-width: none;
 }
 .vtabs button {
+  border: 3px solid transparent;
+  border-radius: 10px;
+  border-image: url('/img/ui/box-card.png') 12 fill / 12px stretch;
+  background: #222034 padding-box;
+  image-rendering: pixelated;
   flex: none;
   display: flex;
   align-items: center;
   gap: var(--s-2);
   min-height: 40px;
   padding: 0 var(--s-4);
-  border-radius: var(--r-md);
-  background: var(--surface);
-  border: 1px solid var(--line);
   color: var(--text-2);
   font-weight: 600;
   font-size: var(--fs-sm);
@@ -157,7 +167,8 @@
 }
 .vtabs button[aria-selected='true'] {
   color: var(--text);
-  border-color: var(--accent-hi);
+  outline: 2px solid var(--accent-hi);
+  outline-offset: 1px;
   background: rgb(124 58 237 / 16%);
 }
 .vtabs .v_gold[aria-selected='true'] {
@@ -186,18 +197,21 @@
   gap: var(--s-2);
 }
 .chips button {
+  border: 3px solid transparent;
+  border-radius: 10px;
+  border-image: url('/img/ui/box-card.png') 12 fill / 12px stretch;
+  background: #222034 padding-box;
+  image-rendering: pixelated;
   min-height: 32px;
   padding: 0 var(--s-3);
-  border-radius: var(--r-pill);
-  background: var(--surface);
-  border: 1px solid var(--line);
   color: var(--text-2);
   font-size: var(--fs-xs);
   font-weight: 600;
 }
 .chips button[aria-pressed='true'] {
   color: var(--text);
-  border-color: var(--accent-hi);
+  outline: 2px solid var(--accent-hi);
+  outline-offset: 1px;
   background: rgb(124 58 237 / 18%);
 }
 .right {
@@ -231,12 +245,16 @@
   gap: var(--s-2);
 }
 .card {
+  border: 3px solid transparent;
+  border-radius: 14px;
+  /* centre peint par le fond (pour garder la lueur des jetons rares), la texture donne le contour */
+  border-image: url('/img/ui/box-card.png') 12 / 24px stretch;
+  background:
+    radial-gradient(circle at 50% 38%, rgba(var(--g), calc(0.16 * var(--ga, 0))), transparent 62%) padding-box,
+    #222034 padding-box;
+  image-rendering: pixelated;
   position: relative;
   display: grid;
-  border-radius: var(--r-md);
-  background:
-    radial-gradient(circle at 50% 38%, rgba(var(--g), calc(0.16 * var(--ga, 0))), transparent 62%), var(--surface);
-  border: 1px solid var(--line);
   transition:
     border-color var(--t-fast),
     transform var(--t-fast);
@@ -307,7 +325,8 @@
   animation: none !important;
 }
 .sel {
-  border-color: var(--accent-hi);
+  outline: 2px solid var(--accent-hi);
+  outline-offset: 1px;
   box-shadow:
     0 0 0 2px rgb(167 139 250 / 35%),
     0 0 22px rgb(124 58 237 / 25%);
@@ -472,14 +491,16 @@
   gap: var(--s-3);
 }
 .item {
+  border: 3px solid transparent;
+  border-radius: 14px;
+  border-image: url('/img/ui/box-card.png') 12 fill / 24px stretch;
+  background: #222034 padding-box;
+  image-rendering: pixelated;
   position: relative;
   display: grid;
   grid-template-rows: auto auto 1fr auto;
   gap: var(--s-2);
   padding: var(--s-5) var(--s-4) var(--s-4);
-  border-radius: var(--r-lg);
-  background: var(--surface);
-  border: 1px solid var(--line);
   text-align: center;
 }
 .item h2 {

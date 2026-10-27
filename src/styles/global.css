@@ -139,10 +139,10 @@ html.lock body {
 
 /* Boutons violets des écrans de jeu (Ring, ouverture) : même texture dessinée que les boutons du site */
 :root .btn.primary {
-  background: none;
+  background: #7d48d9 padding-box;
   border: 2px solid transparent;
   border-image: url('/img/ui/btn-violet.png') 12 fill / 24px stretch;
-  border-radius: 0;
+  border-radius: 12px;
   image-rendering: pixelated;
   box-shadow: none;
   color: #fff;

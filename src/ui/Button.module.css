@@ -56,8 +56,9 @@
 .primary {
   min-height: 48px;
   color: var(--accent-ink);
-  background: none;
+  background: #7d48d9 padding-box; /* même couleur que le centre : pas de fines lignes entre les morceaux */
   border: 2px solid transparent;
+  border-radius: 12px;
   border-image: url('/img/ui/btn-violet.png') 12 fill / 24px stretch;
   image-rendering: pixelated;
   text-shadow: 0 1px 0 rgb(40 10 80 / 70%);

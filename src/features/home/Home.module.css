@@ -159,8 +159,9 @@
   gap: var(--s-3);
   padding: var(--s-5);
   border: 3px solid transparent;
+  border-radius: 16px;
   border-image: url('/img/ui/box-9.png') 14 fill / 28px stretch;
-  background: none;
+  background: #39374f padding-box;
   image-rendering: pixelated;
 }
 

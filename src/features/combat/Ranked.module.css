@@ -55,8 +55,9 @@
   gap: var(--s-3);
   padding: var(--s-3) var(--s-4);
   border: 3px solid transparent;
+  border-radius: 16px;
   border-image: url('/img/ui/box-9.png') 14 fill / 28px stretch;
-  background: none;
+  background: #39374f padding-box;
   image-rendering: pixelated;
 }
 .cardMain {
@@ -118,6 +119,11 @@
   scrollbar-width: thin;
 }
 .road li {
+  border: 3px solid transparent;
+  border-radius: 14px;
+  border-image: url('/img/ui/box-card.png') 12 fill / 24px stretch;
+  background: #222034 padding-box;
+  image-rendering: pixelated;
   position: relative;
   flex: none;
   width: 86px;
@@ -125,9 +131,6 @@
   justify-items: center;
   gap: 4px;
   padding: var(--s-3) var(--s-1) var(--s-2);
-  border-radius: var(--r-md);
-  background: var(--surface);
-  border: 1px solid var(--line);
   text-align: center;
   scroll-snap-align: center;
 }
@@ -230,8 +233,9 @@
   gap: var(--s-2);
   padding: var(--s-3);
   border: 3px solid transparent;
+  border-radius: 16px;
   border-image: url('/img/ui/box-9.png') 14 fill / 28px stretch;
-  background: none;
+  background: #39374f padding-box;
   image-rendering: pixelated;
 }
 .around h2 {

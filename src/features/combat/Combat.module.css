@@ -57,8 +57,9 @@
   gap: var(--s-2);
   padding: var(--s-3);
   border: 3px solid transparent;
+  border-radius: 16px;
   border-image: url('/img/ui/box-9.png') 14 fill / 28px stretch;
-  background: none;
+  background: #39374f padding-box;
   image-rendering: pixelated;
 }
 .eloTop h2,
@@ -157,8 +158,9 @@
   gap: var(--s-3);
   padding: var(--s-3) var(--s-4);
   border: 3px solid transparent;
+  border-radius: 16px;
   border-image: url('/img/ui/box-9.png') 14 fill / 28px stretch;
-  background: none;
+  background: #39374f padding-box;
   image-rendering: pixelated;
 }
 .rankIco {
@@ -185,12 +187,15 @@
   gap: var(--s-2);
 }
 .play {
+  border: 3px solid transparent;
+  border-radius: 14px;
+  border-image: url('/img/ui/btn-violet.png') 12 fill / 24px stretch;
+  background: #7d48d9 padding-box;
+  image-rendering: pixelated;
   display: grid;
   place-items: center;
   min-height: 56px;
   padding: var(--s-2) var(--s-3);
-  border-radius: var(--r-md);
-  background: var(--accent);
   color: #fff;
   font-weight: 700;
 }
@@ -237,6 +242,13 @@
   gap: var(--s-2);
 }
 .slot {
+  border: 3px solid transparent;
+  border-radius: 14px;
+  border-image: url('/img/ui/box-card.png') 12 / 24px stretch;
+  background:
+    radial-gradient(circle at 50% 38%, rgba(var(--g, 139, 92, 246), calc(0.18 * var(--ga, 0))), transparent 62%) padding-box,
+    #222034 padding-box;
+  image-rendering: pixelated;
   position: relative;
   width: 100%;
   min-height: 170px;
@@ -245,11 +257,6 @@
   align-content: center;
   gap: 2px;
   padding: var(--s-5) var(--s-2) var(--s-3);
-  border-radius: var(--r-md);
-  background:
-    radial-gradient(circle at 50% 38%, rgba(var(--g, 139, 92, 246), calc(0.18 * var(--ga, 0))), transparent 62%),
-    var(--surface);
-  border: 1px solid var(--line);
   text-align: center;
 }
 .slot:hover {
@@ -295,8 +302,9 @@
 .help {
   padding: var(--s-3) var(--s-4);
   border: 3px solid transparent;
+  border-radius: 16px;
   border-image: url('/img/ui/box-9.png') 14 fill / 28px stretch;
-  background: none;
+  background: #39374f padding-box;
   image-rendering: pixelated;
 }
 .help summary {
@@ -420,19 +428,22 @@
   scrollbar-width: none;
 }
 .chipsRow button {
+  border: 3px solid transparent;
+  border-radius: 10px;
+  border-image: url('/img/ui/box-card.png') 12 fill / 12px stretch;
+  background: #222034 padding-box;
+  image-rendering: pixelated;
   flex: none;
   min-height: 32px;
   padding: 0 var(--s-3);
-  border-radius: var(--r-pill);
-  background: var(--bg-raised);
-  border: 1px solid var(--line);
   color: var(--text-2);
   font-size: var(--fs-xs);
   font-weight: 600;
 }
 .chipsRow button[aria-pressed='true'] {
   color: var(--text);
-  border-color: var(--accent-hi);
+  outline: 2px solid var(--accent-hi);
+  outline-offset: 1px;
   background: rgb(124 58 237 / 18%);
 }
 .legend {
@@ -453,6 +464,13 @@
   position: relative;
 }
 .teCard {
+  border: 3px solid transparent;
+  border-radius: 14px;
+  border-image: url('/img/ui/box-card.png') 12 / 24px stretch;
+  background:
+    radial-gradient(circle at 50% 22%, rgba(var(--g), calc(0.16 * var(--ga, 0))), transparent 55%) padding-box,
+    #222034 padding-box;
+  image-rendering: pixelated;
   position: relative;
   width: 100%;
   height: 100%;
@@ -461,14 +479,11 @@
   align-content: start;
   gap: 4px;
   padding: var(--s-6) var(--s-2) var(--s-3);
-  border-radius: var(--r-md);
-  background:
-    radial-gradient(circle at 50% 22%, rgba(var(--g), calc(0.16 * var(--ga, 0))), transparent 55%), var(--bg-raised);
-  border: 1px solid var(--line);
   text-align: center;
 }
 .sel .teCard {
-  border-color: var(--accent-hi);
+  outline: 2px solid var(--accent-hi);
+  outline-offset: 1px;
   box-shadow: 0 0 0 2px rgb(167 139 250 / 35%);
 }
 .teCard img {
@@ -615,12 +630,15 @@
   overflow-x: auto;
 }
 .verTabs button {
+  border: 3px solid transparent;
+  border-radius: 10px;
+  border-image: url('/img/ui/box-card.png') 12 fill / 12px stretch;
+  background: #222034 padding-box;
+  image-rendering: pixelated;
   display: inline-flex;
   align-items: center;
   gap: 6px;
   padding: 6px 12px;
-  border-radius: var(--r-pill);
-  border: 1px solid var(--line);
   font-size: var(--fs-sm);
   white-space: nowrap;
 }
@@ -629,7 +647,8 @@
   font-size: 11px;
 }
 .verTabs button[aria-selected='true'] {
-  border-color: var(--accent-hi);
+  outline: 2px solid var(--accent-hi);
+  outline-offset: 1px;
   background: rgb(139 92 246 / 18%);
 }
 .role {

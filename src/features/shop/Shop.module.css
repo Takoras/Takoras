@@ -22,18 +22,21 @@
   gap: var(--s-2);
 }
 .cats button {
+  border: 3px solid transparent;
+  border-radius: 10px;
+  border-image: url('/img/ui/box-card.png') 12 fill / 12px stretch;
+  background: #222034 padding-box;
+  image-rendering: pixelated;
   min-height: 36px;
   padding: 0 var(--s-4);
-  border-radius: var(--r-pill);
-  background: var(--surface);
-  border: 1px solid var(--line);
   color: var(--text-2);
   font-weight: 600;
   font-size: var(--fs-sm);
 }
 .cats button[aria-pressed='true'] {
   color: var(--text);
-  border-color: var(--accent-hi);
+  outline: 2px solid var(--accent-hi);
+  outline-offset: 1px;
   background: rgb(124 58 237 / 18%);
 }
 .h2 {
@@ -67,8 +70,9 @@
   min-height: 150px;
   padding: var(--s-3);
   border: 3px solid transparent;
+  border-radius: 16px;
   border-image: url('/img/ui/box-9.png') 14 fill / 28px stretch;
-  background: none;
+  background: #39374f padding-box;
   image-rendering: pixelated;
 }
 .card.epic {
@@ -163,8 +167,9 @@
   gap: var(--s-3);
   padding: var(--s-5);
   border: 3px solid transparent;
+  border-radius: 16px;
   border-image: url('/img/ui/box-9.png') 14 fill / 28px stretch;
-  background: none;
+  background: #39374f padding-box;
   image-rendering: pixelated;
 }
 .form {
