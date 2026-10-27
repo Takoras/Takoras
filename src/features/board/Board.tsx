@@ -3,7 +3,6 @@ import { Link } from 'react-router';
 import { useQuery } from '@tanstack/react-query';
 import { publicApi } from '@/api';
 import { useMe } from '@/api/queries';
-import { SERIES } from '@/data/jetons';
 import { locale, useSettings } from '@/lib/settings';
 import { useT } from '@/i18n/useT';
 import { Avatar } from '@/ui/Avatar';
@@ -12,11 +11,11 @@ import { RankBadge, useRankName } from '../combat/Ranked';
 import { rankOf } from '../combat/rankedApi';
 import s from './Board.module.css';
 
-// Classement : podium (top 3) + liste. Collection, Elo du classé, pulls ouverts (cette semaine ou depuis toujours)
-// et temps de jeu.
+// Classement : podium (top 3) + liste. Elo du classé, victoires, tirages ouverts et temps de jeu
+// (cette semaine ou depuis toujours). Que des scores sans plafond (plus de « collection », que tout le monde finira).
 const KINDS = [
-  ['ui.k_collec', 'collec'],
   ['ui.k_elo', 'elo'],
+  ['ui.k_wins', 'wins'],
   ['ui.k_pulls', 'pulls'],
   ['ui.k_time', 'time'],
 ] as const;
@@ -48,8 +47,16 @@ export default function Board() {
     // toutes les catégories : cette semaine ou depuis toujours (Elo depuis toujours = meilleur Elo jamais atteint)
     queryFn: async () => {
       const since = period === 'week' ? weekStart() : null;
-      if (id === 'elo' || id === 'time')
-        return (await (id === 'elo' ? publicApi.leaderboardElo : publicApi.leaderboardTime)(since, 50)).map((r) => ({
+      if (id === 'elo' || id === 'time' || id === 'wins')
+        return (
+          await (
+            id === 'elo'
+              ? publicApi.leaderboardElo
+              : id === 'wins'
+                ? publicApi.leaderboardWins
+                : publicApi.leaderboardTime
+          )(since, 50)
+        ).map((r) => ({
           pseudo: r.pseudo,
           value: Number(r.value),
           jeton: '',
@@ -71,7 +78,7 @@ export default function Board() {
       );
     }
     if (id === 'time') return playTime(r.value, locale(lang));
-    if (id === 'collec') return t('ui.u_collec', { n: fmt(r.value), t: SERIES.Takoras?.length ?? 0 });
+    if (id === 'wins') return t('ui.u_wins', { n: fmt(r.value) });
     return t('ui.u_pulls', { n: fmt(r.value) });
   };
   const mine = (r: Row) => !!me.data?.pseudo && r.pseudo === me.data.pseudo;

@@ -437,6 +437,16 @@ function rgPreview() {
   const other = hitEv ? RNG.st.bodies.findIndex(b => b.id === (hitEv.a === RNG.sel ? hitEv.b : hitEv.a)) : -1;
   const cut = r.firstHit >= 0 ? r.firstHit + 1 : r.frames.length;
   RNG.prev = { me: r.frames.slice(0, cut + 40).map(f => f[idx]).filter(Boolean), hit: other >= 0 ? r.frames.slice(cut).map(f => f[other]).filter(Boolean) : [], cut, out: r.ev.some(e => e.t === 'out' && e.id === RNG.sel) };
+  // Dévoreur (Takoras) activé : on simule tout le tour pour montrer EXACTEMENT les deux moitiés de la mâchoire
+  // et l'ennemi qui sera avalé (même moteur que le vrai tour)
+  const b = RNG.st.bodies[idx];
+  if (b && b.pw === 'devour' && RNG.pows?.has(b.id) && b.full == null) {
+    const sim2 = RG.clone(RNG.st), r2 = RG.resolve(sim2, sh), n = RNG.st.bodies.length;
+    const join = r2.ev.find(e => e.t === 'join' && e.id === b.id), eat = r2.ev.find(e => e.t === 'devour' && e.id === b.id);
+    const end = join ? Math.min(r2.frames.length, Math.round(join.at / RCFG.DT) + 2) : r2.frames.length;
+    const fr = r2.frames.slice(0, end);
+    RNG.prev.jaw = { a: fr.map(f => f[idx]).filter(Boolean), b: fr.map(f => f[n]).filter(Boolean), eat: eat ? eat.to : null };
+  }
 }
 function rgLock(auto) {
   if (RNG.phase !== 'aim' || RNG.locked) return;
@@ -949,7 +959,30 @@ function rgDraw(dt) {
     if (RNG.prev && RNG.aim) {
       const col = RNG.aim.f < .5 ? '#a78bfa' : RNG.aim.f < .8 ? '#fb923c' : '#f43f5e';
       // pouvoirs qui ne font pas rouler le jeton : on montre la FORME de l'effet au lieu de la flèche
-      if (!rgShapeAim(c, sel, sx, sy, col, t)) {
+      if (RNG.prev.jaw) {
+        // Dévoreur : les deux moitiés (bleu), la zone de la mâchoire entre elles, et l'ennemi avalé entouré
+        const J = RNG.prev.jaw;
+        if (J.a.length > 1 && J.b.length > 1) {
+          c.save();
+          c.fillStyle = 'rgba(159,182,255,.12)'; c.beginPath();
+          J.a.forEach((p, k) => { const [x, y] = w2s(p[0], p[1]); k ? c.lineTo(x, y) : c.moveTo(x, y); });
+          for (let k = J.b.length - 1; k >= 0; k--) { const [x, y] = w2s(J.b[k][0], J.b[k][1]); c.lineTo(x, y); }
+          c.closePath(); c.fill();
+          for (const L of [J.a, J.b]) {
+            c.strokeStyle = '#9fb6ff'; c.lineWidth = px * 2; c.setLineDash([px * 3, px * 2]); c.lineDashOffset = -t * 30;
+            c.beginPath(); L.forEach((p, k) => { const [x, y] = w2s(p[0], p[1]); k ? c.lineTo(x, y) : c.moveTo(x, y); }); c.stroke();
+            const e = L[L.length - 1]; if (e) { const [x, y] = w2s(e[0], e[1]); c.setLineDash([]); c.globalAlpha = .5; c.beginPath(); c.arc(x, y, sel.r * V.s * .7, 0, 7); c.stroke(); c.globalAlpha = 1; }
+          }
+          c.setLineDash([]);
+          const o = J.eat != null ? RNG.st.bodies.find(x => x.id === J.eat) : null;
+          if (o) {
+            const [x, y] = w2s(o.x, o.y), rr = o.r * V.s + px * 5 + Math.sin(t * 9) * px * 1.5;
+            c.strokeStyle = '#9fb6ff'; c.lineWidth = px * 3; c.beginPath(); c.arc(x, y, rr, 0, 7); c.stroke();
+            c.fillStyle = '#e0e7ff'; c.font = `900 ${Math.round(px * 9)}px Outfit Variable, sans-serif`; c.textAlign = 'center'; c.fillText('!', x, y - rr - px * 3);
+          }
+          c.restore();
+        }
+      } else if (!rgShapeAim(c, sel, sx, sy, col, t)) {
         // trajectoire prévue : pointillés pixel
         c.fillStyle = RNG.prev.out ? '#f43f5e' : 'rgba(255,255,255,.8)';
         RNG.prev.me.forEach((p, k) => { if (k % 3) return; const [x, y] = w2s(p[0], p[1]); c.fillRect(Math.round(x / px) * px, Math.round(y / px) * px, px, px); });

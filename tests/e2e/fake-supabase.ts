@@ -469,6 +469,7 @@ export async function fakeSupabase(
       Object.assign(prof, { avatar: b.p_avatar, banner: b.p_banner, bio: b.p_bio, showcase: b.p_showcase });
       return json(null);
     }
+    if (rpc === 'ranked_of') return json({ elo: 1026, games: 12 });
     if (rpc === 'collection_of')
       return json([
         { jeton: 'Mobu', serie: 'Takoras', variant: 'gold', total: 1 },
@@ -569,6 +570,7 @@ export async function fakeSupabase(
     }
     if (rpc === 'leaderboard_elo')
       return json(['Alpha', 'Testeur', 'Bravo'].map((pseudo, i) => ({ pseudo, value: 1480 - i * 420 })));
+    if (rpc === 'leaderboard_wins') return json([{ pseudo: 'Alpha', value: 12 }]);
     if (rpc === 'leaderboard_time')
       return json(['Alpha', 'Testeur'].map((pseudo, i) => ({ pseudo, value: 7500 - i * 3000 })));
     if (rpc === 'leaderboard') {

@@ -10,7 +10,6 @@ import {
   texOf,
   tierCol,
   tierKey,
-  type Variant,
   vImg,
   vOdds,
   glowVars,
@@ -27,11 +26,9 @@ import { useT } from '@/i18n/useT';
 import { Button } from '@/ui/Button';
 import { confirm } from '@/ui/confirm';
 import { toast } from '@/ui/toast';
-import { VTag } from '@/ui/VTag';
-import { CombatInfo, JetonModal } from './JetonModal';
+import { JetonModal } from './JetonModal';
 import {
   cKey,
-  levelInfo,
   lvlOf,
   needsConfirm,
   quickSelect,
@@ -41,7 +38,6 @@ import {
   visibleCards,
   VKEYS,
   type Card,
-  type Coll,
   type Group,
   type Sort,
   type View,
@@ -85,7 +81,6 @@ export default function Bestiary() {
   const [sel, setSel] = useState<Map<string, number>>(new Map());
   const [open, setOpen] = useState<{ name: string; key: string } | null>(null);
   const [busy, setBusy] = useState(false);
-  const [lvlUp, setLvlUp] = useState(0);
   const grid = useRef<HTMLUListElement>(null);
   const snap = useRef<{ m: Map<string, DOMRect>; dissolve: boolean } | null>(null);
 
@@ -177,7 +172,6 @@ export default function Bestiary() {
       else m.delete(g.key);
       return setSel(m);
     }
-    setLvlUp(0);
     setOpen({ name: c.j.name, key: g?.key ?? '' });
   };
 
@@ -365,20 +359,27 @@ export default function Bestiary() {
           name={open.name}
           serie={view.serie}
           variant={og ? og.variant : view.vtab}
-          lvl={lvlOf(d, view.serie, open.name)}
           locked={!og && !oc}
-          celebrate={lvlUp}
+          found={oc?.vars}
+          facts={
+            <>
+              <li>{t('ui.inv_have', { n: og?.ids.length ?? 0 })}</li>
+              {oc ? <li>{t('ui.bst_got', { n: oc.total })}</li> : null}
+              {og?.deck ? <li>{t('ui.in_deck')}</li> : null}
+              {og?.shown ? <li>{t('ui.shown_n', { n: og.shown })}</li> : null}
+              {og && og.luck > 1 ? <li>{t('ui.best_luck', { l: fmtLuck(og.luck) })}</li> : null}
+              {og ? (
+                <li>
+                  {t('ui.sell_value')} · {fmt(sellValue(og.odds, og.variant))} <Coin />
+                </li>
+              ) : null}
+            </>
+          }
           onClose={() => setOpen(null)}
         >
-          {!og && !oc ? (
-            <p className="muted">{t('ui.bst_unknown')}</p>
-          ) : (
+          {og ? (
             <Sheet
               g={og}
-              c={oc}
-              name={open.name}
-              serie={view.serie}
-              vtab={view.vtab}
               onSell={async (ids) => {
                 // la fiche reste ouverte et se met à jour (Tu en as N…)
                 if (await sell(ids)) await refresh(true);
@@ -393,7 +394,7 @@ export default function Bestiary() {
                 await refresh(false);
               }}
             />
-          )}
+          ) : null}
         </JetonModal>
       ) : null}
     </section>
@@ -480,27 +481,18 @@ function CardView({
   );
 }
 
-// Contenu de la fiche dans le bestiaire : combien j'en ai, variantes trouvées, combat, actions
+// Boutons de la fiche dans le bestiaire : vendre, vendre les doublons, verrouiller
 function Sheet({
   g,
-  c,
-  name,
-  serie,
-  vtab,
   onSell,
   onLock,
 }: {
-  g?: Group;
-  c?: Coll;
-  name: string;
-  serie: string;
-  vtab: string;
+  g: Group;
   onSell: (ids: number[]) => Promise<void>;
   onLock: (g: Group, lock: boolean) => Promise<void>;
 }) {
   const t = useT();
   const lang = useSettings((x) => x.lang);
-  const inv = useInventory();
   const [busy, setBusy] = useState('');
   const fmt = (n: number) => n.toLocaleString(locale(lang));
   const run = (k: string, f: () => Promise<void>) => async () => {
@@ -508,56 +500,22 @@ function Sheet({
     await f();
     setBusy('');
   };
-  const d = inv.data;
-  if (!d) return null;
-  const lv = levelInfo(d, serie, name);
-  const allLocked = !!g && !g.free.length;
+  const allLocked = !g.free.length;
   return (
     <>
-      <ul className={s.owned}>
-        <li>{t('ui.inv_have', { n: g?.ids.length ?? 0 })}</li>
-        {c ? <li>{t('ui.bst_got', { n: c.total })}</li> : null}
-        {g?.shown ? <li>{t('ui.shown_n', { n: g.shown })}</li> : null}
-        {g?.deck ? <li>{t('ui.in_deck')}</li> : null}
-        {g && g.luck > 1 ? <li>{t('ui.best_luck', { l: fmtLuck(g.luck) })}</li> : null}
-      </ul>
-      {c ? (
-        <ul className={s.vlist} aria-label={t('ui.bst_variants')}>
-          {VKEYS.map((v) => (
-            <li key={v} className={c.vars[v] ? s.on : undefined}>
-              {c.vars[v] ? (
-                <VTag v={v} />
-              ) : (
-                <span className="muted">
-                  {t(`ui.v_${v}`)} · 1/{fmt(vOdds(jetonOf(name, serie).odds, v as Variant))}
-                </span>
-              )}
-            </li>
-          ))}
-        </ul>
+      {g.free.length && g.free[0] !== undefined ? (
+        <Button variant="primary" loading={busy === 'one'} onClick={run('one', () => onSell([g.free[0] as number]))}>
+          {t('ui.sell_one')} · +{fmt(sellValue(g.odds, g.variant))} <Coin />
+        </Button>
       ) : null}
-      <CombatInfo name={name} lvl={lv.L} variant={g?.variant ?? vtab} showLvl={false} />
-      {g ? (
-        <div className={s.actions}>
-          {g.free.length && g.free[0] !== undefined ? (
-            <Button
-              variant="primary"
-              loading={busy === 'one'}
-              onClick={run('one', () => onSell([g.free[0] as number]))}
-            >
-              {t('ui.sell_one')} · +{fmt(sellValue(g.odds, g.variant))} <Coin />
-            </Button>
-          ) : null}
-          {g.free.length > 1 ? (
-            <Button loading={busy === 'dupes'} onClick={run('dupes', () => onSell(g.free.slice(0, g.ids.length - 1)))}>
-              {t('ui.sell_dupes', { n: g.ids.length - 1 })}
-            </Button>
-          ) : null}
-          <Button loading={busy === 'lock'} onClick={run('lock', () => onLock(g, !allLocked))}>
-            {allLocked ? `${t('ui.unlock')}` : `${t('ui.lock')}`}
-          </Button>
-        </div>
+      {g.free.length > 1 ? (
+        <Button loading={busy === 'dupes'} onClick={run('dupes', () => onSell(g.free.slice(0, g.ids.length - 1)))}>
+          {t('ui.sell_dupes', { n: g.ids.length - 1 })}
+        </Button>
       ) : null}
+      <Button loading={busy === 'lock'} onClick={run('lock', () => onLock(g, !allLocked))}>
+        {allLocked ? t('ui.unlock') : t('ui.lock')}
+      </Button>
     </>
   );
 }

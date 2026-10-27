@@ -24,7 +24,7 @@
 .sideRank,
 .sideDex {
   display: grid;
-  gap: var(--s-3);
+  gap: var(--s-8);
   align-content: start;
   min-width: 0;
 }
@@ -58,19 +58,18 @@
 }
 
 /* Top Elo */
+/* listes de la colonne de droite : ouvertes, sans grande boîte */
 .eloTop {
   display: grid;
   gap: var(--s-2);
-  padding: var(--s-3);
-  border: 3px solid transparent;
-  border-radius: 16px;
-  border-image: url('/img/ui/box-9.png?v=3') 14 fill / 28px stretch;
-  background: linear-gradient(#39374f, #39374f) center / calc(100% - 16px) calc(100% - 16px) no-repeat;
-  image-rendering: pixelated;
 }
 .eloTop h2,
 .dex h2 {
-  font-size: var(--fs-md);
+  font-size: var(--fs-xs);
+  font-weight: 800;
+  color: var(--muted);
+  text-transform: uppercase;
+  letter-spacing: var(--tracking-caps);
 }
 .eloTop ol {
   list-style: none;
@@ -728,4 +727,44 @@
     min-height: 240px;
     overflow-y: auto;
   }
+}
+
+/* Carte d'équipe : nom + tampon sur la même ligne, ⇄ en coin (toucher = changer), « i » = la fiche */
+.slotWrap {
+  position: relative;
+}
+.slotName {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+}
+.swap {
+  position: absolute;
+  top: 8px;
+  right: 10px;
+  color: var(--muted);
+  font-size: var(--fs-md);
+  transition:
+    color var(--t-fast),
+    transform var(--t-fast);
+}
+.slot:hover .swap {
+  color: var(--text);
+  transform: rotate(180deg);
+}
+.infoBtn {
+  position: absolute;
+  top: 8px;
+  left: 8px;
+  width: 26px;
+  height: 26px;
+  border-radius: 50%;
+  border: 2px solid var(--line-strong);
+  color: var(--text-2);
+  font: 800 13px / 1 var(--font-display);
+  font-style: italic;
+}
+.infoBtn:hover {
+  border-color: var(--accent-hi);
+  color: var(--text);
 }

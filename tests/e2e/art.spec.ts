@@ -51,11 +51,11 @@ test('effets réduits : images fixes mais la variante garde sa couleur', async (
 test('mutations : vrais tampons dans l’éditeur d’équipe, onglets colorés dans le Bestiaire', async ({ page }) => {
   await fakeSupabase(page, {}, [], { deck: [15, 16, 17] });
   await page.goto('/combat');
-  // plus de bouton « Modifier » : on touche un jeton de l'équipe, puis « Modifier l'équipe » dans sa fiche
-  await page.getByRole('region', { name: 'Équipe' }).getByRole('button').first().click();
+  // toucher un jeton de l'équipe ouvre tout de suite l'éditeur, cette place visée
   await page
-    .getByRole('dialog')
-    .getByRole('button', { name: /Modifier/ })
+    .getByRole('region', { name: 'Équipe' })
+    .getByRole('button', { name: /Changer ce jeton/ })
+    .first()
     .click();
   const b = page.getByRole('dialog').getByRole('radio', { name: 'Doré' });
   expect(

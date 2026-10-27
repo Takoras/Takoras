@@ -229,8 +229,8 @@ li[aria-current] .num {
     filter 0.15s;
 }
 .tile.gold {
-  /* fond doré un peu plus sombre : les objets ressortent mieux */
-  background-image: url('/img/ui/box-gold-dark.png?v=3');
+  /* fond doré à peine plus sombre (garde l'effet or) : les objets ressortent mieux */
+  background-image: url('/img/ui/box-gold-mid.png?v=3');
   color: #3b1a02;
 }
 .tile img {

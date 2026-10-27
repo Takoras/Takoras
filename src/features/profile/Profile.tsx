@@ -5,7 +5,6 @@ import { accountApi, errorText, publicApi } from '@/api';
 import { useMe } from '@/api/queries';
 import { BANNER_IMG, bannerName } from '@/data/items';
 import {
-  hexRGB,
   jetonOf,
   MYSTERE,
   SERIES,
@@ -31,7 +30,7 @@ import { Modal } from '@/ui/Modal';
 import { toast } from '@/ui/toast';
 import { VTag } from '@/ui/VTag';
 import { JetonModal } from '../inventory/JetonModal';
-import { cKey, useInventory } from '../inventory/inv';
+import { useInventory } from '../inventory/inv';
 import { NeedLogin } from '@/app/NeedLogin';
 import { FriendButton } from '../social/FriendButton';
 import { RankBadge, useRankName } from '../combat/Ranked';
@@ -113,7 +112,7 @@ export default function Profile() {
           <span className="muted">{t('ui.no_banner')}</span>
         ) : null}
       </div>
-      {/* seule la photo chevauche la bannière ; le pseudo et la bio restent dessous */}
+      {/* la photo chevauche la bannière ; à droite, le rang classé en grand (c'est ce qu'on montre) */}
       <header className={s.head}>
         <div className={s.pp}>
           <Avatar pseudo={p.pseudo} avatar={p.avatar} size={112} />
@@ -123,54 +122,57 @@ export default function Profile() {
             {p.pseudo} <small className={s.num}>#{String(p.num).padStart(6, '0')}</small>
           </h1>
           {p.bio || mine ? <p className="muted">{p.bio || t('ui.bio_empty_me')}</p> : null}
+          <div className={s.headActions}>
+            {mine ? (
+              <Button size="sm" onClick={() => setEdit(true)}>
+                {t('ui.edit_profile')}
+              </Button>
+            ) : user ? (
+              <FriendButton pseudo={p.pseudo} />
+            ) : null}
+          </div>
         </div>
-        <div className={s.headActions}>
-          {mine ? (
-            <Button onClick={() => setEdit(true)}>{t('ui.edit_profile')}</Button>
-          ) : user ? (
-            <FriendButton pseudo={p.pseudo} />
-          ) : null}
-        </div>
+        <EloHero pseudo={p.pseudo} />
       </header>
-      <dl className={s.stats}>
-        <EloBox pseudo={p.pseudo} />
-        <div>
-          <dt>{t('ui.st_pulls')}</dt>
-          <dd>{fmt(p.pulls)}</dd>
-        </div>
-        <div>
-          <dt>{t('ui.st_collec')}</dt>
-          <dd>
+      {/* chiffres posés en ligne, sans boîtes */}
+      <ul className={s.strip}>
+        <li>
+          <b>{fmt(p.pulls)}</b> {t('ui.st_pulls')}
+        </li>
+        <li>
+          <b>
             {p.collection}/{total}
-          </dd>
-        </div>
-        <div>
-          <dt>{t('ui.st_owned')}</dt>
-          <dd>{fmt(p.owned)}</dd>
-        </div>
-        <div>
-          <dt>{t('ui.st_streak')}</dt>
-          <dd>{p.streak > 0 ? `🔥 ${p.streak}` : '—'}</dd>
-        </div>
-        <div className={s.bestCell}>
-          <dt>
-            {t('ui.st_best')}
-            {bp ? ` · 1/${fmt(bp.eff)}` : ''}
-          </dt>
-          <dd>
-            {bp ? (
-              <span className={s.best} style={glowVars(jetonOf(bp.jeton), bp.variant) as CSSProperties}>
-                <img className={vImg(bp.variant)} src={texOf(jetonOf(bp.jeton))} alt="" width={40} height={40} />
-                <span>
-                  {jn(bp.jeton)} <VTag v={bp.variant} />
-                </span>
-              </span>
-            ) : (
-              '—'
-            )}
-          </dd>
-        </div>
-      </dl>
+          </b>{' '}
+          {t('ui.st_collec')}
+        </li>
+        <li>
+          <b>{fmt(p.owned)}</b> {t('ui.st_owned')}
+        </li>
+        {p.streak > 0 ? (
+          <li>
+            <b>🔥 {p.streak}</b> {t('ui.st_streak')}
+          </li>
+        ) : null}
+        {p.wins || p.losses ? (
+          <li>
+            <b>
+              {p.wins || 0}–{p.losses || 0}
+            </b>{' '}
+            {t('ui.st_record')}
+          </li>
+        ) : null}
+        {bp ? (
+          <li className={s.bestLi} style={glowVars(jetonOf(bp.jeton), bp.variant) as CSSProperties}>
+            <img className={vImg(bp.variant)} src={texOf(jetonOf(bp.jeton))} alt="" width={36} height={36} />
+            <span>
+              <b>
+                {jn(bp.jeton)} <VTag v={bp.variant} />
+              </b>{' '}
+              {t('ui.st_best')} · 1/{fmt(bp.eff)}
+            </span>
+          </li>
+        ) : null}
+      </ul>
       <h2 className={s.h2}>{t('ui.showcase')}</h2>
       {/* vitrine : les jetons posés librement (pas de boîte), le nom, la mutation et la vraie chance dessous */}
       <ul className={s.showcase}>
@@ -207,10 +209,7 @@ export default function Profile() {
         })}
       </ul>
       <Bestiaries pseudo={p.pseudo} onOpen={setSerie} />
-      <p className="muted">
-        {t('ui.joined', { d: new Date(p.joined).toLocaleDateString(locale(lang)) })}
-        {p.wins || p.losses ? ` · ${t('ui.battles_rec', { w: p.wins || 0, l: p.losses || 0 })}` : ''}
-      </p>
+      <p className="muted">{t('ui.joined', { d: new Date(p.joined).toLocaleDateString(locale(lang)) })}</p>
       {mine ? (
         <section className={s.private} aria-labelledby="pv-t">
           <h2 id="pv-t" className={s.h2}>
@@ -249,14 +248,7 @@ export default function Profile() {
           />
         </Modal>
       ) : null}
-      <JetonModal
-        name={jeton?.name ?? null}
-        variant={jeton?.variant}
-        locked={jeton?.locked}
-        onClose={() => setJeton(null)}
-      >
-        {jeton && !jeton.locked ? <TheirSheet pseudo={p.pseudo} name={jeton.name} /> : null}
-      </JetonModal>
+      <TheirJeton pseudo={p.pseudo} jeton={jeton} onClose={() => setJeton(null)} />
       {mine && slot !== null ? <ShowcasePicker p={p} slot={slot} onClose={() => setSlot(null)} /> : null}
       {mine && edit ? <EditProfile p={p} onClose={() => setEdit(false)} /> : null}
     </section>
@@ -356,38 +348,37 @@ function Collection({
   );
 }
 
-// Fiche d'un jeton chez un autre joueur : combien il en a, combien il en a eu, ses variantes (comme ton bestiaire)
-function TheirSheet({ pseudo, name }: { pseudo: string; name: string }) {
+// Fiche d'un jeton chez un joueur : combien il en a, combien il en a eu, ses mutations trouvées (tampons)
+function TheirJeton({
+  pseudo,
+  jeton,
+  onClose,
+}: {
+  pseudo: string;
+  jeton: { name: string; variant: string; locked: boolean } | null;
+  onClose: () => void;
+}) {
   const t = useT();
   const lang = useSettings((x) => x.lang);
   const fmt = (n: number) => n.toLocaleString(locale(lang));
   const q = useQuery({ queryKey: ['collection', pseudo.toLowerCase()], queryFn: () => publicApi.collectionOf(pseudo) });
-  const rows = (q.data ?? []).filter((r) => r.jeton === name);
+  const rows = (q.data ?? []).filter((r) => r.jeton === jeton?.name);
   const owned = rows.reduce((n, r) => n + Number(r.owned ?? 0), 0),
-    total = rows.reduce((n, r) => n + Number(r.total), 0),
-    j = jetonOf(name);
+    total = rows.reduce((n, r) => n + Number(r.total), 0);
   return (
-    <>
-      <ul className={s.their}>
-        <li>{t('ui.their_have', { n: fmt(owned) })}</li>
-        <li>{t('ui.bst_got', { n: fmt(total) })}</li>
-      </ul>
-      <ul className={s.theirVars}>
-        {(['gold', 'celeste', 'ombre'] as Variant[]).map((v) => {
-          const r = rows.find((x) => x.variant === v);
-          return (
-            <li key={v} className={r ? s.on : undefined}>
-              {r ? <VTag v={v} /> : <span className="muted">{t(`ui.v_${v}`)}</span>}
-              <small className="muted">
-                {' '}
-                1/{fmt(vOdds(j.odds, v))}
-                {r ? ` · ×${fmt(Number(r.total))}` : ''}
-              </small>
-            </li>
-          );
-        })}
-      </ul>
-    </>
+    <JetonModal
+      name={jeton?.name ?? null}
+      variant={jeton?.variant}
+      locked={jeton?.locked}
+      found={Object.fromEntries(rows.map((r) => [r.variant ?? '', true]))}
+      facts={
+        <>
+          <li>{t('ui.their_have', { n: fmt(owned) })}</li>
+          <li>{t('ui.bst_got', { n: fmt(total) })}</li>
+        </>
+      }
+      onClose={onClose}
+    />
   );
 }
 
@@ -403,21 +394,24 @@ const saveProfile = (
     ...part,
   });
 
-// Choisir le jeton d'une case de la vitrine
+// Choisir le jeton d'une case de la vitrine : la série en haut (comme le bestiaire), toute la collection
+// (ceux pas encore eus en silhouette) ; toucher un jeton ouvre sa fiche, où l'on choisit la mutation à montrer.
 function ShowcasePicker({ p, slot, onClose }: { p: Prof; slot: number; onClose: () => void }) {
   const t = useT();
   const jn = useJn();
   const lang = useSettings((x) => x.lang);
   const qc = useQueryClient();
   const inv = useInventory();
-  const [q, setQ] = useState('');
-  const [sort, setSort] = useState<'rarity' | 'name'>('rarity');
-  const fmt = (n: number) => n.toLocaleString(locale(lang));
+  const [serie, setSerie] = useState(Object.keys(SERIES)[0] ?? 'Takoras');
+  const [open, setOpen] = useState<string | null>(null);
+  const [pv, setPv] = useState('');
   const show = p.showcase ?? [];
   const used = new Set(show.filter(Boolean).map((x) => x?.id));
-  const list = (inv.data?.groups ?? [])
-    .filter((g) => jn(g.name).toLowerCase().includes(q.toLowerCase()))
-    .sort(sort === 'name' ? (a, b) => jn(a.name).localeCompare(jn(b.name)) : (a, b) => b.odds - a.odds);
+  const groups = (inv.data?.groups ?? []).filter((g) => (g.serie || 'Takoras') === serie);
+  // une case libre pour ce jeton dans cette mutation (pas déjà dans une autre case de la vitrine)
+  const freeId = (name: string, v: string) =>
+    groups.find((g) => g.name === name && (g.variant || '') === v)?.ids.find((i) => !used.has(i));
+  const all = [...(SERIES[serie] ?? [])].sort((a, b) => a.odds - b.odds);
   const save = async (id: number | null) => {
     // 5 cases fixes : le jeton va exactement dans la case choisie
     const ids = Array.from({ length: 5 }, (_, i) => show[i]?.id ?? null);
@@ -432,59 +426,68 @@ function ShowcasePicker({ p, slot, onClose }: { p: Prof; slot: number; onClose: 
       toast(errorText(e, lang), true);
     }
   };
+  const owns = (name: string) => groups.some((g) => g.name === name);
+  const found = open
+    ? Object.fromEntries((['', 'gold', 'celeste', 'ombre'] as const).map((v) => [v, !!freeId(open, v)]))
+    : {};
+  const pick = open ? freeId(open, pv) : undefined;
   return (
-    <Modal open onClose={onClose} title={t('ui.pick_title', { n: slot + 1 })} wide>
-      <div className={s.pkTools}>
-        <input
-          type="search"
-          value={q}
-          onChange={(e) => setQ(e.target.value.trim())}
-          placeholder={t('ui.search')}
-          aria-label={t('ui.search')}
-        />
-        <select
-          value={sort}
-          onChange={(e) => setSort(e.target.value as 'rarity' | 'name')}
-          aria-label={t('ui.sort_rarity')}
-        >
-          <option value="rarity">{t('ui.sort_rarity')}</option>
-          <option value="name">{t('ui.sort_name')}</option>
-        </select>
-      </div>
-      {!inv.data ? (
-        <p className="muted" aria-busy>
-          …
-        </p>
-      ) : list.length ? (
-        <ul className={s.pk}>
-          {list.map((g) => {
-            const j = jetonOf(g.name, g.serie),
-              id = g.ids.find((i) => !used.has(i));
-            return (
-              <li key={g.key} style={{ '--g': hexRGB(j.glow) } as CSSProperties}>
-                <button
-                  type="button"
-                  className={id ? undefined : s.off}
-                  onClick={() => (id ? void save(id) : toast(t('ui.already_showcase')))}
+    <>
+      <Modal open={!open} onClose={onClose} title={t('ui.pick_title', { n: slot + 1 })} wide>
+        <div className={s.pkSeries} role="tablist">
+          {Object.keys(SERIES).map((x) => (
+            <button key={x} type="button" role="tab" aria-selected={x === serie} onClick={() => setSerie(x)}>
+              <img className="px" src={x === 'Takoras' ? '/img/jetons/takoras.png' : texOf(jetonOf('Mobu'))} alt="" />
+              {x}
+            </button>
+          ))}
+          <span className={s.pkSoon} aria-disabled="true">
+            <img className="px" src={TEMPLATE} alt="" />
+            {t('ui.pk_soon')}
+          </span>
+        </div>
+        {!inv.data ? (
+          <p className="muted" aria-busy>
+            …
+          </p>
+        ) : (
+          <ul className={s.coll}>
+            {all.map((j) => {
+              const have = owns(j.name);
+              return (
+                <li
+                  key={j.name}
+                  style={(have ? glowVars(j) : { '--g': '113, 113, 122' }) as CSSProperties}
+                  className={have ? undefined : s.unk}
                 >
-                  <img className={vImg(g.variant)} src={texOf(j)} alt="" />
-                  <b>
-                    {jn(g.name)} <VTag v={g.variant} />
-                  </b>
-                  <small>
-                    1/{fmt(g.odds)}
-                    {g.ids.length > 1 ? ` · ×${g.ids.length}` : ''}
-                  </small>
-                </button>
-              </li>
-            );
-          })}
-        </ul>
-      ) : (
-        <p className="muted">{t('ui.inv_empty')}</p>
-      )}
-      {show[slot] ? <Button onClick={() => void save(null)}>{t('ui.pick_remove')}</Button> : null}
-    </Modal>
+                  <button
+                    type="button"
+                    disabled={!have}
+                    onClick={() => {
+                      sfx.click();
+                      const g = groups.find((x) => x.name === j.name && x.ids.some((i) => !used.has(i)));
+                      setPv(g?.variant || '');
+                      setOpen(j.name);
+                    }}
+                    aria-label={have ? jn(j.name) : '?'}
+                  >
+                    <img className="px" src={have ? texOf(j) : MYSTERE} alt="" />
+                    <small>{have ? jn(j.name) : '?'}</small>
+                  </button>
+                </li>
+              );
+            })}
+          </ul>
+        )}
+        {show[slot] ? <Button onClick={() => void save(null)}>{t('ui.pick_remove')}</Button> : null}
+      </Modal>
+      <JetonModal name={open} serie={serie} variant={pv} found={found} pick={setPv} onClose={() => setOpen(null)}>
+        <Button variant="primary" disabled={!pick} onClick={() => pick && void save(pick)}>
+          {pick ? t('ui.pick_put') : t('ui.already_showcase')}
+        </Button>
+        <Button onClick={() => setOpen(null)}>{t('ui.back')}</Button>
+      </JetonModal>
+    </>
   );
 }
 
@@ -502,20 +505,6 @@ function EditProfile({ p, onClose }: { p: Prof; onClose: () => void }) {
   const [busy, setBusy] = useState(false);
   const canRename = !!p.pseudo_free || !p.pseudo_next;
   const pps = ['default', ...FREE_PP, ...Object.keys(AVATARS).filter((a) => !FREE_PP.includes(a))];
-  // jetons déjà obtenus (et leurs mutations) : utilisables en photo de profil, du plus rare au plus commun
-  const inv = useInventory();
-  const tokPps = Object.entries(SERIES)
-    .flatMap(([serie, js]) =>
-      js.flatMap((j) => {
-        const c = inv.data?.coll.get(cKey(serie, j.name));
-        return c
-          ? Object.keys(c.vars).map(
-              (v) => [v ? `j:${j.name}:${v}` : `j:${j.name}`, j.name, v, vOdds(j.odds, v as Variant)] as const,
-            )
-          : [];
-      }),
-    )
-    .sort((a, b) => b[3] - a[3]);
   const save = async () => {
     setBusy(true);
     try {
@@ -627,29 +616,6 @@ function EditProfile({ p, onClose }: { p: Prof; onClose: () => void }) {
             })}
           </div>
         </fieldset>
-        <fieldset>
-          <legend>{t('ui.pe_pp_tokens')}</legend>
-          {tokPps.length ? (
-            <div className={s.pps}>
-              {tokPps.map(([key, name, v]) => (
-                <button
-                  key={key}
-                  type="button"
-                  aria-pressed={avatar === key}
-                  aria-label={name}
-                  onClick={() => {
-                    sfx.click();
-                    setAv(key);
-                  }}
-                >
-                  <img className={vImg(v)} src={texOf(jetonOf(name))} alt="" />
-                </button>
-              ))}
-            </div>
-          ) : (
-            <p className="muted">{t('ui.inv_empty')}</p>
-          )}
-        </fieldset>
         <div className={s.peActions}>
           <Button type="submit" variant="primary" loading={busy}>
             {t('ui.save')}
@@ -661,8 +627,8 @@ function EditProfile({ p, onClose }: { p: Prof; onClose: () => void }) {
   );
 }
 
-// Elo du classé, en haut du profil : badge du rang, nom et Elo
-function EloBox({ pseudo }: { pseudo: string }) {
+// Rang classé en grand sur le profil : gros badge qui brille, nom du rang dans sa couleur, Elo énorme
+function EloHero({ pseudo }: { pseudo: string }) {
   const t = useT();
   const lang = useSettings((x) => x.lang);
   const name = useRankName();
@@ -670,16 +636,19 @@ function EloBox({ pseudo }: { pseudo: string }) {
     queryKey: ['ranked-of', pseudo],
     queryFn: async () => (await publicApi.rankedOf(pseudo)) as unknown as { elo: number; games: number } | null,
   });
-  if (!q.data) return null;
-  const r = rankOf(q.data.elo);
+  const elo = q.data?.elo ?? 1000;
+  const r = rankOf(elo);
   return (
-    <div className={s.elo} style={{ '--rc': r.col } as CSSProperties}>
-      <RankBadge r={r} size={48} />
+    <div className={s.elo} style={{ '--rc': r.col } as CSSProperties} aria-label={`${name(r)} · ${elo} Elo`}>
+      <span className={s.eloBadge}>
+        <RankBadge r={r} size={104} />
+      </span>
       <div>
-        <b>{q.data.elo.toLocaleString(locale(lang))}</b>
-        <small>
-          {name(r)} · Elo{q.data.games ? '' : ` · ${t('ui.elo_none')}`}
-        </small>
+        <small className={s.eloRank}>{name(r)}</small>
+        <b>
+          {elo.toLocaleString(locale(lang))} <span>Elo</span>
+        </b>
+        {q.data?.games ? null : <small className="muted">{t('ui.elo_none')}</small>}
       </div>
     </div>
   );

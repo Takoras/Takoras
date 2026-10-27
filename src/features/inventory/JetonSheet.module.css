@@ -1,0 +1,373 @@
+/* Fiche d'un jeton façon vitrine : nom à gauche, jeton au centre, pouvoir à droite */
+.sheet {
+  display: grid;
+  gap: var(--s-5);
+  overflow: hidden; /* les rayons s'effacent avant le bord, mais ne doivent jamais faire défiler */
+}
+.stage {
+  display: grid;
+  grid-template-columns: 1fr minmax(240px, 300px) 1fr;
+  align-items: center;
+  gap: var(--s-5);
+}
+
+/* --- Nom, chance, ce que tu en as */
+.id {
+  display: grid;
+  gap: var(--s-2);
+  align-content: center;
+}
+.id h2 {
+  font-size: clamp(1.8rem, 4vw, 2.6rem);
+  line-height: 1;
+  text-shadow: 0 0 24px rgba(var(--g), 0.45);
+}
+.odds {
+  font-family: var(--font-display);
+  font-weight: 800;
+  font-size: var(--fs-xl);
+  color: rgb(var(--g));
+  filter: brightness(1.25);
+}
+.facts {
+  list-style: none;
+  display: grid;
+  gap: 6px;
+  margin-top: var(--s-2);
+  font-size: var(--fs-sm);
+  color: var(--text-2);
+}
+.facts li {
+  display: flex;
+  align-items: center;
+  gap: var(--s-2);
+}
+.facts li::before {
+  content: '';
+  width: 6px;
+  height: 6px;
+  background: rgb(var(--g));
+  box-shadow: 0 0 6px rgb(var(--g));
+}
+.facts b {
+  color: var(--text);
+}
+
+/* --- Le jeton au centre */
+.center {
+  position: relative;
+  display: grid;
+  justify-items: center;
+  padding-bottom: var(--s-2);
+}
+.rays,
+.aura {
+  position: absolute;
+  left: 50%;
+  top: 130px;
+  translate: -50% -50%;
+  border-radius: 50%;
+  pointer-events: none;
+}
+/* rayons lumineux qui tournent doucement */
+.rays {
+  width: 380px;
+  height: 380px;
+  background: repeating-conic-gradient(from 0deg, rgba(var(--g), 0.2) 0deg 7deg, transparent 7deg 22deg);
+  mask-image: radial-gradient(closest-side, #000 25%, transparent 100%);
+  animation: spin 26s linear infinite;
+  opacity: calc(0.35 + 0.65 * var(--ga, 0));
+}
+/* halo qui respire */
+.aura {
+  width: 260px;
+  height: 260px;
+  background: radial-gradient(closest-side, rgba(var(--g), 0.55), rgba(var(--g), 0.15) 60%, transparent);
+  animation: breathe 3.2s ease-in-out infinite;
+}
+.sparks {
+  position: absolute;
+  inset: 0 0 auto;
+  height: 260px;
+  pointer-events: none;
+}
+.sparks i {
+  position: absolute;
+  bottom: 30px;
+  width: 6px;
+  height: 6px;
+  background: rgb(var(--g));
+  box-shadow: 0 0 8px rgb(var(--g));
+  filter: brightness(1.6);
+  opacity: 0;
+  animation: rise 3.6s linear infinite;
+}
+.sparks i:nth-child(1) {
+  left: 18%;
+  animation-delay: 0s;
+}
+.sparks i:nth-child(2) {
+  left: 34%;
+  animation-delay: 1.4s;
+  width: 4px;
+  height: 4px;
+}
+.sparks i:nth-child(3) {
+  left: 52%;
+  animation-delay: 0.7s;
+}
+.sparks i:nth-child(4) {
+  left: 68%;
+  animation-delay: 2.2s;
+  width: 4px;
+  height: 4px;
+}
+.sparks i:nth-child(5) {
+  left: 82%;
+  animation-delay: 2.9s;
+}
+.sparks i:nth-child(6) {
+  left: 44%;
+  animation-delay: 3.3s;
+  width: 4px;
+  height: 4px;
+}
+.coin {
+  position: relative;
+  z-index: 1;
+  width: 230px;
+  height: 230px;
+  margin-top: 15px;
+  display: grid;
+  place-items: center;
+  transition: transform var(--t-fast);
+  cursor: grab;
+  touch-action: none;
+  animation: float 4.5s ease-in-out infinite;
+}
+.coin img {
+  width: 200px;
+  height: 200px;
+}
+.glare {
+  position: absolute;
+  inset: 15px;
+  pointer-events: none;
+  opacity: var(--gl, 0);
+  background: radial-gradient(
+    circle at var(--mx, 50%) var(--my, 50%),
+    rgb(255 255 255 / 60%),
+    rgb(255 255 255 / 12%) 30%,
+    transparent 55%
+  );
+  mix-blend-mode: screen;
+  mask-size: 100% 100%;
+  transition: opacity var(--t-fast);
+}
+/* ombre au sol, qui suit le flottement */
+.floor {
+  width: 150px;
+  height: 18px;
+  margin-top: -4px;
+  border-radius: 50%;
+  background: radial-gradient(closest-side, rgb(0 0 0 / 55%), transparent);
+  animation: shadow 4.5s ease-in-out infinite;
+}
+
+/* --- Tampons de mutation */
+.stamps {
+  position: relative;
+  z-index: 1;
+  display: flex;
+  gap: var(--s-3);
+  margin-top: var(--s-3);
+}
+.stamp {
+  display: grid;
+  place-items: center;
+  width: 52px;
+  height: 52px;
+  border-radius: 12px;
+  transition:
+    transform var(--t-fast),
+    filter var(--t-fast);
+}
+.stamp span {
+  width: 40px;
+  height: 40px;
+  background: center / contain no-repeat;
+  image-rendering: pixelated;
+}
+.stamp:not(:disabled):hover {
+  transform: translateY(-3px) rotate(-6deg);
+}
+.stamp[aria-pressed='true'] {
+  background: rgba(var(--g), 0.22);
+  box-shadow: 0 0 0 2px rgba(var(--g), 0.8);
+  transform: scale(1.08);
+}
+.stamp.off {
+  filter: grayscale(1) brightness(0.5);
+  opacity: 0.55;
+  cursor: default;
+}
+
+/* --- Pouvoir et stats */
+.power {
+  display: grid;
+  gap: var(--s-2);
+  align-content: center;
+}
+.power small {
+  color: var(--muted);
+  font-size: var(--fs-xs);
+  text-transform: uppercase;
+  letter-spacing: var(--tracking-caps);
+}
+.power > b {
+  font-family: var(--font-display);
+  font-size: var(--fs-xl);
+  line-height: 1.1;
+  color: rgb(var(--pw, var(--g)));
+  filter: brightness(1.2);
+}
+.power p {
+  color: var(--text-2);
+  font-size: var(--fs-sm);
+}
+.rs {
+  display: grid;
+  gap: 6px;
+  margin-top: var(--s-3);
+}
+.rs div {
+  display: grid;
+  grid-template-columns: 22px 1fr;
+  align-items: center;
+  gap: var(--s-2);
+}
+.rs dd {
+  display: grid;
+  grid-template-columns: 1fr 48px;
+  align-items: center;
+  gap: var(--s-2);
+  margin: 0;
+  font-size: var(--fs-sm);
+}
+.rs b {
+  text-align: right;
+  font-size: var(--fs-sm);
+  font-variant-numeric: tabular-nums;
+}
+.bar {
+  height: 6px;
+  background: rgb(255 255 255 / 8%);
+}
+.bar i {
+  display: block;
+  height: 100%;
+  background: rgb(var(--pw, var(--g)));
+}
+.unknown {
+  align-self: center;
+}
+
+/* --- Boutons en bas */
+.actions {
+  display: flex;
+  justify-content: center;
+  gap: var(--s-2);
+  flex-wrap: wrap;
+}
+.actions > * {
+  min-width: 160px;
+}
+
+@keyframes spin {
+  to {
+    rotate: 360deg;
+  }
+}
+@keyframes breathe {
+  50% {
+    scale: 1.12;
+    opacity: 0.75;
+  }
+}
+@keyframes float {
+  50% {
+    translate: 0 -10px;
+  }
+}
+@keyframes shadow {
+  50% {
+    scale: 0.82;
+    opacity: 0.7;
+  }
+}
+@keyframes rise {
+  0% {
+    opacity: 0;
+    transform: translateY(0);
+  }
+  15% {
+    opacity: 1;
+  }
+  100% {
+    opacity: 0;
+    transform: translateY(-190px);
+  }
+}
+:global(html.reduce-fx) .rays,
+:global(html.reduce-fx) .aura,
+:global(html.reduce-fx) .coin,
+:global(html.reduce-fx) .floor,
+:global(html.reduce-fx) .sparks {
+  animation: none;
+}
+:global(html.reduce-fx) .sparks {
+  display: none;
+}
+
+/* Téléphone : tout en colonne, le jeton en premier */
+@media (max-width: 760px) {
+  .stage {
+    grid-template-columns: 1fr;
+    gap: var(--s-4);
+    text-align: center;
+  }
+  .center {
+    order: -1;
+  }
+  .rays {
+    width: 300px;
+    height: 300px;
+    top: 110px;
+  }
+  .aura {
+    width: 210px;
+    height: 210px;
+    top: 110px;
+  }
+  .sparks {
+    height: 220px;
+  }
+  .coin {
+    width: 190px;
+    height: 190px;
+  }
+  .coin img {
+    width: 165px;
+    height: 165px;
+  }
+  .id {
+    justify-items: center;
+  }
+  .facts {
+    justify-items: center;
+  }
+  .actions > * {
+    flex: 1 1 140px;
+    min-width: 0;
+  }
+}

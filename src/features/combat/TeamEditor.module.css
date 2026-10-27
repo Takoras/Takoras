@@ -37,7 +37,7 @@
   place-content: center;
   border-style: dashed !important;
 }
-.empty span {
+.empty .pickSlot {
   font: 700 var(--fs-xl) / 1 var(--font-display);
   color: var(--text-2);
 }
@@ -211,4 +211,23 @@
   display: flex;
   justify-content: flex-end;
   margin-top: var(--s-3);
+}
+
+/* place visée : le prochain jeton touché va ici */
+.slots li.aim {
+  border-image-source: url('/img/ui/box-sel.png?v=3');
+  animation: aimPulse 1.4s ease-in-out infinite;
+}
+@keyframes aimPulse {
+  50% {
+    filter: drop-shadow(0 0 8px rgb(167 139 250 / 55%));
+  }
+}
+.pickSlot {
+  display: grid;
+  place-items: center;
+  font: 700 var(--fs-xl) / 1 var(--font-display);
+  color: var(--text-2);
+  min-width: 64px;
+  min-height: 64px;
 }

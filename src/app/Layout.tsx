@@ -1,10 +1,9 @@
-import { useEffect, useState } from 'react';
+import { useEffect } from 'react';
 import { NavLink, Outlet, useLocation, useNavigate } from 'react-router';
 import { useMe } from '@/api/queries';
 import { useAuth, signOut } from '@/lib/auth';
 import { locale } from '@/lib/settings';
 import { useT } from '@/i18n/useT';
-import { sfx } from '@/engines/sound';
 import { Avatar } from '@/ui/Avatar';
 import { Button } from '@/ui/Button';
 import { Modal } from '@/ui/Modal';
@@ -33,7 +32,6 @@ export function Layout() {
   const user = useAuth((x) => x.user);
   const me = useMe();
   const more = useUI((x) => x.more);
-  const [muted, setMuted] = useState(sfx.muted);
   useEffect(() => openUI('more', false), [pathname]);
   const navigate = useNavigate();
   // Raccourci « debug » (taper le mot n'importe où) : ouvre le panel admin, pour les admins seulement
@@ -52,10 +50,6 @@ export function Layout() {
     addEventListener('keydown', onKey);
     return () => removeEventListener('keydown', onKey);
   }, [isAdmin, navigate]);
-  const toggleMute = () => {
-    sfx.setMuted(!muted);
-    setMuted(!muted);
-  };
   // Temps de jeu : une minute comptée par le serveur tant que l'onglet est visible
   useEffect(() => {
     if (!user) return;
@@ -113,15 +107,6 @@ export function Layout() {
           </button>
           <button type="button" className={s.icon} onClick={() => openUI('settings')} aria-label={t('ui.settings')}>
             <Icon name="gear" />
-          </button>
-          <button
-            type="button"
-            className={s.icon}
-            onClick={toggleMute}
-            aria-label={muted ? t('ui.unmute') : t('ui.mute')}
-            data-nosound
-          >
-            <Icon name={muted ? 'mute' : 'sound'} />
           </button>
           {user ? (
             <>

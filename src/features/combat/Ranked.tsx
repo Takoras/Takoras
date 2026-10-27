@@ -3,6 +3,7 @@ import { useEffect, useRef, useState, type CSSProperties } from 'react';
 import { locale, useSettings } from '@/lib/settings';
 import { useT } from '@/i18n/useT';
 import { sfx } from '@/engines/sound.js';
+import { RCFG } from '@/engines/ring-config.js';
 import { Button } from '@/ui/Button';
 import { Modal } from '@/ui/Modal';
 import { Link } from 'react-router';
@@ -91,65 +92,46 @@ export function RankCard({ me }: { me: RankedMe | undefined }) {
 }
 
 // Route des rangs : un chemin qui serpente, les badges flottent dessus ; la partie déjà faite est colorée
-const STEP = 132,
-  ROAD_H = 250;
-const roadY = (i: number) => ROAD_H / 2 - 18 + Math.sin(i * 0.95) * 62;
+// Route des rangs : les 8 rangs côte à côte (sans défilement), reliés par une barre qui se remplit jusqu'à toi.
+// Sous chaque badge, les divisions (1, 2, 3) en petites pastilles ; ton rang flotte et brille.
+const TIERS = RCFG.RANKS.map((r) => ({ k: r.k, col: r.col, steps: ROAD.filter((x) => x.k === r.k) }));
 export function RankRoad({ elo }: { elo: number }) {
   const t = useT();
   const name = useRankName();
   const cur = rankOf(elo);
-  const list = useRef<HTMLDivElement>(null);
-  // la marche actuelle est visible sans avoir à chercher
-  useEffect(() => {
-    const el = list.current;
-    if (el) el.scrollLeft = (cur.idx + 0.5) * STEP - el.clientWidth / 2;
-  }, [cur.idx]);
-  const pts = ROAD.map((r, i) => [i * STEP + STEP / 2, roadY(i)] as const);
-  const path = (n: number) =>
-    pts
-      .slice(0, n)
-      .map(([x, y], i) => {
-        if (!i) return `M${x} ${y}`;
-        const [px, py] = pts[i - 1] ?? [x, y];
-        return `C${px + STEP / 2} ${py} ${x - STEP / 2} ${y} ${x} ${y}`;
-      })
-      .join(' ');
-  const W = ROAD.length * STEP;
+  const here = TIERS.findIndex((x) => x.k === cur.k);
   return (
     <section className={s.road} aria-labelledby="road-t">
       <h2 id="road-t">{t('arena.road')}</h2>
-      {/* chemin qui défile : focusable au clavier pour pouvoir le parcourir (accessibilité) */}
-      {/* eslint-disable-next-line jsx-a11y/no-noninteractive-tabindex */}
-      <div ref={list} className={s.roadScroll} tabIndex={0} aria-labelledby="road-t">
-        <div className={s.roadTrack} style={{ width: W, height: ROAD_H }}>
-          <svg className={s.roadPath} width={W} height={ROAD_H} aria-hidden>
-            <path d={path(pts.length)} className={s.roadAll} />
-            <path d={path(cur.idx + 1)} className={s.roadDone} />
-          </svg>
-          <ol>
-            {ROAD.map((r, i) => (
-              <li
-                key={r.idx}
-                className={r.idx < cur.idx ? s.done : r.idx === cur.idx ? s.here : undefined}
-                aria-current={r.idx === cur.idx ? 'step' : undefined}
-                style={
-                  {
-                    '--rc': r.col,
-                    left: (pts[i]?.[0] ?? 0) - 56,
-                    top: (pts[i]?.[1] ?? 0) - 44,
-                    animationDelay: `${(i % 5) * -0.6}s`,
-                  } as CSSProperties
-                }
-              >
-                {r.idx === cur.idx ? <em>{t('arena.you')}</em> : null}
-                <RankBadge r={r} size={r.idx === cur.idx ? 76 : 60} />
-                <b>{name(r)}</b>
-                <small>{r.min > 0 ? `${r.min}+` : `< ${r.max}`}</small>
-              </li>
-            ))}
-          </ol>
-        </div>
-      </div>
+      <ol className={s.tiers} style={{ '--done': here } as CSSProperties}>
+        {TIERS.map((x, i) => {
+          const first = x.steps[0] as Rank,
+            on = i === here;
+          const shown = on ? cur : first;
+          return (
+            <li
+              key={x.k}
+              className={i < here ? s.done : on ? s.here : undefined}
+              aria-current={on ? 'step' : undefined}
+              style={{ '--rc': x.col, animationDelay: `${i * -0.5}s` } as CSSProperties}
+            >
+              {on ? <em>{t('arena.you')}</em> : null}
+              <span className={s.tierBadge}>
+                <RankBadge r={shown} size={on ? 84 : 64} />
+              </span>
+              <b>{on ? name(cur) : t(`arena.r_${x.k}` as 'arena.r_wood')}</b>
+              <small>{first.min > 0 ? `${first.min}+` : `< ${x.steps.at(-1)?.max ?? ''}`}</small>
+              {x.steps.length > 1 ? (
+                <span className={s.pips} aria-hidden>
+                  {x.steps.map((d) => (
+                    <i key={d.idx} className={d.idx < cur.idx ? s.pipDone : d.idx === cur.idx ? s.pipNow : undefined} />
+                  ))}
+                </span>
+              ) : null}
+            </li>
+          );
+        })}
+      </ol>
     </section>
   );
 }

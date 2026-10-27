@@ -26,6 +26,11 @@ export function HeroCoin({ img, label }: { img: string; label: string }) {
   return (
     <div className={s.coinWrap}>
       <div className={s.orbit} aria-hidden />
+      <div className={s.motes} aria-hidden>
+        {[0, 1, 2, 3, 4, 5].map((i) => (
+          <i key={i} />
+        ))}
+      </div>
       <div id="coin" ref={ref} className={s.coin} onPointerMove={move} onPointerLeave={leave}>
         <div className={s.tilt}>
           <img className="px" src={img} alt={label} width={220} height={220} />

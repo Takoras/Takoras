@@ -1,46 +1,38 @@
-import { useEffect, useRef, type CSSProperties, type PointerEvent, type ReactNode } from 'react';
+import { useRef, useState, type CSSProperties, type PointerEvent, type ReactNode } from 'react';
 import { StatIcon } from '@/ui/StatIcon';
-import {
-  hexRGB,
-  jetonOf,
-  MYSTERE,
-  sellValue,
-  texOf,
-  texScale,
-  tierCol,
-  tierKey,
-  vImg,
-  vOdds,
-  glowVars,
-} from '@/data/jetons';
+import { hexRGB, jetonOf, MYSTERE, texOf, texScale, vImg, vOdds, glowVars, type Variant } from '@/data/jetons';
 import { powerInfo, RING_MAX, ringStats } from '@/data/kit';
-import { statsOf, STAT_MAX } from '@/engines/env';
 import { useJn } from '@/lib/names';
 import { locale, reducedFx, useSettings } from '@/lib/settings';
 import { useT } from '@/i18n/useT';
 import { Modal } from '@/ui/Modal';
-import { VTag } from '@/ui/VTag';
-import s from './Inventory.module.css';
+import s from './JetonSheet.module.css';
 
-// Fiche d'un jeton : en-tête (pièce qui penche sous le doigt, rareté, nom, chance), 3 chiffres clés
-// (puissance, niveau, revente), les 3 stats, puis `children` (possession, variantes, combat, actions).
-// `locked` = jamais trouvé : silhouette. `celebrate` : change de valeur à chaque montée de niveau (petite fête).
+const VS = ['gold', 'celeste', 'ombre'] as const;
+
+// Fiche d'un jeton, façon vitrine : le jeton en grand au centre (aura qui tourne, étincelles, il penche sous le doigt),
+// son nom et ce que tu en as à gauche, son pouvoir à droite, et les 3 tampons de mutation en dessous
+// (grisés si pas encore trouvés ; toucher un tampon trouvé montre le jeton dans cette mutation).
+// `facts` : petites lignes sous le nom (« Tu en as 4 »…). `children` : les boutons en bas (vendre…).
+// `pick` : au lieu de seulement montrer, toucher un tampon le CHOISIT (vitrine du profil).
 export function JetonModal({
   name,
   serie,
   variant = '',
-  lvl = 1,
   locked,
-  celebrate = 0,
+  found,
+  facts,
+  pick,
   onClose,
   children,
 }: {
   name: string | null;
   serie?: string;
   variant?: string;
-  lvl?: number;
   locked?: boolean;
-  celebrate?: number;
+  found?: Partial<Record<string, boolean | number>>;
+  facts?: ReactNode;
+  pick?: (v: string) => void;
   onClose: () => void;
   children?: ReactNode;
 }) {
@@ -48,31 +40,21 @@ export function JetonModal({
   const jn = useJn();
   const lang = useSettings((x) => x.lang);
   const coin = useRef<HTMLDivElement>(null);
+  // mutation montrée : celle du jeton, ou celle du tampon touché (pour ce jeton seulement)
+  const [over, setOver] = useState<{ n: string | null; v: string } | null>(null);
+  const pv = over && over.n === name ? over.v : variant;
+  const setPv = (v: string) => setOver({ n: name, v });
   const fmt = (n: number) => n.toLocaleString(locale(lang));
-  const j = jetonOf(name ?? '', serie),
-    st = statsOf(j.name, j.odds, variant, lvl),
-    tier = tierKey(j.odds);
-  // Montée de niveau : la pièce rebondit et « Niv. N » s'envole
-  useEffect(() => {
-    if (!celebrate || reducedFx()) return;
-    {
-      coin.current?.animate(
-        [
-          { transform: 'scale(1)' },
-          { transform: 'scale(1.18) rotate(-6deg)', filter: 'brightness(1.6)' },
-          { transform: 'scale(1)' },
-        ],
-        { duration: 620, easing: 'cubic-bezier(.2, 1.4, .4, 1)' },
-      );
-    }
-  }, [celebrate]);
+  const j = jetonOf(name ?? '', serie);
+  const k = powerInfo(j.name, lang),
+    rs = ringStats(j.name, 1, pv);
   const tilt = (e: PointerEvent) => {
     const c = coin.current;
     if (!c || reducedFx()) return;
     const r = c.getBoundingClientRect(),
       x = (e.clientX - r.left) / r.width - 0.5,
       y = (e.clientY - r.top) / r.height - 0.5;
-    c.style.transform = `perspective(600px) rotateX(${(-y * 50).toFixed(1)}deg) rotateY(${(x * 50).toFixed(1)}deg) scale(1.05)`;
+    c.style.transform = `perspective(600px) rotateX(${(-y * 40).toFixed(1)}deg) rotateY(${(x * 40).toFixed(1)}deg) scale(1.04)`;
     c.style.setProperty('--mx', `${((x + 0.5) * 100).toFixed(1)}%`);
     c.style.setProperty('--my', `${((y + 0.5) * 100).toFixed(1)}%`);
     c.style.setProperty('--gl', '1');
@@ -81,140 +63,121 @@ export function JetonModal({
     coin.current?.style.removeProperty('transform');
     coin.current?.style.setProperty('--gl', '0');
   };
+  const stats = [
+    ['mass', t('ring.mass'), rs.mass, RING_MAX.mass, rs.mass.toFixed(2)],
+    ['power', t('ring.powerS'), rs.power, RING_MAX.power, fmt(Math.round(rs.power))],
+    ['size', t('ring.size'), rs.r, RING_MAX.r, String(rs.r)],
+  ] as const;
+  const vars = (locked
+    ? { '--g': '113, 113, 122', '--ga': 0 }
+    : {
+        ...glowVars(j, pv),
+        '--ga': 1,
+        '--pw': hexRGB(k.col),
+        ...(pv ? { '--g': VCOL[pv as Variant] } : {}),
+      }) as unknown as CSSProperties;
   return (
     <Modal open={!!name} onClose={onClose} wide noX>
       {name ? (
-        <div
-          className={s.jm}
-          style={
-            (locked
-              ? { '--g': '113, 113, 122', '--tier': 'var(--muted)' }
-              : { ...glowVars(j, variant), '--tier': tierCol(tier) }) as unknown as CSSProperties
-          }
-        >
-          <header className={s.jmHero}>
-            <div
-              ref={coin}
-              className={s.jmCoin}
-              onPointerMove={tilt}
-              onPointerLeave={untilt}
-              style={texScale(j) !== 1 ? { scale: String(texScale(j)) } : undefined}
-            >
-              <img className={locked ? 'px' : vImg(variant)} src={locked ? MYSTERE : texOf(j)} alt="" />
+        <div className={s.sheet} style={vars}>
+          <div className={s.stage}>
+            <div className={s.id}>
+              <h2>{locked ? '???' : jn(j.name)}</h2>
+              <p className={s.odds}>{locked ? '1/?' : `1/${fmt(vOdds(j.odds, pv))}`}</p>
+              {facts && !locked ? <ul className={s.facts}>{facts}</ul> : null}
+            </div>
+            <div className={s.center}>
+              <i className={s.rays} aria-hidden />
+              <i className={s.aura} aria-hidden />
               {locked ? null : (
-                <i className={s.glare} style={{ maskImage: `url(${texOf(j)})`, WebkitMaskImage: `url(${texOf(j)})` }} />
+                <span className={s.sparks} aria-hidden>
+                  {[0, 1, 2, 3, 4, 5].map((i) => (
+                    <i key={i} />
+                  ))}
+                </span>
+              )}
+              <div
+                ref={coin}
+                className={s.coin}
+                onPointerMove={tilt}
+                onPointerLeave={untilt}
+                style={texScale(j) !== 1 ? { scale: String(texScale(j)) } : undefined}
+              >
+                <img
+                  className={locked ? 'px' : vImg(pv)}
+                  src={locked ? MYSTERE : texOf(j)}
+                  alt={locked ? '' : jn(j.name)}
+                />
+                {locked ? null : (
+                  <i
+                    className={s.glare}
+                    style={{ maskImage: `url(${texOf(j)})`, WebkitMaskImage: `url(${texOf(j)})` }}
+                  />
+                )}
+              </div>
+              <i className={s.floor} aria-hidden />
+              {locked ? null : (
+                <div className={s.stamps} role="group" aria-label={t('ui.bst_variants')}>
+                  {VS.map((v) => {
+                    const has = pick ? found?.[v] !== false && found?.[v] !== 0 : !!found?.[v];
+                    return (
+                      <button
+                        key={v}
+                        type="button"
+                        className={`${s.stamp} ${has ? '' : s.off}`}
+                        aria-pressed={pv === v}
+                        disabled={!has}
+                        title={t(`ui.v_${v}`)}
+                        aria-label={t(`ui.v_${v}`)}
+                        onClick={() => {
+                          const nv = pv === v ? '' : v;
+                          setPv(nv);
+                          pick?.(nv);
+                        }}
+                      >
+                        <span style={{ backgroundImage: `url(/img/stamps/${v}.png)` }} />
+                      </button>
+                    );
+                  })}
+                </div>
               )}
             </div>
-            {celebrate ? (
-              <b key={celebrate} className={s.lvlPop} aria-hidden>
-                {t('arena.lvl')} {lvl}
-              </b>
-            ) : null}
-            <div className={s.jmId}>
-              <h2>
-                {locked ? '???' : jn(j.name)} <VTag v={variant} />
-              </h2>
-              {/* une seule chance combinée (jeton × mutation), ex. 1/1 200, jamais « 1/60 × 1/20 » */}
-              <p className={s.odds}>{locked ? '1/?' : `1/${fmt(vOdds(j.odds, variant))}`}</p>
-            </div>
-          </header>
-          {locked ? (
-            <p className="muted">{t('ui.bst_unknown')}</p>
-          ) : (
-            <div className={s.jmBody}>
-              <dl className={s.facts}>
-                <div>
-                  <dt>{t('ui.power')}</dt>
-                  <dd className={s.pow}>{fmt(st.power)}</dd>
-                </div>
-                <div>
-                  <dt>{t('ui.sell_value')}</dt>
-                  <dd>
-                    {fmt(sellValue(j.odds, variant))}{' '}
-                    <img className={`px ${s.coin}`} src="/img/piece.png" alt="" width={16} height={16} />
-                  </dd>
-                </div>
-              </dl>
-              <dl className={s.stats}>
-                {(['s_mass', 's_pow', 's_size'] as const).map((k) => (
-                  <div key={k}>
-                    <dt className="muted">{t(`ui.${k}`)}</dt>
-                    <dd>
-                      <span className={s.bar}>
-                        <i style={{ width: `${Math.min(100, (st[k] / STAT_MAX[k]) * 100)}%` }} />
-                      </span>
-                      <b>{st[k]}</b>
-                    </dd>
-                  </div>
-                ))}
-              </dl>
-              {children}
-            </div>
-          )}
+            {locked ? (
+              <p className={`muted ${s.unknown}`}>{t('ui.bst_unknown')}</p>
+            ) : (
+              <div className={s.power}>
+                {k.pw !== 'none' ? (
+                  <>
+                    <small>{k.when}</small>
+                    <b>{k.name}</b>
+                    <p>{k.desc}</p>
+                  </>
+                ) : null}
+                <dl className={s.rs}>
+                  {stats.map(([ico, l, v, max, txt]) => (
+                    <div key={l} title={l}>
+                      <dt>
+                        <StatIcon k={ico} />
+                        <span className="visually-hidden">{l}</span>
+                      </dt>
+                      <dd>
+                        <span className={s.bar}>
+                          <i style={{ width: `${Math.min(100, (v / max) * 100)}%` }} />
+                        </span>
+                        <b>{txt}</b>
+                      </dd>
+                    </div>
+                  ))}
+                </dl>
+              </div>
+            )}
+          </div>
+          {children ? <div className={s.actions}>{children}</div> : null}
         </div>
       ) : null}
     </Modal>
   );
 }
 
-// Combat : pouvoir et stats du Ring
-export function CombatInfo({
-  name,
-  lvl,
-  variant = '',
-  stats,
-  children,
-}: {
-  name: string;
-  lvl: number;
-  variant?: string;
-  stats?: boolean;
-  showLvl?: boolean;
-  children?: ReactNode;
-}) {
-  const t = useT();
-  const lang = useSettings((x) => x.lang);
-  const k = powerInfo(name, lang),
-    rs = ringStats(name, lvl, variant);
-  const fmt = (n: number) => n.toLocaleString(locale(lang));
-  const rows = [
-    ['mass', t('ring.mass'), rs.mass, RING_MAX.mass, rs.mass.toFixed(2)],
-    ['power', t('ring.powerS'), rs.power, RING_MAX.power, fmt(Math.round(rs.power))],
-    ['size', t('ring.size'), rs.r, RING_MAX.r, String(rs.r)],
-  ] as const;
-  return (
-    <section className={s.combat} style={{ '--pw': hexRGB(k.col) } as CSSProperties} aria-label={t('ui.nav_combat')}>
-      <header>
-        <span>{t('ring.power')}</span>
-      </header>
-      {k.pw !== 'none' ? (
-        <div className={s.kit}>
-          <small>
-            {t('ring.power')}
-            {k.when ? ` · ${k.when}` : ''}
-          </small>
-          <b>{k.name}</b>
-          <p>{k.desc}</p>
-        </div>
-      ) : null}
-      {stats ? (
-        <dl className={s.rs}>
-          {rows.map(([ico, l, v, max, txt]) => (
-            <div key={l}>
-              <dt>
-                <StatIcon k={ico} /> {l}
-              </dt>
-              <dd>
-                <span className={s.bar}>
-                  <i style={{ width: `${Math.min(100, (v / max) * 100)}%` }} />
-                </span>
-                <b>{txt}</b>
-              </dd>
-            </div>
-          ))}
-        </dl>
-      ) : null}
-      {children}
-    </section>
-  );
-}
+// Couleur de l'aura selon la mutation montrée
+const VCOL: Record<Variant, string> = { gold: '250, 204, 21', celeste: '186, 200, 255', ombre: '139, 92, 246' };

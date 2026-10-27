@@ -56,7 +56,8 @@ export default function Combat() {
   const deck = useDeck();
   const ranked = useRanked();
   const qc = useQueryClient();
-  const [editing, setEditing] = useState(false);
+  // équipe : null = fermé, sinon la place visée (-1 = aucune)
+  const [editing, setEditing] = useState<number | null>(null);
   const [ptab, setPtab] = useState<'play' | 'rank'>('play');
   const [searching, setSearching] = useState(false);
   const [sheet, setSheet] = useState<Member | null>(null);
@@ -218,11 +219,12 @@ export default function Combat() {
         )}
         {full ? null : <small className={`muted ${s.need}`}>{t('arena.need3')}</small>}
 
-        {tutoOk ? <RankAround elo={elo} /> : null}
-
         <section className={s.team} aria-labelledby="team-t">
           <header>
             <h2 id="team-t">{t('arena.team')}</h2>
+            <Button size="sm" onClick={() => setEditing(-1)}>
+              {t('arena.edit')}
+            </Button>
           </header>
           <ul>
             {team.map((u, i) =>
@@ -230,7 +232,11 @@ export default function Combat() {
                 <li key={i}>
                   <TeamCard
                     u={u}
-                    onOpen={() => {
+                    onEdit={() => {
+                      sfx.click();
+                      setEditing(i);
+                    }}
+                    onInfo={() => {
                       sfx.click();
                       setSheet(u);
                     }}
@@ -243,7 +249,7 @@ export default function Combat() {
                     className={`${s.slot} ${s.emptySlot}`}
                     onClick={() => {
                       sfx.click();
-                      setEditing(true);
+                      setEditing(i);
                     }}
                   >
                     <b aria-hidden>＋</b>
@@ -268,6 +274,7 @@ export default function Combat() {
       <aside className={s.colSide}>
         <div className={s.sideRank}>
           <PassLink />
+          {tutoOk ? <RankAround elo={elo} /> : null}
           <EloTop />
         </div>
       </aside>
@@ -287,8 +294,14 @@ export default function Combat() {
           }}
         />
       ) : null}
-      {editing && inv.data ? (
-        <TeamEditor groups={inv.data.groups} levels={inv.data} team={team} onClose={() => setEditing(false)} />
+      {editing !== null && inv.data ? (
+        <TeamEditor
+          groups={inv.data.groups}
+          levels={inv.data}
+          team={team}
+          focus={editing >= 0 ? editing : undefined}
+          onClose={() => setEditing(null)}
+        />
       ) : null}
       {sheet ? (
         <TokenSheet
@@ -302,7 +315,7 @@ export default function Combat() {
             primary: true,
             onClick: () => {
               setSheet(null);
-              setEditing(true);
+              setEditing(-1);
             },
           }}
         />
@@ -311,24 +324,37 @@ export default function Combat() {
   );
 }
 
-// Mini carte d'un jeton de l'équipe : image, mutation, pouvoir
-function TeamCard({ u, onOpen }: { u: Member; onOpen: () => void }) {
+// Mini carte d'un jeton de l'équipe : toucher = le changer tout de suite ; « i » = sa fiche (pouvoir en vidéo)
+function TeamCard({ u, onEdit, onInfo }: { u: Member; onEdit: () => void; onInfo: () => void }) {
+  const t = useT();
   const jn = useJn();
   const lang = useSettings((x) => x.lang);
   const j = jetonOf(u.name, u.serie),
     k = powerInfo(u.name, lang);
   return (
-    <button type="button" className={s.slot} onClick={onOpen} style={glowVars(j, u.variant) as CSSProperties}>
-      <img className={vImg(u.variant)} src={texOf(j)} alt="" />
-      {u.variant ? (
-        <span className={s.vtag}>
-          <MutationStamp v={u.variant} size="sm" />
+    <div className={s.slotWrap}>
+      <button
+        type="button"
+        className={s.slot}
+        onClick={onEdit}
+        style={glowVars(j, u.variant) as CSSProperties}
+        aria-label={`${jn(u.name)} · ${t('arena.swap')}`}
+      >
+        <img className={vImg(u.variant)} src={texOf(j)} alt="" />
+        <b className={s.slotName}>
+          {jn(u.name)}
+          {u.variant ? <MutationStamp v={u.variant} size="sm" /> : null}
+        </b>
+        <small className={s.ab} style={{ '--c': k.col } as CSSProperties}>
+          {k.name}
+        </small>
+        <span className={s.swap} aria-hidden>
+          ⇄
         </span>
-      ) : null}
-      <b>{jn(u.name)}</b>
-      <small className={s.ab} style={{ '--c': k.col } as CSSProperties}>
-        {k.name}
-      </small>
-    </button>
+      </button>
+      <button type="button" className={s.infoBtn} onClick={onInfo} aria-label={t('arena.details', { n: jn(u.name) })}>
+        i
+      </button>
+    </div>
   );
 }

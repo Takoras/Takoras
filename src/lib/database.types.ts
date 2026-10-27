@@ -254,6 +254,7 @@ export type Database = {
       ranked_tuto_done: { Args: never; Returns: undefined };
       leaderboard_time: { Args: { n?: number; since?: string | null }; Returns: { pseudo: string; value: number }[] };
       leaderboard_elo: { Args: { n?: number; since?: string | null }; Returns: { pseudo: string; value: number }[] };
+      leaderboard_wins: { Args: { n?: number; since?: string | null }; Returns: { pseudo: string; value: number }[] };
       play_ping: { Args: never; Returns: undefined };
       ranked_of: { Args: { p_pseudo: string }; Returns: Json };
       bp_state: { Args: never; Returns: Json };

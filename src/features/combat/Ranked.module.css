@@ -97,77 +97,80 @@
   font-size: var(--fs-xl);
 }
 
-/* Route des rangs : chemin qui serpente, badges qui flottent dessus */
+/* Route des rangs : les 8 rangs alignés, une barre lumineuse se remplit jusqu'à ton rang */
 .road {
   display: grid;
-  gap: var(--s-3);
+  gap: var(--s-4);
   margin-top: var(--s-6);
 }
 .road h2 {
   font-size: var(--fs-xl);
 }
-.roadScroll {
-  overflow-x: auto;
-  scrollbar-width: thin;
-  border-radius: 20px;
-  background:
-    radial-gradient(60% 90% at 50% 50%, rgb(139 92 246 / 10%), transparent 70%),
-    linear-gradient(180deg, rgb(255 255 255 / 2%), transparent);
-}
-.roadTrack {
-  position: relative;
-}
-.roadPath {
-  position: absolute;
-  inset: 0;
-  overflow: visible;
-}
-.roadAll,
-.roadDone {
-  fill: none;
-  stroke-width: 14;
-  stroke-linecap: round;
-}
-.roadAll {
-  stroke: #2a2840;
-  stroke-dasharray: 2 0;
-}
-.roadDone {
-  stroke: #f59e0b;
-  filter: drop-shadow(0 0 8px rgb(245 158 11 / 55%));
-}
-.roadTrack ol {
+.tiers {
+  --badge: 92px; /* hauteur de la zone des badges : la barre passe en son milieu */
   list-style: none;
+  display: grid;
+  grid-template-columns: repeat(8, minmax(0, 1fr));
+  padding: var(--s-6) var(--s-2) var(--s-4);
+  border-radius: 20px;
+  background: radial-gradient(70% 100% at 50% 40%, rgb(139 92 246 / 12%), transparent 70%);
 }
-.roadTrack li {
-  position: absolute;
-  width: 112px;
+.tiers li {
+  position: relative;
   display: grid;
   justify-items: center;
-  gap: 2px;
+  align-content: start;
+  gap: 4px;
   text-align: center;
+}
+/* trait vers le rang suivant */
+.tiers li:not(:last-child)::after {
+  content: '';
+  position: absolute;
+  z-index: 0;
+  top: calc(var(--badge) / 2 - 4px);
+  left: 50%;
+  width: 100%;
+  height: 8px;
+  background: repeating-linear-gradient(90deg, #3a3755 0 8px, #2a2840 8px 16px);
+  image-rendering: pixelated;
+}
+.tiers li.done::after {
+  background: repeating-linear-gradient(90deg, #fbbf24 0 8px, #f59e0b 8px 16px);
+  box-shadow: 0 0 12px rgb(245 158 11 / 55%);
+}
+.tierBadge {
+  position: relative;
+  z-index: 1;
+  display: grid;
+  place-items: center;
+  height: var(--badge);
   animation: bob 3.2s ease-in-out infinite;
+  animation-delay: inherit;
 }
-.roadTrack li b {
+.tiers li b {
   font-size: var(--fs-sm);
-  text-shadow: 0 2px 0 #0d0d12;
 }
-.roadTrack li small {
+.tiers li small {
   font-size: 11px;
   color: var(--muted);
 }
 /* pas encore atteint : en retrait */
-.roadTrack li:not(.done, .here) > :is(img, span) {
-  opacity: 0.4;
+.tiers li:not(.done, .here) .tierBadge {
+  opacity: 0.45;
   filter: grayscale(0.7);
 }
-.roadTrack li.here {
-  z-index: 1;
+.tiers li.here .tierBadge {
+  filter: drop-shadow(0 0 14px var(--rc)) drop-shadow(0 0 3px #fff);
 }
-.roadTrack li.here > :is(img, span) {
-  filter: drop-shadow(0 0 14px var(--rc)) drop-shadow(0 0 4px #fff);
+.tiers li.here b {
+  color: var(--rc);
+  font-size: var(--fs-md);
 }
-.roadTrack li em {
+.tiers li em {
+  position: absolute;
+  z-index: 2;
+  top: calc(-1 * var(--s-5));
   font-style: normal;
   font-size: 11px;
   font-weight: 900;
@@ -177,13 +180,45 @@
   color: #2b1300;
   letter-spacing: var(--tracking-caps);
 }
+.pips {
+  display: flex;
+  gap: 4px;
+  margin-top: 2px;
+}
+.pips i {
+  width: 8px;
+  height: 8px;
+  background: #3a3755;
+}
+.pips .pipDone {
+  background: var(--rc);
+}
+.pips .pipNow {
+  background: #fff;
+  box-shadow: 0 0 8px var(--rc);
+}
+/* téléphone : 4 rangs par ligne, sur 2 lignes */
+@media (max-width: 700px) {
+  .tiers {
+    --badge: 72px;
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    row-gap: var(--s-6);
+  }
+  .tiers li:nth-child(4n)::after {
+    display: none;
+  }
+  .tierBadge > * {
+    scale: 0.8;
+  }
+}
+
 @keyframes bob {
   50% {
     transform: translateY(-8px);
   }
 }
 @media (prefers-reduced-motion: reduce) {
-  .roadTrack li {
+  .tierBadge {
     animation: none;
   }
 }
@@ -357,17 +392,13 @@
 .around {
   display: grid;
   gap: var(--s-2);
-  padding: var(--s-3);
-  border: 3px solid transparent;
-  border-radius: 16px;
-  border-image: url('/img/ui/box-9.png?v=3') 14 fill / 28px stretch;
-  background: linear-gradient(#39374f, #39374f) center / calc(100% - 16px) calc(100% - 16px) no-repeat;
-  image-rendering: pixelated;
 }
 .around h2 {
-  font-size: var(--fs-sm);
+  font-size: var(--fs-xs);
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: var(--tracking-caps);
   color: var(--muted);
-  font-weight: 600;
 }
 .around ol {
   list-style: none;

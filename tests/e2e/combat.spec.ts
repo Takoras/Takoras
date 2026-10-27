@@ -32,11 +32,8 @@ test('combat : monter son équipe (ajouter, version, enregistrer, plus de budget
   await expect(d).toBeHidden();
   expect(calls).toContain('set_deck');
   await expect(page.getByRole('button', { name: /Entraînement/ })).toBeEnabled();
-  // fiche d'un jeton de l'équipe
-  await page
-    .getByRole('region', { name: 'Équipe' })
-    .getByRole('button', { name: /Vyolis/ })
-    .click();
+  // fiche d'un jeton de l'équipe : le petit « i » (toucher le jeton = le changer)
+  await page.getByRole('button', { name: 'Fiche de Vyolis' }).click();
   await expect(page.getByRole('dialog').getByText('Téléportation')).toBeVisible();
 });
 

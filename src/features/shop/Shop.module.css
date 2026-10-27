@@ -137,10 +137,11 @@
 }
 /* Packs en euros (achats intégrés) : ta boîte pêche à rayures, texte foncé */
 .card.pack {
-  border-image-source: url('/img/ui/box-peach.png?v=3');
+  /* 10 % plus sombre : les objets ressortent mieux */
+  border-image-source: url('/img/ui/box-peach-dark.png?v=3');
   border-image-slice: 12 fill;
   border-image-width: 24px;
-  background-image: linear-gradient(#ffe0b4, #ffe0b4);
+  background-image: linear-gradient(#e6caa2, #e6caa2);
   color: #4a2306;
 }
 .pack h3,

@@ -7,12 +7,13 @@ test('mon profil : stats, vitrine, modifier la bio et la photo', async ({ page }
   await expect(page.getByRole('heading', { level: 1, name: /Testeur/ })).toBeVisible();
   await expect(page.getByText('120')).toBeVisible();
   await expect(page.getByText('test@example.com')).toBeVisible(); // zone privée (seulement sur mon profil)
-  // vitrine : case 1 → Vyolis
+  // vitrine : case 1 → toute la collection de la série, Vyolis → sa fiche → « Mettre en vitrine »
   await page.getByRole('button', { name: 'Vitrine · case 1' }).click();
   await page
     .getByRole('dialog')
     .getByRole('button', { name: /Vyolis/ })
     .click();
+  await page.getByRole('button', { name: 'Mettre en vitrine' }).click();
   await expect(page.getByRole('button', { name: /Vyolis/ }).first()).toBeVisible();
   // modifier : bio + photo, sans bannière (envoyée comme null, pas '')
   await page.getByRole('button', { name: /Modifier le profil/ }).click();

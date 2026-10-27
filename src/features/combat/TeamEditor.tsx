@@ -26,11 +26,13 @@ export function TeamEditor({
   groups,
   levels,
   team: start,
+  focus,
   onClose,
 }: {
   groups: Group[];
   levels: InvData;
   team: Team;
+  focus?: number;
   onClose: () => void;
 }) {
   const t = useT();
@@ -47,6 +49,8 @@ export function TeamEditor({
   const [serie, setSerie] = useState(series[0] ?? 'Takoras');
   const [busy, setBusy] = useState(false);
   const [info, setInfo] = useState<Owned | null>(null);
+  // place visée : le prochain jeton choisi la remplace (toucher une place pour la viser)
+  const [target, setTarget] = useState<number | null>(focus ?? null);
   const slotsRef = useRef<HTMLUListElement>(null);
   const inTeam = new Set(team.filter(Boolean).map((u) => ownKey(u?.serie ?? '', u?.name ?? '')));
   const vis = all.filter((u) => u.serie === serie).sort((a, b) => b.odds - a.odds);
@@ -59,7 +63,7 @@ export function TeamEditor({
       sfx.click();
       return setTeam(team.map((u, i) => (i === had ? null : u)));
     }
-    const free = team.findIndex((u) => !u);
+    const free = target ?? team.findIndex((u) => !u);
     if (free < 0) {
       sfx.deny();
       return toast(t('arena.teamFull'), true);
@@ -67,6 +71,7 @@ export function TeamEditor({
     // la meilleure mutation possédée par défaut
     const v = Object.keys(o.vars).sort((a, b) => (VRANK[b] ?? 0) - (VRANK[a] ?? 0))[0] ?? baseVariant(o);
     sfx.upgrade();
+    setTarget(null);
     setTeam(
       team.map((u, i) =>
         i === free ? { id: o.vars[v] ?? 0, serie: o.serie, name: o.name, odds: o.odds, variant: v } : u,
@@ -102,15 +107,17 @@ export function TeamEditor({
         {team.map((u, i) => {
           if (!u)
             return (
-              <li key={i} className={s.empty}>
-                <span>{i + 1}</span>
+              <li key={i} className={`${s.empty} ${target === i ? s.aim : ''}`}>
+                <button type="button" className={s.pickSlot} onClick={() => setTarget(i)} aria-pressed={target === i}>
+                  {i + 1}
+                </button>
               </li>
             );
           const j = jetonOf(u.name, u.serie),
             o = by.get(ownKey(u.serie, u.name)),
             vars = o ? Object.keys(o.vars).sort((a, b) => (VRANK[a] ?? 0) - (VRANK[b] ?? 0)) : [u.variant];
           return (
-            <li key={i} style={glowVars(j, u.variant) as CSSProperties}>
+            <li key={i} style={glowVars(j, u.variant) as CSSProperties} className={target === i ? s.aim : undefined}>
               <button
                 type="button"
                 className={s.rm}
@@ -122,7 +129,15 @@ export function TeamEditor({
               >
                 ✕
               </button>
-              <img className={vImg(u.variant)} src={texOf(j)} alt="" />
+              <button
+                type="button"
+                className={s.pickSlot}
+                onClick={() => setTarget(target === i ? null : i)}
+                aria-pressed={target === i}
+                aria-label={t('arena.swap')}
+              >
+                <img className={vImg(u.variant)} src={texOf(j)} alt="" />
+              </button>
               <b>{jn(u.name)}</b>
               {vars.length > 1 ? (
                 <div className={s.muts} role="radiogroup" aria-label={t('arena.version')}>

@@ -1,12 +1,7 @@
+/* ouvert : pas de grande boîte autour, seulement les cartes des quêtes */
 .box {
   display: grid;
   gap: var(--s-3);
-  padding: var(--s-5);
-  border: 3px solid transparent;
-  border-radius: 16px;
-  border-image: url('/img/ui/box-9.png?v=3') 14 fill / 28px stretch;
-  background: linear-gradient(#39374f, #39374f) center / calc(100% - 16px) calc(100% - 16px) no-repeat;
-  image-rendering: pixelated;
 }
 
 .daily {

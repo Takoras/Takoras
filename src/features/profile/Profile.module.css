@@ -46,12 +46,12 @@
   align-items: end;
   gap: var(--s-5);
   padding: 0 var(--s-5);
-  margin-top: calc(-1 * var(--s-6));
+  margin-top: calc(-1 * var(--s-8));
 }
 .pp {
   position: relative;
   z-index: 1;
-  margin-top: -70px;
+  align-self: start;
   border-radius: 50%;
   padding: 5px;
   background: var(--bg);
@@ -61,7 +61,7 @@
   min-width: 0;
   display: grid;
   gap: var(--s-1);
-  padding-top: var(--s-4);
+  padding-top: var(--s-8);
 }
 .id h1 {
   font-size: var(--fs-2xl);
@@ -73,43 +73,98 @@
   color: var(--muted);
   font-weight: 500;
 }
-.streak {
-  font-size: var(--fs-md);
-  color: var(--gold);
+.headActions {
+  display: flex;
+  gap: var(--s-2);
+  margin-top: var(--s-2);
 }
 
-.headActions {
-  padding-bottom: var(--s-1);
-}
-.stats {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(170px, 1fr));
-  gap: var(--s-3);
-}
-.bestCell {
-  grid-column: span 2;
-}
-.stats div {
-  border: 3px solid transparent;
-  border-radius: 14px;
-  border-image: url('/img/ui/box-card.png?v=3') 12 fill / 24px stretch;
-  background: linear-gradient(#222034, #222034) center / calc(100% - 16px) calc(100% - 16px) no-repeat;
-  image-rendering: pixelated;
+/* Rang classé en grand : c'est le flex du profil */
+.elo {
+  position: relative;
+  z-index: 1;
   display: flex;
-  flex-direction: column-reverse;
-  gap: 2px;
-  padding: var(--s-3) var(--s-4);
+  align-items: center;
+  gap: var(--s-4);
+  padding-right: var(--s-2);
 }
-.stats dt {
-  font-size: var(--fs-xs);
-  color: var(--muted);
+.eloBadge {
+  position: relative;
+  display: grid;
+  place-items: center;
+  width: 128px;
+  height: 128px;
 }
-.stats dd {
-  margin: 0;
-  font-family: var(--font-display);
-  font-weight: 700;
+.eloBadge::before {
+  content: '';
+  position: absolute;
+  inset: -20%;
+  border-radius: 50%;
+  background: radial-gradient(closest-side, color-mix(in srgb, var(--rc) 55%, transparent), transparent);
+  animation: eloGlow 3s ease-in-out infinite;
+}
+.eloBadge > * {
+  position: relative;
+  animation: eloBob 4s ease-in-out infinite;
+  filter: drop-shadow(0 6px 10px rgb(0 0 0 / 50%));
+}
+.elo b {
+  display: block;
+  font: 800 clamp(2.4rem, 5vw, 3.4rem) / 1 var(--font-display);
+  letter-spacing: -0.02em;
+  text-shadow: 0 0 24px color-mix(in srgb, var(--rc) 45%, transparent);
+}
+.elo b span {
   font-size: var(--fs-lg);
-  overflow-wrap: anywhere;
+  color: var(--muted);
+  font-weight: 700;
+}
+.eloRank {
+  display: block;
+  color: var(--rc);
+  font: 800 var(--fs-lg) / 1.1 var(--font-display);
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+}
+@keyframes eloGlow {
+  50% {
+    opacity: 0.55;
+    scale: 1.1;
+  }
+}
+@keyframes eloBob {
+  50% {
+    translate: 0 -6px;
+  }
+}
+:global(html.reduce-fx) .eloBadge::before,
+:global(html.reduce-fx) .eloBadge > * {
+  animation: none;
+}
+
+/* Chiffres en ligne, sans boîtes */
+.strip {
+  list-style: none;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--s-2) var(--s-6);
+  padding: 0 var(--s-5);
+  color: var(--muted);
+  font-size: var(--fs-sm);
+}
+.strip b {
+  color: var(--text);
+  font: 700 var(--fs-lg) var(--font-display);
+}
+.bestLi {
+  display: flex;
+  align-items: center;
+  gap: var(--s-2);
+}
+.bestLi img {
+  image-rendering: pixelated;
+  --df: drop-shadow(0 0 8px rgba(var(--g), calc(0.6 * var(--ga, 0))));
 }
 
 .showcase {
@@ -291,40 +346,6 @@
   color: rgb(134 239 172);
   font-size: 11px;
   font-weight: 600;
-}
-
-/* Elo du classé, bien visible en haut du profil */
-.elo {
-  border: 3px solid transparent;
-  border-radius: 14px;
-  border-image: url('/img/ui/box-card.png?v=3') 12 fill / 24px stretch;
-  background: linear-gradient(#222034, #222034) center / calc(100% - 16px) calc(100% - 16px) no-repeat;
-  image-rendering: pixelated;
-  display: flex;
-  align-items: center;
-  gap: var(--s-2);
-  padding: var(--s-2) var(--s-3);
-}
-.elo b {
-  display: block;
-  font: 700 var(--fs-xl) / 1 var(--font-display);
-}
-.elo small {
-  color: var(--text-2);
-  font-size: var(--fs-xs);
-}
-
-/* Meilleur jeton : son sprite à côté du nom */
-.best {
-  display: inline-flex;
-  align-items: center;
-  gap: var(--s-2);
-}
-.best img {
-  width: 40px;
-  height: 40px;
-  image-rendering: pixelated;
-  --df: drop-shadow(0 0 8px rgba(var(--g), calc(0.6 * var(--ga, 0))));
 }
 
 .private {
@@ -509,13 +530,9 @@
   }
   .head {
     margin-top: -52px;
-    padding: 0 var(--s-2);
   }
   .id h1 {
     font-size: var(--fs-xl);
-  }
-  .stats {
-    grid-template-columns: 1fr 1fr;
   }
   .showcase {
     grid-template-columns: repeat(3, 1fr);
@@ -550,13 +567,57 @@
     grid-template-columns: auto 1fr;
     padding: 0 var(--s-2);
   }
-  .headActions {
+  .id {
+    padding-top: var(--s-6);
+  }
+  .elo {
     grid-column: 1 / -1;
+    justify-content: center;
+    padding: var(--s-2) 0 0;
+  }
+  .strip {
+    justify-content: center;
+    padding: 0;
+    gap: var(--s-2) var(--s-4);
   }
   .showcase {
     grid-template-columns: repeat(3, 1fr);
   }
-  .bestCell {
-    grid-column: 1 / -1;
-  }
+}
+
+/* Choix de la vitrine : les séries en haut, comme le bestiaire */
+.pkSeries {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--s-2);
+  margin-bottom: var(--s-4);
+}
+.pkSeries > * {
+  display: flex;
+  align-items: center;
+  gap: var(--s-2);
+  min-height: 48px;
+  padding: 0 var(--s-4) 0 var(--s-2);
+  border: 3px solid transparent;
+  border-radius: 12px;
+  border-image: url('/img/ui/box-card-in.png?v=3') 12 fill / 24px stretch;
+  background: linear-gradient(#222034, #222034) center / calc(100% - 16px) calc(100% - 16px) no-repeat;
+  image-rendering: pixelated;
+  font-weight: 700;
+}
+.pkSeries img {
+  width: 32px;
+  height: 32px;
+}
+.pkSeries button[aria-selected='true'] {
+  border-image-source: url('/img/ui/box-sel-light.png?v=3');
+  background-image: linear-gradient(#39374f, #39374f);
+}
+.pkSoon {
+  opacity: 0.5;
+  color: var(--muted);
+  font-weight: 500 !important;
+}
+.coll button:disabled {
+  cursor: default;
 }

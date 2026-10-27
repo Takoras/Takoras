@@ -73,24 +73,78 @@ export function Actions() {
           {t('ui.open_all', { n: Math.min(e.stock, MAX_OPEN) })}
         </Button>
       </div>
-      <div className={s.ups}>
-        {e.max < TOP_MAX ? (
-          <Button size="sm" disabled={e.coins < upCost} onClick={() => void upgrade('stock')}>
-            {t('ui.stock_max', { a: e.max, b: nextMax(e.max) })} · {n(upCost)} <Coin />
-          </Button>
-        ) : (
-          <span className="muted">{t('ui.stock_top', { n: TOP_MAX })}</span>
-        )}
-        {e.regen > 60 ? (
-          <Button size="sm" disabled={e.coins < rgCost} onClick={() => void upgrade('regen')}>
-            {t('ui.regen_up', { a: mmss(e.regen * 1000), b: mmss((e.regen - 10) * 1000) })} · {n(rgCost)} <Coin />
-          </Button>
-        ) : (
-          <span className="muted">{t('ui.regen_top')}</span>
-        )}
+      {/* Améliorations : bien en vue, avec la progression jusqu'au max */}
+      <div className={s.ups} aria-label={t('ui.upgrades')} role="group">
+        <Up
+          icon="/img/objets/recharge.png"
+          title={t('ui.up_stock')}
+          now={String(e.max)}
+          next={e.max < TOP_MAX ? String(nextMax(e.max)) : null}
+          pct={(e.max - 5) / (TOP_MAX - 5)}
+          top={t('ui.stock_top', { n: TOP_MAX })}
+          cost={upCost}
+          coins={e.coins}
+          fmt={n}
+          onUp={() => void upgrade('stock')}
+        />
+        <Up
+          icon="/img/objets/sablier.png"
+          title={t('ui.up_regen')}
+          now={mmss(e.regen * 1000)}
+          next={e.regen > 60 ? mmss((e.regen - 10) * 1000) : null}
+          pct={(180 - e.regen) / 120}
+          top={t('ui.regen_top')}
+          cost={rgCost}
+          coins={e.coins}
+          fmt={n}
+          onUp={() => void upgrade('regen')}
+        />
       </div>
       <Effects />
       {info}
+    </div>
+  );
+}
+
+// Une amélioration : icône, valeur actuelle → suivante, barre jusqu'au max, bouton avec le prix (il brille quand on peut payer)
+function Up(p: {
+  icon: string;
+  title: string;
+  now: string;
+  next: string | null;
+  pct: number;
+  top: string;
+  cost: number;
+  coins: number;
+  fmt: (n: number) => string;
+  onUp: () => void;
+}) {
+  const can = !!p.next && p.coins >= p.cost;
+  return (
+    <div className={`${s.up} ${can ? s.upCan : ''}`}>
+      <img className="px" src={p.icon} alt="" width={40} height={40} />
+      <div className={s.upBody}>
+        <b>{p.title}</b>
+        <span className={s.upVal}>
+          {p.now}
+          {p.next ? (
+            <>
+              {' '}
+              → <em>{p.next}</em>
+            </>
+          ) : null}
+        </span>
+        <span className={s.upBar}>
+          <i style={{ width: `${Math.max(3, Math.min(100, p.pct * 100))}%` }} />
+        </span>
+      </div>
+      {p.next ? (
+        <Button size="sm" variant={can ? 'primary' : undefined} disabled={!can} onClick={p.onUp}>
+          {p.fmt(p.cost)} <Coin />
+        </Button>
+      ) : (
+        <small className="muted">{p.top}</small>
+      )}
     </div>
   );
 }

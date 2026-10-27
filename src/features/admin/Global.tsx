@@ -122,21 +122,6 @@ export function Global() {
           variant="danger"
           onClick={async () => {
             if (
-              !(await confirm(
-                'Effacer TOUS les messages de chat ? (le chat est retiré du site) Tape EFFACER pour confirmer.',
-                { typed: 'EFFACER', danger: true },
-              ))
-            )
-              return;
-            await act(() => adminApi.clearMessages(), 'Tous les messages ont été effacés');
-          }}
-        >
-          Effacer tous les messages de chat
-        </Button>
-        <Button
-          variant="danger"
-          onClick={async () => {
-            if (
               !(await confirm('Remettre TOUS les joueurs à zéro ? Tape RESET pour confirmer.', {
                 typed: 'RESET',
                 danger: true,

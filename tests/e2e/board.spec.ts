@@ -11,7 +11,11 @@ test('classement : podium, liste, moi en surbrillance, changer de catégorie', a
   await expect(page.getByRole('button', { name: /Meilleur/ })).toHaveCount(0);
   await page.getByRole('button', { name: 'Tirages ouverts' }).click();
   await page.getByRole('radio', { name: 'Depuis toujours' }).click();
-  expect(calls.filter((c) => c === 'leaderboard').length).toBeGreaterThanOrEqual(3);
+  expect(calls.filter((c) => c === 'leaderboard').length).toBeGreaterThanOrEqual(2);
+  // plus de « Collection » (tout le monde finira par l'avoir) ; « Victoires » à la place
+  await expect(page.getByRole('button', { name: 'Collection' })).toHaveCount(0);
+  await page.getByRole('button', { name: 'Victoires' }).click();
+  await expect(page.getByText('12 victoire(s)').first()).toBeVisible();
   await page.getByRole('button', { name: 'Temps de jeu' }).click();
   await expect(page.getByText('2 h 05').first()).toBeVisible();
 });
