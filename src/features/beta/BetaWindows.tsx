@@ -18,13 +18,22 @@ import { toast } from '@/ui/toast';
 import { lsSet } from '../social/social';
 import { close, markSeen, openPatchnotes, TUTO_KEY, usePatchnotes, type Note, type Win } from './store';
 import { TestPulls } from './TestPulls';
+import { Tour } from './Tour';
 import s from './Beta.module.css';
 
 // Fenêtres bêta (patch notes, popup des nouveautés, tuto, avis, menu testeur) : téléchargées à l'ouverture seulement.
 export default function BetaWindow({ win }: { win: Win }) {
   if (win === 'pn') return <Patchnotes />;
   if (win === 'pop') return <PatchPopup />;
-  if (win === 'tuto') return <Tuto />;
+  if (win === 'tuto')
+    return (
+      <Tour
+        onDone={() => {
+          lsSet(TUTO_KEY, 1);
+          close();
+        }}
+      />
+    );
   if (win === 'fb') return <Feedback />;
   if (win === 'tester') return <Tester />;
   return null;
@@ -123,7 +132,8 @@ function PatchPopup() {
 }
 
 // Tuto de première visite : quelques écrans qui expliquent tout le site (glisser sur téléphone)
-function Tuto() {
+// ancien tuto en fenêtres (remplacé par la visite guidée)
+export function Tuto() {
   const t = useT();
   const dict = useDict();
   const steps = dict.tuto;

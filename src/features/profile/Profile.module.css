@@ -1,6 +1,9 @@
 .page {
   display: grid;
-  gap: var(--s-4);
+  gap: var(--s-6);
+  max-width: 1100px;
+  margin-inline: auto;
+  width: 100%;
 }
 .empty {
   padding: var(--s-10) var(--s-4);
@@ -17,11 +20,13 @@
 
 .banner {
   position: relative;
-  height: 150px;
-  border-radius: var(--r-lg);
+  height: clamp(130px, 22vw, 230px);
+  border-radius: 20px;
   overflow: hidden;
-  background: var(--surface);
-  border: 1px solid var(--line);
+  border: 3px solid transparent;
+  border-image: url('/img/ui/box-9.png?v=3') 14 fill / 28px stretch;
+  background: linear-gradient(#39374f, #39374f) center / calc(100% - 16px) calc(100% - 16px) no-repeat;
+  image-rendering: pixelated;
   display: grid;
   place-items: center;
 }
@@ -36,23 +41,27 @@
   background: var(--surface);
 }
 .head {
-  display: flex;
-  align-items: flex-end;
-  gap: var(--s-4);
-  flex-wrap: wrap;
-  margin-top: -64px;
-  padding: 0 var(--s-4);
+  display: grid;
+  grid-template-columns: auto 1fr auto;
+  align-items: end;
+  gap: var(--s-5);
+  padding: 0 var(--s-5);
+  margin-top: calc(-1 * var(--s-6));
 }
 .pp {
   position: relative;
   z-index: 1;
+  margin-top: -70px;
   border-radius: 50%;
-  padding: 4px;
+  padding: 5px;
   background: var(--bg);
+  box-shadow: 0 8px 24px rgb(0 0 0 / 45%);
 }
 .id {
-  flex: 1;
-  min-width: 200px;
+  min-width: 0;
+  display: grid;
+  gap: var(--s-1);
+  padding-top: var(--s-4);
 }
 .id h1 {
   font-size: var(--fs-2xl);
@@ -69,10 +78,16 @@
   color: var(--gold);
 }
 
+.headActions {
+  padding-bottom: var(--s-1);
+}
 .stats {
   display: grid;
-  grid-template-columns: repeat(4, 1fr);
-  gap: var(--s-2);
+  grid-template-columns: repeat(auto-fit, minmax(170px, 1fr));
+  gap: var(--s-3);
+}
+.bestCell {
+  grid-column: span 2;
 }
 .stats div {
   border: 3px solid transparent;
@@ -101,39 +116,106 @@
   list-style: none;
   display: grid;
   grid-template-columns: repeat(5, 1fr);
-  gap: var(--s-2);
+  gap: var(--s-4);
+  padding: var(--s-4) 0 var(--s-2);
 }
-.sc {
-  position: relative;
-  min-height: 150px;
-  border: 3px solid transparent;
-  border-radius: 14px;
-  border-image: url('/img/ui/box-card.png?v=3') 12 / 24px stretch;
-  background:
-    radial-gradient(circle at 50% 40%, rgba(var(--g), calc(0.18 * var(--ga, 0))), transparent 65%) padding-box,
-    linear-gradient(#222034, #222034) center / calc(100% - 16px) calc(100% - 16px) no-repeat;
-  image-rendering: pixelated;
-}
+/* les jetons de la vitrine sont posés librement (pas de boîte), avec leur halo et une ombre au sol */
 .sc > button {
   width: 100%;
-  height: 100%;
   display: grid;
   justify-items: center;
-  align-content: center;
-  gap: 2px;
-  padding: var(--s-4) var(--s-2);
-  border-radius: inherit;
+  gap: 4px;
+  padding: 0;
+  text-align: center;
 }
 .sc img {
-  width: 72px;
-  height: 72px;
-  --df: drop-shadow(0 0 10px rgba(var(--g), calc(0.5 * var(--ga, 0))));
+  width: min(120px, 100%);
+  aspect-ratio: 1;
+  object-fit: contain;
+  --df: drop-shadow(0 0 16px rgba(var(--g), calc(0.6 * var(--ga, 0)))) drop-shadow(0 10px 0 rgb(0 0 0 / 35%));
+  transition: transform 0.2s;
+}
+.sc > button:hover img {
+  transform: translateY(-6px) scale(1.04);
 }
 .sc b {
-  font-size: var(--fs-sm);
+  margin-top: var(--s-2);
+  font-size: var(--fs-md);
 }
 .sc small {
-  font-size: 11px;
+  font-size: var(--fs-xs);
+  color: var(--text-2);
+}
+.scEmpty {
+  display: grid;
+  place-items: center;
+  min-height: 150px;
+}
+.scEmpty button {
+  width: 96px;
+  aspect-ratio: 1;
+  border-radius: 50%;
+  border: 3px dashed var(--line-strong);
+  color: var(--muted);
+  font-size: var(--fs-2xl);
+}
+.scEmpty button:hover {
+  border-color: var(--accent-hi);
+  color: var(--text);
+}
+/* bestiaires : une carte par série */
+.series {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--s-3);
+}
+.series > * {
+  display: flex;
+  align-items: center;
+  gap: var(--s-3);
+  min-width: 240px;
+  padding: var(--s-3) var(--s-4);
+  border: 3px solid transparent;
+  border-radius: 14px;
+  border-image: url('/img/ui/box-card.png?v=3') 12 fill / 24px stretch;
+  background: linear-gradient(#222034, #222034) center / calc(100% - 16px) calc(100% - 16px) no-repeat;
+  image-rendering: pixelated;
+  color: var(--text);
+  text-align: left;
+}
+.series button:hover {
+  border-image-source: url('/img/ui/box-sel.png?v=3');
+}
+.series img {
+  width: 48px;
+  height: 48px;
+}
+.series span {
+  display: grid;
+}
+.series small {
+  color: var(--muted);
+}
+.seriesSoon {
+  opacity: 0.5;
+}
+/* fiche jeton d'un autre joueur */
+.their,
+.theirVars {
+  list-style: none;
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--s-2);
+}
+.their li,
+.theirVars li {
+  padding: 6px var(--s-3);
+  border: 3px solid transparent;
+  border-radius: 10px;
+  border-image: url('/img/ui/box-card-in.png?v=3') 12 fill / 12px stretch;
+  background: linear-gradient(#222034, #222034) center / calc(100% - 16px) calc(100% - 16px) no-repeat;
+  image-rendering: pixelated;
+  font-size: var(--fs-sm);
 }
 .scV {
   z-index: 2;
@@ -142,15 +224,6 @@
   left: 50%;
   translate: -50% 0;
 }
-.scEmpty {
-  border-style: dashed;
-  display: grid;
-}
-.scEmpty button {
-  font-size: var(--fs-2xl);
-  color: var(--muted);
-}
-
 .coll {
   list-style: none;
   display: grid;
@@ -470,4 +543,20 @@
   margin: 0;
   font-size: 9px;
   padding: 1px 6px;
+}
+
+@media (max-width: 640px) {
+  .head {
+    grid-template-columns: auto 1fr;
+    padding: 0 var(--s-2);
+  }
+  .headActions {
+    grid-column: 1 / -1;
+  }
+  .showcase {
+    grid-template-columns: repeat(3, 1fr);
+  }
+  .bestCell {
+    grid-column: 1 / -1;
+  }
 }

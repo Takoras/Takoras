@@ -10,7 +10,7 @@ import { Button } from '@/ui/Button';
 import { Modal } from '@/ui/Modal';
 import { Announcements, openAnnHistory, unreadAnn, useAnn } from '@/features/social/Announcements';
 import { SocialLayer } from '@/features/social/SocialLayer';
-import { BetaChip, BetaLayer, openPatchnotes, openTester } from '@/features/beta/Beta';
+import { BetaChip, BetaLayer, openPatchnotes } from '@/features/beta/Beta';
 import { badgeOf, useFriends } from '@/features/social/social';
 import { publicApi } from '@/api';
 import { useOnlinePresence } from '@/lib/online';
@@ -52,12 +52,6 @@ export function Layout() {
     addEventListener('keydown', onKey);
     return () => removeEventListener('keydown', onKey);
   }, [isAdmin, navigate]);
-  const streak = Number(me.data?.streak ?? 0),
-    today = !!me.data?.streak_today;
-  const goDaily = () => {
-    navigate('/');
-    setTimeout(() => document.getElementById('daily')?.scrollIntoView({ behavior: 'smooth', block: 'center' }), 350);
-  };
   const toggleMute = () => {
     sfx.setMuted(!muted);
     setMuted(!muted);
@@ -108,11 +102,6 @@ export function Layout() {
               <Icon name="shield" />
             </NavLink>
           ) : null}
-          {me.data?.tester ? (
-            <button type="button" className={s.icon} onClick={openTester} aria-label={t('ui.tester_menu')}>
-              <Icon name="flask" />
-            </button>
-          ) : null}
           <button
             type="button"
             className={`${s.icon} ${s.bell}`}
@@ -134,18 +123,6 @@ export function Layout() {
           >
             <Icon name={muted ? 'mute' : 'sound'} />
           </button>
-          {user && me.data ? (
-            <button
-              type="button"
-              className={`${s.streak} ${today ? '' : s.cold}`}
-              onClick={goDaily}
-              title={today ? t('ui.streak_ok', { n: streak }) : t('ui.streak_todo')}
-              aria-label={today ? t('ui.streak_ok', { n: streak }) : t('ui.streak_todo')}
-            >
-              <Icon name="flame" size={18} />
-              <b>{streak}</b>
-            </button>
-          ) : null}
           {user ? (
             <>
               <span className={s.bal} aria-label={t('app.balance')}>
@@ -195,6 +172,7 @@ export function Layout() {
               {t('ui.foot_news')}
             </button>
             <NavLink to="/profil">{t('app.account')}</NavLink>
+            <NavLink to="/confidentialite">{t('ui.privacy')}</NavLink>
           </div>
         </div>
         <small className={s.copy}>
@@ -249,18 +227,6 @@ export function Layout() {
               <Icon name="shield" />
               Admin
             </NavLink>
-          ) : null}
-          {me.data?.tester ? (
-            <button
-              type="button"
-              onClick={() => {
-                openUI('more', false);
-                openTester();
-              }}
-            >
-              <Icon name="flask" />
-              {t('ui.tester_menu')}
-            </button>
           ) : null}
           <button
             type="button"

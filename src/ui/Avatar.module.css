@@ -16,3 +16,15 @@
   height: 100%;
   object-fit: cover;
 }
+
+/* jeton en photo de profil : il remplit la pastille, sans fond */
+.tok {
+  background: radial-gradient(circle, #2a2840, #15131f);
+  overflow: visible;
+}
+.tok img {
+  width: 92%;
+  height: 92%;
+  object-fit: contain;
+  image-rendering: pixelated;
+}

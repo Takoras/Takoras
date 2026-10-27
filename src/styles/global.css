@@ -24,8 +24,7 @@ body {
   /* lueurs douces comme l'ancien Takoras (violet en haut à droite, orange à gauche) */
   background:
     radial-gradient(900px 500px at 85% -10%, rgb(139 92 246 / 16%), transparent 70%),
-    radial-gradient(700px 400px at -10% 60%, rgb(249 115 22 / 7%), transparent 70%),
-    var(--bg);
+    radial-gradient(700px 400px at -10% 60%, rgb(249 115 22 / 7%), transparent 70%), var(--bg);
   background-attachment: fixed;
   color: var(--text);
   font-family: var(--font-body);

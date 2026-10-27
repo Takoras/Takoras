@@ -1,21 +1,21 @@
 import { test, expect } from '@playwright/test';
 import { fakeSupabase } from './fake-supabase';
 
-test('tuto de première visite : suivant, retour, terminer (une seule fois)', async ({ page }) => {
+test('visite guidée de la première visite : suivant, passer (une seule fois)', async ({ page }) => {
   await fakeSupabase(page, {}, [], { tuto: true, pnSeen: -1 });
   // un vrai nouveau joueur n'a encore rien vu
   await page.goto('/');
-  const d = page.getByRole('dialog');
-  await expect(d.getByRole('heading', { name: 'Bienvenue sur Takoras !' })).toBeVisible({ timeout: 6000 });
-  await d.getByRole('button', { name: /Suivant/ }).click();
-  await expect(d.getByRole('heading', { name: 'Tes pulls' })).toBeVisible();
-  await d.getByRole('button', { name: /Retour/ }).click();
-  await d.getByRole('button', { name: 'Passer' }).click();
-  await expect(d).toBeHidden();
+  const d = page.getByRole('dialog', { name: 'Ton tirage' });
+  await expect(d).toBeVisible({ timeout: 6000 });
+  await d.getByRole('button', { name: 'Suivant' }).click();
+  const d2 = page.getByRole('dialog', { name: 'Les tirages' });
+  await expect(d2).toBeVisible();
+  await d2.getByRole('button', { name: 'Passer' }).click();
+  await expect(d2).toBeHidden();
   expect(await page.evaluate(() => localStorage.getItem('takoras-tuto-done'))).toBe('1');
 });
 
-test('patch notes : popup de la nouveauté, puis toutes les notes via la puce bêta', async ({ page, isMobile }) => {
+test('patch notes : popup de la nouveauté, puis toutes les notes via le pied de page', async ({ page, isMobile }) => {
   await fakeSupabase(page, {}, [], { pnSeen: 11 });
   await page.goto('/');
   const d = page.getByRole('dialog');
@@ -27,10 +27,9 @@ test('patch notes : popup de la nouveauté, puis toutes les notes via la puce b�
   await page.reload();
   await page.waitForTimeout(2000);
   await expect(page.getByRole('dialog')).toBeHidden(); // déjà vue
-  if (!isMobile) {
-    await page.getByRole('button', { name: 'bêta' }).click();
-    await expect(page.getByRole('dialog').getByText('Version 0.12')).toBeVisible();
-  }
+  void isMobile;
+  await page.getByRole('contentinfo').getByRole('button', { name: 'Nouveautés' }).click();
+  await expect(page.getByRole('dialog').getByText('Version 0.12')).toBeVisible();
 });
 
 test('donner un avis', async ({ page }) => {
@@ -49,19 +48,9 @@ test('donner un avis', async ({ page }) => {
   expect(calls).toContain('send_feedback');
 });
 
-test('menu testeur : seulement pour les testeurs, donne des pièces', async ({ page, isMobile }) => {
-  test.skip(isMobile, 'même menu sur téléphone (dans Plus)');
+test('plus de menu testeur ni de menu bêta', async ({ page }) => {
   await fakeSupabase(page, { coins: 100 }, [], { tester: true });
   await page.goto('/');
-  await page.getByRole('button', { name: 'Menu testeur' }).click();
-  await page.getByRole('dialog').getByRole('button', { name: '+10 000', exact: true }).click();
-  await expect(page.getByLabel('Solde')).toContainText('10 100');
-});
-
-test('menu testeur absent pour un joueur normal', async ({ page, isMobile }) => {
-  test.skip(isMobile);
-  await fakeSupabase(page);
-  await page.goto('/');
-  await expect(page.getByLabel('Solde')).toBeVisible();
   await expect(page.getByRole('button', { name: 'Menu testeur' })).toHaveCount(0);
+  await expect(page.getByRole('button', { name: 'bêta' })).toHaveCount(0);
 });

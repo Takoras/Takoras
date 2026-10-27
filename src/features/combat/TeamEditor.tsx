@@ -206,15 +206,6 @@ export function TeamEditor({
                     <b>{k.name}</b> · {k.desc}
                   </small>
                 </button>
-                <button
-                  type="button"
-                  className={s.quick}
-                  aria-pressed={on}
-                  aria-label={`${on ? t('arena.remove') : t('arena.add')} ${jn(o.name)}`}
-                  onClick={() => toggle(o)}
-                >
-                  {on ? '✓' : '+'}
-                </button>
               </li>
             );
           })}

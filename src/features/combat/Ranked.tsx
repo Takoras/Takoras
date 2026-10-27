@@ -54,14 +54,24 @@ export function RankCard({ me }: { me: RankedMe | undefined }) {
   const r = rankOf(elo),
     next = ROAD[r.idx + 1];
   const pct = r.max == null ? 100 : Math.max(4, Math.min(100, ((elo - Math.max(r.min, r.max - 50)) / 50) * 100));
+  // Ton rang en grand, sans boîte : badge qui flotte dans son halo, nom du rang, Elo, barre jusqu'à la division suivante
   return (
-    <div className={s.card} style={{ '--rc': r.col } as CSSProperties}>
-      <RankBadge r={r} size={56} />
-      <div className={s.cardMain}>
-        <small>{t('arena.rank')}</small>
-        <b className={s.rankName}>{name(r)}</b>
+    <div className={s.hero} style={{ '--rc': r.col } as CSSProperties}>
+      <div className={s.heroBadge}>
+        <RankBadge r={r} size={132} />
+      </div>
+      <div className={s.heroMain}>
+        <small className={s.heroTag}>{t('arena.rank')}</small>
+        <b className={s.heroName}>{name(r)}</b>
+        <div className={s.heroLine}>
+          <span className={s.heroElo}>
+            {elo.toLocaleString(locale(lang))} <small>Elo</small>
+          </span>
+          {me?.games ? <span>{t('arena.record', { w: me.wins, l: me.losses })}</span> : null}
+          {me?.games ? <span>{t('arena.eloTop', { n: me.top })}</span> : null}
+        </div>
         <div
-          className={s.bar}
+          className={s.heroBar}
           role="progressbar"
           aria-label={next ? name(next) : name(r)}
           aria-valuemin={0}
@@ -70,53 +80,76 @@ export function RankCard({ me }: { me: RankedMe | undefined }) {
         >
           <i style={{ width: `${pct}%` }} />
         </div>
-        <small>
+        <small className={s.heroNext}>
           {next
             ? t('arena.nextDiv', { n: (next.min - elo).toLocaleString(locale(lang)), r: name(next) })
             : t('arena.maxRank')}
         </small>
       </div>
-      <div className={s.elo}>
-        <b>{elo.toLocaleString(locale(lang))}</b>
-        <small>Elo</small>
-        {me?.games ? <small>{t('arena.record', { w: me.wins, l: me.losses })}</small> : null}
-        {me?.games ? <small>{t('arena.eloTop', { n: me.top })}</small> : null}
-      </div>
     </div>
   );
 }
 
-// Route des rangs : toutes les marches de Bois 1 à Takoras, la tienne mise en avant
+// Route des rangs : un chemin qui serpente, les badges flottent dessus ; la partie déjà faite est colorée
+const STEP = 132,
+  ROAD_H = 250;
+const roadY = (i: number) => ROAD_H / 2 - 18 + Math.sin(i * 0.95) * 62;
 export function RankRoad({ elo }: { elo: number }) {
   const t = useT();
   const name = useRankName();
   const cur = rankOf(elo);
-  const list = useRef<HTMLOListElement>(null);
+  const list = useRef<HTMLDivElement>(null);
   // la marche actuelle est visible sans avoir à chercher
   useEffect(() => {
-    const el = list.current?.querySelector<HTMLElement>('[aria-current]');
-    if (el && list.current) list.current.scrollLeft = el.offsetLeft - list.current.clientWidth / 2 + el.clientWidth / 2;
+    const el = list.current;
+    if (el) el.scrollLeft = (cur.idx + 0.5) * STEP - el.clientWidth / 2;
   }, [cur.idx]);
+  const pts = ROAD.map((r, i) => [i * STEP + STEP / 2, roadY(i)] as const);
+  const path = (n: number) =>
+    pts
+      .slice(0, n)
+      .map(([x, y], i) => {
+        if (!i) return `M${x} ${y}`;
+        const [px, py] = pts[i - 1] ?? [x, y];
+        return `C${px + STEP / 2} ${py} ${x - STEP / 2} ${y} ${x} ${y}`;
+      })
+      .join(' ');
+  const W = ROAD.length * STEP;
   return (
     <section className={s.road} aria-labelledby="road-t">
       <h2 id="road-t">{t('arena.road')}</h2>
-      {/* liste qui défile : focusable au clavier pour pouvoir la parcourir (accessibilité) */}
+      {/* chemin qui défile : focusable au clavier pour pouvoir le parcourir (accessibilité) */}
       {/* eslint-disable-next-line jsx-a11y/no-noninteractive-tabindex */}
-      <ol ref={list} tabIndex={0} aria-labelledby="road-t">
-        {ROAD.map((r) => (
-          <li
-            key={r.idx}
-            className={r.idx < cur.idx ? s.done : r.idx === cur.idx ? s.here : undefined}
-            aria-current={r.idx === cur.idx ? 'step' : undefined}
-            style={{ '--rc': r.col } as CSSProperties}
-          >
-            <RankBadge r={r} size={36} />
-            <b>{name(r)}</b>
-            <small>{r.min > 0 ? `${r.min}+` : `< ${r.max}`}</small>
-            {r.idx === cur.idx ? <em>{t('arena.you')}</em> : null}
-          </li>
-        ))}
-      </ol>
+      <div ref={list} className={s.roadScroll} tabIndex={0} aria-labelledby="road-t">
+        <div className={s.roadTrack} style={{ width: W, height: ROAD_H }}>
+          <svg className={s.roadPath} width={W} height={ROAD_H} aria-hidden>
+            <path d={path(pts.length)} className={s.roadAll} />
+            <path d={path(cur.idx + 1)} className={s.roadDone} />
+          </svg>
+          <ol>
+            {ROAD.map((r, i) => (
+              <li
+                key={r.idx}
+                className={r.idx < cur.idx ? s.done : r.idx === cur.idx ? s.here : undefined}
+                aria-current={r.idx === cur.idx ? 'step' : undefined}
+                style={
+                  {
+                    '--rc': r.col,
+                    left: (pts[i]?.[0] ?? 0) - 56,
+                    top: (pts[i]?.[1] ?? 0) - 44,
+                    animationDelay: `${(i % 5) * -0.6}s`,
+                  } as CSSProperties
+                }
+              >
+                {r.idx === cur.idx ? <em>{t('arena.you')}</em> : null}
+                <RankBadge r={r} size={r.idx === cur.idx ? 76 : 60} />
+                <b>{name(r)}</b>
+                <small>{r.min > 0 ? `${r.min}+` : `< ${r.max}`}</small>
+              </li>
+            ))}
+          </ol>
+        </div>
+      </div>
     </section>
   );
 }

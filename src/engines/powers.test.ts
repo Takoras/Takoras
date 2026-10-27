@@ -132,12 +132,17 @@ test('Tentacules (Kraïos) : agrippe l’ennemi et part avec son élan — il pe
   expect(out).toContain(d.a().id); // … et Kraïos avec lui (sacrifice)
 });
 
-test('Télékinésie (Néphéris) : ne bouge pas, ton tir pousse l’ennemi visé', () => {
-  const d = duel('Néphéris', 'Carmin', [0, 600, 100, 0]);
-  const r = RG.resolve(d.st, [shot(0, -1000, 0.8), null]);
-  expect(evs(r, 'tk')).toBe(1);
+test('Anneau (Néphéris) : ne bouge pas, l’ennemi dans l’anneau s’arrête net et est bloqué au tour suivant', () => {
+  const d = duel('Néphéris', 'Carmin', [0, 600, 0, -300]);
+  // l'anneau tombe sur l'ennemi (900 devant), qui tire au même moment : son tir est annulé
+  const r = RG.resolve(d.st, [shot(0, -1000, 900 / 1100), { i: 0, ax: 0, ay: 1000, f: 1, pow: false }]);
+  expect(evs(r, 'ring')).toBe(1);
+  expect(evs(r, 'locked')).toBe(1);
   expect(d.a().y).toBe(600);
-  expect(d.o().y).toBeLessThan(-200);
+  expect(Math.round(d.o().y)).toBe(-300);
+  const r2 = RG.resolve(d.st, [null, { i: 0, ax: 0, ay: 1000, f: 1, pow: false }]);
+  expect(evs(r2, 'stunned')).toBe(1); // bloqué : il ne tire pas
+  expect(d.a().left).toBe(1);
 });
 
 test('Gravité solaire (Soléo) : ne bouge pas, et le tir ennemi est dévié vers lui', () => {
@@ -152,16 +157,28 @@ test('Gravité solaire (Soléo) : ne bouge pas, et le tir ennemi est dévié ver
   expect(b.foe.x).not.toBe(a.foe.x); // le tir ennemi est courbé vers lui
 });
 
-test('Rayon (Zénith) : ne bouge pas, pousse tous les ennemis sur la ligne, 2 fois par match', () => {
+test('Rayon (Zénith) : ne pousse que le premier jeton sur la ligne, s’arrête aux murs, 1 fois par match', () => {
   const d = duel('Zénith', 'Carmin', [0, 900, 30, 300], true);
   d.o2().x = -40;
   d.o2().y = -300;
   const r = RG.resolve(d.st, [shot(0, -1000, 1), null]);
   expect(evs(r, 'beam')).toBe(1);
-  expect(evs(r, 'beamhit')).toBe(2);
+  expect(evs(r, 'beamhit')).toBe(1);
   expect(d.a().y).toBe(900);
-  expect(d.o().y).toBeLessThan(0);
-  expect(d.a().left).toBe(1);
+  expect(d.o().y).toBeLessThan(300);
+  expect(RG.ready(d.a())).toBe(false);
+  // un mur entre Zénith et l'ennemi : le rayon s'arrête dessus
+  const w = duel('Zénith', 'Carmin', [750, 900, 750, -900]);
+  w.st.map = {
+    id: 'x',
+    R: 2000,
+    R0: 2000,
+    fric: 1,
+    zones: [],
+    walls: [{ x1: 600, y1: 0, x2: 900, y2: 0, w: 60, k: 0.6, hp: 5 }],
+  } as never;
+  const r2 = RG.resolve(w.st, [shot(0, -1000, 1), null]);
+  expect(evs(r2, 'beamhit')).toBe(0);
 });
 
 test('Faille (Oblivion) : la trajectoire se fissure ; au tour suivant, l’ennemi resté dessus tombe', () => {

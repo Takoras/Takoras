@@ -596,7 +596,7 @@ function updateActions() {
   // un par un : seulement « Retour » (on rouvre en cliquant au milieu, sur le jeton) ; plus de bouton « Ouvrir encore »
   $('op-again').hidden = true;
   $('op-back').hidden = !(last && !multi);
-  if (last && !multi) $('op-hint').textContent = t('tap_next');
+  if (last && !multi) $('op-hint').textContent = '';
 }
 const spinning = () => run && performance.now() < (run.spinEnd || 0);
 function next() {
@@ -612,7 +612,7 @@ function next() {
 
 // « Tout ouvrir d'un coup » (pendant un Tout ouvrir) : les jetons s'ouvrent tout seuls, un par un, très vite.
 // Ça s'arrête dès qu'un jeton est spécial (variante, ou 1/1000 et plus) : celui-là tu l'ouvres toi-même, avec toute la mise en scène.
-// S'arrêter ? Selon les réglages du joueur (sous les pulls, sur l'accueil)
+// S'arrêter ? Selon les réglages du joueur (sous les tirages, sur l'accueil)
 const isSpecial = (j, v) => (v && (SETTINGS.autoVars || []).includes(v)) || j.odds >= (SETTINGS.autoMin || Infinity);
 function renderAuto() {
   const b = $('op-auto'); if (!b) return;
@@ -766,6 +766,11 @@ function tap() {
 }
 
 opCoin.addEventListener('pointerdown', e => { e.preventDefault(); tap(); }); // pointerdown = réagit dès l'appui, idéal pour spammer
+// un par un : une fois le jeton révélé, toucher n'importe où sur l'écran (hors boutons) ouvre le tirage suivant
+opening.addEventListener('pointerdown', e => {
+  if (e.target.closest('button, a, input, select, .op-recap-view')) return;
+  if (run?.done && sess && sess.total === 1 && opening.classList.contains('revealed') && !spinning()) { e.preventDefault(); openPulls(1); }
+});
 addEventListener('keydown', e => {
   if (!opening.classList.contains('on') || (e.key !== ' ' && e.key !== 'Enter') || e.target.closest?.('select, .debug') || (e.key === 'Enter' && e.target.closest?.('button:not(#op-coin)'))) return;
   e.preventDefault();
@@ -894,7 +899,7 @@ $('op-recap-grid')?.addEventListener('pointerout', e => {
   const card = e.target.closest('.rc'); if (card && !card.contains(e.relatedTarget)) card.querySelector('img').style.transform = '';
 });
 
-// ---------- Réglages de « Tout ouvrir d'un coup » (sous les pulls, sur l'accueil) : sur quoi ça s'arrête
+// ---------- Réglages de « Tout ouvrir d'un coup » (sous les tirages, sur l'accueil) : sur quoi ça s'arrête
 const AC_MINS = [100, 500, 1000, 5000, 25000, 100000, 0]; // 0 = jamais
 function renderAutoCfg() {
   const box = $('auto-cfg'); if (!box) return;

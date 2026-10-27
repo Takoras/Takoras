@@ -113,5 +113,5 @@ test('plusieurs pouvoirs dans le même tour, mais un seul jeton tire', () => {
   expect(used.sort()).toEqual(['beam', 'jelly', 'ora']);
   expect(res.ev.filter((e) => e.t === 'shot')).toHaveLength(1); // un seul tireur
   const mine = st.bodies.filter((b) => b.side === 0);
-  expect(mine.every((b) => b.cd > 0 || b.left === 1)).toBe(true); // en recharge, ou une charge en moins (Zénith : 2 par match)
+  expect(mine.every((b) => !RG.ready(b))).toBe(true); // tous utilisés : en recharge ou déjà dépensé (Zénith : 1 fois par match)
 });

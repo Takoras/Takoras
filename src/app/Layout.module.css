@@ -132,17 +132,16 @@
 }
 
 .main {
-  /* la page occupe tout l'écran et son contenu est au milieu (comme l'ancien Takoras), pas collé en haut */
+  /* la page prend tout l'écran, avec un grand espace en haut (comme l'ancien Takoras) ;
+     le haut de chaque page est toujours au même endroit, donc rien ne saute en changeant d'onglet */
   display: flex;
   flex-direction: column;
-  justify-content: center;
   max-width: var(--page-max);
   margin: 0 auto;
   min-height: calc(100dvh - 60px);
-  padding: clamp(32px, 6vh, 72px) var(--gutter-page) clamp(48px, 8vh, 96px);
+  padding: clamp(40px, 9vh, 112px) var(--gutter-page) clamp(56px, 10vh, 120px);
   animation: page-in var(--t-slow) var(--ease-out);
 }
-
 
 /* fondu seulement : un glissement placerait les boîtes en pixel art entre deux pixels (fines lignes entre les morceaux) */
 @keyframes page-in {

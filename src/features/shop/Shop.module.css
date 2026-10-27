@@ -1,6 +1,7 @@
 .page {
   display: grid;
-  gap: var(--s-5);
+  gap: var(--s-8);
+  align-content: start;
 }
 .head {
   display: flex;
@@ -36,7 +37,6 @@
 .cats button[aria-pressed='true'] {
   color: var(--text);
   border-image-source: url('/img/ui/box-sel.png?v=3');
-  background: rgb(124 58 237 / 18%);
 }
 .h2 {
   font-size: var(--fs-lg);

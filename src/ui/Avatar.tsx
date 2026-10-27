@@ -1,6 +1,7 @@
 import { useSyncExternalStore } from 'react';
 import { publicApi } from '@/api';
 import { AVATARS } from '@/lib/avatars';
+import { jetonOf, texOf, vImg } from '@/data/jetons';
 import s from './Avatar.module.css';
 
 // Photos de profil des pseudos affichés à l'écran : on les demande en une seule requête groupée
@@ -39,7 +40,17 @@ export function Avatar({ pseudo, avatar, size = 40 }: { pseudo: string; avatar?:
   const known = avatar && avatar !== 'default' ? avatar : undefined;
   const cached = useSyncExternalStore(subscribe, () => cache.get(pseudo));
   if (!known) want(pseudo);
-  const src = AVATARS[known ?? cached ?? ''];
+  const key = known ?? cached ?? '';
+  // un jeton obtenu en photo de profil : « j:Nom » ou « j:Nom:variante »
+  if (key.startsWith('j:')) {
+    const [, name = '', variant = ''] = key.split(':');
+    return (
+      <span className={`${s.av} ${s.tok}`} style={{ width: size, height: size }} aria-hidden>
+        <img className={vImg(variant)} src={texOf(jetonOf(name))} alt="" />
+      </span>
+    );
+  }
+  const src = AVATARS[key];
   return (
     <span className={s.av} style={{ width: size, height: size, fontSize: size / 2.4 }} aria-hidden>
       {src ? <img className="px" src={src} alt="" /> : (pseudo[0] ?? '?').toUpperCase()}

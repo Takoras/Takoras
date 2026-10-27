@@ -55,7 +55,7 @@
 .opening.revealed .op-info { opacity: 1; transform: none; pointer-events: auto; }
 .op-name { font-family: var(--font-display); font-size: 44px; line-height: 1; margin: 8px 0 6px; }
 .op-rarity { font-family: var(--font-display); font-weight: 700; font-size: 22px; color: rgb(var(--tier)); margin-bottom: 18px; }
-.op-stats { display: flex; flex-direction: column; gap: 10px; padding: 16px; border-radius: var(--r-lg); background: rgba(20, 18, 30, .8); border: 1px solid var(--border); }
+.op-stats { display: flex; flex-direction: column; gap: 10px; padding: 16px; border: 3px solid transparent; border-radius: 16px; border-image: url('/img/ui/box-9.png?v=3') 14 fill / 28px stretch; background: linear-gradient(#39374f, #39374f) center / calc(100% - 16px) calc(100% - 16px) no-repeat; image-rendering: pixelated; }
 .stat { display: grid; grid-template-columns: 70px 1fr 36px; align-items: center; gap: 10px; font-size: 13px; }
 .stat .bar { height: 6px; border-radius: 3px; background: rgba(255, 255, 255, .08); overflow: hidden; }
 .stat .bar i { display: block; height: 100%; width: 0; border-radius: 3px; background: rgb(var(--tier)); transition: width .6s cubic-bezier(.2, .8, .3, 1) .35s; }
@@ -254,19 +254,19 @@ html.reduce-fx .opening.turbo::before { display: none; }
   66% { filter: url(#dd2) var(--df); }
 }
 @keyframes vGold {
-  0% { filter: url(#dd0) sepia(1) saturate(2.6) hue-rotate(-12deg) brightness(1.12) drop-shadow(0 0 9px rgba(250, 204, 21, .85)); }
-  33% { filter: url(#dd1) sepia(1) saturate(2.6) hue-rotate(-12deg) brightness(1.12) drop-shadow(0 0 9px rgba(250, 204, 21, .85)); }
-  66% { filter: url(#dd2) sepia(1) saturate(2.6) hue-rotate(-12deg) brightness(1.12) drop-shadow(0 0 9px rgba(250, 204, 21, .85)); }
+  0% { filter: url(#dd0) url(#vgold) drop-shadow(0 0 9px rgba(250, 204, 21, .85)); }
+  33% { filter: url(#dd1) url(#vgold) drop-shadow(0 0 9px rgba(250, 204, 21, .85)); }
+  66% { filter: url(#dd2) url(#vgold) drop-shadow(0 0 9px rgba(250, 204, 21, .85)); }
 }
 @keyframes vCeleste {
-  0% { filter: url(#dd0) grayscale(.55) brightness(1.35) sepia(.15) hue-rotate(195deg) saturate(1.4) drop-shadow(0 0 7px #fff) drop-shadow(0 0 18px rgba(199, 210, 254, .85)); }
-  33% { filter: url(#dd1) grayscale(.55) brightness(1.35) sepia(.15) hue-rotate(195deg) saturate(1.4) drop-shadow(0 0 7px #fff) drop-shadow(0 0 18px rgba(199, 210, 254, .85)); }
-  66% { filter: url(#dd2) grayscale(.55) brightness(1.35) sepia(.15) hue-rotate(195deg) saturate(1.4) drop-shadow(0 0 7px #fff) drop-shadow(0 0 18px rgba(199, 210, 254, .85)); }
+  0% { filter: url(#dd0) url(#vceleste) drop-shadow(0 0 7px #fff) drop-shadow(0 0 18px rgba(199, 210, 254, .85)); }
+  33% { filter: url(#dd1) url(#vceleste) drop-shadow(0 0 7px #fff) drop-shadow(0 0 18px rgba(199, 210, 254, .85)); }
+  66% { filter: url(#dd2) url(#vceleste) drop-shadow(0 0 7px #fff) drop-shadow(0 0 18px rgba(199, 210, 254, .85)); }
 }
 @keyframes vOmbre {
-  0% { filter: url(#dd0) grayscale(.6) brightness(.55) sepia(.45) hue-rotate(225deg) saturate(1.7) contrast(1.3) drop-shadow(0 0 2px #c084fc) drop-shadow(0 0 11px rgba(124, 58, 237, .9)); }
-  33% { filter: url(#dd1) grayscale(.6) brightness(.55) sepia(.45) hue-rotate(225deg) saturate(1.7) contrast(1.3) drop-shadow(0 0 2px #c084fc) drop-shadow(0 0 11px rgba(124, 58, 237, .9)); }
-  66% { filter: url(#dd2) grayscale(.6) brightness(.55) sepia(.45) hue-rotate(225deg) saturate(1.7) contrast(1.3) drop-shadow(0 0 2px #c084fc) drop-shadow(0 0 11px rgba(124, 58, 237, .9)); }
+  0% { filter: url(#dd0) url(#vombre) drop-shadow(0 0 2px #c084fc) drop-shadow(0 0 11px rgba(124, 58, 237, .9)); }
+  33% { filter: url(#dd1) url(#vombre) drop-shadow(0 0 2px #c084fc) drop-shadow(0 0 11px rgba(124, 58, 237, .9)); }
+  66% { filter: url(#dd2) url(#vombre) drop-shadow(0 0 2px #c084fc) drop-shadow(0 0 11px rgba(124, 58, 237, .9)); }
 }
 @keyframes vPop { 0% { opacity: 0; filter: blur(8px); transform: translateY(10px); } 14% { opacity: 1; filter: blur(0); transform: none; } 72% { opacity: 1; } 100% { opacity: 0; transform: translateY(-12px); } }
 @keyframes vLine { 0% { width: 0; } 30% { width: 220px; } 100% { width: 260px; opacity: 0; } }

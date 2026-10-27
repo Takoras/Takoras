@@ -25,7 +25,7 @@ export function useFriends() {
 // Pastille : demandes reçues + messages non lus
 export const badgeOf = (l: Friend[] = []) => ({
   req: l.filter((f) => f.incoming).length,
-  unread: l.reduce((n, f) => n + (Number(f.unread) || 0), 0),
+  unread: 0, // plus de chat : seules les demandes d'ami comptent
 });
 
 export type Msg = { id: number; mine: boolean; body: string; created_at: string };

@@ -1,8 +1,11 @@
 .demo {
   width: 100%;
-  max-width: 240px;
+  max-width: 260px;
   aspect-ratio: 1;
-  border-radius: var(--r-md);
-  background: var(--bg-raised);
-  border: 1px solid var(--line);
+  object-fit: cover;
+  border: 3px solid transparent;
+  border-radius: 14px;
+  border-image: url('/img/ui/box-card-in.png?v=3') 12 / 24px stretch;
+  background: #16131f;
+  image-rendering: pixelated;
 }

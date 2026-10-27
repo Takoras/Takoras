@@ -4,7 +4,7 @@ import { adminApi } from '@/api';
 import { useBetaOpen } from '@/features/beta/Beta';
 import { Button } from '@/ui/Button';
 import { confirm } from '@/ui/confirm';
-import { act, fmt } from './shared';
+import { act, fmt, forgetLocalProgress } from './shared';
 import s from './Admin.module.css';
 
 type Stats = {
@@ -122,13 +122,31 @@ export function Global() {
           variant="danger"
           onClick={async () => {
             if (
+              !(await confirm(
+                'Effacer TOUS les messages de chat ? (le chat est retiré du site) Tape EFFACER pour confirmer.',
+                { typed: 'EFFACER', danger: true },
+              ))
+            )
+              return;
+            await act(() => adminApi.clearMessages(), 'Tous les messages ont été effacés');
+          }}
+        >
+          Effacer tous les messages de chat
+        </Button>
+        <Button
+          variant="danger"
+          onClick={async () => {
+            if (
               !(await confirm('Remettre TOUS les joueurs à zéro ? Tape RESET pour confirmer.', {
                 typed: 'RESET',
                 danger: true,
               }))
             )
               return;
-            if (await act(() => adminApi.reset(null), 'Tous les joueurs ont été remis à zéro')) await refresh();
+            if (await act(() => adminApi.reset(null), 'Tous les joueurs ont été remis à zéro')) {
+              forgetLocalProgress(); // toi aussi : tu revois le tuto comme un nouveau joueur
+              await refresh();
+            }
           }}
         >
           Remettre TOUS les joueurs à zéro

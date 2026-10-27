@@ -204,7 +204,9 @@ function Card({
       </div>
       <div className={s.body}>
         <div>
-          <h3 title={desc}>{name}</h3>
+          <h3>{name}</h3>
+          {/* potions : une courte phrase pour savoir ce qu'on achète */}
+          {it.kind === 'potion' ? <p className="muted">{desc}</p> : null}
         </div>
         <div className={s.foot}>
           <span className={s.meta}>

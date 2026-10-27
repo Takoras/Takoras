@@ -229,7 +229,8 @@ li[aria-current] .num {
     filter 0.15s;
 }
 .tile.gold {
-  background-image: url('/img/ui/box-gold.png?v=3');
+  /* fond doré un peu plus sombre : les objets ressortent mieux */
+  background-image: url('/img/ui/box-gold-dark.png?v=3');
   color: #3b1a02;
 }
 .tile img {
@@ -277,26 +278,27 @@ li[aria-current] .num {
 .bang,
 .lock {
   position: absolute;
-  top: -6px;
-  right: -6px;
-  width: 28px;
-  height: 28px;
+  top: -8px;
+  right: -8px;
+  width: 32px;
+  height: 32px;
   display: grid;
   place-items: center;
-  border-radius: 50%;
   font-style: normal;
-  font-weight: 900;
-  border: 3px solid #0d0d12;
+  font-size: 0; /* le dessin remplace le texte */
+  background: center / 100% 100% no-repeat;
+  image-rendering: pixelated;
 }
+/* tes ronds dessinés : ✓ récupéré, ! à récupérer */
 .check {
-  background: var(--ok);
-  color: #052e16;
+  background-image: url('/img/ui/ok.png?v=3');
 }
 .bang {
-  background: var(--danger-bg);
-  color: #fff;
+  background-image: url('/img/ui/bang.png?v=3');
 }
 .lock {
+  border-radius: 50%;
+  border: 3px solid #0d0d12;
   background: #2b2b3a
     url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16' fill='%23fdba74'%3E%3Cpath d='M5 7V5a3 3 0 0 1 6 0v2h1v7H4V7h1zm2 0h2V5a1 1 0 0 0-2 0v2z'/%3E%3C/svg%3E")
     center / 14px no-repeat;

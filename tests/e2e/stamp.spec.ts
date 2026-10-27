@@ -3,7 +3,7 @@ import { fakeSupabase } from './fake-supabase';
 
 // Les tampons de mutation gardent une taille fixe (≤ 28 px) partout, même dans un bloc qui agrandit ses images
 test('tampon de mutation : taille fixe partout (étiquettes du jeu et du site)', async ({ page }) => {
-  await fakeSupabase(page);
+  await fakeSupabase(page, {}, [], { deck: [15, 16, 17] });
   await page.goto('/');
   await page.evaluate(() => {
     const d = document.createElement('div');
@@ -15,8 +15,8 @@ test('tampon de mutation : taille fixe partout (étiquettes du jeu et du site)',
   });
   const box = await page.locator('#op-test .vstamp').boundingBox();
   expect(box?.width ?? 999).toBeLessThanOrEqual(16);
-  // profil : jetons de la vitrine avec leur mutation
-  await page.goto('/profil/Ami');
+  // combat : jetons de l'équipe avec leur mutation
+  await page.goto('/combat');
   const stamps = page.locator('[class*="stamp_"]');
   await expect(stamps.first()).toBeVisible();
   for (const b of await stamps.all()) expect((await b.boundingBox())?.width ?? 999).toBeLessThanOrEqual(28);

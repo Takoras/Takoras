@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { startRing, closeRing, startRingTuto, RNG } from '@/engines/ring.js';
+import { startRing, closeRing, startRingTuto, ringPlayTurn, RNG } from '@/engines/ring.js';
 import { CINE } from '@/engines/cinema.js';
 import { SERIES } from '@/data/jetons';
 import { Button } from '@/ui/Button';
@@ -90,10 +90,16 @@ async function leakTest(rounds = 50): Promise<LeakReport> {
 
 declare global {
   interface Window {
-    __lab?: { leakTest: typeof leakTest; startRing: typeof startRing; closeRing: typeof closeRing; RNG: typeof RNG };
+    __lab?: {
+      leakTest: typeof leakTest;
+      startRing: typeof startRing;
+      closeRing: typeof closeRing;
+      RNG: typeof RNG;
+      playTurn: typeof ringPlayTurn;
+    };
   }
 }
-window.__lab = { leakTest, startRing, closeRing, RNG };
+window.__lab = { leakTest, startRing, closeRing, RNG, playTurn: ringPlayTurn };
 
 export default function Lab() {
   const [report, setReport] = useState<LeakReport | null>(null);

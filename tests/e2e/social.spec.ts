@@ -1,31 +1,18 @@
 import { test, expect } from '@playwright/test';
 import { fakeSupabase } from './fake-supabase';
 
-test('amis : pastille, accepter une demande, chat (lire, envoyer)', async ({ page, isMobile }) => {
-  const { calls } = await fakeSupabase(page);
+test('amis : pastille, accepter une demande, plus de chat', async ({ page, isMobile }) => {
+  await fakeSupabase(page);
   await page.goto('/amis');
   await expect(page.getByRole('heading', { level: 1 })).toBeVisible();
-  // 1 demande + 2 messages non lus
+  // 1 demande (les messages ne comptent plus : le chat est retiré)
   // sur téléphone, Amis est dans « Plus » : la pastille est sur le bouton Plus
   await expect(
     isMobile ? page.getByRole('button', { name: /Plus/ }) : page.getByRole('link', { name: /Amis/ }).first(),
-  ).toContainText('3');
+  ).toContainText('1');
   await page.getByRole('button', { name: /Accepter/ }).click();
   await expect(page.getByRole('status').getByText(/Nouveau/)).toBeVisible();
-  // ouvrir le chat avec Ami
-  await page
-    .getByRole('listitem')
-    .filter({ hasText: 'Ami' })
-    .first()
-    .getByRole('button', { name: /Discuter|Chat/ })
-    .click();
-  // PC : la conversation s'ouvre à droite de la liste ; téléphone : fenêtre de chat
-  const dock = page.getByRole(isMobile ? 'region' : 'complementary', { name: /Discussions|Messages|Chats/ });
-  await expect(dock.getByText('Moi oui !')).toBeVisible();
-  expect(calls).toContain('mark_read');
-  await dock.getByRole('textbox').fill('Pas encore');
-  await dock.getByRole('button', { name: /Envoyer/ }).click();
-  await expect(dock.getByText('Pas encore')).toBeVisible();
+  await expect(page.getByRole('button', { name: /Discuter|Chat/ })).toHaveCount(0);
 });
 
 test('annonces : plein écran pour une annonce ratée, bandeau, historique', async ({ page }) => {

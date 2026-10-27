@@ -6,15 +6,19 @@ test('combat : monter son équipe (ajouter, version, enregistrer, plus de budget
   await page.goto('/combat');
   await expect(page.getByText('Ton rang')).toBeVisible();
   await expect(page.getByRole('button', { name: /Entraînement/ })).toBeDisabled(); // pas encore 3 jetons
-  await page.getByRole('button', { name: /Modifier/ }).click();
+  // plus de bouton « Modifier » : on touche une case vide de l'équipe
+  await page.getByRole('region', { name: 'Équipe' }).getByRole('button').first().click();
   const d = page.getByRole('dialog');
-  // la carte ouvre la grande fiche (stats, jeton sur son socle, pouvoir + démo) ; on ajoute depuis la fiche
+  // la carte ouvre la grande fiche (stats, jeton sur son socle, pouvoir + vraie vidéo) ; on ajoute depuis la fiche
   await d.getByRole('button', { name: 'Mobu', exact: true }).click();
   const sheet = page.getByRole('dialog', { name: 'Mobu' });
-  await expect(sheet.locator('canvas')).toBeVisible();
+  await expect(sheet.locator('video')).toHaveCount(1);
   await sheet.getByRole('button', { name: 'Ajouter à l’équipe' }).click();
-  // le petit « + » de la carte ajoute directement
-  for (const n of ['Pikko', 'Vyolis']) await d.getByRole('button', { name: `Ajouter à l’équipe ${n}` }).click();
+  // plus de « + » sur les cartes : jeton → fiche → « Ajouter à l'équipe »
+  for (const n of ['Pikko', 'Vyolis']) {
+    await d.getByRole('button', { name: n, exact: true }).click();
+    await page.getByRole('dialog', { name: n }).getByRole('button', { name: 'Ajouter à l’équipe' }).click();
+  }
   // un 4e jeton : équipe pleine (toast)
   await expect(d.getByText(/Budget/)).toHaveCount(0); // plus de limite de points
   // Mobu existe aussi en Doré : pris en Doré par défaut (la meilleure mutation), on peut repasser en normal avec les tampons
@@ -33,7 +37,7 @@ test('combat : monter son équipe (ajouter, version, enregistrer, plus de budget
     .getByRole('region', { name: 'Équipe' })
     .getByRole('button', { name: /Vyolis/ })
     .click();
-  await expect(page.getByRole('dialog').getByText(/Niv\. 1\/10/)).toBeVisible();
+  await expect(page.getByRole('dialog').getByText('Téléportation')).toBeVisible();
 });
 
 test('combat : l’entraînement lance le Ring, abandon avec la confirmation du site', async ({ page }) => {

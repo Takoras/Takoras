@@ -187,6 +187,8 @@ export type Database = {
       };
       admin_remove_pulls: { Args: { ids: number[]; target: string }; Returns: number };
       admin_reset: { Args: { target: string | null }; Returns: number };
+      admin_give_all: { Args: { target: string }; Returns: undefined };
+      admin_clear_messages: { Args: never; Returns: number };
       admin_set_beta: { Args: { p_on: boolean }; Returns: undefined };
       admin_set_items: { Args: { p_item: string; p_qty: number; target: string }; Returns: undefined };
       admin_set_tester: { Args: { p_on: boolean; target: string }; Returns: undefined };
@@ -207,7 +209,7 @@ export type Database = {
       claim_quest: { Args: { p_id: string }; Returns: Json };
       collection_of: {
         Args: { p_pseudo: string };
-        Returns: { jeton: string; serie: string; total: number; variant: string }[];
+        Returns: { jeton: string; serie: string; total: number; variant: string; owned: number }[];
       };
       eco_state: { Args: never; Returns: Json };
       friend_remove: { Args: { p_other: string }; Returns: undefined };

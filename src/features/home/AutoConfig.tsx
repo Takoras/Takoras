@@ -37,7 +37,6 @@ export function AutoConfig() {
           </button>
         ))}
       </fieldset>
-      {!st.autoMin && !st.autoVars.length ? <p className="muted">{t('ui.ac_hint')}</p> : null}
     </section>
   );
 }

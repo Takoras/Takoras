@@ -111,8 +111,8 @@ const RCFG = {
     Astra:    { mass: .85, power: 2120, r: 98, pw: 'starfall',   cd: 0, uses: 3, p: { range: 1100, radius: 320, push: 1300 } }, // étoiles filantes : pluie ciblée
     Kraïos:   { mass: 1.80, power: 1600, r: 130, pw: 'grab',     cd: 0, p: {} },                          // kraken : tentacules (1 fois par match)
     Koi:      { mass: 1.00, power: 1970, r: 104, pw: 'current',  cd: 0, uses: 3, p: { back: .75 } },     // poisson : frappe puis repart vers son départ
-    Néphéris: { mass: .90, power: 2150, r: 100, pw: 'telekinesis', cd: 0, p: { mult: .75 } },             // psychique : télékinésie (1 fois par match)
-    Zénith:   { mass: 1.75, power: 1650, r: 126, pw: 'beam',     cd: 0, uses: 2, p: { range: 2600, width: 70, push: 2100 } }, // œil : rayon qui traverse et pousse tous les ennemis sur la ligne
+    Néphéris: { mass: .90, power: 2150, r: 100, pw: 'ring',     cd: 0, uses: 2, p: { range: 1100, radius: 240 } }, // psychique : anneau qui bloque les ennemis (2 fois par match)
+    Zénith:   { mass: 1.75, power: 1650, r: 126, pw: 'beam',     cd: 0, p: { range: 2600, width: 70, push: 2100 } }, // œil : rayon (1 fois par match), s'arrête au 1er mur ou au 1er jeton
     Oblivion: { mass: 1.15, power: 1980, r: 110, pw: 'rift',     cd: 0, p: {} },                          // planète fissurée : faille qui s'ouvre au tour suivant
     Takoras:  { mass: 1.15, power: 2000, r: 110, pw: 'devour',   cd: 0, p: { spread: .55, open: .34, spit: .9, turns: 3 } }, // se coupe en deux, avale l'ennemi pris entre les moitiés, le recrache
   },

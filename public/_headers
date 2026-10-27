@@ -21,6 +21,10 @@
 /img/ui/*
   Cache-Control: no-cache
 
+# Vidéos d'exemple des pouvoirs : refaites quand un pouvoir change, toujours vérifiées
+/video/*
+  Cache-Control: no-cache
+
 # Images : elles gardent leur nom quand on les redessine → 1 jour, puis mise à jour en arrière-plan (comme l'ancien site)
 /img/*
   Cache-Control: public, max-age=86400, stale-while-revalidate=604800

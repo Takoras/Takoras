@@ -4,7 +4,19 @@ import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { accountApi, errorText, publicApi } from '@/api';
 import { useMe } from '@/api/queries';
 import { BANNER_IMG, bannerName } from '@/data/items';
-import { hexRGB, jetonOf, MYSTERE, SERIES, texOf, tierCol, tierKey, VARIANTS, vImg, glowVars } from '@/data/jetons';
+import {
+  hexRGB,
+  jetonOf,
+  MYSTERE,
+  SERIES,
+  TEMPLATE,
+  texOf,
+  VARIANTS,
+  vImg,
+  vOdds,
+  glowVars,
+  type Variant,
+} from '@/data/jetons';
 import { sfx } from '@/engines/sound.js';
 import { openUI } from '@/app/ui-store';
 import { AVATARS, FREE_PP } from '@/lib/avatars';
@@ -19,7 +31,7 @@ import { Modal } from '@/ui/Modal';
 import { toast } from '@/ui/toast';
 import { VTag } from '@/ui/VTag';
 import { JetonModal } from '../inventory/JetonModal';
-import { useInventory } from '../inventory/inv';
+import { cKey, useInventory } from '../inventory/inv';
 import { NeedLogin } from '@/app/NeedLogin';
 import { FriendButton } from '../social/FriendButton';
 import { RankBadge, useRankName } from '../combat/Ranked';
@@ -71,6 +83,7 @@ export default function Profile() {
   const [jeton, setJeton] = useState<{ name: string; variant: string; locked: boolean } | null>(null);
   const [slot, setSlot] = useState<number | null>(null);
   const [edit, setEdit] = useState(false);
+  const [serie, setSerie] = useState<string | null>(null);
 
   if (!params.pseudo && !user) return <NeedLogin title={t('app.account')} />;
   if (prof.isError) return <p className="muted">{t('ui.err_generic')}</p>;
@@ -100,40 +113,46 @@ export default function Profile() {
           <span className="muted">{t('ui.no_banner')}</span>
         ) : null}
       </div>
+      {/* seule la photo chevauche la bannière ; le pseudo et la bio restent dessous */}
       <header className={s.head}>
         <div className={s.pp}>
-          <Avatar pseudo={p.pseudo} avatar={p.avatar} size={104} />
+          <Avatar pseudo={p.pseudo} avatar={p.avatar} size={112} />
         </div>
         <div className={s.id}>
           <h1>
             {p.pseudo} <small className={s.num}>#{String(p.num).padStart(6, '0')}</small>
-            {p.streak > 0 ? (
-              <span className={s.streak} title={t('ui.streak_ok', { n: p.streak })}>
-                {' '}
-                {p.streak}
-              </span>
-            ) : null}
           </h1>
-          {p.beta ? (
-            <span className={s.betaChip} title={t('ui.beta_thanks')}>
-              {t('ui.beta_tester')}
-            </span>
-          ) : null}
-          <p className="muted">{p.bio || (mine ? t('ui.bio_empty_me') : '')}</p>
+          {p.bio || mine ? <p className="muted">{p.bio || t('ui.bio_empty_me')}</p> : null}
         </div>
-        <EloBox pseudo={p.pseudo} />
-        {mine ? (
-          <Button onClick={() => setEdit(true)}>{t('ui.edit_profile')}</Button>
-        ) : user ? (
-          <FriendButton pseudo={p.pseudo} />
-        ) : null}
+        <div className={s.headActions}>
+          {mine ? (
+            <Button onClick={() => setEdit(true)}>{t('ui.edit_profile')}</Button>
+          ) : user ? (
+            <FriendButton pseudo={p.pseudo} />
+          ) : null}
+        </div>
       </header>
       <dl className={s.stats}>
+        <EloBox pseudo={p.pseudo} />
         <div>
           <dt>{t('ui.st_pulls')}</dt>
           <dd>{fmt(p.pulls)}</dd>
         </div>
         <div>
+          <dt>{t('ui.st_collec')}</dt>
+          <dd>
+            {p.collection}/{total}
+          </dd>
+        </div>
+        <div>
+          <dt>{t('ui.st_owned')}</dt>
+          <dd>{fmt(p.owned)}</dd>
+        </div>
+        <div>
+          <dt>{t('ui.st_streak')}</dt>
+          <dd>{p.streak > 0 ? `🔥 ${p.streak}` : '—'}</dd>
+        </div>
+        <div className={s.bestCell}>
           <dt>
             {t('ui.st_best')}
             {bp ? ` · 1/${fmt(bp.eff)}` : ''}
@@ -151,24 +170,15 @@ export default function Profile() {
             )}
           </dd>
         </div>
-        <div>
-          <dt>{t('ui.st_collec')}</dt>
-          <dd>
-            {p.collection}/{total}
-          </dd>
-        </div>
-        <div>
-          <dt>{t('ui.st_owned')}</dt>
-          <dd>{fmt(p.owned)}</dd>
-        </div>
       </dl>
       <h2 className={s.h2}>{t('ui.showcase')}</h2>
+      {/* vitrine : les jetons posés librement (pas de boîte), le nom, la mutation et la vraie chance dessous */}
       <ul className={s.showcase}>
         {Array.from({ length: 5 }, (_, i) => {
           const x = show[i];
           if (!x)
             return (
-              <li key={`e${i}`} className={`${s.sc} ${s.scEmpty}`}>
+              <li key={`e${i}`} className={s.scEmpty}>
                 {mine ? (
                   <button type="button" onClick={() => setSlot(i)} aria-label={t('ui.pick_title', { n: i + 1 })}>
                     +
@@ -185,20 +195,18 @@ export default function Profile() {
                   mine ? setSlot(i) : setJeton({ name: x.jeton, variant: x.variant ?? '', locked: false })
                 }
               >
-                {x.variant ? (
-                  <span className={s.scV}>
-                    <VTag v={x.variant} />
-                  </span>
-                ) : null}
                 <img className={vImg(x.variant)} src={texOf(j)} alt="" />
                 <b>{jn(x.jeton)}</b>
-                <small style={{ color: tierCol(tierKey(x.odds)) }}>1/{fmt(x.odds)}</small>
+                <small>
+                  {x.variant ? `${t(`ui.v_${x.variant}` as 'ui.v_gold')} · ` : ''}1/
+                  {fmt(vOdds(x.odds, (x.variant ?? '') as Variant))}
+                </small>
               </button>
             </li>
           );
         })}
       </ul>
-      <Collection pseudo={p.pseudo} onOpen={(name, locked) => setJeton({ name, variant: '', locked })} />
+      <Bestiaries pseudo={p.pseudo} onOpen={setSerie} />
       <p className="muted">
         {t('ui.joined', { d: new Date(p.joined).toLocaleDateString(locale(lang)) })}
         {p.wins || p.losses ? ` · ${t('ui.battles_rec', { w: p.wins || 0, l: p.losses || 0 })}` : ''}
@@ -232,63 +240,149 @@ export default function Profile() {
           </Button>
         </section>
       ) : null}
+      {serie ? (
+        <Modal open onClose={() => setSerie(null)} title={`${t('ui.bestiary')} · ${serie}`} wide>
+          <Collection
+            pseudo={p.pseudo}
+            serie={serie}
+            onOpen={(name, locked) => setJeton({ name, variant: '', locked })}
+          />
+        </Modal>
+      ) : null}
       <JetonModal
         name={jeton?.name ?? null}
         variant={jeton?.variant}
         locked={jeton?.locked}
         onClose={() => setJeton(null)}
-      />
+      >
+        {jeton && !jeton.locked ? <TheirSheet pseudo={p.pseudo} name={jeton.name} /> : null}
+      </JetonModal>
       {mine && slot !== null ? <ShowcasePicker p={p} slot={slot} onClose={() => setSlot(null)} /> : null}
       {mine && edit ? <EditProfile p={p} onClose={() => setEdit(false)} /> : null}
     </section>
   );
 }
 
-// Collection d'un joueur : tous les jetons du jeu, ceux déjà eus en couleur, avec les variantes trouvées
-function Collection({ pseudo, onOpen }: { pseudo: string; onOpen: (name: string, locked: boolean) => void }) {
+// Bestiaires d'un joueur : une carte par série (tirage) ; toucher = son bestiaire de cette série
+function Bestiaries({ pseudo, onOpen }: { pseudo: string; onOpen: (serie: string) => void }) {
   const t = useT();
+  const q = useQuery({ queryKey: ['collection', pseudo.toLowerCase()], queryFn: () => publicApi.collectionOf(pseudo) });
+  return (
+    <>
+      <h2 className={s.h2}>{t('ui.bestiaries')}</h2>
+      <div className={s.series}>
+        {Object.keys(SERIES).map((name) => {
+          const all = SERIES[name] ?? [],
+            got = new Set((q.data ?? []).filter((r) => (r.serie || 'Takoras') === name).map((r) => r.jeton));
+          return (
+            <button key={name} type="button" onClick={() => onOpen(name)}>
+              <img
+                className="px"
+                src={name === 'Takoras' ? '/img/jetons/takoras.png' : texOf(all[0] ?? jetonOf('Mobu'))}
+                alt=""
+              />
+              <span>
+                <b>{t('ui.bst_pull', { n: name })}</b>
+                <small>{q.data ? `${all.filter((j) => got.has(j.name)).length} / ${all.length}` : '…'}</small>
+              </span>
+            </button>
+          );
+        })}
+        <div className={s.seriesSoon} aria-disabled="true">
+          <img className="px" src={TEMPLATE} alt="" />
+          <span>
+            <b>{t('ui.bst_next')}</b>
+            <small>{t('ui.pk_soon')}</small>
+          </span>
+        </div>
+      </div>
+    </>
+  );
+}
+
+// Le bestiaire d'un joueur pour une série : ceux déjà eus en couleur, avec les variantes trouvées
+function Collection({
+  pseudo,
+  serie,
+  onOpen,
+}: {
+  pseudo: string;
+  serie: string;
+  onOpen: (name: string, locked: boolean) => void;
+}) {
   const jn = useJn();
   const lang = useSettings((x) => x.lang);
   const fmt = (n: number) => n.toLocaleString(locale(lang));
   const q = useQuery({ queryKey: ['collection', pseudo.toLowerCase()], queryFn: () => publicApi.collectionOf(pseudo) });
   const got = new Map<string, Set<string>>();
-  (q.data ?? []).forEach((r) => {
-    const v = got.get(r.jeton) ?? new Set<string>();
-    if (r.variant) v.add(r.variant);
-    got.set(r.jeton, v);
-  });
-  const all = [...(SERIES.Takoras ?? [])].sort((a, b) => a.odds - b.odds);
+  (q.data ?? [])
+    .filter((r) => (r.serie || 'Takoras') === serie)
+    .forEach((r) => {
+      const v = got.get(r.jeton) ?? new Set<string>();
+      if (r.variant) v.add(r.variant);
+      got.set(r.jeton, v);
+    });
+  const all = [...(SERIES[serie] ?? [])].sort((a, b) => a.odds - b.odds);
+  return (
+    <ul className={s.coll}>
+      {all.map((j) => {
+        const c = got.get(j.name);
+        return (
+          <li
+            key={j.name}
+            style={(c ? glowVars(j) : { '--g': '113, 113, 122' }) as CSSProperties}
+            className={c ? undefined : s.unk}
+          >
+            <button
+              type="button"
+              onClick={() => {
+                sfx.click();
+                onOpen(j.name, !c);
+              }}
+              aria-label={c ? `${jn(j.name)} · 1/${fmt(j.odds)}` : '?'}
+            >
+              <img className="px" src={c ? texOf(j) : MYSTERE} alt="" />
+              <small>{c ? `1/${fmt(j.odds)}` : '?'}</small>
+              <span className={s.dots} aria-hidden>
+                {Object.keys(VARIANTS).map((v) => (
+                  <i key={v} className={`${s.dot} ${s[`d_${v}`]} ${c?.has(v) ? s.on : ''}`} />
+                ))}
+              </span>
+            </button>
+          </li>
+        );
+      })}
+    </ul>
+  );
+}
+
+// Fiche d'un jeton chez un autre joueur : combien il en a, combien il en a eu, ses variantes (comme ton bestiaire)
+function TheirSheet({ pseudo, name }: { pseudo: string; name: string }) {
+  const t = useT();
+  const lang = useSettings((x) => x.lang);
+  const fmt = (n: number) => n.toLocaleString(locale(lang));
+  const q = useQuery({ queryKey: ['collection', pseudo.toLowerCase()], queryFn: () => publicApi.collectionOf(pseudo) });
+  const rows = (q.data ?? []).filter((r) => r.jeton === name);
+  const owned = rows.reduce((n, r) => n + Number(r.owned ?? 0), 0),
+    total = rows.reduce((n, r) => n + Number(r.total), 0),
+    j = jetonOf(name);
   return (
     <>
-      <h2 className={s.h2}>
-        {t('ui.bestiary')}{' '}
-        <small className="muted">{q.data ? `${all.filter((j) => got.has(j.name)).length}/${all.length}` : ''}</small>
-      </h2>
-      <ul className={s.coll}>
-        {all.map((j) => {
-          const c = got.get(j.name);
+      <ul className={s.their}>
+        <li>{t('ui.their_have', { n: fmt(owned) })}</li>
+        <li>{t('ui.bst_got', { n: fmt(total) })}</li>
+      </ul>
+      <ul className={s.theirVars}>
+        {(['gold', 'celeste', 'ombre'] as Variant[]).map((v) => {
+          const r = rows.find((x) => x.variant === v);
           return (
-            <li
-              key={j.name}
-              style={(c ? glowVars(j) : { '--g': '113, 113, 122' }) as CSSProperties}
-              className={c ? undefined : s.unk}
-            >
-              <button
-                type="button"
-                onClick={() => {
-                  sfx.click();
-                  onOpen(j.name, !c);
-                }}
-                aria-label={c ? `${jn(j.name)} · 1/${fmt(j.odds)}` : '?'}
-              >
-                <img className="px" src={c ? texOf(j) : MYSTERE} alt="" />
-                <small>{c ? `1/${fmt(j.odds)}` : '?'}</small>
-                <span className={s.dots} aria-hidden>
-                  {Object.keys(VARIANTS).map((v) => (
-                    <i key={v} className={`${s.dot} ${s[`d_${v}`]} ${c?.has(v) ? s.on : ''}`} />
-                  ))}
-                </span>
-              </button>
+            <li key={v} className={r ? s.on : undefined}>
+              {r ? <VTag v={v} /> : <span className="muted">{t(`ui.v_${v}`)}</span>}
+              <small className="muted">
+                {' '}
+                1/{fmt(vOdds(j.odds, v))}
+                {r ? ` · ×${fmt(Number(r.total))}` : ''}
+              </small>
             </li>
           );
         })}
@@ -408,6 +502,20 @@ function EditProfile({ p, onClose }: { p: Prof; onClose: () => void }) {
   const [busy, setBusy] = useState(false);
   const canRename = !!p.pseudo_free || !p.pseudo_next;
   const pps = ['default', ...FREE_PP, ...Object.keys(AVATARS).filter((a) => !FREE_PP.includes(a))];
+  // jetons déjà obtenus (et leurs mutations) : utilisables en photo de profil, du plus rare au plus commun
+  const inv = useInventory();
+  const tokPps = Object.entries(SERIES)
+    .flatMap(([serie, js]) =>
+      js.flatMap((j) => {
+        const c = inv.data?.coll.get(cKey(serie, j.name));
+        return c
+          ? Object.keys(c.vars).map(
+              (v) => [v ? `j:${j.name}:${v}` : `j:${j.name}`, j.name, v, vOdds(j.odds, v as Variant)] as const,
+            )
+          : [];
+      }),
+    )
+    .sort((a, b) => b[3] - a[3]);
   const save = async () => {
     setBusy(true);
     try {
@@ -518,6 +626,29 @@ function EditProfile({ p, onClose }: { p: Prof; onClose: () => void }) {
               );
             })}
           </div>
+        </fieldset>
+        <fieldset>
+          <legend>{t('ui.pe_pp_tokens')}</legend>
+          {tokPps.length ? (
+            <div className={s.pps}>
+              {tokPps.map(([key, name, v]) => (
+                <button
+                  key={key}
+                  type="button"
+                  aria-pressed={avatar === key}
+                  aria-label={name}
+                  onClick={() => {
+                    sfx.click();
+                    setAv(key);
+                  }}
+                >
+                  <img className={vImg(v)} src={texOf(jetonOf(name))} alt="" />
+                </button>
+              ))}
+            </div>
+          ) : (
+            <p className="muted">{t('ui.inv_empty')}</p>
+          )}
         </fieldset>
         <div className={s.peActions}>
           <Button type="submit" variant="primary" loading={busy}>

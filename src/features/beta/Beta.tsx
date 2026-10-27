@@ -3,7 +3,7 @@ import { lazy, Suspense, useEffect, useRef } from 'react';
 import { sfx } from '@/engines/sound.js';
 import { useT } from '@/i18n/useT';
 import { lsGet, lsSet } from '../social/social';
-import { openFeedback, openPatchnotes, PN_KEY, TUTO_KEY, useBeta, useBetaOpen, usePatchnotes } from './store';
+import { openFeedback, PN_KEY, TUTO_KEY, useBeta, useBetaOpen, usePatchnotes } from './store';
 import s from './Beta.module.css';
 
 // Bêta : patch notes (fenêtre + popup des nouveautés), menu des testeurs choisis par l'admin,
@@ -49,24 +49,13 @@ export function BetaLayer() {
   );
 }
 
-// Puce « bêta » à côté du logo (clic = patch notes), seulement quand la bêta est ouverte
+// Puce « bêta » à côté du logo, seulement quand la bêta est ouverte
 export function BetaChip() {
   const t = useT();
   const open = useBetaOpen();
   if (!open.data) return null;
-  return (
-    <button
-      type="button"
-      className={s.chip}
-      onClick={() => {
-        sfx.click();
-        openPatchnotes();
-      }}
-      title={t('ui.pn_title')}
-    >
-      {t('app.beta')}
-    </button>
-  );
+  // simple étiquette : plus de menu bêta
+  return <span className={s.chip}>{t('app.beta')}</span>;
 }
 
 // Bouton flottant en bas à gauche (sur téléphone, il est dans le menu Plus)

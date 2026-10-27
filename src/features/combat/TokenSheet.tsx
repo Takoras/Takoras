@@ -1,8 +1,8 @@
 import type { CSSProperties } from 'react';
-import { glowVars, jetonOf, texOf, tierCol, tierKey, vImg } from '@/data/jetons';
-import { LEVEL_MAX, powerInfo, RING_MAX, ringStats } from '@/data/kit';
+import { glowVars, jetonOf, texOf, tierCol, tierKey, vImg, vOdds, type Variant } from '@/data/jetons';
+import { powerInfo, RING_MAX, ringStats } from '@/data/kit';
 import { useJn } from '@/lib/names';
-import { useSettings } from '@/lib/settings';
+import { locale, useSettings } from '@/lib/settings';
 import { useT } from '@/i18n/useT';
 import { Button } from '@/ui/Button';
 import { Modal } from '@/ui/Modal';
@@ -45,11 +45,8 @@ export function TokenSheet({
       <div className={s.sheet} style={glowVars(j, variant) as CSSProperties}>
         <section className={s.stats} aria-label={t('ui.stats_note')}>
           <span className={s.tier} style={{ color: tierCol(tier) }}>
-            {t(`ui.${tier}`)}
+            1/{vOdds(j.odds, variant as Variant).toLocaleString(locale(lang))}
           </span>
-          <b className={s.lvl}>
-            {t('arena.lvl')} {lvl}/{LEVEL_MAX}
-          </b>
           {stats.map(([key, label, v, max, txt, col]) => (
             <div key={key} className={s.stat}>
               <span>

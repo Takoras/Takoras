@@ -1,6 +1,7 @@
 .page {
   display: grid;
-  gap: var(--s-4);
+  gap: var(--s-6);
+  align-content: start;
   padding-bottom: var(--s-12);
 }
 .head {
@@ -89,7 +90,6 @@
 }
 .shelf[aria-pressed='true'] {
   border-image-source: url('/img/ui/box-sel.png?v=3');
-  background: color-mix(in srgb, var(--accent) 16%, var(--surface));
 }
 .shelfSoon {
   opacity: 0.55;
@@ -167,7 +167,6 @@
 .vtabs button[aria-selected='true'] {
   color: var(--text);
   border-image-source: url('/img/ui/box-sel.png?v=3');
-  background: rgb(124 58 237 / 16%);
 }
 .vtabs .v_gold[aria-selected='true'] {
   border-color: var(--v-gold);
@@ -209,7 +208,6 @@
 .chips button[aria-pressed='true'] {
   color: var(--text);
   border-image-source: url('/img/ui/box-sel.png?v=3');
-  background: rgb(124 58 237 / 18%);
 }
 .right {
   display: flex;
@@ -325,9 +323,6 @@
 }
 .sel {
   border-image-source: url('/img/ui/box-sel.png?v=3');
-  box-shadow:
-    0 0 0 2px rgb(167 139 250 / 35%),
-    0 0 22px rgb(124 58 237 / 25%);
 }
 .locked .cardBtn img {
   opacity: 0.85;
@@ -790,14 +785,10 @@
   font-weight: 600;
 }
 .actions {
-  position: sticky;
-  bottom: calc(-1 * var(--s-6));
   display: flex;
   gap: var(--s-2);
   flex-wrap: wrap;
-  margin: 0 calc(-1 * var(--s-6)) calc(-1 * var(--s-6));
-  padding: var(--s-3) var(--s-6) var(--s-4);
-  background: linear-gradient(180deg, transparent, #39374f 30%); /* même couleur que la fenêtre */
+  padding-top: var(--s-2);
 }
 .actions > :first-child {
   flex: 1 1 100%;

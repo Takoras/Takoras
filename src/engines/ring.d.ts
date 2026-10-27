@@ -14,6 +14,7 @@ export type RingOnline = {
 export function startRing(teams: [Team, Team], opts?: { names?: [string, string]; ai?: string; tuto?: boolean; map?: string; online?: RingOnline; onEnd?: (r: 'again' | 'back') => void }): void;
 export function ringOnline(m: unknown): void;
 export function closeRing(): void;
+export function ringPlayTurn(shots?: unknown[]): void;
 export function startRingTuto(onEnd?: (r: 'again' | 'back') => void, opts?: { must?: boolean; onDone?: () => void }): void;
 export function ringTutoSeen(): boolean;
 export function powerText(name: string): { pw: string; name: string; desc: string; cd: number; when: string };

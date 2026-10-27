@@ -34,3 +34,15 @@ export async function act(f: () => Promise<unknown>, ok: string) {
     return false;
   }
 }
+
+// Après une remise à zéro de son propre compte : on oublie aussi ce que ce navigateur a retenu
+// (tuto vu, notes de mise à jour vues, historique…) pour tout revoir comme un nouveau joueur. Les réglages restent.
+export function forgetLocalProgress() {
+  try {
+    Object.keys(localStorage)
+      .filter((k) => k.startsWith('takoras-') && k !== 'takoras-settings' && k !== 'takoras-muted')
+      .forEach((k) => localStorage.removeItem(k));
+  } catch {
+    /* navigation privée */
+  }
+}

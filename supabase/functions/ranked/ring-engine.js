@@ -62,6 +62,22 @@ const RG = (() => {
     }
     o.x = q(x); o.y = q(y);
   }
+  // Rayon de Zénith : jusqu'où il va (1er mur, 1er jeton touché ou bord du ring) et quel jeton il touche
+  function beamStop(st, b, ux, uy) {
+    const range = kit(b.name).p.range || 2600, w = (kit(b.name).p.width || 70) / 2, R = ringR(st);
+    let best = null, bl = range;
+    for (const o of st.bodies) {
+      if (o === b || !o.alive || o.tmp) continue;
+      const dx = o.x - b.x, dy = o.y - b.y, al = dx * ux + dy * uy;
+      if (al <= 0 || al >= bl || Math.abs(dx * uy - dy * ux) > o.r + w) continue;
+      best = o; bl = al;
+    }
+    for (let D = b.r; D < bl; D += 10) {
+      const X = b.x + ux * D, Y = b.y + uy * D;
+      if (len(X, Y) > R || touchesWall(st, X, Y, w * .5)) { return { len: D, o: null }; }
+    }
+    return { len: best ? bl : Math.min(bl, R * 2), o: best };
+  }
   const STOP_PW = new Set(['eruption', 'magnet']); // anciens pouvoirs « à l'arrêt » (plus utilisés par les jetons)
 
   // ---------- Un tour : les deux tirs partent en même temps. Renvoie { frames, ev } pour l'animation.
@@ -79,7 +95,7 @@ const RG = (() => {
     // s.pows = les autres jetons de l'équipe). Chaque pouvoir prêt s'active une fois.
     const act = (b, side) => {
       const T = b.t, k = kit(b.name);
-      if (!ready(b) || T.pw) return;
+      if (!ready(b) || T.pw || b.stun) return; // bloqué (Anneau) : pas de pouvoir ce tour
       T.pw = b.pw; ev.push({ t: 'power', id: b.id, pw: b.pw, at: 0 });
       if (b.pw === 'grow') { b.r = b.base.r * k.p.r; b.mass = b.base.mass * k.p.mass; }
       if (b.pw === 'scrap') b.mass = b.base.mass * k.p.mass;
@@ -139,7 +155,7 @@ const RG = (() => {
       else { b.cd = k.cd; if (!k.cd) b.spent = true; }
     };
     const release = (o, x, y) => { const h = B.find(b => b.id === o.held?.by); if (h) delete h.full; delete o.held; o.alive = true; placeFree(st, o, x, y); o.vx = 0; o.vy = 0; };
-    const fired = [];
+    const fired = [], rings = [];
     shots.forEach((s, side) => {
       if (!s) return;
       const mine = i => B.find(x => x.side === side && x.i === i && x.alive && !x.tmp);
@@ -187,15 +203,20 @@ const RG = (() => {
       }
       // Rayon (Zénith) : ne bouge pas, un rayon traverse l'arène dans la direction visée et pousse tous les ennemis sur la ligne
       if (T.pw === 'beam') {
-        const ux = s.ax / d, uy = s.ay / d;
-        for (const o of B) {
-          if (o.side === b.side || !o.alive || o.tmp || o.t.anchor || o.t.shield) continue;
-          const dx = o.x - b.x, dy = o.y - b.y, al = dx * ux + dy * uy;
-          if (al <= 0 || al > k.p.range || Math.abs(dx * uy - dy * ux) > o.r + k.p.width / 2) continue;
-          const g = k.p.push * (.4 + .6 * f) * (1 - .3 * al / k.p.range) / o.mass; o.vx += ux * g; o.vy += uy * g;
+        const ux = s.ax / d, uy = s.ay / d, hit = beamStop(st, b, ux, uy);
+        const o = hit.o;
+        if (o && o.side !== b.side && !o.t.anchor && !o.t.shield) {
+          const g = k.p.push * (.4 + .6 * f) * (1 - .3 * hit.len / k.p.range) / o.mass; o.vx += ux * g; o.vy += uy * g;
           ev.push({ t: 'beamhit', id: b.id, to: o.id, at: 0 });
         }
-        ev.push({ t: 'beam', id: b.id, ax: q(ux * 1000), ay: q(uy * 1000), f, at: 0 });
+        ev.push({ t: 'beam', id: b.id, ax: q(ux * 1000), ay: q(uy * 1000), len: q(hit.len), f, at: 0 });
+        return;
+      }
+      // Anneau (Néphéris) : ne bouge pas, lance un anneau là où on vise ; les ennemis dedans sont stoppés et bloqués au tour suivant
+      if (T.pw === 'ring') {
+        const ux = s.ax / d, uy = s.ay / d; let X = b.x + ux * f * k.p.range, Y = b.y + uy * f * k.p.range;
+        const L = len(X, Y); if (L > RR) { X = X / L * RR; Y = Y / L * RR; }
+        rings.push({ id: b.id, side, x: q(X), y: q(Y), r: k.p.radius });
         return;
       }
       // Pluie d'étoiles (Astra) : ne bouge pas, les étoiles tombent là où on vise (plus loin avec plus de force) et repoussent tout
@@ -233,6 +254,14 @@ const RG = (() => {
       }
       ev.push({ t: 'shot', id: b.id, at: 0, f });
     });
+    // anneaux posés ce tour : appliqués après tous les tirs (ils arrêtent aussi un ennemi qui vient de tirer)
+    for (const g of rings) {
+      ev.push({ t: 'ring', id: g.id, x: g.x, y: g.y, r: g.r, at: 0 });
+      for (const o of B) {
+        if (o.side === g.side || !o.alive || o.tmp || len(o.x - g.x, o.y - g.y) > g.r + o.r * .5) continue;
+        o.vx = 0; o.vy = 0; o.stunNext = true; ev.push({ t: 'locked', id: g.id, to: o.id, at: 0 });
+      }
+    }
     const suns = B.filter(b => b.t.sun);
     let tm = 0, steps = 0, firstHit = -1;
     const maxSteps = Math.round(C.MAX_SIM_S / dt);
@@ -585,7 +614,7 @@ const RG = (() => {
     return best;
   }
 
-  return { kit, roleOf, bonus: RG_bonus, stats, create, clone, alive, ready, resolve, aiShot, aiSmart, len, ringR, nearest, touchesWall };
+  return { kit, roleOf, bonus: RG_bonus, stats, create, clone, alive, ready, resolve, aiShot, aiSmart, len, ringR, nearest, touchesWall, beamStop };
 })();
 
 export { RG };

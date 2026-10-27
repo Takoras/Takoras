@@ -37,7 +37,8 @@ const RT = {
       blackhole: ['Trou noir', 'Au premier choc, ouvre un trou noir qui aspire tout pendant 2 tours. Son cœur avale les jetons.'],
       sun: ['Gravité solaire', 'Ne tire pas : devient un petit soleil. Ce tour, tout ce qui bouge près de lui est attiré, même le tir ennemi.'],
       cyclone: ['Œil du cyclone', 'Au lancer, les ennemis autour sont pris dans un tourbillon et projetés.'],
-      beam: ['Rayon', 'Ne bouge pas : un rayon traverse l’arène là où tu vises et pousse tous les ennemis sur la ligne (2 fois par match).'],
+      beam: ['Rayon', 'Une fois par match : ne bouge pas, un rayon part là où tu vises et frappe le premier jeton sur sa route. Les murs l’arrêtent.'],
+      ring: ['Anneau', 'Ne bouge pas : lance un anneau là où tu vises. Les ennemis dedans s’arrêtent net et sont bloqués au tour suivant (pas de tir, pas de pouvoir). 2 fois par match.'],
       devour: ['Dévoreur', 'Une fois par match : se coupe en deux et se referme comme une mâchoire. L’ennemi pris entre les moitiés est avalé, et le prochain tir de Takoras le recrache là où tu vises (sinon il ressort seul après 2 tours).'],
       rift: ['Faille', 'Une fois par match : son trajet se fissure. Au tour suivant la faille s’ouvre et avale les ennemis restés dessus.'],
       current: ['Contre-courant', 'Après son premier coup, repart vers sa place de départ (3 fois par match).'],
@@ -103,7 +104,8 @@ const RT = {
       blackhole: ['Black hole', 'On first hit, opens a black hole that pulls everything for 2 turns. Its core swallows tokens.'],
       sun: ['Solar gravity', 'Doesn’t shoot: becomes a small sun. This turn, anything moving nearby is pulled in, even the enemy shot.'],
       cyclone: ['Eye of the storm', 'On launch, nearby enemies are caught in a whirlwind and thrown.'],
-      beam: ['Eye beam', 'Doesn’t move: a beam crosses the arena where you aim and pushes every enemy on the line (twice per match).'],
+      beam: ['Eye beam', 'Once per match: doesn’t move, a beam fires where you aim and hits the first token in its path. Walls stop it.'],
+      ring: ['Ring', 'Doesn’t move: throws a ring where you aim. Enemies inside stop dead and are locked next turn (no shot, no power). Twice per match.'],
       devour: ['Devourer', 'Once per match: splits in two and snaps shut like jaws. An enemy caught between the halves is swallowed, and Takoras’s next shot spits it out where you aim (or it comes out by itself after 2 turns).'],
       rift: ['Rift', 'Once per match: its path cracks. Next turn the rift opens and swallows enemies still on it.'],
       current: ['Backflow', 'After its first hit, swims back to where it started (3 times per match).'],
@@ -147,7 +149,7 @@ const RT = {
 };
 const rtL = () => RT[SETTINGS.lang] || RT.fr;
 const rt = (k, v = {}) => String(rtL()[k] ?? RT.fr[k]).replace(/\{(\w+)\}/g, (_, x) => v[x] ?? '');
-const PW_COL = { beam: '#ff4d6a', devour: '#9fb6ff', grow: '#7dd3fc', bounce: '#f9a8d4', scrap: '#fb923c', slide: '#a5f3fc', eruption: '#f97316', flare: '#fb923c', zerog: '#93c5fd', sun: '#fbbf24', cyclone: '#d9364f', rift: '#3fc7b6', current: '#f0453a', avatar: '#9fb6ff', jelly: '#7dd3fc', pinball: '#f9a8d4', rampart: '#d97706', icetrail: '#a5f3fc', surf: '#38bdf8', ora: '#f43f5e', blink: '#c9a6f2', mirror: '#f7a8d8', shade: '#7c8cf8', starfall: '#f6d39a', grab: '#6366f1', yinyang: '#f0453a', telekinesis: '#f08a3c', stun: '#d9364f', blackhole: '#3fc7b6', freeze: '#a5f3fc', wave: '#38bdf8', curve: '#60a5fa', double: '#f43f5e', ghost: '#c4b5fd',
+const PW_COL = { ring: '#f08a3c', beam: '#ff4d6a', devour: '#9fb6ff', grow: '#7dd3fc', bounce: '#f9a8d4', scrap: '#fb923c', slide: '#a5f3fc', eruption: '#f97316', flare: '#fb923c', zerog: '#93c5fd', sun: '#fbbf24', cyclone: '#d9364f', rift: '#3fc7b6', current: '#f0453a', avatar: '#9fb6ff', jelly: '#7dd3fc', pinball: '#f9a8d4', rampart: '#d97706', icetrail: '#a5f3fc', surf: '#38bdf8', ora: '#f43f5e', blink: '#c9a6f2', mirror: '#f7a8d8', shade: '#7c8cf8', starfall: '#f6d39a', grab: '#6366f1', yinyang: '#f0453a', telekinesis: '#f08a3c', stun: '#d9364f', blackhole: '#3fc7b6', freeze: '#a5f3fc', wave: '#38bdf8', curve: '#60a5fa', double: '#f43f5e', ghost: '#c4b5fd',
   rescue: '#4ade80', shrink: '#818cf8', magnet: '#fde68a', anchor: '#94a3b8', second: '#fb7185', roots: '#e879f9', shield: '#f1f5f9', void: '#a855f7', split: '#ffffff', haste: '#86efac', guard: '#7dd3fc', none: '#888' };
 // charges restantes : petits carrés pleins / vides
 const rgPips = b => { const u = RG.kit(b.name).uses; if (!u) return ''; const l = b.left ?? u; return `<span class="rg-pips">${'<i></i>'.repeat(l)}${'<i class="off"></i>'.repeat(Math.max(0, u - l))}</span>`; };
@@ -243,7 +245,10 @@ const s2w = (px, py) => { const k = RNG.view.s * FL(); return [(px - RNG.view.si
 // Couleurs des camps : violet = toi, orange = l'adversaire (les couleurs du site)
 const SIDE = [{ hi: '#ddd6fe', md: '#a78bfa', lo: '#4c1d95', rgb: '167,139,250' }, { hi: '#fed7aa', md: '#fb923c', lo: '#7c2d12', rgb: '251,146,60' }];
 // Filtres des variantes (les mêmes que sur tout le site)
-const VFILTER = { gold: 'sepia(1) saturate(2.6) hue-rotate(-12deg) brightness(1.12)', celeste: 'grayscale(.55) brightness(1.35) sepia(.15) hue-rotate(195deg) saturate(1.4)', ombre: 'grayscale(.6) brightness(.55) sepia(.45) hue-rotate(225deg) saturate(1.7) contrast(1.3)' };
+// mutations sur le canvas : mêmes palettes SVG que le site (#vgold…), filtres simples sur Safari
+const VFILTER = typeof document !== 'undefined' && !document.documentElement.classList.contains('no-svgfx')
+  ? { gold: 'url(#vgold) brightness(1.05)', celeste: 'url(#vceleste)', ombre: 'url(#vombre)' }
+  : { gold: 'sepia(1) saturate(4) hue-rotate(-10deg) brightness(1.15) contrast(1.2)', celeste: 'grayscale(.7) brightness(1.4) sepia(.15) hue-rotate(195deg) saturate(1.5)', ombre: 'grayscale(.7) brightness(.5) sepia(.5) hue-rotate(225deg) saturate(2) contrast(1.35)' };
 
 // ---------- Tour : visée (60 s, ou dès que les deux ont validé), l'IA prépare son tir en même temps
 // L'IA calcule dans un Worker (fil à part) ; sans Worker, on calcule ici (même résultat, juste un petit à-coup)
@@ -492,7 +497,7 @@ function rgOnlineAfter() {
     O.elo = O.done.elo;
     RNG.phase = 'end'; rgHud();
     const d = O.done; O.done = null;
-    return setTimeout(() => rgResult({ winner: d.winner, why: d.why }), 600);
+    return setTimeout(() => rgResult({ winner: d.winner, why: d.why }), 1600);
   }
   rgTurnStart();
 }
@@ -620,11 +625,12 @@ function rgFrame(now) {
     const ev = P.r.ev;
     while (P.ei < ev.length && ev[P.ei].at / RCFG.DT <= P.f) rgEvent(ev[P.ei++]);
     P.fall.forEach(x => { x.t += dt * scale; });
-    if (P.f >= P.r.frames.length - 1 && P.fall.every(x => x.t > .7)) {
-      while (P.ei < ev.length) rgEvent(ev[P.ei++]);
+    // fin de l'animation : on joue d'abord les derniers événements (chutes de fin de tour), puis on attend qu'elles soient finies
+    if (P.f >= P.r.frames.length - 1) while (P.ei < ev.length) rgEvent(ev[P.ei++]);
+    if (P.f >= P.r.frames.length - 1 && P.fall.every(x => x.t > .9)) {
       RNG.play = null; RNG.trails = {}; RFX.endTurn();
       if (RNG.online) rgOnlineAfter();
-      else if (RNG.st.over) { RNG.phase = 'end'; rgHud(); setTimeout(() => rgResult(ev.find(x => x.t === 'end')), 600); }
+      else if (RNG.st.over) { RNG.phase = 'end'; rgHud(); setTimeout(() => rgResult(ev.find(x => x.t === 'end')), 1600); } // le temps de voir le dernier jeton tomber
       else { rgTurnStart(); RNG.tuto?.on?.('turn'); }
     }
   }
@@ -673,18 +679,18 @@ function rgZones(c, t) {
 }
 // Murs : pierre en briques (amortit) ou mur rebondisseur rose lumineux, chevrons qui défilent (renvoie plus vite)
 // Visée en forme d'effet : Téléportation (destination), Ressac (cône), Pluie d'étoiles (zone), Télékinésie (cible)
-const SHAPE_PW = new Set(['blink', 'surf', 'starfall', 'telekinesis', 'beam']);
+const SHAPE_PW = new Set(['blink', 'surf', 'starfall', 'telekinesis', 'beam', 'ring']);
 function rgShapeAim(c, sel, sx, sy, col, t) {
   if (!RNG.pows?.has(sel.id)) return false;
   const k = RG.kit(sel.name), pw = k.pw; if (!SHAPE_PW.has(pw)) return false;
   const V = RNG.view, px = V.px, f = RNG.aim.f, n = RG.len(RNG.aim.ax, RNG.aim.ay) || 1, wx = RNG.aim.ax / n, wy = RNG.aim.ay / n; // direction dans le monde
   const ux = wx * FL(), uy = wy * FL(); // direction à l'écran
   c.save();
-  if (pw === 'blink' || pw === 'starfall') {
+  if (pw === 'blink' || pw === 'starfall' || pw === 'ring') {
     const R = RG.ringR(RNG.st), d = f * k.p.range; let X = sel.x + wx * d, Y = sel.y + wy * d; const L = RG.len(X, Y); if (L > R) { X = X / L * R; Y = Y / L * R; }
     const [x, y] = w2s(X, Y), rad = (pw === 'blink' ? sel.r : k.p.radius) * V.s;
     c.setLineDash([px * 3, px * 2]); c.strokeStyle = 'rgba(255,255,255,.35)'; c.lineWidth = px; c.beginPath(); c.moveTo(sx, sy); c.lineTo(x, y); c.stroke(); c.setLineDash([]);
-    c.fillStyle = pw === 'blink' ? 'rgba(201,166,242,.18)' : 'rgba(246,211,154,.16)'; c.strokeStyle = pw === 'blink' ? '#c9a6f2' : '#f6d39a'; c.lineWidth = px * 2;
+    c.fillStyle = pw === 'blink' ? 'rgba(201,166,242,.18)' : pw === 'ring' ? 'rgba(240,138,60,.14)' : 'rgba(246,211,154,.16)'; c.strokeStyle = pw === 'blink' ? '#c9a6f2' : pw === 'ring' ? '#f08a3c' : '#f6d39a'; c.lineWidth = px * (pw === 'ring' ? 4 : 2);
     c.beginPath(); c.arc(x, y, rad, 0, 7); c.fill(); c.stroke();
     if (pw === 'blink') { c.globalAlpha = .45; rgToken(c, { ...sel, x: X, y: Y }, t, false); }
     else for (let i = 0; i < 4; i++) { const a = t * 1.5 + i * 1.571; c.fillStyle = '#fff7e6'; c.fillRect(x + Math.cos(a) * rad * .55 - px, y + Math.sin(a) * rad * .55 - px, px * 2, px * 2); }
@@ -694,17 +700,12 @@ function rgShapeAim(c, sel, sx, sy, col, t) {
     c.beginPath(); c.moveTo(sx, sy); c.arc(sx, sy, R, a0 - half, a0 + half); c.closePath(); c.fill(); c.stroke();
     for (let i = 1; i <= 3; i++) { const rr = R * (((t * .8 + i / 3) % 1)); c.strokeStyle = `rgba(224,242,254,${.5 * (1 - rr / R)})`; c.beginPath(); c.arc(sx, sy, rr, a0 - half, a0 + half); c.stroke(); }
   } else if (pw === 'beam') {
-    // Rayon : une bande rouge jusqu'au bord, les ennemis sur la ligne sont entourés
-    const R = RG.ringR(RNG.st), bx = sel.x, by = sel.y, b2 = bx * wx + by * wy, L = Math.min(k.p.range, -b2 + Math.sqrt(Math.max(0, b2 * b2 - (bx * bx + by * by - R * R))));
+    // Rayon : une bande rouge jusqu'au 1er mur ou au 1er jeton ; le jeton touché est entouré
+    const hit = RG.beamStop(RNG.st, sel, wx, wy), L = hit.len;
     const ex = sx + ux * L * V.s, ey = sy + uy * L * V.s, wd = k.p.width * V.s;
     c.lineCap = 'round'; c.strokeStyle = `rgba(255,77,106,${.14 + .14 * f})`; c.lineWidth = wd * 2.2; c.beginPath(); c.moveTo(sx, sy); c.lineTo(ex, ey); c.stroke();
     c.strokeStyle = 'rgba(255,214,220,.75)'; c.lineWidth = Math.max(px, wd * .35); c.setLineDash([px * 4, px * 3]); c.lineDashOffset = -t * 40; c.beginPath(); c.moveTo(sx, sy); c.lineTo(ex, ey); c.stroke(); c.setLineDash([]);
-    for (const o of RNG.st.bodies) {
-      if (!o.alive || o.side === sel.side) continue;
-      const dx = o.x - bx, dy = o.y - by, al = dx * wx + dy * wy;
-      if (al <= 0 || al > L || Math.abs(dx * wy - dy * wx) > o.r + k.p.width / 2) continue;
-      const [x, y] = w2s(o.x, o.y); c.strokeStyle = '#ff4d6a'; c.lineWidth = px * 2; c.beginPath(); c.arc(x, y, o.r * V.s + px * 4 + Math.sin(t * 8) * px, 0, 7); c.stroke();
-    }
+    if (hit.o) { const [x, y] = w2s(hit.o.x, hit.o.y); c.strokeStyle = hit.o.side === sel.side ? 'rgba(255,255,255,.5)' : '#ff4d6a'; c.lineWidth = px * 2; c.beginPath(); c.arc(x, y, hit.o.r * V.s + px * 4 + Math.sin(t * 8) * px, 0, 7); c.stroke(); }
   } else if (pw === 'telekinesis') {
     const foes = RNG.st.bodies.filter(o => o.alive && o.side !== sel.side && (o.x - sel.x) * wx + (o.y - sel.y) * wy > 0);
     const tg = foes.sort((a, b) => Math.abs((a.x - sel.x) * wy - (a.y - sel.y) * wx) - Math.abs((b.x - sel.x) * wy - (b.y - sel.y) * wx))[0];
@@ -1226,7 +1227,7 @@ const RSND = (() => {
   return S;
 })();
 RSND.freeze = RSND.slide; RSND.wave = RSND.curve; // sons des nouveaux pouvoirs
-Object.assign(RSND, { beam: RSND.curve, devour: RSND.split, sun: RSND.shield, cyclone: RSND.curve, rift: RSND.blackhole, current: RSND.boing, avatar: RSND.split, jelly: RSND.grow, pinball: RSND.bounce, rampart: RSND.anchor, icetrail: RSND.slide, surf: RSND.curve, ora: RSND.double, blink: RSND.ghost, mirror: RSND.shield, shade: RSND.shrink, starfall: RSND.split, grab: RSND.magnet, yinyang: RSND.split, telekinesis: RSND.curve, stun: RSND.anchor });
+Object.assign(RSND, { ring: RSND.anchor, beam: RSND.curve, devour: RSND.split, sun: RSND.shield, cyclone: RSND.curve, rift: RSND.blackhole, current: RSND.boing, avatar: RSND.split, jelly: RSND.grow, pinball: RSND.bounce, rampart: RSND.anchor, icetrail: RSND.slide, surf: RSND.curve, ora: RSND.double, blink: RSND.ghost, mirror: RSND.shield, shade: RSND.shrink, starfall: RSND.split, grab: RSND.magnet, yinyang: RSND.split, telekinesis: RSND.curve, stun: RSND.anchor });
 
 // ---------- Effets visuels des pouvoirs
 const RFX = (() => {
@@ -1280,7 +1281,9 @@ const RFX = (() => {
     if (e.t === 'rampart') { const p = at2(e.id); if (p) { burst(p[0], p[1], 30, '#d97706', 4); RNG.parts.push({ ring: true, x: p[0], y: p[1], col: '#fbbf24', size: 1.8, life: 1 }); RNG.shake = 10; RSND.anchor?.(); } }
     if (e.t === 'mirror') { for (const o of P.bodies) if (o.alive && o.side === body(e.id)?.side) { const [x, y] = w2s(o.x, o.y); RNG.parts.push({ ring: true, x, y, col: '#f7a8d8', size: 1.3, life: 1 }); burst(x, y, 10, '#fff0f8', 2.5); } RSND.shield?.(); }
     if (e.t === 'reflect') { const p = at2(e.to); if (p) { burst(p[0], p[1], 24, '#f9a8d4', 4.5); rgPunch(p[0], p[1], .05); RNG.shake = Math.max(RNG.shake, 10); RSND.boing?.(); } }
-    if (e.t === 'beam') { const b = body(e.id); if (b) { const [x, y] = w2s(b.x, b.y), n = Math.hypot(e.ax, e.ay) || 1, ux = e.ax / n * FL(), uy = e.ay / n * FL(), L = RNG.view.size * 1.5; for (let d = b.r * RNG.view.s; d < L; d += 3) { for (const [w, col, sz] of [[0, '#ffffff', 4], [6, '#ff4d6a', 5], [-6, '#ff4d6a', 5]]) { const j = w + (Math.random() - .5) * 2; part({ x: x + ux * d - uy * j, y: y + uy * d + ux * j, vx: -uy * j * .08, vy: ux * j * .08, col, size: sz + Math.random() * 1.5 }); } } burst(x, y, 24, '#ff4d6a', 4); rgFlashCol('#ff4d6a'); RNG.shake = 14; RSND.eruption?.(); } }
+    if (e.t === 'beam') { const b = body(e.id); if (b) { const [x, y] = w2s(b.x, b.y), n = Math.hypot(e.ax, e.ay) || 1, ux = e.ax / n * FL(), uy = e.ay / n * FL(), L = e.len != null ? e.len * RNG.view.s : RNG.view.size * 1.5; for (let d = b.r * RNG.view.s; d < L; d += 3) { for (const [w, col, sz] of [[0, '#ffffff', 4], [6, '#ff4d6a', 5], [-6, '#ff4d6a', 5]]) { const j = w + (Math.random() - .5) * 2; part({ x: x + ux * d - uy * j, y: y + uy * d + ux * j, vx: -uy * j * .08, vy: ux * j * .08, col, size: sz + Math.random() * 1.5 }); } } burst(x, y, 24, '#ff4d6a', 4); rgFlashCol('#ff4d6a'); RNG.shake = 14; RSND.eruption?.(); } }
+    if (e.t === 'ring') { const [x, y] = w2s(e.x, e.y), R = e.r * RNG.view.s; for (let w = 0; w < 3; w++) RNG.parts.push({ wave: true, x, y, col: w ? '#fde0c8' : '#f08a3c', rad: R * (1 - w * .18), life: 1 }); for (let k = 0; k < 40; k++) { const a = k / 40 * 6.283; part({ x: x + Math.cos(a) * R, y: y + Math.sin(a) * R, vx: -Math.cos(a) * 1.5, vy: -Math.sin(a) * 1.5, col: k % 2 ? '#f08a3c' : '#fff3e8', size: 3.5 }); } RNG.shake = 10; RSND.anchor?.(); }
+    if (e.t === 'locked') { const p = at2(e.to); if (p) { RNG.parts.push({ ring: true, x: p[0], y: p[1], col: '#f08a3c', size: 1.6, life: 1 }); burst(p[0], p[1], 18, '#fde0c8', 3); rgPunch(p[0], p[1], .05); } }
     if (e.t === 'beamhit') { const p = at2(e.to); if (p) { burst(p[0], p[1], 22, '#ffd6dc', 5); rgPunch(p[0], p[1], .06); } }
     if (e.t === 'cut') { const p = at2(e.id); if (p) { burst(p[0], p[1], 30, '#c7d2fe', 4.5); rgFlashCol('#9fb6ff'); RNG.shake = 10; RSND.split?.(); } }
     if (e.t === 'devour') { const p = at2(e.to); const [x, y] = p || w2s(e.x, e.y); for (let k = 0; k < 40; k++) { const a = k / 40 * 6.283, r0 = 40 + Math.random() * 30; part({ x: x + Math.cos(a) * r0, y: y + Math.sin(a) * r0, vx: -Math.cos(a) * 3, vy: -Math.sin(a) * 3, col: k % 2 ? '#9fb6ff' : '#ffffff', size: 3.5 }); } RNG.parts.push({ ring: true, x, y, col: '#9fb6ff', size: 2.6, life: 1 }); rgPunch(x, y, .1); RNG.shake = 18; RSND.blackhole?.(); }
@@ -1462,4 +1465,4 @@ const RFX = (() => {
   return { start, introStart, event, under, aura, emit, over, busy, reset, endTurn, isActive: id => active[id] };
 })();
 
-export { ringOnline, startRing, closeRing, startRingTuto, ringTutoSeen, powerText, ringStatsHTML, PW_COL, RT, rt, RNG, RFX, RSND };
+export { rgReveal as ringPlayTurn, ringOnline, startRing, closeRing, startRingTuto, ringTutoSeen, powerText, ringStatsHTML, PW_COL, RT, rt, RNG, RFX, RSND };

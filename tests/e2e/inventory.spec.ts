@@ -1,7 +1,7 @@
 import { test, expect } from '@playwright/test';
 import { fakeSupabase } from './fake-supabase';
 
-test('bestiaire : grille, filtres, fiche, vente, verrou, niveau', async ({ page }) => {
+test('bestiaire : grille, filtres, fiche, vente, verrou', async ({ page }) => {
   const { calls } = await fakeSupabase(page, { coins: 100 });
   await page.goto('/inventaire');
   await expect(page.getByRole('heading', { level: 1, name: 'Ta collection' })).toBeVisible();
@@ -15,7 +15,7 @@ test('bestiaire : grille, filtres, fiche, vente, verrou, niveau', async ({ page 
   await expect(page.locator('ul li[data-key]')).toHaveCount(1);
   await page.getByRole('tab', { name: /Normaux|Normal/ }).click();
 
-  // fiche de Mobu : vendre 1, puis monter de niveau
+  // fiche de Mobu : vendre 1 (plus de montée de niveau pour l'instant)
   await page.getByRole('button', { name: /×4 Mobu/ }).click();
   const dlg = page.getByRole('dialog');
   await expect(dlg.getByText('Gélatine')).toBeVisible();
@@ -23,12 +23,9 @@ test('bestiaire : grille, filtres, fiche, vente, verrou, niveau', async ({ page 
   // la fiche reste ouverte et se met à jour
   await expect(dlg.getByText('Tu en as 3')).toBeVisible();
   await expect(page.getByLabel('Solde')).toContainText('101');
-  await dlg.getByRole('button', { name: /Monter au niveau 2/ }).click();
-  await expect(page.getByRole('status').getByText(/niveau 2/)).toBeVisible();
-  await expect(dlg).toBeVisible(); // toujours ouverte après la montée de niveau
-  await expect(dlg.getByRole('button', { name: /Monter au niveau 3/ })).toBeVisible();
+  await expect(dlg.getByRole('button', { name: /Monter au niveau/ })).toHaveCount(0);
   await page.keyboard.press('Escape');
-  await expect(page.getByRole('button', { name: /×2 Mobu/ })).toBeVisible(); // 1 vendu + 1 utilisé pour le niveau
+  await expect(page.getByRole('button', { name: /×3 Mobu/ })).toBeVisible(); // 1 vendu
 
   // verrouiller Vyolis
   await page.getByRole('button', { name: /×1 Vyolis/ }).click();

@@ -8,12 +8,17 @@ test('doodle partout et variantes visibles (vitrine, bestiaire)', async ({ page 
   const gold = page.locator('ul li img.v-gold').first(); // Mobu Doré dans la vitrine
   await expect(gold).toBeVisible();
   expect(await gold.evaluate((el) => getComputedStyle(el).animationName)).toBe('vGold');
-  // une image normale (collection) a le doodle
-  const normal = page.getByRole('button', { name: /^Mobu · 1\/2/ }).locator('img');
+  // une image normale (bestiaire du joueur, ouvert depuis sa série) a le doodle
+  await page.getByRole('button', { name: /Tirage Takoras/ }).click();
+  const normal = page
+    .getByRole('dialog')
+    .getByRole('button', { name: /^Mobu · 1\/2/ })
+    .locator('img');
   expect(await normal.evaluate((el) => getComputedStyle(el).animationName)).toBe('doodle');
   // le filtre est vraiment appliqué (une couleur invalide dans --df l'annulait sans bruit)
   const applied = async (sel: ReturnType<typeof page.locator>) => sel.evaluate((el) => getComputedStyle(el).filter);
   expect(await applied(normal)).toMatch(/url\(.*#dd\d.*drop-shadow/);
+  await page.keyboard.press('Escape');
   const nyx = page.getByRole('button', { name: /Nyx/ }).first().locator('img'); // jeton normal de la vitrine
   expect(await applied(nyx)).toMatch(/url\(.*#dd\d.*drop-shadow/);
   // le logo reste fixe
@@ -39,14 +44,19 @@ test('effets réduits : images fixes mais la variante garde sa couleur', async (
   await expect(gold).toBeVisible();
   const st = await gold.evaluate((el) => ({ a: getComputedStyle(el).animationName, f: getComputedStyle(el).filter }));
   expect(st.a).toBe('none');
-  expect(st.f).toContain('sepia');
+  expect(st.f).toContain('vgold'); // la palette dorée reste, sans le doodle
 });
 
 // Les classes de variante des CSS Modules existent bien (une config les renommait en camelCase et les vidait)
 test('mutations : vrais tampons dans l’éditeur d’équipe, onglets colorés dans le Bestiaire', async ({ page }) => {
   await fakeSupabase(page, {}, [], { deck: [15, 16, 17] });
   await page.goto('/combat');
-  await page.getByRole('button', { name: /Modifier/ }).click();
+  // plus de bouton « Modifier » : on touche un jeton de l'équipe, puis « Modifier l'équipe » dans sa fiche
+  await page.getByRole('region', { name: 'Équipe' }).getByRole('button').first().click();
+  await page
+    .getByRole('dialog')
+    .getByRole('button', { name: /Modifier/ })
+    .click();
   const b = page.getByRole('dialog').getByRole('radio', { name: 'Doré' });
   expect(
     await b

@@ -13,7 +13,7 @@ import {
   vOdds,
   glowVars,
 } from '@/data/jetons';
-import { LEVEL_MAX, powerInfo, RING_MAX, ringStats } from '@/data/kit';
+import { powerInfo, RING_MAX, ringStats } from '@/data/kit';
 import { statsOf, STAT_MAX } from '@/engines/env';
 import { useJn } from '@/lib/names';
 import { locale, reducedFx, useSettings } from '@/lib/settings';
@@ -82,7 +82,7 @@ export function JetonModal({
     coin.current?.style.setProperty('--gl', '0');
   };
   return (
-    <Modal open={!!name} onClose={onClose} wide>
+    <Modal open={!!name} onClose={onClose} wide noX>
       {name ? (
         <div
           className={s.jm}
@@ -111,7 +111,6 @@ export function JetonModal({
               </b>
             ) : null}
             <div className={s.jmId}>
-              <span className={s.tier}>{locked ? '???' : t(`ui.${tier}`)}</span>
               <h2>
                 {locked ? '???' : jn(j.name)} <VTag v={variant} />
               </h2>
@@ -127,13 +126,6 @@ export function JetonModal({
                 <div>
                   <dt>{t('ui.power')}</dt>
                   <dd className={s.pow}>{fmt(st.power)}</dd>
-                </div>
-                <div>
-                  <dt>{t('arena.lvl')}</dt>
-                  <dd>
-                    {st.lvl}
-                    <small>/{LEVEL_MAX}</small>
-                  </dd>
                 </div>
                 <div>
                   <dt>{t('ui.sell_value')}</dt>
@@ -165,13 +157,12 @@ export function JetonModal({
   );
 }
 
-// Combat : élément, pouvoir, stats du Ring et niveau (avec le bouton pour monter de niveau)
+// Combat : pouvoir et stats du Ring
 export function CombatInfo({
   name,
   lvl,
   variant = '',
   stats,
-  showLvl = true,
   children,
 }: {
   name: string;
@@ -195,11 +186,6 @@ export function CombatInfo({
     <section className={s.combat} style={{ '--pw': hexRGB(k.col) } as CSSProperties} aria-label={t('ui.nav_combat')}>
       <header>
         <span>{t('ring.power')}</span>
-        {showLvl ? (
-          <b>
-            {t('arena.lvl')} {lvl}/{LEVEL_MAX}
-          </b>
-        ) : null}
       </header>
       {k.pw !== 'none' ? (
         <div className={s.kit}>

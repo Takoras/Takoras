@@ -1,0 +1,25 @@
+.page {
+  display: grid;
+  gap: var(--s-4);
+  max-width: 720px;
+  margin-inline: auto;
+}
+.page h1 {
+  font-size: var(--fs-2xl);
+}
+.page article {
+  display: grid;
+  gap: var(--s-1);
+  padding: var(--s-4) var(--s-5);
+  border: 3px solid transparent;
+  border-radius: 14px;
+  border-image: url('/img/ui/box-card.png?v=3') 12 fill / 24px stretch;
+  background: linear-gradient(#222034, #222034) center / calc(100% - 16px) calc(100% - 16px) no-repeat;
+  image-rendering: pixelated;
+}
+.page h2 {
+  font-size: var(--fs-lg);
+}
+.page p {
+  color: var(--text-2);
+}

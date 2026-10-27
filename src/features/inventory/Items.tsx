@@ -39,6 +39,7 @@ export default function Items() {
       <header className={s.head}>
         <div>
           <h1>{t('ui.inv_items_title')}</h1>
+          <p className="muted">{t('ui.items_n', { n: list.reduce((n, x) => n + x.qty, 0) })}</p>
         </div>
       </header>
       <InvTabs />

@@ -2,7 +2,7 @@ import { useLayoutEffect, useMemo, useRef, useState, type CSSProperties } from '
 import { Link, NavLink } from 'react-router';
 import { NeedLogin } from '@/app/NeedLogin';
 import { useQueryClient } from '@tanstack/react-query';
-import { combatApi, errorText, invApi } from '@/api';
+import { errorText, invApi } from '@/api';
 import {
   MYSTERE,
   sellValue,
@@ -10,9 +10,7 @@ import {
   texOf,
   tierCol,
   tierKey,
-  type Tier,
   type Variant,
-  VARIANTS,
   vImg,
   vOdds,
   glowVars,
@@ -50,7 +48,6 @@ import {
 } from './inv';
 import s from './Inventory.module.css';
 
-const TIERS: ('all' | Tier)[] = ['all', 'r_common', 'r_rare', 'r_epic', 'r_legend', 'r_myth'];
 const SORTS: Sort[] = ['rarity', 'count', 'recent', 'name'];
 const Coin = () => <img className={`px ${s.coin}`} src="/img/piece.png" alt="" width={14} height={14} />;
 
@@ -188,7 +185,7 @@ export default function Bestiary() {
   const oc = open && d ? d.coll.get(cKey(view.serie, open.name)) : undefined;
   return (
     <section className={`${s.page} ${selecting ? s.withBar : ''}`}>
-      <header className={s.head}>
+      <header className={s.head} data-tour="inv">
         <div>
           <h1>{t('ui.bst_title')}</h1>
           <p className="muted">
@@ -279,11 +276,6 @@ export default function Bestiary() {
       </div>
       <div className={s.tools}>
         <div className={s.chips} role="group" aria-label={t('ui.sort_rarity')}>
-          {TIERS.map((k) => (
-            <button key={k} type="button" aria-pressed={view.tier === k} onClick={() => set({ tier: k })}>
-              {t(k === 'all' ? 'ui.all' : `ui.${k}`)}
-            </button>
-          ))}
           <button type="button" aria-pressed={view.own} onClick={() => set({ own: !view.own })}>
             ✓ {t('ui.bst_owned_only')}
           </button>
@@ -400,18 +392,6 @@ export default function Bestiary() {
                 }
                 await refresh(false);
               }}
-              onLevel={async () => {
-                try {
-                  const r = (await combatApi.levelUp(open.name, view.serie)) as { lvl: number };
-                  sfx.upgrade();
-                  toast(`${t('arena.lvlOk', { j: jn(open.name), n: r.lvl })}`);
-                  await refresh(true);
-                  setLvlUp((n) => n + 1); // la pièce de la fiche fête la montée de niveau
-                } catch (e) {
-                  sfx.deny();
-                  toast(errorText(e, lang), true);
-                }
-              }}
             />
           )}
         </JetonModal>
@@ -509,7 +489,6 @@ function Sheet({
   vtab,
   onSell,
   onLock,
-  onLevel,
 }: {
   g?: Group;
   c?: Coll;
@@ -518,7 +497,6 @@ function Sheet({
   vtab: string;
   onSell: (ids: number[]) => Promise<void>;
   onLock: (g: Group, lock: boolean) => Promise<void>;
-  onLevel: () => Promise<void>;
 }) {
   const t = useT();
   const lang = useSettings((x) => x.lang);
@@ -551,27 +529,14 @@ function Sheet({
                 <VTag v={v} />
               ) : (
                 <span className="muted">
-                  {t(`ui.v_${v}`)} · 1/{fmt(VARIANTS[v as Variant].odds)}
+                  {t(`ui.v_${v}`)} · 1/{fmt(vOdds(jetonOf(name, serie).odds, v as Variant))}
                 </span>
               )}
             </li>
           ))}
         </ul>
       ) : null}
-      <CombatInfo name={name} lvl={lv.L} variant={g?.variant ?? vtab} showLvl={false}>
-        {lv.owned ? (
-          lv.L >= 10 ? (
-            <small className="muted">{t('arena.lvlMax')}</small>
-          ) : (
-            <>
-              <Button size="sm" disabled={!lv.can} loading={busy === 'lvl'} onClick={run('lvl', onLevel)}>
-                {t('arena.lvlUp', { n: lv.L + 1 })} · {t('arena.lvlCost', { n: lv.L })}
-              </Button>
-              {lv.can ? null : <small className="muted">{t('arena.lvlNeed', { n: lv.L, h: lv.have })}</small>}
-            </>
-          )
-        ) : null}
-      </CombatInfo>
+      <CombatInfo name={name} lvl={lv.L} variant={g?.variant ?? vtab} showLvl={false} />
       {g ? (
         <div className={s.actions}>
           {g.free.length && g.free[0] !== undefined ? (

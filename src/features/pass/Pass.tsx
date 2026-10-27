@@ -141,7 +141,7 @@ export default function Pass() {
   const pct = tier >= 50 ? 100 : ((d.xp % XP_TIER) / XP_TIER) * 100;
   return (
     <section className={s.page}>
-      <header className={s.head}>
+      <header className={s.head} data-tour="pass">
         <div className={s.season}>
           <small>{t('ui.bp_season', { n: d.season })}</small>
           <h1>{t('ui.bp_title')}</h1>

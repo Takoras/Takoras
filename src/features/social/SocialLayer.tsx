@@ -21,7 +21,6 @@ export function SocialLayer() {
   usePriceRealtime();
   return (
     <>
-      <ChatDock />
       <Notifs />
     </>
   );
@@ -144,7 +143,8 @@ function usePriceRealtime() {
   }, [qc]);
 }
 
-function ChatDock() {
+// (chat retiré du site : gardé ici au cas où on le remettrait)
+export function ChatDock() {
   const t = useT();
   const { dock, open, min } = useChat();
   const fr = useFriends();

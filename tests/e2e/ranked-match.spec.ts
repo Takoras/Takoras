@@ -70,14 +70,19 @@ test('classé : rang, route des rangs, recherche puis match en ligne jusqu’à 
   // carte du rang (1000 Elo = Bois 1) et route des rangs
   await expect(page.getByText('Bois 1', { exact: true }).first()).toBeVisible();
   await expect(page.getByText(/Encore 50 Elo pour Bois 2/)).toBeVisible();
-  await expect(page.getByRole('heading', { name: 'Route des rangs' })).toBeVisible();
   // près de toi au classement : devant / toi / derrière
   const around = page.getByRole('region', { name: 'Près de toi au classement' });
   await expect(around.getByText('#1')).toBeVisible();
   await expect(around.getByRole('link', { name: 'Alpha' })).toBeVisible();
   await expect(around.getByText('Bravo')).toBeVisible();
+  // téléphone : la route des rangs est dans l'onglet « Classement »
+  const tab = page.getByRole('radio', { name: 'Classement' });
+  if (await tab.isVisible()) await tab.click();
+  await expect(page.getByRole('heading', { name: 'Route des rangs' })).toBeVisible();
   await expect(page.locator('[aria-current="step"]')).toContainText('Bois 1');
   await expect(page.getByText('Takoras', { exact: true }).first()).toBeAttached();
+  const play = page.getByRole('radio', { name: 'Jouer' });
+  if (await play.isVisible()) await play.click();
   if (process.env.SHOT) await page.screenshot({ path: `${process.env.SHOT}/combat-ranked.png`, fullPage: true });
   // recherche : 1er passage en file, 2e = adversaire trouvé
   await page.getByRole('button', { name: /JOUER/ }).click();

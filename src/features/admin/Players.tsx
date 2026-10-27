@@ -9,7 +9,8 @@ import { locale } from '@/lib/settings';
 import { Button } from '@/ui/Button';
 import { confirm } from '@/ui/confirm';
 import { useNow } from '@/features/eco/eco';
-import { act, day, dt, fmt, ITEMS } from './shared';
+import { act, day, dt, fmt, forgetLocalProgress, ITEMS } from './shared';
+import { useAuth } from '@/lib/auth';
 import s from './Admin.module.css';
 
 type Row = {
@@ -153,6 +154,7 @@ function PlayerBody({ id, P }: { id: string; P: Player }) {
     { id: number; created_at: string; from_pseudo: string; to_pseudo: string; body: string }[] | null
   >(null);
   const name = P.pseudo || 'ce joueur';
+  const myId = useAuth((x) => x.user?.id);
   const after = async () => {
     await Promise.all([
       qc.invalidateQueries({ queryKey: ['adm-player', id] }),
@@ -531,12 +533,41 @@ function PlayerBody({ id, P }: { id: string; P: Player }) {
       </section>
 
       <Button
+        variant="primary"
+        block
+        onClick={async () => {
+          if (
+            !(await confirm(
+              `Tout donner à ${name} ? (chaque jeton en normal, Doré, Céleste, Ombre ; 10 de chaque objet ; 1 000 000 de pièces ; bannières et photos)`,
+            ))
+          )
+            return;
+          if (await act(() => adminApi.giveAll(id), `Tout donné à ${name}`)) await after();
+        }}
+      >
+        Tout donner à {name}
+      </Button>
+      <Button
         variant="danger"
         block
         onClick={async () => {
-          if (!(await confirm(`Remettre ${name} à zéro ? (tirages, pièces, stock, effets effacés)`, { danger: true })))
+          if (
+            !(await confirm(
+              `Remettre ${name} à zéro ? (tirages, pièces, objets, classé, passe, tuto : tout est effacé)`,
+              {
+                danger: true,
+              },
+            ))
+          )
             return;
-          if (await act(() => adminApi.reset(id), `${name} remis à zéro`)) await after();
+          if (await act(() => adminApi.reset(id), `${name} remis à zéro`)) {
+            if (id === myId) {
+              forgetLocalProgress(); // c'est moi : je revois le tuto et tout comme un nouveau joueur
+              location.assign('/');
+              return;
+            }
+            await after();
+          }
         }}
       >
         Remettre {name} à zéro

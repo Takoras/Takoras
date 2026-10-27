@@ -1,4 +1,4 @@
-import { useEffect, useState, type FormEvent } from 'react';
+import { useState, type FormEvent } from 'react';
 import { Link } from 'react-router';
 import { useQueryClient } from '@tanstack/react-query';
 import { errorText, socialApi } from '@/api';
@@ -11,13 +11,11 @@ import { Button } from '@/ui/Button';
 import { confirm } from '@/ui/confirm';
 import { toast } from '@/ui/toast';
 import { NeedLogin } from '@/app/NeedLogin';
-import { openChat, useChat } from './chatStore';
-import { Conversation } from './SocialLayer';
 import { friendRequest } from './FriendButton';
 import { dateOf, useFriends, type Friend } from './social';
 import s from './Social.module.css';
 
-// Page Amis : ajouter par pseudo, demandes reçues, amis (chat), demandes envoyées
+// Page Amis : ajouter par pseudo, demandes reçues, amis, demandes envoyées (plus de chat)
 export default function Friends() {
   const t = useT();
   const lang = useSettings((x) => x.lang);
@@ -26,10 +24,6 @@ export default function Friends() {
   const fr = useFriends();
   const [pseudo, setPseudo] = useState('');
   const [busy, setBusy] = useState(false);
-  // PC : la conversation s'ouvre à droite de la liste (sur téléphone : la fenêtre de chat habituelle)
-  const wide = useWide();
-  const open = useChat((x) => x.open);
-  const chat = (id: string) => (wide ? useChat.setState({ open: id, dock: false, min: false }) : openChat(id));
   if (!user) return <NeedLogin title={t('ui.nav_friends')} />;
   const list = fr.data ?? [];
   const inc = list.filter((f) => f.incoming),
@@ -90,7 +84,7 @@ export default function Friends() {
     </li>
   );
   return (
-    <section className={`${s.page} ${wide ? s.split : ''}`}>
+    <section className={s.page}>
       <div className={s.colList}>
         <header>
           <h1>{t('ui.fr_title')}</h1>
@@ -146,9 +140,6 @@ export default function Friends() {
                     row(
                       f,
                       <>
-                        <Button size="sm" variant="primary" onClick={() => chat(f.id)}>
-                          {t('ui.fr_chat')}
-                        </Button>
                         <Button
                           size="sm"
                           onClick={() => void remove(f)}
@@ -184,27 +175,6 @@ export default function Friends() {
           </>
         )}
       </div>
-      {wide ? (
-        <aside className={s.colChat} aria-label={t('ui.fr_chats')}>
-          {(() => {
-            const f = ok.find((x) => x.id === open);
-            return f ? <Conversation f={f} min={false} inline /> : <p className="muted">{t('ui.fr_pick')}</p>;
-          })()}
-        </aside>
-      ) : null}
     </section>
   );
-}
-
-// Écran large (PC) : vrai à partir de 1000 px
-function useWide() {
-  const q = '(min-width: 1000px)';
-  const [w, setW] = useState(() => matchMedia(q).matches);
-  useEffect(() => {
-    const m = matchMedia(q),
-      on = () => setW(m.matches);
-    m.addEventListener('change', on);
-    return () => m.removeEventListener('change', on);
-  }, []);
-  return w;
 }

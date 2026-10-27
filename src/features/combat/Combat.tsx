@@ -11,13 +11,13 @@ import { useAuth } from '@/lib/auth';
 import { useJn } from '@/lib/names';
 import { useSettings } from '@/lib/settings';
 import { Rich } from '@/i18n/Rich';
-import { useDict, useT } from '@/i18n/useT';
+import { useT } from '@/i18n/useT';
 import { Button } from '@/ui/Button';
 import { Segmented } from '@/ui/Segmented';
 import { toast } from '@/ui/toast';
 import { MutationStamp } from '@/ui/MutationStamp';
 import { lvlOf, useInventory } from '../inventory/inv';
-import { CombatDex, EloTop, PassLink } from './CombatSide';
+import { EloTop, PassLink } from './CombatSide';
 import { botTeam, useDeck, type Member } from './team';
 import { call, fetchMatch, toLocal, useRanked, watchMatch, type RankedMe } from './rankedApi';
 import { RankAround, RankCard, RankRoad, SearchModal } from './Ranked';
@@ -50,7 +50,6 @@ export const playTuto = async (onEnd?: () => void) => {
 // Le tuto du Ring est obligatoire avant le premier match (classé comme entraînement).
 export default function Combat() {
   const t = useT();
-  const dict = useDict();
   const user = useAuth((x) => x.user);
   const me = useMe();
   const inv = useInventory();
@@ -58,7 +57,7 @@ export default function Combat() {
   const ranked = useRanked();
   const qc = useQueryClient();
   const [editing, setEditing] = useState(false);
-  const [ptab, setPtab] = useState<'play' | 'rank' | 'dex'>('play');
+  const [ptab, setPtab] = useState<'play' | 'rank'>('play');
   const [searching, setSearching] = useState(false);
   const [sheet, setSheet] = useState<Member | null>(null);
   // Quitter la page ferme le Ring (plus de boucle d'animation ni d'écouteur qui traîne)
@@ -89,7 +88,6 @@ export default function Combat() {
   const rk = ranked.data;
   const elo = rk?.elo ?? RCFG.ELO.start;
   const tutoOk = !!rk?.tuto_done;
-  const slots = dict.arena.slots;
   const refresh = () => void qc.invalidateQueries({ queryKey: ['ranked'] });
 
   // Tuto obligatoire : sans bouton « Passer » ; fini = le classé et l'entraînement sont débloqués
@@ -180,7 +178,6 @@ export default function Combat() {
           options={[
             ['play', t('arena.tab_play')],
             ['rank', t('arena.tab_rank')],
-            ['dex', t('arena.tab_dex')],
           ]}
         />
       </div>
@@ -196,7 +193,7 @@ export default function Combat() {
             </Button>
           </div>
         ) : (
-          <div className={s.playRow}>
+          <div className={s.playRow} data-tour="fight">
             <button type="button" className={`${s.play} ${s.ghost}`} disabled={!full} onClick={() => void train()}>
               <b>{t('arena.train')}</b>
             </button>
@@ -226,15 +223,6 @@ export default function Combat() {
         <section className={s.team} aria-labelledby="team-t">
           <header>
             <h2 id="team-t">{t('arena.team')}</h2>
-            <Button
-              size="sm"
-              onClick={() => {
-                sfx.click();
-                setEditing(true);
-              }}
-            >
-              {t('arena.edit')}
-            </Button>
           </header>
           <ul>
             {team.map((u, i) =>
@@ -242,8 +230,6 @@ export default function Combat() {
                 <li key={i}>
                   <TeamCard
                     u={u}
-                    pos={slots[i] ?? ''}
-                    lvl={lvl(u)}
                     onOpen={() => {
                       sfx.click();
                       setSheet(u);
@@ -260,7 +246,6 @@ export default function Combat() {
                       setEditing(true);
                     }}
                   >
-                    <span className={s.pos}>{slots[i]}</span>
                     <b aria-hidden>＋</b>
                     <small>{t('arena.pick')}</small>
                   </button>
@@ -279,18 +264,16 @@ export default function Combat() {
             {t('arena.tuto')}
           </Button>
         </details>
-
-        <RankRoad elo={elo} />
       </div>
       <aside className={s.colSide}>
         <div className={s.sideRank}>
           <PassLink />
           <EloTop />
         </div>
-        <div className={s.sideDex}>
-          <CombatDex inv={inv.data} />
-        </div>
       </aside>
+      <div className={s.roadRow}>
+        <RankRoad elo={elo} />
+      </div>
 
       {searching ? (
         <SearchModal
@@ -314,22 +297,28 @@ export default function Combat() {
           variant={sheet.variant}
           lvl={lvl(sheet)}
           onClose={() => setSheet(null)}
+          action={{
+            label: t('arena.edit'),
+            primary: true,
+            onClick: () => {
+              setSheet(null);
+              setEditing(true);
+            },
+          }}
         />
       ) : null}
     </section>
   );
 }
 
-// Mini carte d'un jeton de l'équipe : image, mutation, niveau, pouvoir
-function TeamCard({ u, pos, lvl, onOpen }: { u: Member; pos: string; lvl: number; onOpen: () => void }) {
-  const t = useT();
+// Mini carte d'un jeton de l'équipe : image, mutation, pouvoir
+function TeamCard({ u, onOpen }: { u: Member; onOpen: () => void }) {
   const jn = useJn();
   const lang = useSettings((x) => x.lang);
   const j = jetonOf(u.name, u.serie),
     k = powerInfo(u.name, lang);
   return (
     <button type="button" className={s.slot} onClick={onOpen} style={glowVars(j, u.variant) as CSSProperties}>
-      <span className={s.pos}>{pos}</span>
       <img className={vImg(u.variant)} src={texOf(j)} alt="" />
       {u.variant ? (
         <span className={s.vtag}>
@@ -337,9 +326,6 @@ function TeamCard({ u, pos, lvl, onOpen }: { u: Member; pos: string; lvl: number
         </span>
       ) : null}
       <b>{jn(u.name)}</b>
-      <small>
-        {t('arena.lvl')} {lvl}
-      </small>
       <small className={s.ab} style={{ '--c': k.col } as CSSProperties}>
         {k.name}
       </small>
