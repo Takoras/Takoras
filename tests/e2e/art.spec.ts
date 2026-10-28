@@ -8,17 +8,12 @@ test('doodle partout et variantes visibles (vitrine, bestiaire)', async ({ page 
   const gold = page.locator('ul li img.v-gold').first(); // Mobu Doré dans la vitrine
   await expect(gold).toBeVisible();
   expect(await gold.evaluate((el) => getComputedStyle(el).animationName)).toBe('vGold');
-  // une image normale (bestiaire du joueur, ouvert depuis sa série) a le doodle
-  await page.getByRole('button', { name: /Tirage Takoras/ }).click();
-  const normal = page
-    .getByRole('dialog')
-    .getByRole('button', { name: /^Mobu · 1\/2/ })
-    .locator('img');
+  // une image normale (bestiaire du joueur, affiché directement sous ses séries) a le doodle
+  const normal = page.getByRole('button', { name: /#01 Mobu 1\/2/ }).locator('img');
   expect(await normal.evaluate((el) => getComputedStyle(el).animationName)).toBe('doodle');
   // le filtre est vraiment appliqué (une couleur invalide dans --df l'annulait sans bruit)
   const applied = async (sel: ReturnType<typeof page.locator>) => sel.evaluate((el) => getComputedStyle(el).filter);
   expect(await applied(normal)).toMatch(/url\(.*#dd\d.*drop-shadow/);
-  await page.keyboard.press('Escape');
   const nyx = page.getByRole('button', { name: /Nyx/ }).first().locator('img'); // jeton normal de la vitrine
   expect(await applied(nyx)).toMatch(/url\(.*#dd\d.*drop-shadow/);
   // le logo reste fixe

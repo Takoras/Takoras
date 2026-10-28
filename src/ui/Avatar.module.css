@@ -16,6 +16,10 @@
   height: 100%;
   object-fit: cover;
 }
+/* photo dessinée : un peu agrandie, le doodle ne laisse plus de morceaux noirs sur les bords */
+.av:not(.tok) img {
+  scale: 1.08;
+}
 
 /* jeton en photo de profil : il remplit la pastille, sans fond */
 .tok {

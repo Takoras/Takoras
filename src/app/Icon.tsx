@@ -33,8 +33,8 @@ export function Icon({ name, size = 20 }: { name: keyof typeof P | string; size?
         style={{
           display: 'inline-block',
           flex: 'none',
-          width: px,
-          height: px,
+          width: `var(--ico, ${px}px)`, // la barre peut la rétrécir sur écran bas
+          height: `var(--ico, ${px}px)`,
           background: 'currentColor',
           maskImage: url,
           WebkitMaskImage: url,

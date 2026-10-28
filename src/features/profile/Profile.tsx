@@ -10,7 +10,6 @@ import {
   SERIES,
   TEMPLATE,
   texOf,
-  VARIANTS,
   vImg,
   vOdds,
   glowVars,
@@ -27,6 +26,7 @@ import { Avatar, setAvatar } from '@/ui/Avatar';
 import { Button } from '@/ui/Button';
 import { confirm } from '@/ui/confirm';
 import { Modal } from '@/ui/Modal';
+import { MutationStamp } from '@/ui/MutationStamp';
 import { toast } from '@/ui/toast';
 import { VTag } from '@/ui/VTag';
 import { JetonModal } from '../inventory/JetonModal';
@@ -35,6 +35,7 @@ import { NeedLogin } from '@/app/NeedLogin';
 import { FriendButton } from '../social/FriendButton';
 import { RankBadge, useRankName } from '../combat/Ranked';
 import { rankOf } from '../combat/rankedApi';
+import iv from '../inventory/Inventory.module.css';
 import s from './Profile.module.css';
 
 type Shown = { id: number; jeton: string; odds: number; variant: string | null } | null;
@@ -82,7 +83,7 @@ export default function Profile() {
   const [jeton, setJeton] = useState<{ name: string; variant: string; locked: boolean } | null>(null);
   const [slot, setSlot] = useState<number | null>(null);
   const [edit, setEdit] = useState(false);
-  const [serie, setSerie] = useState<string | null>(null);
+  const [serie, setSerie] = useState<string | null>('Takoras'); // bestiaire montré en dessous (pas de fenêtre)
 
   if (!params.pseudo && !user) return <NeedLogin title={t('app.account')} />;
   if (prof.isError) return <p className="muted">{t('ui.err_generic')}</p>;
@@ -197,7 +198,15 @@ export default function Profile() {
           );
         })}
       </ul>
-      <Bestiaries pseudo={p.pseudo} onOpen={setSerie} />
+      <Bestiaries pseudo={p.pseudo} open={serie} onOpen={(x) => setSerie(serie === x ? null : x)} />
+      {/* le bestiaire de la série choisie, directement dans la page, comme dans l'inventaire */}
+      {serie ? (
+        <Collection
+          pseudo={p.pseudo}
+          serie={serie}
+          onOpen={(name, locked) => setJeton({ name, variant: '', locked })}
+        />
+      ) : null}
       <p className="muted">{t('ui.joined', { d: new Date(p.joined).toLocaleDateString(locale(lang)) })}</p>
       {mine ? (
         <section className={s.private} aria-labelledby="pv-t">
@@ -228,15 +237,6 @@ export default function Profile() {
           </Button>
         </section>
       ) : null}
-      {serie ? (
-        <Modal open onClose={() => setSerie(null)} title={`${t('ui.bestiary')} · ${serie}`} wide>
-          <Collection
-            pseudo={p.pseudo}
-            serie={serie}
-            onOpen={(name, locked) => setJeton({ name, variant: '', locked })}
-          />
-        </Modal>
-      ) : null}
       <TheirJeton pseudo={p.pseudo} jeton={jeton} onClose={() => setJeton(null)} />
       {mine && slot !== null ? <ShowcasePicker p={p} slot={slot} onClose={() => setSlot(null)} /> : null}
       {mine && edit ? <EditProfile p={p} onClose={() => setEdit(false)} /> : null}
@@ -245,7 +245,15 @@ export default function Profile() {
 }
 
 // Bestiaires d'un joueur : une carte par série (tirage) ; toucher = son bestiaire de cette série
-function Bestiaries({ pseudo, onOpen }: { pseudo: string; onOpen: (serie: string) => void }) {
+function Bestiaries({
+  pseudo,
+  open,
+  onOpen,
+}: {
+  pseudo: string;
+  open: string | null;
+  onOpen: (serie: string) => void;
+}) {
   const t = useT();
   const q = useQuery({ queryKey: ['collection', pseudo.toLowerCase()], queryFn: () => publicApi.collectionOf(pseudo) });
   return (
@@ -256,7 +264,7 @@ function Bestiaries({ pseudo, onOpen }: { pseudo: string; onOpen: (serie: string
           const all = SERIES[name] ?? [],
             got = new Set((q.data ?? []).filter((r) => (r.serie || 'Takoras') === name).map((r) => r.jeton));
           return (
-            <button key={name} type="button" onClick={() => onOpen(name)}>
+            <button key={name} type="button" aria-pressed={open === name} onClick={() => onOpen(name)}>
               <img
                 className="px"
                 src={name === 'Takoras' ? '/img/jetons/takoras.png' : texOf(all[0] ?? jetonOf('Mobu'))}
@@ -304,31 +312,36 @@ function Collection({
       got.set(r.jeton, v);
     });
   const all = [...(SERIES[serie] ?? [])].sort((a, b) => a.odds - b.odds);
+  // même style que le bestiaire de l'inventaire : jetons posés librement, « ? » pour ceux pas trouvés
   return (
-    <ul className={s.coll}>
-      {all.map((j) => {
+    <ul className={`${iv.grid} ${s.collGrid}`}>
+      {all.map((j, i) => {
         const c = got.get(j.name);
         return (
           <li
             key={j.name}
             style={(c ? glowVars(j) : { '--g': '113, 113, 122' }) as CSSProperties}
-            className={c ? undefined : s.unk}
+            className={`${iv.card} ${c ? '' : iv.unk}`}
           >
             <button
               type="button"
+              className={iv.cardBtn}
               onClick={() => {
                 sfx.click();
                 onOpen(j.name, !c);
               }}
-              aria-label={c ? `${jn(j.name)} · 1/${fmt(j.odds)}` : '?'}
             >
+              <span className={iv.num}>#{c ? String(i + 1).padStart(2, '0') : '?'}</span>
               <img className="px" src={c ? texOf(j) : MYSTERE} alt="" />
+              <b>{c ? jn(j.name) : '???'}</b>
               <small>{c ? `1/${fmt(j.odds)}` : '?'}</small>
-              <span className={s.dots} aria-hidden>
-                {Object.keys(VARIANTS).map((v) => (
-                  <i key={v} className={`${s.dot} ${s[`d_${v}`]} ${c?.has(v) ? s.on : ''}`} />
-                ))}
-              </span>
+              {c?.size ? (
+                <span className={s.vrow}>
+                  {[...c].map((v) => (
+                    <MutationStamp key={v} v={v} size="xs" />
+                  ))}
+                </span>
+              ) : null}
             </button>
           </li>
         );

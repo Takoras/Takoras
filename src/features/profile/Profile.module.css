@@ -36,6 +36,7 @@
   width: 100%;
   height: 100%;
   object-fit: cover;
+  scale: 1.06; /* le doodle déforme les bords : agrandi un peu pour ne jamais laisser de trou noir */
 }
 .noBanner {
   background: var(--surface);
@@ -83,6 +84,7 @@
 .elo {
   position: relative;
   z-index: 1;
+  margin-top: var(--s-8); /* seule la photo chevauche la bannière : le rang reste en dessous, jamais par-dessus */
   display: flex;
   align-items: center;
   gap: var(--s-4);
@@ -95,14 +97,6 @@
   width: 128px;
   height: 128px;
 }
-.eloBadge::before {
-  content: '';
-  position: absolute;
-  inset: -20%;
-  border-radius: 50%;
-  background: radial-gradient(closest-side, color-mix(in srgb, var(--rc) 55%, transparent), transparent);
-  animation: eloGlow 3s ease-in-out infinite;
-}
 .eloBadge > * {
   position: relative;
   animation: eloBob 4s ease-in-out infinite;
@@ -112,7 +106,6 @@
   display: block;
   font: 800 clamp(2.4rem, 5vw, 3.4rem) / 1 var(--font-display);
   letter-spacing: -0.02em;
-  text-shadow: 0 0 24px color-mix(in srgb, var(--rc) 45%, transparent);
 }
 .elo b span {
   font-size: var(--fs-lg);
@@ -125,12 +118,6 @@
   font: 800 var(--fs-lg) / 1.1 var(--font-display);
   text-transform: uppercase;
   letter-spacing: 0.08em;
-}
-@keyframes eloGlow {
-  50% {
-    opacity: 0.55;
-    scale: 1.1;
-  }
 }
 @keyframes eloBob {
   50% {
@@ -478,6 +465,7 @@
   width: 100%;
   height: 100%;
   object-fit: cover;
+  scale: 1.08; /* pas de bord noir pendant le doodle */
 }
 .banners button[aria-pressed='true'],
 .pps button[aria-pressed='true'] {
@@ -506,6 +494,7 @@
   width: 100%;
   height: 100%;
   object-fit: cover;
+  scale: 1.08; /* pas de bord noir pendant le doodle */
 }
 .pps i {
   position: absolute;
@@ -717,4 +706,21 @@
   .best b {
     justify-content: center;
   }
+}
+
+/* bestiaire du joueur : série choisie en surbrillance, mutations trouvées sous chaque jeton */
+.series button[aria-pressed='true'] {
+  outline: 3px solid #8b5cf6;
+  outline-offset: 2px;
+}
+.vrow {
+  display: flex;
+  justify-content: center;
+  gap: 2px;
+}
+
+/* dans le profil, toute la grille s'affiche (pas de zone qui défile comme dans l'inventaire) */
+ul.collGrid {
+  max-height: none;
+  overflow: visible;
 }

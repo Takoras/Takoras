@@ -66,6 +66,18 @@ export default function Pass() {
     const el = list.current?.querySelector<HTMLElement>('[aria-current]');
     if (el && list.current) list.current.scrollLeft = el.offsetLeft - list.current.clientWidth / 2;
   }, [tier, tab, d]);
+  // PC : la molette fait défiler la piste de gauche à droite
+  useEffect(() => {
+    const el = list.current;
+    if (!el) return;
+    const wheel = (e: WheelEvent) => {
+      if (Math.abs(e.deltaY) <= Math.abs(e.deltaX)) return;
+      e.preventDefault();
+      el.scrollLeft += e.deltaY;
+    };
+    el.addEventListener('wheel', wheel, { passive: false });
+    return () => el.removeEventListener('wheel', wheel);
+  }, [tab, d]);
   // téléphone : la page du passe ne défile pas, on fait juste glisser la piste
   useEffect(() => {
     const h = document.documentElement;
@@ -132,7 +144,11 @@ export default function Pass() {
     const cls = `${s.tile} ${prem ? s.gold : ''} ${got ? s.got : ''} ${can ? s.ready : ''} ${isCosmetic(r) ? s.rare : ''} ${!open ? s.future : ''}`;
     const body = (
       <>
-        <img className={`px ${isCosmetic(r) && r.item?.startsWith('b_') ? s.wide : ''}`} src={icon(r)} alt="" />
+        <img
+          className={`px ${r.item?.startsWith('b_') ? s.wide : r.item?.startsWith('a_') ? s.round : ''}`}
+          src={icon(r)}
+          alt=""
+        />
         {qty ? <b className={s.qty}>{qty}</b> : null}
         {/* nom affiché en CSS (attr) : ne gêne pas le nom lu par les lecteurs d'écran */}
         <small className={s.lbl} data-l={short} aria-hidden />
