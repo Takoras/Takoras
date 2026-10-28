@@ -189,9 +189,13 @@ html.lock body {
 ::-webkit-scrollbar-track {
   background: transparent;
 }
+/* invisible par défaut (rien qui « pop » quand la page change de taille), visible au survol de la zone */
 ::-webkit-scrollbar-thumb {
-  background: #5b3fa0;
+  background: transparent;
   border-radius: 0;
+}
+:hover::-webkit-scrollbar-thumb {
+  background: #5b3fa0;
   box-shadow:
     inset 2px 2px 0 #9b7be0,
     inset -2px -2px 0 #3a2470;
@@ -207,6 +211,9 @@ html.lock body {
 @supports not selector(::-webkit-scrollbar) {
   * {
     scrollbar-width: thin;
+    scrollbar-color: transparent transparent;
+  }
+  *:hover {
     scrollbar-color: #7d48d9 transparent;
   }
 }

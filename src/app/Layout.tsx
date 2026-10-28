@@ -154,7 +154,7 @@ export function Layout() {
       <Announcements />
       {/* fond vivant : poussière de pixels qui dérive doucement derrière tout le site */}
       <div className={s.ambient} aria-hidden>
-        {Array.from({ length: 18 }, (_, i) => (
+        {Array.from({ length: 12 }, (_, i) => (
           <i key={i} />
         ))}
       </div>

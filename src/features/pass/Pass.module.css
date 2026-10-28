@@ -167,7 +167,13 @@
   scroll-snap-type: x proximity;
   padding: var(--s-5) var(--s-4);
   gap: var(--s-3);
-  scrollbar-width: thin;
+}
+/* la piste du passe garde sa barre pixel art visible (elle se fait défiler à la main) */
+.track::-webkit-scrollbar-thumb {
+  background: #5b3fa0;
+  box-shadow:
+    inset 2px 2px 0 #9b7be0,
+    inset -2px -2px 0 #3a2470;
 }
 .track li {
   position: relative;

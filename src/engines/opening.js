@@ -605,6 +605,12 @@ function updateActions() {
   if (last && !multi) $('op-hint').textContent = '';
 }
 const spinning = () => run && performance.now() < (run.spinEnd || 0);
+// Toucher pendant la rotation : le jeton s'arrête net de face (on peut enchaîner vite les tirages)
+function stopSpin() {
+  opCoin.querySelector('.spin')?.getAnimations().forEach(a => a.finish());
+  if (run) run.spinEnd = 0;
+  opening.classList.remove('spinning');
+}
 function next() {
   if (!sess || sess.idx >= sess.total - 1 || !opening.classList.contains('revealed') || spinning()) return;
   sess.idx++;
@@ -709,9 +715,10 @@ function turboHit(j, v = '') {
   z?.animate([{ transform: 'scale(1.28)', filter: 'brightness(1.6)' }, { transform: 'scale(.95)', offset: .55 }, { transform: 'scale(1)', filter: 'none' }], { duration: 170, easing: 'cubic-bezier(.2, .9, .3, 1)' });
   // chaque jeton : étincelles à sa couleur ; un peu rare : rayons + flash ; tous les 10 : gros coup
   opening.style.setProperty('--tier', hexRGB(j.glow));
-  burst(j.odds >= 100 ? 10 : 5);
-  if (j.odds >= 50 || v) { rays(.5); tint(.25, 220); shake(.35); }
-  if (combo % 10 === 0) { rays(.9); tint(.35, 300); shake(.6); }
+  // effets légers à chaque jeton (ça défile vite) ; les gros effets seulement sur les jetons rares et tous les 10
+  burst(j.odds >= 100 ? 6 : 3);
+  if (j.odds >= 400 || v) { rays(.5); tint(.25, 220); shake(.35); }
+  else if (combo % 10 === 0) { rays(.7); shake(.4); }
 }
 $('op-auto')?.addEventListener('click', e => {
   e.stopPropagation();
@@ -755,6 +762,7 @@ function addToHistory(j, variant = '', luck = +(sess?.lucks || [])[sess?.results
 }
 
 function tap() {
+  if (run?.done && opening.classList.contains('revealed') && spinning()) return stopSpin();
   // un par un : une fois le jeton révélé, toucher le jeton ouvre le pull suivant (il n'y a plus de bouton « Ouvrir encore »)
   if (run?.done && sess && sess.total === 1 && opening.classList.contains('revealed') && !spinning()) return openPulls(1);
   if (!run || run.done) return;
@@ -776,10 +784,11 @@ function tap() {
   }
 }
 
-opCoin.addEventListener('pointerdown', e => { e.preventDefault(); tap(); }); // pointerdown = réagit dès l'appui, idéal pour spammer
+opCoin.addEventListener('pointerdown', e => { e.preventDefault(); e.stopPropagation(); tap(); }); // pointerdown = réagit dès l'appui, idéal pour spammer
 // un par un : une fois le jeton révélé, toucher n'importe où sur l'écran (hors boutons) ouvre le tirage suivant
 opening.addEventListener('pointerdown', e => {
   if (e.target.closest('button, a, input, select, .op-recap-view')) return;
+  if (run?.done && opening.classList.contains('revealed') && spinning()) { e.preventDefault(); return stopSpin(); }
   if (run?.done && sess && sess.total === 1 && opening.classList.contains('revealed') && !spinning()) { e.preventDefault(); openPulls(1); }
 });
 addEventListener('keydown', e => {

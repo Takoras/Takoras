@@ -192,10 +192,9 @@ img.v-ombre, .opening.v-ombre .op-coin .spin img.face, .opening.v-ombre .op-coin
 .op-skip:hover { color: var(--text); }
 .opening.recap .op-autobar { display: none; }
 .opening.turbo::before, .opening.turbo::after { content: ""; position: absolute; inset: 0; pointer-events: none; }
-.opening.turbo::before { z-index: 1; -webkit-backdrop-filter: blur(10px) saturate(1.4); backdrop-filter: blur(10px) saturate(1.4);
-  -webkit-mask: radial-gradient(circle at var(--cx, 50%) var(--cy, 40%), transparent calc(var(--coinr, 120px) * 1.1), rgba(0, 0, 0, .5) calc(var(--coinr, 120px) * 1.6), #000 calc(var(--coinr, 120px) * 2.8));
-  mask: radial-gradient(circle at var(--cx, 50%) var(--cy, 40%), transparent calc(var(--coinr, 120px) * 1.1), rgba(0, 0, 0, .5) calc(var(--coinr, 120px) * 1.6), #000 calc(var(--coinr, 120px) * 2.8)); }
-.opening.turbo::after { z-index: 1; opacity: .55; mix-blend-mode: screen; filter: blur(7px);
+.opening.turbo::before { z-index: 1; /* assombrit le tour de l'écran (léger : pas de flou en direct, qui faisait ramer) */
+  background: radial-gradient(circle at var(--cx, 50%) var(--cy, 40%), transparent calc(var(--coinr, 120px) * 1.3), rgba(10, 8, 20, .55) calc(var(--coinr, 120px) * 3)); }
+.opening.turbo::after { z-index: 1; opacity: .45;
   background: repeating-conic-gradient(from 0deg at var(--cx, 50%) var(--cy, 40%), rgba(var(--tier), .55) 0 1.2deg, transparent 1.2deg 9deg),
               radial-gradient(circle at var(--cx, 50%) var(--cy, 40%), transparent 14%, rgba(var(--tier), .25) 40%, rgba(0, 0, 0, .55) 85%);
   -webkit-mask: radial-gradient(circle at var(--cx, 50%) var(--cy, 40%), transparent calc(var(--coinr, 120px) * 1.05), #000 calc(var(--coinr, 120px) * 2.4));
@@ -309,7 +308,7 @@ html.reduce-fx .op-id, html.reduce-fx .op-stats, html.reduce-fx .op-actions { an
   background: repeating-conic-gradient(from 0deg, rgba(var(--tier), .85) 0deg 4deg, transparent 4deg 22.5deg),
     radial-gradient(closest-side, rgba(255, 255, 255, .9), rgba(var(--tier), .5) 30%, transparent 70%);
   -webkit-mask: radial-gradient(closest-side, #000 15%, transparent 100%); mask: radial-gradient(closest-side, #000 15%, transparent 100%);
-  mix-blend-mode: screen; }
+}
 .op-main { position: relative; z-index: 2; }
 @media (max-width: 760px) {
   .op-id { padding: 14px 18px; border: 3px solid transparent; border-radius: 14px; border-image: url('/img/ui/box-9.png?v=3') 14 fill / 28px stretch;

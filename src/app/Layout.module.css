@@ -339,13 +339,12 @@
   width: 4px;
   height: 4px;
   background: #a78bfa;
-  box-shadow: 0 0 8px #8b5cf6;
   opacity: 0;
+  will-change: transform, opacity;
   animation: drift 18s linear infinite;
 }
 .ambient i:nth-child(3n) {
   background: #fdba74;
-  box-shadow: 0 0 8px #f97316;
 }
 .ambient i:nth-child(2n) {
   width: 3px;
