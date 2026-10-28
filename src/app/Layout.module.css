@@ -738,7 +738,13 @@
 /* écran très bas (téléphone à l'horizontale) : les icônes seules (plus d'étiquette qui apparaît à droite) */
 @media (max-height: 480px) {
   .railTxt {
-    display: none;
+    /* caché à l'écran mais toujours lu par les lecteurs d'écran */
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    overflow: hidden;
+    clip-path: inset(50%);
+    white-space: nowrap;
   }
   .railItem.on::before {
     top: 6px;
