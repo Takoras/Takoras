@@ -21,11 +21,11 @@ const P: Record<string, string> = {
   user: 'M12 12a4 4 0 1 0 0-8 4 4 0 0 0 0 8zM4 21a8 8 0 0 1 16 0',
 };
 // Icônes pixel art dessinées à la main (grille 32×32, blanc sur transparent) : utilisées en masque pour prendre la couleur du texte.
-// Affichées à 16 ou 32 px pour rester nettes.
+// Affichées à 16 px (petits boutons) ou 26 px (barre).
 const PIX = new Set(['home', 'users', 'swords', 'bag', 'help', 'bulb', 'bell', 'gear', 'star', 'scroll', 'user', 'shop']);
 export function Icon({ name, size = 20 }: { name: keyof typeof P | string; size?: number }) {
   if (PIX.has(name)) {
-    const px = size >= 22 ? 32 : 16;
+    const px = size >= 22 ? 26 : 16; // un peu plus petit que la boîte, pour ne pas déborder
     const url = `url('/img/ui/ico/${name}.png')`;
     return (
       <span

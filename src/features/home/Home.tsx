@@ -2,7 +2,7 @@ import { useEffect, useState } from 'react';
 import { PULLS } from '@/engines/env';
 import { useT } from '@/i18n/useT';
 import { installOpeningHost } from '../eco/openPulls';
-import { Actions } from './Actions';
+import { Actions, Upgrades } from './Actions';
 import { AutoConfig } from './AutoConfig';
 import { PullPicker } from './PullPicker';
 import { Live } from './Feeds';
@@ -41,6 +41,9 @@ export default function Home() {
         <div className={`${s.side} ${s.stack}`}>
           <PullPicker value={pi} onChange={setPi} />
           <AutoConfig />
+          <div className={s.upsSide}>
+            <Upgrades />
+          </div>
         </div>
       </div>
       <Live />

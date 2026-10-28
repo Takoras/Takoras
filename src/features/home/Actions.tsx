@@ -19,11 +19,8 @@ const Coin = () => <img className="px" src="/img/piece.png" alt="" width={16} he
 // Stock de pulls, boutons d'ouverture et améliorations (stock max, recharge)
 export function Actions() {
   const t = useT();
-  const lang = useSettings((x) => x.lang);
   const user = useAuth((x) => x.user);
   const e = useEco();
-  const qc = useQueryClient();
-  const upBusy = useRef(false);
   const info = (
     <button type="button" className={s.info} onClick={openInfo}>
       {t('ui.odds_info')}
@@ -44,6 +41,42 @@ export function Actions() {
         …
       </div>
     );
+  return (
+    <div className={s.actions}>
+      <div className={s.stock} role="status">
+        <b className={s.stockN}>{e.stock}</b>
+        <span className={s.stockMax}>/{e.max}</span>
+        <span className="muted">
+          {t('ui.pulls_word')} · {e.full ? t('ui.stock_full') : t('ui.plus1_in', { t: mmss(e.nextIn) })}
+        </span>
+      </div>
+      <div className={s.row}>
+        <Button variant="primary" size="lg" disabled={!e.stock} onClick={() => void openPulls(1)} data-nosound>
+          {t('ui.open1')}
+        </Button>
+        <Button size="lg" disabled={e.stock < 2} onClick={() => void openPulls('all')} data-nosound>
+          {t('ui.open_all', { n: Math.min(e.stock, MAX_OPEN) })}
+        </Button>
+      </div>
+      {/* sur grand écran, les améliorations sont dans la colonne de gauche (Upgrades) */}
+      <div className={s.upsCenter}>
+        <Upgrades />
+      </div>
+      <Effects />
+      {info}
+    </div>
+  );
+}
+
+// Améliorations (stock max, recharge) : sous les boutons sur petit écran, dans la colonne de gauche sur grand écran
+export function Upgrades() {
+  const t = useT();
+  const lang = useSettings((x) => x.lang);
+  const user = useAuth((x) => x.user);
+  const e = useEco();
+  const qc = useQueryClient();
+  const upBusy = useRef(false);
+  if (!user || !e) return null;
   const n = (v: number) => v.toLocaleString(locale(lang));
   const upCost = upgradeCost(nextMax(e.max)),
     rgCost = regenCost(e.regen - 10);
@@ -65,51 +98,31 @@ export function Actions() {
     }
   };
   return (
-    <div className={s.actions}>
-      <div className={s.stock} role="status">
-        <b className={s.stockN}>{e.stock}</b>
-        <span className={s.stockMax}>/{e.max}</span>
-        <span className="muted">
-          {t('ui.pulls_word')} · {e.full ? t('ui.stock_full') : t('ui.plus1_in', { t: mmss(e.nextIn) })}
-        </span>
-      </div>
-      <div className={s.row}>
-        <Button variant="primary" size="lg" disabled={!e.stock} onClick={() => void openPulls(1)} data-nosound>
-          {t('ui.open1')}
-        </Button>
-        <Button size="lg" disabled={e.stock < 2} onClick={() => void openPulls('all')} data-nosound>
-          {t('ui.open_all', { n: Math.min(e.stock, MAX_OPEN) })}
-        </Button>
-      </div>
-      {/* Améliorations : bien en vue, avec la progression jusqu'au max */}
-      <div className={s.ups} aria-label={t('ui.upgrades')} role="group">
-        <Up
-          icon="/img/objets/recharge.png"
-          title={t('ui.up_stock')}
-          now={String(e.max)}
-          next={e.max < TOP_MAX ? String(nextMax(e.max)) : null}
-          pct={(e.max - 5) / (TOP_MAX - 5)}
-          top={t('ui.stock_top', { n: TOP_MAX })}
-          cost={upCost}
-          coins={e.coins}
-          fmt={n}
-          onUp={() => void upgrade('stock')}
-        />
-        <Up
-          icon="/img/objets/sablier.png"
-          title={t('ui.up_regen')}
-          now={mmss(e.regen * 1000)}
-          next={e.regen > 60 ? mmss((e.regen - 10) * 1000) : null}
-          pct={(180 - e.regen) / 120}
-          top={t('ui.regen_top')}
-          cost={rgCost}
-          coins={e.coins}
-          fmt={n}
-          onUp={() => void upgrade('regen')}
-        />
-      </div>
-      <Effects />
-      {info}
+    <div className={s.ups} aria-label={t('ui.upgrades')} role="group">
+      <Up
+        icon="/img/objets/recharge.png"
+        title={t('ui.up_stock')}
+        now={String(e.max)}
+        next={e.max < TOP_MAX ? String(nextMax(e.max)) : null}
+        pct={(e.max - 5) / (TOP_MAX - 5)}
+        top={t('ui.stock_top', { n: TOP_MAX })}
+        cost={upCost}
+        coins={e.coins}
+        fmt={n}
+        onUp={() => void upgrade('stock')}
+      />
+      <Up
+        icon="/img/objets/sablier.png"
+        title={t('ui.up_regen')}
+        now={mmss(e.regen * 1000)}
+        next={e.regen > 60 ? mmss((e.regen - 10) * 1000) : null}
+        pct={(180 - e.regen) / 120}
+        top={t('ui.regen_top')}
+        cost={rgCost}
+        coins={e.coins}
+        fmt={n}
+        onUp={() => void upgrade('regen')}
+      />
     </div>
   );
 }

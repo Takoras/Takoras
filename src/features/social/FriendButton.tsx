@@ -7,7 +7,6 @@ import { useT } from '@/i18n/useT';
 import type { Key } from '@/i18n';
 import { Button } from '@/ui/Button';
 import { toast } from '@/ui/toast';
-import { openChat } from './chatStore';
 
 type Status = { id: string; status: string | null; incoming: boolean } | null;
 
@@ -49,9 +48,8 @@ export function FriendButton({ pseudo }: { pseudo: string }) {
   if (st === 'sent') return <Button disabled>{t('ui.fr_sent')}</Button>;
   if (st === 'chat')
     return (
-      <Button variant="primary" onClick={() => openChat(s.id)}>
-        {t('ui.fr_chat')}
-      </Button>
+      // le chat est retiré : on montre juste que vous êtes amis
+      <Button disabled>✓ Ami</Button>
     );
   if (st === 'accept')
     return (

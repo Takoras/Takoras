@@ -66,6 +66,13 @@ export default function Pass() {
     const el = list.current?.querySelector<HTMLElement>('[aria-current]');
     if (el && list.current) list.current.scrollLeft = el.offsetLeft - list.current.clientWidth / 2;
   }, [tier, tab, d]);
+  // téléphone : la page du passe ne défile pas, on fait juste glisser la piste
+  useEffect(() => {
+    const h = document.documentElement;
+    if (!h.classList.contains('phone')) return;
+    h.classList.add('lockScroll');
+    return () => h.classList.remove('lockScroll');
+  }, []);
   if (!user) return <NeedLogin title={t('ui.bp_title')} />;
   if (!d)
     return (

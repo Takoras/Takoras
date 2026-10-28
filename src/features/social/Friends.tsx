@@ -86,10 +86,10 @@ export default function Friends() {
   };
   const card = (f: Friend, actions: ReactNode) => (
     <li key={f.id} className={`${s.frCard} ${f.online ? s.isOn : ''}`}>
-      <span className={s.frAva}>
+      <Link className={s.frAva} to={`/profil/${encodeURIComponent(f.pseudo)}`} tabIndex={-1} aria-hidden>
         <Avatar pseudo={f.pseudo} avatar={f.avatar} size={56} />
-        {f.status === 'accepted' ? <i className={s.dotOn} aria-hidden /> : null}
-      </span>
+        {f.status === 'accepted' ? <i className={s.dotOn} /> : null}
+      </Link>
       <div className={s.who}>
         <Link to={`/profil/${encodeURIComponent(f.pseudo)}`}>{f.pseudo}</Link>
         <small className="muted">

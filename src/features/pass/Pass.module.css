@@ -617,3 +617,9 @@ button.tile:focus-visible {
     grid-row: 2;
   }
 }
+
+:global(html.lockScroll),
+:global(html.lockScroll body) {
+  overflow: hidden;
+  height: 100%;
+}

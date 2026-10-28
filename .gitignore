@@ -8,3 +8,4 @@ tsconfig.tsbuildinfo
 
 # sons générés par sound-lab/gen.mjs (on garde le script, pas les WAV)
 /sound-lab/out/
+shots/

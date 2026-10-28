@@ -124,9 +124,13 @@
 }
 .foot {
   display: flex;
+  flex-wrap: wrap; /* prix long : le bouton passe dessous au lieu de déborder de la carte */
   align-items: center;
   justify-content: space-between;
   gap: var(--s-2);
+}
+.foot > :last-child {
+  margin-left: auto;
 }
 .meta {
   display: grid;
