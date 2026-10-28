@@ -3,7 +3,7 @@ import { lazy, Suspense, useEffect, useRef } from 'react';
 import { sfx } from '@/engines/sound.js';
 import { useT } from '@/i18n/useT';
 import { lsGet, lsSet } from '../social/social';
-import { openFeedback, PN_KEY, TUTO_KEY, useBeta, useBetaOpen, usePatchnotes } from './store';
+import { PN_KEY, TUTO_KEY, useBeta, useBetaOpen, usePatchnotes } from './store';
 import s from './Beta.module.css';
 
 // Bêta : patch notes (fenêtre + popup des nouveautés), menu des testeurs choisis par l'admin,
@@ -39,7 +39,6 @@ export function BetaLayer() {
   }, [notes.data]);
   return (
     <>
-      <FeedbackFab />
       {win ? (
         <Suspense fallback={null}>
           <BetaWindow win={win} />
@@ -56,22 +55,4 @@ export function BetaChip() {
   if (!open.data) return null;
   // simple étiquette : plus de menu bêta
   return <span className={s.chip}>{t('app.beta')}</span>;
-}
-
-// Bouton flottant en bas à gauche (sur téléphone, il est dans le menu Plus)
-function FeedbackFab() {
-  const t = useT();
-  return (
-    <button
-      type="button"
-      className={s.fab}
-      onClick={() => {
-        sfx.click();
-        openFeedback();
-      }}
-    >
-      <span aria-hidden></span>
-      <span className={s.fabTxt}>{t('ui.fb_btn')}</span>
-    </button>
-  );
 }

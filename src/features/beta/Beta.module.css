@@ -189,7 +189,7 @@
   image-rendering: pixelated;
   position: fixed;
   z-index: 44;
-  left: var(--gutter);
+  left: calc(var(--rail) + var(--s-3));
   bottom: var(--s-4);
   display: flex;
   align-items: center;

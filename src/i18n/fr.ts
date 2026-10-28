@@ -87,6 +87,8 @@ export const fr = {
     pick_title: 'Vitrine · case {n}',
     pick_remove: 'Vider cette case',
     pick_put: 'Mettre en vitrine',
+    rotate_title: 'Tourne ton téléphone',
+    rotate_txt: 'Takoras se joue à l’horizontale.',
     none: 'Aucune',
     no_banner_owned: 'Tu n’as pas encore de bannière. Elles arriveront bientôt en boutique.',
     pp_soon: 'Les photos de profil arrivent bientôt.',

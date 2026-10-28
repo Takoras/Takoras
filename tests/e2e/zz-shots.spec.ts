@@ -10,7 +10,7 @@ for (const p of ['/', '/inventaire', '/combat', '/profil', '/boutique', '/passe'
     await page.goto(p);
     await page.waitForTimeout(1500);
     const name = `${OUT}/${info.project.name}${p.replace(/\//g, '_') === '_' ? '_home' : p.replace(/\//g, '_')}`;
-    await page.screenshot({ path: `${name}.png`, fullPage: true });
+    await page.screenshot({ path: `${name}.png`, fullPage: !process.env.VIEW });
     if (p === '/inventaire') {
       await page.locator('ul li[data-key] button').first().click();
       await page.waitForTimeout(800);

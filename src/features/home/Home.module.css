@@ -534,3 +534,22 @@
     inset: -28%;
   }
 }
+
+/* Téléphone à l'horizontale (écran bas) : le jeton à gauche en plus petit, tout le reste à droite */
+@media (max-height: 520px) and (min-width: 600px) {
+  .stage {
+    grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+    grid-template-areas: 'center right' 'center left';
+    align-items: start;
+  }
+  .coinWrap {
+    width: 150px;
+  }
+  .title {
+    font-size: 2rem;
+  }
+  .center {
+    padding-top: 0;
+    gap: var(--s-2);
+  }
+}

@@ -86,11 +86,12 @@ export function Tour({ onDone }: { onDone: () => void }) {
   const pad = 10;
   // la bulle se met sous la zone, ou au-dessus si elle est trop bas
   const below = !box || box.bottom + 220 < innerHeight;
+  // toujours dans l'écran : sous la zone, sinon au-dessus, sinon en bas de l'écran (zone très haute)
+  const want = box ? (below ? box.bottom + pad + 14 : box.top - pad - 14 - 210) : 0;
   const bubble = box
     ? {
         left: Math.max(16, Math.min(innerWidth - 336, box.left + box.width / 2 - 160)),
-        top: below ? box.bottom + pad + 14 : undefined,
-        bottom: below ? undefined : innerHeight - box.top + pad + 14,
+        top: Math.max(16, Math.min(innerHeight - 230, want)),
       }
     : { left: innerWidth / 2 - 160, top: innerHeight / 2 - 80 };
   return (

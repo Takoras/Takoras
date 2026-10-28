@@ -121,14 +121,9 @@
   --glow: 139, 92, 246;
 
   /* Mobile : hauteur de la barre d'onglets et du clavier (mise à jour par JS) */
-  --tabh: 0px;
+  --tabh: 0px; /* plus de barre d'onglets en bas : la navigation est dans la barre latérale */
+  --rail: 104px; /* largeur de la barre latérale */
   --kb: 0px;
-}
-
-@media (max-width: 759px) {
-  :root {
-    --tabh: 64px;
-  }
 }
 
 @media (prefers-reduced-motion: reduce) {

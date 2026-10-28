@@ -259,11 +259,16 @@
 
 /* Annonces */
 .annBar {
+  /* bandeau au-dessus de tout, à droite de la barre latérale (le bouton fermer reste cliquable) */
+  position: sticky;
+  top: 0;
+  z-index: 45;
+  margin-left: var(--rail);
   display: flex;
   align-items: center;
   gap: var(--s-3);
   padding: var(--s-2) var(--gutter);
-  background: rgb(249 115 22 / 12%);
+  background: #2a1c1c;
   border-bottom: 1px solid var(--line);
   font-size: var(--fs-sm);
 }

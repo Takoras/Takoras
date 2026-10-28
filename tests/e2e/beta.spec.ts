@@ -15,7 +15,7 @@ test('visite guidée de la première visite : suivant, passer (une seule fois)',
   expect(await page.evaluate(() => localStorage.getItem('takoras-tuto-done'))).toBe('1');
 });
 
-test('patch notes : popup de la nouveauté, puis toutes les notes via le pied de page', async ({ page, isMobile }) => {
+test('patch notes : popup de la nouveauté, puis toutes les notes via le menu « … »', async ({ page, isMobile }) => {
   await fakeSupabase(page, {}, [], { pnSeen: 11 });
   await page.goto('/');
   const d = page.getByRole('dialog');
@@ -28,7 +28,12 @@ test('patch notes : popup de la nouveauté, puis toutes les notes via le pied de
   await page.waitForTimeout(2000);
   await expect(page.getByRole('dialog')).toBeHidden(); // déjà vue
   void isMobile;
-  await page.getByRole('contentinfo').getByRole('button', { name: 'Nouveautés' }).click();
+  // plus de pied de page : les nouveautés sont dans le menu « … » de la barre latérale
+  await page.getByRole('button', { name: 'Plus', exact: true }).click();
+  await page
+    .getByRole('dialog')
+    .getByRole('button', { name: /Patch notes|Nouveautés/ })
+    .click();
   await expect(page.getByRole('dialog').getByText('Version 0.12')).toBeVisible();
 });
 

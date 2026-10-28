@@ -88,6 +88,8 @@ export const en: Dict = {
     pick_title: 'Showcase · slot {n}',
     pick_remove: 'Empty this slot',
     pick_put: 'Put in showcase',
+    rotate_title: 'Turn your phone',
+    rotate_txt: 'Takoras is played in landscape.',
     none: 'None',
     no_banner_owned: 'You don’t have a banner yet. They’ll be in the shop soon.',
     pp_soon: 'Profile pictures are coming soon.',

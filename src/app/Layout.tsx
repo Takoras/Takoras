@@ -11,6 +11,7 @@ import { Modal } from '@/ui/Modal';
 import { Announcements, openAnnHistory, unreadAnn, useAnn } from '@/features/social/Announcements';
 import { SocialLayer } from '@/features/social/SocialLayer';
 import { BetaChip, BetaLayer, openPatchnotes } from '@/features/beta/Beta';
+import { openFeedback } from '@/features/beta/store';
 import { badgeOf, useFriends } from '@/features/social/social';
 import { publicApi } from '@/api';
 import { useOnlinePresence } from '@/lib/online';
@@ -89,67 +90,74 @@ export function Layout() {
   const fr = useFriends();
   const frN = user ? badgeOf(fr.data).req + badgeOf(fr.data).unread : 0;
   const annN = useAnn(unreadAnn);
-  const inMore = !NAV.some((n) => n.tab && (n.to === '/' ? pathname === '/' : pathname.startsWith(n.to)));
 
   return (
     <>
       <a className={s.skip} href="#main">
         {t('app.skip')}
       </a>
-      <header className={s.top}>
-        <NavLink to="/" className={s.brand} aria-label="Takoras">
-          <img className="px still" src="/img/logo.png" alt="" width={32} height={32} />
-          <span>Takoras</span>
+      {/* Barre latérale façon jeu : logo, grosses icônes des pages, et en bas annonces, réglages, plus, profil */}
+      <nav className={s.rail} aria-label={t('app.main_nav')}>
+        <NavLink to="/" className={s.railBrand} aria-label="Takoras">
+          <img className="px still" src="/img/logo.png" alt="" width={44} height={44} />
         </NavLink>
-        <BetaChip />
-        <nav className={s.links} aria-label={t('app.main_nav')}>
+        <div className={s.railNav}>
           {NAV.map((n) => (
             <NavLink
               key={n.to}
               to={n.to}
               end={n.to === '/'}
-              className={({ isActive }) => (isActive ? s.on : undefined)}
+              className={({ isActive }) => `${s.railItem} ${isActive ? s.on : ''}`}
             >
-              {t(n.key)}
+              <span className={s.railIco}>
+                <Icon name={n.icon} size={24} />
+              </span>
+              <span className={s.railTxt}>{t(n.key)}</span>
               {n.to === '/amis' ? <Badge n={frN} /> : null}
             </NavLink>
           ))}
-        </nav>
-        <div className={s.tools}>
+        </div>
+        <div className={s.railBottom}>
           {me.data?.admin ? (
-            <NavLink to="/admin" className={s.icon} aria-label="Admin">
+            <NavLink to="/admin" className={s.railMini} aria-label="Admin">
               <Icon name="shield" />
             </NavLink>
           ) : null}
-          <button
-            type="button"
-            className={`${s.icon} ${s.bell}`}
-            onClick={openAnnHistory}
-            aria-label={t('ui.ann_hist')}
-          >
+          <button type="button" className={s.railMini} onClick={openAnnHistory} aria-label={t('ui.ann_hist')}>
             <Icon name="bell" />
             <Badge n={annN} />
           </button>
-          <button type="button" className={s.icon} onClick={() => openUI('settings')} aria-label={t('ui.settings')}>
+          <button type="button" className={s.railMini} onClick={openFeedback} aria-label={t('ui.fb_btn')}>
+            <Icon name="bulb" />
+          </button>
+          <button type="button" className={s.railMini} onClick={() => openUI('settings')} aria-label={t('ui.settings')}>
             <Icon name="gear" />
           </button>
-          {user ? (
-            <>
-              <span className={s.bal} aria-label={t('app.balance')}>
-                <img className="px" src="/img/piece.png" alt="" width={18} height={18} />
-                {me.data ? me.data.coins.toLocaleString(locale()) : me.isError ? '—' : '…'}
-              </span>
-              <NavLink to="/profil" className={s.me} aria-label={t('app.account')}>
-                <Avatar pseudo={me.data?.pseudo ?? '?'} size={32} />
-              </NavLink>
-            </>
-          ) : (
-            <Button variant="primary" size="sm" onClick={() => openUI('account')}>
-              {t('ui.login')}
-            </Button>
-          )}
+          <button type="button" className={s.railMini} onClick={() => openUI('more')} aria-label={t('ui.more')}>
+            <Icon name="more" />
+          </button>
         </div>
-      </header>
+      </nav>
+
+      {/* en haut à droite : bêta, pièces, profil (pas de grande barre) */}
+      <div className={s.hud}>
+        <BetaChip />
+        {user ? (
+          <>
+            <span className={s.bal} aria-label={t('app.balance')}>
+              <img className="px" src="/img/piece.png" alt="" width={20} height={20} />
+              {me.data ? me.data.coins.toLocaleString(locale()) : me.isError ? '—' : '…'}
+            </span>
+            <NavLink to="/profil" className={s.me} aria-label={t('app.account')}>
+              <Avatar pseudo={me.data?.pseudo ?? '?'} size={40} />
+            </NavLink>
+          </>
+        ) : (
+          <Button variant="primary" size="sm" onClick={() => openUI('account')}>
+            {t('ui.login')}
+          </Button>
+        )}
+      </div>
 
       <Announcements />
       {/* fond vivant : poussière de pixels qui dérive doucement derrière tout le site */}
@@ -162,71 +170,18 @@ export function Layout() {
         <Outlet />
       </main>
 
-      <footer className={s.foot}>
-        <div className={s.footIn}>
-          <div className={s.footBrand}>
-            <img className="px still" src="/img/logo.png" alt="" width={40} height={40} />
-            <b>Takoras</b>
-            <small>{t('ui.foot_tag')}</small>
-          </div>
-          <nav className={s.footCol} aria-label={t('ui.foot_play')}>
-            <b>{t('ui.foot_play')}</b>
-            <NavLink to="/">{t('ui.nav_home')}</NavLink>
-            <NavLink to="/inventaire">{t('ui.nav_inv')}</NavLink>
-            <NavLink to="/combat">{t('ui.nav_combat')}</NavLink>
-            <NavLink to="/passe">{t('ui.bp_title')}</NavLink>
-          </nav>
-          <nav className={s.footCol} aria-label={t('ui.foot_more')}>
-            <b>{t('ui.foot_more')}</b>
-            <NavLink to="/boutique">{t('ui.nav_shop')}</NavLink>
-            <NavLink to="/amis">{t('ui.nav_friends')}</NavLink>
-          </nav>
-          <div className={s.footCol}>
-            <b>{t('ui.foot_beta')}</b>
-            <button type="button" onClick={openPatchnotes}>
-              {t('ui.foot_news')}
-            </button>
-            <NavLink to="/profil">{t('app.account')}</NavLink>
-            <NavLink to="/confidentialite">{t('ui.privacy')}</NavLink>
-          </div>
-        </div>
-        <small className={s.copy}>
-          © {new Date().getFullYear()} Takoras · {t('ui.foot_art')}
-        </small>
-      </footer>
-
-      <nav className={s.tabbar} aria-label={t('app.main_nav')}>
-        {NAV.filter((n) => n.tab).map((n) => (
-          <NavLink key={n.to} to={n.to} end={n.to === '/'} className={({ isActive }) => (isActive ? s.on : undefined)}>
-            <Icon name={n.icon} size={22} />
-            <span>{t(n.key)}</span>
-            {n.to === '/amis' ? <Badge n={frN} /> : null}
-          </NavLink>
-        ))}
-        <button
-          type="button"
-          className={inMore ? s.on : undefined}
-          onClick={() => openUI('more')}
-          aria-haspopup="dialog"
-        >
-          <Icon name="more" size={22} />
-          <span>{t('ui.more')}</span>
-          <Badge n={frN} />
-        </button>
-      </nav>
+      {/* téléphone tenu debout : le jeu se joue à l'horizontale */}
+      <div className={s.rotate} role="alert">
+        <span className={s.rotatePhone} aria-hidden />
+        <b>{t('ui.rotate_title')}</b>
+        <small>{t('ui.rotate_txt')}</small>
+      </div>
 
       <SocialLayer />
       <BetaLayer />
 
       <Modal open={more} onClose={() => openUI('more', false)} title={t('ui.more')}>
         <div className={s.sheet}>
-          {NAV.filter((n) => !n.tab).map((n) => (
-            <NavLink key={n.to} to={n.to}>
-              <Icon name={n.icon} />
-              {t(n.key)}
-              {n.to === '/amis' ? <Badge n={frN} /> : null}
-            </NavLink>
-          ))}
           <button
             type="button"
             onClick={() => {
@@ -237,6 +192,14 @@ export function Layout() {
             <Icon name="scroll" />
             {t('ui.pn_title')}
           </button>
+          <NavLink to="/profil">
+            <Icon name="user" />
+            {t('app.account')}
+          </NavLink>
+          <NavLink to="/confidentialite">
+            <Icon name="help" />
+            {t('ui.privacy')}
+          </NavLink>
           {me.data?.admin ? (
             <NavLink to="/admin">
               <Icon name="shield" />

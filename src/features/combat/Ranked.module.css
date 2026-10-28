@@ -464,3 +464,20 @@
   color: var(--muted);
   letter-spacing: 0.2em;
 }
+
+/* téléphone à l'horizontale (écran bas) : le rang reste grand mais tient avec les boutons */
+@media (max-height: 520px) {
+  .heroBadge {
+    width: 130px;
+    height: 130px;
+  }
+  .heroBadge > * {
+    scale: 0.65;
+  }
+  .heroName {
+    font-size: 2.8rem;
+  }
+  .hero {
+    padding: 0;
+  }
+}

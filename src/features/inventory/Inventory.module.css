@@ -259,36 +259,12 @@
   border-radius: 16px;
   transition: transform var(--t-fast);
 }
-.card::after {
-  content: '';
-  position: absolute;
-  left: 50%;
-  top: calc(var(--s-5) + 70px);
-  width: 76px;
-  height: 14px;
-  translate: -50% 0;
-  border-radius: 50%;
-  background: radial-gradient(
-    closest-side,
-    rgba(var(--g), calc(0.25 + 0.35 * var(--ga, 0))),
-    rgb(0 0 0 / 35%) 60%,
-    transparent
-  );
-  pointer-events: none;
-  transition:
-    scale var(--t-fast),
-    opacity var(--t-fast);
-}
 .card:hover {
   transform: translateY(-4px);
 }
 .card:hover .cardBtn img {
   scale: 1.12;
   --df: drop-shadow(0 0 4px rgba(var(--g), 0.8));
-}
-.card:hover::after {
-  scale: 0.8;
-  opacity: 0.7;
 }
 .cardBtn {
   position: relative;
