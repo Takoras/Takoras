@@ -329,6 +329,9 @@ li[aria-current] .num {
   overflow: hidden;
   text-overflow: ellipsis;
 }
+.lbl::before {
+  content: attr(data-l);
+}
 .qty {
   position: absolute;
   bottom: 8px;

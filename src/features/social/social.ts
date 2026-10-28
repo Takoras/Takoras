@@ -12,6 +12,10 @@ export type Friend = {
   incoming: boolean;
   last_at: string | null;
   unread: number;
+  avatar?: string | null;
+  online?: boolean;
+  elo?: number | null;
+  collection?: number;
 };
 export function useFriends() {
   const uid = useAuth((s) => s.user?.id);

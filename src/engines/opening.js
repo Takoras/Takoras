@@ -663,7 +663,11 @@ async function quitAll() {
 $('op-skip')?.addEventListener('click', e => { e.stopPropagation(); quitAll(); });
 // Mode turbo : environ 0,25 s par jeton, lignes de vitesse, compteur de combo, notes qui montent
 const AUTO_STEP = 200;
+let autoWait = 0;
 function autoRun() {
+  // auto lancée pendant que l'écran d'ouverture arrive : on réessaie un peu plus tard (sinon elle restait bloquée)
+  if (sess?.auto && (!run || !opening.classList.contains('on')) && autoWait < 40) { autoWait++; return setTimeout(autoRun, 100); }
+  autoWait = 0;
   if (!sess?.auto || !run || !opening.classList.contains('on')) return turbo(false);
   if (sess.recap) { sess.auto = false; turbo(false); return renderAuto(); }
   if (!run.done) {

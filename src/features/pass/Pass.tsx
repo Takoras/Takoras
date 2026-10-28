@@ -127,7 +127,8 @@ export default function Pass() {
       <>
         <img className={`px ${isCosmetic(r) && r.item?.startsWith('b_') ? s.wide : ''}`} src={icon(r)} alt="" />
         {qty ? <b className={s.qty}>{qty}</b> : null}
-        <small className={s.lbl}>{short}</small>
+        {/* nom affiché en CSS (attr) : ne gêne pas le nom lu par les lecteurs d'écran */}
+        <small className={s.lbl} data-l={short} aria-hidden />
         {got ? (
           <i className={s.check} aria-hidden>
             ✓
