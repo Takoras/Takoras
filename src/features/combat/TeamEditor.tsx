@@ -1,8 +1,7 @@
 import { useEffect, useRef, useState, type CSSProperties } from 'react';
 import { useQueryClient } from '@tanstack/react-query';
 import { combatApi, errorText } from '@/api';
-import { glowVars, jetonOf, TEMPLATE, texOf, vImg } from '@/data/jetons';
-import { powerInfo, RING_MAX, ringStats } from '@/data/kit';
+import { glowVars, jetonOf, MYSTERE, SERIES, TEMPLATE, texOf, vImg } from '@/data/jetons';
 import { RCFG } from '@/engines/ring-config.js';
 import { sfx } from '@/engines/sound.js';
 import { useAuth } from '@/lib/auth';
@@ -15,6 +14,7 @@ import { toast } from '@/ui/toast';
 import { lvlOf, seriesList, type Group, type InvData } from '../inventory/inv';
 import { baseVariant, ownedTokens, ownKey, VRANK, type Owned, type Team } from './team';
 import { TokenSheet } from './TokenSheet';
+import iv from '../inventory/Inventory.module.css';
 import s from './TeamEditor.module.css';
 
 // Choisir son équipe, en simple :
@@ -51,11 +51,12 @@ export function TeamEditor({
   const [target, setTarget] = useState<number | null>(focus ?? null);
   const slotsRef = useRef<HTMLUListElement>(null);
   const inTeam = new Set(team.filter(Boolean).map((u) => ownKey(u?.serie ?? '', u?.name ?? '')));
-  const vis = all.filter((u) => u.serie === serie).sort((a, b) => b.odds - a.odds);
+  // toute la série, du plus commun au plus rare ; ceux qu'on n'a pas sont des « ? »
+  const vis = [...(SERIES[serie] ?? [])].sort((a, b) => a.odds - b.odds);
   const lvl = (o: { serie: string; name: string }) => lvlOf(levels, o.serie, o.name);
   const vName = (v: string) => (v ? t(`ui.v_${v as 'gold'}`) : t('arena.normal'));
 
-  const toggle = (o: Owned) => {
+  const toggle = (o: Owned, pick?: string) => {
     const had = team.findIndex((u) => u && ownKey(u.serie, u.name) === o.k);
     if (had >= 0) {
       sfx.click();
@@ -67,7 +68,7 @@ export function TeamEditor({
       return toast(t('arena.teamFull'), true);
     }
     // la meilleure mutation possédée par défaut
-    const v = Object.keys(o.vars).sort((a, b) => (VRANK[b] ?? 0) - (VRANK[a] ?? 0))[0] ?? baseVariant(o);
+    const v = pick ?? Object.keys(o.vars).sort((a, b) => (VRANK[b] ?? 0) - (VRANK[a] ?? 0))[0] ?? baseVariant(o);
     sfx.upgrade();
     setTarget(null);
     setTeam(
@@ -196,42 +197,32 @@ export function TeamEditor({
       </div>
 
       {vis.length ? (
-        <ul className={s.list}>
-          {vis.map((o) => {
-            const j = jetonOf(o.name, o.serie),
-              k = powerInfo(o.name, lang),
-              on = inTeam.has(o.k),
-              rs = ringStats(o.name, lvl(o), baseVariant(o));
-            // carte : le jeton à gauche, ses 3 stats en barres à droite, une mini description dessous ; toucher = la grande fiche
-            return (
-              <li key={o.k} className={`${s.card} ${on ? s.on : ''}`} style={glowVars(j) as CSSProperties}>
-                <button type="button" className={s.cardBtn} onClick={() => setInfo(o)} aria-label={jn(o.name)}>
-                  <span className={s.cardTop}>
-                    <img className="px" src={texOf(j)} alt="" />
-                    <span className={s.bars}>
-                      {(
-                        [
-                          ['mass', rs.mass, RING_MAX.mass],
-                          ['power', rs.power, RING_MAX.power],
-                          ['size', rs.r, RING_MAX.r],
-                        ] as const
-                      ).map(([key, v, max]) => (
-                        <i key={key} className={s[`b_${key}`]}>
-                          <b style={{ width: `${Math.min(100, (v / max) * 100)}%` }} />
-                        </i>
-                      ))}
-                    </span>
+        <ul className={`${iv.grid} ${s.list}`}>
+          {vis.map((j) => {
+            const o = by.get(ownKey(serie, j.name)),
+              on = !!o && inTeam.has(o.k);
+            // même style que le bestiaire : le jeton posé librement ; pas possédé = « ? » sans rien d'autre
+            if (!o)
+              return (
+                <li key={j.name} className={`${iv.card} ${iv.unk}`} style={{ '--g': '113, 113, 122' } as CSSProperties}>
+                  <span className={iv.cardBtn} aria-label="?">
+                    <img className="px" src={MYSTERE} alt="" />
+                    <b>???</b>
                   </span>
-                  <b className={s.cardName}>
-                    {jn(o.name)}
+                </li>
+              );
+            return (
+              <li key={j.name} className={`${iv.card} ${on ? s.on : ''}`} style={glowVars(j) as CSSProperties}>
+                <button type="button" className={iv.cardBtn} onClick={() => setInfo(o)} aria-label={jn(o.name)}>
+                  {on ? <span className={s.inTeam}>{t('ui.in_deck')}</span> : null}
+                  <img className="px" src={texOf(j)} alt="" />
+                  <b>{jn(o.name)}</b>
+                  <small className={s.vrow}>
                     {Object.keys(o.vars)
                       .filter(Boolean)
                       .map((v) => (
                         <MutationStamp key={v} v={v} size="xs" />
                       ))}
-                  </b>
-                  <small className={s.mini} style={{ '--c': k.col } as CSSProperties}>
-                    <b>{k.name}</b> · {k.desc}
                   </small>
                 </button>
               </li>
@@ -242,22 +233,79 @@ export function TeamEditor({
         <p className="muted">{t('arena.none')}</p>
       )}
       {info ? (
-        <TokenSheet
-          name={info.name}
-          serie={info.serie}
-          variant={baseVariant(info)}
+        <PickSheet
+          o={info}
           lvl={lvl(info)}
+          inTeam={inTeam.has(info.k)}
           onClose={() => setInfo(null)}
-          action={{
-            label: inTeam.has(info.k) ? t('arena.remove') : t('arena.add'),
-            primary: !inTeam.has(info.k),
-            onClick: () => {
-              toggle(info);
-              setInfo(null);
-            },
+          onPick={(v) => {
+            if (inTeam.has(info.k)) toggle(info);
+            else toggle(info, v);
+            setInfo(null);
           }}
         />
       ) : null}
     </Modal>
+  );
+}
+
+// Fiche d'un jeton dans l'éditeur : on choisit la mutation (les 3 tampons, ceux qu'on n'a pas sont grisés), puis « Ajouter »
+function PickSheet({
+  o,
+  lvl,
+  inTeam,
+  onClose,
+  onPick,
+}: {
+  o: Owned;
+  lvl: number;
+  inTeam: boolean;
+  onClose: () => void;
+  onPick: (v: string) => void;
+}) {
+  const t = useT();
+  const best = Object.keys(o.vars).sort((a, b) => (VRANK[b] ?? 0) - (VRANK[a] ?? 0))[0] ?? baseVariant(o);
+  const [v, setV] = useState(best);
+  const vName = (x: string) => (x ? t(`ui.v_${x as 'gold'}`) : t('arena.normal'));
+  return (
+    <TokenSheet
+      name={o.name}
+      serie={o.serie}
+      variant={v}
+      lvl={lvl}
+      onClose={onClose}
+      extra={
+        inTeam ? null : (
+          <div className={s.pickMuts} role="radiogroup" aria-label={t('arena.version')}>
+            {['', 'gold', 'celeste', 'ombre'].map((x) => {
+              const has = x in o.vars;
+              return (
+                <button
+                  key={x || 'none'}
+                  type="button"
+                  role="radio"
+                  aria-checked={v === x}
+                  disabled={!has}
+                  title={vName(x)}
+                  aria-label={vName(x)}
+                  onClick={() => {
+                    sfx.click();
+                    setV(x);
+                  }}
+                >
+                  {x ? <MutationStamp v={x} size="md" /> : <i className={s.plain} />}
+                  <small>{vName(x)}</small>
+                </button>
+              );
+            })}
+          </div>
+        )
+      }
+      action={{
+        label: inTeam ? t('arena.remove') : t('arena.add'),
+        primary: !inTeam,
+        onClick: () => onPick(v),
+      }}
+    />
   );
 }

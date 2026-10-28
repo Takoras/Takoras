@@ -13,6 +13,9 @@ test('combat : monter son équipe (ajouter, version, enregistrer, plus de budget
   await d.getByRole('button', { name: 'Mobu', exact: true }).click();
   const sheet = page.getByRole('dialog', { name: 'Mobu' });
   await expect(sheet.locator('video')).toHaveCount(1);
+  // on choisit la mutation dans la fiche (Doré par défaut, la meilleure qu'on a ; celles qu'on n'a pas sont grisées)
+  await expect(sheet.getByRole('radio', { name: 'Doré' })).toHaveAttribute('aria-checked', 'true');
+  await expect(sheet.getByRole('radio', { name: 'Ombre' })).toBeDisabled();
   await sheet.getByRole('button', { name: 'Ajouter à l’équipe' }).click();
   // plus de « + » sur les cartes : jeton → fiche → « Ajouter à l'équipe »
   for (const n of ['Pikko', 'Vyolis']) {
@@ -26,8 +29,8 @@ test('combat : monter son équipe (ajouter, version, enregistrer, plus de budget
   await expect(d.getByText('Doré +3 %')).toBeVisible();
   await d.getByRole('radio', { name: 'Normal' }).click();
   await expect(d.getByRole('radio', { name: 'Normal' })).toHaveAttribute('aria-checked', 'true');
-  // chaque jeton montre ce que fait son pouvoir
-  await expect(d.getByText('Gélatine').first()).toBeVisible();
+  // les jetons pas encore trouvés sont des « ? »
+  await expect(d.getByText('???').first()).toBeVisible();
   // plus de bouton « Valider » : l'équipe s'enregistre toute seule, on ferme simplement
   await expect.poll(() => calls.includes('set_deck')).toBe(true);
   await page.keyboard.press('Escape');

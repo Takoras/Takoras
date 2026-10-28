@@ -1,5 +1,5 @@
-import type { CSSProperties } from 'react';
-import { glowVars, jetonOf, texOf, tierCol, tierKey, vImg, vOdds, type Variant } from '@/data/jetons';
+import type { CSSProperties, ReactNode } from 'react';
+import { glowVars, jetonOf, texOf, vImg, vOdds, type Variant } from '@/data/jetons';
 import { powerInfo, RING_MAX, ringStats } from '@/data/kit';
 import { useJn } from '@/lib/names';
 import { locale, useSettings } from '@/lib/settings';
@@ -9,6 +9,7 @@ import { Modal } from '@/ui/Modal';
 import { MutationStamp } from '@/ui/MutationStamp';
 import { StatIcon } from '@/ui/StatIcon';
 import { PowerDemo } from './PowerDemo';
+import { STAT_COL } from '../inventory/JetonModal';
 import js from '../inventory/JetonSheet.module.css';
 import s from './TokenSheet.module.css';
 
@@ -21,6 +22,7 @@ export function TokenSheet({
   lvl,
   onClose,
   action,
+  extra,
 }: {
   name: string;
   serie?: string;
@@ -28,24 +30,24 @@ export function TokenSheet({
   lvl: number;
   onClose: () => void;
   action?: { label: string; onClick: () => void; primary?: boolean };
+  extra?: ReactNode;
 }) {
   const t = useT();
   const jn = useJn();
   const lang = useSettings((x) => x.lang);
   const j = jetonOf(name, serie),
-    tier = tierKey(j.odds),
     k = powerInfo(name, lang),
     rs = ringStats(name, lvl, variant);
   const stats = [
-    ['mass', t('ring.mass'), rs.mass, RING_MAX.mass, rs.mass.toFixed(2), '#60a5fa'],
-    ['power', t('ring.powerS'), rs.power, RING_MAX.power, String(Math.round(rs.power)), '#fb923c'],
-    ['size', t('ring.size'), rs.r, RING_MAX.r, String(rs.r), '#4ade80'],
+    ['mass', t('ring.mass'), rs.mass, RING_MAX.mass, rs.mass.toFixed(2), `rgb(${STAT_COL.mass})`],
+    ['power', t('ring.powerS'), rs.power, RING_MAX.power, String(Math.round(rs.power)), `rgb(${STAT_COL.power})`],
+    ['size', t('ring.size'), rs.r, RING_MAX.r, String(rs.r), `rgb(${STAT_COL.size})`],
   ] as const;
   return (
     <Modal open onClose={onClose} title={jn(name)} wide>
       <div className={s.sheet} style={{ ...glowVars(j, variant), '--ga': 1 } as CSSProperties}>
         <section className={s.stats} aria-label={t('ui.stats_note')}>
-          <span className={s.tier} style={{ color: tierCol(tier) }}>
+          <span className={s.tier}>
             1/{vOdds(j.odds, variant as Variant).toLocaleString(locale(lang))}
           </span>
           {stats.map(([key, label, v, max, txt, col]) => (
@@ -83,6 +85,7 @@ export function TokenSheet({
           <PowerDemo name={name} />
         </section>
       </div>
+      {extra}
       {action ? (
         <div className={s.foot}>
           <Button variant={action.primary ? 'primary' : 'ghost'} onClick={action.onClick}>
