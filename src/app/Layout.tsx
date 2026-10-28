@@ -3,7 +3,7 @@ import { NavLink, Outlet, useLocation, useNavigate } from 'react-router';
 import { useMe } from '@/api/queries';
 import { useResetWatch } from '@/lib/resetWatch';
 import { useAuth, signOut } from '@/lib/auth';
-import { locale } from '@/lib/settings';
+import { locale, reducedFx } from '@/lib/settings';
 import { useT } from '@/i18n/useT';
 import { Avatar } from '@/ui/Avatar';
 import { Button } from '@/ui/Button';
@@ -34,6 +34,29 @@ export function Layout() {
   const me = useMe();
   const more = useUI((x) => x.more);
   useResetWatch();
+  // Chaque page arrive en douceur : ses blocs montent et apparaissent l'un après l'autre
+  useEffect(() => {
+    if (reducedFx()) return;
+    const main = document.getElementById('main');
+    if (!main) return;
+    const blocks = [...main.children].flatMap((c) =>
+      c.children.length > 1 && c.children.length < 14 ? [...c.children] : [c],
+    );
+    blocks.slice(0, 14).forEach((el, i) =>
+      el.animate(
+        [
+          { opacity: 0, translate: '0 18px' },
+          { opacity: 1, translate: '0 0' },
+        ],
+        {
+          duration: 520,
+          delay: 40 + i * 55,
+          easing: 'cubic-bezier(.2, .9, .3, 1)',
+          fill: 'backwards',
+        },
+      ),
+    );
+  }, [pathname]);
   useEffect(() => openUI('more', false), [pathname]);
   const navigate = useNavigate();
   // Raccourci « debug » (taper le mot n'importe où) : ouvre le panel admin, pour les admins seulement
@@ -129,6 +152,12 @@ export function Layout() {
       </header>
 
       <Announcements />
+      {/* fond vivant : poussière de pixels qui dérive doucement derrière tout le site */}
+      <div className={s.ambient} aria-hidden>
+        {Array.from({ length: 18 }, (_, i) => (
+          <i key={i} />
+        ))}
+      </div>
       <main id="main" className={s.main} key={pathname}>
         <Outlet />
       </main>

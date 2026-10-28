@@ -132,6 +132,8 @@
 }
 
 .main {
+  position: relative;
+  z-index: 1;
   /* la page prend tout l'écran, avec un grand espace en haut (comme l'ancien Takoras) ;
      le haut de chaque page est toujours au même endroit, donc rien ne saute en changeant d'onglet */
   display: flex;
@@ -156,6 +158,8 @@
 
 /* Pied de page */
 .foot {
+  position: relative;
+  z-index: 1;
   border-top: 1px solid var(--line);
   background: var(--bg-raised);
   padding: var(--s-10) var(--gutter-page) calc(var(--tabh) + var(--s-8) + env(safe-area-inset-bottom));
@@ -319,4 +323,140 @@
   top: 2px;
   right: 0;
   margin: 0;
+}
+
+/* Fond vivant : petits pixels lumineux qui montent lentement (violet et orange), derrière tout le site */
+.ambient {
+  position: fixed;
+  inset: 0;
+  z-index: 0;
+  overflow: hidden;
+  pointer-events: none;
+}
+.ambient i {
+  position: absolute;
+  bottom: -10px;
+  width: 4px;
+  height: 4px;
+  background: #a78bfa;
+  box-shadow: 0 0 8px #8b5cf6;
+  opacity: 0;
+  animation: drift 18s linear infinite;
+}
+.ambient i:nth-child(3n) {
+  background: #fdba74;
+  box-shadow: 0 0 8px #f97316;
+}
+.ambient i:nth-child(2n) {
+  width: 3px;
+  height: 3px;
+}
+.ambient i:nth-child(1) {
+  left: 43%;
+  animation-delay: -3.8s;
+  animation-duration: 19s;
+}
+.ambient i:nth-child(2) {
+  left: 85%;
+  animation-delay: -1.2s;
+  animation-duration: 14.9s;
+}
+.ambient i:nth-child(3) {
+  left: 70%;
+  animation-delay: -2.4s;
+  animation-duration: 18.6s;
+}
+.ambient i:nth-child(4) {
+  left: 76%;
+  animation-delay: -1.4s;
+  animation-duration: 25.6s;
+}
+.ambient i:nth-child(5) {
+  left: 66%;
+  animation-delay: -5.4s;
+  animation-duration: 14.4s;
+}
+.ambient i:nth-child(6) {
+  left: 13%;
+  animation-delay: -11.1s;
+  animation-duration: 19.3s;
+}
+.ambient i:nth-child(7) {
+  left: 10%;
+  animation-delay: -6.1s;
+  animation-duration: 15.1s;
+}
+.ambient i:nth-child(8) {
+  left: 72%;
+  animation-delay: -10.8s;
+  animation-duration: 14.7s;
+}
+.ambient i:nth-child(9) {
+  left: 74%;
+  animation-delay: -3.1s;
+  animation-duration: 16.8s;
+}
+.ambient i:nth-child(10) {
+  left: 82%;
+  animation-delay: -16s;
+  animation-duration: 21.4s;
+}
+.ambient i:nth-child(11) {
+  left: 9%;
+  animation-delay: -14.7s;
+  animation-duration: 21.4s;
+}
+.ambient i:nth-child(12) {
+  left: 52%;
+  animation-delay: -1.2s;
+  animation-duration: 16.8s;
+}
+.ambient i:nth-child(13) {
+  left: 7%;
+  animation-delay: -14.2s;
+  animation-duration: 24.9s;
+}
+.ambient i:nth-child(14) {
+  left: 19%;
+  animation-delay: -7.4s;
+  animation-duration: 19.3s;
+}
+.ambient i:nth-child(15) {
+  left: 20%;
+  animation-delay: -13.8s;
+  animation-duration: 15.5s;
+}
+.ambient i:nth-child(16) {
+  left: 75%;
+  animation-delay: -7.8s;
+  animation-duration: 21.1s;
+}
+.ambient i:nth-child(17) {
+  left: 89%;
+  animation-delay: -4.6s;
+  animation-duration: 15.3s;
+}
+.ambient i:nth-child(18) {
+  left: 76%;
+  animation-delay: -14.6s;
+  animation-duration: 22.1s;
+}
+@keyframes drift {
+  0% {
+    opacity: 0;
+    transform: translate(0, 0);
+  }
+  10% {
+    opacity: 0.55;
+  }
+  90% {
+    opacity: 0.35;
+  }
+  100% {
+    opacity: 0;
+    transform: translate(40px, -105vh);
+  }
+}
+:global(html.reduce-fx) .ambient {
+  display: none;
 }

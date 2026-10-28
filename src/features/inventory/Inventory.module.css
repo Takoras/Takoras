@@ -102,23 +102,28 @@
 }
 
 /* Progression */
+/* compteurs ouverts (plus de grosses boîtes) : gros chiffre + barre épaisse qui brille */
 .progress {
   display: grid;
   grid-template-columns: 1fr 1fr;
-  gap: var(--s-3);
+  gap: var(--s-4) var(--s-8);
 }
 .progress > div {
-  padding: var(--s-3) var(--s-4);
-  border: 3px solid transparent;
-  border-radius: 16px;
-  border-image: url('/img/ui/box-9.png?v=3') 14 fill / 28px stretch;
-  background: linear-gradient(#39374f, #39374f) center / calc(100% - 16px) calc(100% - 16px) no-repeat;
-  image-rendering: pixelated;
   font-size: var(--fs-sm);
 }
 .progress b {
   font-family: var(--font-display);
-  font-size: var(--fs-lg);
+  font-size: var(--fs-2xl);
+}
+.progress .bar {
+  height: 10px;
+  border-radius: 0;
+  background: rgb(255 255 255 / 7%);
+  box-shadow: inset 0 2px 0 rgb(0 0 0 / 35%);
+}
+.progress .bar i {
+  border-radius: 0;
+  box-shadow: 0 0 12px var(--accent-hi);
 }
 .bar {
   display: block;
