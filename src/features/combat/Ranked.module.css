@@ -176,8 +176,9 @@
   font-weight: 900;
   padding: 2px 8px;
   border-radius: 6px;
-  background: var(--gold);
-  color: #2b1300;
+  background: #7d48d9;
+  color: #fff;
+  box-shadow: 0 2px 0 #4c1d95;
   letter-spacing: var(--tracking-caps);
 }
 .pips {

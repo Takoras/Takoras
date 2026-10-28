@@ -543,7 +543,7 @@ function reveal(restored, quiet = false) {
   // dopamine : le jeton claque, des rayons jaillissent derrière, étincelles, flash à sa couleur, secousse
   const lv = j.odds >= MYTHIC ? 2 : j.odds >= RARE ? 1.4 : j.odds >= 100 ? 1 : .6;
   pop(lv); rays(lv); tint(.25 + lv * .2, 300 + lv * 250);
-  burstAt(opCoin, j.glow, .8 + lv * .4); // particules dessinées à la main, à la couleur du jeton
+  if (lv >= 1) burstAt(opCoin, j.glow, .6 + lv * .2); // particules dessinées à la main, à la couleur du jeton (jetons pas communs)
   burst(Math.round(10 + lv * 12));
   shake(lv * .7);
   if (j.odds >= MYTHIC) {
@@ -614,6 +614,7 @@ function stopSpin() {
   opening.classList.remove('spinning');
 }
 function next() {
+  if (sess?.auto) return;
   if (!sess || sess.idx >= sess.total - 1 || !opening.classList.contains('revealed') || spinning()) return;
   sess.idx++;
   sfx.next();
@@ -647,7 +648,7 @@ async function quitAll() {
   sess.auto = false; turbo(false);
   if (run) { run.done = true; run.queue = []; clearInterval(run.hb); run.spinEnd = 0; }
   opening.classList.remove('spinning', 'hold');
-  const ids = (sess.ids || []).slice(sess.results.length); // le jeton en cours (pas encore révélé) compte comme pas ouvert
+  const ids = (sess.ids || []).slice(sess.results.length).filter((x) => x != null); // les doublons vendus d'office (limite 500) n'ont pas de ligne // le jeton en cours (pas encore révélé) compte comme pas ouvert
   let back = 0;
   if (ids.length) {
     const { data, error } = await sb.rpc('refund_pulls', { ids });
@@ -719,7 +720,7 @@ function turboHit(j, v = '') {
   opening.style.setProperty('--tier', hexRGB(j.glow));
   // effets légers à chaque jeton (ça défile vite) ; les gros effets seulement sur les jetons rares et tous les 10
   burst(j.odds >= 100 ? 6 : 3);
-  if (j.odds >= 400 || v) { rays(.5); tint(.25, 220); shake(.35); burstAt(opCoin, j.glow, .7); }
+  if (j.odds >= 400 || v) { rays(.5); tint(.25, 220); shake(.35); burstAt(opCoin, j.glow, .45); }
   else if (combo % 10 === 0) { rays(.7); shake(.4); }
 }
 $('op-auto')?.addEventListener('click', e => {
@@ -764,6 +765,7 @@ function addToHistory(j, variant = '', luck = +(sess?.lucks || [])[sess?.results
 }
 
 function tap() {
+  if (sess?.auto) return; // ouverture auto en cours : les clics ne doivent pas s'en mêler (ça la faisait dérailler)
   if (run?.done && opening.classList.contains('revealed') && spinning()) return stopSpin();
   // un par un : une fois le jeton révélé, toucher le jeton ouvre le pull suivant (il n'y a plus de bouton « Ouvrir encore »)
   if (run?.done && sess && sess.total === 1 && opening.classList.contains('revealed') && !spinning()) return openPulls(1);
@@ -790,6 +792,7 @@ opCoin.addEventListener('pointerdown', e => { e.preventDefault(); e.stopPropagat
 // un par un : une fois le jeton révélé, toucher n'importe où sur l'écran (hors boutons) ouvre le tirage suivant
 opening.addEventListener('pointerdown', e => {
   if (e.target.closest('button, a, input, select, .op-recap-view')) return;
+  if (sess?.auto) return;
   if (run?.done && opening.classList.contains('revealed') && spinning()) { e.preventDefault(); return stopSpin(); }
   if (run?.done && sess && sess.total === 1 && opening.classList.contains('revealed') && !spinning()) { e.preventDefault(); openPulls(1); }
 });

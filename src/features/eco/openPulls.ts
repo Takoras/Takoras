@@ -41,10 +41,15 @@ export async function openPulls(n: number | 'all') {
       results: string[];
       variants?: (string | null)[];
       lucks?: number[];
-      ids?: number[];
+      ids?: (number | null)[];
+      capped?: number;
+      capped_coins?: number;
     };
     qc.setQueryData(meKey(), data.state);
     buy(data.results.length, data.results, data.variants ?? null, data.lucks ?? null, data.ids ?? null);
+    // limite de 500 exemplaires par jeton : le surplus est vendu tout de suite
+    if (data.capped)
+      toast(`${data.capped} doublon${data.capped > 1 ? 's' : ''} au-delà de 500 vendu${data.capped > 1 ? 's' : ''} : +${data.capped_coins ?? 0} pièces`);
   } catch (err) {
     sfx.deny();
     toast(errorText(err, useSettings.getState().lang), true);

@@ -777,11 +777,11 @@
 .slot::before {
   content: '';
   position: absolute;
-  top: 50%;
+  top: 40%;
   left: 50%;
   width: 120px;
   height: 120px;
-  translate: -50% -72%;
+  translate: -50% -50%;
   border-radius: 50%;
   background: radial-gradient(closest-side, rgba(var(--g, 139, 92, 246), calc(0.5 * var(--ga, 0))), transparent);
   pointer-events: none;

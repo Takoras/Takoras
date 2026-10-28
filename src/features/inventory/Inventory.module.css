@@ -264,7 +264,6 @@
 }
 .card:hover .cardBtn img {
   scale: 1.12;
-  --df: drop-shadow(0 0 4px rgba(var(--g), 0.8));
 }
 .cardBtn {
   position: relative;

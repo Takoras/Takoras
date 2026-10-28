@@ -8,8 +8,6 @@ import {
   sellValue,
   SERIES,
   texOf,
-  tierCol,
-  tierKey,
   vImg,
   vOdds,
   glowVars,
@@ -428,7 +426,6 @@ function CardView({
   const { j, g } = c,
     n = g?.ids.length ?? 0,
     locked = !!g && !g.free.length;
-  const tier = tierKey(j.odds);
   // jamais trouvé : mystère total (fond gris neutre, pas de numéro, pas de rareté, pas de nom)
   const known = !!g || c.seen;
   const badge = g?.deck
@@ -462,7 +459,7 @@ function CardView({
         <b>{g || c.seen ? jn(j.name) : '???'}</b>
         {known ? (
           <small>
-            <span style={{ color: tierCol(tier) }}>1/{fmt(vOdds(j.odds, vtab))}</span>
+            <span>1/{fmt(vOdds(j.odds, vtab))}</span>
             {g ? ` · ${fmt(statsOf(j.name, j.odds, vtab, lvl).power)}` : ' · ×0'}
           </small>
         ) : (

@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { Link, Navigate } from 'react-router';
-import { useQuery } from '@tanstack/react-query';
+import { keepPreviousData, useQuery } from '@tanstack/react-query';
 import { publicApi } from '@/api';
 import { useMe } from '@/api/queries';
 import { locale, useSettings } from '@/lib/settings';
@@ -45,6 +45,7 @@ export function BoardSection({ kind: id, title }: { kind: 'pulls' | 'time'; titl
       return (await publicApi.leaderboard(id, since, 10)) as Row[];
     },
     refetchInterval: 120_000,
+    placeholderData: keepPreviousData, // changer de période ne vide pas la liste (plus de saut)
   });
   const fmt = (n: number) => Number(n).toLocaleString(locale(lang));
   const val = (r: Row) => {

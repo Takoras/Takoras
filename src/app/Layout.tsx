@@ -67,7 +67,7 @@ export function Layout() {
       if (!b || (b as HTMLButtonElement).disabled) return;
       pixelBurst(e.clientX, e.clientY, {
         kind: 3,
-        size: 90,
+        size: 52,
         color: b.getAttribute('data-variant') === 'gold' ? '#fdba74' : '#c4b5fd',
         ms: 340,
       });
@@ -216,22 +216,6 @@ export function Layout() {
             <Icon name="help" />
             {t('ui.privacy')}
           </NavLink>
-          {me.data?.admin ? (
-            <NavLink to="/admin">
-              <Icon name="shield" />
-              Admin
-            </NavLink>
-          ) : null}
-          <button
-            type="button"
-            onClick={() => {
-              openUI('more', false);
-              openUI('settings');
-            }}
-          >
-            <Icon name="gear" />
-            {t('ui.settings')}
-          </button>
           {user ? (
             <button type="button" onClick={() => void signOut()}>
               <Icon name="user" />

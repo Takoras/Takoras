@@ -148,6 +148,7 @@
 }
 
 .glare {
+  display: none; /* plus de petite lumière qui suit la souris (pas propre) */
   position: absolute;
   inset: 0;
   opacity: var(--gl);
