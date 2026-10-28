@@ -409,3 +409,14 @@
     height: 150px;
   }
 }
+
+/* vidéo d'exemple du pouvoir (éditeur d'équipe) */
+.demo {
+  width: 220px;
+  margin-top: var(--s-2);
+}
+@media (max-height: 720px) {
+  .demo {
+    width: 170px;
+  }
+}

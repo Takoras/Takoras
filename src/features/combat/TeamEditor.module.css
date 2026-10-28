@@ -115,6 +115,14 @@
   overflow-y: auto;
   padding: 4px 2px;
 }
+.list img {
+  /* jamais étiré */
+  width: 76px;
+  max-width: 100%;
+  height: auto;
+  aspect-ratio: 1;
+  object-fit: contain;
+}
 .on img {
   filter: drop-shadow(0 0 8px rgb(var(--g) / 80%));
 }

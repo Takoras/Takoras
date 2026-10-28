@@ -254,9 +254,8 @@
   gap: var(--s-2);
 }
 .slot {
-  /* jeton de l'équipe posé sur un socle lumineux (pas de boîte) */
+  /* jeton de l'équipe posé librement : juste un halo doux derrière lui (plus d'ombre colorée dessous) */
   border-radius: 18px;
-  background: radial-gradient(60% 18% at 50% 64%, rgba(var(--g, 139, 92, 246), 0.28), transparent 70%);
   transition: transform var(--t-fast);
   position: relative;
   width: 100%;

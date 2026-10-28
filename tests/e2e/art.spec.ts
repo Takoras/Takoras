@@ -57,13 +57,16 @@ test('mutations : vrais tampons dans l’éditeur d’équipe, onglets colorés 
     .getByRole('button', { name: /Changer ce jeton/ })
     .first()
     .click();
-  const b = page.getByRole('dialog').getByRole('radio', { name: 'Doré' });
+  // les tampons sont dans la fiche du jeton (même fiche que le bestiaire)
+  await page.getByRole('dialog').getByRole('button', { name: 'Mobu', exact: true }).click();
+  const b = page.getByRole('dialog').getByRole('button', { name: 'Doré' });
   expect(
     await b
       .locator('span')
       .first()
       .evaluate((el) => getComputedStyle(el).backgroundImage),
   ).toContain('stamps/gold.png');
+  await page.keyboard.press('Escape');
   await page.keyboard.press('Escape');
   await page.goto('/inventaire');
   const tab = page.getByRole('tab', { name: /Doré/ });

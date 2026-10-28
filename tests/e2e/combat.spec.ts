@@ -11,24 +11,27 @@ test('combat : monter son équipe (ajouter, version, enregistrer, plus de budget
   const d = page.getByRole('dialog');
   // la carte ouvre la grande fiche (stats, jeton sur son socle, pouvoir + vraie vidéo) ; on ajoute depuis la fiche
   await d.getByRole('button', { name: 'Mobu', exact: true }).click();
-  const sheet = page.getByRole('dialog', { name: 'Mobu' });
+  // la fiche est celle du bestiaire (+ la vidéo du pouvoir) ; les tampons choisissent la mutation
+  const sheet = page.getByRole('dialog').filter({ has: page.getByRole('heading', { name: 'Mobu' }) });
   await expect(sheet.locator('video')).toHaveCount(1);
-  // on choisit la mutation dans la fiche (Doré par défaut, la meilleure qu'on a ; celles qu'on n'a pas sont grisées)
-  await expect(sheet.getByRole('radio', { name: 'Doré' })).toHaveAttribute('aria-checked', 'true');
-  await expect(sheet.getByRole('radio', { name: 'Ombre' })).toBeDisabled();
+  await expect(sheet.getByRole('button', { name: 'Doré' })).toHaveAttribute('aria-pressed', 'true');
+  await expect(sheet.getByRole('button', { name: 'Ombre' })).toBeDisabled();
+  await sheet.getByRole('button', { name: 'Doré' }).click(); // retour en normal
   await sheet.getByRole('button', { name: 'Ajouter à l’équipe' }).click();
   // plus de « + » sur les cartes : jeton → fiche → « Ajouter à l'équipe »
   for (const n of ['Pikko', 'Vyolis']) {
     await d.getByRole('button', { name: n, exact: true }).click();
-    await page.getByRole('dialog', { name: n }).getByRole('button', { name: 'Ajouter à l’équipe' }).click();
+    await page
+      .getByRole('dialog')
+      .filter({ has: page.getByRole('heading', { name: n }) })
+      .getByRole('button', { name: 'Ajouter à l’équipe' })
+      .click();
   }
   // un 4e jeton : équipe pleine (toast)
   await expect(d.getByText(/Budget/)).toHaveCount(0); // plus de limite de points
-  // Mobu existe aussi en Doré : pris en Doré par défaut (la meilleure mutation), on peut repasser en normal avec les tampons
-  await expect(d.getByRole('radio', { name: 'Doré' })).toHaveAttribute('aria-checked', 'true');
-  await expect(d.getByText('Doré +3 %')).toBeVisible();
-  await d.getByRole('radio', { name: 'Normal' }).click();
-  await expect(d.getByRole('radio', { name: 'Normal' })).toHaveAttribute('aria-checked', 'true');
+  // plus de choix de mutation dans les places du haut : Mobu a été pris en normal depuis la fiche
+  await expect(d.getByRole('radio', { name: 'Doré' })).toHaveCount(0);
+  await expect(d.getByText('Normal').first()).toBeVisible();
   // les jetons pas encore trouvés sont des « ? »
   await expect(d.getByText('???').first()).toBeVisible();
   // plus de bouton « Valider » : l'équipe s'enregistre toute seule, on ferme simplement

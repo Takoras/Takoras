@@ -6,6 +6,7 @@ import { useJn } from '@/lib/names';
 import { locale, reducedFx, useSettings } from '@/lib/settings';
 import { useT } from '@/i18n/useT';
 import { Modal } from '@/ui/Modal';
+import { PowerDemo } from '../combat/PowerDemo';
 import s from './JetonSheet.module.css';
 
 const VS = ['gold', 'celeste', 'ombre'] as const;
@@ -23,6 +24,7 @@ export function JetonModal({
   found,
   facts,
   pick,
+  demo,
   onClose,
   children,
 }: {
@@ -33,6 +35,8 @@ export function JetonModal({
   found?: Partial<Record<string, boolean | number>>;
   facts?: ReactNode;
   pick?: (v: string) => void;
+  /** montre la vidéo d'exemple du pouvoir (éditeur d'équipe) */
+  demo?: boolean;
   onClose: () => void;
   children?: ReactNode;
 }) {
@@ -85,6 +89,12 @@ export function JetonModal({
               <h2>{locked ? '???' : jn(j.name)}</h2>
               <p className={s.odds}>{locked ? '1/?' : `1/${fmt(vOdds(j.odds, pv))}`}</p>
               {facts && !locked ? <ul className={s.facts}>{facts}</ul> : null}
+              {/* vidéo d'exemple du pouvoir (éditeur d'équipe) : dans la colonne de gauche, qui a la place */}
+              {demo && !locked ? (
+                <div className={s.demo}>
+                  <PowerDemo name={j.name} />
+                </div>
+              ) : null}
             </div>
             <div className={s.center}>
               <i className={s.rays} aria-hidden />

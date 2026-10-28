@@ -11,9 +11,10 @@ import { useT } from '@/i18n/useT';
 import { Modal } from '@/ui/Modal';
 import { MutationStamp } from '@/ui/MutationStamp';
 import { toast } from '@/ui/toast';
-import { lvlOf, seriesList, type Group, type InvData } from '../inventory/inv';
+import { seriesList, type Group, type InvData } from '../inventory/inv';
 import { baseVariant, ownedTokens, ownKey, VRANK, type Owned, type Team } from './team';
-import { TokenSheet } from './TokenSheet';
+import { JetonModal } from '../inventory/JetonModal';
+import { Button } from '@/ui/Button';
 import iv from '../inventory/Inventory.module.css';
 import s from './TeamEditor.module.css';
 
@@ -53,7 +54,7 @@ export function TeamEditor({
   const inTeam = new Set(team.filter(Boolean).map((u) => ownKey(u?.serie ?? '', u?.name ?? '')));
   // toute la série, du plus commun au plus rare ; ceux qu'on n'a pas sont des « ? »
   const vis = [...(SERIES[serie] ?? [])].sort((a, b) => a.odds - b.odds);
-  const lvl = (o: { serie: string; name: string }) => lvlOf(levels, o.serie, o.name);
+  void levels; // la fiche montre les stats de base, comme dans le bestiaire
   const vName = (v: string) => (v ? t(`ui.v_${v as 'gold'}`) : t('arena.normal'));
 
   const toggle = (o: Owned, pick?: string) => {
@@ -127,9 +128,7 @@ export function TeamEditor({
                 </button>
               </li>
             );
-          const j = jetonOf(u.name, u.serie),
-            o = by.get(ownKey(u.serie, u.name)),
-            vars = o ? Object.keys(o.vars).sort((a, b) => (VRANK[a] ?? 0) - (VRANK[b] ?? 0)) : [u.variant];
+          const j = jetonOf(u.name, u.serie);
           return (
             <li key={i} style={glowVars(j, u.variant) as CSSProperties} className={target === i ? s.aim : undefined}>
               <button
@@ -153,27 +152,6 @@ export function TeamEditor({
                 <img className={vImg(u.variant)} src={texOf(j)} alt="" />
               </button>
               <b>{jn(u.name)}</b>
-              {vars.length > 1 ? (
-                <div className={s.muts} role="radiogroup" aria-label={t('arena.version')}>
-                  {vars.map((v) => (
-                    <button
-                      key={v || 'none'}
-                      type="button"
-                      role="radio"
-                      aria-checked={u.variant === v}
-                      aria-label={vName(v)}
-                      title={vName(v)}
-                      onClick={() => {
-                        if (!o || u.variant === v) return;
-                        sfx.click();
-                        setTeam(team.map((x, k) => (k === i && x ? { ...x, variant: v, id: o.vars[v] ?? x.id } : x)));
-                      }}
-                    >
-                      {v ? <MutationStamp v={v} size="sm" /> : <i className={s.plain} />}
-                    </button>
-                  ))}
-                </div>
-              ) : null}
               <small>
                 {vName(u.variant)}
                 {u.variant ? ` +${Math.round(((RCFG.MUTATION[u.variant] ?? 1) - 1) * 100)} %` : ''}
@@ -214,7 +192,7 @@ export function TeamEditor({
             return (
               <li key={j.name} className={`${iv.card} ${on ? s.on : ''}`} style={glowVars(j) as CSSProperties}>
                 <button type="button" className={iv.cardBtn} onClick={() => setInfo(o)} aria-label={jn(o.name)}>
-                  {on ? <span className={s.inTeam}>{t('ui.in_deck')}</span> : null}
+                  {on ? <span className={s.inTeam}>Équipe</span> : null}
                   <img className="px" src={texOf(j)} alt="" />
                   <b>{jn(o.name)}</b>
                   <small className={s.vrow}>
@@ -235,7 +213,6 @@ export function TeamEditor({
       {info ? (
         <PickSheet
           o={info}
-          lvl={lvl(info)}
           inTeam={inTeam.has(info.k)}
           onClose={() => setInfo(null)}
           onPick={(v) => {
@@ -249,16 +226,15 @@ export function TeamEditor({
   );
 }
 
-// Fiche d'un jeton dans l'éditeur : on choisit la mutation (les 3 tampons, ceux qu'on n'a pas sont grisés), puis « Ajouter »
+// Fiche d'un jeton dans l'éditeur : exactement la fiche du bestiaire (+ la vidéo du pouvoir) ;
+// les tampons choisissent la mutation (celles qu'on n'a pas sont grisées), puis « Ajouter »
 function PickSheet({
   o,
-  lvl,
   inTeam,
   onClose,
   onPick,
 }: {
   o: Owned;
-  lvl: number;
   inTeam: boolean;
   onClose: () => void;
   onPick: (v: string) => void;
@@ -266,46 +242,19 @@ function PickSheet({
   const t = useT();
   const best = Object.keys(o.vars).sort((a, b) => (VRANK[b] ?? 0) - (VRANK[a] ?? 0))[0] ?? baseVariant(o);
   const [v, setV] = useState(best);
-  const vName = (x: string) => (x ? t(`ui.v_${x as 'gold'}`) : t('arena.normal'));
   return (
-    <TokenSheet
+    <JetonModal
       name={o.name}
       serie={o.serie}
-      variant={v}
-      lvl={lvl}
+      variant={best}
+      demo
+      found={{ gold: 'gold' in o.vars, celeste: 'celeste' in o.vars, ombre: 'ombre' in o.vars }}
+      pick={inTeam ? undefined : (x) => setV(x in o.vars ? x : baseVariant(o))}
       onClose={onClose}
-      extra={
-        inTeam ? null : (
-          <div className={s.pickMuts} role="radiogroup" aria-label={t('arena.version')}>
-            {['', 'gold', 'celeste', 'ombre'].map((x) => {
-              const has = x in o.vars;
-              return (
-                <button
-                  key={x || 'none'}
-                  type="button"
-                  role="radio"
-                  aria-checked={v === x}
-                  disabled={!has}
-                  title={vName(x)}
-                  aria-label={vName(x)}
-                  onClick={() => {
-                    sfx.click();
-                    setV(x);
-                  }}
-                >
-                  {x ? <MutationStamp v={x} size="md" /> : <i className={s.plain} />}
-                  <small>{vName(x)}</small>
-                </button>
-              );
-            })}
-          </div>
-        )
-      }
-      action={{
-        label: inTeam ? t('arena.remove') : t('arena.add'),
-        primary: !inTeam,
-        onClick: () => onPick(v),
-      }}
-    />
+    >
+      <Button variant={inTeam ? 'ghost' : 'primary'} onClick={() => onPick(v)}>
+        {inTeam ? t('arena.remove') : t('arena.add')}
+      </Button>
+    </JetonModal>
   );
 }
