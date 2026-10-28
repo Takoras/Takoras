@@ -254,14 +254,10 @@
   gap: var(--s-2);
 }
 .slot {
-  border: 3px solid transparent;
-  border-radius: 14px;
-  border-image: url('/img/ui/box-card.png?v=3') 12 / 24px stretch;
-  background:
-    radial-gradient(circle at 50% 38%, rgba(var(--g, 139, 92, 246), calc(0.18 * var(--ga, 0))), transparent 62%)
-      padding-box,
-    linear-gradient(#222034, #222034) center / calc(100% - 16px) calc(100% - 16px) no-repeat;
-  image-rendering: pixelated;
+  /* jeton de l'équipe posé sur un socle lumineux (pas de boîte) */
+  border-radius: 18px;
+  background: radial-gradient(60% 18% at 50% 64%, rgba(var(--g, 139, 92, 246), 0.28), transparent 70%);
+  transition: transform var(--t-fast);
   position: relative;
   width: 100%;
   min-height: 170px;
@@ -273,11 +269,15 @@
   text-align: center;
 }
 .slot:hover {
-  border-color: rgba(var(--g, 139, 92, 246), 0.5);
+  transform: translateY(-4px);
+}
+.slot:hover img {
+  scale: 1.1;
 }
 .slot img {
-  width: 64px;
-  height: 64px;
+  transition: scale var(--t-fast);
+  width: 88px;
+  height: 88px;
   --df: drop-shadow(0 0 3px rgba(var(--g), calc(0.5 * var(--ga, 0))));
 }
 .slot b {
@@ -288,7 +288,8 @@
   color: var(--muted);
 }
 .emptySlot {
-  border-style: dashed;
+  border: 2px dashed var(--line-strong);
+  background: none;
 }
 .emptySlot b {
   font-size: var(--fs-2xl);
@@ -480,9 +481,7 @@
   border: 3px solid transparent;
   border-radius: 14px;
   border-image: url('/img/ui/box-card.png?v=3') 12 / 24px stretch;
-  background:
-    radial-gradient(circle at 50% 22%, rgba(var(--g), calc(0.16 * var(--ga, 0))), transparent 55%) padding-box,
-    linear-gradient(#222034, #222034) center / calc(100% - 16px) calc(100% - 16px) no-repeat;
+  background: linear-gradient(#222034, #222034) center / calc(100% - 16px) calc(100% - 16px) no-repeat;
   image-rendering: pixelated;
   position: relative;
   width: 100%;
@@ -572,8 +571,8 @@
     min-height: 150px;
   }
   .slot img {
-    width: 52px;
-    height: 52px;
+    width: 68px;
+    height: 68px;
   }
   .teGrid {
     grid-template-columns: 1fr 1fr;
@@ -772,4 +771,23 @@
 .infoBtn:hover {
   border-color: var(--accent-hi);
   color: var(--text);
+}
+
+/* halo des jetons de l'équipe : disque flou rond derrière l'image */
+.slot::before {
+  content: '';
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 120px;
+  height: 120px;
+  translate: -50% -72%;
+  border-radius: 50%;
+  background: radial-gradient(closest-side, rgba(var(--g, 139, 92, 246), calc(0.5 * var(--ga, 0))), transparent);
+  pointer-events: none;
+}
+.slot > img,
+.slot > b,
+.slot > small {
+  position: relative;
 }

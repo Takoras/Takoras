@@ -527,3 +527,10 @@
 .boardBottom {
   margin-top: var(--s-10);
 }
+
+/* téléphone : les rayons autour du jeton restent dans l'écran (sinon ils étaient coupés aux bords) */
+@media (max-width: 559px) {
+  .orbit {
+    inset: -28%;
+  }
+}

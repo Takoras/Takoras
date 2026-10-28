@@ -54,9 +54,8 @@
   position: relative;
   display: grid;
   justify-items: center;
-  padding: var(--s-4) 0 var(--s-6);
-  overflow: hidden;
-  min-height: 300px;
+  padding: 45px 0 var(--s-6); /* jeton centré sur ses rayons (175 px), qui s'effacent avant le bord */
+  min-height: 360px;
 }
 .stage img {
   position: relative;

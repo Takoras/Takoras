@@ -244,27 +244,49 @@
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(118px, 1fr));
   /* PC : 7 colonnes fixes (cahier § 6) */
-  gap: var(--s-2);
+  gap: var(--s-4) var(--s-2);
 }
+/* les jetons sont posés librement (plus de boîte) : un socle ovale lumineux sous chacun, ils flottent un peu,
+   et au survol ils montent, grossissent et brillent */
 .card {
-  border: 3px solid transparent;
-  border-radius: 14px;
-  /* centre peint par le fond (pour garder la lueur des jetons rares), la texture donne le contour */
-  border-image: url('/img/ui/box-card.png?v=3') 12 / 24px stretch;
-  background:
-    radial-gradient(circle at 50% 38%, rgba(var(--g), calc(0.16 * var(--ga, 0))), transparent 62%) padding-box,
-    linear-gradient(#222034, #222034) center / calc(100% - 16px) calc(100% - 16px) no-repeat;
-  image-rendering: pixelated;
   position: relative;
   display: grid;
+  border-radius: 16px;
+  transition: transform var(--t-fast);
+}
+.card::after {
+  content: '';
+  position: absolute;
+  left: 50%;
+  top: calc(var(--s-5) + 70px);
+  width: 76px;
+  height: 14px;
+  translate: -50% 0;
+  border-radius: 50%;
+  background: radial-gradient(
+    closest-side,
+    rgba(var(--g), calc(0.25 + 0.35 * var(--ga, 0))),
+    rgb(0 0 0 / 35%) 60%,
+    transparent
+  );
+  pointer-events: none;
   transition:
-    border-color var(--t-fast),
-    transform var(--t-fast);
+    scale var(--t-fast),
+    opacity var(--t-fast);
 }
 .card:hover {
-  border-color: rgba(var(--g), 0.5);
+  transform: translateY(-4px);
+}
+.card:hover .cardBtn img {
+  scale: 1.12;
+  --df: drop-shadow(0 0 4px rgba(var(--g), 0.8));
+}
+.card:hover::after {
+  scale: 0.8;
+  opacity: 0.7;
 }
 .cardBtn {
+  position: relative;
   display: grid;
   justify-items: center;
   gap: 2px;
@@ -273,9 +295,10 @@
   border-radius: inherit;
 }
 .cardBtn img {
-  width: 72px;
-  height: 72px;
-  margin-bottom: var(--s-1);
+  width: 76px;
+  height: 76px;
+  margin-bottom: var(--s-2);
+  transition: scale var(--t-fast);
   --df: drop-shadow(0 0 3px rgba(var(--g), calc(0.5 * var(--ga, 0))));
 }
 .cardBtn b {
@@ -327,7 +350,9 @@
   animation: none !important;
 }
 .sel {
-  border-image-source: url('/img/ui/box-sel.png?v=3');
+  outline: 3px solid var(--accent-hi);
+  outline-offset: -3px;
+  background: rgb(139 92 246 / 12%);
 }
 .locked .cardBtn img {
   opacity: 0.85;
@@ -898,4 +923,23 @@
     flex: 1;
     min-width: 0;
   }
+}
+
+/* halo des jetons : un disque flou ROND posé derrière l'image (jamais de bord coupé) */
+.cardBtn::before {
+  content: '';
+  position: absolute;
+  top: calc(var(--s-5) - 18px);
+  left: 50%;
+  width: 108px;
+  height: 108px;
+  translate: -50% 0;
+  border-radius: 50%;
+  background: radial-gradient(closest-side, rgba(var(--g), calc(0.5 * var(--ga, 0))), transparent);
+  pointer-events: none;
+}
+.cardBtn > img,
+.cardBtn > b,
+.cardBtn > small {
+  position: relative;
 }

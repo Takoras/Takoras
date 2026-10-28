@@ -2,7 +2,7 @@
 .sheet {
   display: grid;
   gap: var(--s-5);
-  overflow: hidden; /* les rayons s'effacent avant le bord, mais ne doivent jamais faire défiler */
+  padding-top: var(--s-4); /* de la place au-dessus : les rayons s'effacent avant le bord, jamais coupés */
 }
 .stage {
   display: grid;
@@ -58,24 +58,24 @@
   position: relative;
   display: grid;
   justify-items: center;
-  padding-bottom: var(--s-2);
+  padding: 45px 0 var(--s-2);
 }
 .rays,
 .aura {
   position: absolute;
   left: 50%;
-  top: 130px;
+  top: 175px;
   translate: -50% -50%;
   border-radius: 50%;
   pointer-events: none;
 }
 /* rayons lumineux qui tournent doucement */
 .rays {
-  width: 270px;
-  height: 270px;
+  width: 360px;
+  height: 360px;
   /* 16 rayons réguliers (22,5° chacun : ça tombe juste sur 360°, plus de rayons collés) */
   background: repeating-conic-gradient(from 0deg, rgba(var(--g), 0.24) 0deg 7deg, transparent 7deg 22.5deg);
-  mask-image: radial-gradient(closest-side, #000 30%, transparent 96%);
+  mask-image: radial-gradient(closest-side, #000 40%, transparent 92%);
   animation: spin 26s linear infinite;
   opacity: calc(0.35 + 0.65 * var(--ga, 0));
 }
@@ -88,7 +88,7 @@
 }
 .sparks {
   position: absolute;
-  inset: 0 0 auto;
+  inset: 45px 0 auto;
   height: 260px;
   pointer-events: none;
 }
@@ -341,14 +341,14 @@
     order: -1;
   }
   .rays {
-    width: 230px;
-    height: 230px;
-    top: 110px;
+    width: 290px;
+    height: 290px;
+    top: 155px;
   }
   .aura {
     width: 210px;
     height: 210px;
-    top: 110px;
+    top: 155px;
   }
   .sparks {
     height: 220px;
