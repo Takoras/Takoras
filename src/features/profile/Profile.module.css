@@ -164,7 +164,7 @@
 }
 .bestLi img {
   image-rendering: pixelated;
-  --df: drop-shadow(0 0 8px rgba(var(--g), calc(0.6 * var(--ga, 0))));
+  --df: drop-shadow(0 0 3px rgba(var(--g), calc(0.6 * var(--ga, 0))));
 }
 
 .showcase {
@@ -300,7 +300,7 @@
 .coll img {
   width: 48px;
   height: 48px;
-  --df: drop-shadow(0 0 8px rgba(var(--g), calc(0.45 * var(--ga, 0))));
+  --df: drop-shadow(0 0 3px rgba(var(--g), calc(0.45 * var(--ga, 0))));
 }
 .coll small {
   font-size: 10px;

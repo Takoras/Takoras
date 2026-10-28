@@ -205,17 +205,13 @@ function spawn() {
   sfx.spawn();
   opCoin.animate([{ transform: 'scale(0)', opacity: 0 }, { transform: 'scale(1)', opacity: 1 }], { duration: 520, easing: 'cubic-bezier(.16, 1, .3, 1)' });
 }
-// Jeton en volume : la face devant, une vraie tranche pleine (des disques empilés en 3D, sombres au milieu et
-// clairs sur les bords, aux couleurs du jeton) et un dos. Rien n'est calculé : juste du CSS 3D, fluide partout.
-const DEPTH = 14, STEP = 1.5; // 14 disques espacés de 1,5 px : ~21 px d'épaisseur
+// Jeton plat : la même image devant et derrière (le dos est retourné pour se lire dans le bon sens), rien d'autre.
+// Pas de tranche ni de reflet plaqué : ils faisaient des bords qui dépassent pendant la rotation.
 function coin3D(src, alt, style = '', cls = '') {
-  let edge = '';
-  for (let i = 1; i <= DEPTH; i++) edge += `<i class="edge${i === 1 || i === DEPTH ? ' lip' : ''}" style="transform:translateZ(${-i * STEP}px)"></i>`;
-  // reflet et éclat posés sur la face : ils tournent avec le jeton
-  return `<img class="face${cls}" src="${src}" alt="${alt}" decoding="sync" style="${style}"><i class="glare"></i><i class="shine"></i>${edge}<img class="back${cls}" src="${src}" alt="" decoding="sync" style="transform:translateZ(${-(DEPTH + 1) * STEP}px) rotateY(180deg)">`;
+  return `<img class="face${cls}" src="${src}" alt="${alt}" decoding="sync" style="${style}"><img class="back${cls}" src="${src}" alt="" decoding="sync" style="transform:rotateY(180deg)">`;
 }
 function setGlareMask(src) {
-  opCoin.querySelectorAll('.glare, .shine').forEach(g => { g.style.webkitMaskImage = g.style.maskImage = `url(${src})`; });
+  void src; // plus de reflet plaqué sur le jeton
 }
 // Onde de choc qui part du jeton
 function wave() {
@@ -486,21 +482,17 @@ function reveal(restored, quiet = false) {
     const turns = j.odds >= GOD ? 10 : j.odds >= MYTHIC ? 8 : j.odds >= RARE ? 6 : j.odds >= FAST ? 4 : 3;
     // rythme selon la rareté (cahier § 16.2) : commune 0,8 s · rare 1,4 s · épique 2,2 s · légendaire 3,2 s · hyper rare 4,5 s
     const ms = Math.max(350, (j.odds >= MYTHIC ? 4500 : j.odds >= 10000 ? 3200 : j.odds >= RARE ? 2200 : j.odds >= 100 ? 1400 : 800) * (speed() || .2));
-    // élan (il recule un peu en se penchant), gros tour qui freine, dépasse un peu, puis se pose : courbes ease in/out
     const T = turns * 360;
     spin.animate([
-      { transform: 'rotateY(0) rotateX(0) scale(1)', easing: 'cubic-bezier(.4, 0, .6, 1)' },
-      { transform: 'rotateY(-30deg) rotateX(10deg) scale(.9)', offset: .1, easing: 'cubic-bezier(.15, .55, .1, 1)' },
-      { transform: `rotateY(${T + 16}deg) rotateX(-5deg) scale(1.08)`, offset: .8, easing: 'cubic-bezier(.45, 0, .55, 1)' },
-      { transform: `rotateY(${T - 5}deg) rotateX(2deg) scale(.98)`, offset: .91, easing: 'cubic-bezier(.45, 0, .55, 1)' },
-      { transform: `rotateY(${T}deg) rotateX(0) scale(1)` },
-    ], { duration: ms, easing: 'linear' });
+      { transform: 'rotateY(0) scale(.92)' },
+      { transform: `rotateY(${T}deg) scale(1)` },
+    ], { duration: ms, easing: 'cubic-bezier(.1, .8, .15, 1)' }); // part très vite et freine longtemps, sans à-coup
     // atterrissage : petit impact (secousse, étincelles, onde) pile quand il se pose
     setTimeout(() => {
       if (run !== r) return;
       shake(j.odds >= RARE ? 1 : .5); burst(j.odds >= RARE ? 18 : 10); wave();
       if (j.odds >= RARE) flash(.25, 300);
-    }, ms * .8);
+    }, ms * .7);
     // On ne peut pas passer à la suite tout de suite : 0,5 s max pour les jetons communs,
     // toute la rotation pour les vrais rares (1/1000 et plus)
     const lock = j.odds >= RARE ? ms : Math.min(ms, 500);

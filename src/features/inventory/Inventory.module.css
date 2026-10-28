@@ -271,7 +271,7 @@
   width: 72px;
   height: 72px;
   margin-bottom: var(--s-1);
-  --df: drop-shadow(0 0 10px rgba(var(--g), calc(0.45 * var(--ga, 0))));
+  --df: drop-shadow(0 0 3px rgba(var(--g), calc(0.5 * var(--ga, 0))));
 }
 .cardBtn b {
   font-size: var(--fs-sm);

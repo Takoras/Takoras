@@ -89,7 +89,6 @@ function ItemCard({ it, before }: { it: Row; before: () => void }) {
       const r = (await invApi.useItems(it.item, qty)) as { used: number; state: unknown };
       qc.setQueryData(['me', user?.id], r.state);
       sfx.upgrade();
-      toast(r.used > 1 ? t('ui.items_used', { n: r.used }) : t('ui.item_used'));
       setN(1);
     } catch (e) {
       sfx.deny();

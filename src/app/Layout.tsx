@@ -1,6 +1,7 @@
 import { useEffect } from 'react';
 import { NavLink, Outlet, useLocation, useNavigate } from 'react-router';
 import { useMe } from '@/api/queries';
+import { useResetWatch } from '@/lib/resetWatch';
 import { useAuth, signOut } from '@/lib/auth';
 import { locale } from '@/lib/settings';
 import { useT } from '@/i18n/useT';
@@ -32,6 +33,7 @@ export function Layout() {
   const user = useAuth((x) => x.user);
   const me = useMe();
   const more = useUI((x) => x.more);
+  useResetWatch();
   useEffect(() => openUI('more', false), [pathname]);
   const navigate = useNavigate();
   // Raccourci « debug » (taper le mot n'importe où) : ouvre le panel admin, pour les admins seulement

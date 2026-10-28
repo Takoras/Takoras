@@ -15,3 +15,7 @@ begin
   update public.profiles set coins = coins - cost, stock_max = stock_max + 1 where id = auth.uid();
   return public.eco_state();
 end $function$;
+
+-- la contrainte de la table bloquait encore à 50
+alter table public.profiles drop constraint if exists profiles_stock_max_check;
+alter table public.profiles add constraint profiles_stock_max_check check (stock_max >= 5 and stock_max <= 100);

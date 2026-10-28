@@ -12,6 +12,7 @@ export type Me = {
   banned: boolean;
   beta: boolean;
   tester: boolean;
+  reset_at?: string | null;
   [k: string]: unknown;
 };
 
@@ -22,6 +23,7 @@ export function useMe() {
     queryFn: async () => (await ecoApi.state()) as unknown as Me,
     enabled: !!uid,
     staleTime: 15_000,
+    refetchInterval: 60_000, // aussi pour voir vite une remise à zéro faite par un admin
   });
 }
 

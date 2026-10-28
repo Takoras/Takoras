@@ -71,10 +71,11 @@
 }
 /* rayons lumineux qui tournent doucement */
 .rays {
-  width: 380px;
-  height: 380px;
-  background: repeating-conic-gradient(from 0deg, rgba(var(--g), 0.2) 0deg 7deg, transparent 7deg 22deg);
-  mask-image: radial-gradient(closest-side, #000 25%, transparent 100%);
+  width: 270px;
+  height: 270px;
+  /* 16 rayons réguliers (22,5° chacun : ça tombe juste sur 360°, plus de rayons collés) */
+  background: repeating-conic-gradient(from 0deg, rgba(var(--g), 0.24) 0deg 7deg, transparent 7deg 22.5deg);
+  mask-image: radial-gradient(closest-side, #000 30%, transparent 96%);
   animation: spin 26s linear infinite;
   opacity: calc(0.35 + 0.65 * var(--ga, 0));
 }
@@ -340,8 +341,8 @@
     order: -1;
   }
   .rays {
-    width: 300px;
-    height: 300px;
+    width: 230px;
+    height: 230px;
     top: 110px;
   }
   .aura {

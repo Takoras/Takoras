@@ -102,12 +102,8 @@
 .op-coin .zoom { perspective: 800px; }
 .op-coin .spin { position: relative; }
 .op-coin .spin img.face { position: relative; }
+.op-coin .spin img { backface-visibility: hidden; }
 .op-coin .spin img.back { position: absolute; inset: 0; }
-/* tranche : disques pleins, sombres au milieu et clairs aux bords (couleur du jeton), qui donnent l'épaisseur */
-.op-coin .spin i.edge { position: absolute; inset: 1.5%; border-radius: 50%; pointer-events: none;
-  background: linear-gradient(90deg, #1b1830, rgb(var(--tier, 167, 139, 250)) 18%, #2a2547 50%, rgb(var(--tier, 167, 139, 250)) 82%, #1b1830);
-  filter: brightness(.55); }
-.op-coin .spin i.edge.lip { filter: brightness(.9); }
 .opening.spinning .op-actions { opacity: .35; pointer-events: none; transition: opacity .3s; }
 .op-actions { transition: opacity .3s; }
 .op-coin::before { transform: scale(calc(1 + var(--boost) * .35)); }
@@ -278,3 +274,26 @@ html.reduce-fx .opening.turbo::before { display: none; }
 @keyframes warp { 0% { transform: scale(1) rotate(0); opacity: .7; } 100% { transform: scale(1.18) rotate(2deg); opacity: .35; } }
 @keyframes turboGlow { 0% { opacity: 1; transform: scale(1.25); } 100% { opacity: .6; transform: scale(1); } }
 @keyframes comboPop { 0% { transform: scale(1.6) rotate(-6deg); } 100% { transform: none; } }
+
+/* Révélation (PC) : le jeton au centre, en grand ; son nom et sa chance à gauche, ses stats et les boutons à droite */
+.op-note { display: none; }
+@media (min-width: 761px) {
+  .opening.revealed .op-main { display: grid; width: min(1240px, 94vw); grid-template-columns: minmax(0, 1fr) auto minmax(0, 1fr);
+    grid-template-rows: 1fr auto auto auto 1fr; column-gap: clamp(32px, 5vw, 80px); align-content: center; }
+  .opening.revealed .op-coin-col { grid-column: 2; grid-row: 1 / 6; }
+  .opening.revealed .op-coin { width: clamp(260px, 30vw, 380px); }
+  .opening.revealed .op-coin .zoom { scale: 1; }
+  .opening.revealed .op-info { display: contents; }
+  .opening.revealed .op-info > .eyebrow { grid-column: 1; grid-row: 2; justify-self: end; }
+  .opening.revealed .op-name { grid-column: 1; grid-row: 3; justify-self: end; text-align: right; font-size: clamp(44px, 5vw, 76px); }
+  .opening.revealed .op-rarity { grid-column: 1; grid-row: 4; justify-self: end; margin: 0; font-size: clamp(22px, 2.4vw, 34px); }
+  .opening.revealed .op-stats { grid-column: 3; grid-row: 2 / 4; align-self: end; width: min(100%, 360px); font-size: 15px; }
+  .opening.revealed .op-actions { grid-column: 3; grid-row: 4; align-self: start; }
+  .opening.revealed .op-actions .btn { min-height: 48px; padding-inline: 28px; font-size: 16px; }
+  /* chaque bloc arrive à son tour, en glissant depuis le jeton */
+  .opening.revealed .op-info > * { animation: opIn .45s cubic-bezier(.2, 1.1, .3, 1) .3s both; }
+  .opening.revealed .op-info > .eyebrow, .opening.revealed .op-name, .opening.revealed .op-rarity { --from: 30px; }
+  .opening.revealed .op-stats, .opening.revealed .op-actions { --from: -30px; animation-delay: .4s; }
+}
+@keyframes opIn { from { opacity: 0; transform: translateX(var(--from, 0)) scale(.96); } }
+html.reduce-fx .opening.revealed .op-info > * { animation: none; }

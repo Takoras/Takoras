@@ -1,3 +1,4 @@
+import { useRef } from 'react';
 import { useQueryClient } from '@tanstack/react-query';
 import { ecoApi, errorText } from '@/api';
 import { useAuth } from '@/lib/auth';
@@ -22,6 +23,7 @@ export function Actions() {
   const user = useAuth((x) => x.user);
   const e = useEco();
   const qc = useQueryClient();
+  const upBusy = useRef(false);
   const info = (
     <button type="button" className={s.info} onClick={openInfo}>
       {t('ui.odds_info')}
@@ -45,15 +47,21 @@ export function Actions() {
   const n = (v: number) => v.toLocaleString(locale(lang));
   const upCost = upgradeCost(nextMax(e.max)),
     rgCost = regenCost(e.regen - 10);
+  // une amélioration à la fois (spammer le bouton envoyait plusieurs achats et un message d'erreur bizarre),
+  // et pas de message en cas de réussite : la tuile change, c'est suffisant
   const upgrade = async (kind: 'stock' | 'regen') => {
+    if (upBusy.current) return;
+    upBusy.current = true;
     try {
       const st = kind === 'stock' ? await ecoApi.upgradeStock() : await ecoApi.upgradeRegen();
       sfx.upgrade();
-      if (kind === 'regen') toast(t('ui.regen_ok', { s: Number((st as { regen?: number })?.regen ?? e.regen - 10) }));
       qc.setQueryData(['me', user.id], st);
     } catch (err) {
       sfx.deny();
-      toast(errorText(err, lang), true);
+      const code = String((err as { message?: string })?.message ?? '');
+      if (!/rate|max_reached/.test(code)) toast(errorText(err, lang), true);
+    } finally {
+      upBusy.current = false;
     }
   };
   return (

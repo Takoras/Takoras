@@ -24,7 +24,7 @@
   width: 64px;
   height: 64px;
   image-rendering: pixelated;
-  --df: drop-shadow(0 0 10px rgba(var(--g), calc(0.6 * var(--ga, 0))));
+  --df: drop-shadow(0 0 3px rgba(var(--g), calc(0.5 * var(--ga, 0))));
 }
 .slots b {
   font-size: var(--fs-sm);
