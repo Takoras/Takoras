@@ -111,7 +111,7 @@
 
 /* Liste : même style que le bestiaire (jetons posés librement), dans une zone qui défile */
 .list {
-  max-height: min(50vh, 560px);
+  max-height: min(calc(50vh / var(--z, 1)), 560px);
   overflow-y: auto;
   padding: 4px 2px;
 }
@@ -124,7 +124,7 @@
   object-fit: contain;
 }
 .on img {
-  filter: drop-shadow(0 0 8px rgb(var(--g) / 80%));
+  filter: drop-shadow(0 0 4px rgb(var(--g) / 40%)); /* lueur douce : on voit qu'il est dans l'équipe sans éblouir */
 }
 .inTeam {
   position: absolute;

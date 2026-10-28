@@ -1,4 +1,5 @@
 import { useEffect, useRef, useState, type CSSProperties } from 'react';
+import { SerieName } from '@/ui/SerieName';
 import { useQueryClient } from '@tanstack/react-query';
 import { combatApi, errorText } from '@/api';
 import { glowVars, jetonOf, MYSTERE, SERIES, TEMPLATE, texOf, vImg } from '@/data/jetons';
@@ -164,7 +165,7 @@ export function TeamEditor({
       <div className={s.tabs} role="tablist" aria-label={t('arena.serie')}>
         {series.map((sr) => (
           <button key={sr} type="button" role="tab" aria-selected={sr === serie} onClick={() => setSerie(sr)}>
-            {sr}
+            <SerieName name={sr} />
           </button>
         ))}
         {/* les prochaines séries arriveront ici */}

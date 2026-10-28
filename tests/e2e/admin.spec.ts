@@ -92,3 +92,14 @@ test('admin : pas de problème d’accessibilité grave', async ({ page }) => {
       .map((v) => `${v.id}: ${v.nodes[0]?.html.slice(0, 120)}`),
   ).toEqual([]);
 });
+
+test('admin : aperçu du site comme un joueur, puis retour', async ({ page }) => {
+  await fakeSupabase(page, {}, [], { admin: true });
+  await page.goto('/admin');
+  await page.getByRole('button', { name: /comme un joueur/ }).click();
+  // plus rien d'admin : le bouclier disparaît, la page admin n'existe plus
+  await expect(page.getByRole('link', { name: 'Admin' })).toHaveCount(0);
+  await expect(page.getByText(/n’existe pas/)).toBeVisible();
+  await page.getByRole('button', { name: /revenir admin/ }).click();
+  await expect(page.getByRole('link', { name: 'Admin' })).toHaveCount(1);
+});

@@ -1,7 +1,7 @@
 .dialog {
   margin: auto;
   width: min(100% - 2 * var(--gutter), 440px);
-  max-height: min(90dvh, 100dvh - var(--kb) - 2 * var(--gutter));
+  max-height: min(calc(90dvh / var(--z, 1)), calc(100dvh / var(--z, 1)) - var(--kb) - 2 * var(--gutter));
   padding: 0;
   border: 0;
   background: transparent;

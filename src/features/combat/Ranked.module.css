@@ -236,8 +236,8 @@
   flex: none;
   display: grid;
   place-items: center;
-  width: clamp(180px, 20vw, 250px);
-  height: clamp(180px, 20vw, 250px);
+  width: clamp(180px, calc(20vw / var(--z, 1)), 250px);
+  height: clamp(180px, calc(20vw / var(--z, 1)), 250px);
   animation: bob 3.6s ease-in-out infinite;
 }
 .heroBadge::before {
@@ -267,7 +267,7 @@
 }
 .heroName {
   font-family: var(--font-display);
-  font-size: clamp(3rem, 8vw, 6rem);
+  font-size: clamp(3rem, calc(8vw / var(--z, 1)), 6rem);
   line-height: 0.95;
   color: var(--rc);
   text-shadow:

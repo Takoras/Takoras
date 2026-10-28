@@ -20,7 +20,7 @@
 
 .banner {
   position: relative;
-  height: clamp(130px, 22vw, 230px);
+  height: clamp(130px, calc(22vw / var(--z, 1)), 230px);
   border-radius: 20px;
   overflow: hidden;
   border: 3px solid transparent;
@@ -104,7 +104,7 @@
 }
 .elo b {
   display: block;
-  font: 800 clamp(2.4rem, 5vw, 3.4rem) / 1 var(--font-display);
+  font: 800 clamp(2.4rem, calc(5vw / var(--z, 1)), 3.4rem) / 1 var(--font-display);
   letter-spacing: -0.02em;
 }
 .elo b span {
@@ -389,7 +389,7 @@
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(110px, 1fr));
   gap: var(--s-2);
-  max-height: 55dvh;
+  max-height: calc(55dvh / var(--z, 1));
   overflow-y: auto;
   margin-bottom: var(--s-3);
 }
@@ -675,7 +675,7 @@
   display: flex;
   align-items: center;
   gap: var(--s-2);
-  font: 800 clamp(1.8rem, 4vw, 2.6rem) / 1.1 var(--font-display);
+  font: 800 clamp(1.8rem, calc(4vw / var(--z, 1)), 2.6rem) / 1.1 var(--font-display);
 }
 .bestOdds {
   font: 800 var(--fs-xl) var(--font-display);

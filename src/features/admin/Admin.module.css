@@ -82,7 +82,7 @@ textarea.input {
 }
 .tableWrap {
   overflow: auto;
-  max-height: 70dvh;
+  max-height: calc(70dvh / var(--z, 1));
   border-radius: var(--r-md);
   border: 1px solid var(--line);
 }
@@ -378,7 +378,7 @@ textarea.input {
     position: static;
   }
   .tableWrap {
-    max-height: 50dvh;
+    max-height: calc(50dvh / var(--z, 1));
   }
   .two {
     grid-template-columns: 1fr;

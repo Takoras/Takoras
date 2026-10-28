@@ -7,6 +7,8 @@ import { Codes } from './Codes';
 import { FeedbackAdmin } from './FeedbackAdmin';
 import { PatchnotesAdmin } from './PatchnotesAdmin';
 import { Tests } from './Tests';
+import { Button } from '@/ui/Button';
+import { setPreview } from '@/lib/preview';
 import s from './Admin.module.css';
 
 // Panel admin : 8 onglets (comme l'ancien site). Réservé aux admins, en français (outil interne).
@@ -29,6 +31,9 @@ export default function Admin() {
       <header className={s.head}>
         <p className="eyebrow">Admin</p>
         <h1>Panel admin</h1>
+        <Button size="sm" onClick={() => setPreview(true)}>
+          👁 Voir le site comme un joueur
+        </Button>
       </header>
       <div className={s.tabs} role="tablist" aria-label="Onglets admin">
         {TABS.map(([k, l]) => (

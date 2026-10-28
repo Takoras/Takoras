@@ -180,40 +180,17 @@ html.lock body {
   filter: brightness(1.25);
 }
 
-/* Barres de défilement des zones internes : fines, pixel art, faites pour le site.
-   (Chrome / Safari / Edge : pseudo-éléments ; Firefox : barre fine violette.) */
-::-webkit-scrollbar {
-  width: 8px;
-  height: 8px;
+/* Plus aucune barre de défilement nulle part : on défile à la molette, au doigt ou en glissant
+   (une barre apparaissait dès qu'un élément dépassait d'un demi-pixel). */
+* {
+  scrollbar-width: none;
 }
-::-webkit-scrollbar-track {
-  background: transparent;
-}
-/* invisible par défaut (rien qui « pop » quand la page change de taille), visible au survol de la zone */
-::-webkit-scrollbar-thumb {
-  background: transparent;
-  border-radius: 0;
-}
-:hover::-webkit-scrollbar-thumb {
-  background: #5b3fa0;
-  box-shadow:
-    inset 2px 2px 0 #9b7be0,
-    inset -2px -2px 0 #3a2470;
-}
-::-webkit-scrollbar-thumb:hover {
-  background: #7d48d9;
-}
-::-webkit-scrollbar-corner,
-::-webkit-scrollbar-button {
+*::-webkit-scrollbar {
   display: none;
-  background: transparent;
 }
-@supports not selector(::-webkit-scrollbar) {
-  * {
-    scrollbar-width: thin;
-    scrollbar-color: transparent transparent;
-  }
-  *:hover {
-    scrollbar-color: #7d48d9 transparent;
-  }
+
+/* Échelle du site (posée par public/phone.js en --z) : PC à ~133 % sur grand écran, téléphone réduit à sa hauteur.
+   Les effets plein écran (ouverture, Ring, cinématiques) sont hors de #root et gardent la taille réelle de l'écran. */
+#root {
+  zoom: var(--z, 1);
 }

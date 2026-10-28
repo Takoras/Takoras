@@ -139,11 +139,11 @@
   display: flex;
   flex-direction: column;
   /* à droite de la barre latérale, centrée dans l'espace restant */
-  width: min(var(--page-max), 100vw - var(--rail));
-  margin-left: max(var(--rail), calc(var(--rail) + (100vw - var(--rail) - var(--page-max)) / 2));
+  width: min(var(--page-max), calc(100vw / var(--z, 1)) - var(--rail));
+  margin-left: max(var(--rail), calc(var(--rail) + (calc(100vw / var(--z, 1)) - var(--rail) - var(--page-max)) / 2));
   margin-right: auto;
-  min-height: 100dvh;
-  padding: clamp(84px, 11vh, 120px) var(--gutter-page) clamp(56px, 10vh, 120px);
+  min-height: calc(100dvh / var(--z, 1));
+  padding: clamp(84px, calc(11vh / var(--z, 1)), 120px) var(--gutter-page) clamp(56px, calc(10vh / var(--z, 1)), 120px);
   animation: page-in var(--t-slow) var(--ease-out);
 }
 
@@ -621,6 +621,7 @@
   font-variant-numeric: tabular-nums;
 }
 .hud .me {
+  display: grid; /* pas de décalage de ligne de base : la photo reste bien alignée */
   border-radius: 50%;
   box-shadow: 0 0 0 3px #2c2640;
   transition:
@@ -705,18 +706,18 @@
   }
   /* la page est rendue sur 1280 px puis réduite : on écrit en grand (en vw) pour que ce soit lisible */
   :global(html.phone) .rotate b {
-    font: 800 6vw var(--font-display);
+    font: 800 calc(6vw / var(--z, 1)) var(--font-display);
   }
   .rotate small {
     color: var(--text-2);
-    font-size: 3.6vw;
+    font-size: calc(3.6vw / var(--z, 1));
   }
   .rotatePhone {
-    width: 16vw;
-    height: 26vw;
+    width: calc(16vw / var(--z, 1));
+    height: calc(26vw / var(--z, 1));
     margin-bottom: var(--s-4);
-    border: 1vw solid #a78bfa;
-    border-radius: 2vw;
+    border: calc(1vw / var(--z, 1)) solid #a78bfa;
+    border-radius: calc(2vw / var(--z, 1));
     box-shadow: 0 0 24px rgb(139 92 246 / 50%);
     animation: turnPhone 2.4s ease-in-out infinite;
   }
@@ -783,26 +784,26 @@
   }
 }
 
-/* la barre de gauche ne défile jamais : sur écran bas, les boîtes rapetissent avec la hauteur pour que tout tienne */
-@media (max-height: 760px) {
+/* la barre de gauche ne défile jamais : les boîtes suivent la hauteur (à l'échelle du site) pour que tout tienne */
+@media all {
   .rail {
     justify-content: space-between;
     gap: 0;
   }
   .railIco {
-    width: clamp(30px, 8.2dvh, 54px);
-    height: clamp(30px, 8.2dvh, 54px);
-    border-image-width: clamp(12px, 2.4dvh, 16px);
-    --ico: clamp(18px, 4.6dvh, 30px);
+    width: clamp(30px, calc(7dvh / var(--z, 1)), 52px);
+    height: clamp(30px, calc(7dvh / var(--z, 1)), 52px);
+    border-image-width: clamp(12px, calc(2.4dvh / var(--z, 1)), 16px);
+    --ico: clamp(18px, calc(4.6dvh / var(--z, 1)), 30px);
   }
   .railBrand img {
-    width: clamp(24px, 5dvh, 40px);
-    height: clamp(24px, 5dvh, 40px);
+    width: clamp(24px, calc(5dvh / var(--z, 1)), 40px);
+    height: clamp(24px, calc(5dvh / var(--z, 1)), 40px);
   }
   .railMini {
-    width: clamp(26px, 6.4dvh, 42px);
-    height: clamp(26px, 6.4dvh, 42px);
-    --ico: clamp(16px, 3.4dvh, 22px);
+    width: clamp(26px, calc(6.4dvh / var(--z, 1)), 42px);
+    height: clamp(26px, calc(6.4dvh / var(--z, 1)), 42px);
+    --ico: clamp(16px, calc(3.4dvh / var(--z, 1)), 22px);
   }
 }
 @media (max-height: 420px) {
@@ -815,4 +816,36 @@
   .railItem {
     padding: 0;
   }
+}
+
+/* bouton paramètres dans le coin en haut à droite */
+.hudGear {
+  display: grid;
+  place-items: center;
+  width: 40px;
+  height: 40px;
+  border: 3px solid transparent;
+  border-radius: 12px;
+  border-image: url('/img/ui/box-card.png?v=3') 12 fill / 18px stretch;
+  background: linear-gradient(#222034, #222034) center / calc(100% - 12px) calc(100% - 12px) no-repeat;
+  image-rendering: pixelated;
+  color: var(--text-2);
+  transition:
+    color var(--t-fast),
+    transform var(--t-fast);
+}
+.hudGear:hover {
+  color: var(--text);
+  transform: rotate(30deg);
+}
+
+/* aperçu « comme un joueur » (admin) : petit bouton pour revenir */
+.previewChip {
+  padding: 6px 12px;
+  border-radius: 999px;
+  background: #f97316;
+  color: #2a0f1c;
+  font-size: 12px;
+  font-weight: 800;
+  box-shadow: 0 3px 0 #9a3412;
 }

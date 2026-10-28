@@ -1,5 +1,6 @@
 import { useQuery } from '@tanstack/react-query';
 import { useAuth } from '@/lib/auth';
+import { usePreview } from '@/lib/preview';
 import { ecoApi } from './index';
 
 // État du joueur renvoyé par eco_state (source de vérité : le serveur)
@@ -18,9 +19,12 @@ export type Me = {
 
 export function useMe() {
   const uid = useAuth((s) => s.user?.id);
+  const preview = usePreview();
   return useQuery({
     queryKey: ['me', uid],
     queryFn: async () => (await ecoApi.state()) as unknown as Me,
+    // aperçu « comme un joueur » : l'admin voit le site sans rien d'admin
+    select: (d: Me) => (preview && d?.admin ? { ...d, admin: false, tester: false, realAdmin: true } : d),
     enabled: !!uid,
     staleTime: 15_000,
     refetchInterval: 60_000, // aussi pour voir vite une remise à zéro faite par un admin

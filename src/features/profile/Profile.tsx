@@ -1,20 +1,11 @@
 import { useState, type CSSProperties } from 'react';
+import { SerieName } from '@/ui/SerieName';
 import { useNavigate, useParams } from 'react-router';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { accountApi, errorText, publicApi } from '@/api';
 import { useMe } from '@/api/queries';
 import { BANNER_IMG, bannerName } from '@/data/items';
-import {
-  jetonOf,
-  MYSTERE,
-  SERIES,
-  TEMPLATE,
-  texOf,
-  vImg,
-  vOdds,
-  glowVars,
-  type Variant,
-} from '@/data/jetons';
+import { jetonOf, MYSTERE, SERIES, TEMPLATE, texOf, vImg, vOdds, glowVars, type Variant } from '@/data/jetons';
 import { sfx } from '@/engines/sound.js';
 import { openUI } from '@/app/ui-store';
 import { AVATARS, FREE_PP } from '@/lib/avatars';
@@ -144,7 +135,10 @@ export default function Profile() {
         </li>
         {p.streak > 0 ? (
           <li>
-            <b>🔥 {p.streak}</b> {t('ui.st_streak')}
+            <b>
+              <img className="px" src="/img/ui/flame.png" alt="" width={18} height={18} /> {p.streak}
+            </b>{' '}
+            {t('ui.st_streak')}
           </li>
         ) : null}
       </ul>
@@ -271,7 +265,9 @@ function Bestiaries({
                 alt=""
               />
               <span>
-                <b>{t('ui.bst_pull', { n: name })}</b>
+                <b>
+                  <SerieName name={name} h="1.4em" />
+                </b>
                 <small>{q.data ? `${all.filter((j) => got.has(j.name)).length} / ${all.length}` : '…'}</small>
               </span>
             </button>

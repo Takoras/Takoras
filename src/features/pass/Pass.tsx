@@ -8,6 +8,7 @@ import { useAuth } from '@/lib/auth';
 import { locale, useSettings } from '@/lib/settings';
 import { useT } from '@/i18n/useT';
 import { NeedLogin } from '@/app/NeedLogin';
+import { useMe } from '@/api/queries';
 import { Button } from '@/ui/Button';
 import { Modal } from '@/ui/Modal';
 import { Segmented } from '@/ui/Segmented';
@@ -54,6 +55,7 @@ export default function Pass() {
   const list = useRef<HTMLOListElement>(null);
   const [tab, setTab] = useState<'rewards' | 'missions'>('rewards');
   const [premOpen, setPremOpen] = useState(false);
+  const me = useMe();
   const q = useQuery({
     queryKey: ['pass', user?.id],
     enabled: !!user,
@@ -228,6 +230,50 @@ export default function Pass() {
 
       {tab === 'rewards' ? (
         <>
+          {/* tout récupérer d'un coup ; admin : se donner le passe complet pour tester */}
+          {ready(false) + (d.premium ? ready(true) : 0) > 1 || me.data?.admin ? (
+            <div className={s.bulk}>
+              {ready(false) + (d.premium ? ready(true) : 0) > 1 ? (
+                <Button
+                  variant="primary"
+                  size="sm"
+                  onClick={async (e) => {
+                    const el = e.currentTarget;
+                    try {
+                      const r = (await passApi.claimAll()) as { claimed: number; state: unknown };
+                      qc.setQueryData(['me', user.id], r.state);
+                      burstAt(el, '#fbbf24', 1.2);
+                      sfx.upgrade();
+                      toast(`${r.claimed} récompense${r.claimed > 1 ? 's' : ''} récupérée${r.claimed > 1 ? 's' : ''}`);
+                      void q.refetch();
+                      void qc.invalidateQueries({ queryKey: ['items'] });
+                    } catch (err) {
+                      sfx.deny();
+                      toast(errorText(err, lang), true);
+                    }
+                  }}
+                >
+                  Tout récupérer ({ready(false) + (d.premium ? ready(true) : 0)})
+                </Button>
+              ) : null}
+              {me.data?.admin ? (
+                <Button
+                  size="sm"
+                  onClick={async () => {
+                    try {
+                      await passApi.adminMax();
+                      toast('Admin : passe premium + 50 paliers débloqués');
+                      void q.refetch();
+                    } catch (err) {
+                      toast(errorText(err, lang), true);
+                    }
+                  }}
+                >
+                  Admin · passe complet
+                </Button>
+              ) : null}
+            </div>
+          ) : null}
           <div className={s.board}>
             <div className={s.rail}>
               {/* panneau premium de la saison (Halloween) : toucher = voir ce qu'il débloque */}

@@ -67,6 +67,8 @@ export const passApi = {
   starterQuest: () => rpc('starter_quest_claim'),
   state: () => rpc('bp_state'),
   claim: (p_tier: number, p_prem: boolean) => rpc('bp_claim', { p_tier, p_prem }),
+  claimAll: () => rpc('bp_claim_all'),
+  adminMax: () => rpc('admin_bp_max'),
 };
 
 export const shopApi = {

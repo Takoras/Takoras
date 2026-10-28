@@ -469,7 +469,7 @@
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
   gap: var(--s-2);
-  max-height: 52dvh;
+  max-height: calc(52dvh / var(--z, 1));
   overflow-y: auto;
   padding: 2px;
 }
@@ -726,7 +726,7 @@
 /* PC : le bestiaire défile dans sa colonne, la page reste en place */
 @media (min-width: 1000px) {
   .dex ul {
-    max-height: calc(100dvh - 520px);
+    max-height: calc(calc(100dvh / var(--z, 1)) - 520px);
     min-height: 240px;
     overflow-y: auto;
   }

@@ -85,7 +85,7 @@
   --s-12: 48px;
   --gutter: 16px;
   --page-max: 1240px; /* contenu centré et aéré, même sur grand écran */
-  --gutter-page: clamp(16px, 4vw, 40px);
+  --gutter-page: clamp(16px, calc(4vw / var(--z, 1)), 40px);
 
   /* Rayons : petits et nets (pixel art), le rond est réservé aux avatars et aux pastilles */
   --r-xs: 8px; /* 3 rayons seulement : 8 / 12 / 20 (cahier § 3.3) */

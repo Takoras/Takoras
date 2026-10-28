@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react';
+import { SerieName } from '@/ui/SerieName';
 import { PULLS } from '@/engines/env';
 import { useT } from '@/i18n/useT';
 import { installOpeningHost } from '../eco/openPulls';
@@ -30,7 +31,7 @@ export default function Home() {
         <div className={s.center} data-tour="pull">
           <HeroCoin img={pull.img} label={pull.name} />
           <h1 className={s.title}>
-            {t('ui.pull')} {pull.name}
+            {t('ui.pull')} <SerieName name={pull.name} h="0.95em" />
           </h1>
           <Actions />
         </div>

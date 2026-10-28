@@ -1,3 +1,4 @@
+import { zoomOf } from '@/lib/zoom';
 import { useEffect, useLayoutEffect, useState } from 'react';
 import { useNavigate } from 'react-router';
 import { sfx } from '@/engines/sound.js';
@@ -51,7 +52,7 @@ export function Tour({ onDone }: { onDone: () => void }) {
   const nav = useNavigate();
   const lang = useSettings((x) => x.lang);
   const [i, setI] = useState(0);
-  const [box, setBox] = useState<DOMRect | null>(null);
+  const [rawBox, setBox] = useState<DOMRect | null>(null);
   const st = (STEPS[i] ?? STEPS[0]) as Step;
   useEffect(() => {
     void nav(st.to);
@@ -82,18 +83,25 @@ export function Tour({ onDone }: { onDone: () => void }) {
     };
   }, [st.sel, i]);
   const [title, text] = lang === 'en' ? st.en : st.fr;
+  // le site est à l'échelle (--z) : mesures d'écran → pixels du site
+  const z = zoomOf(),
+    W = innerWidth / z,
+    H = innerHeight / z;
+  const box = rawBox
+    ? { left: rawBox.left / z, top: rawBox.top / z, width: rawBox.width / z, height: rawBox.height / z, bottom: rawBox.bottom / z }
+    : null;
   const last = i === STEPS.length - 1;
   const pad = 10;
   // la bulle se met sous la zone, ou au-dessus si elle est trop bas
-  const below = !box || box.bottom + 220 < innerHeight;
+  const below = !box || box.bottom + 220 < H;
   // toujours dans l'écran : sous la zone, sinon au-dessus, sinon en bas de l'écran (zone très haute)
   const want = box ? (below ? box.bottom + pad + 14 : box.top - pad - 14 - 210) : 0;
   const bubble = box
     ? {
-        left: Math.max(16, Math.min(innerWidth - 336, box.left + box.width / 2 - 160)),
-        top: Math.max(16, Math.min(innerHeight - 230, want)),
+        left: Math.max(16, Math.min(W - 336, box.left + box.width / 2 - 160)),
+        top: Math.max(16, Math.min(H - 230, want)),
       }
-    : { left: innerWidth / 2 - 160, top: innerHeight / 2 - 80 };
+    : { left: W / 2 - 160, top: H / 2 - 80 };
   return (
     <div className={s.tour} role="dialog" aria-modal="true" aria-label={title}>
       {box ? (

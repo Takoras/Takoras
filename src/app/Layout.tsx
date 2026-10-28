@@ -17,6 +17,7 @@ import { badgeOf, useFriends } from '@/features/social/social';
 import { publicApi } from '@/api';
 import { useOnlinePresence } from '@/lib/online';
 import { Icon } from './Icon';
+import { setPreview, usePreview } from '@/lib/preview';
 import { NAV } from './nav';
 import { openUI, useUI } from './ui-store';
 import s from './Layout.module.css';
@@ -34,6 +35,7 @@ export function Layout() {
   const { pathname } = useLocation();
   const user = useAuth((x) => x.user);
   const me = useMe();
+  const preview = usePreview();
   const more = useUI((x) => x.more);
   useResetWatch();
   // Chaque page arrive en douceur : ses blocs montent et apparaissent l'un après l'autre
@@ -146,9 +148,6 @@ export function Layout() {
           <button type="button" className={s.railMini} onClick={openFeedback} aria-label={t('ui.fb_btn')}>
             <Icon name="bulb" />
           </button>
-          <button type="button" className={s.railMini} onClick={() => openUI('settings')} aria-label={t('ui.settings')}>
-            <Icon name="gear" />
-          </button>
           <button type="button" className={s.railMini} onClick={() => openUI('more')} aria-label={t('ui.more')}>
             <Icon name="more" />
           </button>
@@ -157,6 +156,11 @@ export function Layout() {
 
       {/* en haut à droite : bêta, pièces, profil (pas de grande barre) */}
       <div className={s.hud}>
+        {preview ? (
+          <button type="button" className={s.previewChip} onClick={() => setPreview(false)}>
+            Aperçu joueur · revenir admin
+          </button>
+        ) : null}
         <BetaChip />
         {user ? (
           <>
@@ -168,7 +172,12 @@ export function Layout() {
               <Avatar pseudo={me.data?.pseudo ?? '?'} size={40} />
             </NavLink>
           </>
-        ) : (
+        ) : null}
+        {/* paramètres : bien en vue, à côté de la photo */}
+        <button type="button" className={s.hudGear} onClick={() => openUI('settings')} aria-label={t('ui.settings')}>
+          <Icon name="gear" size={24} />
+        </button>
+        {user ? null : (
           <Button variant="primary" size="sm" onClick={() => openUI('account')}>
             {t('ui.login')}
           </Button>

@@ -314,3 +314,12 @@ html.reduce-fx .op-id, html.reduce-fx .op-stats, html.reduce-fx .op-actions { an
   .op-id { padding: 14px 18px; border: 3px solid transparent; border-radius: 14px; border-image: url('/img/ui/box-9.png?v=3') 14 fill / 28px stretch;
     background: linear-gradient(#39374f, #39374f) center / calc(100% - 16px) calc(100% - 16px) no-repeat; image-rendering: pixelated; margin-bottom: 12px; }
 }
+
+/* logo de la série (dessiné à la main) en haut de la boîte d'infos */
+.op-serie {
+  display: block;
+  height: 34px;
+  width: auto;
+  image-rendering: pixelated;
+  margin-bottom: 4px;
+}

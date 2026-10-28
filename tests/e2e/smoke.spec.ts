@@ -14,6 +14,7 @@ for (const path of ROUTES) {
     page.on('pageerror', (e) => errors.push(e.message));
     await page.goto(path);
     await expect(page.locator('main h1')).toBeVisible();
+    await page.waitForTimeout(700); // fin des animations d'apparition (texte à moitié transparent = faux problème de contraste)
     const a11y = await new AxeBuilder({ page }).analyze();
     expect(a11y.violations.filter((v) => v.impact === 'critical' || v.impact === 'serious').map((v) => v.id)).toEqual(
       [],

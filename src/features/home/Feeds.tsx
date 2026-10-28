@@ -105,7 +105,14 @@ export function Live() {
               <li key={i} aria-hidden={i >= rows.length || undefined}>
                 <Avatar pseudo={r.pseudo} size={24} />
                 <span>
-                  {mine ? <b>{t('ui.you')}</b> : <Link to={`/profil/${encodeURIComponent(r.pseudo)}`}>{r.pseudo}</Link>}{' '}
+                  {mine ? (
+                    <b>{t('ui.you')}</b>
+                  ) : (
+                    // les copies (pour la boucle) sont cachées : leurs liens ne doivent pas être atteignables au clavier
+                    <Link to={`/profil/${encodeURIComponent(r.pseudo)}`} tabIndex={i >= rows.length ? -1 : undefined}>
+                      {r.pseudo}
+                    </Link>
+                  )}{' '}
                   <span className="muted">{t('ui.got')}</span> {jn(r.jeton)}
                   <VTag v={r.variant} />{' '}
                   <span className="muted">· 1/{vOdds(r.odds, r.variant).toLocaleString(locale(lang))}</span>

@@ -78,7 +78,7 @@
 .popBody {
   display: grid;
   gap: var(--s-2);
-  max-height: 50dvh;
+  max-height: calc(50dvh / var(--z, 1));
   overflow-y: auto;
 }
 .btns {

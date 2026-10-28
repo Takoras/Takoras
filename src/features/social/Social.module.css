@@ -89,7 +89,7 @@
   right: var(--gutter);
   bottom: calc(var(--tabh) + env(safe-area-inset-bottom) + var(--s-4));
   width: min(360px, 100% - 2 * var(--gutter));
-  height: min(480px, 70dvh);
+  height: min(480px, calc(70dvh / var(--z, 1)));
   display: flex;
   flex-direction: column;
   overflow: hidden;
@@ -312,7 +312,7 @@
   padding: var(--s-3);
   border-radius: var(--r-md);
   background: var(--bg-raised);
-  max-height: 30dvh;
+  max-height: calc(30dvh / var(--z, 1));
   overflow-y: auto;
 }
 .annMore p {
@@ -351,7 +351,7 @@
     right: var(--s-2);
     left: var(--s-2);
     width: auto;
-    height: min(460px, 65dvh);
+    height: min(460px, calc(65dvh / var(--z, 1)));
   }
   .annBar small {
     display: none;
@@ -378,7 +378,7 @@
   top: var(--s-4);
   display: grid;
   grid-template-rows: auto minmax(0, 1fr) auto;
-  height: calc(100dvh - 140px);
+  height: calc(calc(100dvh / var(--z, 1)) - 140px);
   border-radius: var(--r-lg);
   border: 1px solid var(--line);
   background: var(--surface);

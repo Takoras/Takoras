@@ -2,7 +2,7 @@
    Les cases utilisent les textures dessinées à la main (/img/ui/box-gold.png?v=3, box-dark.png). */
 .page {
   /* le passe prend tout l'écran (comme Brawl) : la taille des cases suit la hauteur dispo */
-  --tile: clamp(96px, calc((100dvh - 340px) / 2.5), 200px); /* un peu moins zoomé : plus de paliers visibles en largeur */
+  --tile: clamp(96px, calc((calc(100dvh / var(--z, 1)) - 340px) / 2.5), 200px); /* un peu moins zoomé : plus de paliers visibles en largeur */
   display: grid;
   gap: var(--s-3);
 }
@@ -27,7 +27,7 @@
   font-weight: 700;
 }
 .season h1 {
-  font-size: clamp(1.4rem, 3vw, 2rem);
+  font-size: clamp(1.4rem, calc(3vw / var(--z, 1)), 2rem);
   line-height: var(--lh-tight);
 }
 .season .ends {
@@ -618,8 +618,8 @@ button.tile:focus-visible {
     translate: -50% 0;
   }
   .tile {
-    width: min(132px, 38vw);
-    height: min(132px, 38vw);
+    width: min(132px, calc(38vw / var(--z, 1)));
+    height: min(132px, calc(38vw / var(--z, 1)));
     padding: 20px;
   }
   .tile img {
@@ -639,4 +639,12 @@ button.tile:focus-visible {
 :global(html.lockScroll body) {
   overflow: hidden;
   height: 100%;
+}
+
+/* « Tout récupérer » (et le bouton admin) au-dessus de la piste */
+.bulk {
+  display: flex;
+  gap: var(--s-2);
+  justify-content: flex-end;
+  margin-bottom: calc(-1 * var(--s-1));
 }

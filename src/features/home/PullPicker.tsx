@@ -1,4 +1,5 @@
 import { PULLS } from '@/engines/env';
+import { SerieName } from '@/ui/SerieName';
 import { TEMPLATE } from '@/data/jetons';
 import { useT } from '@/i18n/useT';
 import s from './Home.module.css';
@@ -15,7 +16,7 @@ export function PullPicker({ value, onChange }: { value: number; onChange: (i: n
         {PULLS.map((p, i) => (
           <button key={p.name} type="button" aria-pressed={i === value} onClick={() => onChange(i)}>
             <img className="px" src={p.img} alt="" width={36} height={36} />
-            {p.name}
+            <SerieName name={p.name} h="1.5em" />
           </button>
         ))}
         <button type="button" disabled className={s.soon}>

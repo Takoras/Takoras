@@ -18,7 +18,7 @@
   align-content: center;
 }
 .id h2 {
-  font-size: clamp(1.8rem, 4vw, 2.6rem);
+  font-size: clamp(1.8rem, calc(4vw / var(--z, 1)), 2.6rem);
   line-height: 1;
   text-shadow: 0 0 24px rgba(var(--g), 0.45);
 }
@@ -264,7 +264,7 @@
   align-items: center;
   gap: var(--s-2);
   margin: 0;
-  min-width: 170px;
+  min-width: 150px;
 }
 .rs b {
   text-align: right;
@@ -412,7 +412,7 @@
 
 /* vidéo d'exemple du pouvoir (éditeur d'équipe) */
 .demo {
-  width: 220px;
+  width: min(190px, 100%);
   margin-top: var(--s-2);
 }
 @media (max-height: 720px) {

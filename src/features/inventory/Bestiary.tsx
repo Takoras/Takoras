@@ -1,19 +1,10 @@
 import { useLayoutEffect, useMemo, useRef, useState, type CSSProperties } from 'react';
+import { SerieName } from '@/ui/SerieName';
 import { Link, NavLink } from 'react-router';
 import { NeedLogin } from '@/app/NeedLogin';
 import { useQueryClient } from '@tanstack/react-query';
 import { errorText, invApi } from '@/api';
-import {
-  MYSTERE,
-  sellValue,
-  SERIES,
-  texOf,
-  vImg,
-  vOdds,
-  glowVars,
-  jetonOf,
-  TEMPLATE,
-} from '@/data/jetons';
+import { MYSTERE, sellValue, SERIES, texOf, vImg, vOdds, glowVars, jetonOf, TEMPLATE } from '@/data/jetons';
 import { statsOf, fmtLuck } from '@/engines/env';
 import { moPlay, moSnap } from '@/engines/motion.js';
 import { sfx } from '@/engines/sound.js';
@@ -212,7 +203,9 @@ export default function Bestiary() {
                 alt=""
               />
               <span>
-                <b>{t('ui.bst_pull', { n: x })}</b>
+                <b>
+                  <SerieName name={x} h="1.4em" />
+                </b>
                 <small>{`${f} / ${js.length}`}</small>
               </span>
             </button>

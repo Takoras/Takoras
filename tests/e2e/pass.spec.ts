@@ -13,7 +13,9 @@ test('passe de combat : palier, récupérer une récompense gratuite, premium pa
   await expect(pd.getByRole('button', { name: /Débloquer/ })).toBeDisabled();
   await expect(pd.getByText(/€/)).toHaveCount(0);
   await page.keyboard.press('Escape');
-  await page.getByRole('button', { name: 'Récupérer' }).first().click();
+  await page.getByRole('button', { name: /^Récupérer ·/ }).first().click();
   await expect(page.getByRole('status').getByText(/Récompense récupérée/)).toBeVisible();
   expect(calls).toContain('bp_claim');
+  // plusieurs paliers prêts : « Tout récupérer » d'un coup
+  await expect(page.getByRole('button', { name: /Tout récupérer/ })).toBeVisible();
 });
