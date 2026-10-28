@@ -102,8 +102,12 @@
 .op-coin .zoom { perspective: 800px; }
 .op-coin .spin { position: relative; }
 .op-coin .spin img.face { position: relative; }
-.op-coin .spin img.edge, .op-coin .spin img.back { position: absolute; inset: 0; filter: brightness(.45) saturate(.8); }
-.op-coin .spin img.back { filter: none; }
+.op-coin .spin img.back { position: absolute; inset: 0; }
+/* tranche : disques pleins, sombres au milieu et clairs aux bords (couleur du jeton), qui donnent l'épaisseur */
+.op-coin .spin i.edge { position: absolute; inset: 1.5%; border-radius: 50%; pointer-events: none;
+  background: linear-gradient(90deg, #1b1830, rgb(var(--tier, 167, 139, 250)) 18%, #2a2547 50%, rgb(var(--tier, 167, 139, 250)) 82%, #1b1830);
+  filter: brightness(.55); }
+.op-coin .spin i.edge.lip { filter: brightness(.9); }
 .opening.spinning .op-actions { opacity: .35; pointer-events: none; transition: opacity .3s; }
 .op-actions { transition: opacity .3s; }
 .op-coin::before { transform: scale(calc(1 + var(--boost) * .35)); }

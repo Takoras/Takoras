@@ -1,4 +1,5 @@
-// Généré par scripts/port/canvas.mjs depuis legacy/transitions.js + legacy/opening.js (+ HTML de legacy/index.html) — ne pas modifier ici, modifier legacy/ puis relancer.
+// Ouverture des tirages. Repris de legacy/ (transitions.js + opening.js) ; ce fichier est maintenant la référence (plus régénéré).
+import { SERIES, texOf } from '@/data/jetons';
 import { $, ACC, LOCALE, PULLS, SETTINGS, STAT_MAX, VARIANTS, errText, fmt, fmtLuck, jn, jnH, reducedFx, saveSettings, sb, sfx, sparkStyle, speed, statsOf, t, toast, vCls, vOdds, vTag, host } from './env';
 import { CINE } from './cinema.js';
 import './legacy-base.css';
@@ -153,32 +154,10 @@ addEventListener('keydown', e => {
 // Le résultat est tiré dès l'ouverture ; les clics ne font que le révéler. On peut spammer pour aller vite.
 
 // Jetons de la série Takoras — PROVISOIRES : même texture (template), seule la couleur du glow change.
-const TEMPLATE = '/img/jetons/template.png'; // texture par défaut tant qu'un jeton n'a pas son dessin
-const texOf = j => j.img || TEMPLATE;
 // Taille de la grille du dessin (64×64 pour la plupart). Un dessin plus grand (Néphéris : 74×74) est affiché un peu plus grand
 // pour que ses pixels fassent la même taille que ceux des autres jetons.
 const texScale = j => (j?.grid || 64) / 64;
-const SERIES = {
-  Takoras: [
-    { name: 'Mobu', odds: 2, glow: '#8fb3c4', img: '/img/jetons/serie-takoras/mobu.png' },
-    { name: 'Pikko', odds: 4, glow: '#f0a3b0', img: '/img/jetons/serie-takoras/pikko.png' },
-    { name: 'Rouillé', odds: 10, glow: '#d2603a', img: '/img/jetons/serie-takoras/rouille.png' },
-    { name: 'Givre', odds: 25, glow: '#a5b4fc', img: '/img/jetons/serie-takoras/givre.png' },
-    { name: 'Soléo', odds: 60, glow: '#f0805c', img: '/img/jetons/serie-takoras/soleo.png' },
-    { name: 'Azura', odds: 150, glow: '#7c7cc4', img: '/img/jetons/serie-takoras/azura.png' },
-    { name: 'Carmin', odds: 400, glow: '#d0408f', img: '/img/jetons/serie-takoras/carmin.png' },
-    { name: 'Vyolis', odds: 1000, glow: '#c9a6f2', img: '/img/jetons/serie-takoras/vyolis.png' },
-    { name: 'Lumis', odds: 2500, glow: '#f7a8d8', img: '/img/jetons/serie-takoras/lumis.png' },
-    { name: 'Nyx', odds: 5000, glow: '#7c8cf8', img: '/img/jetons/serie-takoras/nyx.png' },
-    { name: 'Astra', odds: 10000, glow: '#f6d39a', img: '/img/jetons/serie-takoras/astra.png' },
-    { name: 'Kraïos', odds: 25000, glow: '#3d3fa8', img: '/img/jetons/serie-takoras/kraios.gif' },
-    { name: 'Koi', odds: 50000, glow: '#f0453a', img: '/img/jetons/serie-takoras/koi.png' },
-    { name: 'Néphéris', odds: 100000, glow: '#f08a3c', img: '/img/jetons/serie-takoras/nepheris.gif' },
-    { name: 'Zénith', odds: 250000, glow: '#d9364f', img: '/img/jetons/serie-takoras/zenith.gif' },
-    { name: 'Oblivion', odds: 500000, glow: '#3fc7b6', img: '/img/jetons/serie-takoras/oblivion.gif' },
-    { name: 'Takoras', odds: 1000000, glow: '#9fb6ff' },
-  ],
-};
+// la liste des jetons vient de src/data/series.json (une seule source : avant, une vieille copie ici n'avait pas l'image de Takoras)
 const SKIP = 1 / 5; // environ 1 clic sur 5 saute discrètement une étape
 
 // Couleur du compteur selon la rareté atteinte
@@ -226,14 +205,14 @@ function spawn() {
   sfx.spawn();
   opCoin.animate([{ transform: 'scale(0)', opacity: 0 }, { transform: 'scale(1)', opacity: 1 }], { duration: 520, easing: 'cubic-bezier(.16, 1, .3, 1)' });
 }
-// Jeton en volume : la face devant, quelques copies assombries derrière pour la tranche, et un dos.
-// Ce ne sont que des images empilées en 3D (pas de calcul), donc ça ne fait pas ramer le navigateur.
-const DEPTH = 8; // nombre de couches de la tranche
+// Jeton en volume : la face devant, une vraie tranche pleine (des disques empilés en 3D, sombres au milieu et
+// clairs sur les bords, aux couleurs du jeton) et un dos. Rien n'est calculé : juste du CSS 3D, fluide partout.
+const DEPTH = 14, STEP = 1.5; // 14 disques espacés de 1,5 px : ~21 px d'épaisseur
 function coin3D(src, alt, style = '', cls = '') {
   let edge = '';
-  for (let i = 1; i <= DEPTH; i++) edge += `<img class="edge" src="${src}" alt="" style="transform:translateZ(${-i * 2}px)">`;
+  for (let i = 1; i <= DEPTH; i++) edge += `<i class="edge${i === 1 || i === DEPTH ? ' lip' : ''}" style="transform:translateZ(${-i * STEP}px)"></i>`;
   // reflet et éclat posés sur la face : ils tournent avec le jeton
-  return `<img class="face${cls}" src="${src}" alt="${alt}" style="${style}"><i class="glare"></i><i class="shine"></i>${edge}<img class="back${cls}" src="${src}" alt="" style="transform:translateZ(${-(DEPTH + 1) * 2}px) rotateY(180deg)">`;
+  return `<img class="face${cls}" src="${src}" alt="${alt}" decoding="sync" style="${style}"><i class="glare"></i><i class="shine"></i>${edge}<img class="back${cls}" src="${src}" alt="" decoding="sync" style="transform:translateZ(${-(DEPTH + 1) * STEP}px) rotateY(180deg)">`;
 }
 function setGlareMask(src) {
   opCoin.querySelectorAll('.glare, .shine').forEach(g => { g.style.webkitMaskImage = g.style.maskImage = `url(${src})`; });
@@ -507,7 +486,21 @@ function reveal(restored, quiet = false) {
     const turns = j.odds >= GOD ? 10 : j.odds >= MYTHIC ? 8 : j.odds >= RARE ? 6 : j.odds >= FAST ? 4 : 3;
     // rythme selon la rareté (cahier § 16.2) : commune 0,8 s · rare 1,4 s · épique 2,2 s · légendaire 3,2 s · hyper rare 4,5 s
     const ms = Math.max(350, (j.odds >= MYTHIC ? 4500 : j.odds >= 10000 ? 3200 : j.odds >= RARE ? 2200 : j.odds >= 100 ? 1400 : 800) * (speed() || .2));
-    spin.animate([{ transform: 'rotateY(0)' }, { transform: `rotateY(${turns * 360}deg)` }], { duration: ms, easing: 'cubic-bezier(.05, .9, .1, 1)' });
+    // élan (il recule un peu en se penchant), gros tour qui freine, dépasse un peu, puis se pose : courbes ease in/out
+    const T = turns * 360;
+    spin.animate([
+      { transform: 'rotateY(0) rotateX(0) scale(1)', easing: 'cubic-bezier(.4, 0, .6, 1)' },
+      { transform: 'rotateY(-30deg) rotateX(10deg) scale(.9)', offset: .1, easing: 'cubic-bezier(.15, .55, .1, 1)' },
+      { transform: `rotateY(${T + 16}deg) rotateX(-5deg) scale(1.08)`, offset: .8, easing: 'cubic-bezier(.45, 0, .55, 1)' },
+      { transform: `rotateY(${T - 5}deg) rotateX(2deg) scale(.98)`, offset: .91, easing: 'cubic-bezier(.45, 0, .55, 1)' },
+      { transform: `rotateY(${T}deg) rotateX(0) scale(1)` },
+    ], { duration: ms, easing: 'linear' });
+    // atterrissage : petit impact (secousse, étincelles, onde) pile quand il se pose
+    setTimeout(() => {
+      if (run !== r) return;
+      shake(j.odds >= RARE ? 1 : .5); burst(j.odds >= RARE ? 18 : 10); wave();
+      if (j.odds >= RARE) flash(.25, 300);
+    }, ms * .8);
     // On ne peut pas passer à la suite tout de suite : 0,5 s max pour les jetons communs,
     // toute la rotation pour les vrais rares (1/1000 et plus)
     const lock = j.odds >= RARE ? ms : Math.min(ms, 500);

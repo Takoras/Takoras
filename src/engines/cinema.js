@@ -1,4 +1,4 @@
-// Généré par scripts/port/canvas.mjs depuis legacy/cinema.js — ne pas modifier ici, modifier legacy/ puis relancer.
+// Cinématiques des jetons rares. Repris de legacy/cinema.js ; ce fichier est maintenant la référence (plus régénéré).
 import { LOCALE, SERIES, jn, sfx, speed, texOf, t } from './env';
 const MYSTERE = '/img/jetons/mystere.png';
 import FILES from '../data/sounds.json';
@@ -37,7 +37,8 @@ const CINE = (() => {
     'Néphéris': { c: ['#140a05', '#7a3a14', '#f08a3c', '#fff6ea'], scene: ['dust', 'atom'],              root: 233.1, scale: [0, 3, 5, 7, 10], chord: [0, 3, 7, 10, 14],    bpm: 84,  voice: 'choir' },
     'Zénith':   { c: ['#120306', '#6e1424', '#d9364f', '#ffd6dc'], scene: ['embers', 'emberstorm'],     root: 293.7, scale: [0, 1, 5, 7, 8],  chord: [0, 4, 7, 11, 14],    bpm: 76,  voice: 'choir' },
     'Oblivion': { c: ['#020b0d', '#14524f', '#3fc7b6', '#e6fffb'], scene: ['stars', 'vortex', 'disk', 'glitch'], root: 138.6, scale: [0, 1, 5, 7, 8], chord: [0, 6, 12],     bpm: 64,  voice: 'pad', sub: true },
-    'Takoras':  { c: ['#02040f', '#2a3f9e', '#9fb6ff', '#ffffff'], scene: ['galaxy', 'orbiters', 'pillar'], root: 130.8, scale: [0, 2, 4, 7, 9], chord: [0, 4, 7, 12, 16, 19], bpm: 88, voice: 'choir', epic: true },
+    // couleurs du sprite : bord cyan et bleu roi, blanc, violet sombre, langue rose
+    'Takoras':  { c: ['#04030c', '#1d3fae', '#3cc8ea', '#ffffff'], gal: ['#3cc8ea', '#1d3fae', '#ffffff', '#ff7aa2', '#8b5cf6', '#e8d5d0'], rim: ['#1d3fae', '#3cc8ea'], scene: ['galaxy', 'jaws', 'orbiters', 'pillar'], root: 130.8, scale: [0, 2, 4, 7, 9], chord: [0, 4, 7, 12, 16, 19], bpm: 88, voice: 'choir', epic: true },
   };
   const DEFAULT = j => ({ c: ['#05050a', '#312e81', j.glow || '#a78bfa', '#ffffff'], scene: ['stars', 'rays', 'sparkles'], root: 196, scale: [0, 2, 4, 7, 9], chord: [0, 4, 7, 12], bpm: 96, voice: 'ep' });
 
@@ -201,7 +202,9 @@ const CINE = (() => {
     // déchirures numériques (bandes décalées)
     glitch(x, w, h, t, k, th, st, cine) { if (Math.random() < k * .25) { const y = Math.floor(rnd(0, h)), hh = Math.floor(rnd(1, 5)); try { const img = x.getImageData(0, y, w, hh); x.putImageData(img, Math.floor(rnd(-8, 8)), y); } catch {} x.fillStyle = rgba(th.c[2], .5); x.fillRect(0, y, w, 1); } },
     // galaxie (Takoras) : spirale multicolore
-    galaxy(x, w, h, t, k, th) { const cols = ['#c4b5fd', '#f0abfc', '#93c5fd', '#fde68a', '#86efac', '#fda4af', '#ffffff']; for (let i = 0; i < 500; i++) { const arm = i % 3, d = (i / 500) * Math.min(w, h) * .6, a = arm * 2.09 + d * .06 + t * .3; px(x, w / 2 + Math.cos(a) * d + Math.sin(i) * 3, h / 2 + Math.sin(a) * d * .6 + Math.cos(i) * 3, 1, rgba(cols[i % cols.length], .5 * (1 - d / (Math.min(w, h) * .6)) + .15)); } },
+    galaxy(x, w, h, t, k, th) { const cols = th.gal || ['#c4b5fd', '#f0abfc', '#93c5fd', '#fde68a', '#86efac', '#fda4af', '#ffffff']; for (let i = 0; i < 500; i++) { const arm = i % 3, d = (i / 500) * Math.min(w, h) * .6, a = arm * 2.09 + d * .06 + t * .3; px(x, w / 2 + Math.cos(a) * d + Math.sin(i) * 3, h / 2 + Math.sin(a) * d * .6 + Math.cos(i) * 3, 1, rgba(cols[i % cols.length], .5 * (1 - d / (Math.min(w, h) * .6)) + .15)); } },
+    // Takoras : une mâchoire géante (ses deux moitiés cyan et bleues) qui s'ouvre et claque de plus en plus vite, lueur rose entre les deux
+    jaws(x, w, h, t, k, th) { const cx = w / 2, cy = h / 2, R = Math.min(w, h) * (.46 - .06 * k), bite = Math.pow(Math.abs(Math.sin(t * (1.2 + k * 5))), 3), gap = R * (.18 + .5 * (1 - bite)) * (1 - k * .4); const g = x.createRadialGradient(cx, cy, 0, cx, cy, R); g.addColorStop(0, rgba('#ff7aa2', .1 + .3 * k * bite)); g.addColorStop(1, rgba('#ff7aa2', 0)); x.fillStyle = g; x.fillRect(0, 0, w, h); [[-1, th.c[2]], [1, th.c[1]]].forEach(([sg, col]) => { x.strokeStyle = rgba(col, .45 + .45 * k); x.lineWidth = 3; x.beginPath(); x.arc(cx, cy + sg * gap, R, sg < 0 ? Math.PI * 1.08 : Math.PI * .08, sg < 0 ? Math.PI * 1.92 : Math.PI * .92); x.stroke(); for (let i = 1; i < 8; i++) { const a = (sg < 0 ? Math.PI : 0) + i / 8 * Math.PI, X = cx + Math.cos(a) * R * .96, Y = cy + sg * gap + Math.sin(a) * R * .96; x.fillStyle = rgba('#ffffff', .5 + .5 * k); x.beginPath(); x.moveTo(X - 2, Y); x.lineTo(X + 2, Y); x.lineTo(X, Y - sg * (4 + 3 * k)); x.fill(); } }); },
     // tous les autres jetons tournent autour (Takoras)
     orbiters(x, w, h, t, k, th, st, cine) { const imgs = cine.orbit; if (!imgs) return; imgs.forEach((im, i) => { if (!im.complete || !im.naturalWidth) return; const a = t * (.6 + k) + i / imgs.length * Math.PI * 2, R = Math.min(w, h) * (.42 - .12 * k), s = 12; x.globalAlpha = .85; x.drawImage(im, Math.round(w / 2 + Math.cos(a) * R - s / 2), Math.round(h / 2 + Math.sin(a) * R * .55 - s / 2), s, s); x.globalAlpha = 1; }); },
     // ---------- Scènes « signature » : chacune reprend le motif dessiné sur le jeton ----------
@@ -248,6 +251,44 @@ const CINE = (() => {
     // pilier de lumière divine
     pillar(x, w, h, t, k, th) { const W = 6 + k * 26, g = x.createLinearGradient(w / 2 - W, 0, w / 2 + W, 0); g.addColorStop(0, 'rgba(255,255,255,0)'); g.addColorStop(.5, `rgba(255,255,255,${.15 + .5 * k})`); g.addColorStop(1, 'rgba(255,255,255,0)'); x.fillStyle = g; x.fillRect(w / 2 - W, 0, W * 2, h); },
   };
+
+  // =====================================================================
+  // Faux jeton 3D (dessiné en pixel art) : tranche épaisse, face qui s'écrase avec le cosinus de l'angle,
+  // dos plus sombre, reflet qui glisse sur la face quand il tourne. ang = angle autour de l'axe vertical.
+  // =====================================================================
+  function coin3d(x, im, cx, cy, size, ang, rim) {
+    const c = Math.cos(ang), sn = Math.sin(ang), rx = Math.max(.6, Math.abs(c) * size / 2), ry = size / 2;
+    const T = size * .1, off = sn * T; // épaisseur de la tranche, vue de côté
+    // tranche : des ellipses empilées de l'arrière (cx - off/2) vers l'avant (cx + off/2), bord sombre, liseré clair
+    const n = Math.ceil(Math.abs(off)), dir = Math.sign(off) || 1;
+    for (let i = 0; i <= n; i++) {
+      const X = Math.round(cx - off / 2 + dir * i);
+      x.fillStyle = i === 0 || i === n ? rim[1] : rim[0];
+      x.beginPath(); x.ellipse(X, cy, rx, ry, 0, 0, 7); x.fill();
+      if (i % 2 && i < n) { x.fillStyle = 'rgba(255,255,255,.16)'; x.fillRect(X + (c >= 0 ? -rx : rx) * dir * .97, Math.round(cy - ry * .55), 1, Math.round(ry * 1.1)); } // stries
+    }
+    const fx = Math.round(cx + off / 2);
+    x.save(); x.translate(fx, cy); x.scale(Math.max(.02, Math.abs(c)), 1);
+    if (im && im.complete && im.naturalWidth) x.drawImage(im, -size / 2, -size / 2, size, size);
+    x.restore();
+    // dos : même dessin assombri
+    if (c < 0) { x.fillStyle = 'rgba(0,0,0,.35)'; x.beginPath(); x.ellipse(fx, cy, rx * .98, ry * .98, 0, 0, 7); x.fill(); }
+    // reflet : une bande claire qui traverse la face selon l'angle
+    x.save(); x.beginPath(); x.ellipse(fx, cy, rx * .96, ry * .96, 0, 0, 7); x.clip();
+    const sx = fx + Math.sin(ang * 2) * rx * 1.3, gr = x.createLinearGradient(sx - size * .22, cy - ry, sx + size * .22, cy + ry);
+    gr.addColorStop(0, 'rgba(255,255,255,0)'); gr.addColorStop(.5, `rgba(255,255,255,${.12 + .3 * Math.abs(sn)})`); gr.addColorStop(1, 'rgba(255,255,255,0)');
+    x.fillStyle = gr; x.fillRect(fx - rx, cy - ry, rx * 2, ry * 2);
+    x.restore();
+  }
+  // Rotation du jeton par à-coups : il marque une pause, puis fait un demi-tour avec un ease in-out bien fluide.
+  // Plus la tension monte, plus les demi-tours s'enchaînent vite.
+  const easeIO = k => k < .5 ? 16 * k ** 5 : 1 - (-2 * k + 2) ** 5 / 2;
+  function flipAngle(st, dt, period) {
+    st.ph = (st.ph || 0) + dt / period;
+    const n = Math.floor(st.ph), f = st.ph - n, move = clamp((f - .3) / .7);
+    return (n + easeIO(move)) * Math.PI;
+  }
+  const easeOutBack = k => 1 + 2.7 * (k - 1) ** 3 + 1.7 * (k - 1) ** 2;
 
   // =====================================================================
   // Lecture
@@ -306,39 +347,50 @@ const CINE = (() => {
         const cx = w / 2, cy = h / 2;
         if (p >= .08 && p < .94) {
           const size = lerp(10, Math.min(w, h) * .42, ease(clamp((p - .08) / .8))) * (1 - suck * .9);
-          const spin = tt * (1 + tense * 6), sx = Math.cos(spin); // vraie rotation sur lui-même
+          // vrai jeton en volume : demi-tours fluides avec une pause entre deux, de plus en plus serrés
+          const ang = flipAngle(cine, Math.min(.05, (now - (cine.last ?? now)) / 1000), lerp(1.2, .22, tense) * (suck ? .4 : 1)), sx = Math.cos(ang);
+          cine.last = now;
           // halo qui bat avec la tension
           const beat = tense ? (Math.sin(tt * (6 + tense * 14)) * .5 + .5) : .3;
           const gr = x.createRadialGradient(cx, cy, 0, cx, cy, size * (1 + .4 * beat));
           gr.addColorStop(0, rgba(th.c[2], .25 + .45 * k * beat)); gr.addColorStop(1, rgba(th.c[2], 0));
           x.fillStyle = gr; x.fillRect(0, 0, w, h);
-          x.save(); x.translate(cx, cy); x.scale(Math.max(.04, Math.abs(sx)), 1);
-          // rien ne se devine avant la fin : un « ? » sur les DEUX faces (le dos est un peu plus sombre)
-          x.drawImage(mys.complete && mys.naturalWidth ? mys : sil, -size / 2, -size / 2, size, size);
-          if (sx < 0) { x.globalAlpha = .28; x.fillStyle = '#000'; x.beginPath(); x.arc(0, 0, size * .47, 0, 7); x.fill(); x.globalAlpha = 1; }
-          x.restore();
-          // tranche du jeton quand il est vu de profil
-          if (Math.abs(sx) < .35) { x.fillStyle = rgba(th.c[2], .8 * (1 - Math.abs(sx) / .35)); x.fillRect(Math.round(cx - 1), Math.round(cy - size * .45), 2, Math.round(size * .9)); }
+          coin3d(x, mys.complete && mys.naturalWidth ? mys : sil, cx, cy, size, ang, th.rim || ['#1c1a2e', '#4a4568']);
           // contour lumineux de la silhouette (petits pixels autour)
-          for (let i = 0; i < 24 * k; i++) { const a = rnd(0, 7), r = size * .5 * (.95 + Math.random() * .1); px(x, cx + Math.cos(a) * r * Math.abs(sx), cy + Math.sin(a) * r, 1, rgba(th.c[3], .8)); }
+          for (let i = 0; i < 24 * k; i++) { const a = rnd(0, 7), r = size * .5 * (1.02 + Math.random() * .1); px(x, cx + Math.cos(a) * r * Math.max(.3, Math.abs(sx)), cy + Math.sin(a) * r, 1, rgba(th.c[3], .8)); }
         }
         if (p >= .94) {
           const ry = h * .42; // un peu plus haut : le nom s'affiche dessous
-          // révélation : le jeton en couleur, grand, avec onde de choc
-          const q = clamp((now - (cine.revAt ?? now)) / 450), size = Math.min(w, h) * (.5 + .1 * ease(q));
-          if (!cine.revealed) { cine.revealed = true; cine.revAt = now; cine.flash = 1; root.classList.add('named'); }
+          // RÉVÉLATION façon jeu vidéo : flash, le jeton arrive de profil et fait 1,5 tour en freinant (ease out),
+          // gros « pop » d'échelle qui dépasse puis se pose, rayons qui tournent, double onde de choc, confettis aux couleurs du jeton
+          if (!cine.revealed) {
+            cine.revealed = true; cine.revAt = now; cine.flash = 1; root.classList.add('named');
+            const cols = th.gal || [th.c[2], th.c[3], th.c[1]];
+            cine.conf = Array.from({ length: 140 }, (_, i) => { const a = rnd(0, 7), v = rnd(1.5, 5.5); return { x: cx, y: ry, vx: Math.cos(a) * v, vy: Math.sin(a) * v - rnd(.5, 2.5), c: cols[i % cols.length], s: i % 5 ? 1 : 2, life: rnd(.7, 1.4) }; });
+          }
+          const ms = now - cine.revAt, q = clamp(ms / 450), turn = clamp(ms / 900);
+          const size = Math.min(w, h) * .5 * (.55 + .45 * easeOutBack(clamp(ms / 520)));
           x.fillStyle = th.c[0]; x.fillRect(0, 0, w, h);
+          // rayons qui tournent derrière le jeton
+          const nR = 14, R = Math.hypot(w, h);
+          for (let i = 0; i < nR; i++) { const a0 = ms / 1000 * .5 + i / nR * Math.PI * 2, a1 = a0 + Math.PI / nR * .6; x.fillStyle = rgba(i % 2 ? th.c[2] : th.c[3], .1 + .1 * (1 - turn)); x.beginPath(); x.moveTo(cx, ry); x.lineTo(cx + Math.cos(a0) * R, ry + Math.sin(a0) * R); x.lineTo(cx + Math.cos(a1) * R, ry + Math.sin(a1) * R); x.fill(); }
           const gr = x.createRadialGradient(cx, ry, 0, cx, ry, size * 1.6); gr.addColorStop(0, rgba(th.c[2], .7)); gr.addColorStop(1, rgba(th.c[0], 0)); x.fillStyle = gr; x.fillRect(0, 0, w, h);
-          x.strokeStyle = rgba(th.c[3], 1 - q); x.lineWidth = 2; x.beginPath(); x.arc(cx, ry, size * (.6 + q * 2.2), 0, 7); x.stroke();
-          for (let i = 0; i < 60; i++) { const a = i / 60 * Math.PI * 2 + i, r = size * (.5 + q * 1.8 + (i % 5) * .08); px(x, cx + Math.cos(a) * r, ry + Math.sin(a) * r, 1, rgba(i % 2 ? th.c[2] : th.c[3], 1 - q)); }
-          x.drawImage(img, cx - size * TS / 2, ry - size * TS / 2, size * TS, size * TS);
+          [0, .25].forEach(d => { const qq = clamp((ms / 1000 - d) / .55); if (qq <= 0 || qq >= 1) return; x.strokeStyle = rgba(d ? th.c[2] : th.c[3], 1 - qq); x.lineWidth = d ? 2 : 3; x.beginPath(); x.arc(cx, ry, size * (.55 + qq * 2.4), 0, 7); x.stroke(); });
+          // confettis (petite gravité)
+          (cine.conf || []).forEach(c => { c.vy += .06; c.vx *= .985; c.x += c.vx; c.y += c.vy; c.life -= .012; if (c.life > 0) px(x, c.x, c.y, c.s, rgba(c.c, Math.min(1, c.life))); });
+          // le jeton : 1,5 tour qui freine pour finir pile de face, puis il flotte doucement
+          const ang = (1 - (1 - turn) ** 3) * Math.PI * 3 + Math.PI, bob = Math.sin(ms / 1000 * 2.4) * 2 * turn;
+          coin3d(x, img, cx, ry + bob, size * TS, ang, th.rim || [th.c[1], th.c[2]]);
+          if (q < 1) for (let i = 0; i < 60; i++) { const a = i / 60 * Math.PI * 2 + i, r = size * (.5 + q * 1.8 + (i % 5) * .08); px(x, cx + Math.cos(a) * r, ry + Math.sin(a) * r, 1, rgba(i % 2 ? th.c[2] : th.c[3], 1 - q)); }
+          // secousse d'impact au moment du flash
+          cv.style.transform = ms < 260 ? `translate(${rnd(-6, 6)}px, ${rnd(-6, 6)}px) scale(${1.06 - ms / 260 * .04})` : '';
         }
         // tremblement pendant la tension
         const sh = tense * (1 - suck) * 3;
-        cv.style.transform = sh ? `translate(${rnd(-sh, sh)}px, ${rnd(-sh, sh)}px) scale(1.02)` : '';
+        if (p < .94) cv.style.transform = sh ? `translate(${rnd(-sh, sh)}px, ${rnd(-sh, sh)}px) scale(1.02)` : '';
         // flash (éclairs, révélation)
         if (cine.flash > 0) { fl.style.opacity = cine.flash; fl.style.background = cine.revealed ? '#fff' : th.c[3]; cine.flash = Math.max(0, cine.flash - .06); } else fl.style.opacity = 0;
-        if (p >= 1 && now - (cine.revAt ?? now) > 1100) return finish(); // on garde le jeton et son nom un instant à l'écran
+        if (p >= 1 && now - (cine.revAt ?? now) > 1500) return finish(); // on garde le jeton et son nom un instant à l'écran
         requestAnimationFrame(frame);
       }
       function finish() {
