@@ -9,6 +9,7 @@ import { locale, useSettings } from '@/lib/settings';
 import { useT } from '@/i18n/useT';
 import { NeedLogin } from '@/app/NeedLogin';
 import { Button } from '@/ui/Button';
+import { Modal } from '@/ui/Modal';
 import { Segmented } from '@/ui/Segmented';
 import { toast } from '@/ui/toast';
 import s from './Pass.module.css';
@@ -36,9 +37,6 @@ const ITEMS: Record<string, ShopItem & { price: number }> = {
   potion100: { id: 'potion100', kind: 'potion', data: { mult: 100, rolls: 10 }, price: 31000 },
   instant: { id: 'instant', kind: 'instant', data: { pulls: 15 }, price: 500 },
   hourglass: { id: 'hourglass', kind: 'hourglass', data: { minutes: 60 }, price: 700 },
-  b_plaine: { id: 'b_plaine', kind: 'banner', data: {}, price: 1000 },
-  b_doodle: { id: 'b_doodle', kind: 'banner', data: {}, price: 2500 },
-  a_etoile: { id: 'a_etoile', kind: 'avatar', data: { anim: true }, price: 25000 },
   // exclusifs du passe premium (saison 1) : jamais vendus en boutique
   a_oeil: { id: 'a_oeil', kind: 'avatar', data: {}, price: 20000 },
   b_yeux: { id: 'b_yeux', kind: 'banner', data: {}, price: 15000 },
@@ -55,6 +53,7 @@ export default function Pass() {
   const qc = useQueryClient();
   const list = useRef<HTMLOListElement>(null);
   const [tab, setTab] = useState<'rewards' | 'missions'>('rewards');
+  const [premOpen, setPremOpen] = useState(false);
   const q = useQuery({
     queryKey: ['pass', user?.id],
     enabled: !!user,
@@ -110,11 +109,25 @@ export default function Pass() {
       locked = prem && !d.premium,
       can = open && !got && !locked;
     const qty = r.coins ? n(r.coins) : (r.qty ?? 1) > 1 ? `×${r.qty}` : '';
+    const it = ITEMS[r.item ?? ''];
+    // nom court et clair sous chaque récompense
+    const short = r.coins
+      ? t('ui.bp_coins', { n: '' }).trim()
+      : it?.kind === 'potion'
+        ? `Chance ×${it.data.mult}`
+        : it?.kind === 'banner'
+          ? 'Bannière'
+          : it?.kind === 'avatar'
+            ? 'Photo de profil'
+            : it
+              ? itemText(it, lang)[0]
+              : '';
     const cls = `${s.tile} ${prem ? s.gold : ''} ${got ? s.got : ''} ${can ? s.ready : ''} ${isCosmetic(r) ? s.rare : ''} ${!open ? s.future : ''}`;
     const body = (
       <>
         <img className={`px ${isCosmetic(r) && r.item?.startsWith('b_') ? s.wide : ''}`} src={icon(r)} alt="" />
         {qty ? <b className={s.qty}>{qty}</b> : null}
+        <small className={s.lbl}>{short}</small>
         {got ? (
           <i className={s.check} aria-hidden>
             ✓
@@ -194,10 +207,13 @@ export default function Pass() {
         <>
           <div className={s.board}>
             <div className={s.rail}>
-              <div className={`${s.ticket} ${s.ticketGold}`}>
+              {/* panneau premium de la saison (Halloween) : toucher = voir ce qu'il débloque */}
+              <button type="button" className={s.premCard} onClick={() => setPremOpen(true)}>
+                <img className={`px ${s.premPp}`} src="/img/pp/oeil.png" alt="" />
                 <b>{t('ui.bp_prem_short')}</b>
+                <small>{d.premium ? `✓ ${t('ui.bp_prem_owned')}` : 'Débloquer'}</small>
                 {ready(true) && d.premium ? <i className={s.dot}>{ready(true)}</i> : null}
-              </div>
+              </button>
               <div className={s.ticket}>
                 <b>{t('ui.bp_free')}</b>
                 {ready(false) ? <i className={s.dot}>{ready(false)}</i> : null}
@@ -221,9 +237,22 @@ export default function Pass() {
             </ol>
           </div>
 
-          <div className={s.premium}>
-            <div className={s.premTxt}>
-              <b>{t('ui.bp_prem')}</b>
+          <Modal open={premOpen} onClose={() => setPremOpen(false)} title={t('ui.bp_prem')}>
+            <div className={s.premium}>
+              <div className={s.premShow}>
+                <figure>
+                  <img className="px" src="/img/pp/oeil.png" alt="" />
+                  <figcaption>
+                    Photo « Œil » <small>palier 50 · exclusive</small>
+                  </figcaption>
+                </figure>
+                <figure>
+                  <img className={`px ${s.premBan}`} src="/img/bannieres/yeux.webp" alt="" />
+                  <figcaption>
+                    Bannière « Yeux » <small>palier 30 · exclusive</small>
+                  </figcaption>
+                </figure>
+              </div>
               <div className={s.compare}>
                 <span>
                   <small>{t('ui.bp_free')}</small>
@@ -242,15 +271,15 @@ export default function Pass() {
                 </span>
                 <span className={s.mult}>×{Math.max(1, Math.round(vPrem / Math.max(1, vFree)))}</span>
               </div>
+              {d.premium ? (
+                <b className={s.owned}>✓ {t('ui.bp_prem_owned')}</b>
+              ) : (
+                <Button variant="primary" disabled title={t('ui.packs_soon')}>
+                  Débloquer · {t('ui.pk_soon')}
+                </Button>
+              )}
             </div>
-            {d.premium ? (
-              <b className={s.owned}>✓ {t('ui.bp_prem_owned')}</b>
-            ) : (
-              <Button variant="primary" disabled title={t('ui.packs_soon')}>
-                5,00 € · {t('ui.pk_soon')}
-              </Button>
-            )}
-          </div>
+          </Modal>
         </>
       ) : (
         <div className={s.missions}>

@@ -561,7 +561,12 @@ export async function fakeSupabase(
         tiers: Array.from({ length: 50 }, (_, i) => ({
           t: i + 1,
           free: (i + 1) % 5 ? { coins: 100 } : { item: 'instant', qty: 1 },
-          prem: (i + 1) % 10 === 0 ? { item: 'b_plaine', qty: 1 } : { item: 'potion10', qty: 1 },
+          prem:
+            i + 1 === 30
+              ? { item: 'b_yeux', qty: 1 }
+              : i + 1 === 50
+                ? { item: 'a_oeil', qty: 1 }
+                : { item: 'potion10', qty: 1 },
         })),
       });
     if (rpc === 'bp_claim') {

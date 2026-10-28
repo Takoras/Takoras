@@ -8,17 +8,12 @@
 }
 
 .head {
+  /* plus de boîte : titre et barre d'XP posés directement */
   display: flex;
   flex-wrap: wrap;
   align-items: center;
   justify-content: space-between;
   gap: var(--s-5);
-  padding: var(--s-6);
-  border-radius: var(--r-md);
-  background:
-    radial-gradient(120% 140% at 0% 0%, color-mix(in srgb, var(--gold) 26%, transparent), transparent 60%),
-    linear-gradient(120deg, #2a1846, #161226 70%);
-  border: 2px solid #3b2a5c;
 }
 .season {
   display: grid;
@@ -137,10 +132,60 @@
   text-align: center;
 }
 /* étiquette premium : boîte pêche à rayures dessinée à la main */
-.ticketGold {
-  background: #ffe0b4 url('/img/ui/box-peach.png?v=3') center / 100% 100% no-repeat;
+/* panneau premium saison 1 (Halloween) : ta boîte rose à rayures, citrouille orange et violet nuit */
+.premCard {
+  position: relative;
+  display: grid;
+  place-items: center;
+  align-content: center;
+  gap: 4px;
+  padding: var(--s-4) var(--s-3);
+  border: 0;
+  font: inherit;
+  color: #ffe4ec;
+  cursor: pointer;
+  background:
+    radial-gradient(60% 50% at 50% 38%, rgb(249 115 22 / 45%), transparent 70%),
+    url('/img/ui/box-premium-s1.png?v=1') center / 100% 100% no-repeat;
   image-rendering: pixelated;
-  color: #7a3a06;
+  transition: filter 0.15s;
+}
+.premCard:hover {
+  filter: brightness(1.12);
+}
+.premCard b {
+  font-size: var(--fs-md);
+  font-weight: 900;
+  letter-spacing: var(--tracking-caps);
+  text-transform: uppercase;
+  color: #fdba74;
+  -webkit-text-stroke: 4px #2a0f1c;
+  paint-order: stroke fill;
+}
+.premCard small {
+  padding: 2px 10px;
+  background: #f97316;
+  box-shadow: 0 2px 0 #9a3412;
+  color: #2a0f1c;
+  font-weight: 800;
+  font-size: var(--fs-xs);
+}
+.premPp {
+  width: 72px;
+  height: 72px;
+  image-rendering: pixelated;
+  filter: drop-shadow(0 0 10px rgb(249 115 22 / 70%));
+  animation: premFloat 2.4s ease-in-out infinite;
+}
+@keyframes premFloat {
+  50% {
+    translate: 0 -4px;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .premPp {
+    animation: none;
+  }
 }
 .dot {
   position: absolute;
@@ -268,6 +313,22 @@ li[aria-current] .num {
 .tile.got {
   filter: grayscale(0.6) brightness(0.6);
 }
+.lbl {
+  position: absolute;
+  top: 8px;
+  left: 6px;
+  right: 6px;
+  text-align: center;
+  font-size: 11px;
+  font-weight: 800;
+  line-height: 1.1;
+  color: #fff;
+  -webkit-text-stroke: 3px #1a1022;
+  paint-order: stroke fill;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
 .qty {
   position: absolute;
   bottom: 8px;
@@ -335,25 +396,45 @@ button.tile:focus-visible {
   }
 }
 
-/* ---------- Premium */
+/* ---------- Premium (fenêtre) */
 .premium {
-  display: flex;
-  flex-wrap: wrap;
-  align-items: center;
-  justify-content: space-between;
-  gap: var(--s-5);
-  padding: var(--s-5) var(--s-6);
-  border-radius: var(--r-md);
-  background: radial-gradient(90% 160% at 100% 50%, rgb(245 158 11 / 22%), transparent 60%), #1a1424;
-  border: 2px solid #5b3a12;
-}
-.premTxt {
   display: grid;
-  gap: var(--s-2);
+  gap: var(--s-4);
+  justify-items: center;
 }
-.premTxt > b {
-  font-size: var(--fs-lg);
-  color: var(--gold-hi);
+.premShow {
+  display: flex;
+  gap: var(--s-4);
+  justify-content: center;
+  flex-wrap: wrap;
+}
+.premShow figure {
+  display: grid;
+  justify-items: center;
+  gap: 6px;
+  margin: 0;
+  padding: var(--s-3);
+  min-width: 150px;
+  background: url('/img/ui/box-premium-s1.png?v=1') center / 100% 100% no-repeat;
+  image-rendering: pixelated;
+  color: #ffe4ec;
+  font-weight: 800;
+  text-align: center;
+}
+.premShow img {
+  width: 84px;
+  height: 84px;
+  image-rendering: pixelated;
+}
+.premShow .premBan {
+  width: 150px;
+  height: 84px;
+  object-fit: cover;
+}
+.premShow small {
+  display: block;
+  font-size: 11px;
+  color: #fdba74;
 }
 .compare {
   display: flex;
