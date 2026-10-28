@@ -790,18 +790,19 @@
     gap: 0;
   }
   .railIco {
-    width: clamp(26px, 7.5dvh, 44px);
-    height: clamp(26px, 7.5dvh, 44px);
+    width: clamp(30px, 8.2dvh, 54px);
+    height: clamp(30px, 8.2dvh, 54px);
     border-image-width: clamp(12px, 2.4dvh, 16px);
-    --ico: clamp(18px, 3.8dvh, 26px);
+    --ico: clamp(18px, 4.6dvh, 30px);
   }
   .railBrand img {
     width: clamp(24px, 5dvh, 40px);
     height: clamp(24px, 5dvh, 40px);
   }
   .railMini {
-    width: clamp(24px, 5dvh, 36px);
-    height: clamp(24px, 5dvh, 36px);
+    width: clamp(26px, 6.4dvh, 42px);
+    height: clamp(26px, 6.4dvh, 42px);
+    --ico: clamp(16px, 3.4dvh, 22px);
   }
 }
 @media (max-height: 420px) {
