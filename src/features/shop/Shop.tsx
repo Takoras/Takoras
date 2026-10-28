@@ -255,7 +255,7 @@ const PACKS: { id: string; eur: number; img: string; coins?: number; bonus?: num
   { id: 'starter', eur: 1.99, img: '/img/piece.png', coins: 8000 },
   { id: 'pass', eur: 5, img: '/img/logo.png' },
 ];
-// Micro-achats (vitrine seulement, aucun paiement) : petits coups de pouce à 0,20–0,30 €, sur fond or
+// Micro-achats (vitrine seulement, aucun paiement) : petits coups de pouce à 0,20–0,30 €, même fond que les packs
 const MICRO: Record<string, { id: string; eur: number; img: string; name: string; desc: string }[]> = {
   potion: [
     { id: 'm_pot2', eur: 0.2, img: '/img/potions/chance-2.png', name: 'Potion ×2 express', desc: 'Chance ×2 pendant 10 tirages' },
@@ -275,7 +275,7 @@ function Micro({ cat }: { cat: string }) {
   return (
     <ul className={`${s.grid} ${s.microGrid}`} aria-label="Micro-achats">
       {list.map((m) => (
-        <li key={m.id} className={`${s.card} ${s.micro}`}>
+        <li key={m.id} className={`${s.card} ${s.pack}`}>
           <div className={s.icon}>
             <img className="px" src={m.img} alt="" />
           </div>

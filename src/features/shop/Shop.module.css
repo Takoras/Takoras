@@ -162,26 +162,9 @@
   background: rgb(255 255 255 / 45%);
 }
 
-/* micro-achats : petite rangée sous la catégorie, fond or */
+/* micro-achats : petite rangée sous la catégorie, même fond que les packs en euros */
 .microGrid {
   margin-top: 10px;
-}
-.card.micro {
-  border-image-source: url('/img/ui/box-gold-mid.png');
-  border-image-slice: 12 fill;
-  border-image-width: 24px;
-  background-image: linear-gradient(#f3c75a, #f3c75a);
-  color: #3d2400;
-}
-.micro h3,
-.micro .price {
-  color: #3d2400;
-}
-.micro :global(.muted) {
-  color: #7a4d00;
-}
-.micro .icon {
-  background: rgb(255 255 255 / 40%);
 }
 
 /* stock (petit texte) et variation de prix (pastille) : dans le bas de la carte */

@@ -166,6 +166,17 @@ export default function Pass() {
           <h1>{t('ui.bp_title')}</h1>
           <small className={s.ends}>{t('ui.bp_ends', { n: days })}</small>
         </div>
+        <div className={s.tabs}>
+          <Segmented
+            value={tab}
+            onChange={setTab}
+            label={t('ui.bp_title')}
+            options={[
+              ['rewards', t('ui.bp_tab_rewards')],
+              ['missions', t('ui.bp_tab_missions')],
+            ]}
+          />
+        </div>
         <div className={s.xp}>
           <span className={s.badge} aria-label={`${tier} / 50`}>
             {tier}
@@ -191,18 +202,6 @@ export default function Pass() {
           <span className={s.next}>{Math.min(50, tier + 1)}</span>
         </div>
       </header>
-
-      <div className={s.tabs}>
-        <Segmented
-          value={tab}
-          onChange={setTab}
-          label={t('ui.bp_title')}
-          options={[
-            ['rewards', t('ui.bp_tab_rewards')],
-            ['missions', t('ui.bp_tab_missions')],
-          ]}
-        />
-      </div>
 
       {tab === 'rewards' ? (
         <>

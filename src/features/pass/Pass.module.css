@@ -1,10 +1,10 @@
 /* Passe de combat façon Brawl : bandeau saison + XP, piste premium dorée en haut, gratuite en bas, numéros sur la ligne.
    Les cases utilisent les textures dessinées à la main (/img/ui/box-gold.png?v=3, box-dark.png). */
 .page {
+  /* le passe prend tout l'écran (comme Brawl) : la taille des cases suit la hauteur dispo */
+  --tile: clamp(104px, calc((100dvh - 340px) / 2), 250px);
   display: grid;
-  gap: var(--s-6);
-  max-width: 1180px;
-  margin-inline: auto;
+  gap: var(--s-3);
 }
 
 .head {
@@ -27,7 +27,7 @@
   font-weight: 700;
 }
 .season h1 {
-  font-size: clamp(1.6rem, 4vw, 2.4rem);
+  font-size: clamp(1.4rem, 3vw, 2rem);
   line-height: var(--lh-tight);
 }
 .season .ends {
@@ -112,7 +112,7 @@
   display: grid;
   grid-template-rows: 1fr 1fr;
   gap: 0;
-  width: 150px;
+  width: calc(var(--tile) * 1.25);
   position: relative;
   z-index: 1;
   box-shadow: 6px 0 14px rgb(0 0 0 / 35%);
@@ -154,7 +154,7 @@
   filter: brightness(1.12);
 }
 .premCard b {
-  font-size: var(--fs-md);
+  font-size: calc(var(--tile) * 0.15);
   font-weight: 900;
   letter-spacing: var(--tracking-caps);
   text-transform: uppercase;
@@ -171,8 +171,8 @@
   font-size: var(--fs-xs);
 }
 .premPp {
-  width: 72px;
-  height: 72px;
+  width: calc(var(--tile) * 0.7);
+  height: calc(var(--tile) * 0.7);
   image-rendering: pixelated;
   filter: drop-shadow(0 0 10px rgb(249 115 22 / 70%));
   animation: premFloat 2.4s ease-in-out infinite;
@@ -267,9 +267,9 @@ li[aria-current] .num {
   position: relative;
   display: grid;
   place-items: center;
-  width: 148px;
-  height: 148px;
-  padding: 24px;
+  width: var(--tile);
+  height: var(--tile);
+  padding: calc(var(--tile) * 0.16);
   border: 0;
   font: inherit;
   color: var(--text);
@@ -285,14 +285,14 @@ li[aria-current] .num {
   color: #ffe4ec;
 }
 .tile img {
-  width: 84px;
-  height: 84px;
+  width: calc(var(--tile) * 0.58);
+  height: calc(var(--tile) * 0.58);
   object-fit: contain;
   image-rendering: pixelated;
 }
 .tile img.wide {
-  width: 84px;
-  height: 46px;
+  width: calc(var(--tile) * 0.7);
+  height: calc(var(--tile) * 0.4);
   object-fit: cover;
   border-radius: 4px;
 }
@@ -319,7 +319,7 @@ li[aria-current] .num {
   left: 6px;
   right: 6px;
   text-align: center;
-  font-size: 11px;
+  font-size: calc(var(--tile) * 0.085);
   font-weight: 800;
   line-height: 1.1;
   color: #fff;
@@ -339,7 +339,7 @@ li[aria-current] .num {
   right: 0;
   text-align: center;
   font-weight: 800;
-  font-size: var(--fs-md);
+  font-size: calc(var(--tile) * 0.13);
   color: #fff;
   -webkit-text-stroke: 4px #1a1022;
   paint-order: stroke fill;

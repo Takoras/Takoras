@@ -20,7 +20,31 @@ const P: Record<string, string> = {
   bell: 'M6 8a6 6 0 0 1 12 0c0 7 3 9 3 9H3s3-2 3-9M10.3 21a1.9 1.9 0 0 0 3.4 0',
   user: 'M12 12a4 4 0 1 0 0-8 4 4 0 0 0 0 8zM4 21a8 8 0 0 1 16 0',
 };
+// Icônes pixel art dessinées à la main (grille 32×32, blanc sur transparent) : utilisées en masque pour prendre la couleur du texte.
+// Affichées à 16 ou 32 px pour rester nettes.
+const PIX = new Set(['home', 'users', 'swords', 'bag', 'help', 'bulb', 'bell', 'gear', 'star', 'scroll', 'user', 'shop']);
 export function Icon({ name, size = 20 }: { name: keyof typeof P | string; size?: number }) {
+  if (PIX.has(name)) {
+    const px = size >= 22 ? 32 : 16;
+    const url = `url('/img/ui/ico/${name}.png')`;
+    return (
+      <span
+        aria-hidden
+        style={{
+          display: 'inline-block',
+          flex: 'none',
+          width: px,
+          height: px,
+          background: 'currentColor',
+          maskImage: url,
+          WebkitMaskImage: url,
+          maskSize: '100% 100%',
+          WebkitMaskSize: '100% 100%',
+          imageRendering: 'pixelated',
+        }}
+      />
+    );
+  }
   return (
     <svg
       viewBox="0 0 24 24"
