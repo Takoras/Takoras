@@ -542,6 +542,7 @@ export const en: Dict = {
     aroundAll: 'Full Elo leaderboard',
     dex: 'Combat bestiary',
     eloTop10: 'Top 10 Elo',
+    eloBoard: 'Elo leaderboard',
     eloEmpty: 'Nobody has played ranked yet.',
     r_wood: 'Wood',
     rankName: '{r} {d}',

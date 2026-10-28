@@ -5,7 +5,7 @@ const MAP: Record<string, string> = {
   bestiaire: '/inventaire',
   inventaire: '/inventaire',
   boutique: '/boutique',
-  classement: '/classement',
+  classement: '/combat',
   combat: '/combat',
   amis: '/amis',
   profil: '/profil',

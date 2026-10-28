@@ -150,7 +150,6 @@ export function Layout() {
           <nav className={s.footCol} aria-label={t('ui.foot_more')}>
             <b>{t('ui.foot_more')}</b>
             <NavLink to="/boutique">{t('ui.nav_shop')}</NavLink>
-            <NavLink to="/classement">{t('ui.nav_board')}</NavLink>
             <NavLink to="/amis">{t('ui.nav_friends')}</NavLink>
           </nav>
           <div className={s.footCol}>

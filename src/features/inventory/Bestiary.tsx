@@ -27,6 +27,7 @@ import { Button } from '@/ui/Button';
 import { confirm } from '@/ui/confirm';
 import { toast } from '@/ui/toast';
 import { JetonModal } from './JetonModal';
+import { BoardSection } from '../board/Board';
 import {
   cKey,
   lvlOf,
@@ -397,6 +398,10 @@ export default function Bestiary() {
           ) : null}
         </JetonModal>
       ) : null}
+      {/* classement du temps de jeu, tout en bas de l'inventaire */}
+      <div className={s.boardBottom}>
+        <BoardSection kind="time" title={t('ui.k_time')} />
+      </div>
     </section>
   );
 }

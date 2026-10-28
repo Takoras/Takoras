@@ -544,6 +544,7 @@ export const fr = {
     aroundAll: 'Le classement Elo complet',
     dex: 'Bestiaire du combat',
     eloTop10: 'Top 10 Elo',
+    eloBoard: 'Classement Elo',
     eloEmpty: 'Personne n’a encore joué en classé.',
     r_wood: 'Bois',
     rankName: '{r} {d}',

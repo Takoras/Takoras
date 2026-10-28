@@ -74,7 +74,7 @@ test('classé : rang, route des rangs, recherche puis match en ligne jusqu’à 
   const tab = page.getByRole('radio', { name: 'Classement' });
   if (await tab.isVisible()) await tab.click();
   // près de toi au classement : devant / toi / derrière
-  const around = page.getByRole('region', { name: 'Près de toi au classement' });
+  const around = page.getByRole('region', { name: 'Classement Elo' });
   await expect(around.getByText('#1')).toBeVisible();
   await expect(around.getByRole('link', { name: 'Alpha' })).toBeVisible();
   await expect(around.getByText('Bravo')).toBeVisible();

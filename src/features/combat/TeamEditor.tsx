@@ -1,4 +1,4 @@
-import { useRef, useState, type CSSProperties } from 'react';
+import { useEffect, useRef, useState, type CSSProperties } from 'react';
 import { useQueryClient } from '@tanstack/react-query';
 import { combatApi, errorText } from '@/api';
 import { glowVars, jetonOf, TEMPLATE, texOf, vImg } from '@/data/jetons';
@@ -9,7 +9,6 @@ import { useAuth } from '@/lib/auth';
 import { useJn } from '@/lib/names';
 import { reducedFx, useSettings } from '@/lib/settings';
 import { useT } from '@/i18n/useT';
-import { Button } from '@/ui/Button';
 import { Modal } from '@/ui/Modal';
 import { MutationStamp } from '@/ui/MutationStamp';
 import { toast } from '@/ui/toast';
@@ -47,7 +46,6 @@ export function TeamEditor({
     start.map((u) => (u && by.has(ownKey(u.serie, u.name)) ? { ...u } : null)),
   );
   const [serie, setSerie] = useState(series[0] ?? 'Takoras');
-  const [busy, setBusy] = useState(false);
   const [info, setInfo] = useState<Owned | null>(null);
   // place visée : le prochain jeton choisi la remplace (toucher une place pour la viser)
   const [target, setTarget] = useState<number | null>(focus ?? null);
@@ -85,21 +83,36 @@ export function TeamEditor({
         }),
       );
   };
-  const save = async () => {
-    setBusy(true);
+  // Enregistrée toute seule à chaque changement (plus de bouton « Valider l'équipe » qu'on oubliait).
+  // Si on ferme la fenêtre avant la fin du petit délai, l'équipe est enregistrée tout de suite.
+  const pending = useRef<Team | null>(null);
+  const push = useRef(async (tm: Team) => {
+    pending.current = null;
     try {
-      await combatApi.setDeck(team.filter(Boolean).map((u) => u?.id ?? 0));
-      qc.setQueryData(['deck', uid], team);
+      await combatApi.setDeck(tm.filter(Boolean).map((u) => u?.id ?? 0));
+      qc.setQueryData(['deck', uid], tm);
       void qc.invalidateQueries({ queryKey: ['inv'] }); // les jetons de l'équipe sont protégés de la vente
-      sfx.upgrade();
-      onClose();
     } catch (e) {
       sfx.deny();
       toast(errorText(e, lang), true);
-    } finally {
-      setBusy(false);
     }
-  };
+  });
+  const first = useRef(true);
+  useEffect(() => {
+    if (first.current) {
+      first.current = false;
+      return;
+    }
+    pending.current = team;
+    const tm = setTimeout(() => void push.current(team), 250);
+    return () => clearTimeout(tm);
+  }, [team]);
+  useEffect(
+    () => () => {
+      if (pending.current) void push.current(pending.current);
+    },
+    [],
+  );
 
   return (
     <Modal open onClose={onClose} title={t('arena.team')} wide>
@@ -245,11 +258,6 @@ export function TeamEditor({
           }}
         />
       ) : null}
-      <div className={s.foot}>
-        <Button variant="primary" loading={busy} onClick={() => void save()}>
-          {t('arena.saveTeam')}
-        </Button>
-      </div>
     </Modal>
   );
 }

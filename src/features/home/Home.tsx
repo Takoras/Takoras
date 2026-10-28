@@ -6,6 +6,7 @@ import { Actions } from './Actions';
 import { AutoConfig } from './AutoConfig';
 import { PullPicker } from './PullPicker';
 import { Live } from './Feeds';
+import { BoardSection } from '../board/Board';
 import { HeroCoin } from './HeroCoin';
 import { Quests } from '../quests/Quests';
 import { Starter } from '../starter/Starter';
@@ -43,6 +44,10 @@ export default function Home() {
         </div>
       </div>
       <Live />
+      {/* classement des tirages ouverts, sous « En direct » */}
+      <div className={s.boardBottom}>
+        <BoardSection kind="pulls" title={t('ui.k_pulls')} />
+      </div>
     </>
   );
 }

@@ -28,9 +28,10 @@ test('combat : monter son équipe (ajouter, version, enregistrer, plus de budget
   await expect(d.getByRole('radio', { name: 'Normal' })).toHaveAttribute('aria-checked', 'true');
   // chaque jeton montre ce que fait son pouvoir
   await expect(d.getByText('Gélatine').first()).toBeVisible();
-  await d.getByRole('button', { name: 'Valider l’équipe' }).click();
+  // plus de bouton « Valider » : l'équipe s'enregistre toute seule, on ferme simplement
+  await expect.poll(() => calls.includes('set_deck')).toBe(true);
+  await page.keyboard.press('Escape');
   await expect(d).toBeHidden();
-  expect(calls).toContain('set_deck');
   await expect(page.getByRole('button', { name: /Entraînement/ })).toBeEnabled();
   // fiche d'un jeton de l'équipe : le petit « i » (toucher le jeton = le changer)
   await page.getByRole('button', { name: 'Fiche de Vyolis' }).click();

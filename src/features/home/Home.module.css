@@ -522,3 +522,8 @@
   font-weight: 500;
   color: var(--muted);
 }
+
+/* classement en bas de page (il n'y a plus de page Classement) */
+.boardBottom {
+  margin-top: var(--s-10);
+}

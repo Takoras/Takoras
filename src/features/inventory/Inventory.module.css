@@ -852,3 +852,8 @@
     padding: 2px 4px 2px 2px;
   }
 }
+
+/* classement en bas de page (il n'y a plus de page Classement) */
+.boardBottom {
+  margin-top: var(--s-10);
+}

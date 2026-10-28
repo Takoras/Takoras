@@ -4,7 +4,7 @@ import { fakeSupabase } from './fake-supabase';
 const OUT = 'test-results/shots';
 test.skip(!process.env.SHOTS, 'captures seulement avec SHOTS=1');
 test.use({ contextOptions: { reducedMotion: 'no-preference' } });
-for (const p of ['/', '/inventaire', '/combat', '/profil', '/boutique', '/passe', '/classement'])
+for (const p of ['/', '/inventaire', '/combat', '/profil', '/boutique', '/passe'])
   test(`shot ${p}`, async ({ page }, info) => {
     await fakeSupabase(page, {}, [], { deck: [11, 16, 17] });
     await page.goto(p);

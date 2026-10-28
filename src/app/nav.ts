@@ -8,6 +8,5 @@ export const NAV: { to: string; key: Key; icon: string; tab?: boolean }[] = [
   { to: '/combat', key: 'ui.nav_combat', icon: 'swords', tab: true },
   { to: '/boutique', key: 'ui.nav_shop', icon: 'shop', tab: true },
   { to: '/passe', key: 'ui.bp_title', icon: 'star' },
-  { to: '/classement', key: 'ui.nav_board', icon: 'trophy' },
   { to: '/amis', key: 'ui.nav_friends', icon: 'users' },
 ];

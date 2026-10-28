@@ -6,7 +6,7 @@ test.beforeEach(async ({ page }) => {
   await page.addInitScript(() => localStorage.setItem('takoras-tuto-done', '1'));
 });
 
-const ROUTES = ['/', '/inventaire', '/boutique', '/classement', '/combat', '/amis'];
+const ROUTES = ['/', '/inventaire', '/boutique', '/combat', '/amis'];
 
 for (const path of ROUTES) {
   test(`${path} : charge sans erreur ni problème d’accessibilité grave`, async ({ page }) => {
@@ -50,7 +50,6 @@ for (const path of [
   '/profil',
   '/profil/Ami',
   '/amis',
-  '/classement',
   '/combat',
   '/passe',
   '/boutique',

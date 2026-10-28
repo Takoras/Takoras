@@ -16,6 +16,11 @@
   grid-column: 1 / -1;
   min-width: 0;
 }
+/* le rang, en énorme, sur toute la largeur en haut */
+.heroRow {
+  grid-column: 1 / -1;
+  min-width: 0;
+}
 /* Téléphone / tablette : onglets Jouer · Classement */
 .mtabs {
   display: flex;

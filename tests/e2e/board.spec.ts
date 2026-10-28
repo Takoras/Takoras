@@ -1,21 +1,17 @@
 import { test, expect } from '@playwright/test';
 import { fakeSupabase } from './fake-supabase';
 
-test('classement : podium, liste, moi en surbrillance, changer de catégorie', async ({ page }) => {
+// Les classements vivent dans les pages : tirages ouverts sous « En direct » (accueil), temps de jeu en bas de l'inventaire
+test('classements : tirages ouverts sur l’accueil, temps de jeu dans l’inventaire', async ({ page }) => {
   const { calls } = await fakeSupabase(page);
-  await page.goto('/classement');
-  await expect(page.getByRole('heading', { level: 1 })).toBeVisible();
-  await expect(page.getByRole('link', { name: 'Alpha' })).toBeVisible();
-  await expect(page.getByText('(toi)')).toBeVisible(); // Testeur = moi, 3e
-  // plus de « meilleur tirage » ni de variantes ; temps de jeu en plus
-  await expect(page.getByRole('button', { name: /Meilleur/ })).toHaveCount(0);
-  await page.getByRole('button', { name: 'Tirages ouverts' }).click();
-  await page.getByRole('radio', { name: 'Depuis toujours' }).click();
-  expect(calls.filter((c) => c === 'leaderboard').length).toBeGreaterThanOrEqual(2);
-  // plus de « Collection » (tout le monde finira par l'avoir) ; « Victoires » à la place
-  await expect(page.getByRole('button', { name: 'Collection' })).toHaveCount(0);
-  await page.getByRole('button', { name: 'Victoires' }).click();
-  await expect(page.getByText('12 victoire(s)').first()).toBeVisible();
-  await page.getByRole('button', { name: 'Temps de jeu' }).click();
-  await expect(page.getByText('2 h 05').first()).toBeVisible();
+  await page.goto('/');
+  const pulls = page.getByRole('region', { name: 'Tirages ouverts' });
+  await expect(pulls.getByRole('link', { name: 'Alpha' })).toBeVisible();
+  await pulls.getByRole('radio', { name: 'Depuis toujours' }).click();
+  await expect.poll(() => calls.filter((c) => c === 'leaderboard').length).toBeGreaterThanOrEqual(2);
+  await page.goto('/inventaire');
+  const time = page.getByRole('region', { name: 'Temps de jeu' });
+  await expect(time.getByText('2 h 05').first()).toBeVisible();
+  // plus d'onglet Classement dans le menu
+  await expect(page.getByRole('link', { name: 'Classement', exact: true })).toHaveCount(0);
 });

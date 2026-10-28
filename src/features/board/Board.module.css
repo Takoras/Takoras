@@ -10,7 +10,7 @@
   gap: var(--s-4);
   flex-wrap: wrap;
 }
-.head h1 {
+.head h2 {
   font-size: var(--fs-2xl);
 }
 .kinds {
@@ -102,7 +102,7 @@
 }
 
 .list {
-  min-height: 520px;
+  min-height: 0;
   align-content: start;
   list-style: none;
   display: grid;
@@ -154,7 +154,7 @@
 }
 
 @media (max-width: 559px) {
-  .head h1 {
+  .head h2 {
     font-size: var(--fs-xl);
   }
   .podium {

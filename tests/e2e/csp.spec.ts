@@ -60,7 +60,6 @@ test('CSP : aucune violation sur tout le site', async ({ page, isMobile }) => {
     '/profil',
     '/profil/Ami',
     '/amis',
-    '/classement',
     '/admin',
   ]) {
     await page.goto(path);

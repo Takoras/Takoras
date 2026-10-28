@@ -17,7 +17,6 @@ import { Segmented } from '@/ui/Segmented';
 import { toast } from '@/ui/toast';
 import { MutationStamp } from '@/ui/MutationStamp';
 import { lvlOf, useInventory } from '../inventory/inv';
-import { EloTop, PassLink } from './CombatSide';
 import { botTeam, useDeck, type Member } from './team';
 import { call, fetchMatch, toLocal, useRanked, watchMatch, type RankedMe } from './rankedApi';
 import { RankAround, RankCard, RankRoad, SearchModal } from './Ranked';
@@ -170,7 +169,11 @@ export default function Combat() {
 
   return (
     <section className={`${s.page} ${s['t_' + ptab]}`}>
-      {/* téléphone : 3 onglets au lieu d'une longue page */}
+      {/* ton rang en énorme, tout en haut, sur toute la largeur */}
+      <div className={s.heroRow}>
+        <RankCard me={rk} />
+      </div>
+      {/* téléphone : 2 onglets au lieu d'une longue page */}
       <div className={s.mtabs}>
         <Segmented
           value={ptab}
@@ -183,7 +186,6 @@ export default function Combat() {
         />
       </div>
       <div className={s.colMain}>
-        <RankCard me={rk} />
         <h1 className="visually-hidden">{t('arena.title')}</h1>
         {ranked.isPending ? null : !tutoOk ? (
           <div className={rs.lock}>
@@ -273,9 +275,7 @@ export default function Combat() {
       </div>
       <aside className={s.colSide}>
         <div className={s.sideRank}>
-          <PassLink />
-          {tutoOk ? <RankAround elo={elo} /> : null}
-          <EloTop />
+          <RankAround elo={elo} />
         </div>
       </aside>
       <div className={s.roadRow}>

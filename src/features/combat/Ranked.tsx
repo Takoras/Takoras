@@ -59,7 +59,7 @@ export function RankCard({ me }: { me: RankedMe | undefined }) {
   return (
     <div className={s.hero} style={{ '--rc': r.col } as CSSProperties}>
       <div className={s.heroBadge}>
-        <RankBadge r={r} size={132} />
+        <RankBadge r={r} size={200} />
       </div>
       <div className={s.heroMain}>
         <small className={s.heroTag}>{t('arena.rank')}</small>
@@ -210,21 +210,35 @@ export function RankAround({ elo }: { elo: number }) {
   const lang = useSettings((x) => x.lang);
   const uid = useAuth((x) => x.user?.id);
   const name = useRankName();
-  const q = useQuery({
+  // Un seul classement : le haut du top 10, puis « … », puis les joueurs juste devant et derrière toi
+  const around = useQuery({
     queryKey: ['ranked-around', uid, elo],
     enabled: !!uid,
     queryFn: () => combatApi.rankedAround(),
   });
-  const rows = q.data ?? [];
-  if (rows.length < 2) return null;
+  const top = useQuery({ queryKey: ['ranked-top', 10], queryFn: () => combatApi.rankedTop(10), staleTime: 60_000 });
+  const byPos = new Map<number, { pos: number; pseudo: string; elo: number; me: boolean }>();
+  (top.data ?? []).forEach((r, i) => byPos.set(i + 1, { pos: i + 1, pseudo: r.pseudo, elo: r.elo, me: false }));
+  (around.data ?? []).forEach((r) => byPos.set(r.pos, { ...r }));
+  const mePos = (around.data ?? []).find((r) => r.me)?.pos ?? 0;
+  // si tu es loin du top : on garde les 5 premiers, puis toi et tes voisins
+  const rows = [...byPos.values()]
+    .sort((a, b) => a.pos - b.pos)
+    .filter((r) => mePos <= 8 || r.pos <= 5 || Math.abs(r.pos - mePos) <= 2);
+  if (!rows.length) return null;
   return (
     <section className={s.around} aria-labelledby="around-t">
-      <h2 id="around-t">{t('arena.around')}</h2>
+      <h2 id="around-t">{t('arena.eloBoard')}</h2>
       <ol>
-        {rows.map((r) => {
-          const rk = rankOf(r.elo);
+        {rows.map((r, i) => {
+          const rk = rankOf(r.elo),
+            gap = i > 0 && r.pos - (rows[i - 1]?.pos ?? 0) > 1;
           return (
-            <li key={r.pos} className={r.me ? s.meRow : undefined} style={{ '--rc': rk.col } as CSSProperties}>
+            <li
+              key={r.pos}
+              className={[r.me ? s.meRow : '', gap ? s.gapRow : ''].join(' ')}
+              style={{ '--rc': rk.col } as CSSProperties}
+            >
               <span className={s.pos}>#{r.pos}</span>
               <RankBadge r={rk} size={22} />
               {r.me ? <b>{r.pseudo}</b> : <Link to={`/profil/${encodeURIComponent(r.pseudo)}`}>{r.pseudo}</Link>}
@@ -234,9 +248,6 @@ export function RankAround({ elo }: { elo: number }) {
           );
         })}
       </ol>
-      <Link to="/classement" className={s.aroundAll}>
-        {t('arena.aroundAll')} →
-      </Link>
     </section>
   );
 }
