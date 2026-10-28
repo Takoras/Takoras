@@ -155,10 +155,10 @@ export function JetonModal({
                 ) : null}
                 <dl className={s.rs}>
                   {stats.map(([ico, l, v, max, txt]) => (
-                    <div key={l} title={l}>
+                    <div key={l} title={l} style={{ '--sc': STAT_COL[ico] } as CSSProperties}>
                       <dt>
                         <StatIcon k={ico} />
-                        <span className="visually-hidden">{l}</span>
+                        <span>{l}</span>
                       </dt>
                       <dd>
                         <span className={s.bar}>
@@ -178,6 +178,9 @@ export function JetonModal({
     </Modal>
   );
 }
+
+// Une couleur par stat (même code partout : fiche, éditeur d'équipe)
+export const STAT_COL = { mass: '96, 165, 250', power: '251, 113, 133', size: '74, 222, 128' } as const;
 
 // Couleur de l'aura selon la mutation montrée
 const VCOL: Record<Variant, string> = { gold: '250, 204, 21', celeste: '186, 200, 255', ombre: '139, 92, 246' };

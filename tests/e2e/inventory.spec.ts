@@ -54,5 +54,7 @@ test('objets : utiliser une potion', async ({ page }) => {
   await page.goto('/inventaire/objets');
   await expect(page.getByText('×3')).toBeVisible();
   await page.getByRole('button', { name: 'Tout utiliser' }).click();
-  await expect(page.getByRole('heading', { level: 2 })).toHaveCount(1);
+  // la potion est partie : plus que la catégorie Recharges
+  await expect(page.getByRole('heading', { name: 'Potions' })).toHaveCount(0);
+  await expect(page.getByRole('heading', { name: 'Recharges' })).toBeVisible();
 });

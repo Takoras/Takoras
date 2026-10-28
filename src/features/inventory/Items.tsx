@@ -15,6 +15,15 @@ import { NeedLogin } from '@/app/NeedLogin';
 import { InvTabs } from './Bestiary';
 import s from './Inventory.module.css';
 
+// rangés par catégorie : potions, recharges (tirages), le reste
+const ITEM_CATS = [
+  ['potion', 'Potions'],
+  ['pulls', 'Recharges'],
+  ['other', 'Autres'],
+] as const;
+const itemCat = (kind: string) =>
+  kind === 'potion' ? 'potion' : kind === 'instant' || kind === 'hourglass' ? 'pulls' : 'other';
+
 type Row = { item: string; kind: string; data: ShopItem['data']; qty: number };
 
 // Objets (potions, sabliers, recharges) achetés en boutique, à utiliser quand on veut
@@ -26,7 +35,7 @@ export default function Items() {
     enabled: !!user,
     queryFn: async () => (await invApi.items()) as unknown as Row[],
   });
-  const box = useRef<HTMLUListElement>(null);
+  const box = useRef<HTMLDivElement>(null);
   const snap = useRef<Map<string, DOMRect> | null>(null);
   useLayoutEffect(() => {
     if (snap.current && box.current) moPlay(snap.current, box.current, '[data-key]', { dissolve: true });
@@ -51,17 +60,27 @@ export default function Items() {
           …
         </p>
       ) : list.length ? (
-        <ul ref={box} className={s.items}>
-          {list.map((it) => (
-            <ItemCard
-              key={it.item}
-              it={it}
-              before={() => {
-                if (box.current) snap.current = moSnap(box.current, '[data-key]');
-              }}
-            />
-          ))}
-        </ul>
+        <div ref={box} className={s.itemCats}>
+          {ITEM_CATS.map(([k, label]) => {
+            const part = list.filter((x) => itemCat(x.kind) === k);
+            return part.length ? (
+              <section key={k} aria-label={label}>
+                <h2 className={s.itemCatTitle}>{label}</h2>
+                <ul className={s.items}>
+                  {part.map((it) => (
+                    <ItemCard
+                      key={it.item}
+                      it={it}
+                      before={() => {
+                        if (box.current) snap.current = moSnap(box.current, '[data-key]');
+                      }}
+                    />
+                  ))}
+                </ul>
+              </section>
+            ) : null;
+          })}
+        </div>
       ) : (
         <div className={s.empty}>
           <p className="muted">{t('ui.inv_items_empty')}</p>

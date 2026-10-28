@@ -239,36 +239,47 @@
 }
 .rs {
   display: grid;
-  gap: 6px;
+  gap: 8px;
   margin-top: var(--s-3);
+  padding: 10px 12px;
+  background: rgb(0 0 0 / 22%);
 }
+/* une ligne par stat : icône + nom, puis barre + valeur ; chaque stat a sa couleur */
 .rs div {
   display: grid;
-  grid-template-columns: 22px 1fr;
+  grid-template-columns: 1fr;
+  gap: 3px;
+}
+.rs dt {
+  display: flex;
   align-items: center;
-  gap: var(--s-2);
+  gap: 6px;
+  font-size: var(--fs-sm);
+  font-weight: 700;
+  color: rgb(var(--sc));
 }
 .rs dd {
   display: grid;
-  grid-template-columns: 1fr 48px;
+  grid-template-columns: 1fr 52px;
   align-items: center;
   gap: var(--s-2);
   margin: 0;
-  font-size: var(--fs-sm);
+  min-width: 170px;
 }
 .rs b {
   text-align: right;
-  font-size: var(--fs-sm);
+  font-size: var(--fs-md, 15px);
   font-variant-numeric: tabular-nums;
 }
 .bar {
-  height: 6px;
+  height: 10px;
   background: rgb(255 255 255 / 8%);
 }
 .bar i {
   display: block;
   height: 100%;
-  background: rgb(var(--pw, var(--g)));
+  background: rgb(var(--sc, var(--g)));
+  box-shadow: 0 0 6px rgb(var(--sc, var(--g)) / 50%);
 }
 .unknown {
   align-self: center;

@@ -152,6 +152,7 @@ export default function Shop() {
               <Card key={it.id} it={it} coins={coins} logged={!!user} left={left} onBuy={buy} />
             ))}
           </ul>
+          <Micro cat={k} />
         </section>
       ))}
       {cat === 'all' || cat === 'packs' ? <Packs /> : null}
@@ -247,13 +248,55 @@ function Card({
 // Packs en euros : seulement la vitrine pour l'instant (aucun paiement réel). Contenu connu à l'avance, jamais de hasard
 // payant (règles UE sur les monnaies virtuelles, loot boxes) : voir docs/achats.md avant d'activer quoi que ce soit.
 const PACKS: { id: string; eur: number; img: string; coins?: number; bonus?: number }[] = [
-  { id: 'coins_s', eur: 0.99, img: '/img/piece.png', coins: 1200 },
-  { id: 'coins_m', eur: 4.99, img: '/img/piece.png', coins: 6500, bonus: 8 },
-  { id: 'coins_l', eur: 9.99, img: '/img/piece.png', coins: 14000, bonus: 16 },
+  { id: 'coins_s', eur: 0.99, img: '/img/piece.png', coins: 3000 },
+  { id: 'coins_m', eur: 4.99, img: '/img/piece.png', coins: 17000, bonus: 15 },
+  { id: 'coins_l', eur: 9.99, img: '/img/piece.png', coins: 40000, bonus: 35 },
   { id: 'potions', eur: 2.99, img: '/img/potions/chance-5.png' },
-  { id: 'starter', eur: 1.99, img: '/img/piece.png', coins: 3000 },
+  { id: 'starter', eur: 1.99, img: '/img/piece.png', coins: 8000 },
   { id: 'pass', eur: 5, img: '/img/logo.png' },
 ];
+// Micro-achats (vitrine seulement, aucun paiement) : petits coups de pouce à 0,20–0,30 €, sur fond or
+const MICRO: Record<string, { id: string; eur: number; img: string; name: string; desc: string }[]> = {
+  potion: [
+    { id: 'm_pot2', eur: 0.2, img: '/img/potions/chance-2.png', name: 'Potion ×2 express', desc: 'Chance ×2 pendant 10 tirages' },
+    { id: 'm_pot5', eur: 0.3, img: '/img/potions/chance-5.png', name: 'Potion ×5 express', desc: 'Chance ×5 pendant 5 tirages' },
+  ],
+  util: [
+    { id: 'm_inst', eur: 0.2, img: '/img/objets/recharge.png', name: 'Recharge express', desc: '+15 tirages tout de suite' },
+    { id: 'm_hour', eur: 0.3, img: '/img/objets/sablier.png', name: 'Sablier express', desc: '1 h de tirages rechargés' },
+  ],
+};
+function Micro({ cat }: { cat: string }) {
+  const t = useT();
+  const lang = useSettings((x) => x.lang);
+  const list = MICRO[cat];
+  if (!list) return null;
+  const eur = (v: number) => v.toLocaleString(locale(lang), { style: 'currency', currency: 'EUR' });
+  return (
+    <ul className={`${s.grid} ${s.microGrid}`} aria-label="Micro-achats">
+      {list.map((m) => (
+        <li key={m.id} className={`${s.card} ${s.micro}`}>
+          <div className={s.icon}>
+            <img className="px" src={m.img} alt="" />
+          </div>
+          <div className={s.body}>
+            <div>
+              <h3>{m.name}</h3>
+              <p className="muted">{m.desc}</p>
+            </div>
+            <div className={s.foot}>
+              <b className={s.price}>{eur(m.eur)}</b>
+              <Button size="sm" disabled title={t('ui.packs_soon')}>
+                {t('ui.pk_soon')}
+              </Button>
+            </div>
+          </div>
+        </li>
+      ))}
+    </ul>
+  );
+}
+
 function Packs() {
   const t = useT();
   const lang = useSettings((x) => x.lang);
