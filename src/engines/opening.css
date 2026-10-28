@@ -275,25 +275,43 @@ html.reduce-fx .opening.turbo::before { display: none; }
 @keyframes turboGlow { 0% { opacity: 1; transform: scale(1.25); } 100% { opacity: .6; transform: scale(1); } }
 @keyframes comboPop { 0% { transform: scale(1.6) rotate(-6deg); } 100% { transform: none; } }
 
-/* Révélation (PC) : le jeton au centre, en grand ; son nom et sa chance à gauche, ses stats et les boutons à droite */
+/* Ouverture (PC) : le jeton est au centre du début à la fin (il ne bouge jamais de place) ;
+   à la révélation, une boîte d'infos glisse à gauche et la boîte des stats à droite */
 .op-note { display: none; }
+.op-id { display: grid; gap: 4px; }
 @media (min-width: 761px) {
-  .opening.revealed .op-main { display: grid; width: min(1240px, 94vw); grid-template-columns: minmax(0, 1fr) auto minmax(0, 1fr);
-    grid-template-rows: 1fr auto auto auto 1fr; column-gap: clamp(32px, 5vw, 80px); align-content: center; }
-  .opening.revealed .op-coin-col { grid-column: 2; grid-row: 1 / 6; }
-  .opening.revealed .op-coin { width: clamp(260px, 30vw, 380px); }
+  .op-main { display: grid; width: min(1240px, 94vw); grid-template-columns: minmax(0, 1fr) auto minmax(0, 1fr);
+    grid-template-rows: 1fr auto auto 1fr; column-gap: clamp(32px, 5vw, 80px); align-items: center; }
+  .op-coin-col { grid-column: 2; grid-row: 1 / 5; transform: none !important; }
+  .opening.revealed .op-coin { width: clamp(260px, 28vw, 360px); }
   .opening.revealed .op-coin .zoom { scale: 1; }
-  .opening.revealed .op-info { display: contents; }
-  .opening.revealed .op-info > .eyebrow { grid-column: 1; grid-row: 2; justify-self: end; }
-  .opening.revealed .op-name { grid-column: 1; grid-row: 3; justify-self: end; text-align: right; font-size: clamp(44px, 5vw, 76px); }
-  .opening.revealed .op-rarity { grid-column: 1; grid-row: 4; justify-self: end; margin: 0; font-size: clamp(22px, 2.4vw, 34px); }
-  .opening.revealed .op-stats { grid-column: 3; grid-row: 2 / 4; align-self: end; width: min(100%, 360px); font-size: 15px; }
-  .opening.revealed .op-actions { grid-column: 3; grid-row: 4; align-self: start; }
-  .opening.revealed .op-actions .btn { min-height: 48px; padding-inline: 28px; font-size: 16px; }
-  /* chaque bloc arrive à son tour, en glissant depuis le jeton */
-  .opening.revealed .op-info > * { animation: opIn .45s cubic-bezier(.2, 1.1, .3, 1) .3s both; }
-  .opening.revealed .op-info > .eyebrow, .opening.revealed .op-name, .opening.revealed .op-rarity { --from: 30px; }
-  .opening.revealed .op-stats, .opening.revealed .op-actions { --from: -30px; animation-delay: .4s; }
+  .op-info { display: contents; }
+  .op-id, .op-stats, .op-actions { opacity: 0; pointer-events: none; }
+  .op-id { grid-column: 1; grid-row: 2 / 4; justify-self: end; align-self: center; width: min(100%, 340px); padding: 22px 24px;
+    border: 3px solid transparent; border-radius: 16px; border-image: url('/img/ui/box-9.png?v=3') 14 fill / 28px stretch;
+    background: linear-gradient(#39374f, #39374f) center / calc(100% - 16px) calc(100% - 16px) no-repeat; image-rendering: pixelated; }
+  .op-name { font-size: clamp(40px, 4.4vw, 64px); margin: 6px 0 4px; }
+  .op-rarity { margin: 0; font-size: clamp(24px, 2.4vw, 34px); }
+  .op-stats { grid-column: 3; grid-row: 2; align-self: end; width: min(100%, 360px); font-size: 15px; }
+  .op-actions { grid-column: 3; grid-row: 3; align-self: start; margin-top: 16px; }
+  .op-actions .btn { min-height: 48px; padding-inline: 28px; font-size: 16px; }
+  .opening.revealed .op-id, .opening.revealed .op-stats, .opening.revealed .op-actions { opacity: 1; pointer-events: auto;
+    animation: opIn .5s cubic-bezier(.2, 1.15, .3, 1) .12s both; }
+  .opening.revealed .op-id { --from: 60px; }
+  .opening.revealed .op-stats { --from: -60px; animation-delay: .2s; }
+  .opening.revealed .op-actions { --from: -60px; animation-delay: .3s; }
 }
-@keyframes opIn { from { opacity: 0; transform: translateX(var(--from, 0)) scale(.96); } }
-html.reduce-fx .opening.revealed .op-info > * { animation: none; }
+@keyframes opIn { from { opacity: 0; transform: translateX(var(--from, 0)) scale(.92); } }
+html.reduce-fx .op-id, html.reduce-fx .op-stats, html.reduce-fx .op-actions { animation: none !important; }
+
+/* Explosion de rayons derrière le jeton (étoile de lumière à la couleur du jeton) */
+.op-burst { position: absolute; z-index: 1; pointer-events: none; border-radius: 50%;
+  background: repeating-conic-gradient(from 0deg, rgba(var(--tier), .85) 0deg 4deg, transparent 4deg 22.5deg),
+    radial-gradient(closest-side, rgba(255, 255, 255, .9), rgba(var(--tier), .5) 30%, transparent 70%);
+  -webkit-mask: radial-gradient(closest-side, #000 15%, transparent 100%); mask: radial-gradient(closest-side, #000 15%, transparent 100%);
+  mix-blend-mode: screen; }
+.op-main { position: relative; z-index: 2; }
+@media (max-width: 760px) {
+  .op-id { padding: 14px 18px; border: 3px solid transparent; border-radius: 14px; border-image: url('/img/ui/box-9.png?v=3') 14 fill / 28px stretch;
+    background: linear-gradient(#39374f, #39374f) center / calc(100% - 16px) calc(100% - 16px) no-repeat; image-rendering: pixelated; margin-bottom: 12px; }
+}

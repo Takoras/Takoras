@@ -20,7 +20,7 @@ const select = (i) => { current = i; };
 
 // HTML de l’écran (textes traduits au passage)
 if (!document.getElementById('opening')) {
-  document.body.insertAdjacentHTML('beforeend', "<div class=\"opening\" id=\"opening\" aria-hidden=\"true\">\n    <div class=\"op-bg\" id=\"op-bg\"></div>\n    <div class=\"op-rays\"></div>\n    <div class=\"op-glow\"></div>\n    <div class=\"op-vignette\"></div>\n    <div class=\"op-bars\"></div>\n    <div class=\"op-top\">\n      <div class=\"eyebrow\" id=\"op-tag\">Pull Takoras</div>\n      <div class=\"op-odds\" id=\"op-odds\">1/1</div>\n    </div>\n    <div class=\"op-autobar\"><button class=\"op-auto\" id=\"op-auto\" hidden></button><button class=\"op-auto op-skip\" id=\"op-skip\" hidden></button></div>\n    <div class=\"op-main\">\n      <div class=\"op-coin-col\">\n        <button class=\"op-coin\" id=\"op-coin\" aria-label=\"Cliquer sur le jeton\"></button>\n        <p class=\"op-hint\" id=\"op-hint\">Clique sur le jeton</p>\n      </div>\n      <div class=\"op-info\" id=\"op-info\">\n        <div class=\"eyebrow\" data-i18n=\"series\">Série Takoras</div>\n        <h2 class=\"op-name\" id=\"op-name\"></h2>\n        <div class=\"op-rarity\" id=\"op-rarity\"></div>\n        <div class=\"op-stats\" id=\"op-stats\"></div>\n        <p class=\"op-note\" data-i18n=\"stats_note\">Statistiques provisoires · combats bientôt</p>\n        <div class=\"op-actions\">\n          <button class=\"btn primary\" id=\"op-next\" hidden>Suivant</button>\n          <button class=\"btn primary\" id=\"op-recap\" hidden data-i18n=\"see_recap\">Voir le récap</button>\n          <button class=\"btn primary\" id=\"op-again\">Pull encore · <span id=\"op-price\">100</span> ◆</button>\n          <button class=\"btn ghost\" id=\"op-back\" data-i18n=\"back\">Retour</button>\n        </div>\n      </div>\n    </div>\n    <button class=\"op-recap-x\" id=\"op-recap-x\" aria-label=\"Fermer\">✕</button>\n    <div class=\"op-recap-view\">\n      <div class=\"eyebrow\" id=\"op-recap-tag\">Récap</div>\n      <h2 class=\"op-name\" id=\"op-recap-title\">Tes jetons</h2>\n      <div class=\"op-recap-grid\" id=\"op-recap-grid\"></div>\n      <div class=\"op-actions\">\n        <button class=\"btn primary\" id=\"op-recap-again\">Pull ×10 encore · <span id=\"op-recap-price\">1 000</span> ◆</button>\n        <button class=\"btn ghost\" id=\"op-recap-back\" data-i18n=\"back\">Retour</button>\n      </div>\n    </div>\n  </div>\n  <div class=\"fx\" id=\"fx\"></div>");
+  document.body.insertAdjacentHTML('beforeend', "<div class=\"opening\" id=\"opening\" aria-hidden=\"true\">\n    <div class=\"op-bg\" id=\"op-bg\"></div>\n    <div class=\"op-rays\"></div>\n    <div class=\"op-glow\"></div>\n    <div class=\"op-vignette\"></div>\n    <div class=\"op-bars\"></div>\n    <div class=\"op-top\">\n      <div class=\"eyebrow\" id=\"op-tag\">Pull Takoras</div>\n      <div class=\"op-odds\" id=\"op-odds\">1/1</div>\n    </div>\n    <div class=\"op-autobar\"><button class=\"op-auto\" id=\"op-auto\" hidden></button><button class=\"op-auto op-skip\" id=\"op-skip\" hidden></button></div>\n    <div class=\"op-main\">\n      <div class=\"op-coin-col\">\n        <button class=\"op-coin\" id=\"op-coin\" aria-label=\"Cliquer sur le jeton\"></button>\n        <p class=\"op-hint\" id=\"op-hint\">Clique sur le jeton</p>\n      </div>\n      <div class=\"op-info\" id=\"op-info\">\n        <div class=\"op-id\"><div class=\"eyebrow\" data-i18n=\"series\">Série Takoras</div>\n        <h2 class=\"op-name\" id=\"op-name\"></h2>\n        <div class=\"op-rarity\" id=\"op-rarity\"></div></div>\n        <div class=\"op-stats\" id=\"op-stats\"></div>\n        <p class=\"op-note\" data-i18n=\"stats_note\">Statistiques provisoires · combats bientôt</p>\n        <div class=\"op-actions\">\n          <button class=\"btn primary\" id=\"op-next\" hidden>Suivant</button>\n          <button class=\"btn primary\" id=\"op-recap\" hidden data-i18n=\"see_recap\">Voir le récap</button>\n          <button class=\"btn primary\" id=\"op-again\">Pull encore · <span id=\"op-price\">100</span> ◆</button>\n          <button class=\"btn ghost\" id=\"op-back\" data-i18n=\"back\">Retour</button>\n        </div>\n      </div>\n    </div>\n    <button class=\"op-recap-x\" id=\"op-recap-x\" aria-label=\"Fermer\">✕</button>\n    <div class=\"op-recap-view\">\n      <div class=\"eyebrow\" id=\"op-recap-tag\">Récap</div>\n      <h2 class=\"op-name\" id=\"op-recap-title\">Tes jetons</h2>\n      <div class=\"op-recap-grid\" id=\"op-recap-grid\"></div>\n      <div class=\"op-actions\">\n        <button class=\"btn primary\" id=\"op-recap-again\">Pull ×10 encore · <span id=\"op-recap-price\">1 000</span> ◆</button>\n        <button class=\"btn ghost\" id=\"op-recap-back\" data-i18n=\"back\">Retour</button>\n      </div>\n    </div>\n  </div>\n  <div class=\"fx\" id=\"fx\"></div>");
   document.querySelectorAll('#opening [data-i18n]').forEach((el) => { el.textContent = t(el.dataset.i18n); });
 }
 
@@ -213,14 +213,38 @@ function coin3D(src, alt, style = '', cls = '') {
 function setGlareMask(src) {
   void src; // plus de reflet plaqué sur le jeton
 }
-// Onde de choc qui part du jeton
-function wave() {
-  const r = opCoin.getBoundingClientRect(), w = document.createElement('div');
-  w.className = 'op-wave';
-  w.style.cssText = `left:${r.left + r.width / 2}px;top:${r.top + r.height / 2}px;width:${r.width}px;height:${r.width}px`;
-  opening.appendChild(w);
-  w.animate([{ transform: 'translate(-50%,-50%) scale(.6)', opacity: 1 }, { transform: 'translate(-50%,-50%) scale(9)', opacity: 0 }],
-    { duration: 1000, easing: 'cubic-bezier(.1,.7,.3,1)' }).finished.then(() => w.remove());
+// Explosion de rayons de lumière derrière le jeton (pas un cercle) : une étoile qui jaillit, tourne et s'efface
+function rays(power = 1) {
+  if (reducedFx()) return;
+  const r = opCoin.getBoundingClientRect(), d = document.createElement('div');
+  d.className = 'op-burst';
+  const size = r.width * (2.2 + power * 1.6);
+  d.style.cssText = `left:${r.left + r.width / 2}px;top:${r.top + r.height / 2}px;width:${size}px;height:${size}px`;
+  opening.appendChild(d);
+  d.animate([
+    { transform: 'translate(-50%,-50%) scale(.25) rotate(0deg)', opacity: 0 },
+    { transform: 'translate(-50%,-50%) scale(1) rotate(25deg)', opacity: 1, offset: .25 },
+    { transform: 'translate(-50%,-50%) scale(1.25) rotate(60deg)', opacity: 0 },
+  ], { duration: 650 + power * 450, easing: 'cubic-bezier(.15,.7,.3,1)' }).finished.then(() => d.remove());
+}
+// Le jeton « claque » : il gonfle d'un coup, dépasse, puis se pose (ressort)
+function pop(power = 1) {
+  if (reducedFx()) return;
+  opCoin.querySelector('.zoom')?.animate([
+    { transform: 'scale(.55)', filter: 'brightness(2.2)' },
+    { transform: `scale(${1.18 + power * .12})`, filter: 'brightness(1.5)', offset: .35 },
+    { transform: 'scale(.94)', filter: 'brightness(1.05)', offset: .65 },
+    { transform: 'scale(1.02)', offset: .85 },
+    { transform: 'scale(1)', filter: 'none' },
+  ], { duration: 560, easing: 'cubic-bezier(.2,.8,.3,1)' });
+}
+// Flash à la couleur du jeton (pas blanc)
+function tint(power = .35, ms = 450) {
+  if (reducedFx()) power *= .3;
+  const f = document.createElement('div');
+  f.style.cssText = `position:absolute;inset:0;pointer-events:none;background:radial-gradient(circle at 50% 45%, rgba(${getComputedStyle(opening).getPropertyValue('--tier')}, .9), transparent 70%)`;
+  opening.appendChild(f);
+  f.animate([{ opacity: power }, { opacity: 0 }], { duration: ms, easing: 'ease-out' }).finished.then(() => f.remove());
 }
 
 // Session d'ouverture (1 ou 10 pulls), sauvegardée dans le navigateur pour reprendre après un refresh
@@ -490,8 +514,7 @@ function reveal(restored, quiet = false) {
     // atterrissage : petit impact (secousse, étincelles, onde) pile quand il se pose
     setTimeout(() => {
       if (run !== r) return;
-      shake(j.odds >= RARE ? 1 : .5); burst(j.odds >= RARE ? 18 : 10); wave();
-      if (j.odds >= RARE) flash(.25, 300);
+      shake(j.odds >= RARE ? .8 : .35); burst(j.odds >= RARE ? 14 : 8);
     }, ms * .7);
     // On ne peut pas passer à la suite tout de suite : 0,5 s max pour les jetons communs,
     // toute la rotation pour les vrais rares (1/1000 et plus)
@@ -516,16 +539,14 @@ function reveal(restored, quiet = false) {
   sess.results.push(j.name); (sess.rvars ||= []).push(r.variant || '');
   save();
   if (!quiet) { sfx.reveal(j.odds); if (j.odds >= MYTHIC) sfx.impact(); } // après une cinématique, sa musique a déjà fait la révélation
+  // dopamine : le jeton claque, des rayons jaillissent derrière, étincelles, flash à sa couleur, secousse
+  const lv = j.odds >= MYTHIC ? 2 : j.odds >= RARE ? 1.4 : j.odds >= 100 ? 1 : .6;
+  pop(lv); rays(lv); tint(.25 + lv * .2, 300 + lv * 250);
+  burst(Math.round(10 + lv * 12));
+  shake(lv * .7);
   if (j.odds >= MYTHIC) {
-    flash(j.odds >= GOD ? .85 : .65, 900);
-    shake(1.8);
-    wave(); if (j.odds >= GOD) setTimeout(wave, 180);
-    burst(j.odds >= GOD ? 40 : 28);
-    setTimeout(() => { if (run === r) { shake(1); burst(16); } }, 350);
-  } else {
-    burst(j.odds >= RARE ? 14 : 8);
-    if (j.odds >= RARE) flash(.3, 350);
-    setTimeout(() => { if (run === r) shake(j.odds >= RARE ? .8 : .45); }, 300); // impact à l'arrivée
+    flash(j.odds >= GOD ? .8 : .55, 800);
+    setTimeout(() => { if (run === r) { rays(lv * .8); burst(20); shake(1.2); } }, 260);
   }
   addToHistory(j, r.variant);
   if (r.variant) setTimeout(() => { if (run === r) variantFx(r.variant, j.odds); }, 650); // jeton spécial : deuxième effet
@@ -685,7 +706,12 @@ function turboHit(j, v = '') {
   c.classList.remove('pop'); void c.offsetWidth; c.classList.add('pop');
   const z = opCoin.querySelector('.zoom');
   // petit coup de zoom, sans flash blanc : le jeton reste bien visible
-  z?.animate([{ transform: 'scale(1.18)', filter: 'brightness(1.35)' }, { transform: 'scale(.97)', offset: .55 }, { transform: 'scale(1)', filter: 'none' }], { duration: 150, easing: 'cubic-bezier(.2, .9, .3, 1)' });
+  z?.animate([{ transform: 'scale(1.28)', filter: 'brightness(1.6)' }, { transform: 'scale(.95)', offset: .55 }, { transform: 'scale(1)', filter: 'none' }], { duration: 170, easing: 'cubic-bezier(.2, .9, .3, 1)' });
+  // chaque jeton : étincelles à sa couleur ; un peu rare : rayons + flash ; tous les 10 : gros coup
+  opening.style.setProperty('--tier', hexRGB(j.glow));
+  burst(j.odds >= 100 ? 10 : 5);
+  if (j.odds >= 50 || v) { rays(.5); tint(.25, 220); shake(.35); }
+  if (combo % 10 === 0) { rays(.9); tint(.35, 300); shake(.6); }
 }
 $('op-auto')?.addEventListener('click', e => {
   e.stopPropagation();
