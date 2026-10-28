@@ -277,6 +277,7 @@ export const en: Dict = {
     no_item: 'You don’t have this item anymore',
     bn_plaine: 'Plains',
     bn_doodle: 'Doodle',
+    bn_yeux: 'The eyes',
     bn_aurore: 'Dawn',
     bn_ocean: 'Ocean',
     bn_braise: 'Ember',

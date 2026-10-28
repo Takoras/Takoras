@@ -1,3 +1,4 @@
+import { burstAt } from '@/lib/pfx';
 import { useEffect, useRef } from 'react';
 import { useQueryClient } from '@tanstack/react-query';
 import { errorText, questApi } from '@/api';
@@ -64,6 +65,7 @@ export function Quests() {
     try {
       const r = (await questApi.claimDaily()) as { amount: number; streak: number; state: unknown };
       coinRain(el, 4);
+      burstAt(el, '#fb923c', 1.2);
       sfx.upgrade();
       toast(t('ui.daily_got', { n: n(r.amount), s: r.streak }));
       refresh(r.state);
@@ -76,6 +78,7 @@ export function Quests() {
     try {
       refresh(await questApi.claimQuest(id));
       coinRain(el, 3);
+      burstAt(el, '#4ade80');
       sfx.upgrade();
       toast(t('ui.q_got'));
     } catch (e) {

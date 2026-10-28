@@ -1,3 +1,4 @@
+import { burstAt } from '@/lib/pfx';
 import { useEffect, useRef, useState, type CSSProperties } from 'react';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { errorText, passApi } from '@/api';
@@ -38,6 +39,9 @@ const ITEMS: Record<string, ShopItem & { price: number }> = {
   b_plaine: { id: 'b_plaine', kind: 'banner', data: {}, price: 1000 },
   b_doodle: { id: 'b_doodle', kind: 'banner', data: {}, price: 2500 },
   a_etoile: { id: 'a_etoile', kind: 'avatar', data: { anim: true }, price: 25000 },
+  // exclusifs du passe premium (saison 1) : jamais vendus en boutique
+  a_oeil: { id: 'a_oeil', kind: 'avatar', data: {}, price: 20000 },
+  b_yeux: { id: 'b_yeux', kind: 'banner', data: {}, price: 15000 },
 };
 const worth = (r: Reward) => (!r ? 0 : r.coins ? r.coins : (ITEMS[r.item ?? '']?.price ?? 0) * (r.qty ?? 1));
 const isCosmetic = (r: Reward) => !!r?.item && (r.item.startsWith('b_') || r.item.startsWith('a_'));
@@ -80,10 +84,11 @@ export default function Pass() {
   };
   const icon = (r: Reward) =>
     r?.coins ? '/img/piece.png' : itemImg(ITEMS[r?.item ?? ''] ?? { id: 'instant', kind: 'instant' }).src;
-  const claim = async (tr: number, prem: boolean) => {
+  const claim = async (tr: number, prem: boolean, el?: HTMLElement) => {
     try {
       const res = (await passApi.claim(tr, prem)) as { state: unknown };
       qc.setQueryData(['me', user.id], res.state);
+      burstAt(el ?? null, prem ? '#fbbf24' : '#a78bfa', 1.3);
       sfx.upgrade();
       toast(`${t('ui.bp_got')}`);
       void q.refetch();
@@ -127,7 +132,7 @@ export default function Pass() {
       <button
         type="button"
         className={cls}
-        onClick={() => void claim(tr, prem)}
+        onClick={(e) => void claim(tr, prem, e.currentTarget)}
         aria-label={`${t('ui.bp_claim')} · ${label(r)}`}
       >
         {body}

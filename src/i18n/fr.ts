@@ -279,6 +279,7 @@ export const fr = {
     no_item: 'Tu n’as plus cet objet',
     bn_plaine: 'Plaine',
     bn_doodle: 'Doodle',
+    bn_yeux: 'Les yeux',
     bn_aurore: 'Aurore',
     bn_ocean: 'Océan',
     bn_braise: 'Braise',

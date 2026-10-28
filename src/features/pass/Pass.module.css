@@ -235,9 +235,9 @@ li[aria-current] .num {
     filter 0.15s;
 }
 .tile.gold {
-  /* fond doré à peine plus sombre (garde l'effet or) : les objets ressortent mieux */
-  background-image: url('/img/ui/box-gold-mid.png?v=3');
-  color: #3b1a02;
+  /* skin des paliers premium de la saison 1 (dessiné à la main) */
+  background-image: url('/img/ui/box-premium-s1.png?v=1');
+  color: #ffe4ec;
 }
 .tile img {
   width: 84px;

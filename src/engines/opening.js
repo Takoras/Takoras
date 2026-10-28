@@ -1,5 +1,6 @@
 // Ouverture des tirages. Repris de legacy/ (transitions.js + opening.js) ; ce fichier est maintenant la référence (plus régénéré).
 import { SERIES, texOf } from '@/data/jetons';
+import { burstAt } from '@/lib/pfx';
 import { $, ACC, LOCALE, PULLS, SETTINGS, STAT_MAX, VARIANTS, errText, fmt, fmtLuck, jn, jnH, reducedFx, saveSettings, sb, sfx, sparkStyle, speed, statsOf, t, toast, vCls, vOdds, vTag, host } from './env';
 import { CINE } from './cinema.js';
 import './legacy-base.css';
@@ -542,6 +543,7 @@ function reveal(restored, quiet = false) {
   // dopamine : le jeton claque, des rayons jaillissent derrière, étincelles, flash à sa couleur, secousse
   const lv = j.odds >= MYTHIC ? 2 : j.odds >= RARE ? 1.4 : j.odds >= 100 ? 1 : .6;
   pop(lv); rays(lv); tint(.25 + lv * .2, 300 + lv * 250);
+  burstAt(opCoin, j.glow, .8 + lv * .4); // particules dessinées à la main, à la couleur du jeton
   burst(Math.round(10 + lv * 12));
   shake(lv * .7);
   if (j.odds >= MYTHIC) {
@@ -717,7 +719,7 @@ function turboHit(j, v = '') {
   opening.style.setProperty('--tier', hexRGB(j.glow));
   // effets légers à chaque jeton (ça défile vite) ; les gros effets seulement sur les jetons rares et tous les 10
   burst(j.odds >= 100 ? 6 : 3);
-  if (j.odds >= 400 || v) { rays(.5); tint(.25, 220); shake(.35); }
+  if (j.odds >= 400 || v) { rays(.5); tint(.25, 220); shake(.35); burstAt(opCoin, j.glow, .7); }
   else if (combo % 10 === 0) { rays(.7); shake(.4); }
 }
 $('op-auto')?.addEventListener('click', e => {

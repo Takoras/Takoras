@@ -6,6 +6,7 @@ import { AVATARS } from '@/lib/avatars';
 export const BANNER_IMG: Record<string, string> = {
   plaine: '/img/bannieres/plaine.png',
   doodle: '/img/bannieres/doodle.png',
+  yeux: '/img/bannieres/yeux.webp', // passe premium, saison 1
 };
 const POTION5 = '/img/potions/chance-5.png';
 export const ITEM_IMG: Record<string, { src: string; tint?: string }> = {

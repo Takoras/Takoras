@@ -2,6 +2,7 @@ import { useEffect } from 'react';
 import { NavLink, Outlet, useLocation, useNavigate } from 'react-router';
 import { useMe } from '@/api/queries';
 import { useResetWatch } from '@/lib/resetWatch';
+import { pixelBurst } from '@/lib/pfx';
 import { useAuth, signOut } from '@/lib/auth';
 import { locale, reducedFx } from '@/lib/settings';
 import { useT } from '@/i18n/useT';
@@ -59,6 +60,21 @@ export function Layout() {
     );
   }, [pathname]);
   useEffect(() => openUI('more', false), [pathname]);
+  // un petit éclat de pixels sous le doigt à chaque bouton principal (violet) ou doré
+  useEffect(() => {
+    const on = (e: PointerEvent) => {
+      const b = (e.target as HTMLElement | null)?.closest?.('[data-variant="primary"], [data-variant="gold"]');
+      if (!b || (b as HTMLButtonElement).disabled) return;
+      pixelBurst(e.clientX, e.clientY, {
+        kind: 3,
+        size: 90,
+        color: b.getAttribute('data-variant') === 'gold' ? '#fdba74' : '#c4b5fd',
+        ms: 340,
+      });
+    };
+    addEventListener('pointerdown', on);
+    return () => removeEventListener('pointerdown', on);
+  }, []);
   const navigate = useNavigate();
   // Raccourci « debug » (taper le mot n'importe où) : ouvre le panel admin, pour les admins seulement
   const isAdmin = !!me.data?.admin;
