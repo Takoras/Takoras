@@ -1,9 +1,9 @@
 /* eslint-disable react-refresh/only-export-components -- le magasin des annonces vit à côté de son affichage */
+import { usePoll } from '@/lib/poll';
 import { useEffect } from 'react';
 import { create } from 'zustand';
 import { tables } from '@/api';
 import { sfx } from '@/engines/sound.js';
-import { sb } from '@/lib/supabase';
 import { useT } from '@/i18n/useT';
 import { Button } from '@/ui/Button';
 import { Modal } from '@/ui/Modal';
@@ -61,26 +61,26 @@ export function Announcements() {
         useAnn.setState({ full: { a: missed[0], more: missed.slice(1) } });
       } else markSeen();
     })().catch(() => undefined);
-    const ch = sb
-      .channel('annonces')
-      .on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'announcements' }, ({ new: n }) => {
-        const a = n as Ann;
-        useAnn.setState((st) => ({ list: [a, ...st.list.filter((x) => x.id !== a.id)] }));
-        if (a.fullscreen) {
-          sfx.announce();
-          useAnn.setState({ full: { a, more: [] } });
-        } else {
-          sfx.message();
-          toast(`${a.body}`);
-        }
-      })
-      .on('postgres_changes', { event: 'DELETE', schema: 'public', table: 'announcements' }, ({ old }) => {
-        const id = (old as { id?: number }).id;
-        useAnn.setState((st) => ({ list: st.list.filter((x) => x.id !== id) }));
-      })
-      .subscribe();
-    return () => void sb.removeChannel(ch);
   }, []);
+  // nouvelles annonces : on revérifie toutes les 90 s (plus de connexion en direct ouverte en permanence)
+  usePoll(async () => {
+    const st = useAnn.getState();
+    if (!st.list.length) return; // le premier chargement s'en occupe
+    const { data } = await tables.announcements(30);
+    const l = ((data ?? []) as Ann[]).sort((a, b) => b.id - a.id);
+    const known = new Set(st.list.map((x) => x.id));
+    const fresh = l.filter((a) => !known.has(a.id) && a.id > (st.list[0]?.id ?? 0) && a.id > (st.seen ?? 0));
+    useAnn.setState({ list: l });
+    const a = fresh[0];
+    if (!a) return;
+    if (a.fullscreen) {
+      sfx.announce();
+      useAnn.setState({ full: { a, more: fresh.slice(1) } });
+    } else {
+      sfx.message();
+      toast(`${a.body}`);
+    }
+  }, 90_000);
 
   const bar = list.find((x) => x.banner);
   const who = (a: Ann) => `${a.author ? `${a.author} · ` : ''}${dateOf(a.created_at)}`;

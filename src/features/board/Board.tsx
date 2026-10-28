@@ -44,7 +44,7 @@ export function BoardSection({ kind: id, title }: { kind: 'pulls' | 'time'; titl
         }));
       return (await publicApi.leaderboard(id, since, 10)) as Row[];
     },
-    refetchInterval: 60_000,
+    refetchInterval: 120_000,
   });
   const fmt = (n: number) => Number(n).toLocaleString(locale(lang));
   const val = (r: Row) => {

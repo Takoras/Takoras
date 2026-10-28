@@ -256,6 +256,7 @@ export type Database = {
       leaderboard_elo: { Args: { n?: number; since?: string | null }; Returns: { pseudo: string; value: number }[] };
       leaderboard_wins: { Args: { n?: number; since?: string | null }; Returns: { pseudo: string; value: number }[] };
       play_ping: { Args: never; Returns: undefined };
+      online_count: { Args: never; Returns: number };
       ranked_of: { Args: { p_pseudo: string }; Returns: Json };
       bp_state: { Args: never; Returns: Json };
       bp_claim: { Args: { p_tier: number; p_prem?: boolean }; Returns: Json };

@@ -14,6 +14,7 @@ export const publicApi = {
   leaderboardElo: (since: string | null, n = 50) => rpc('leaderboard_elo', { n, since }),
   leaderboardWins: (since: string | null, n = 50) => rpc('leaderboard_wins', { n, since }),
   playPing: () => rpc('play_ping'),
+  onlineCount: () => rpc('online_count'),
   profile: (p_pseudo: string) => rpc('profile_public', { p_pseudo }),
   rankedOf: (p_pseudo: string) => rpc('ranked_of', { p_pseudo }),
   collectionOf: (p_pseudo: string) => rpc('collection_of', { p_pseudo }),

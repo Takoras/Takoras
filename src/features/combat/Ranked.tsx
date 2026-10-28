@@ -176,7 +176,9 @@ export function SearchModal({
         return cbs.current.onError(r.error);
       }
       if (r.window) setWin(r.window);
-      timer = window.setTimeout(() => void tick(), 3000);
+      // on redemande de moins en moins souvent si l'attente dure (économise les appels au serveur du classé)
+      const waited = Date.now() - t0;
+      timer = window.setTimeout(() => void tick(), waited < 20_000 ? 3000 : waited < 60_000 ? 5000 : 8000);
     };
     void tick();
     return () => {

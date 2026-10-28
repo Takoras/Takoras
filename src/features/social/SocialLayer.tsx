@@ -1,4 +1,5 @@
-import { useEffect, useEffectEvent, useRef, useState, type FormEvent } from 'react';
+import { useEffect, useRef, useState, type FormEvent } from 'react';
+import { usePoll } from '@/lib/poll';
 import { Link, useNavigate } from 'react-router';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { errorText, publicApi, socialApi } from '@/api';
@@ -26,121 +27,82 @@ export function SocialLayer() {
   );
 }
 
+// Demandes d'ami et amis acceptés : on revérifie toutes les 90 s (plus de connexion en direct ouverte en permanence)
 function useSocialRealtime() {
   const uid = useAuth((x) => x.user?.id);
   const qc = useQueryClient();
   const t = useT();
-  const say = useEffectEvent((k: 'ui.fr_got' | 'ui.fr_now', n: string) => t(k, { n }));
-  useEffect(() => {
-    if (!uid) {
-      closeChat();
-      return;
-    }
-    const friends = () => (qc.getQueryData(['friends', uid]) as Friend[] | undefined) ?? [];
-    const reload = () =>
-      qc.fetchQuery({
-        queryKey: ['friends', uid],
-        queryFn: async () => (await socialApi.friends()) as unknown as Friend[],
-      });
-    // Le serveur (RLS) n'envoie que les lignes qui nous concernent
-    const ch = sb
-      .channel(`social-${uid}`)
-      .on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'messages' }, ({ new: m }) => {
-        const r = m as { id: number; sender: string; receiver: string; body: string; created_at: string };
-        const other = r.sender === uid ? r.receiver : r.sender;
-        const st = useChat.getState();
-        if (st.open === other) {
-          qc.setQueryData<Msg[]>(['conv', other], (l = []) =>
-            l.some((x) => x.id === r.id)
-              ? l
-              : [...l, { id: r.id, mine: r.sender === uid, body: r.body, created_at: r.created_at }],
-          );
-          if (r.sender !== uid) {
-            if (!st.min && document.visibilityState === 'visible')
-              void socialApi.markRead(other).catch(() => undefined);
-            else sfx.message();
-          }
-          return;
-        }
-        if (r.sender === uid) return;
-        void reload().then((l) => {
-          const f = l.find((x) => x.id === other);
-          if (!f) return;
+  usePoll(
+    async () => {
+      if (!uid) return;
+      const before = (qc.getQueryData(['friends', uid]) as Friend[] | undefined) ?? null;
+      const l = (await socialApi.friends()) as unknown as Friend[];
+      qc.setQueryData(['friends', uid], l);
+      if (!before) return; // premier passage : rien à annoncer
+      const had = new Map(before.map((x) => [x.id, x.status]));
+      for (const x of l) {
+        if (!had.has(x.id) && x.status === 'pending' && x.incoming) {
           sfx.message();
-          notify({
-            title: f.pseudo,
-            pseudo: f.pseudo,
-            body: r.body.length > 80 ? `${r.body.slice(0, 80)}…` : r.body,
-            go: () => openChat(f.id),
-          });
-        });
-      })
-      .on('postgres_changes', { event: '*', schema: 'public', table: 'friendships' }, ({ eventType, new: n }) => {
-        const f = n as { requested_by?: string; status?: string };
-        const before = new Set(
-          friends()
-            .filter((x) => x.status === 'accepted')
-            .map((x) => x.id),
-        );
-        void reload().then((l) => {
-          if (eventType === 'INSERT' && f.requested_by && f.requested_by !== uid) {
-            const x = l.find((y) => y.id === f.requested_by);
-            if (x) {
-              sfx.message();
-              toast(`${say('ui.fr_got', x.pseudo)}`);
-            }
-          }
-          if (eventType === 'UPDATE' && f.status === 'accepted' && f.requested_by === uid) {
-            const x = l.find((y) => y.status === 'accepted' && !before.has(y.id));
-            if (x) {
-              sfx.upgrade();
-              toast(`${say('ui.fr_now', x.pseudo)}`);
-            }
-          }
-          void qc.invalidateQueries({ queryKey: ['friend'] });
-        });
-      })
-      .subscribe();
-    return () => void sb.removeChannel(ch);
-  }, [uid, qc]);
+          toast(t('ui.fr_got', { n: x.pseudo }));
+        }
+        if (had.get(x.id) === 'pending' && x.status === 'accepted' && !x.incoming) {
+          sfx.upgrade();
+          toast(t('ui.fr_now', { n: x.pseudo }));
+        }
+      }
+      void qc.invalidateQueries({ queryKey: ['friend'] });
+    },
+    90_000,
+    !!uid,
+  );
+  useEffect(() => {
+    if (!uid) closeChat();
+  }, [uid]);
 }
 
-// Prix changé par l'admin (seulement pour la boutique actuelle) : notif chez tout le monde, clic = boutique
+// Prix changé par l'admin (seulement pour la boutique actuelle) : notif chez tout le monde, clic = boutique.
+// On revérifie toutes les 2 min les derniers changements de prix.
 function usePriceRealtime() {
   const qc = useQueryClient();
   const nav = useNavigate();
   const t = useT();
-  const title = useEffectEvent((down: boolean) => t(down ? 'ui.price_down' : 'ui.price_up'));
-  const goShop = useEffectEvent(() => void nav('/boutique'));
-  useEffect(() => {
-    const ch = sb
-      .channel('prix')
-      .on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'price_changes' }, ({ new: n }) => {
-        const c = n as { item: string; old_price: number; new_price: number };
-        void (async () => {
-          const shop = (await publicApi.shopToday()) as unknown as { items: (ShopItem & { price: number })[] };
-          qc.setQueryData(['shop'], { ...shop, at: Date.now() });
-          const it = shop.items.find((x) => x.id === c.item);
-          if (!it) return;
-          sfx.message();
-          const down = c.new_price < c.old_price,
-            lang = useSettings.getState().lang,
-            f = (v: number) => v.toLocaleString(locale(lang));
-          notify(
-            {
-              title: `${title(down)}`,
-              body: `${itemText(it, lang)[0]} : ${f(c.old_price)} → ${f(c.new_price)}`,
-              tone: down ? 'down' : 'up',
-              img: itemImg(it),
-              go: () => goShop(),
-            },
-            7000,
-          );
-        })().catch(() => undefined);
-      })
-      .subscribe();
-    return () => void sb.removeChannel(ch);
-  }, [qc]);
+  const last = useRef<number | null>(null);
+  usePoll(async () => {
+    const { data } = await sb
+      .from('price_changes')
+      .select('id, item, old_price, new_price')
+      .order('id', { ascending: false })
+      .limit(5);
+    const rows = (data ?? []) as { id: number; item: string; old_price: number; new_price: number }[];
+    const top = rows[0]?.id ?? 0;
+    if (last.current === null) {
+      last.current = top; // premier passage : on ne rejoue pas les anciens changements
+      return;
+    }
+    const fresh = rows.filter((r) => r.id > (last.current ?? 0));
+    last.current = Math.max(last.current, top);
+    if (!fresh.length) return;
+    const shop = (await publicApi.shopToday()) as unknown as { items: (ShopItem & { price: number })[] };
+    qc.setQueryData(['shop'], { ...shop, at: Date.now() });
+    for (const c of fresh) {
+      const it = shop.items.find((x) => x.id === c.item);
+      if (!it) continue;
+      sfx.message();
+      const down = c.new_price < c.old_price,
+        lang = useSettings.getState().lang,
+        f = (v: number) => v.toLocaleString(locale(lang));
+      notify(
+        {
+          title: t(down ? 'ui.price_down' : 'ui.price_up'),
+          body: `${itemText(it, lang)[0]} : ${f(c.old_price)} → ${f(c.new_price)}`,
+          tone: down ? 'down' : 'up',
+          img: itemImg(it),
+          go: () => void nav('/boutique'),
+        },
+        7000,
+      );
+    }
+  }, 120_000);
 }
 
 // (chat retiré du site : gardé ici au cas où on le remettrait)

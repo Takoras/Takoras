@@ -41,13 +41,13 @@ export function useHistory() {
       return data;
     },
     enabled: !!uid,
-    refetchInterval: 60_000,
+    refetchInterval: 120_000,
   });
 }
 
-// En direct : les beaux tirages de tous les joueurs, toutes les 15 s
+// En direct : les beaux tirages de tous les joueurs, toutes les 30 s (et rien quand l'onglet est caché)
 export function useLive() {
-  return useQuery({ queryKey: ['live'], queryFn: () => publicApi.liveFeed(50), refetchInterval: 15_000 });
+  return useQuery({ queryKey: ['live'], queryFn: () => publicApi.liveFeed(50), refetchInterval: 30_000 });
 }
 
 import { questApi } from './index';

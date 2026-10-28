@@ -520,7 +520,8 @@ function rgOnlineClock() {
   const left = (O.deadline - Date.now()) / 1000;
   RNG.timer = Math.max(0, Math.min(RCFG.AIM_S, left));
   if (left <= 0 && !RNG.locked) rgLock(true);
-  if (left < -3 && Date.now() - (O.ticked || 0) > 2500) { O.ticked = Date.now(); O.tick(); }
+  // un seul des deux joueurs demande d'abord le calcul du tour (l'autre seulement si ça traîne) : 2× moins d'appels
+  if (left < (ME() ? -8 : -3) && Date.now() - (O.ticked || 0) > 4000) { O.ticked = Date.now(); O.tick(); }
 }
 
 // ---------- Révélation puis résolution animée
