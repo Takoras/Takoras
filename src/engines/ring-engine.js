@@ -90,6 +90,30 @@ const RG = (() => {
     const holes = st.holes || [];
     const holePull = (h, scale) => { for (const o of B) { if (!o.alive || o.tmp || o.id === h.owner) continue; const dx = h.x - o.x, dy = h.y - o.y, d = len(dx, dy); if (d > h.r || !d) continue; const f = h.pull * scale * (1 - d / h.r) / o.mass; o.vx += dx / d * f; o.vy += dy / d * f; } };
     holes.forEach(h => { holePull(h, 1); ev.push({ t: 'holepull', x: h.x, y: h.y, at: 0 }); });
+    // Supernova (Soléo) chargée au tour d'avant : elle explose au début de ce tour et repousse tous les ennemis autour
+    for (const b of B) {
+      if (!b.nova || !b.alive) continue;
+      const p = kit(b.name).p; delete b.nova;
+      for (const o of B) {
+        if (!o.alive || o.tmp || o.side === b.side) continue;
+        const dx = o.x - b.x, dy = o.y - b.y, d = len(dx, dy);
+        if (d > p.radius || !d) continue;
+        const g = p.push * (1 - d / p.radius) / o.mass; o.vx += dx / d * g; o.vy += dy / d * g;
+      }
+      ev.push({ t: 'novaboom', id: b.id, x: q(b.x), y: q(b.y), at: 0 });
+    }
+    // Faille (Oblivion) armée : au début du tour, elle aspire les ennemis proches vers elle
+    if (st.rift && st.rift.armed) {
+      const P = kit('Oblivion').p;
+      for (const o of B) {
+        if (!o.alive || o.tmp || o.side === st.rift.side) continue;
+        let best = null, bd = Infinity;
+        for (const [x, y] of st.rift.pts) { const d = len(x - o.x, y - o.y); if (d < bd) { bd = d; best = [x, y]; } }
+        if (!best || bd > P.range || bd < 1) continue;
+        const g = P.pull * (1 - bd / P.range) / o.mass; o.vx += (best[0] - o.x) / bd * g; o.vy += (best[1] - o.y) / bd * g;
+        ev.push({ t: 'riftpull', id: o.id, at: 0 });
+      }
+    }
     // pouvoirs et lancers
     // Un tir : un seul jeton tire (s.i), mais on peut activer les pouvoirs de plusieurs jetons (s.pow pour le tireur,
     // s.pows = les autres jetons de l'équipe). Chaque pouvoir prêt s'active une fois.
@@ -114,6 +138,8 @@ const RG = (() => {
       if (b.pw === 'mirror') { alive(st, side).forEach(a => { if (len(a.x - b.x, a.y - b.y) > k.p.radius) return; a.t.shield = true; a.t.reflect = k.p.mult; }); ev.push({ t: 'mirror', id: b.id, at: 0 }); }
       // Gravité solaire (Soléo) : ne tire pas, devient un petit soleil fixe ; ce tour, tout ce qui bouge près de lui est attiré
       if (b.pw === 'sun') { T.anchor = true; T.sun = true; ev.push({ t: 'sun', id: b.id, at: 0 }); }
+      // Supernova (Soléo) : ne tire pas, se charge (immobile ce tour) ; elle explosera au début du tour suivant
+      if (b.pw === 'nova') { T.anchor = true; b.nova = 1; ev.push({ t: 'nova', id: b.id, at: 0 }); }
       // Œil du cyclone (Zénith) : au lancer, les ennemis autour sont pris dans un tourbillon (ils tournent et sont projetés)
       if (b.pw === 'cyclone') {
         for (const o of alive(st, 1 - side)) {

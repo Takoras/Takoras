@@ -117,7 +117,7 @@
   display: grid;
   grid-template-rows: 1fr 1fr;
   gap: 0;
-  width: 132px;
+  width: 150px;
   position: relative;
   z-index: 1;
   box-shadow: 6px 0 14px rgb(0 0 0 / 35%);
@@ -172,7 +172,7 @@
 .track li {
   position: relative;
   display: grid;
-  grid-template-rows: auto 44px auto;
+  grid-template-rows: auto 56px auto;
   place-items: center center;
   scroll-snap-align: center;
 }
@@ -195,12 +195,12 @@
   position: relative;
   display: grid;
   place-items: center;
-  width: 42px;
-  height: 42px;
-  background: url('/img/ui/num-next.png?v=3') center / 42px 42px no-repeat;
+  width: 52px;
+  height: 52px;
+  background: url('/img/ui/num-next.png?v=3') center / 52px 52px no-repeat;
   image-rendering: pixelated;
   font-weight: 800;
-  font-size: var(--fs-sm);
+  font-size: var(--fs-md);
   color: var(--text-2);
 }
 .reached .num {
@@ -216,9 +216,9 @@ li[aria-current] .num {
   position: relative;
   display: grid;
   place-items: center;
-  width: 112px;
-  height: 112px;
-  padding: 18px;
+  width: 148px;
+  height: 148px;
+  padding: 24px;
   border: 0;
   font: inherit;
   color: var(--text);
@@ -234,8 +234,8 @@ li[aria-current] .num {
   color: #3b1a02;
 }
 .tile img {
-  width: 64px;
-  height: 64px;
+  width: 84px;
+  height: 84px;
   object-fit: contain;
   image-rendering: pixelated;
 }
@@ -476,22 +476,48 @@ button.tile:focus-visible {
   .head {
     padding: var(--s-4);
   }
-  .rail {
-    width: 64px;
+  /* téléphone : liste verticale, un palier par ligne (premium · numéro · gratuit), en gros */
+  .board {
+    grid-template-columns: 1fr;
+    background: #141420;
   }
-  .ticket b {
-    writing-mode: vertical-rl;
-    rotate: 180deg;
-    font-size: var(--fs-xs);
+  .rail {
+    width: auto;
+    grid-template-rows: none;
+    grid-template-columns: 1fr 56px 1fr;
+    box-shadow: 0 6px 14px rgb(0 0 0 / 35%);
+  }
+  .rail .ticket:last-child {
+    grid-column: 3;
+  }
+  .track {
+    flex-direction: column;
+    align-items: center;
+    overflow: visible;
+    padding: var(--s-4) var(--s-2);
+    gap: var(--s-3);
+  }
+  .track li {
+    grid-template-rows: none;
+    grid-template-columns: 1fr 56px 1fr;
+    width: 100%;
+    justify-items: center;
+  }
+  /* la ligne de progression devient verticale, derrière les numéros */
+  .track li::before {
+    inset: calc(var(--s-3) * -0.5 - 1px) auto calc(var(--s-3) * -0.5 - 1px) 50%;
+    width: 8px;
+    height: auto;
+    translate: -50% 0;
   }
   .tile {
-    width: 92px;
-    height: 92px;
-    padding: 14px;
+    width: min(132px, 38vw);
+    height: min(132px, 38vw);
+    padding: 20px;
   }
   .tile img {
-    width: 52px;
-    height: 52px;
+    width: 64px;
+    height: 64px;
   }
   .weekly li {
     grid-template-columns: 1fr auto;

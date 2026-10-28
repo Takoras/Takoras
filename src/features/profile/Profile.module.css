@@ -621,3 +621,100 @@
 .coll button:disabled {
   cursor: default;
 }
+
+/* victoires / défaites sous le rang */
+.record {
+  display: flex;
+  gap: var(--s-2);
+  margin-top: var(--s-2);
+  font: 700 var(--fs-sm) var(--font-display);
+}
+.record em {
+  font-style: normal;
+  padding: 2px 10px;
+  border: 2px solid rgb(255 255 255 / 10%);
+  color: var(--text-2);
+}
+.record .win {
+  color: #86efac;
+  border-color: rgb(134 239 172 / 35%);
+}
+.record .loss {
+  color: #fca5a5;
+  border-color: rgb(252 165 165 / 35%);
+}
+
+/* meilleur tirage : un trophée, en grand, avec son halo */
+.best {
+  display: flex;
+  align-items: center;
+  gap: var(--s-6);
+  padding: 0 var(--s-5);
+}
+.bestImg {
+  position: relative;
+  display: grid;
+  place-items: center;
+  width: 150px;
+  height: 150px;
+  flex: none;
+}
+.bestImg::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  border-radius: 50%;
+  background: radial-gradient(closest-side, rgba(var(--g), 0.55), transparent);
+  animation: bestPulse 3s ease-in-out infinite;
+}
+.bestImg img {
+  position: relative;
+  width: 120px;
+  height: 120px;
+  image-rendering: pixelated;
+  animation: bestFloat 4s ease-in-out infinite;
+}
+.best small {
+  display: block;
+  color: var(--muted);
+  font-size: var(--fs-xs);
+  text-transform: uppercase;
+  letter-spacing: var(--tracking-caps);
+  font-weight: 700;
+}
+.best b {
+  display: flex;
+  align-items: center;
+  gap: var(--s-2);
+  font: 800 clamp(1.8rem, 4vw, 2.6rem) / 1.1 var(--font-display);
+}
+.bestOdds {
+  font: 800 var(--fs-xl) var(--font-display);
+  color: rgb(var(--g));
+  filter: brightness(1.3);
+}
+@keyframes bestPulse {
+  50% {
+    opacity: 0.6;
+    scale: 1.12;
+  }
+}
+@keyframes bestFloat {
+  50% {
+    translate: 0 -6px;
+  }
+}
+:global(html.reduce-fx) .bestImg::before,
+:global(html.reduce-fx) .bestImg img {
+  animation: none;
+}
+@media (max-width: 640px) {
+  .best {
+    flex-direction: column;
+    text-align: center;
+    padding: 0;
+  }
+  .best b {
+    justify-content: center;
+  }
+}

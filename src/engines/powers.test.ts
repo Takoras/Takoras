@@ -145,16 +145,15 @@ test('Anneau (Néphéris) : ne bouge pas, l’ennemi dans l’anneau s’arrête
   expect(d.a().left).toBe(1);
 });
 
-test('Gravité solaire (Soléo) : ne bouge pas, et le tir ennemi est dévié vers lui', () => {
-  const run = (pow: boolean) => {
-    const d = duel('Soléo', 'Carmin', [500, 0, 0, -600]);
-    RG.resolve(d.st, [shot(0, -1, 0, pow), { i: 0, ax: 0, ay: 1000, f: 0.8, pow: false }]);
-    return { me: d.a(), foe: d.o() };
-  };
-  const a = run(false),
-    b = run(true);
-  expect(b.me.x).toBe(500); // le soleil reste en place
-  expect(b.foe.x).not.toBe(a.foe.x); // le tir ennemi est courbé vers lui
+test('Supernova (Soléo) : ne bouge pas en se chargeant, puis explose au début du tour suivant', () => {
+  const d = duel('Soléo', 'Carmin', [0, 300, 0, -200]);
+  const r = RG.resolve(d.st, [shot(0, -1000, 1), null]);
+  expect(evs(r, 'nova')).toBe(1);
+  expect(d.a().y).toBe(300); // il se charge sur place
+  expect(d.o().y).toBe(-200); // rien ne se passe encore
+  const r2 = RG.resolve(d.st, [null, null]);
+  expect(evs(r2, 'novaboom')).toBe(1);
+  expect(d.o().y).toBeLessThan(-400); // l'ennemi est soufflé loin de lui
 });
 
 test('Rayon (Zénith) : ne pousse que le premier jeton sur la ligne, s’arrête aux murs, 1 fois par match', () => {
@@ -193,6 +192,16 @@ test('Faille (Oblivion) : la trajectoire se fissure ; au tour suivant, l’ennem
   expect(evs(r2, 'riftopen')).toBe(1);
   expect(d.o().alive).toBe(false);
   expect(d.st.rift).toBeUndefined();
+});
+
+test('Faille (Oblivion) : au tour suivant, elle aspire l’ennemi proche vers elle avant de s’ouvrir', () => {
+  const d = duel('Oblivion', 'Carmin', [0, 600, 600, -600]);
+  RG.resolve(d.st, [shot(0, -1000, 0.7), null]);
+  const [x, y] = d.st.rift?.pts[3] ?? [0, 0];
+  d.o().x = x + 300; // à côté de la faille, pas dessus
+  d.o().y = y;
+  const r2 = RG.resolve(d.st, [null, null]);
+  expect(evs(r2, 'riftpull')).toBe(1);
 });
 
 test('Contre-courant (Koi) : frappe puis repart vers son point de départ', () => {

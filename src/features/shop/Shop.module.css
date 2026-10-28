@@ -63,11 +63,14 @@
 .card {
   position: relative;
   display: grid;
-  grid-template-columns: 112px minmax(0, 1fr);
-  gap: var(--s-3);
-  aspect-ratio: 2.2 / 1;
-  min-height: 150px;
-  padding: var(--s-3);
+  grid-template-columns: 140px minmax(0, 1fr);
+  gap: var(--s-4);
+  aspect-ratio: 2 / 1;
+  min-height: 190px;
+  padding: var(--s-4);
+  transition:
+    transform var(--t-fast),
+    filter var(--t-fast);
   border: 3px solid transparent;
   border-radius: 16px;
   border-image: url('/img/ui/box-9.png?v=3') 14 fill / 28px stretch;
@@ -84,8 +87,12 @@
   opacity: 0.45;
   filter: grayscale(0.7);
 }
+.card:hover {
+  transform: translateY(-3px);
+  filter: brightness(1.08);
+}
 .card h3 {
-  font-size: var(--fs-md);
+  font-size: var(--fs-lg);
 }
 .card p {
   font-size: var(--fs-sm);
@@ -97,8 +104,8 @@
   background: rgba(var(--g), 0.08);
 }
 .icon img {
-  width: 76px;
-  height: 76px;
+  width: 96px;
+  height: 96px;
   object-fit: contain;
   --df: drop-shadow(0 0 12px rgba(var(--g), calc(0.45 * var(--ga, 0))));
 }
@@ -215,17 +222,24 @@
     gap: var(--s-2);
   }
   .card {
-    grid-template-columns: 84px minmax(0, 1fr);
+    grid-template-columns: 92px minmax(0, 1fr);
     aspect-ratio: auto;
-    min-height: 120px;
-    padding: var(--s-2);
+    min-height: 0;
+    padding: var(--s-3);
   }
   .card p {
     font-size: var(--fs-xs);
   }
   .icon img {
-    width: 56px;
-    height: 56px;
+    width: 68px;
+    height: 68px;
+  }
+  /* prix au-dessus, bouton en dessous sur toute la largeur : plus rien ne se chevauche */
+  .foot {
+    flex-wrap: wrap;
+  }
+  .foot > :last-child {
+    flex: 1 1 100%;
   }
 }
 

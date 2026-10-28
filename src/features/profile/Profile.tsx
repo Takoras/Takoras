@@ -101,7 +101,6 @@ export default function Profile() {
     );
   const mine = !!me.data?.pseudo && p.pseudo === me.data.pseudo;
   const bp = p.best_pull;
-  const total = SERIES.Takoras?.length ?? 0;
   const show = p.showcase ?? [];
   return (
     <section className={s.page}>
@@ -132,18 +131,12 @@ export default function Profile() {
             ) : null}
           </div>
         </div>
-        <EloHero pseudo={p.pseudo} />
+        <EloHero pseudo={p.pseudo} wins={p.wins || 0} losses={p.losses || 0} />
       </header>
       {/* chiffres posés en ligne, sans boîtes */}
       <ul className={s.strip}>
         <li>
           <b>{fmt(p.pulls)}</b> {t('ui.st_pulls')}
-        </li>
-        <li>
-          <b>
-            {p.collection}/{total}
-          </b>{' '}
-          {t('ui.st_collec')}
         </li>
         <li>
           <b>{fmt(p.owned)}</b> {t('ui.st_owned')}
@@ -153,26 +146,22 @@ export default function Profile() {
             <b>🔥 {p.streak}</b> {t('ui.st_streak')}
           </li>
         ) : null}
-        {p.wins || p.losses ? (
-          <li>
-            <b>
-              {p.wins || 0}–{p.losses || 0}
-            </b>{' '}
-            {t('ui.st_record')}
-          </li>
-        ) : null}
-        {bp ? (
-          <li className={s.bestLi} style={glowVars(jetonOf(bp.jeton), bp.variant) as CSSProperties}>
-            <img className={vImg(bp.variant)} src={texOf(jetonOf(bp.jeton))} alt="" width={36} height={36} />
-            <span>
-              <b>
-                {jn(bp.jeton)} <VTag v={bp.variant} />
-              </b>{' '}
-              {t('ui.st_best')} · 1/{fmt(bp.eff)}
-            </span>
-          </li>
-        ) : null}
       </ul>
+      {/* meilleur tirage : en grand, c'est un trophée */}
+      {bp ? (
+        <div className={s.best} style={glowVars(jetonOf(bp.jeton), bp.variant) as CSSProperties}>
+          <span className={s.bestImg}>
+            <img className={vImg(bp.variant)} src={texOf(jetonOf(bp.jeton))} alt="" width={120} height={120} />
+          </span>
+          <div>
+            <small>{t('ui.st_best')}</small>
+            <b>
+              {jn(bp.jeton)} <VTag v={bp.variant} />
+            </b>
+            <span className={s.bestOdds}>1/{fmt(bp.eff)}</span>
+          </div>
+        </div>
+      ) : null}
       <h2 className={s.h2}>{t('ui.showcase')}</h2>
       {/* vitrine : les jetons posés librement (pas de boîte), le nom, la mutation et la vraie chance dessous */}
       <ul className={s.showcase}>
@@ -628,7 +617,7 @@ function EditProfile({ p, onClose }: { p: Prof; onClose: () => void }) {
 }
 
 // Rang classé en grand sur le profil : gros badge qui brille, nom du rang dans sa couleur, Elo énorme
-function EloHero({ pseudo }: { pseudo: string }) {
+function EloHero({ pseudo, wins, losses }: { pseudo: string; wins: number; losses: number }) {
   const t = useT();
   const lang = useSettings((x) => x.lang);
   const name = useRankName();
@@ -649,6 +638,13 @@ function EloHero({ pseudo }: { pseudo: string }) {
           {elo.toLocaleString(locale(lang))} <span>Elo</span>
         </b>
         {q.data?.games ? null : <small className="muted">{t('ui.elo_none')}</small>}
+        {wins || losses ? (
+          <span className={s.record}>
+            <em className={s.win}>{wins} V</em>
+            <em className={s.loss}>{losses} D</em>
+            <em>{Math.round((wins / Math.max(1, wins + losses)) * 100)} %</em>
+          </span>
+        ) : null}
       </div>
     </div>
   );

@@ -15,6 +15,7 @@ export const PW_COL: Record<string, string> = {
   flare: '#fb923c',
   zerog: '#93c5fd',
   sun: '#fbbf24',
+  nova: '#fb923c',
   cyclone: '#d9364f',
   beam: '#ff4d6a',
   ring: '#f08a3c',

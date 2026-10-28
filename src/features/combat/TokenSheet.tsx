@@ -9,6 +9,7 @@ import { Modal } from '@/ui/Modal';
 import { MutationStamp } from '@/ui/MutationStamp';
 import { StatIcon } from '@/ui/StatIcon';
 import { PowerDemo } from './PowerDemo';
+import js from '../inventory/JetonSheet.module.css';
 import s from './TokenSheet.module.css';
 
 // Grande fiche d'un jeton : stats à gauche, le jeton sur son socle au centre, son pouvoir expliqué à droite
@@ -42,7 +43,7 @@ export function TokenSheet({
   ] as const;
   return (
     <Modal open onClose={onClose} title={jn(name)} wide>
-      <div className={s.sheet} style={glowVars(j, variant) as CSSProperties}>
+      <div className={s.sheet} style={{ ...glowVars(j, variant), '--ga': 1 } as CSSProperties}>
         <section className={s.stats} aria-label={t('ui.stats_note')}>
           <span className={s.tier} style={{ color: tierCol(tier) }}>
             1/{vOdds(j.odds, variant as Variant).toLocaleString(locale(lang))}
@@ -58,9 +59,17 @@ export function TokenSheet({
             </div>
           ))}
         </section>
+        {/* le jeton vivant, comme dans l'inventaire : rayons qui tournent, halo qui respire, étincelles, il flotte */}
         <div className={s.stage}>
-          <img className={vImg(variant)} src={texOf(j)} alt="" />
-          <span className={s.pedestal} aria-hidden />
+          <i className={js.rays} aria-hidden />
+          <i className={js.aura} aria-hidden />
+          <span className={js.sparks} aria-hidden>
+            {[0, 1, 2, 3, 4, 5].map((i) => (
+              <i key={i} />
+            ))}
+          </span>
+          <img className={`${vImg(variant)} ${s.float}`} src={texOf(j)} alt="" />
+          <i className={js.floor} aria-hidden />
           {variant ? (
             <span className={s.mut}>
               <MutationStamp v={variant} size="md" />

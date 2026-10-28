@@ -1,7 +1,7 @@
 import { test } from '@playwright/test';
 import { fakeSupabase } from './fake-supabase';
 // Captures d'écran pour relire le rendu (SHOTS=1), pas un vrai test
-const OUT = 'test-results/shots';
+const OUT = process.env.SHOTS_DIR ?? 'test-results/shots';
 test.skip(!process.env.SHOTS, 'captures seulement avec SHOTS=1');
 test.use({ contextOptions: { reducedMotion: 'no-preference' } });
 for (const p of ['/', '/inventaire', '/combat', '/profil', '/boutique', '/passe'])

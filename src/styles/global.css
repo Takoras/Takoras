@@ -16,7 +16,11 @@
 
 html {
   -webkit-text-size-adjust: 100%;
-  scrollbar-color: var(--line-strong) transparent;
+  /* pas de grande barre de défilement sur la page : on défile à la molette / au doigt */
+  scrollbar-width: none;
+}
+html::-webkit-scrollbar {
+  display: none;
 }
 
 body {
@@ -176,27 +180,33 @@ html.lock body {
   filter: brightness(1.25);
 }
 
-/* Barres de défilement maison (plus celle du navigateur) : fine, violette, carrée façon pixel art */
-* {
-  scrollbar-width: thin;
-  scrollbar-color: #5b4a8a transparent;
-}
+/* Barres de défilement des zones internes : fines, pixel art, faites pour le site.
+   (Chrome / Safari / Edge : pseudo-éléments ; Firefox : barre fine violette.) */
 ::-webkit-scrollbar {
-  width: 10px;
-  height: 10px;
+  width: 8px;
+  height: 8px;
 }
 ::-webkit-scrollbar-track {
   background: transparent;
 }
 ::-webkit-scrollbar-thumb {
-  background: #5b4a8a;
-  border: 2px solid #0d0d12;
+  background: #5b3fa0;
   border-radius: 0;
-  box-shadow: inset 2px 2px 0 #7d6ab8;
+  box-shadow:
+    inset 2px 2px 0 #9b7be0,
+    inset -2px -2px 0 #3a2470;
 }
 ::-webkit-scrollbar-thumb:hover {
   background: #7d48d9;
 }
-::-webkit-scrollbar-corner {
+::-webkit-scrollbar-corner,
+::-webkit-scrollbar-button {
+  display: none;
   background: transparent;
+}
+@supports not selector(::-webkit-scrollbar) {
+  * {
+    scrollbar-width: thin;
+    scrollbar-color: #7d48d9 transparent;
+  }
 }

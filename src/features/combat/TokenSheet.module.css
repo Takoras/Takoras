@@ -55,14 +55,44 @@
   display: grid;
   justify-items: center;
   padding: var(--s-4) 0 var(--s-6);
+  overflow: hidden;
+  min-height: 300px;
 }
 .stage img {
   position: relative;
   z-index: 1;
-  width: min(100%, 190px);
+  width: min(100%, 200px);
   aspect-ratio: 1;
+  margin-top: 30px;
   image-rendering: pixelated;
-  --df: drop-shadow(0 0 22px rgba(var(--g), calc(0.6 * var(--ga, 0))));
+}
+.float {
+  animation: tsFloat 4.5s ease-in-out infinite;
+}
+@keyframes tsFloat {
+  50% {
+    translate: 0 -10px;
+  }
+}
+/* chaque colonne arrive en glissant */
+.sheet > * {
+  animation: tsIn 0.45s cubic-bezier(0.2, 1.1, 0.3, 1) both;
+}
+.sheet > :nth-child(2) {
+  animation-delay: 0.08s;
+}
+.sheet > :nth-child(3) {
+  animation-delay: 0.16s;
+}
+@keyframes tsIn {
+  from {
+    opacity: 0;
+    transform: translateY(14px) scale(0.97);
+  }
+}
+:global(html.reduce-fx) .float,
+:global(html.reduce-fx) .sheet > * {
+  animation: none;
 }
 .pedestal {
   position: absolute;
