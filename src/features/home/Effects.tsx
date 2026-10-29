@@ -23,7 +23,12 @@ export function Effects() {
       {pots.map((p, i) => (
         <li key={i}>{t('ui.fx_luck', { m: dec(p.m, lang), n: p.n })}</li>
       ))}
-      {fast ? <li>{t('ui.fx_fast', { t: hms(fast) })}</li> : null}
+      {fast ? (
+        <li>
+          <img className="px" src="/img/objets/sablier.png" alt="" width={18} height={18} /> Sablier actif ·{' '}
+          {t('ui.fx_fast', { t: hms(fast) })}
+        </li>
+      ) : null}
     </ul>
   );
 }

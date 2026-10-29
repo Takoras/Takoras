@@ -95,7 +95,7 @@ function moPlay(old, root, sel, { dissolve = false, appear = true } = {}) {
     if (!o) { news.push(el); return; }
     seen.add(k);
     // le site est à l'échelle (--z) : écart mesuré à l'écran → pixels du site
-    const z = parseFloat(getComputedStyle(document.documentElement).getPropertyValue('--z')) || 1;
+    const z = parseFloat(getComputedStyle(el).getPropertyValue('--z')) || 1;
     const r = el.getBoundingClientRect(), dx = (o.r.left - r.left) / z, dy = (o.r.top - r.top) / z;
     if (fx && (Math.abs(dx) > 1 || Math.abs(dy) > 1)) el.animate([{ transform: `translate(${dx}px, ${dy}px)` }, { transform: 'none' }], { duration: 480, easing: 'cubic-bezier(.2, .9, .3, 1)' });
     if (o.sig !== el.dataset.sig) {

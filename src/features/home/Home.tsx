@@ -31,7 +31,9 @@ export default function Home() {
         <div className={s.center} data-tour="pull">
           <HeroCoin img={pull.img} label={pull.name} />
           <h1 className={s.title}>
-            {t('ui.pull')} <SerieName name={pull.name} h="0.95em" />
+            {/* juste le logo de la série, au centre (le mot « Tirage » reste lu par les lecteurs d'écran) */}
+            <span className="visually-hidden">{t('ui.pull')} </span>
+            <SerieName name={pull.name} h="1.5em" doodle />
           </h1>
           <Actions />
         </div>

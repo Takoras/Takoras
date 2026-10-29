@@ -98,7 +98,7 @@ export default function Profile() {
     <section className={s.page}>
       <div className={`${s.banner} ${p.banner && BANNER_IMG[p.banner] ? '' : s.noBanner}`}>
         {p.banner && BANNER_IMG[p.banner] ? (
-          <img className="px" src={BANNER_IMG[p.banner]} alt="" />
+          <img className="ban" src={BANNER_IMG[p.banner]} alt="" />
         ) : mine ? (
           <span className="muted">{t('ui.no_banner')}</span>
         ) : null}
@@ -135,10 +135,9 @@ export default function Profile() {
         </li>
         {p.streak > 0 ? (
           <li>
-            <b>
-              <img className="px" src="/img/ui/flame.png" alt="" width={18} height={18} /> {p.streak}
-            </b>{' '}
-            {t('ui.st_streak')}
+            <b className="streak" title={t('ui.st_streak')}>
+              <img className="px" src="/img/ui/flame.png" alt="" width={22} height={22} /> {p.streak}
+            </b>
           </li>
         ) : null}
       </ul>
@@ -573,7 +572,7 @@ function EditProfile({ p, onClose }: { p: Prof; onClose: () => void }) {
                   onClick={() => setBanner(b)}
                   aria-label={bannerName(b, lang)}
                 >
-                  {BANNER_IMG[b] ? <img className="px" src={BANNER_IMG[b]} alt="" /> : bannerName(b, lang)}
+                  {BANNER_IMG[b] ? <img className="ban" src={BANNER_IMG[b]} alt="" /> : bannerName(b, lang)}
                 </button>
               ))}
             </div>

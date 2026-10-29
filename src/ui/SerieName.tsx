@@ -2,12 +2,12 @@
 const LOGOS: Record<string, { src: string; ratio: number }> = {
   Takoras: { src: '/img/logo-takoras.png', ratio: 880 / 320 },
 };
-export function SerieName({ name, h = '1.25em' }: { name: string; h?: string }) {
+export function SerieName({ name, h = '1.25em', doodle }: { name: string; h?: string; doodle?: boolean }) {
   const l = LOGOS[name];
   if (!l) return <>{name}</>;
   return (
     <img
-      className="serie-logo"
+      className={doodle ? 'px serie-logo' : 'serie-logo'}
       src={l.src}
       alt={name}
       style={{ display: 'inline-block', height: h, width: 'auto', aspectRatio: String(l.ratio), verticalAlign: 'middle' }}

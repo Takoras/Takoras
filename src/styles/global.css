@@ -79,6 +79,10 @@ img {
 .px {
   image-rendering: pixelated;
 }
+/* bannières : pixels nets, sans doodle (sur une image aussi large, il la rendait floue) */
+img.ban {
+  image-rendering: pixelated;
+}
 
 /* Focus visible au clavier uniquement, bien contrasté */
 :focus-visible {

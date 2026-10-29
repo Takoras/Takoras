@@ -64,10 +64,20 @@ export default function Pass() {
   const d = q.data;
   const tier = d ? Math.min(50, Math.floor(d.xp / XP_TIER)) : 0;
   // le palier en cours est au milieu de l'écran, sans chercher
+  // seulement à l'arrivée (et en revenant sur l'onglet) : récupérer une récompense ne fait plus sauter la piste
+  const centered = useRef(false);
   useEffect(() => {
+    if (tab !== 'rewards') {
+      centered.current = false;
+      return;
+    }
+    if (centered.current || !d) return;
     const el = list.current?.querySelector<HTMLElement>('[aria-current]');
-    if (el && list.current) list.current.scrollLeft = el.offsetLeft - list.current.clientWidth / 2;
-  }, [tier, tab, d]);
+    if (el && list.current) {
+      list.current.scrollLeft = el.offsetLeft - list.current.clientWidth / 2 + el.offsetWidth / 2;
+      centered.current = true;
+    }
+  }, [tab, d]);
   // PC : la molette fait défiler la piste de gauche à droite
   useEffect(() => {
     const el = list.current;
@@ -147,7 +157,7 @@ export default function Pass() {
     const body = (
       <>
         <img
-          className={`px ${r.item?.startsWith('b_') ? s.wide : r.item?.startsWith('a_') ? s.round : ''}`}
+          className={r.item?.startsWith('b_') ? `ban ${s.wide}` : `px ${r.item?.startsWith('a_') ? s.round : ''}`}
           src={icon(r)}
           alt=""
         />
@@ -316,7 +326,7 @@ export default function Pass() {
                   </figcaption>
                 </figure>
                 <figure>
-                  <img className={`px ${s.premBan}`} src="/img/bannieres/yeux.webp" alt="" />
+                  <img className={`ban ${s.premBan}`} src="/img/bannieres/yeux.webp" alt="" />
                   <figcaption>
                     Bannière « Yeux » <small>palier 30 · exclusive</small>
                   </figcaption>

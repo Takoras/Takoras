@@ -1,4 +1,5 @@
 import { useRef } from 'react';
+import { openPulls } from '../eco/openPulls';
 import s from './Home.module.css';
 
 // Jeton du pull, en grand : il penche vers le pointeur avec un reflet. id="coin" : le moteur d'ouverture
@@ -31,9 +32,26 @@ export function HeroCoin({ img, label }: { img: string; label: string }) {
           <i key={i} />
         ))}
       </div>
-      <div id="coin" ref={ref} className={s.coin} onPointerMove={move} onPointerLeave={leave}>
+      {/* toucher le jeton = ouvrir un tirage (comme le bouton « Ouvrir 1 ») */}
+      <div
+        id="coin"
+        ref={ref}
+        className={s.coin}
+        onPointerMove={move}
+        onPointerLeave={leave}
+        role="button"
+        tabIndex={0}
+        aria-label={`${label} · ouvrir un tirage`}
+        onClick={() => void openPulls(1)}
+        onKeyDown={(e) => {
+          if (e.key === 'Enter' || e.key === ' ') {
+            e.preventDefault();
+            void openPulls(1);
+          }
+        }}
+      >
         <div className={s.tilt}>
-          <img className="px" src={img} alt={label} width={220} height={220} />
+          <img className="px" src={img} alt="" width={220} height={220} />
           <i className={s.glare} style={{ maskImage: `url(${img})`, WebkitMaskImage: `url(${img})` }} aria-hidden />
         </div>
       </div>

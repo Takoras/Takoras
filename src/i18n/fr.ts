@@ -526,7 +526,7 @@ export const fr = {
     send: 'Envoyer',
     err_banned: 'Ton compte est suspendu',
     err_not_friends: 'Vous n’êtes pas amis',
-    err_slow: 'Doucement ! Attends un peu avant de réécrire',
+    err_slow: 'Trop rapide ! Réessaie dans une seconde',
     err_unknown: 'Aucun joueur avec ce pseudo',
     err_self: 'C’est toi',
     banned_bar: 'Ton compte est suspendu par un admin : tu ne peux plus ouvrir, acheter, vendre ni écrire.',

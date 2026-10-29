@@ -43,9 +43,12 @@ const far = o => Math.hypot(Math.max(o.x, innerWidth - o.x), Math.max(o.y, inner
 // vite au centre, de plus en plus lentement vers les bords.
 const css = v => getComputedStyle(document.documentElement).getPropertyValue(v).trim();
 
+// couleur des cubes = couleur de la série (Takoras : le bleu du logo)
+const SERIE_COL = { Takoras: ['#2747b5', '#47c2ea'] };
+const serieCol = () => SERIE_COL[(sess && PULLS[sess.pull]?.name) || 'Takoras'] || [css('--mid'), css('--hi')];
 function grid(cols) {
   const w = Math.ceil(innerWidth / cols), rows = Math.ceil(innerHeight / w);
-  const color = css('--mid');
+  const color = serieCol()[0];
   const cells = [];
   for (let y = 0; y < rows; y++) for (let x = 0; x < cols; x++) {
     const d = el(`left:${x * w}px;top:${y * w}px;width:${w + 1}px;height:${w + 1}px;transform:scale(0);background:${color}`);
@@ -56,7 +59,7 @@ function grid(cols) {
 
 // Petits carrés qui jaillissent du jeton (peu nombreux, sans glow)
 function sparks(n = 12) {
-  const o = center(), tints = [css('--hi'), css('--mid')];
+  const o = center(), tints = [serieCol()[1], serieCol()[0]];
   for (let i = 0; i < n; i++) {
     const s = 5 + Math.random() * 6, a = Math.random() * Math.PI * 2, r = o.r * (1.2 + Math.random() * 1.4);
     el(`left:${o.x - s / 2}px;top:${o.y - s / 2}px;${sparkStyle(tints[i % 2])};z-index:2`).animate([
@@ -268,7 +271,8 @@ function startOpening() {
   }
   const c = sess.cur, p = PULLS[sess.pull];
   run = { result: findJeton(c.name), variant: c.variant || '', queue: c.queue, shown: c.shown, done: false };
-  $('op-tag').textContent = t('pull') + ' ' + p.name + (sess.total > 1 ? ` · ${sess.idx + 1}/${sess.total}` : '');
+  // en haut : le logo de la série (et la position dans la série d'ouvertures)
+  $('op-tag').innerHTML = `<img class="op-tag-logo" src="/img/logo-takoras.png" alt="${p.name}">` + (sess.total > 1 ? `<span>${sess.idx + 1}/${sess.total}</span>` : '');
   $('op-odds').classList.remove('bump');
   if ($('op-price')) $('op-price').textContent = (p.price * sess.total).toLocaleString(LOCALE()); // ce bouton peut être réécrit par l'économie
   $('op-odds').textContent = '1/' + c.shown.toLocaleString(LOCALE());
@@ -797,6 +801,8 @@ opCoin.addEventListener('pointerdown', e => { e.preventDefault(); e.stopPropagat
 opening.addEventListener('pointerdown', e => {
   if (e.target.closest('button, a, input, select, .op-recap-view')) return;
   if (sess?.auto) return;
+  // toucher n'importe où fait monter le jeton (pas besoin de viser le jeton)
+  if (run && !run.done) { e.preventDefault(); return tap(); }
   if (run?.done && opening.classList.contains('revealed') && spinning()) { e.preventDefault(); return stopSpin(); }
   if (run?.done && sess && sess.total === 1 && opening.classList.contains('revealed') && !spinning()) { e.preventDefault(); openPulls(1); }
 });
@@ -807,7 +813,11 @@ addEventListener('keydown', e => {
   tap();
 });
 
-function buy(n, plan = null, vars = null, lucks = null, ids = null) { closeOpening(); startSession(n, plan, vars, lucks, ids); runTransition(); }
+function buy(n, plan = null, vars = null, lucks = null, ids = null) {
+  closeOpening(); startSession(n, plan, vars, lucks, ids);
+  // « Ouvrir 1 » : pas l'animation des cubes à chaque fois, juste un fondu rapide
+  if (n === 1) showOpening(160); else runTransition();
+}
 $('op-next')?.addEventListener('click', next);
 // Pendant un ×10 : un clic n'importe où sur l'écran passe au jeton suivant
 opening.addEventListener('click', e => {

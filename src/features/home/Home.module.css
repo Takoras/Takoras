@@ -166,8 +166,16 @@
 }
 
 @keyframes bob {
-  50% {
-    transform: translateY(-10px);
+  /* le jeton flotte et se balance doucement */
+  0%,
+  100% {
+    transform: none;
+  }
+  30% {
+    transform: translateY(-12px) rotate(-3deg);
+  }
+  65% {
+    transform: translateY(-5px) rotate(2.5deg);
   }
 }
 @keyframes spin {

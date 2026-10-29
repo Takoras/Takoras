@@ -16,6 +16,7 @@
       if (z === last) return;
       last = z;
       d.style.setProperty('--z', String(z));
+      d.style.setProperty('--zg', String(z)); // échelle générale (le contenu de chaque page a en plus son propre zoom)
     };
     fitPc();
     addEventListener('resize', fitPc);

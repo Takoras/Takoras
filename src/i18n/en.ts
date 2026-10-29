@@ -524,7 +524,7 @@ export const en: Dict = {
     send: 'Send',
     err_banned: 'Your account is suspended',
     err_not_friends: 'You are not friends',
-    err_slow: 'Slow down! Wait a bit before writing again',
+    err_slow: 'Too fast! Try again in a second',
     err_unknown: 'No player with that username',
     err_self: 'That’s you',
     banned_bar: 'Your account was suspended by an admin: you can’t open, buy, sell or write anymore.',

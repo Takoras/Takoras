@@ -323,3 +323,35 @@ html.reduce-fx .op-id, html.reduce-fx .op-stats, html.reduce-fx .op-actions { an
   image-rendering: pixelated;
   margin-bottom: 4px;
 }
+
+/* logo de la série en haut de l'ouverture */
+#op-tag {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+.op-tag-logo {
+  height: 30px;
+  width: auto;
+  image-rendering: pixelated;
+}
+/* plus de « Clique sur le jeton » : on sait qu'il faut toucher */
+.op-hint {
+  display: none !important;
+}
+/* spammer l'écran ne sélectionne plus le texte de la page derrière (téléphone : double-toucher, traduction…) */
+.opening,
+.opening * {
+  -webkit-user-select: none;
+  user-select: none;
+  -webkit-touch-callout: none;
+  -webkit-tap-highlight-color: transparent;
+}
+html.lock body,
+html.lock #root {
+  -webkit-user-select: none;
+  user-select: none;
+}
+html.lock #root {
+  pointer-events: none;
+}

@@ -1,8 +1,8 @@
+import type { CSSProperties } from 'react';
 import { useEffect } from 'react';
 import { NavLink, Outlet, useLocation, useNavigate } from 'react-router';
 import { useMe } from '@/api/queries';
 import { useResetWatch } from '@/lib/resetWatch';
-import { pixelBurst } from '@/lib/pfx';
 import { useAuth, signOut } from '@/lib/auth';
 import { locale, reducedFx } from '@/lib/settings';
 import { useT } from '@/i18n/useT';
@@ -30,6 +30,17 @@ const Badge = ({ n }: { n: number }) =>
     </i>
   ) : null;
 
+// Zoom de chaque page, réglé à l'œil sur PC (100 % = taille normale du site)
+const PAGE_ZOOM: [string, number][] = [
+  ['/inventaire', 0.75],
+  ['/combat', 0.75],
+  ['/boutique', 0.67],
+];
+function pageZoom(path: string) {
+  if (path === '/') return 0.75;
+  return PAGE_ZOOM.find(([p]) => path.startsWith(p))?.[1] ?? 1;
+}
+
 export function Layout() {
   const t = useT();
   const { pathname } = useLocation();
@@ -40,8 +51,10 @@ export function Layout() {
   useResetWatch();
   // Chaque page arrive en douceur : ses blocs montent et apparaissent l'un après l'autre
   useEffect(() => {
+    // nouvelle page : toujours en haut (avant, on gardait parfois la position de la page d'avant)
+    window.scrollTo({ top: 0, left: 0, behavior: 'instant' as ScrollBehavior });
     if (reducedFx()) return;
-    const main = document.getElementById('main');
+    const main = document.getElementById('main')?.firstElementChild;
     if (!main) return;
     const blocks = [...main.children].flatMap((c) =>
       c.children.length > 1 && c.children.length < 14 ? [...c.children] : [c],
@@ -62,21 +75,6 @@ export function Layout() {
     );
   }, [pathname]);
   useEffect(() => openUI('more', false), [pathname]);
-  // un petit éclat de pixels sous le doigt à chaque bouton principal (violet) ou doré
-  useEffect(() => {
-    const on = (e: PointerEvent) => {
-      const b = (e.target as HTMLElement | null)?.closest?.('[data-variant="primary"], [data-variant="gold"]');
-      if (!b || (b as HTMLButtonElement).disabled) return;
-      pixelBurst(e.clientX, e.clientY, {
-        kind: 3,
-        size: 52,
-        color: b.getAttribute('data-variant') === 'gold' ? '#fdba74' : '#c4b5fd',
-        ms: 340,
-      });
-    };
-    addEventListener('pointerdown', on);
-    return () => removeEventListener('pointerdown', on);
-  }, []);
   const navigate = useNavigate();
   // Raccourci « debug » (taper le mot n'importe où) : ouvre le panel admin, pour les admins seulement
   const isAdmin = !!me.data?.admin;
@@ -192,7 +190,10 @@ export function Layout() {
         ))}
       </div>
       <main id="main" className={s.main} key={pathname}>
-        <Outlet />
+        {/* zoom propre à chaque page (choisi à l'œil) : le contenu de la page seulement, pas la barre ni le haut */}
+        <div className={s.pz} style={{ '--pz': pageZoom(pathname) } as CSSProperties}>
+          <Outlet />
+        </div>
       </main>
 
       {/* téléphone tenu debout : le jeu se joue à l'horizontale */}
