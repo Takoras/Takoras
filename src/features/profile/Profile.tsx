@@ -98,7 +98,7 @@ export default function Profile() {
     <section className={s.page}>
       <div className={`${s.banner} ${p.banner && BANNER_IMG[p.banner] ? '' : s.noBanner}`}>
         {p.banner && BANNER_IMG[p.banner] ? (
-          <img className="ban" src={BANNER_IMG[p.banner]} alt="" />
+          <img className="px" src={BANNER_IMG[p.banner]} alt="" />
         ) : mine ? (
           <span className="muted">{t('ui.no_banner')}</span>
         ) : null}
@@ -572,7 +572,7 @@ function EditProfile({ p, onClose }: { p: Prof; onClose: () => void }) {
                   onClick={() => setBanner(b)}
                   aria-label={bannerName(b, lang)}
                 >
-                  {BANNER_IMG[b] ? <img className="ban" src={BANNER_IMG[b]} alt="" /> : bannerName(b, lang)}
+                  {BANNER_IMG[b] ? <img className="px" src={BANNER_IMG[b]} alt="" /> : bannerName(b, lang)}
                 </button>
               ))}
             </div>

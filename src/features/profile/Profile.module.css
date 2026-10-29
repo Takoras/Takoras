@@ -710,8 +710,8 @@
 
 /* bestiaire du joueur : série choisie en surbrillance, mutations trouvées sous chaque jeton */
 .series button[aria-pressed='true'] {
-  outline: 3px solid #8b5cf6;
-  outline-offset: 2px;
+  /* série choisie : ta boîte « sélectionnée » (plus de contour violet en CSS) */
+  border-image-source: url('/img/ui/box-sel.png?v=3');
 }
 .vrow {
   display: flex;

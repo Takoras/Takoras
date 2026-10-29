@@ -157,7 +157,7 @@ export default function Pass() {
     const body = (
       <>
         <img
-          className={r.item?.startsWith('b_') ? `ban ${s.wide}` : `px ${r.item?.startsWith('a_') ? s.round : ''}`}
+          className={`px ${r.item?.startsWith('b_') ? s.wide : r.item?.startsWith('a_') ? s.round : ''}`}
           src={icon(r)}
           alt=""
         />
@@ -366,7 +366,7 @@ export default function Pass() {
                   </figcaption>
                 </figure>
                 <figure>
-                  <img className={`ban ${s.premBan}`} src="/img/bannieres/yeux.webp" alt="" />
+                  <img className={`px ${s.premBan}`} src="/img/bannieres/yeux.png" alt="" />
                   <figcaption>
                     Bannière « Yeux » <small>palier 30 · exclusive</small>
                   </figcaption>

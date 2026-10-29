@@ -309,14 +309,6 @@ li[aria-current] .num {
   border-radius: 50%;
   border: 2px solid #000;
 }
-.tile.rare::after {
-  content: '';
-  position: absolute;
-  inset: -4px;
-  border-radius: 14px;
-  box-shadow: 0 0 22px rgb(253 186 116 / 55%);
-  pointer-events: none;
-}
 .tile.none {
   opacity: 0.25;
 }
@@ -649,16 +641,9 @@ button.tile:focus-visible {
   margin-bottom: calc(-1 * var(--s-1));
 }
 
-/* récompense exclusive de la saison (photo, bannière) : cadre doré qui brille + ruban « Exclusif » */
+/* récompense exclusive de la saison (photo, bannière) : ta case à bord doré, sans clignoter */
 .tile.rare {
-  outline: 3px solid #fbbf24;
-  outline-offset: -3px;
-  animation: exclGlow 2.2s ease-in-out infinite;
-}
-@keyframes exclGlow {
-  50% {
-    filter: brightness(1.15) drop-shadow(0 0 12px rgb(251 191 36 / 70%));
-  }
+  background-image: url('/img/ui/box-exclusive.png?v=1');
 }
 .ribbon {
   position: absolute;
@@ -676,9 +661,4 @@ button.tile:focus-visible {
   letter-spacing: 0.08em;
   text-transform: uppercase;
   white-space: nowrap;
-}
-@media (prefers-reduced-motion: reduce) {
-  .tile.rare {
-    animation: none;
-  }
 }
