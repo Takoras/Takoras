@@ -9,6 +9,7 @@ export const sfx: {
   tick(v?: number): void; hold: Snd; heartbeat: Snd; reveal(odds: number): void; impact: Snd;
   riser(dur?: number): void; next: Snd; regen: Snd; upgrade: Snd; announce: Snd; message: Snd;
   combo(n: number): void; deny: Snd;
+  open: Snd; close: Snd; page: Snd; type: Snd; pop: Snd; toggle(on: boolean): void; suspense(step?: number): void;
 };
 export function configureSound(o: { volume?: () => number; reduced?: () => boolean }): void;
 export function installSoundListeners(): void;

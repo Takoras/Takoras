@@ -127,7 +127,7 @@ const sfx = (() => {
 
   // Gamme pentatonique majeure à partir de do grave (rien ne dépasse ~1 kHz)
   const NOTE = n => 196 * 2 ** ([0, 2, 4, 7, 9][((n % 5) + 5) % 5] / 12 + Math.floor(n / 5));
-  let lastHover = 0, lastClick = 0;
+  let lastHover = 0, lastClick = 0, lastPage = 0, lastType = 0;
   const tierOf = odds => (odds >= 100000 ? 'mythic' : odds >= 10000 ? 'legend' : odds >= 1000 ? 'epic' : odds >= 100 ? 'rare' : 'common');
 
   return {
@@ -142,6 +142,13 @@ const sfx = (() => {
     hover() { const t = performance.now(); if (t - lastHover < 90) return; lastHover = t; if (!file('ui', 'hover', .2)) mar(NOTE(5), { vol: .015, dur: .12 }); },
     whoosh() { air({ dur: .45, vol: .14, from: 180, to: 1300 }); ep(NOTE(2), { vol: .05, dur: .5 }); },
     whooshOut() { air({ dur: .45, vol: .12, from: 1300, to: 160 }); },
+    // sons d'interface (doux, courts) : fenêtre qui s'ouvre / se ferme, nouvelle page, frappe au clavier, petit message
+    open() { air({ dur: .22, vol: .05, from: 400, to: 1600 }); ep(NOTE(4), { vol: .045, dur: .35 }); ep(NOTE(6), { vol: .035, dur: .4, delay: .05 }); },
+    close() { air({ dur: .2, vol: .045, from: 1400, to: 380 }); ep(NOTE(3), { vol: .035, dur: .3 }); },
+    page() { const t = performance.now(); if (t - lastPage < 200) return; lastPage = t; air({ dur: .3, vol: .04, from: 300, to: 1100 }); },
+    type() { const t = performance.now(); if (t - lastType < 45) return; lastType = t; mar(NOTE(7 + Math.floor(Math.random() * 3)), { vol: .018, dur: .06 }); },
+    toggle(on) { mar(NOTE(on ? 5 : 3), { vol: .06, dur: .15 }); mar(NOTE(on ? 7 : 1), { vol: .05, dur: .2, delay: .05 }); },
+    pop() { ep(NOTE(5), { vol: .05, dur: .3 }); },
     // Transition pixel : petit arpège lo-fi qui descend + crépitement de vinyle
     corrupt() {
       [7, 5, 4, 2, 0].forEach((n, i) => ep(NOTE(n), { vol: .07, dur: .4, delay: i * .06 }));
@@ -196,6 +203,17 @@ let installed = false;
 export function installSoundListeners() {
   if (installed) return;
   installed = true;
-  document.addEventListener('click', e => { if (e.target.closest?.('button:not([data-nosound])')) sfx.click(); });
-  document.addEventListener('pointerover', e => { if (e.target.closest?.('[data-hoversound]')) sfx.hover(); });
+  // un son pour chaque interaction : boutons, liens, onglets, choix, cases, menus
+  const CLICKABLE = 'button:not([data-nosound]), a[href], [role="tab"], [role="radio"], [role="switch"], [role="menuitem"], summary, select';
+  document.addEventListener('click', e => { if (e.target.closest?.(CLICKABLE)) sfx.click(); });
+  document.addEventListener('change', e => { const el = e.target; if (el?.type === 'checkbox' || el?.type === 'radio') sfx.toggle(el.checked); });
+  // survol : un tout petit son sur ce qu'on peut toucher (souris seulement)
+  let overEl = null;
+  document.addEventListener('pointerover', e => {
+    if (e.pointerType && e.pointerType !== 'mouse') return;
+    const el = e.target.closest?.(`${CLICKABLE}, [data-hoversound], [data-key]`);
+    if (el && el !== overEl) { overEl = el; sfx.hover(); } else if (!el) overEl = null;
+  });
+  // frappe au clavier dans les champs
+  document.addEventListener('keydown', e => { if (e.key.length === 1 && e.target.closest?.('input, textarea')) sfx.type(); });
 }

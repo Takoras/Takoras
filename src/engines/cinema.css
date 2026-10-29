@@ -23,9 +23,9 @@
 /* carton de texte plein écran (Takoras : « Bien joué. ») : grandes lettres espacées, dégradé bleu glacé, lueur ;
    les lettres sortent du flou l'une après l'autre, puis tout s'efface lentement */
 .cine-card { position: absolute; inset: 0; display: flex; align-items: center; justify-content: center; pointer-events: none; opacity: 0;
-  font: 800 clamp(44px, 8.5vw, 124px) / 1 var(--font-display); letter-spacing: .14em; padding-left: .14em; text-transform: uppercase;
+  font: 800 clamp(44px, 8.5vw, 124px) / 1.4 var(--font-display); letter-spacing: .14em; padding-left: .14em; text-transform: uppercase;
   transition: opacity 1.1s cubic-bezier(.4, 0, .2, 1); filter: drop-shadow(0 0 .35em rgba(60, 200, 234, .45)); }
-.cine-card span { display: inline-block; background: linear-gradient(180deg, #ffffff 15%, #9be7fb 55%, #3cc8ea 100%); -webkit-background-clip: text; background-clip: text; color: transparent;
+.cine-card span { display: inline-block; padding: .2em 0; /* de la place au-dessus : les accents (É) ne sont plus coupés */ background: linear-gradient(180deg, #ffffff 15%, #9be7fb 55%, #3cc8ea 100%); -webkit-background-clip: text; background-clip: text; color: transparent;
   opacity: 0; transform: translateY(.25em) scale(1.08); filter: blur(10px); }
 .cine-card.on { opacity: 1; }
 .cine-card.on span { animation: cardLetter 1.1s cubic-bezier(.2, .7, .2, 1) calc(var(--i) * 90ms + 150ms) forwards; }

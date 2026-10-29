@@ -4,6 +4,7 @@ import { NavLink, Outlet, useLocation, useNavigate } from 'react-router';
 import { useMe } from '@/api/queries';
 import { useResetWatch } from '@/lib/resetWatch';
 import { kickDoodle } from '@/lib/doodle';
+import { sfx } from '@/engines/sound.js';
 import { useAuth, signOut } from '@/lib/auth';
 import { locale, reducedFx } from '@/lib/settings';
 import { useT } from '@/i18n/useT';
@@ -55,7 +56,8 @@ export function Layout() {
     // nouvelle page : toujours en haut (avant, on gardait parfois la position de la page d'avant)
     window.scrollTo({ top: 0, left: 0, behavior: 'instant' as ScrollBehavior });
     // le doodle ne prenait parfois pas sur les images : on le relance une fois la page affichée
-    setTimeout(kickDoodle, 120);
+    [120, 1000, 3000].forEach((ms) => setTimeout(kickDoodle, ms)); // aussi quand les images arrivent plus tard
+    sfx.page(); // petit souffle en changeant de page
     if (reducedFx()) return;
     const main = document.getElementById('main')?.firstElementChild;
     if (!main) return;

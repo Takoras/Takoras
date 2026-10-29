@@ -10,6 +10,8 @@ import './cinema.css';
 
 const MYSTERE = '/img/jetons/mystere.png';
 
+const tr = t; // traductions (dans les films, « t » est le temps)
+
 const CINE = (() => {
   const S = 3; // taille d'un « pixel » à l'écran
   const TAU = Math.PI * 2;
@@ -410,7 +412,7 @@ const CINE = (() => {
       // pendant la révélation, l'ombre finit de passer et dévoile le jeton
       over(c, ms) { const u = .5 + clamp(ms / 1400) * .5; if (u < 1) this.front(c, u); },
     },
-    // ---------------------------------------------------------------- Koi : l'étang de nuit, deux carpes, le saut, le tourbillon
+    // ---------------------------------------------------------------- Koi : l'étang de nuit, deux esprits de lumière (rouge, blanc), le saut, le tourbillon
     Koi: {
       R: 7.6, c: ['#08050d', '#2b2433', '#f0453a', '#fff4ee'],
       init(c) { c.st.petals = Array.from({ length: 36 }, () => ({ x: rnd(0, c.w), y: rnd(0, c.h), v: rnd(6, 14), s: rnd(0, 9) })); c.st.trail = [[], []]; c.st.sw = []; c.st.splash = []; c.st.ang = 0; },
@@ -443,14 +445,14 @@ const CINE = (() => {
         const rad = act === 3 ? M * lerp(.36, .02, E.in(seg(t, 5.5, R - .15), 2)) : M * .36;
         // tourbillon de lumière rouge et blanche (dernier acte)
         if (act === 3) { const q = seg(t, 5.5, R); for (let i = 0; i < 260; i++) { const p = (i / 260 + t * .3) % 1, r = M * .6 * (1 - p), a = i * 2.4 + t * (2 + q * 6) + (1 - p) * 5; P(x, cx + Math.cos(a) * r, cy + Math.sin(a) * r * .85, i % 6 ? 1 : 2, rgba(i % 2 ? ac : li, .3 + .6 * p * q)); } }
-        // les deux carpes (rouge, blanche) qui tournent l'une autour de l'autre
+        // les deux esprits de lumière (rouge, blanc) qui tournent l'un autour de l'autre
         if (act !== 2) [[ac, 0], [li, Math.PI]].forEach(([col, off], f) => {
           const a = st.ang + off, X = cx + Math.cos(a) * rad, Y = cy + Math.sin(a) * rad * .8;
           const tr = st.trail[f]; tr.unshift([X, Y]); tr.length = Math.min(tr.length, act === 0 ? 1 : 14);
           tr.forEach(([tx, ty], i) => i && P(x, tx, ty, 2, rgba(col, (1 - i / 14) * .5)));
           koi(x, X, Y, a + Math.PI / 2, M * .26, col, f ? ac : li, t * 9 + f);
         });
-        // le saut : elles bondissent hors de l'eau et se croisent au-dessus du jeton
+        // le saut : ils bondissent hors de l'eau et se croisent au-dessus du jeton
         if (act === 2) { const u = seg(t, 4.4, 5.3); [[ac, -1], [li, 1]].forEach(([col, s], f) => { const X = cx + s * lerp(-M * .7, M * .7, u), Y = cy - Math.sin(u * Math.PI) * M * .3, vx = s * 1.4 * M, vy = -Math.cos(u * Math.PI) * Math.PI * .3 * M; koi(x, X, Y, Math.atan2(vy, vx), M * .38 * (1 + Math.sin(u * Math.PI) * .3), col, f ? ac : li, t * 12 + f); }); if (t < 4.6 || (t > 5.25 && t < 5.4)) for (let i = 0; i < 4; i++) st.splash.push({ x: cx + rnd(-M * .7, M * .7), y: cy + rnd(-5, 5), vx: rnd(-30, 30), vy: rnd(-80, -40), l: 1 }); }
         st.splash = st.splash.filter(s => { s.vy += 160 * dt; s.x += s.vx * dt; s.y += s.vy * dt; s.l -= dt * 1.5; P(x, s.x, s.y, 1, rgba(li, s.l)); return s.l > 0; });
         glow(x, cx, cy, M * (.3 + .3 * k), ac, .2 + .3 * k);
@@ -682,7 +684,7 @@ const CINE = (() => {
       scene(c) {
         const { x, w, h, cx, cy, M, t, st, dt } = c, [, dk, ac, li] = this.c, B = this.BOOM;
         x.fillStyle = '#000'; x.fillRect(0, 0, w, h);
-        c.fx.title('Bien joué.', t > .3 && t < 2.8);
+        c.fx.title(tr('cine_gg'), t > .3 && t < 2.8);
         if (t < 3.2) return;
         const slow = t > B + .05 && t < 11.8 ? .18 : 1; st.clock += dt * slow;
         // la caméra pousse doucement vers le centre ; chaque impact donne un petit coup
@@ -776,16 +778,18 @@ const CINE = (() => {
     t2.addColorStop(0, `rgba(0,0,6,${a * .8})`); t2.addColorStop(1, 'rgba(0,0,8,0)');
     x.fillStyle = t2; [-1, 1].forEach(s => x.fillRect(tx - L * .22, Y + s * L * .08 - L * .22, L * .44, L * .44));
   }
-  // une carpe stylisée : corps en perles qui ondule, queue en éventail, deux nageoires
+  // Koi : pas de poisson dessiné. Un esprit de lumière : une tête qui brille et une longue traînée qui ondule
+  // derrière elle (comme une carpe qui nage, juste suggérée), rouge pour l'une, blanche pour l'autre.
   function koi(x, X, Y, a, L, col, spot, ph) {
-    const n = 9, dx = Math.cos(a), dy = Math.sin(a);
-    for (let i = n - 1; i >= 0; i--) {
-      const f = i / n, wv = Math.sin(ph - i * .7) * L * .05 * f, r = L * .13 * (1 - f * .7) + .6;
-      const px = X - dx * L * f + -dy * wv, py = Y - dy * L * f + dx * wv;
-      if (i === n - 1) { x.fillStyle = rgba(col, .85); x.beginPath(); x.moveTo(px, py); x.lineTo(px - dx * L * .2 - dy * L * .14, py - dy * L * .2 + dx * L * .14); x.lineTo(px - dx * L * .2 + dy * L * .14, py - dy * L * .2 - dx * L * .14); x.fill(); }
-      if (i === 2) [-1, 1].forEach(s => { x.fillStyle = rgba(col, .7); x.beginPath(); x.moveTo(px, py); x.lineTo(px - dx * L * .12 + s * -dy * L * .17, py - dy * L * .12 + s * dx * L * .17); x.lineTo(px - dx * L * .2, py - dy * L * .2); x.fill(); });
-      x.fillStyle = i === 3 || i === 5 ? spot : col; x.beginPath(); x.arc(px, py, r, 0, TAU); x.fill();
+    const dx = Math.cos(a), dy = Math.sin(a), n = 22;
+    for (let i = n; i >= 1; i--) {
+      const f = i / n, wv = Math.sin(ph - i * .45) * L * .1 * f;
+      const px = X - dx * L * 1.3 * f - dy * wv, py = Y - dy * L * 1.3 * f + dx * wv;
+      glow(x, px, py, (1 - f) * L * .22 + 2, col, (1 - f) * .35);
+      P(x, px, py, f < .5 ? 2 : 1, rgba(i % 4 ? col : spot, (1 - f) * .9));
     }
+    glow(x, X, Y, L * .42, col, .55); glow(x, X, Y, L * .16, '#ffffff', .8);
+    twinkle(x, X, Y, 3, '#ffffff');
   }
   // une plume : tige + barbes de chaque côté, plus larges au milieu
   function feather(x, X, Y, a, L, col, shade) {

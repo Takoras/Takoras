@@ -10,3 +10,9 @@ export function kickDoodle() {
   void document.body.offsetWidth;
   h.classList.remove('dd-kick');
 }
+
+// en revenant sur l'onglet (le navigateur a pu mettre la page en veille) : on relance aussi
+if (typeof document !== 'undefined')
+  document.addEventListener('visibilitychange', () => {
+    if (document.visibilityState === 'visible') setTimeout(kickDoodle, 100);
+  });

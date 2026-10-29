@@ -1,4 +1,5 @@
 import { useEffect, useRef, type ReactNode } from 'react';
+import { sfx } from '@/engines/sound.js';
 import { useT } from '@/i18n/useT';
 import s from './Modal.module.css';
 
@@ -27,8 +28,14 @@ export function Modal({
   useEffect(() => {
     const d = ref.current;
     if (!d) return;
-    if (open && !d.open) d.showModal();
-    if (!open && d.open) d.close();
+    if (open && !d.open) {
+      d.showModal();
+      sfx.open();
+    }
+    if (!open && d.open) {
+      d.close();
+      sfx.close();
+    }
   }, [open]);
   return (
     // Clic sur le fond = fermer ; au clavier, Échap fait la même chose (onCancel natif du <dialog>).

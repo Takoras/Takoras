@@ -247,13 +247,23 @@ function Card({
 
 // Packs en euros : seulement la vitrine pour l'instant (aucun paiement réel). Contenu connu à l'avance, jamais de hasard
 // payant (règles UE sur les monnaies virtuelles, loot boxes) : voir docs/achats.md avant d'activer quoi que ce soit.
+// Pièces : 1 € vaut au moins une potion ×25 (4 000 pièces), et plus le pack est gros, plus il est rentable
 const PACKS: { id: string; eur: number; img: string; coins?: number; bonus?: number }[] = [
-  { id: 'coins_s', eur: 0.99, img: '/img/piece.png', coins: 3000 },
-  { id: 'coins_m', eur: 4.99, img: '/img/piece.png', coins: 17000, bonus: 15 },
-  { id: 'coins_l', eur: 9.99, img: '/img/piece.png', coins: 40000, bonus: 35 },
-  { id: 'potions', eur: 2.99, img: '/img/potions/chance-5.png' },
-  { id: 'starter', eur: 1.99, img: '/img/piece.png', coins: 8000 },
+  { id: 'coins_s', eur: 0.99, img: '/img/piece.png', coins: 6000 },
+  { id: 'coins_m', eur: 4.99, img: '/img/piece.png', coins: 40000, bonus: 35 },
+  { id: 'coins_l', eur: 9.99, img: '/img/piece.png', coins: 100000, bonus: 65 },
+  { id: 'coins_xl', eur: 19.99, img: '/img/piece.png', coins: 250000, bonus: 100 },
+  { id: 'starter', eur: 1.99, img: '/img/piece.png', coins: 15000 },
   { id: 'pass', eur: 5, img: '/img/logo.png' },
+];
+// Potions fortes, achetables avec de l'argent (contenu connu à l'avance, jamais de hasard payant)
+const POTION_PACKS: { id: string; eur: number; mult: number; n: number; img: string }[] = [
+  { id: 'p25', eur: 0.99, mult: 25, n: 1, img: '/img/potions/chance-25.png' },
+  { id: 'p50', eur: 1.99, mult: 50, n: 1, img: '/img/potions/chance-50.png' },
+  { id: 'p100', eur: 2.99, mult: 100, n: 1, img: '/img/potions/chance-100.png' },
+  { id: 'p250', eur: 5.99, mult: 250, n: 1, img: '/img/potions/chance-250.png' },
+  { id: 'p500', eur: 9.99, mult: 500, n: 1, img: '/img/potions/chance-500.png' },
+  { id: 'p100x3', eur: 6.99, mult: 100, n: 3, img: '/img/potions/chance-100.png' },
 ];
 // Micro-achats (vitrine seulement, aucun paiement) : petits coups de pouce à 0,20–0,30 €, même fond que les packs
 const MICRO: Record<string, { id: string; eur: number; img: string; name: string; desc: string }[]> = {
@@ -321,6 +331,30 @@ function Packs() {
                     b: p.bonus ?? 0,
                   })}
                 </p>
+              </div>
+              <div className={s.foot}>
+                <b className={s.price}>{eur(p.eur)}</b>
+                <Button size="sm" disabled title={t('ui.packs_soon')}>
+                  {t('ui.pk_soon')}
+                </Button>
+              </div>
+            </div>
+          </li>
+        ))}
+      </ul>
+      <h2 className={s.h2}>
+        {t('ui.pk_pot_title')} <small className="muted">{t('ui.packs_soon')}</small>
+      </h2>
+      <ul className={s.grid}>
+        {POTION_PACKS.map((p) => (
+          <li key={p.id} className={`${s.card} ${s.pack}`} style={{ '--g': '249, 115, 22' } as React.CSSProperties}>
+            <div className={s.icon}>
+              <img className="px" src={p.img} alt="" />
+            </div>
+            <div className={s.body}>
+              <div>
+                <h3>{p.n > 1 ? t('ui.pk_pots', { m: p.mult, n: p.n }) : t('ui.pk_pot', { m: p.mult })}</h3>
+                <p className="muted">{t('ui.pk_pot_d', { m: p.mult })}</p>
               </div>
               <div className={s.foot}>
                 <b className={s.price}>{eur(p.eur)}</b>
