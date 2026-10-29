@@ -45,26 +45,65 @@
     setTimeout(function () {
       W = 0;
       fit();
-      // certains navigateurs ignorent la largeur de rendu en plein écran (tout devient énorme) : on en ressort
+      // certains navigateurs ignorent la largeur de rendu en plein écran (tout devient énorme) : on réessaie,
+      // et seulement si ça reste énorme, on en ressort
       setTimeout(function () {
-        if (document.fullscreenElement && innerWidth > innerHeight && innerWidth < 1000) {
-          noFs = true;
-          document.exitFullscreen().catch(function () {});
-        }
+        if (!document.fullscreenElement) return;
+        W = 0;
+        fit();
+        setTimeout(function () {
+          if (document.fullscreenElement && innerWidth > innerHeight && innerWidth < 1000) {
+            noFs = true;
+            document.exitFullscreen().catch(function () {});
+            hint();
+          }
+        }, 900);
       }, 400);
     }, 150);
   });
 
   // au premier toucher (le navigateur exige un geste) : plein écran, et l'écran reste en paysage
   var noFs = false;
+  var standalone =
+    (window.matchMedia && matchMedia('(display-mode: fullscreen), (display-mode: standalone)').matches) ||
+    navigator.standalone === true;
+  // pas de plein écran possible ici (iPhone, ou navigateur qui le refuse) : on explique comment l'avoir, une seule fois
+  function hint() {
+    if (standalone) return;
+    try {
+      if (localStorage.getItem('takoras-fs-hint')) return;
+      localStorage.setItem('takoras-fs-hint', '1');
+    } catch (e) {
+      return;
+    }
+    var ios = /iPhone|iPad|iPod/.test(navigator.userAgent);
+    var b = document.createElement('div');
+    b.className = 'fs-hint';
+    b.setAttribute('role', 'status');
+    b.textContent = ios
+      ? 'Plein écran : touche Partager puis « Sur l’écran d’accueil », et ouvre Takoras depuis l’icône.'
+      : 'Plein écran : menu ⋮ du navigateur puis « Ajouter à l’écran d’accueil », et ouvre Takoras depuis l’icône.';
+    b.style.cssText =
+      'position:fixed;left:50%;bottom:16px;transform:translateX(-50%);z-index:9999;max-width:90vw;padding:12px 18px;border-radius:14px;background:#2a1d4a;color:#fff;font:600 15px/1.35 system-ui,sans-serif;box-shadow:0 8px 30px rgba(0,0,0,.5);text-align:center';
+    b.onclick = function () {
+      b.remove();
+    };
+    document.body.appendChild(b);
+    setTimeout(function () {
+      b.remove();
+    }, 9000);
+  }
   function go() {
-    if (noFs || document.fullscreenElement || !d.requestFullscreen) return;
+    if (standalone || noFs || document.fullscreenElement) return;
     if (innerWidth <= innerHeight) return;
+    if (!d.requestFullscreen) return hint();
     Promise.resolve(d.requestFullscreen({ navigationUI: 'hide' }))
       .then(function () {
         if (screen.orientation && screen.orientation.lock) return screen.orientation.lock('landscape');
       })
-      .catch(function () {});
+      .catch(function () {
+        hint();
+      });
   }
   document.addEventListener('pointerup', go, { passive: true });
 })();

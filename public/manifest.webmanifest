@@ -1,0 +1,10 @@
+{
+  "name": "Takoras",
+  "short_name": "Takoras",
+  "start_url": "/",
+  "display": "fullscreen",
+  "orientation": "landscape",
+  "background_color": "#0d0d12",
+  "theme_color": "#0d0d12",
+  "icons": [{ "src": "/img/logo.png", "sizes": "any", "type": "image/png" }]
+}

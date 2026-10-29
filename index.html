@@ -7,6 +7,12 @@
     <meta name="theme-color" content="#0d0d12" />
     <title>Takoras</title>
     <link rel="icon" type="image/png" href="/img/logo.png" />
+    <!-- ajouté à l'écran d'accueil : le site s'ouvre en plein écran, en paysage (seule façon d'avoir le plein écran sur iPhone) -->
+    <link rel="manifest" href="/manifest.webmanifest" />
+    <link rel="apple-touch-icon" href="/img/logo.png" />
+    <meta name="mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
     <!-- connexion au serveur de jeu ouverte tout de suite (gagne ~100 ms sur la première requête) -->
     <link rel="preconnect" href="https://joyskjoofihwhycyreyn.supabase.co" crossorigin />
     <!-- Écran de chargement (comme l'ancien site) : affiché tout de suite, avant le JS ; React le remplace dès qu'il est prêt -->

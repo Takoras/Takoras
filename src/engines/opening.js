@@ -255,7 +255,7 @@ function tint(power = .35, ms = 450) {
 const SAVE_KEY = 'takoras-session';
 let sess = null;
 function save() { try { sess ? localStorage.setItem(SAVE_KEY, JSON.stringify(sess)) : localStorage.removeItem(SAVE_KEY); } catch {} }
-function startSession(n, plan = null, vars = null, lucks = null, ids = null) { sess = { pull: current, total: n, idx: 0, results: [], rvars: [], cur: null, plan, vars, lucks, ids }; save(); }
+function startSession(n, plan = null, vars = null, lucks = null, ids = null) { const tg = $('op-tag'); if (tg) tg.innerHTML = ''; sess = { pull: current, total: n, idx: 0, results: [], rvars: [], cur: null, plan, vars, lucks, ids }; save(); }
 function endSession() { sess = null; save(); }
 const seriesOf = () => SERIES[PULLS[sess.pull].name] || SERIES.Takoras;
 const findJeton = name => seriesOf().find(j => j.name === name);
@@ -272,7 +272,10 @@ function startOpening() {
   const c = sess.cur, p = PULLS[sess.pull];
   run = { result: findJeton(c.name), variant: c.variant || '', queue: c.queue, shown: c.shown, done: false };
   // en haut : le logo de la série (et la position dans la série d'ouvertures)
-  $('op-tag').innerHTML = `<img class="op-tag-logo" src="/img/logo-takoras.png" alt="${p.name}">` + (sess.total > 1 ? `<span>${sess.idx + 1}/${sess.total}</span>` : '');
+  // (le logo n'est recréé qu'au début d'une série d'ouvertures : son entrée animée ne rejoue pas à chaque jeton)
+  const tag = $('op-tag');
+  if (!tag.querySelector('.op-tag-logo')) tag.innerHTML = `<span class="op-tag-wrap"><img class="px op-tag-logo" src="/img/logo-takoras.png" alt="${p.name}"></span><span class="op-tag-n"></span>`;
+  tag.querySelector('.op-tag-n').textContent = sess.total > 1 ? `${sess.idx + 1}/${sess.total}` : '';
   $('op-odds').classList.remove('bump');
   if ($('op-price')) $('op-price').textContent = (p.price * sess.total).toLocaleString(LOCALE()); // ce bouton peut être réécrit par l'économie
   $('op-odds').textContent = '1/' + c.shown.toLocaleString(LOCALE());
