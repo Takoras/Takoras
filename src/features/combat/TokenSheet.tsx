@@ -9,6 +9,7 @@ import { Modal } from '@/ui/Modal';
 import { MutationStamp } from '@/ui/MutationStamp';
 import { StatIcon } from '@/ui/StatIcon';
 import { PowerDemo } from './PowerDemo';
+import { Tween } from '@/ui/Tween';
 import { STAT_COL } from '../inventory/JetonModal';
 import js from '../inventory/JetonSheet.module.css';
 import s from './TokenSheet.module.css';
@@ -39,21 +40,29 @@ export function TokenSheet({
     k = powerInfo(name, lang),
     rs = ringStats(name, lvl, variant);
   const stats = [
-    ['mass', t('ring.mass'), rs.mass, RING_MAX.mass, rs.mass.toFixed(2), `rgb(${STAT_COL.mass})`],
-    ['power', t('ring.powerS'), rs.power, RING_MAX.power, String(Math.round(rs.power)), `rgb(${STAT_COL.power})`],
-    ['size', t('ring.size'), rs.r, RING_MAX.r, String(rs.r), `rgb(${STAT_COL.size})`],
+    ['mass', t('ring.mass'), rs.mass, RING_MAX.mass, (n: number) => n.toFixed(2), `rgb(${STAT_COL.mass})`],
+    [
+      'power',
+      t('ring.powerS'),
+      rs.power,
+      RING_MAX.power,
+      (n: number) => String(Math.round(n)),
+      `rgb(${STAT_COL.power})`,
+    ],
+    ['size', t('ring.size'), rs.r, RING_MAX.r, (n: number) => String(Math.round(n)), `rgb(${STAT_COL.size})`],
   ] as const;
   return (
     <Modal open onClose={onClose} title={jn(name)} wide>
       <div className={s.sheet} style={{ ...glowVars(j, variant), '--ga': 1 } as CSSProperties}>
         <section className={s.stats} aria-label={t('ui.stats_note')}>
-          <span className={s.tier}>
-            1/{vOdds(j.odds, variant as Variant).toLocaleString(locale(lang))}
-          </span>
+          <span className={s.tier}>1/{vOdds(j.odds, variant as Variant).toLocaleString(locale(lang))}</span>
           {stats.map(([key, label, v, max, txt, col]) => (
             <div key={key} className={s.stat}>
               <span>
-                <StatIcon k={key} /> {label} <b>{txt}</b>
+                <StatIcon k={key} /> {label}{' '}
+                <b>
+                  <Tween value={v} format={txt} />
+                </b>
               </span>
               <i style={{ '--c': col } as CSSProperties}>
                 <b style={{ width: `${Math.min(100, (v / max) * 100)}%` }} />

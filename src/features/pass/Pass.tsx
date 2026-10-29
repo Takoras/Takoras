@@ -162,6 +162,12 @@ export default function Pass() {
           alt=""
         />
         {qty ? <b className={s.qty}>{qty}</b> : null}
+        {/* photo de profil / bannière : récompense spéciale de la saison */}
+        {isCosmetic(r) ? (
+          <em className={s.ribbon} aria-hidden>
+            Exclusif
+          </em>
+        ) : null}
         {/* nom affiché en CSS (attr) : ne gêne pas le nom lu par les lecteurs d'écran */}
         <small className={s.lbl} data-l={short} aria-hidden />
         {got ? (
@@ -181,13 +187,14 @@ export default function Pass() {
       <button
         type="button"
         className={cls}
+        data-k={`${tr}-${prem ? 1 : 0}`}
         onClick={(e) => void claim(tr, prem, e.currentTarget)}
         aria-label={`${t('ui.bp_claim')} · ${label(r)}`}
       >
         {body}
       </button>
     ) : (
-      <span className={cls} role="img" aria-label={label(r)}>
+      <span className={cls} data-k={`${tr}-${prem ? 1 : 0}`} role="img" aria-label={label(r)}>
         {body}
       </span>
     );
@@ -247,12 +254,45 @@ export default function Pass() {
                 <Button
                   variant="primary"
                   size="sm"
-                  onClick={async (e) => {
-                    const el = e.currentTarget;
+                  onClick={async () => {
+                    // les cases à récupérer, dans l'ordre de la piste
+                    const todo = d.tiers.flatMap((x) =>
+                      [false, true]
+                        .filter(
+                          (p) =>
+                            x.t <= tier &&
+                            (p ? x.prem && d.premium : x.free) &&
+                            !(p ? d.pclaimed : d.claimed).includes(x.t),
+                        )
+                        .map((p) => [x.t, p] as const),
+                    );
                     try {
                       const r = (await passApi.claimAll()) as { claimed: number; state: unknown };
                       qc.setQueryData(['me', user.id], r.state);
-                      burstAt(el, '#fbbf24', 1.2);
+                      // animation : la piste revient au début et les cases se récupèrent l'une après l'autre,
+                      // de plus en plus vite
+                      const box = list.current;
+                      if (box) box.scrollTo({ left: 0, behavior: 'smooth' });
+                      await new Promise((ok) => setTimeout(ok, 350));
+                      let wait = 260;
+                      for (const [tr, p] of todo) {
+                        const tile = box?.querySelector<HTMLElement>(`[data-k="${tr}-${p ? 1 : 0}"]`);
+                        if (box && tile)
+                          box.scrollTo({ left: tile.offsetLeft - box.clientWidth / 2, behavior: 'smooth' });
+                        qc.setQueryData(['pass', user.id], (o: PassState | undefined) =>
+                          o ? (p ? { ...o, pclaimed: [...o.pclaimed, tr] } : { ...o, claimed: [...o.claimed, tr] }) : o,
+                        );
+                        if (tile) {
+                          tile.animate([{ scale: 1.18 }, { scale: 1 }], {
+                            duration: 260,
+                            easing: 'cubic-bezier(.2,.8,.3,1)',
+                          });
+                          burstAt(tile, p ? '#fbbf24' : '#a78bfa', 0.8);
+                        }
+                        sfx.click();
+                        await new Promise((ok) => setTimeout(ok, wait));
+                        wait = Math.max(40, wait * 0.82);
+                      }
                       sfx.upgrade();
                       toast(`${r.claimed} récompense${r.claimed > 1 ? 's' : ''} récupérée${r.claimed > 1 ? 's' : ''}`);
                       void q.refetch();

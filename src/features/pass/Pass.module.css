@@ -648,3 +648,37 @@ button.tile:focus-visible {
   justify-content: flex-end;
   margin-bottom: calc(-1 * var(--s-1));
 }
+
+/* récompense exclusive de la saison (photo, bannière) : cadre doré qui brille + ruban « Exclusif » */
+.tile.rare {
+  outline: 3px solid #fbbf24;
+  outline-offset: -3px;
+  animation: exclGlow 2.2s ease-in-out infinite;
+}
+@keyframes exclGlow {
+  50% {
+    filter: brightness(1.15) drop-shadow(0 0 12px rgb(251 191 36 / 70%));
+  }
+}
+.ribbon {
+  position: absolute;
+  left: 50%;
+  bottom: -9px;
+  translate: -50% 0;
+  z-index: 2;
+  padding: 2px 9px;
+  background: linear-gradient(180deg, #fde68a, #f59e0b);
+  box-shadow: 0 2px 0 #92400e;
+  color: #3b1d00;
+  font-style: normal;
+  font-size: calc(var(--tile) * 0.075);
+  font-weight: 900;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  white-space: nowrap;
+}
+@media (prefers-reduced-motion: reduce) {
+  .tile.rare {
+    animation: none;
+  }
+}

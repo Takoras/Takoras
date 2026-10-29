@@ -278,6 +278,7 @@
 .bar i {
   display: block;
   height: 100%;
+  transition: width 0.45s cubic-bezier(0.2, 0.8, 0.3, 1); /* la jauge glisse jusqu'à sa nouvelle valeur */
   background: rgb(var(--sc, var(--g)));
   box-shadow: 0 0 6px rgb(var(--sc, var(--g)) / 50%);
 }

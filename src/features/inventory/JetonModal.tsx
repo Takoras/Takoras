@@ -7,6 +7,7 @@ import { locale, reducedFx, useSettings } from '@/lib/settings';
 import { useT } from '@/i18n/useT';
 import { Modal } from '@/ui/Modal';
 import { PowerDemo } from '../combat/PowerDemo';
+import { Tween } from '@/ui/Tween';
 import s from './JetonSheet.module.css';
 
 const VS = ['gold', 'celeste', 'ombre'] as const;
@@ -68,9 +69,9 @@ export function JetonModal({
     coin.current?.style.setProperty('--gl', '0');
   };
   const stats = [
-    ['mass', t('ring.mass'), rs.mass, RING_MAX.mass, rs.mass.toFixed(2)],
-    ['power', t('ring.powerS'), rs.power, RING_MAX.power, fmt(Math.round(rs.power))],
-    ['size', t('ring.size'), rs.r, RING_MAX.r, String(rs.r)],
+    ['mass', t('ring.mass'), rs.mass, RING_MAX.mass, (n: number) => n.toFixed(2)],
+    ['power', t('ring.powerS'), rs.power, RING_MAX.power, (n: number) => fmt(Math.round(n))],
+    ['size', t('ring.size'), rs.r, RING_MAX.r, (n: number) => String(Math.round(n))],
   ] as const;
   const vars = (locked
     ? { '--g': '113, 113, 122', '--ga': 0 }
@@ -174,7 +175,9 @@ export function JetonModal({
                         <span className={s.bar}>
                           <i style={{ width: `${Math.min(100, (v / max) * 100)}%` }} />
                         </span>
-                        <b>{txt}</b>
+                        <b>
+                          <Tween value={v} format={txt} />
+                        </b>
                       </dd>
                     </div>
                   ))}
