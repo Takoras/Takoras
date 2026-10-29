@@ -174,3 +174,8 @@ html.no-svgfx.reduce-fx img.px {
 img.px.still {
   animation: none;
 }
+
+/* relance du doodle (voir lib/doodle.ts) : une image sans animation, puis l'animation repart avec les filtres relus */
+html.dd-kick img.px {
+  animation: none !important;
+}

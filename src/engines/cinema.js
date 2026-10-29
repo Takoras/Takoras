@@ -324,7 +324,7 @@ const CINE = (() => {
         vignette(x, w, h, bg, .75);
       },
     },
-    // ---------------------------------------------------------------- Astra : les comètes dorées… et un astéroïde qui la percute
+    // ---------------------------------------------------------------- Astra : les comètes dorées… et une grande étoile filante qui la percute
     Astra: {
       R: 6.6, c: ['#06071a', '#2b3a67', '#f6d39a', '#ffffff'],
       init(c) { c.st.stars = Array.from({ length: Math.floor(c.w * c.h / 60) }, () => ({ x: rnd(0, c.w), y: rnd(0, c.h), z: rnd(.05, 1), p: rnd(0, 9) })); c.st.comets = []; c.st.embers = []; },
@@ -351,7 +351,7 @@ const CINE = (() => {
         if (Math.random() < .05) st.comets.push({ x: rnd(w * .4, w * 1.3), y: rnd(-20, h * .3), v: rnd(70, 120) });
         st.comets = st.comets.filter(m => { m.x -= m.v * dt; m.y += m.v * .55 * dt; for (let i = 0; i < 26; i++) P(x, m.x + i, m.y - i * .55, i < 3 ? 2 : 1, rgba(i < 4 ? li : ac, (1 - i / 26) * .85)); return m.x > -40; });
         // l'astéroïde : il naît au fond, grossit, et fonce sur le jeton
-        const z = seg(t, 2.6, 5.32), ax = lerp(w * .12, cx, E.in(z, 2.2)), ay = lerp(h * .14, cy, E.in(z, 2.2)), ar = lerp(1.5, M * 1.1, E.in(z, 3.2));
+        const z = seg(t, 2.6, 5.32), ax = lerp(w * .12, cx, E.in(z, 2.2)), ay = lerp(h * .14, cy, E.in(z, 2.2)), ar = lerp(1, M * .22, E.in(z, 3));
         const front = z > .82;
         if (!front && z > 0) rock(x, ax, ay, ar, z, st, dt, t);
         coin(x, c.mys, cx, cy + Math.sin(t * 1.4) * 2, M * .3, { ang: t * .9 });
@@ -364,7 +364,7 @@ const CINE = (() => {
     },
     // ---------------------------------------------------------------- Kraïos : sous l'eau, une ombre immense passe derrière, puis devant
     Kraïos: {
-      R: 7.0, c: ['#01020a', '#0f1d5c', '#3d3fa8', '#a8b4ff'],
+      R: 5.4, c: ['#01020a', '#0f1d5c', '#3d3fa8', '#a8b4ff'], noFlash: true,
       init(c) {
         c.st.snow = Array.from({ length: 90 }, () => ({ x: rnd(0, c.w), y: rnd(0, c.h), v: rnd(2, 7), s: rnd(0, 9) }));
         c.st.bub = []; c.st.o = { x: 0, y: 0, vx: 0, vy: 0 }; c.st.pushed = {};
@@ -375,8 +375,8 @@ const CINE = (() => {
         bars(m, .2, R - .4, 70, ch, (t, c) => { m.I.pad(chordHz(m, r, c), t, 240 / 70 + .2, .03, 700); m.I.bell(m.hz(r, c[1] + 24), t + .4, .025, 2.5); });
         for (let s = .5; s < R - .5; s += rnd(.25, .7)) m.I.bubble(m.T(s), .02);
         m.I.whoosh(m.T(1.55), .7, .12); m.I.whoosh(m.T(3.35), .8, .14);
-        m.I.whale(m.T(4.6), .16); m.I.rumble(m.T(4.9), 1.4, .32);
-        m.I.strings(chordHz(m, r, [0, 7, 12, 15], 1), m.T(5.7), 1.2, .03); m.I.swell(m.T(R - 1), .8, .08);
+        m.I.strings(chordHz(m, r, [0, 7, 12, 15], 1), m.T(3.9), 1.3, .03);
+        m.I.whale(m.T(4.2), .18); m.I.rumble(m.T(4.4), 1.6, .36); m.I.swell(m.T(R - 1), .8, .08);
         revealHit(m, R, r * 2, [0, 3, 7, 12], 'bell');
       },
       scene(c) {
@@ -392,15 +392,23 @@ const CINE = (() => {
         const o = st.o;
         [[p1, 1, 'a'], [p2, -1, 'b']].forEach(([p, dir, id]) => { if (p && !st.pushed[id] && Math.abs(p.X - cx) < M * .2) { st.pushed[id] = true; o.vx += dir * 85; o.vy -= 22; for (let i = 0; i < 18; i++) st.bub.push({ x: cx + rnd(-12, 12), y: cy + rnd(-6, 10), v: rnd(10, 30), l: 1 }); } });
         o.vx += (-5 * o.x - 2.2 * o.vx) * dt; o.vy += (-5 * o.y - 2.2 * o.vy) * dt; o.x += o.vx * dt; o.y += o.vy * dt;
-        const near = E.out(seg(t, 5.6, R - .1)), cs = M * (.3 + .14 * near);
+        const near = E.out(seg(t, 4.0, R - .4)), cs = M * (.3 + .14 * near);
         glow(x, cx + o.x, cy + o.y, cs * 1.4, ac, .25 + .3 * near);
         coin(x, c.mys, cx + o.x, cy + o.y + Math.sin(t * 1.3) * 2, cs, { rot: o.vx * .006 + Math.sin(t * .9) * .05, ang: Math.sin(t * .7) * .4 });
         st.bub = st.bub.filter(b => { b.y -= b.v * dt; b.x += Math.sin(b.y * .3) * .3; b.l -= dt * .6; x.strokeStyle = rgba(li, b.l * .7); x.lineWidth = 1; x.beginPath(); x.arc(Math.round(b.x), Math.round(b.y), 1.5, 0, TAU); x.stroke(); return b.l > 0; });
-        // l'ombre passe DEVANT la caméra : tout l'écran s'assombrit, flou
-        const u3 = seg(t, 4.7, 5.8);
-        if (u3 > 0 && u3 < 1) { const X = lerp(w * 1.7, -w * .7, E.io(u3)); shadow(x, X, cy, Math.max(w, h) * .9, -1, .96); c.fx.shake(2); }
+        // l'ombre passe DEVANT la caméra, immense : elle couvre tout l'écran (c'est la transition vers la révélation)
+        if (t > 4.4) { this.front(c, seg(t, 4.4, 6.4)); c.fx.shake(2.5); }
         vignette(x, w, h, bg, .55);
       },
+      front(c, u) {
+        const { x, w, h, cx, cy } = c, X = lerp(w * 2.2, -w * 1.2, E.io(u));
+        shadow(x, X, cy, Math.max(w, h) * 2.6, -1, .98);
+        const cover = clamp(1 - Math.abs(X - cx) / (w * .75));
+        if (cover > 0) { x.fillStyle = `rgba(0,0,6,${E.in(cover, 1.5)})`; x.fillRect(0, 0, w, h); }
+        if (c.live) c.live.style.opacity = String(1 - E.in(cover, 1.5)); // le sprite par-dessus est caché lui aussi
+      },
+      // pendant la révélation, l'ombre finit de passer et dévoile le jeton
+      over(c, ms) { const u = .5 + clamp(ms / 1400) * .5; if (u < 1) this.front(c, u); },
     },
     // ---------------------------------------------------------------- Koi : l'étang de nuit, deux carpes, le saut, le tourbillon
     Koi: {
@@ -475,27 +483,37 @@ const CINE = (() => {
       },
       scene(c) {
         const { x, w, h, cx, cy, M, t, st, dt } = c, [bg, dk, ac, li] = this.c, R = this.R;
+        const k = seg(t, 0, R), white = E.in(seg(t, 6, 7.4), 2);
         x.fillStyle = bg; x.fillRect(0, 0, w, h);
-        for (let i = 0; i < 7; i++) { const X = cx + (i - 3) * w * .13 + Math.sin(t * .3 + i) * 6; x.fillStyle = rgba('#ffd9a8', .04 + .02 * Math.sin(t + i)); x.beginPath(); x.moveTo(cx - 4, -10); x.lineTo(X - 10, h); x.lineTo(X + 10, h); x.lineTo(cx + 4, -10); x.fill(); }
-        st.dust.forEach(d => { d.y -= d.v * dt; if (d.y < 0) { d.y = h; d.x = rnd(0, w); } P(x, d.x, d.y, 1, rgba(li, .25 + .3 * Math.sin(t * 2 + d.p))); });
-        const k = seg(t, 0, R), spin = t * .18;
+        // la caméra avance doucement et se balance un peu
+        x.save(); const zoom = 1 + E.io(k) * .22; x.translate(cx, cy); x.rotate(Math.sin(t * .4) * .03); x.scale(zoom, zoom); x.translate(-cx, -cy);
+        // rayons divins qui tournent lentement depuis le haut
+        for (let i = 0; i < 9; i++) { const a = Math.PI / 2 + (i - 4) * .16 + Math.sin(t * .35 + i) * .05; x.fillStyle = rgba('#ffd9a8', .035 + .025 * Math.sin(t * 1.3 + i) + .04 * k); x.beginPath(); x.moveTo(cx - 3, -h * .3); x.lineTo(cx + Math.cos(a - .04) * h * 2, -h * .3 + Math.sin(a - .04) * h * 2); x.lineTo(cx + Math.cos(a + .04) * h * 2, -h * .3 + Math.sin(a + .04) * h * 2); x.fill(); }
+        st.dust.forEach(d => { d.y -= d.v * dt * (1 + k * 3); d.x += Math.sin(t + d.p) * dt * 4; if (d.y < 0) { d.y = h; d.x = rnd(0, w); } P(x, d.x, d.y, d.p > 7 ? 2 : 1, rgba(li, .25 + .3 * Math.sin(t * 2 + d.p))); });
         glow(x, cx, cy, M * (.5 + .4 * k), '#ffd9a8', .25 + .4 * k);
-        // les plumes descendent en se balançant, puis viennent s'accrocher autour du jeton, une à une
-        st.f.forEach(f => {
+        // l'anneau de plumes tourne de plus en plus vite, respire, et s'ouvre quand tout devient blanc
+        st.spin = (st.spin || 0) + dt * lerp(.15, 1.4, E.in(k, 2));
+        st.rings = (st.rings || []).filter(r => { r.u += dt * 1.6; x.strokeStyle = rgba('#fff6ea', (1 - r.u) * .6); x.lineWidth = 1; x.beginPath(); x.arc(cx, cy, M * (.15 + r.u * .35), 0, TAU); x.stroke(); return r.u < 1; });
+        st.f.forEach((f, i) => {
           const u = seg(t, f.s, f.s + 1.1); if (u <= 0) return;
-          const a = f.a + spin, tx = cx + Math.cos(a) * M * f.r, ty = cy + Math.sin(a) * M * f.r;
-          let X, Y, ang;
-          if (u < 1) { const fall = E.io(u); X = lerp(f.x0, tx, fall) + Math.sin(t * 2.4 + f.sw) * 10 * (1 - fall); Y = lerp(-12, ty, fall); ang = lerp(Math.PI / 2 + Math.sin(t * 3 + f.sw) * .6, a, E.out(u, 4)); }
-          else { if (!f.on) { f.on = true; c.st.pulse = 1; } X = tx; Y = ty; ang = a; }
-          feather(x, X, Y, ang, f.L, li, '#f2c99a');
+          const breathe = 1 + .06 * Math.sin(t * 3 + i) + white * .5, a = f.a + st.spin;
+          const tx = cx + Math.cos(a) * M * f.r * breathe, ty = cy + Math.sin(a) * M * f.r * breathe;
+          let X, Y, ang, L = f.L;
+          if (u < 1) { const fall = E.io(u); X = lerp(f.x0, tx, fall) + Math.sin(t * 2.4 + f.sw) * 12 * (1 - fall); Y = lerp(-12, ty, fall); ang = lerp(Math.PI / 2 + Math.sin(t * 3 + f.sw) * .7, a, E.out(u, 4)); }
+          else {
+            if (!f.on) { f.on = t; st.pulse = 1; st.rings.push({ u: 0 }); }
+            const since = t - f.on; X = tx; Y = ty; ang = a + Math.sin(t * 7 + i) * .12; // la plume frémit
+            L = f.L * (1 + .45 * Math.exp(-6 * since) * Math.cos(14 * since)); // petit rebond en s'accrochant
+          }
+          feather(x, X, Y, ang, L, li, '#f2c99a');
         });
         st.pulse = Math.max(0, (st.pulse || 0) - dt * 3);
-        // l'œil : une lumière qui s'ouvre au centre
-        const eye = seg(t, 4.6, 6.5);
-        coin(x, c.mys, cx, cy, M * .26, { tint: '#fff6ea', tintA: eye * .7 + st.pulse * .3 });
-        glow(x, cx, cy, M * .2 * (1 + eye), '#ffffff', eye * .8 + st.pulse * .3);
+        // l'œil : une lumière qui s'ouvre au centre et bat
+        const eye = seg(t, 4.6, 6.5), beat = Math.sin(t * lerp(2, 8, k)) * .5 + .5;
+        coin(x, c.mys, cx, cy + Math.sin(t * 1.5) * 1.5, M * .26 * (1 + st.pulse * .06), { tint: '#fff6ea', tintA: eye * .7 + st.pulse * .3, ang: Math.sin(t * .9) * .4 });
+        glow(x, cx, cy, M * .2 * (1 + eye + beat * eye * .3), '#ffffff', eye * .8 + st.pulse * .3);
+        x.restore();
         // tout devient blanc, l'écran tremble
-        const white = E.in(seg(t, 6, 7.4), 2);
         c.fx.shake(white * 4 + seg(t, 7.4, R) * 2);
         if (white > 0) c.fx.white(white);
         vignette(x, w, h, bg, .6 * (1 - white));
@@ -615,83 +633,98 @@ const CINE = (() => {
         }
       },
     },
-    // ---------------------------------------------------------------- Takoras : « Bien joué. », tous les jetons se rassemblent, il les fait exploser
+    // ---------------------------------------------------------------- Takoras : « Bien joué. », puis tous les jetons viennent s'écraser au centre… et il les fait exploser
     Takoras: {
-      R: 11.9, c: ['#04030c', '#1d3fae', '#3cc8ea', '#ffffff'],
+      R: 12.4, c: ['#04030c', '#1d3fae', '#3cc8ea', '#ffffff'], noSpin: true,
+      BOOM: 9.6,
       init(c) {
-        const others = SERIES.Takoras.filter(o => o.name !== 'Takoras' && o.img);
+        const others = SERIES.Takoras.filter(o => o.name !== 'Takoras' && o.img), M = c.M;
         c.st.toks = others.map((o, i) => {
           const im = new Image(); im.src = o.img;
           const ring = i < 6 ? 0 : 1, n = ring ? others.length - 6 : 6, k = ring ? i - 6 : i;
-          return { im, at: 2.9 + i * .26, from: (i * 2.399) % TAU, slot: k / n * TAU + ring * .3, r: ring ? 26 : 13 };
+          return { im, at: 3.4 + i * (.33 - i * .006), from: (i * 2.399 + .4) % TAU, slot: k / n * TAU + ring * .31, r: ring ? M * .36 : M * .19 };
         });
-        c.st.real = new Image(); c.st.real.src = texOf({ img: '/img/jetons/serie-takoras/takoras.gif' });
+        c.st.real = new Image(); c.st.real.src = '/img/jetons/serie-takoras/takoras.gif';
         c.st.clock = 0;
       },
       music(m, R) {
-        const C = 130.8;
-        // « Bien joué. » : presque rien, une note qui sonne dans le noir
-        m.I.bell(m.hz(C, 24), m.T(.5), .05, 2.4); m.I.bell(m.hz(C, 31), m.T(.62), .03, 2.2);
-        // le thème : épique, façon jeu vidéo (cuivres, cordes, batterie)
-        const ch = [[0, 4, 7], [-3, 0, 4], [-7, -3, 0], [-5, -1, 2]], bpm = 128, b = 60 / bpm;
-        const lead = [[0, 2], [4, 1], [7, 1], [12, 2], [11, 1], [7, 1], [9, 2], [7, 2], [4, 1], [5, 1], [7, 2], [14, 2], [12, 4]];
-        let s = 2.45; lead.forEach(([n, d]) => { m.I.brass(m.hz(C, n + 12), m.T(s), d * b * .95, .05); s += d * b; });
-        bars(m, 2.45, 8.9, bpm, ch, (t, c, i, bb) => {
-          m.I.strings(chordHz(m, C, c), t, bb * 4 + .05, .03);
-          for (let k = 0; k < 4; k++) { m.I.kick(t + k * bb, k % 2 ? .25 : .4); if (k % 2) m.I.snare(t + k * bb, .09); m.I.hat(t + k * bb + bb / 2, .03); m.I.bass(m.hz(C, c[0] - 12), t + k * bb, bb * .9, .1); }
+        const C = 65.4, B = this.BOOM;
+        // « Bien joué. » : rien qu'une nappe grave et large qui respire (pas de notes)
+        m.I.warm(chordHz(m, C, [12, 19, 24, 27]), m.T(.15), 3.1, .05); m.I.sub(C, m.T(.15), 3.1, .16);
+        m.I.choir(chordHz(m, C, [24, 31, 36]), m.T(.6), 2.6, .03); m.I.swell(m.T(1.9), 1.2, .05);
+        // le grand coup qui lance la suite
+        m.I.taiko(m.T(3.2), .9); m.I.impact(m.T(3.2), .6);
+        // cordes graves qui martèlent pendant que les jetons arrivent
+        bars(m, 3.2, B, 92, [[0, 3, 7], [-4, 0, 3], [-2, 2, 5], [-5, -2, 2]], (t, c2, i, b, len) => {
+          m.I.strings(chordHz(m, C, c2, 1), t, len + .05, .028 + i * .004);
+          for (let k = 0; k < 8; k++) m.I.bass(m.hz(C, c2[0] + 12), t + k * b / 2, .2, .07);
+          if (i >= 2) m.I.choir(chordHz(m, C, c2, 2), t, len, .03 + i * .004);
         });
-        // chaque jeton qui arrive : une petite note qui monte
-        Array.from({ length: 16 }, (_, i) => 2.9 + i * .26 + .55).forEach((at, i) => m.I.bell(m.hz(C, [0, 2, 4, 7, 9, 12][i % 6] + 24 + Math.floor(i / 6) * 12), m.T(at), .025, .7));
-        // la masse tremble : roulement de tambour
-        for (let t = 7.2, gap = .16; t < 8.85; t += gap, gap = Math.max(.045, gap * .9)) m.I.snare(m.T(t), .05 + (t - 7.2) * .04);
-        m.I.swell(m.T(7.6), 1.25, .12);
-        // l'explosion, puis le ralenti (la musique s'étouffe)
-        m.I.impact(m.T(8.9), 1); m.I.crash(m.T(8.9), .16);
-        m.slow(true, 8.95);
-        m.I.choir(chordHz(m, C, [0, 7, 12, 16]), m.T(8.95), 2.5, .07); m.I.sub(m.hz(C, -24), m.T(8.95), 2.4, .18);
-        m.slow(false, 11.2);
-        m.I.brass(m.hz(C, 12), m.T(11.2), .6, .05); m.I.brass(m.hz(C, 19), m.T(11.45), .5, .05);
-        revealHit(m, R, C, [0, 4, 7, 12, 16], 'bell');
-        [0, 4, 7, 12].forEach((n, k) => m.I.brass(m.hz(C, n + 12), m.T(R) + k * .02, 1.6, .045));
+        // chaque jeton qui s'écrase : un tambour, et tous les 4 un « braam » de cuivres graves
+        this.init && Array.from({ length: 16 }, (_, i) => 3.4 + i * (.33 - i * .006) + .5).forEach((at, i) => {
+          m.I.taiko(m.T(at), .45 + i * .02);
+          if (i % 4 === 3) [0, 7, 12].forEach(n => m.I.brass(m.hz(C, n + 12 + Math.floor(i / 4) * 2), m.T(at), .9, .045));
+        });
+        // la masse tremble : roulement de tambours qui accélère
+        for (let t = 8.4, gap = .22; t < B - .05; t += gap, gap = Math.max(.05, gap * .86)) m.I.taiko(m.T(t), .3 + (t - 8.4) * .25);
+        m.I.swell(m.T(8.5), B - 8.5, .14); m.I.choir(chordHz(m, C, [24, 31, 36, 39]), m.T(8.4), B - 8.4, .06);
+        // l'explosion, puis le ralenti (tout s'étouffe sous un grand accord)
+        m.I.impact(m.T(B), 1); m.I.crash(m.T(B), .18);
+        [0, 7, 12, 15].forEach(n => m.I.brass(m.hz(C, n + 12), m.T(B), 2.2, .05));
+        m.slow(true, B + .05);
+        m.I.choir(chordHz(m, C, [24, 31, 36, 40]), m.T(B + .05), 2.2, .07); m.I.sub(m.hz(C, -12), m.T(B), 2.2, .2);
+        m.slow(false, 11.8);
+        m.I.swell(m.T(11.8), R - 11.8, .1);
+        revealHit(m, R, C * 4, [0, 4, 7, 12], 'bell');
+        [0, 7, 12, 16].forEach(n => m.I.brass(m.hz(C, n + 12), m.T(R), 2.2, .05));
+        m.I.choir(chordHz(m, C, [24, 28, 31, 36]), m.T(R), 2.4, .06);
       },
       scene(c) {
-        const { x, w, h, cx, cy, M, t, st, dt } = c, [bg, dk, ac, li] = this.c, R = this.R;
+        const { x, w, h, cx, cy, M, t, st, dt } = c, [, dk, ac, li] = this.c, B = this.BOOM;
         x.fillStyle = '#000'; x.fillRect(0, 0, w, h);
-        c.fx.title('Bien joué.', t > .4 && t < 2.1);
-        if (t < 2.4) return;
-        // ralenti entre l'explosion et la révélation
-        const slow = t > 8.95 && t < 11.2 ? .16 : 1; st.clock += dt * slow;
+        c.fx.title('Bien joué.', t > .3 && t < 2.8);
+        if (t < 3.2) return;
+        const slow = t > B + .05 && t < 11.8 ? .18 : 1; st.clock += dt * slow;
+        // la caméra pousse doucement vers le centre ; chaque impact donne un petit coup
+        st.punch = Math.max(0, (st.punch || 0) - dt * 4);
+        const zoom = 1 + E.io(seg(t, 3.2, B)) * .12 + st.punch * .05;
+        x.save(); x.translate(cx, cy); x.scale(zoom, zoom); x.translate(-cx, -cy);
         // la galaxie au fond
-        const ga = seg(t, 2.4, 3.4);
-        for (let i = 0; i < 380; i++) { const arm = i % 3, d = (i / 380) * M * .7, a = arm * 2.09 + d * .06 + st.clock * .25; P(x, cx + Math.cos(a) * d + Math.sin(i) * 3, cy + Math.sin(a) * d * .6 + Math.cos(i) * 3, 1, rgba([ac, dk, li, '#ff7aa2', '#8b5cf6'][i % 5], ga * (.45 * (1 - d / (M * .7)) + .12))); }
-        const boom = t >= 8.9, sz = M * .11;
+        const ga = seg(t, 3.2, 4.2);
+        for (let i = 0; i < 420; i++) { const arm = i % 3, d = (i / 420) * M * .95, a = arm * 2.09 + d * .045 + st.clock * .2; P(x, cx + Math.cos(a) * d * 1.3 + Math.sin(i) * 3, cy + Math.sin(a) * d * .7 + Math.cos(i) * 3, 1, rgba([ac, dk, li, '#ff7aa2', '#8b5cf6'][i % 5], ga * (.45 * (1 - d / (M * .95)) + .1))); }
+        const sz = M * .2, boom = t >= B;
         if (!boom) {
-          // ils arrivent un par un des bords et viennent se coller au milieu
-          let shk = 0;
+          // ils arrivent de loin, accélèrent, et s'écrasent au centre un par un
+          let hits = 0;
           st.toks.forEach(o => {
-            const u = seg(t, o.at, o.at + .55); if (u <= 0) return;
-            const sx = cx + Math.cos(o.from) * Math.max(w, h) * .7, sy = cy + Math.sin(o.from) * Math.max(w, h) * .7;
-            const tx = cx + Math.cos(o.slot + t * .2) * o.r, ty = cy + Math.sin(o.slot + t * .2) * o.r * .9;
-            const k = E.back(u); if (u >= 1 && !o.hit) { o.hit = true; shk = 1.5; }
-            coin(x, o.im, lerp(sx, tx, k), lerp(sy, ty, k), sz, { ang: (1 - u) * 6 });
+            const u = seg(t, o.at, o.at + .5); if (u <= 0) return;
+            const rot = o.slot + st.clock * .15;
+            const sx = cx + Math.cos(o.from) * Math.max(w, h) * .9, sy = cy + Math.sin(o.from) * Math.max(w, h) * .9;
+            const tx = cx + Math.cos(rot) * o.r, ty = cy + Math.sin(rot) * o.r * .92;
+            if (u >= 1 && !o.hit) { o.hit = true; hits++; }
+            const k = E.in(u, 2.2), X = lerp(sx, tx, k), Y = lerp(sy, ty, k);
+            if (u < 1) for (let q = 1; q < 6; q++) coin(x, o.im, lerp(sx, tx, E.in(Math.max(0, u - q * .04), 2.2)), lerp(sy, ty, E.in(Math.max(0, u - q * .04), 2.2)), sz, { alpha: .12 * (6 - q) / 5 });
+            const settle = o.hit ? E.spring(clamp((t - o.at - .5) / .5)) : 1;
+            coin(x, o.im, X, Y, sz * (o.hit ? .8 + .2 * settle : 1.15 - .15 * u), { rot: Math.sin(t * 2 + o.slot) * .05 });
           });
-          if (shk) c.fx.shake(shk);
-          const q = seg(t, 7.2, 8.9);
-          glow(x, cx, cy, M * (.1 + .35 * q), li, .2 + .6 * E.in(q, 2));
-          c.fx.shake(E.in(q, 3) * 3);
-          if (t > 8.75) c.fx.flash(li, .5);
+          if (hits) { st.punch = 1; c.fx.shake(3); c.fx.flash('#ffffff', .18); }
+          const q = seg(t, 8.4, B);
+          glow(x, cx, cy, M * (.15 + .5 * q), li, .2 + .7 * E.in(q, 2));
+          c.fx.shake(E.in(q, 3) * 4);
+          if (t > B - .15) c.fx.flash(li, .6);
+          x.restore();
           return;
         }
         // l'explosion : Takoras sort du lot, les jetons volent et retombent au ralenti
-        if (!st.flung) { st.flung = true; c.fx.flash('#ffffff', 1); st.toks.forEach(o => { const a = Math.atan2(Math.sin(o.slot), Math.cos(o.slot)) + rnd(-.3, .3), v = rnd(90, 170); o.x = cx + Math.cos(o.slot) * o.r; o.y = cy + Math.sin(o.slot) * o.r; o.vx = Math.cos(a) * v; o.vy = Math.sin(a) * v - 60; o.ang = 0; o.va = rnd(-6, 6); }); }
+        if (!st.flung) { st.flung = true; c.fx.flash('#ffffff', 1); st.toks.forEach(o => { const rot = o.slot + st.clock * .15, a = rot + rnd(-.25, .25), v = rnd(110, 200); o.x = cx + Math.cos(rot) * o.r; o.y = cy + Math.sin(rot) * o.r; o.vx = Math.cos(a) * v; o.vy = Math.sin(a) * v - 70; o.ro = 0; o.vr = rnd(-3, 3); }); }
         const cdt = dt * slow;
-        st.toks.forEach(o => { o.vy += 150 * cdt; o.x += o.vx * cdt; o.y += o.vy * cdt; o.ang += o.va * cdt; coin(x, o.im, o.x, o.y, sz * 1.1, { ang: o.ang, rot: o.ang * .3 }); });
-        const q = seg(st.clock, 0, 99) && seg(t, 8.9, R);
-        [0, .3].forEach(d => { const u = seg(t, 8.9 + d, 10 + d); if (u <= 0 || u >= 1) return; x.strokeStyle = rgba(d ? ac : li, 1 - u); x.lineWidth = 2; x.beginPath(); x.arc(cx, cy, E.out(u) * M * .9, 0, TAU); x.stroke(); });
-        glow(x, cx, cy, M * (.35 + .2 * q), ac, .55);
-        coin(x, st.real, cx, cy - E.out(seg(t, 8.9, 11.2)) * 6, M * .34 * E.back(seg(t, 8.9, 9.6)), { ang: st.clock * 2 });
-        if (t > 11.15 && t < 11.3) c.fx.flash(li, .6);
-        c.fx.shake(slow < 1 ? .6 : 1.5);
+        st.toks.forEach(o => { o.vy += 150 * cdt; o.x += o.vx * cdt; o.y += o.vy * cdt; o.ro += o.vr * cdt; coin(x, o.im, o.x, o.y, sz, { rot: o.ro }); });
+        [0, .3, .6].forEach(d => { const u = seg(t, B + d, B + 1.3 + d); if (u <= 0 || u >= 1) return; x.strokeStyle = rgba(d ? ac : li, 1 - u); x.lineWidth = 3 - d * 2; x.beginPath(); x.arc(cx, cy, E.out(u) * M * 1.1, 0, TAU); x.stroke(); });
+        glow(x, cx, cy, M * .55, ac, .55);
+        coin(x, st.real, cx, cy, M * .4 * E.back(seg(t, B, B + .7)));
+        x.restore();
+        if (t > 11.75 && t < 11.9) c.fx.flash(li, .6);
+        c.fx.shake(slow < 1 ? .7 : 1.8);
       },
     },
   };
@@ -719,18 +752,20 @@ const CINE = (() => {
     x.fillStyle = col; x.beginPath(); x.moveTo(X + dx * 7, Y + dy * 7); x.lineTo(X - dx * 3 - dy * 5, Y - dy * 3 + dx * 5); x.lineTo(X - dx * 3 + dy * 5, Y - dy * 3 - dx * 5); x.fill();
     [-1, 1].forEach(s => { x.beginPath(); x.moveTo(X - dx * (L - 3), Y - dy * (L - 3)); x.lineTo(X - dx * (L + 5) - s * dy * 5, Y - dy * (L + 5) + s * dx * 5); x.stroke(); });
   }
-  // un astéroïde : rocher rond, côté éclairé, cratères, traînée de feu
+  // une grande étoile filante (Astra) : tête de lumière, longue traînée dorée qui s'effile, étincelles qui s'en détachent
   function rock(x, X, Y, r, z, st, dt) {
     const dx = X - x.canvas.width * .12, dy = Y - x.canvas.height * .14, d = Math.hypot(dx, dy) || 1, ux = -dx / d, uy = -dy / d;
-    for (let i = 0; i < 10; i++) glow(x, X + ux * r * (.6 + i * .45), Y + uy * r * (.6 + i * .45), r * (1.1 - i * .07), '#ff9a3c', .22 * (1 - i / 10) * clamp(z * 2));
-    if (Math.random() < .6) st.embers.push({ x: X + rnd(-r, r) * .6, y: Y + rnd(-r, r) * .6, vx: ux * rnd(20, 60), vy: uy * rnd(20, 60), l: 1 });
-    st.embers = st.embers.filter(e => { e.x += e.vx * dt; e.y += e.vy * dt; e.l -= dt * 1.6; P(x, e.x, e.y, 1, rgba('#ffcf7a', e.l)); return e.l > 0; });
-    x.fillStyle = '#4a3b33'; x.beginPath(); x.arc(X, Y, r, 0, TAU); x.fill();
-    x.save(); x.beginPath(); x.arc(X, Y, r, 0, TAU); x.clip();
-    x.fillStyle = '#7a6352'; x.beginPath(); x.arc(X - r * .25, Y - r * .25, r * .85, 0, TAU); x.fill();
-    x.fillStyle = '#9c836c'; x.beginPath(); x.arc(X - r * .4, Y - r * .4, r * .45, 0, TAU); x.fill();
-    [[.3, .1, .22], [-.2, .35, .16], [.05, -.35, .12], [.45, -.3, .1]].forEach(([a, b, s]) => { x.fillStyle = '#3a2e28'; x.beginPath(); x.arc(X + a * r, Y + b * r, s * r, 0, TAU); x.fill(); });
-    x.restore();
+    const L = r * 9 + 30, a = clamp(z * 3);
+    // traînée : large et douce, puis un trait vif au centre
+    for (let i = 0; i < 24; i++) { const f = i / 24; glow(x, X + ux * L * f, Y + uy * L * f, r * (1.6 - f * 1.3) + 2, i % 3 ? '#f6d39a' : '#ffe9c2', .16 * (1 - f) * a); }
+    x.strokeStyle = rgba('#fff4dc', .85 * a); x.lineWidth = Math.max(1, r * .45); x.lineCap = 'round';
+    x.beginPath(); x.moveTo(X, Y); x.lineTo(X + ux * L * .55, Y + uy * L * .55); x.stroke();
+    x.strokeStyle = rgba('#f6d39a', .45 * a); x.lineWidth = Math.max(1, r * .25); x.beginPath(); x.moveTo(X, Y); x.lineTo(X + ux * L, Y + uy * L); x.stroke();
+    if (Math.random() < .9) st.embers.push({ x: X + rnd(-r, r) * .5, y: Y + rnd(-r, r) * .5, vx: ux * rnd(15, 50) + rnd(-12, 12), vy: uy * rnd(15, 50) + rnd(-12, 12), l: 1 });
+    st.embers = st.embers.filter(e => { e.x += e.vx * dt; e.y += e.vy * dt; e.l -= dt * 1.3; P(x, e.x, e.y, e.l > .6 ? 2 : 1, rgba(e.l > .5 ? '#ffffff' : '#f6d39a', e.l)); return e.l > 0; });
+    // tête : halo doré, cœur blanc, étoile à 4 branches
+    glow(x, X, Y, r * 3 + 4, '#f6d39a', .55 * a); glow(x, X, Y, r * 1.4 + 2, '#ffffff', .9 * a);
+    twinkle(x, X, Y, Math.round(r * 1.6 + 3), '#ffffff');
   }
   // une ombre floue et allongée (on devine une baleine), avec sa queue
   function shadow(x, X, Y, L, dir, a = .92) {
@@ -802,6 +837,7 @@ const CINE = (() => {
       root.querySelector('.cine-title small').textContent = '1/' + j.odds.toLocaleString(LOCALE());
       document.body.appendChild(root);
       const cv = root.querySelector('canvas'), fl = root.querySelector('.cine-flash'), skip = root.querySelector('.cine-skip'), card = root.querySelector('.cine-card');
+      const live = document.createElement('img'); live.className = 'px cine-live'; live.alt = ''; live.hidden = true; live.src = texOf(j); cv.after(live);
       const w = Math.ceil(innerWidth / S), h = Math.ceil(innerHeight / S);
       cv.width = w; cv.height = h;
       const x = cv.getContext('2d'); x.imageSmoothingEnabled = false;
@@ -814,14 +850,21 @@ const CINE = (() => {
         flash(col, a) { flashC = col; flashA = Math.max(flashA, a); },
         white(a) { whiteA = Math.max(whiteA, a); },
         shake(a) { shakeA = Math.max(shakeA, a); },
-        title(txt, on) { if (card.textContent !== txt) card.textContent = txt; card.classList.toggle('on', !!on); },
+        // carton de texte : chaque lettre arrive l'une après l'autre (CSS)
+        title(txt, on) {
+          if (card.dataset.t !== txt) { card.dataset.t = txt; card.setAttribute('aria-label', txt); card.innerHTML = [...txt].map((ch, i) => `<span style="--i:${i}" aria-hidden="true">${ch === ' ' ? '&nbsp;' : ch}</span>`).join(''); }
+          card.classList.toggle('on', !!on);
+        },
       };
-      const c = { x, w, h, cx: w / 2, cy: h / 2, M: Math.min(w, h), t: 0, dt: 0, st: {}, img, mys, fx };
-      F.init?.(c);
-      const mus = trackOf(j.name, D) || (() => { const m = Music(); if (m) F.music(m, R); return m; })() || { stop() {}, slow() {} };
+      const c = { x, w, h, cx: w / 2, cy: h / 2, M: Math.min(w, h), t: 0, dt: 0, st: {}, img, mys, fx, live };
       const t0 = performance.now();
-      let ended = false, last = t0, jump = 0, rev = null;
+      let ended = false, last = t0, jump = 0, rev = null, broken = false;
       const skipAt = t0 + 2000;
+      // jamais bloqué : si une scène ou la musique plante sur un appareil, on passe à la révélation au lieu de rester sur un écran figé
+      const fail = (where, e) => { console.error('[cinématique]', j.name, where, e); if (!broken) { broken = true; const tt = (performance.now() - t0) / 1000 + jump; if (tt < R) jump += R - tt; } };
+      try { F.init?.(c); } catch (e) { fail('init', e); }
+      let mus = { stop() {}, slow() {} };
+      try { mus = trackOf(j.name, D) || (() => { const m = Music(); if (m) F.music(m, R); return m; })() || mus; } catch (e) { console.error('[cinématique] musique', j.name, e); try { mus.stop?.(); } catch {} }
       requestAnimationFrame(() => root.classList.add('on'));
 
       function frame(now) {
@@ -831,14 +874,15 @@ const CINE = (() => {
         skip.classList.toggle('on', now > skipAt && tt < R - .3);
         shakeA = 0; whiteA = 0;
         x.save();
-        if (tt < R) {
-          F.scene.call(F, c);
+        if (tt < R && !broken) {
+          try { F.scene.call(F, c); } catch (e) { x.restore(); fail('scène', e); requestAnimationFrame(frame); return; }
           // bandes noires de cinéma
           const bar = Math.round(E.out(seg(tt, 0, .6)) * h * .085);
           x.fillStyle = '#000'; x.fillRect(0, 0, w, bar); x.fillRect(0, h - bar, w, bar);
         } else {
-          if (!rev) { rev = { at: now }; flashA = 1; flashC = '#ffffff'; root.classList.add('named'); fx.title('', false); rev.streaks = Array.from({ length: 70 }, () => ({ a: rnd(0, TAU), r: rnd(4, 20), v: rnd(3, 9), L: rnd(6, 22), life: 1 })); }
+          if (!rev) { rev = { at: now }; if (!F.noFlash) { flashA = 1; flashC = '#ffffff'; } root.classList.add('named'); fx.title('', false); rev.streaks = Array.from({ length: 70 }, () => ({ a: rnd(0, TAU), r: rnd(4, 20), v: rnd(3, 9), L: rnd(6, 22), life: 1 })); }
           reveal(now - rev.at);
+          try { F.over?.call(F, c, now - rev.at); } catch (e) { console.error(e); }
         }
         x.restore();
         // tremblement (petit zoom pour ne jamais voir les bords)
@@ -860,8 +904,14 @@ const CINE = (() => {
         glow(x, cx, ry, size * 1.6, th.c[2], .7);
         [0, .25].forEach(d => { const qq = clamp((ms / 1000 - d) / .55); if (qq <= 0 || qq >= 1) return; x.strokeStyle = rgba(d ? th.c[2] : th.c[3], 1 - qq); x.lineWidth = d ? 2 : 3; x.beginPath(); x.arc(cx, ry, size * (.55 + qq * 2.4), 0, TAU); x.stroke(); });
         rev.streaks.forEach(sk => { sk.r += sk.v; sk.v *= .97; sk.life -= .018; if (sk.life <= 0) return; x.strokeStyle = rgba(th.c[3], sk.life * .8); x.lineWidth = 1; x.beginPath(); x.moveTo(cx + Math.cos(sk.a) * sk.r, ry + Math.sin(sk.a) * sk.r); x.lineTo(cx + Math.cos(sk.a) * (sk.r + sk.L * sk.life), ry + Math.sin(sk.a) * (sk.r + sk.L * sk.life)); x.stroke(); });
-        const spinT = clamp(ms / 1500), ang = (1 - (1 - spinT) ** 4) * Math.PI * 12, bob = Math.sin(ms / 1000 * 2.4) * 2 * spinT;
-        coin(x, img, cx, ry + bob, size * TS, { ang });
+        const spinT = clamp(ms / 1500), ang = F.noSpin ? 0 : (1 - (1 - spinT) ** 4) * Math.PI * 12, bob = Math.sin(ms / 1000 * 2.4) * 2 * spinT;
+        // le vrai sprite (animé si c'est un GIF, avec le doodle) posé par-dessus le canvas, à la même place
+        const k = cv.getBoundingClientRect().width / w, sz = size * TS * k;
+        live.style.width = live.style.height = `${sz}px`;
+        live.style.left = `${cv.offsetLeft + cx * k - sz / 2}px`;
+        live.style.top = `${cv.offsetTop + (ry + bob) * k - sz / 2}px`;
+        live.style.transform = `scaleX(${Math.max(.05, Math.abs(Math.cos(ang)))})`;
+        live.hidden = false;
         if (q < 1) for (let i = 0; i < 60; i++) { const a = i / 60 * TAU + i, r = size * (.5 + q * 1.8 + (i % 5) * .08); P(x, cx + Math.cos(a) * r, ry + Math.sin(a) * r, 1, rgba(i % 2 ? th.c[2] : th.c[3], 1 - q)); }
         if (ms < 260) shakeA = Math.max(shakeA, 2 * (1 - ms / 260));
       }
@@ -875,7 +925,7 @@ const CINE = (() => {
       // passer : on va directement à la révélation
       root.addEventListener('pointerdown', () => {
         const tt = (performance.now() - t0) / 1000 + jump;
-        if (performance.now() < skipAt || tt >= R - .3) return;
+        if ((performance.now() < skipAt && !broken) || tt >= R - .3) return;
         jump += R - tt; mus.stop(.15);
         const m = Music(); if (m) revealHit(m, 0, 196, [0, 4, 7, 12]);
       });

@@ -86,7 +86,7 @@
     g.setAttribute('aria-label', 'Installer Takoras');
     g.innerHTML =
       '<img src="/img/logo.png" alt="">' +
-      '<div><b>Joue en plein écran</b><small>Installe Takoras, c’est gratuit et ça prend 2 secondes.</small></div>' +
+      '<div><b>Installe l’appli Takoras</b><small>Plus fluide et mieux optimisée, en plein écran. Gratuit, 2 secondes.</small></div>' +
       '<button id="gate-install">Installer</button>' +
       '<button id="gate-x" aria-label="Plus tard">✕</button>' +
       '<p id="gate-steps" hidden>' +

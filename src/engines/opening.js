@@ -580,7 +580,7 @@ async function cine() {
   const r = run;
   r.done = true;
   clearInterval(r.hb);
-  await CINE.play(r.result);
+  try { await CINE.play(r.result); } catch (e) { console.error('[cinématique]', e); document.querySelectorAll('.cine').forEach(n => n.remove()); }
   if (run !== r) return;
   reveal(false, true);
 }
