@@ -66,14 +66,13 @@
   var standalone =
     (window.matchMedia && matchMedia('(display-mode: fullscreen), (display-mode: standalone)').matches) ||
     navigator.standalone === true;
-  // Sur téléphone, Takoras se joue depuis son raccourci (écran d'accueil) : plein écran, en paysage, sans barre.
-  // Dans le navigateur, un écran explique comment l'installer (bouton « Installer » quand le navigateur le permet).
+  // Sur téléphone, une petite carte propose d'installer Takoras (raccourci sur l'écran d'accueil : plein écran, en paysage).
+  // Android : le bouton « Installer » ouvre directement l'installation. iPhone : Apple ne le permet pas à un site,
+  // le bouton montre alors les 2 étapes (Partager → Sur l'écran d'accueil).
   var installEvt = null;
   addEventListener('beforeinstallprompt', function (e) {
     e.preventDefault();
     installEvt = e;
-    var b = document.getElementById('gate-install');
-    if (b) b.hidden = false;
   });
   function gate() {
     if (standalone) return;
@@ -86,43 +85,39 @@
     g.setAttribute('role', 'dialog');
     g.setAttribute('aria-label', 'Installer Takoras');
     g.innerHTML =
-      '<img src="/img/logo-takoras.png?v=2" alt="Takoras">' +
-      '<h1>Installe Takoras sur ton téléphone</h1>' +
-      '<p>Takoras se joue depuis son icône : en plein écran, en paysage, sans la barre du navigateur.</p>' +
-      '<button id="gate-install" hidden>Installer</button>' +
-      '<ol>' +
+      '<img src="/img/logo.png" alt="">' +
+      '<div><b>Joue en plein écran</b><small>Installe Takoras, c’est gratuit et ça prend 2 secondes.</small></div>' +
+      '<button id="gate-install">Installer</button>' +
+      '<button id="gate-x" aria-label="Plus tard">✕</button>' +
+      '<p id="gate-steps" hidden>' +
       (ios
-        ? '<li>Touche <b>Partager</b> (le carré avec une flèche)</li><li>Choisis <b>« Sur l’écran d’accueil »</b></li>'
-        : '<li>Ouvre le menu <b>⋮</b> du navigateur</li><li>Choisis <b>« Installer l’application »</b> ou <b>« Ajouter à l’écran d’accueil »</b></li>') +
-      '<li>Ouvre <b>Takoras</b> depuis l’icône sur ton écran d’accueil</li></ol>' +
-      '<a href="#" id="gate-skip">Continuer dans le navigateur</a>';
+        ? 'Touche <b>Partager</b> (le carré avec une flèche) puis <b>« Sur l’écran d’accueil »</b>.'
+        : 'Ouvre le menu <b>⋮</b> du navigateur puis <b>« Installer l’application »</b>.') +
+      '</p>';
     var css = document.createElement('style');
     css.textContent =
-      '#gate{position:fixed;inset:0;z-index:10000;display:grid;place-content:center;justify-items:center;gap:2.4vmin;padding:4vmin;text-align:center;' +
-      'background:radial-gradient(circle at 50% 35%,#1d3fae55,transparent 60%),#0d0d12;color:#f2f2f5;font-family:system-ui,-apple-system,sans-serif}' +
-      '#gate img{height:16vmin;width:auto;image-rendering:pixelated;filter:drop-shadow(0 0 3vmin #3cc8ea66)}' +
-      '#gate h1{margin:0;font-size:6.5vmin;line-height:1.1}#gate p{margin:0;max-width:70ch;font-size:3.6vmin;color:#b9b4cf}' +
-      '#gate ol{margin:0;padding:0;list-style:none;counter-reset:s;display:grid;gap:1.6vmin;font-size:3.8vmin;text-align:left}' +
-      '#gate li{counter-increment:s;display:flex;gap:2vmin;align-items:center}#gate li::before{content:counter(s);display:grid;place-items:center;' +
-      'flex:none;width:6vmin;height:6vmin;border-radius:50%;background:#7d48d9;font-weight:800}' +
-      '#gate button{font:inherit;font-size:4.6vmin;font-weight:800;padding:2vmin 7vmin;border:0;border-radius:2vmin;background:#7d48d9;color:#fff;box-shadow:0 1vmin 0 #4c1d95}' +
-      '#gate a{font-size:2.8vmin;color:#8f8aa8}';
+      '#gate{position:fixed;left:50%;bottom:3vmin;transform:translateX(-50%);z-index:10000;display:grid;grid-template-columns:auto 1fr auto auto;align-items:center;gap:2.2vmin;' +
+      'width:min(92vw,120vmin);padding:2.2vmin 2.6vmin;border-radius:3vmin;background:#1b1530;border:.4vmin solid #3b2a5c;box-shadow:0 2vmin 6vmin rgba(0,0,0,.55);' +
+      'color:#f2f2f5;font-family:system-ui,-apple-system,sans-serif;animation:gateIn .5s cubic-bezier(.2,1.2,.4,1) both}' +
+      '@keyframes gateIn{from{opacity:0;transform:translate(-50%,4vmin)}}' +
+      '#gate img{width:9vmin;height:9vmin;image-rendering:pixelated;border-radius:2vmin}' +
+      '#gate div{display:grid;gap:.6vmin;text-align:left}#gate b{font-size:3.6vmin}#gate small{font-size:2.6vmin;color:#b9b4cf}' +
+      '#gate-install{font:inherit;font-size:3.4vmin;font-weight:800;padding:1.6vmin 4.4vmin;border:0;border-radius:2vmin;background:#7d48d9;color:#fff;box-shadow:0 .8vmin 0 #4c1d95}' +
+      '#gate-x{font:inherit;font-size:3vmin;width:7vmin;height:7vmin;border:0;border-radius:50%;background:rgba(255,255,255,.08);color:#b9b4cf}' +
+      '#gate p{grid-column:1/-1;margin:0;font-size:3vmin;color:#f2f2f5;text-align:center}';
     document.head.appendChild(css);
     document.body.appendChild(g);
-    var inst = document.getElementById('gate-install');
-    if (installEvt) inst.hidden = false;
-    inst.onclick = function () {
-      if (!installEvt) return;
-      installEvt.prompt();
-      installEvt.userChoice.then(function (r) {
-        if (r && r.outcome === 'accepted') {
-          inst.hidden = true;
-          g.querySelector('p').textContent = 'C’est installé ! Ouvre Takoras depuis l’icône sur ton écran d’accueil.';
-        }
-      });
+    document.getElementById('gate-install').onclick = function () {
+      if (installEvt) {
+        installEvt.prompt();
+        installEvt.userChoice.then(function (r) {
+          if (r && r.outcome === 'accepted') g.querySelector('small').textContent = 'C’est installé ! Ouvre Takoras depuis son icône.';
+        });
+        return;
+      }
+      document.getElementById('gate-steps').hidden = false; // iPhone (ou navigateur sans bouton) : les 2 étapes
     };
-    document.getElementById('gate-skip').onclick = function (e) {
-      e.preventDefault();
+    document.getElementById('gate-x').onclick = function () {
       try {
         sessionStorage.setItem('takoras-gate-skip', '1');
       } catch (er) {}
