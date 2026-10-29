@@ -55,7 +55,6 @@
           if (document.fullscreenElement && innerWidth > innerHeight && innerWidth < 1000) {
             noFs = true;
             document.exitFullscreen().catch(function () {});
-            hint();
           }
         }, 900);
       }, 400);
@@ -67,43 +66,80 @@
   var standalone =
     (window.matchMedia && matchMedia('(display-mode: fullscreen), (display-mode: standalone)').matches) ||
     navigator.standalone === true;
-  // pas de plein écran possible ici (iPhone, ou navigateur qui le refuse) : on explique comment l'avoir, une seule fois
-  function hint() {
+  // Sur téléphone, Takoras se joue depuis son raccourci (écran d'accueil) : plein écran, en paysage, sans barre.
+  // Dans le navigateur, un écran explique comment l'installer (bouton « Installer » quand le navigateur le permet).
+  var installEvt = null;
+  addEventListener('beforeinstallprompt', function (e) {
+    e.preventDefault();
+    installEvt = e;
+    var b = document.getElementById('gate-install');
+    if (b) b.hidden = false;
+  });
+  function gate() {
     if (standalone) return;
     try {
-      if (localStorage.getItem('takoras-fs-hint')) return;
-      localStorage.setItem('takoras-fs-hint', '1');
-    } catch (e) {
-      return;
-    }
-    var ios = /iPhone|iPad|iPod/.test(navigator.userAgent);
-    var b = document.createElement('div');
-    b.className = 'fs-hint';
-    b.setAttribute('role', 'status');
-    b.textContent = ios
-      ? 'Plein écran : touche Partager puis « Sur l’écran d’accueil », et ouvre Takoras depuis l’icône.'
-      : 'Plein écran : menu ⋮ du navigateur puis « Ajouter à l’écran d’accueil », et ouvre Takoras depuis l’icône.';
-    b.style.cssText =
-      'position:fixed;left:50%;bottom:16px;transform:translateX(-50%);z-index:9999;max-width:90vw;padding:12px 18px;border-radius:14px;background:#2a1d4a;color:#fff;font:600 15px/1.35 system-ui,sans-serif;box-shadow:0 8px 30px rgba(0,0,0,.5);text-align:center';
-    b.onclick = function () {
-      b.remove();
+      if (sessionStorage.getItem('takoras-gate-skip')) return;
+    } catch (e) {}
+    var ios = /iPhone|iPad|iPod/.test(navigator.userAgent) || (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
+    var g = document.createElement('div');
+    g.id = 'gate';
+    g.setAttribute('role', 'dialog');
+    g.setAttribute('aria-label', 'Installer Takoras');
+    g.innerHTML =
+      '<img src="/img/logo-takoras.png?v=2" alt="Takoras">' +
+      '<h1>Installe Takoras sur ton téléphone</h1>' +
+      '<p>Takoras se joue depuis son icône : en plein écran, en paysage, sans la barre du navigateur.</p>' +
+      '<button id="gate-install" hidden>Installer</button>' +
+      '<ol>' +
+      (ios
+        ? '<li>Touche <b>Partager</b> (le carré avec une flèche)</li><li>Choisis <b>« Sur l’écran d’accueil »</b></li>'
+        : '<li>Ouvre le menu <b>⋮</b> du navigateur</li><li>Choisis <b>« Installer l’application »</b> ou <b>« Ajouter à l’écran d’accueil »</b></li>') +
+      '<li>Ouvre <b>Takoras</b> depuis l’icône sur ton écran d’accueil</li></ol>' +
+      '<a href="#" id="gate-skip">Continuer dans le navigateur</a>';
+    var css = document.createElement('style');
+    css.textContent =
+      '#gate{position:fixed;inset:0;z-index:10000;display:grid;place-content:center;justify-items:center;gap:2.4vmin;padding:4vmin;text-align:center;' +
+      'background:radial-gradient(circle at 50% 35%,#1d3fae55,transparent 60%),#0d0d12;color:#f2f2f5;font-family:system-ui,-apple-system,sans-serif}' +
+      '#gate img{height:16vmin;width:auto;image-rendering:pixelated;filter:drop-shadow(0 0 3vmin #3cc8ea66)}' +
+      '#gate h1{margin:0;font-size:6.5vmin;line-height:1.1}#gate p{margin:0;max-width:70ch;font-size:3.6vmin;color:#b9b4cf}' +
+      '#gate ol{margin:0;padding:0;list-style:none;counter-reset:s;display:grid;gap:1.6vmin;font-size:3.8vmin;text-align:left}' +
+      '#gate li{counter-increment:s;display:flex;gap:2vmin;align-items:center}#gate li::before{content:counter(s);display:grid;place-items:center;' +
+      'flex:none;width:6vmin;height:6vmin;border-radius:50%;background:#7d48d9;font-weight:800}' +
+      '#gate button{font:inherit;font-size:4.6vmin;font-weight:800;padding:2vmin 7vmin;border:0;border-radius:2vmin;background:#7d48d9;color:#fff;box-shadow:0 1vmin 0 #4c1d95}' +
+      '#gate a{font-size:2.8vmin;color:#8f8aa8}';
+    document.head.appendChild(css);
+    document.body.appendChild(g);
+    var inst = document.getElementById('gate-install');
+    if (installEvt) inst.hidden = false;
+    inst.onclick = function () {
+      if (!installEvt) return;
+      installEvt.prompt();
+      installEvt.userChoice.then(function (r) {
+        if (r && r.outcome === 'accepted') {
+          inst.hidden = true;
+          g.querySelector('p').textContent = 'C’est installé ! Ouvre Takoras depuis l’icône sur ton écran d’accueil.';
+        }
+      });
     };
-    document.body.appendChild(b);
-    setTimeout(function () {
-      b.remove();
-    }, 9000);
+    document.getElementById('gate-skip').onclick = function (e) {
+      e.preventDefault();
+      try {
+        sessionStorage.setItem('takoras-gate-skip', '1');
+      } catch (er) {}
+      g.remove();
+    };
   }
+  if (document.body) gate();
+  else document.addEventListener('DOMContentLoaded', gate);
   function go() {
     if (standalone || noFs || document.fullscreenElement) return;
     if (innerWidth <= innerHeight) return;
-    if (!d.requestFullscreen) return hint();
+    if (!d.requestFullscreen) return;
     Promise.resolve(d.requestFullscreen({ navigationUI: 'hide' }))
       .then(function () {
         if (screen.orientation && screen.orientation.lock) return screen.orientation.lock('landscape');
       })
-      .catch(function () {
-        hint();
-      });
+      .catch(function () {});
   }
   document.addEventListener('pointerup', go, { passive: true });
 })();

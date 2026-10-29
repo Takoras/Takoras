@@ -193,11 +193,7 @@ export function TeamEditor({
             return (
               <li key={j.name} className={`${iv.card} ${on ? s.on : ''}`} style={glowVars(j) as CSSProperties}>
                 <button type="button" className={iv.cardBtn} onClick={() => setInfo(o)} aria-label={jn(o.name)}>
-                  {on ? (
-                    <span className={s.inTeam} aria-label={t('ui.in_deck')}>
-                      ✓
-                    </span>
-                  ) : null}
+                  {on ? <span className="visually-hidden">{t('ui.in_deck')}</span> : null}
                   <img className="px" src={texOf(j)} alt="" />
                   <b>{jn(o.name)}</b>
                   <small className={s.vrow}>

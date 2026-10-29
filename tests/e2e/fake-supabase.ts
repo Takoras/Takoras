@@ -167,6 +167,7 @@ export async function fakeSupabase(
   // Tuto de première visite et popup de patch note : déjà vus, sauf si le test les veut
   await page.addInitScript(
     ([tuto, pn]) => {
+      sessionStorage.setItem('takoras-gate-skip', '1'); // pas d'écran « installe le raccourci » pendant les tests
       if (tuto !== '1') localStorage.setItem('takoras-tuto-done', '1');
       if (pn !== '-1' && localStorage.getItem('takoras-pn-seen') === null) localStorage.setItem('takoras-pn-seen', pn);
     },

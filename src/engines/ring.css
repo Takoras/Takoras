@@ -150,3 +150,22 @@
 .rg-pips { display: inline-flex; gap: 3px; margin-left: 6px; vertical-align: middle; }
 .rg-pips i { width: 8px; height: 8px; background: currentColor; }
 .rg-pips i.off { background: transparent; box-shadow: inset 0 0 0 1px currentColor; opacity: .5; }
+
+/* Écran large (PC, téléphone tourné) : l'arène prend toute la hauteur au centre.
+   À gauche le score, le chrono et les noms ; à droite les boutons, empilés. */
+@media (orientation: landscape) and (min-aspect-ratio: 4/3) {
+  .rg {
+    grid-template-columns: 1fr var(--arena) 1fr;
+    grid-template-rows: auto auto 1fr;
+    grid-template-areas: 'top stage bot' 'names stage bot' 'hint stage bot';
+    column-gap: 18px;
+    max-width: none; /* tout l'écran (avant : bande de 760 px au milieu) */
+  }
+  .rg-top { grid-area: top; grid-template-columns: 40px auto 52px; justify-content: start; gap: 14px; }
+  .rg-names { grid-area: names; flex-direction: column; align-items: flex-start; gap: 6px; font-size: 14px; }
+  .rg-hint { grid-area: hint; align-self: start; text-align: left; font-size: 15px; }
+  .rg { --side: clamp(170px, 18vw, 260px); --arena: min(calc(100dvh - 24px - env(safe-area-inset-top) - env(safe-area-inset-bottom)), calc(100vw - 2 * var(--side) - 60px)); }
+  .rg-stage { grid-area: stage; width: var(--arena); height: var(--arena); }
+  .rg-bot { grid-area: bot; grid-template-columns: 1fr; align-content: center; gap: 14px; }
+  .rg-pw, .rg-go { min-height: 88px; }
+}

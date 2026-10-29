@@ -77,6 +77,7 @@ test('bonus du jour et quêtes : récupérer met à jour le solde', async ({ pag
 });
 
 test('« Probas & infos » : la somme des probabilités affichées et le choix de chance', async ({ page }) => {
+  await page.addInitScript(() => sessionStorage.setItem('takoras-gate-skip', '1'));
   await page.goto('/');
   await page.getByRole('button', { name: 'Probas & infos' }).click();
   const dialog = page.getByRole('dialog');

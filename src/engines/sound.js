@@ -164,6 +164,8 @@ const sfx = (() => {
     },
     hold() { thump(100, { vol: .4, dur: .45, to: 45 }); air({ dur: .3, vol: .06, from: 600, to: 120 }); },
     heartbeat() { thump(62, { vol: .4, dur: .2, to: 40 }); thump(62, { vol: .3, dur: .2, to: 40, delay: .22 }); },
+    // juste avant une cinématique : pas de battements de cœur, une note de cloche qui monte à chaque fois + un souffle doux
+    suspense(step = 0) { ep(NOTE(4 + (step % 8)), { vol: .06, dur: 1.4 }); ep(NOTE(8 + (step % 8)), { vol: .03, dur: 1.2, delay: .18 }); air({ dur: 1, vol: .03 + Math.min(.05, step * .008), from: 300, to: 900 }); },
 
     // Révélation : arpège de piano électrique, plus long selon la rareté, avec une nappe pour les rares
     reveal(odds) {

@@ -123,25 +123,7 @@
   object-fit: contain;
 }
 
-/* jeton déjà dans l'équipe : assombri, avec une coche ronde par-dessus */
-.inTeam {
-  position: absolute;
-  top: 18px;
-  left: 50%;
-  translate: -50% 0;
-  z-index: 2;
-  display: grid;
-  place-items: center;
-  width: 30px;
-  height: 30px;
-  border-radius: 50%;
-  background: #7d48d9;
-  border: 3px solid #1b1828;
-  box-shadow: 0 3px 0 #4c1d95;
-  color: #fff;
-  font-size: 15px;
-  font-weight: 900;
-}
+/* jeton déjà dans l'équipe : juste un peu assombri */
 .on img {
   opacity: 0.55;
 }
@@ -200,18 +182,4 @@
   color: var(--text-2);
   min-width: 64px;
   min-height: 64px;
-}
-
-/* une ombre douce posée sous chaque jeton */
-.list li::after {
-  content: '';
-  position: absolute;
-  left: 50%;
-  top: 98px;
-  width: 64px;
-  height: 12px;
-  translate: -50% 0;
-  border-radius: 50%;
-  background: radial-gradient(closest-side, rgb(0 0 0 / 55%), transparent);
-  pointer-events: none;
 }

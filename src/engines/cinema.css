@@ -19,3 +19,9 @@
 .cine-title b { font: 800 clamp(34px, 7vw, 64px) / 1 var(--font-display); letter-spacing: -.02em; color: #fff; }
 .cine-title small { font: 600 clamp(14px, 2.4vw, 18px) / 1 var(--font-body); color: var(--cc); letter-spacing: .08em; }
 .cine.named .cine-title { opacity: 1; transform: none; }
+
+/* carton de texte plein écran (Takoras : « Bien joué. ») */
+.cine-card { position: absolute; inset: 0; display: grid; place-items: center; pointer-events: none; opacity: 0; transform: scale(.96);
+  font: 800 clamp(34px, 6vw, 72px) / 1 var(--font-display); letter-spacing: .04em; color: #fff;
+  transition: opacity .9s cubic-bezier(.3, 0, .2, 1), transform 2.2s cubic-bezier(.2, .7, .2, 1); }
+.cine-card.on { opacity: 1; transform: none; }

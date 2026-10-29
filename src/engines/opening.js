@@ -386,8 +386,9 @@ function hold(restored) {
   opening.classList.toggle('cinema', r.result.odds >= MYTHIC); // bandes noires façon film + battement de cœur
   opCoin.classList.remove('hit');
   if (!restored) { flash(.18, 260); sfx.hold(); } // mini flash : le compteur ne montera plus
-  if (r.result.odds >= MYTHIC) { // battement de cœur sonore, calé sur la vignette
-    r.hb = setInterval(() => { if (run !== r || r.done) clearInterval(r.hb); else sfx.heartbeat(); }, 1100);
+  if (r.result.odds >= MYTHIC) { // suspense : une note qui monte à chaque pulsation (plus de « boum boum »)
+    let step = 0;
+    r.hb = setInterval(() => { if (run !== r || r.done) clearInterval(r.hb); else sfx.suspense(step++); }, 1100);
   }
   $('op-hint').textContent = t('click_reveal');
   setTimeout(() => { if (run === r) r.canReveal = true; }, 450 * Math.max(.5, speed())); // évite de révéler par accident en spammant

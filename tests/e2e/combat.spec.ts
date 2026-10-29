@@ -58,7 +58,10 @@ test('combat : l’entraînement lance le Ring, abandon avec la confirmation du 
 });
 
 test('combat sans compte : essayer le tuto du Ring', async ({ page }) => {
-  await page.addInitScript(() => localStorage.setItem('takoras-tuto-done', '1'));
+  await page.addInitScript(() => {
+    localStorage.setItem('takoras-tuto-done', '1');
+    sessionStorage.setItem('takoras-gate-skip', '1');
+  });
   await page.goto('/combat');
   await page.getByRole('button', { name: /Essayer le Ring/ }).click();
   await expect(page.locator('.rg.on .rg-tip')).toBeVisible();

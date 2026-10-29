@@ -3,7 +3,10 @@ import AxeBuilder from '@axe-core/playwright';
 
 // Pas de tuto de première visite pendant ces tests
 test.beforeEach(async ({ page }) => {
-  await page.addInitScript(() => localStorage.setItem('takoras-tuto-done', '1'));
+  await page.addInitScript(() => {
+    localStorage.setItem('takoras-tuto-done', '1');
+    sessionStorage.setItem('takoras-gate-skip', '1');
+  });
 });
 
 const ROUTES = ['/', '/inventaire', '/boutique', '/combat', '/amis'];
