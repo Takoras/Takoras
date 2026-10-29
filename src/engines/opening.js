@@ -21,7 +21,7 @@ const select = (i) => { current = i; };
 
 // HTML de l’écran (textes traduits au passage)
 if (!document.getElementById('opening')) {
-  document.body.insertAdjacentHTML('beforeend', "<div class=\"opening\" id=\"opening\" aria-hidden=\"true\">\n    <div class=\"op-bg\" id=\"op-bg\"></div>\n    <div class=\"op-rays\"></div>\n    <div class=\"op-glow\"></div>\n    <div class=\"op-vignette\"></div>\n    <div class=\"op-bars\"></div>\n    <div class=\"op-top\">\n      <div class=\"eyebrow\" id=\"op-tag\">Pull Takoras</div>\n      <div class=\"op-odds\" id=\"op-odds\">1/1</div>\n    </div>\n    <div class=\"op-autobar\"><button class=\"op-auto\" id=\"op-auto\" hidden></button><button class=\"op-auto op-skip\" id=\"op-skip\" hidden></button></div>\n    <div class=\"op-main\">\n      <div class=\"op-coin-col\">\n        <button class=\"op-coin\" id=\"op-coin\" aria-label=\"Cliquer sur le jeton\"></button>\n        <p class=\"op-hint\" id=\"op-hint\">Clique sur le jeton</p>\n      </div>\n      <div class=\"op-info\" id=\"op-info\">\n        <div class=\"op-id\"><img class=\"op-serie\" src=\"/img/logo-takoras.png\" alt=\"Takoras\">\n        <h2 class=\"op-name\" id=\"op-name\"></h2>\n        <div class=\"op-rarity\" id=\"op-rarity\"></div></div>\n        <div class=\"op-stats\" id=\"op-stats\"></div>\n        <p class=\"op-note\" data-i18n=\"stats_note\">Statistiques provisoires · combats bientôt</p>\n        <div class=\"op-actions\">\n          <button class=\"btn primary\" id=\"op-next\" hidden>Suivant</button>\n          <button class=\"btn primary\" id=\"op-recap\" hidden data-i18n=\"see_recap\">Voir le récap</button>\n          <button class=\"btn primary\" id=\"op-again\">Pull encore · <span id=\"op-price\">100</span> ◆</button>\n          <button class=\"btn ghost\" id=\"op-back\" data-i18n=\"back\">Retour</button>\n        </div>\n      </div>\n    </div>\n    <button class=\"op-recap-x\" id=\"op-recap-x\" aria-label=\"Fermer\">✕</button>\n    <div class=\"op-recap-view\">\n      <div class=\"eyebrow\" id=\"op-recap-tag\">Récap</div>\n      <h2 class=\"op-name\" id=\"op-recap-title\">Tes jetons</h2>\n      <div class=\"op-recap-grid\" id=\"op-recap-grid\"></div>\n      <div class=\"op-actions\">\n        <button class=\"btn primary\" id=\"op-recap-again\">Pull ×10 encore · <span id=\"op-recap-price\">1 000</span> ◆</button>\n        <button class=\"btn ghost\" id=\"op-recap-back\" data-i18n=\"back\">Retour</button>\n      </div>\n    </div>\n  </div>\n  <div class=\"fx\" id=\"fx\"></div>");
+  document.body.insertAdjacentHTML('beforeend', "<div class=\"opening\" id=\"opening\" aria-hidden=\"true\">\n    <div class=\"op-bg\" id=\"op-bg\"></div>\n    <div class=\"op-rays\"></div>\n    <div class=\"op-glow\"></div>\n    <div class=\"op-vignette\"></div>\n    <div class=\"op-bars\"></div>\n    <div class=\"op-top\">\n      <div class=\"eyebrow\" id=\"op-tag\">Pull Takoras</div>\n      <div class=\"op-odds\" id=\"op-odds\">1/1</div>\n    </div>\n    <div class=\"op-autobar\"><button class=\"op-auto\" id=\"op-auto\" hidden></button><button class=\"op-auto op-skip\" id=\"op-skip\" hidden></button></div>\n    <div class=\"op-main\">\n      <div class=\"op-coin-col\">\n        <button class=\"op-coin\" id=\"op-coin\" aria-label=\"Cliquer sur le jeton\"></button>\n        <p class=\"op-hint\" id=\"op-hint\">Clique sur le jeton</p>\n      </div>\n      <div class=\"op-info\" id=\"op-info\">\n        <div class=\"op-id\"><img class=\"op-serie\" src=\"/img/logo-takoras.png?v=2\" alt=\"Takoras\">\n        <h2 class=\"op-name\" id=\"op-name\"></h2>\n        <div class=\"op-rarity\" id=\"op-rarity\"></div></div>\n        <div class=\"op-stats\" id=\"op-stats\"></div>\n        <p class=\"op-note\" data-i18n=\"stats_note\">Statistiques provisoires · combats bientôt</p>\n        <div class=\"op-actions\">\n          <button class=\"btn primary\" id=\"op-next\" hidden>Suivant</button>\n          <button class=\"btn primary\" id=\"op-recap\" hidden data-i18n=\"see_recap\">Voir le récap</button>\n          <button class=\"btn primary\" id=\"op-again\">Pull encore · <span id=\"op-price\">100</span> ◆</button>\n          <button class=\"btn ghost\" id=\"op-back\" data-i18n=\"back\">Retour</button>\n        </div>\n      </div>\n    </div>\n    <button class=\"op-recap-x\" id=\"op-recap-x\" aria-label=\"Fermer\">✕</button>\n    <div class=\"op-recap-view\">\n      <div class=\"eyebrow\" id=\"op-recap-tag\">Récap</div>\n      <h2 class=\"op-name\" id=\"op-recap-title\">Tes jetons</h2>\n      <div class=\"op-recap-grid\" id=\"op-recap-grid\"></div>\n      <div class=\"op-actions\">\n        <button class=\"btn primary\" id=\"op-recap-again\">Pull ×10 encore · <span id=\"op-recap-price\">1 000</span> ◆</button>\n        <button class=\"btn ghost\" id=\"op-recap-back\" data-i18n=\"back\">Retour</button>\n      </div>\n    </div>\n  </div>\n  <div class=\"fx\" id=\"fx\"></div>");
   document.querySelectorAll('#opening [data-i18n]').forEach((el) => { el.textContent = t(el.dataset.i18n); });
 }
 
@@ -274,7 +274,7 @@ function startOpening() {
   // en haut : le logo de la série (et la position dans la série d'ouvertures)
   // (le logo n'est recréé qu'au début d'une série d'ouvertures : son entrée animée ne rejoue pas à chaque jeton)
   const tag = $('op-tag');
-  if (!tag.querySelector('.op-tag-logo')) tag.innerHTML = `<span class="op-tag-wrap"><img class="px op-tag-logo" src="/img/logo-takoras.png" alt="${p.name}"></span><span class="op-tag-n"></span>`;
+  if (!tag.querySelector('.op-tag-logo')) tag.innerHTML = `<span class="op-tag-wrap"><img class="px op-tag-logo" src="/img/logo-takoras.png?v=2" alt="${p.name}"></span><span class="op-tag-n"></span>`;
   tag.querySelector('.op-tag-n').textContent = sess.total > 1 ? `${sess.idx + 1}/${sess.total}` : '';
   $('op-odds').classList.remove('bump');
   if ($('op-price')) $('op-price').textContent = (p.price * sess.total).toLocaleString(LOCALE()); // ce bouton peut être réécrit par l'économie
@@ -500,6 +500,7 @@ function drawBg(t) {
 function reveal(restored, quiet = false) {
   const r = run, j = r.result;
   r.done = true;
+  revealedAt = performance.now(); tapsAfter = 0;
   opening.classList.remove('hold');
   opCoin.classList.add('done');
   $('op-hint').textContent = '';
@@ -775,11 +776,22 @@ function addToHistory(j, variant = '', luck = +(sess?.lucks || [])[sess?.results
   renderHist();
 }
 
+// Le « clic de trop » : on spamme, le jeton se révèle, on veut s'arrêter… mais 1 ou 2 clics partent encore.
+// Ceux-là ne rouvrent pas. Le spam, lui, continue : si les clics s'enchaînent (3 juste après la révélation),
+// on rouvre tout de suite ; et un clic posé un peu plus tard (le joueur a vu son jeton) rouvre aussi.
+let revealedAt = 0, tapsAfter = 0;
+const GRACE = 350, SPAM = 3;
+function tryReopen() {
+  tapsAfter++;
+  if (performance.now() - revealedAt < GRACE && tapsAfter < SPAM) return; // clic qui « traîne » : ignoré
+  openPulls(1);
+}
+
 function tap() {
   if (sess?.auto) return; // ouverture auto en cours : les clics ne doivent pas s'en mêler (ça la faisait dérailler)
   if (run?.done && opening.classList.contains('revealed') && spinning()) return stopSpin();
   // un par un : une fois le jeton révélé, toucher le jeton ouvre le pull suivant (il n'y a plus de bouton « Ouvrir encore »)
-  if (run?.done && sess && sess.total === 1 && opening.classList.contains('revealed') && !spinning()) return openPulls(1);
+  if (run?.done && sess && sess.total === 1 && opening.classList.contains('revealed') && !spinning()) return tryReopen();
   if (!run || run.done) return;
   if (run.holding) { if (run.canReveal) (run.result.odds >= RARE && SETTINGS.speed !== 'instant' ? cine() : reveal()); return; }
   if (!run.queue.length) return; // entre le dernier palier et la pause
@@ -807,7 +819,7 @@ opening.addEventListener('pointerdown', e => {
   // toucher n'importe où fait monter le jeton (pas besoin de viser le jeton)
   if (run && !run.done) { e.preventDefault(); return tap(); }
   if (run?.done && opening.classList.contains('revealed') && spinning()) { e.preventDefault(); return stopSpin(); }
-  if (run?.done && sess && sess.total === 1 && opening.classList.contains('revealed') && !spinning()) { e.preventDefault(); openPulls(1); }
+  if (run?.done && sess && sess.total === 1 && opening.classList.contains('revealed') && !spinning()) { e.preventDefault(); tryReopen(); }
 });
 addEventListener('keydown', e => {
   if (!opening.classList.contains('on') || (e.key !== ' ' && e.key !== 'Enter') || e.target.closest?.('select, .debug') || (e.key === 'Enter' && e.target.closest?.('button:not(#op-coin)'))) return;

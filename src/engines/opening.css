@@ -352,8 +352,8 @@ html.reduce-fx .op-id, html.reduce-fx .op-stats, html.reduce-fx .op-actions { an
   inset: 0;
   background: linear-gradient(105deg, transparent 35%, rgb(255 255 255 / 55%) 50%, transparent 65%) no-repeat;
   background-size: 250% 100%;
-  -webkit-mask: url('/img/logo-takoras.png') center / contain no-repeat;
-  mask: url('/img/logo-takoras.png') center / contain no-repeat;
+  -webkit-mask: url('/img/logo-takoras.png?v=2') center / contain no-repeat;
+  mask: url('/img/logo-takoras.png?v=2') center / contain no-repeat;
   animation: tagShine 3.6s ease-in-out 0.8s infinite;
   pointer-events: none;
 }

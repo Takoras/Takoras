@@ -22,6 +22,11 @@ test('ouvrir 1 pull : transition, révélation au tap, retour', async ({ page })
   }
   await expect(opening).toHaveClass(/revealed/);
   await expect(page.locator('#op-name')).toContainText('Pikko');
+  // le « clic de trop » juste après la révélation (on voulait s'arrêter) n'ouvre pas un autre tirage…
+  const n = fake.calls.filter((c) => c === 'take_pulls').length;
+  await page.locator('#op-coin').dispatchEvent('pointerdown');
+  await page.waitForTimeout(150);
+  expect(fake.calls.filter((c) => c === 'take_pulls').length).toBe(n);
   await page.keyboard.press('Escape'); // retour (même effet que le bouton « Retour »)
   await expect(opening).not.toHaveClass(/\bon\b/, { timeout: 5000 });
 });

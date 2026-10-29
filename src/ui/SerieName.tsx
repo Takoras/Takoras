@@ -1,6 +1,6 @@
 // Nom d'une série : le logo dessiné à la main quand il existe (Takoras), sinon le texte
 const LOGOS: Record<string, { src: string; ratio: number }> = {
-  Takoras: { src: '/img/logo-takoras.png', ratio: 880 / 320 },
+  Takoras: { src: '/img/logo-takoras.png?v=2', ratio: 880 / 320 },
 };
 export function SerieName({ name, h = '1.25em', doodle }: { name: string; h?: string; doodle?: boolean }) {
   const l = LOGOS[name];
