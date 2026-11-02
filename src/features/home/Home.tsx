@@ -1,4 +1,5 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState, type ReactNode } from 'react';
+import { useSwing } from '@/ui/useSwing';
 import { SerieName } from '@/ui/SerieName';
 import { PULLS } from '@/engines/env';
 import { useT } from '@/i18n/useT';
@@ -49,19 +50,19 @@ export default function Home() {
           <Actions />
         </div>
         {/* satellites : ils flottent autour du jeton, chacun à sa profondeur */}
-        <div className={`${s.sat} ${s.satPick}`}>
+        <Sat className={`${s.satPick}`}>
           <PullPicker value={pi} onChange={setPi} />
-        </div>
-        <div className={`${s.sat} ${s.satAuto}`}>
+        </Sat>
+        <Sat className={`${s.satAuto}`}>
           <AutoConfig />
-        </div>
-        <div className={`${s.sat} ${s.satUps} ${s.upsSide}`}>
+        </Sat>
+        <Sat className={`${s.satUps} ${s.upsSide}`}>
           <Upgrades />
-        </div>
-        <div className={`${s.sat} ${s.satQuests} ${s.stack}`}>
+        </Sat>
+        <Sat className={`${s.satQuests} ${s.stack}`}>
           <Starter />
           <Quests />
-        </div>
+        </Sat>
       </div>
       {/* « En direct » : une bande en biais qui traverse tout l'écran */}
       <div className={s.liveDiag}>
@@ -72,5 +73,16 @@ export default function Home() {
         <BoardSection kind="pulls" title={t('ui.k_pulls')} />
       </div>
     </>
+  );
+}
+
+// Satellite de l'accueil : il flotte, penche, et se balance comme un post-it épinglé quand on passe dessus
+function Sat({ className, children }: { className: string; children: ReactNode }) {
+  const ref = useRef<HTMLDivElement>(null);
+  useSwing(ref, 0.35);
+  return (
+    <div ref={ref} className={`${s.sat} ${className}`}>
+      {children}
+    </div>
   );
 }

@@ -6,19 +6,20 @@
 :root {
   color-scheme: dark;
 
-  /* Album à vignettes (nouvelle DA, d'abord sur l'accueil) : couverture cobalt, pages papier, encre bleu nuit, numéros rouges */
-  --al-cover: #1d3fbf;
-  --al-cover-deep: #142e8f;
-  --al-cover-ink: #e8edff;
-  --al-paper: #f6f3ea;
-  --al-paper-2: #ece6d6;
-  --al-line: #d6cdb6;
-  --al-ink: #14204d;
-  --al-ink-2: #4a4f66; /* 7:1 sur le papier */
-  --al-red: #d4232f; /* blanc dessus = 5:1 */
-  --al-red-deep: #9e1620;
-  --al-shadow: 0 2px 3px rgb(20 32 77 / 18%), 0 10px 22px rgb(20 32 77 / 16%);
-  --al-shadow-lift: 0 6px 8px rgb(20 32 77 / 16%), 0 22px 40px rgb(20 32 77 / 22%);
+  /* Album à vignettes (accueil) aux couleurs de nuit : fond nuit, pages mates, vignettes, violet pour l'action */
+  --al-cover: #1b1530;
+  --al-cover-deep: #0b0a10;
+  --al-cover-ink: #f2f2f5;
+  --al-paper: #17171f;
+  --al-paper-2: #1e1e28;
+  --al-line: #3a3a4a;
+  --al-ink: #f2f2f5;
+  --al-ink-2: #b8b8c6;
+  --al-num: #a78bfa; /* numéros des cases : violet clair lisible sur le sombre */
+  --al-red: #7c3aed; /* action principale (violet d'avant) : blanc dessus = 5,7:1 */
+  --al-red-deep: #4c1d95;
+  --al-shadow: 0 2px 3px rgb(0 0 0 / 35%), 0 10px 22px rgb(0 0 0 / 40%);
+  --al-shadow-lift: 0 6px 8px rgb(0 0 0 / 35%), 0 22px 40px rgb(0 0 0 / 50%);
   --font-album: 'Archivo Black', 'Archivo Variable', system-ui, sans-serif;
   --font-album-body: 'Archivo Variable', system-ui, sans-serif;
 

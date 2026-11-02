@@ -37,7 +37,7 @@
   max-width: 1240px;
   margin: 0 auto;
   border-radius: 6px;
-  box-shadow: 0 24px 48px rgb(4 12 48 / 45%), 0 4px 8px rgb(4 12 48 / 30%);
+  box-shadow: 0 24px 48px rgb(0 0 0 / 55%), 0 4px 8px rgb(0 0 0 / 40%);
 }
 
 .spread:first-child {
@@ -55,12 +55,12 @@
 /* la reliure : ombre au creux du pli */
 .left {
   border-radius: 6px 0 0 6px;
-  background: linear-gradient(to left, rgb(20 32 77 / 12%), transparent 48px), var(--al-paper);
+  background: linear-gradient(to left, rgb(0 0 0 / 35%), transparent 48px), var(--al-paper);
 }
 
 .right {
   border-radius: 0 6px 6px 0;
-  background: linear-gradient(to right, rgb(20 32 77 / 12%), transparent 48px), var(--al-paper);
+  background: linear-gradient(to right, rgb(0 0 0 / 35%), transparent 48px), var(--al-paper);
 }
 
 .running {
@@ -133,7 +133,7 @@
 .link:focus-visible,
 .foot button:focus-visible,
 .foot a:focus-visible {
-  outline: 3px solid var(--al-ink);
+  outline: 3px solid var(--al-num);
   outline-offset: 3px;
 }
 
@@ -147,14 +147,14 @@
   font-size: var(--fs-md);
   font-weight: 600;
   text-decoration: underline;
-  text-decoration-color: var(--al-red);
+  text-decoration-color: var(--al-num);
   text-decoration-thickness: 2px;
   text-underline-offset: 6px;
   cursor: pointer;
 }
 
 .link:hover {
-  color: var(--al-red);
+  color: var(--al-num);
 }
 
 /* ---------- Cases et vignettes ---------- */
@@ -204,7 +204,7 @@
   font-family: var(--font-album);
   font-size: var(--fs-sm);
   font-variant-numeric: tabular-nums;
-  color: var(--al-red);
+  color: var(--al-num);
 }
 
 .sticker {
@@ -239,7 +239,7 @@
   position: absolute;
   inset: 0;
   border-radius: inherit;
-  background: linear-gradient(120deg, transparent 30%, rgb(255 255 255 / 45%) 46%, transparent 60%);
+  background: linear-gradient(120deg, transparent 30%, rgb(255 255 255 / 18%) 46%, transparent 60%);
   background-size: 260% 100%;
   background-position: 120% 0;
   pointer-events: none;
@@ -296,7 +296,7 @@
   font-size: var(--fs-sm);
   font-weight: 600;
   font-variant-numeric: tabular-nums;
-  color: var(--al-red);
+  color: var(--al-num);
 }
 
 @property --lift {
@@ -406,7 +406,7 @@
 
 .cardNum {
   font-size: var(--fs-sm);
-  color: var(--al-red);
+  color: var(--al-num);
 }
 
 .cardBody dl {
@@ -507,7 +507,7 @@
   max-width: 1240px;
   margin: 0 auto;
   padding: var(--s-6) var(--s-10) 0;
-  border-top: 1px solid rgb(232 237 255 / 25%);
+  border-top: 1px solid rgb(255 255 255 / 12%);
   font-size: var(--fs-sm);
   color: var(--al-cover-ink);
 }
