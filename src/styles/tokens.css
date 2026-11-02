@@ -6,6 +6,22 @@
 :root {
   color-scheme: dark;
 
+  /* Album à vignettes (nouvelle DA, d'abord sur l'accueil) : couverture cobalt, pages papier, encre bleu nuit, numéros rouges */
+  --al-cover: #1d3fbf;
+  --al-cover-deep: #142e8f;
+  --al-cover-ink: #e8edff;
+  --al-paper: #f6f3ea;
+  --al-paper-2: #ece6d6;
+  --al-line: #d6cdb6;
+  --al-ink: #14204d;
+  --al-ink-2: #4a4f66; /* 7:1 sur le papier */
+  --al-red: #d4232f; /* blanc dessus = 5:1 */
+  --al-red-deep: #9e1620;
+  --al-shadow: 0 2px 3px rgb(20 32 77 / 18%), 0 10px 22px rgb(20 32 77 / 16%);
+  --al-shadow-lift: 0 6px 8px rgb(20 32 77 / 16%), 0 22px 40px rgb(20 32 77 / 22%);
+  --font-album: 'Archivo Black', 'Archivo Variable', system-ui, sans-serif;
+  --font-album-body: 'Archivo Variable', system-ui, sans-serif;
+
   /* Fonds et surfaces (du plus profond au plus proche) */
   --bg: #0d0d12;
   --bg-raised: #13131a;

@@ -8,7 +8,7 @@ import { AutoConfig } from './AutoConfig';
 import { PullPicker } from './PullPicker';
 import { Live } from './Feeds';
 import { BoardSection } from '../board/Board';
-import { HeroCoin } from './HeroCoin';
+import { FallCoin, FallRain } from './FallStage';
 import { Quests } from '../quests/Quests';
 import { Starter } from '../starter/Starter';
 import { useAuth } from '@/lib/auth';
@@ -27,9 +27,10 @@ export default function Home() {
   if (ready && !user) return <Landing />;
   return (
     <>
+      <FallRain serie={pull.name} />
       <div className={s.stage}>
         <div className={s.center} data-tour="pull">
-          <HeroCoin img={pull.img} label={pull.name} />
+          <FallCoin img={pull.img} label={pull.name} />
           <h1 className={s.title}>
             {/* juste le logo de la série, au centre (le mot « Tirage » reste lu par les lecteurs d'écran) */}
             <span className="visually-hidden">{t('ui.pull')} </span>
