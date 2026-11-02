@@ -23,103 +23,124 @@ export function FallRain({ serie }: { serie: string }) {
     // les jetons rares tombent moins souvent
     const weights = list.map((j) => 1 / Math.sqrt(j.odds));
     const total = weights.reduce((a, b) => a + b, 0) || 1;
-    const imgs = list.map((j) => {
+    // Chaque jeton est pré-dessiné une fois, déjà flou et avec sa traînée, à 4 niveaux de flou :
+    // à chaque image on ne fait plus que des copies (le flou en direct faisait ramer les PC).
+    const S = 96,
+      LEVELS = [2, 5, 9, 14];
+    type Sprite = { cv: HTMLCanvasElement; ox: number; oy: number };
+    const sprites: (Sprite[] | null)[] = list.map(() => null);
+    const hasFilter = 'filter' in (document.createElement('canvas').getContext('2d') ?? {});
+    const bake = (im: HTMLImageElement): Sprite[] =>
+      LEVELS.map((b) => {
+        const pad = Math.ceil(b * 2.5);
+        const c = document.createElement('canvas');
+        c.width = S + pad * 2;
+        c.height = Math.round(S * 1.9) + pad * 2;
+        const g = c.getContext('2d');
+        if (g) {
+          g.imageSmoothingEnabled = false;
+          if (hasFilter) g.filter = `blur(${b}px)`;
+          // traînée sous le jeton (le monde monte, donc ce qu'il laisse derrière est en bas)
+          for (let k = 5; k >= 0; k--) {
+            g.globalAlpha = k ? 0.32 / k : 1;
+            g.drawImage(im, pad, pad + k * S * 0.15, S, S);
+          }
+        }
+        return { cv: c, ox: pad + S / 2, oy: pad + S / 2 };
+      });
+    list.forEach((j, i) => {
       const im = new Image();
+      im.onload = () => (sprites[i] = bake(im));
       im.src = texOf(j);
-      return im;
     });
+    // trait de vitesse pré-dessiné (un dégradé), juste étiré à chaque image
+    const streakImg = document.createElement('canvas');
+    streakImg.width = 2;
+    streakImg.height = 128;
+    const sg = streakImg.getContext('2d');
+    if (sg) {
+      const g = sg.createLinearGradient(0, 0, 0, 128);
+      g.addColorStop(0, 'rgba(196,181,253,0)');
+      g.addColorStop(1, 'rgba(196,181,253,1)');
+      sg.fillStyle = g;
+      sg.fillRect(0, 0, 2, 128);
+    }
     const pick = () => {
       let r = Math.random() * total;
       for (let i = 0; i < weights.length; i++) if ((r -= weights[i] ?? 0) <= 0) return i;
       return 0;
     };
     let W = 0,
-      H = 0,
-      dpr = 1;
+      H = 0;
     const resize = () => {
-      dpr = Math.min(1.5, window.devicePixelRatio || 1);
+      // pleine résolution inutile pour un fond flou : 1 pixel du canvas = 1 pixel CSS
       W = window.innerWidth;
       H = window.innerHeight;
-      cv.width = Math.round(W * dpr);
-      cv.height = Math.round(H * dpr);
-      ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
-      ctx.imageSmoothingEnabled = false;
+      cv.width = W;
+      cv.height = H;
+      ctx.imageSmoothingEnabled = true;
     };
     resize();
-    const N = W < 700 ? 18 : 30;
+    const N = W < 700 ? 14 : 24;
     const drops: Drop[] = Array.from({ length: N }, () => ({
       t: pick(),
       x: Math.random(),
       y: Math.random(),
       z: Math.random(),
-      spin: (Math.random() - 0.5) * 1.2,
-      rot: Math.random() * 6.28,
+      spin: Math.random() * 6.28,
+      rot: 0,
     }));
-    const streaks: Streak[] = Array.from({ length: W < 700 ? 16 : 28 }, () => ({
+    const streaks: Streak[] = Array.from({ length: W < 700 ? 12 : 22 }, () => ({
       x: Math.random(),
       y: Math.random(),
       z: Math.random(),
       len: 40 + Math.random() * 160,
     }));
+    drops.sort((a, b) => a.z - b.z); // du plus loin au plus proche (l'ordre ne change jamais)
     // pointeur : léger décalage de perspective (les proches bougent plus)
     let px = 0,
       tx = 0;
     const onMove = (e: PointerEvent) => {
       tx = e.clientX / W - 0.5;
     };
-    window.addEventListener('pointermove', onMove);
+    window.addEventListener('pointermove', onMove, { passive: true });
     window.addEventListener('resize', resize);
 
-    const hasFilter = 'filter' in ctx;
+    let time = 0;
     const draw = (dt: number) => {
+      time += dt;
       px += (tx - px) * Math.min(1, dt * 3);
       ctx.clearRect(0, 0, W, H);
-      // traits de vitesse
       for (const st of streaks) {
         st.y -= dt * (1.4 + st.z * 2.2);
         if (st.y < -0.3) {
           st.y = 1.1;
           st.x = Math.random();
         }
-        const x = st.x * W - px * 40 * st.z,
-          y = st.y * H;
-        const g = ctx.createLinearGradient(x, y, x, y + st.len);
-        g.addColorStop(0, 'rgba(196,181,253,0)');
-        g.addColorStop(1, `rgba(196,181,253,${0.05 + st.z * 0.18})`);
-        ctx.fillStyle = g;
-        ctx.fillRect(x, y, 1 + st.z, st.len);
+        ctx.globalAlpha = 0.05 + st.z * 0.16;
+        ctx.drawImage(streakImg, st.x * W - px * 40 * st.z, st.y * H, 1 + st.z, st.len);
       }
-      // jetons, du plus loin au plus proche
-      drops.sort((a, b) => a.z - b.z);
       for (const d of drops) {
-        const im = imgs[d.t];
-        if (!im?.complete || !im.naturalWidth) continue;
-        const size = 16 + d.z * d.z * 110;
-        d.y -= dt * (0.12 + d.z * 0.75);
-        d.rot += dt * d.spin;
-        if (d.y < -0.25) {
-          d.y = 1.15;
+        const sp = sprites[d.t];
+        d.y -= dt * (0.1 + d.z * 0.6);
+        if (d.y < -0.3) {
+          d.y = 1.2;
           d.x = Math.random();
           d.t = pick();
         }
-        const x = d.x * W - px * 60 * d.z,
+        if (!sp) continue;
+        // profondeur de champ : très flou loin et tout près, un peu flou au milieu
+        const lv = d.z < 0.3 ? 3 : d.z < 0.55 ? 1 : d.z < 0.8 ? 0 : 2;
+        const spr = sp[lv];
+        if (!spr) continue;
+        const k = (16 + d.z * d.z * 110) / S;
+        // petit balancement de côté pendant la chute
+        const x = d.x * W - px * 60 * d.z + Math.sin(time * 1.3 + d.spin) * 6 * d.z,
           y = d.y * H;
-        // profondeur de champ : flou loin et tout près, net au milieu
-        const blur = d.z < 0.3 ? (0.3 - d.z) * 12 : d.z > 0.82 ? (d.z - 0.82) * 40 : 0;
-        const a = 0.18 + d.z * 0.55;
-        if (hasFilter) ctx.filter = blur > 0.4 ? `blur(${blur.toFixed(1)}px)` : 'none';
-        // traînée : copies de plus en plus pâles au-dessus (on monte, donc la traînée est en bas)
-        for (let k = 3; k >= 0; k--) {
-          ctx.globalAlpha = k ? (a * 0.22) / k : a;
-          ctx.save();
-          ctx.translate(x, y + k * size * 0.22);
-          ctx.rotate(d.rot);
-          ctx.drawImage(im, -size / 2, -size / 2, size, size);
-          ctx.restore();
-        }
+        ctx.globalAlpha = 0.16 + d.z * 0.5;
+        ctx.drawImage(spr.cv, x - spr.ox * k, y - spr.oy * k, spr.cv.width * k, spr.cv.height * k);
       }
       ctx.globalAlpha = 1;
-      if (hasFilter) ctx.filter = 'none';
     };
 
     let raf = 0,
@@ -134,7 +155,7 @@ export function FallRain({ serie }: { serie: string }) {
       if (raf || document.hidden) return;
       if (reducedFx() || matchMedia('(prefers-reduced-motion: reduce)').matches) {
         // une seule image fixe quand les effets sont allégés
-        setTimeout(() => draw(0), 300);
+        [300, 1200].forEach((ms) => setTimeout(() => draw(0), ms)); // après le chargement des images
         return;
       }
       last = 0;
@@ -200,7 +221,7 @@ export function FallCoin({ img, label }: { img: string; label: string }) {
       <div key={shown} className={`${s.body} ${s.in}`}>
         {/* traînée de chute : copies étirées et floues au-dessus du jeton */}
         <div className={s.trail} aria-hidden>
-          {[1, 2, 3, 4].map((k) => (
+          {[1, 2, 3].map((k) => (
             <img key={k} src={shown} alt="" style={{ '--k': k } as React.CSSProperties} />
           ))}
         </div>
@@ -227,11 +248,6 @@ export function FallCoin({ img, label }: { img: string; label: string }) {
           </div>
         </div>
       </div>
-      <svg width="0" height="0" className={s.defs} aria-hidden>
-        <filter id="fall-vblur" x="-20%" y="-60%" width="140%" height="220%">
-          <feGaussianBlur stdDeviation="0 10" />
-        </filter>
-      </svg>
     </div>
   );
 }

@@ -74,9 +74,8 @@
   image-rendering: pixelated;
   opacity: calc(0.42 / var(--k));
   transform: translateY(calc(var(--k) * -15%)) scale(calc(1 - var(--k) * 0.06), calc(1 + var(--k) * 0.14));
-  filter: url('#fall-vblur') saturate(1.3);
-  animation: shiver 140ms steps(2) infinite;
-  animation-delay: calc(var(--k) * -35ms);
+  /* flou CSS simple (le filtre SVG animé coûtait cher) */
+  filter: blur(calc(2px + var(--k) * 2px));
 }
 
 .coin {
@@ -108,9 +107,11 @@
 .tumble {
   width: 100%;
   height: 100%;
+  /* un peu flou : il tombe vite */
+  filter: blur(0.6px);
   animation:
-    tumble 3.4s ease-in-out infinite,
-    buffet 0.18s steps(2) infinite;
+    tumble 4.2s ease-in-out infinite,
+    buffet 1.7s ease-in-out infinite;
 }
 
 .tumble img {
@@ -127,9 +128,6 @@
   scale: 0.94;
 }
 
-.defs {
-  position: absolute;
-}
 
 @keyframes dropIn {
   0% {
@@ -154,22 +152,30 @@
 @keyframes tumble {
   0%,
   100% {
-    rotate: -7deg;
+    rotate: -4deg;
   }
   50% {
-    rotate: 7deg;
+    rotate: 4deg;
   }
 }
 
+/* tremblement très doux, irrégulier, comme dans l'air */
 @keyframes buffet {
-  50% {
-    translate: 0 1.5px;
+  0%,
+  100% {
+    translate: 0 0;
   }
-}
-
-@keyframes shiver {
-  50% {
-    translate: 0 -3px;
+  20% {
+    translate: 1px -1px;
+  }
+  45% {
+    translate: -1px 1.5px;
+  }
+  70% {
+    translate: 1.5px 0.5px;
+  }
+  85% {
+    translate: -0.5px -1px;
   }
 }
 
@@ -181,7 +187,6 @@
 
 @media (prefers-reduced-motion: reduce) {
   .beam,
-  .trail img,
   .tumble,
   .in,
   .out {
@@ -190,7 +195,6 @@
 }
 
 :global(html.reduce-fx) .beam,
-:global(html.reduce-fx) .trail img,
 :global(html.reduce-fx) .tumble {
   animation: none;
 }

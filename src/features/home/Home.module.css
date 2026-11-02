@@ -2,7 +2,7 @@
 .stage {
   display: grid;
   gap: var(--s-6);
-  grid-template-areas: 'center' 'right' 'left';
+  grid-template-areas: 'center' 'quests' 'pick' 'auto' 'ups';
 }
 
 .center {
@@ -209,13 +209,16 @@
 }
 .stockN {
   font-family: var(--font-display);
-  font-size: var(--fs-3xl);
+  /* gros chiffres : on lit son stock d'un coup d'œil */
+  font-size: clamp(3.5rem, calc(9vw / var(--z, 1)), 5.5rem);
+  letter-spacing: -0.03em;
+  text-shadow: 0 6px 24px rgb(0 0 0 / 50%);
   line-height: 1;
   font-variant-numeric: tabular-nums;
 }
 .stockMax {
   font-family: var(--font-display);
-  font-size: var(--fs-xl);
+  font-size: var(--fs-2xl);
   color: var(--muted);
 }
 .row {
@@ -591,4 +594,220 @@
     padding-top: 0;
     gap: var(--s-2);
   }
+}
+
+/* ======================================================================
+   Accueil « chute libre » : le jeton tombe au centre, tout le reste flotte autour
+   ====================================================================== */
+
+
+/* satellites : plus de cadres, ils flottent doucement, penchent un peu et suivent la souris en profondeur */
+.sat {
+  --d: 1; /* profondeur : plus c'est grand, plus il glisse avec la souris */
+  --tilt: 0deg;
+  --fl: 6s;
+  position: relative;
+  z-index: 1;
+  translate: calc(var(--px, 0) * -18px * var(--d)) calc(var(--py, 0) * -12px * var(--d));
+  rotate: var(--tilt);
+  transition:
+    translate 600ms var(--ease-out),
+    rotate 400ms var(--ease-out);
+  animation: drift var(--fl) ease-in-out infinite;
+}
+.sat:hover {
+  rotate: 0deg;
+}
+.satPick {
+  grid-area: pick;
+  --tilt: -2.5deg;
+  --d: 1.4;
+  --fl: 7s;
+}
+.satAuto {
+  grid-area: auto;
+  --tilt: 1.5deg;
+  --d: 0.8;
+  --fl: 8.5s;
+  animation-delay: -2s;
+}
+.satUps {
+  grid-area: ups;
+  --tilt: -1deg;
+  --d: 1.1;
+  --fl: 6.5s;
+  animation-delay: -4s;
+}
+.satQuests {
+  grid-area: quests;
+  --tilt: 2deg;
+  --d: 1.2;
+  --fl: 7.5s;
+  animation-delay: -1s;
+}
+
+@keyframes drift {
+  0%,
+  100% {
+    transform: translateY(0);
+  }
+  50% {
+    transform: translateY(-8px);
+  }
+}
+
+@media (min-width: 1000px) {
+  .stage {
+    grid-template:
+      'pick center quests' auto
+      'auto center quests' auto
+      'ups center quests' 1fr
+      / 260px 1fr 300px;
+    align-items: start;
+  }
+  /* décalages irréguliers : rien n'est aligné au cordeau */
+  .satAuto {
+    margin-left: var(--s-6);
+  }
+  .satUps {
+    margin-left: calc(var(--s-2) * -1);
+    margin-top: var(--s-4);
+  }
+  .satQuests {
+    margin-top: var(--s-10);
+  }
+}
+
+/* téléphone à l'horizontale : tout reste en colonnes simples, sans pencher */
+@media (max-height: 520px) and (min-width: 600px) {
+  .stage {
+    grid-template-areas: 'center quests' 'center pick' 'center auto';
+  }
+  .sat {
+    --tilt: 0deg;
+  }
+}
+
+/* choix de la série : des jetons, pas des boutons */
+.satPick .picker button {
+  min-height: 64px;
+  border: 0;
+  border-image: none;
+  border-radius: 999px;
+  padding: 0 var(--s-4) 0 var(--s-1);
+  background: rgb(23 23 31 / 70%);
+  box-shadow: inset 0 0 0 1px rgb(255 255 255 / 8%);
+  transition:
+    transform var(--t-med) var(--ease-out),
+    box-shadow var(--t-med) var(--ease-out);
+}
+.satPick .picker button img {
+  width: 52px;
+  height: 52px;
+  transition: rotate var(--t-slow) var(--ease-out);
+}
+.satPick .picker button:not(:disabled):hover {
+  transform: translateX(6px);
+}
+.satPick .picker button:not(:disabled):hover img {
+  rotate: 25deg;
+}
+.satPick .picker button[aria-pressed='true'] {
+  background: rgb(124 58 237 / 28%);
+  box-shadow: inset 0 0 0 2px #a78bfa;
+}
+
+/* réglages de l'ouverture auto : des pastilles légères, sans cadre */
+.satAuto .chips button {
+  border: 0;
+  border-image: none;
+  border-radius: 999px;
+  background: rgb(23 23 31 / 70%);
+  box-shadow: inset 0 0 0 1px rgb(255 255 255 / 10%);
+  transition:
+    background var(--t-fast),
+    transform var(--t-fast) var(--ease-out);
+}
+.satAuto .chips button:hover {
+  transform: translateY(-2px);
+}
+.satAuto .chips button[aria-pressed='true'] {
+  background: #7c3aed;
+  box-shadow: none;
+  color: #fff;
+}
+.satAuto .chips button[aria-pressed='true'] small {
+  color: rgb(255 255 255 / 75%);
+}
+
+/* améliorations : capsules flottantes */
+.satUps .up {
+  border: 0;
+  border-image: none;
+  border-radius: 20px;
+  background: rgb(23 23 31 / 72%);
+  box-shadow:
+    inset 0 0 0 1px rgb(255 255 255 / 8%),
+    0 10px 24px rgb(0 0 0 / 35%);
+}
+.satUps .upCan {
+  box-shadow:
+    inset 0 0 0 2px #f97316,
+    0 10px 24px rgb(0 0 0 / 35%);
+}
+.satUps .up + .up {
+  margin-left: var(--s-6);
+}
+
+/* titres des satellites : plus gros, sans trait */
+.sat .panelT {
+  font-size: var(--fs-sm);
+  color: var(--text-2);
+}
+.sat .panelT::after {
+  display: none;
+}
+
+/* En direct : une bande de chantier en biais qui traverse tout l'écran */
+.liveDiag {
+  position: relative;
+  z-index: 2;
+  margin: var(--s-12) calc(50% - 50vw / var(--z, 1)) var(--s-8);
+  padding: var(--s-3) 0;
+  rotate: -3deg;
+  background: #7c3aed;
+  box-shadow: 0 18px 40px rgb(0 0 0 / 45%);
+}
+.liveDiag .live {
+  margin: 0;
+  /* le début de la bande passe sous la barre de gauche : le texte commence après */
+  padding: 0 var(--s-8) 0 calc(var(--rail) + var(--s-8));
+}
+.liveDiag .liveHead {
+  font-size: var(--fs-lg);
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+}
+.liveDiag .ticker {
+  mask-image: none;
+}
+.liveDiag .track li {
+  border: 0;
+  border-image: none;
+  border-radius: 999px;
+  background: rgb(13 13 18 / 55%);
+  font-size: var(--fs-md);
+}
+.liveDiag .dot {
+  background: #fff;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .sat {
+    animation: none;
+    transition: none;
+  }
+}
+:global(html.reduce-fx) .sat {
+  animation: none;
 }

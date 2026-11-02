@@ -23,12 +23,22 @@ export default function Home() {
   const user = useAuth((x) => x.user);
   const ready = useAuth((x) => x.ready);
   useEffect(installOpeningHost, []);
+  // la souris donne de la profondeur : les satellites glissent un peu à l'opposé (variables CSS, pas de rendu React)
+  const parallax = (e: React.PointerEvent<HTMLDivElement>) => {
+    const r = e.currentTarget.getBoundingClientRect();
+    e.currentTarget.style.setProperty('--px', ((e.clientX - r.left) / r.width - 0.5).toFixed(3));
+    e.currentTarget.style.setProperty('--py', ((e.clientY - r.top) / r.height - 0.5).toFixed(3));
+  };
+  const unParallax = (e: React.PointerEvent<HTMLDivElement>) => {
+    e.currentTarget.style.setProperty('--px', '0');
+    e.currentTarget.style.setProperty('--py', '0');
+  };
   // visiteur (pas connecté) : la page de présentation
   if (ready && !user) return <Landing />;
   return (
     <>
       <FallRain serie={pull.name} />
-      <div className={s.stage}>
+      <div className={s.stage} onPointerMove={parallax} onPointerLeave={unParallax}>
         <div className={s.center} data-tour="pull">
           <FallCoin img={pull.img} label={pull.name} />
           <h1 className={s.title}>
@@ -38,19 +48,25 @@ export default function Home() {
           </h1>
           <Actions />
         </div>
-        <div className={`${s.side} ${s.stack}`}>
+        {/* satellites : ils flottent autour du jeton, chacun à sa profondeur */}
+        <div className={`${s.sat} ${s.satPick}`}>
+          <PullPicker value={pi} onChange={setPi} />
+        </div>
+        <div className={`${s.sat} ${s.satAuto}`}>
+          <AutoConfig />
+        </div>
+        <div className={`${s.sat} ${s.satUps} ${s.upsSide}`}>
+          <Upgrades />
+        </div>
+        <div className={`${s.sat} ${s.satQuests} ${s.stack}`}>
           <Starter />
           <Quests />
         </div>
-        <div className={`${s.side} ${s.stack}`}>
-          <PullPicker value={pi} onChange={setPi} />
-          <AutoConfig />
-          <div className={s.upsSide}>
-            <Upgrades />
-          </div>
-        </div>
       </div>
-      <Live />
+      {/* « En direct » : une bande en biais qui traverse tout l'écran */}
+      <div className={s.liveDiag}>
+        <Live />
+      </div>
       {/* classement des tirages ouverts, sous « En direct » */}
       <div className={s.boardBottom}>
         <BoardSection kind="pulls" title={t('ui.k_pulls')} />
