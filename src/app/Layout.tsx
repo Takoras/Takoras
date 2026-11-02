@@ -43,6 +43,19 @@ function pageZoom(path: string) {
   return PAGE_ZOOM.find(([p]) => path.startsWith(p))?.[1] ?? 1;
 }
 
+// Chaque grande page est un chapitre de l'album, avec sa couleur d'intercalaire (tokens --ch-*)
+const CHAPTERS: [string, string][] = [
+  ['/inventaire', 'inv'],
+  ['/bestiaire', 'inv'],
+  ['/combat', 'combat'],
+  ['/classement', 'combat'],
+  ['/boutique', 'shop'],
+  ['/passe', 'pass'],
+  ['/amis', 'friends'],
+  ['/profil', 'profile'],
+];
+const chapterOf = (path: string) => CHAPTERS.find(([p]) => path.startsWith(p))?.[1] ?? 'home';
+
 export function Layout() {
   const t = useT();
   const { pathname } = useLocation();
@@ -80,6 +93,10 @@ export function Layout() {
     );
   }, [pathname]);
   useEffect(() => openUI('more', false), [pathname]);
+  // Chapitre de l'album (couleur d'intercalaire de la page) : lu par la barre, les titres et le fond
+  useEffect(() => {
+    document.documentElement.dataset.chap = chapterOf(pathname);
+  }, [pathname]);
   const navigate = useNavigate();
   // Raccourci « debug » (taper le mot n'importe où) : ouvre le panel admin, pour les admins seulement
   const isAdmin = !!me.data?.admin;

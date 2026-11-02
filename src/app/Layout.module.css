@@ -548,8 +548,11 @@
 }
 .railItem.on .railIco {
   color: var(--al-paper);
-  border-image-source: url('/img/ui/btn-violet.png?v=4');
-  background-image: linear-gradient(#d4232f, #d4232f);
+  /* la page ouverte prend la couleur de son chapitre */
+  border-color: color-mix(in oklab, var(--chap) 70%, black);
+  border-image: none;
+  background: var(--chap);
+  box-shadow: 0 0 0 2px var(--al-paper);
   filter: drop-shadow(0 3px 4px rgb(4 12 48 / 45%));
 }
 .railItem.on::before {

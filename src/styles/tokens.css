@@ -22,6 +22,17 @@
   --font-album: 'Archivo Black', 'Archivo Variable', system-ui, sans-serif;
   --font-album-body: 'Archivo Variable', system-ui, sans-serif;
 
+  /* Chapitres de l'album : une couleur d'intercalaire par grande page (repère, pas déco).
+     Blanc dessus ≥ 5:1 pour chacune. --chap = chapitre de la page ouverte (posé sur <html data-chap>). */
+  --ch-home: #1d3fbf;
+  --ch-inv: #1f7a4d;
+  --ch-combat: #6d28d9;
+  --ch-shop: #a8480b;
+  --ch-pass: #a21caf;
+  --ch-friends: #0f766e;
+  --ch-profile: #142e8f;
+  --chap: var(--ch-home);
+
   /* Fonds et surfaces (du plus profond au plus proche) */
   --bg: #ece6d6; /* papier de l'album (fond des pages) */
   --bg-raised: #f2ede0;
@@ -148,4 +159,23 @@
     --t-med: 0ms;
     --t-slow: 0ms;
   }
+}
+
+html[data-chap='inv'] {
+  --chap: var(--ch-inv);
+}
+html[data-chap='combat'] {
+  --chap: var(--ch-combat);
+}
+html[data-chap='shop'] {
+  --chap: var(--ch-shop);
+}
+html[data-chap='pass'] {
+  --chap: var(--ch-pass);
+}
+html[data-chap='friends'] {
+  --chap: var(--ch-friends);
+}
+html[data-chap='profile'] {
+  --chap: var(--ch-profile);
 }
