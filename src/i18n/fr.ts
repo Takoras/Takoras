@@ -161,6 +161,10 @@ export const fr = {
     cat_potions: 'Potions de chance',
     cat_utils: 'Objets utiles',
     land_title: 'Ouvre des jetons. Gagne des duels.',
+    land_album: 'Série {s} · album 1',
+    land_how: 'Comment on remplit l’album',
+    land_slot: 'Case {n} : {name}',
+    land_empty: 'Case {n} : encore vide',
     land_lead:
       'Takoras, c’est un gacha de jetons en pixel art et un ring où tes jetons se poussent hors de l’arène. Gratuit, dans le navigateur.',
     land_play: 'Jouer',

@@ -162,6 +162,10 @@ export const en: Dict = {
     cat_potions: 'Luck potions',
     cat_utils: 'Useful items',
     land_title: 'Open tokens. Win duels.',
+    land_album: '{s} series · album 1',
+    land_how: 'How you fill the album',
+    land_slot: 'Slot {n}: {name}',
+    land_empty: 'Slot {n}: still empty',
     land_lead:
       'Takoras is a pixel-art token gacha and a ring where your tokens push each other out of the arena. Free, in your browser.',
     land_play: 'Play',

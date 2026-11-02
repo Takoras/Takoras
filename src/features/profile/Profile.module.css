@@ -24,8 +24,8 @@
   border-radius: 20px;
   overflow: hidden;
   border: 3px solid transparent;
-  border-image: url('/img/ui/box-9.png?v=3') 14 fill / 28px stretch;
-  background: linear-gradient(#39374f, #39374f) center / calc(100% - 16px) calc(100% - 16px) no-repeat;
+  border-image: url('/img/ui/box-9.png?v=4') 14 fill / 28px stretch;
+  background: linear-gradient(#f6f3ea, #f6f3ea) center / calc(100% - 16px) calc(100% - 16px) no-repeat;
   image-rendering: pixelated;
   display: grid;
   place-items: center;
@@ -219,14 +219,14 @@
   padding: var(--s-3) var(--s-4);
   border: 3px solid transparent;
   border-radius: 14px;
-  border-image: url('/img/ui/box-card.png?v=3') 12 fill / 24px stretch;
-  background: linear-gradient(#222034, #222034) center / calc(100% - 16px) calc(100% - 16px) no-repeat;
+  border-image: url('/img/ui/box-card.png?v=4') 12 fill / 24px stretch;
+  background: linear-gradient(#efe9db, #efe9db) center / calc(100% - 16px) calc(100% - 16px) no-repeat;
   image-rendering: pixelated;
   color: var(--text);
   text-align: left;
 }
 .series button:hover {
-  border-image-source: url('/img/ui/box-sel.png?v=3');
+  border-image-source: url('/img/ui/box-sel.png?v=4');
 }
 .series img {
   width: 48px;
@@ -254,8 +254,8 @@
   padding: 6px var(--s-3);
   border: 3px solid transparent;
   border-radius: 10px;
-  border-image: url('/img/ui/box-card-in.png?v=3') 12 fill / 12px stretch;
-  background: linear-gradient(#222034, #222034) center / calc(100% - 16px) calc(100% - 16px) no-repeat;
+  border-image: url('/img/ui/box-card-in.png?v=4') 12 fill / 12px stretch;
+  background: linear-gradient(#efe9db, #efe9db) center / calc(100% - 16px) calc(100% - 16px) no-repeat;
   image-rendering: pixelated;
   font-size: var(--fs-sm);
 }
@@ -275,8 +275,8 @@
 .coll button {
   border: 3px solid transparent;
   border-radius: 14px;
-  border-image: url('/img/ui/box-card.png?v=3') 12 fill / 24px stretch;
-  background: linear-gradient(#222034, #222034) center / calc(100% - 16px) calc(100% - 16px) no-repeat;
+  border-image: url('/img/ui/box-card.png?v=4') 12 fill / 24px stretch;
+  background: linear-gradient(#efe9db, #efe9db) center / calc(100% - 16px) calc(100% - 16px) no-repeat;
   image-rendering: pixelated;
   width: 100%;
   display: grid;
@@ -338,8 +338,8 @@
 .private {
   border: 3px solid transparent;
   border-radius: 14px;
-  border-image: url('/img/ui/box-card.png?v=3') 12 fill / 24px stretch;
-  background: linear-gradient(#222034, #222034) center / calc(100% - 16px) calc(100% - 16px) no-repeat;
+  border-image: url('/img/ui/box-card.png?v=4') 12 fill / 24px stretch;
+  background: linear-gradient(#efe9db, #efe9db) center / calc(100% - 16px) calc(100% - 16px) no-repeat;
   image-rendering: pixelated;
   display: grid;
   gap: var(--s-2);
@@ -373,8 +373,8 @@
 .pe textarea {
   border: 3px solid transparent;
   border-radius: 10px;
-  border-image: url('/img/ui/box-card-in.png?v=3') 12 fill / 12px stretch;
-  background: linear-gradient(#222034, #222034) center / calc(100% - 16px) calc(100% - 16px) no-repeat;
+  border-image: url('/img/ui/box-card-in.png?v=4') 12 fill / 12px stretch;
+  background: linear-gradient(#efe9db, #efe9db) center / calc(100% - 16px) calc(100% - 16px) no-repeat;
   image-rendering: pixelated;
   min-height: 40px;
   padding: 0 var(--s-3);
@@ -396,8 +396,8 @@
 .pk button {
   border: 3px solid transparent;
   border-radius: 10px;
-  border-image: url('/img/ui/box-card-in.png?v=3') 12 fill / 12px stretch;
-  background: linear-gradient(#222034, #222034) center / calc(100% - 16px) calc(100% - 16px) no-repeat;
+  border-image: url('/img/ui/box-card-in.png?v=4') 12 fill / 12px stretch;
+  background: linear-gradient(#efe9db, #efe9db) center / calc(100% - 16px) calc(100% - 16px) no-repeat;
   image-rendering: pixelated;
   width: 100%;
   display: grid;
@@ -453,8 +453,8 @@
 .banners button {
   border: 3px solid transparent;
   border-radius: 10px;
-  border-image: url('/img/ui/box-card-in.png?v=3') 12 fill / 12px stretch;
-  background: linear-gradient(#222034, #222034) center / calc(100% - 16px) calc(100% - 16px) no-repeat;
+  border-image: url('/img/ui/box-card-in.png?v=4') 12 fill / 12px stretch;
+  background: linear-gradient(#efe9db, #efe9db) center / calc(100% - 16px) calc(100% - 16px) no-repeat;
   image-rendering: pixelated;
   width: 120px;
   height: 44px;
@@ -469,7 +469,7 @@
 }
 .banners button[aria-pressed='true'],
 .pps button[aria-pressed='true'] {
-  border-image-source: url('/img/ui/box-sel.png?v=3');
+  border-image-source: url('/img/ui/box-sel.png?v=4');
 }
 .pps {
   display: flex;
@@ -479,8 +479,8 @@
 .pps button {
   border: 3px solid transparent;
   border-radius: 10px;
-  border-image: url('/img/ui/box-card-in.png?v=3') 12 fill / 12px stretch;
-  background: linear-gradient(#222034, #222034) center / calc(100% - 16px) calc(100% - 16px) no-repeat;
+  border-image: url('/img/ui/box-card-in.png?v=4') 12 fill / 12px stretch;
+  background: linear-gradient(#efe9db, #efe9db) center / calc(100% - 16px) calc(100% - 16px) no-repeat;
   image-rendering: pixelated;
   position: relative;
   width: 52px;
@@ -589,8 +589,8 @@
   padding: 0 var(--s-4) 0 var(--s-2);
   border: 3px solid transparent;
   border-radius: 12px;
-  border-image: url('/img/ui/box-card-in.png?v=3') 12 fill / 24px stretch;
-  background: linear-gradient(#222034, #222034) center / calc(100% - 16px) calc(100% - 16px) no-repeat;
+  border-image: url('/img/ui/box-card-in.png?v=4') 12 fill / 24px stretch;
+  background: linear-gradient(#efe9db, #efe9db) center / calc(100% - 16px) calc(100% - 16px) no-repeat;
   image-rendering: pixelated;
   font-weight: 700;
 }
@@ -599,8 +599,8 @@
   height: 32px;
 }
 .pkSeries button[aria-selected='true'] {
-  border-image-source: url('/img/ui/box-sel-light.png?v=3');
-  background-image: linear-gradient(#39374f, #39374f);
+  border-image-source: url('/img/ui/box-sel-light.png?v=4');
+  background-image: linear-gradient(#f6f3ea, #f6f3ea);
 }
 .pkSoon {
   opacity: 0.5;
@@ -711,7 +711,7 @@
 /* bestiaire du joueur : série choisie en surbrillance, mutations trouvées sous chaque jeton */
 .series button[aria-pressed='true'] {
   /* série choisie : ta boîte « sélectionnée » (plus de contour violet en CSS) */
-  border-image-source: url('/img/ui/box-sel.png?v=3');
+  border-image-source: url('/img/ui/box-sel.png?v=4');
 }
 .vrow {
   display: flex;

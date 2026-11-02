@@ -4,46 +4,62 @@
  * principale, l'orange pour la monnaie et l'urgence, et la lumière vient des jetons eux-mêmes (--g).
  */
 :root {
-  color-scheme: dark;
+  color-scheme: light;
+
+  /* Album à vignettes (nouvelle DA, d'abord sur l'accueil) : couverture cobalt, pages papier, encre bleu nuit, numéros rouges */
+  --al-cover: #1d3fbf;
+  --al-cover-deep: #142e8f;
+  --al-cover-ink: #e8edff;
+  --al-paper: #f6f3ea;
+  --al-paper-2: #ece6d6;
+  --al-line: #d6cdb6;
+  --al-ink: #14204d;
+  --al-ink-2: #4a4f66; /* 7:1 sur le papier */
+  --al-red: #d4232f; /* blanc dessus = 5:1 */
+  --al-red-deep: #9e1620;
+  --al-shadow: 0 2px 3px rgb(20 32 77 / 18%), 0 10px 22px rgb(20 32 77 / 16%);
+  --al-shadow-lift: 0 6px 8px rgb(20 32 77 / 16%), 0 22px 40px rgb(20 32 77 / 22%);
+  --font-album: 'Archivo Black', 'Archivo Variable', system-ui, sans-serif;
+  --font-album-body: 'Archivo Variable', system-ui, sans-serif;
 
   /* Fonds et surfaces (du plus profond au plus proche) */
-  --bg: #0d0d12;
-  --bg-raised: #13131a;
-  --surface: #17171f;
-  --surface-2: #1e1e28;
-  --surface-3: #262632;
-  --line: #2a2a36;
-  --line-strong: #3a3a4a;
+  --bg: #ece6d6; /* papier de l'album (fond des pages) */
+  --bg-raised: #f2ede0;
+  --surface: #f6f3ea;
+  --surface-2: #efe9db;
+  --surface-3: #e4dcc8;
+  --line: #d6cdb6;
+  --line-strong: #bfb497;
 
   /* Texte */
-  --text: #f2f2f5;
-  --text-2: #b8b8c6;
-  --muted: #8d8da0;
-  --faint: #5c5c6e; /* décoratif seulement (pas pour du texte) */
+  --text: #14204d; /* encre bleu nuit */
+  --text-2: #3c4260;
+  --muted: #5d6380; /* 5,4:1 sur le papier */
+  --faint: #a39c87; /* décoratif seulement (pas pour du texte) */
 
   /* Accent (action principale) et secondaire (monnaie, urgence) */
-  --accent: #7c3aed; /* fond des boutons principaux : blanc dessus = 5,7:1 */
-  --accent-hover: #6d28d9;
-  --accent-hi: #a78bfa; /* violet clair pour du texte sur fond sombre */
-  --accent-lo: #4c1d95;
+  --accent: #d4232f; /* rouge des numéros d'album : fond des boutons principaux, blanc dessus = 5:1 */
+  --accent-hover: #b81d28;
+  --accent-hi: #b81d28; /* rouge pour du texte sur le papier (5,6:1) */
+  --accent-lo: #9e1620;
   --accent-ink: #ffffff;
-  --gold: #f97316;
-  --gold-hi: #fdba74;
+  --gold: #c2570c; /* pièces : orange brûlé lisible sur papier */
+  --gold-hi: #ea7a1e;
 
   /* États */
-  --ok: #4ade80;
-  --warn: #fbbf24;
-  --danger: #f43f5e;
+  --ok: #15803d;
+  --warn: #b45309;
+  --danger: #be123c;
   --danger-lo: #9f1239;
   --danger-bg: #e11d48; /* fond des boutons danger : texte blanc lisible (contraste ≥ 4,5:1) */
-  --info: #38bdf8;
+  --info: #0369a1;
 
   /* Raretés (texte et lueur) */
-  --r-common: #cbd5e1;
-  --r-rare: #38bdf8;
-  --r-epic: #a78bfa;
-  --r-legend: #fbbf24;
-  --r-myth: #f0abfc;
+  --r-common: #64748b;
+  --r-rare: #0284c7;
+  --r-epic: #7c3aed;
+  --r-legend: #b45309;
+  --r-myth: #c026d3;
 
   /* Variantes */
   --v-gold: #facc15;
@@ -51,8 +67,8 @@
   --v-ombre: #a855f7;
 
   /* Camps du Ring */
-  --me: #22c55e;
-  --foe: #f43f5e;
+  --me: #16a34a;
+  --foe: #e11d48;
 
   /* Lueur d'un jeton : triplet RGB réécrit par composant (style="--g: 139, 92, 246") */
   --g: 139, 92, 246;
@@ -60,8 +76,8 @@
 
   /* Typo */
   /* Outfit partout (OFL). Échelle du cahier : H1 32/700, H2 22/700, texte 15-16, petit 13 */
-  --font-display: 'Outfit Variable', 'Outfit', system-ui, sans-serif;
-  --font-body: 'Outfit Variable', 'Outfit', system-ui, sans-serif;
+  --font-display: 'Archivo Black', 'Archivo Variable', system-ui, sans-serif;
+  --font-body: 'Archivo Variable', system-ui, sans-serif;
   --fs-xs: 0.75rem; /* 12 */
   --fs-sm: 0.8125rem; /* 13 */
   --fs-md: 0.9375rem; /* 15 */
@@ -96,8 +112,8 @@
 
   /* Ombres : une ombre « arcade » dure sous les boutons, des lueurs pour les jetons */
   --press: 0 3px 0 0;
-  --shadow-1: 0 1px 0 rgb(255 255 255 / 4%) inset, 0 8px 24px rgb(0 0 0 / 35%);
-  --shadow-pop: 0 20px 60px rgb(0 0 0 / 60%);
+  --shadow-1: 0 2px 3px rgb(20 32 77 / 14%), 0 10px 22px rgb(20 32 77 / 12%);
+  --shadow-pop: 0 8px 16px rgb(20 32 77 / 18%), 0 28px 60px rgb(20 32 77 / 28%);
   --glow-shadow: 0 0 24px rgba(var(--g), 0.45);
 
   /* Mouvement */

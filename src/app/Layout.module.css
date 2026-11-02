@@ -329,6 +329,8 @@
 
 /* Fond vivant : petits pixels lumineux qui montent lentement (violet et orange), derrière tout le site */
 .ambient {
+  /* poussière d'étoiles de l'ancienne DA nuit : coupée sur le papier de l'album */
+  display: none;
   position: fixed;
   inset: 0;
   z-index: 0;
@@ -477,10 +479,11 @@
   overflow: hidden; /* la barre ne défile pas et ne se pousse pas */
   overscroll-behavior: none;
   touch-action: manipulation;
-  background: linear-gradient(180deg, #17131f, #0e0c15);
+  /* le dos de l'album : couverture cobalt */
+  background: linear-gradient(180deg, var(--al-cover), var(--al-cover-deep));
   box-shadow:
-    inset -2px 0 0 #262036,
-    6px 0 24px rgb(0 0 0 / 35%);
+    inset -3px 0 0 rgb(4 12 48 / 35%),
+    4px 0 12px rgb(20 32 77 / 25%);
 }
 .railBrand {
   display: grid;
@@ -504,14 +507,14 @@
   gap: 4px;
   width: 84px;
   padding: 6px 0;
-  color: var(--muted);
+  color: rgb(232 237 255 / 78%);
   text-decoration: none;
   transition:
     transform var(--t-fast),
     color var(--t-fast);
 }
 .railItem:hover {
-  color: var(--text);
+  color: var(--al-cover-ink);
   transform: translateY(-2px);
 }
 .railIco {
@@ -521,9 +524,10 @@
   height: 52px;
   border: 3px solid transparent;
   border-radius: 14px;
-  border-image: url('/img/ui/box-card.png?v=3') 12 fill / 24px stretch;
-  background: linear-gradient(#222034, #222034) center / calc(100% - 16px) calc(100% - 16px) no-repeat;
+  border-image: url('/img/ui/box-card.png?v=4') 12 fill / 24px stretch;
+  background: linear-gradient(#efe9db, #efe9db) center / calc(100% - 16px) calc(100% - 16px) no-repeat;
   image-rendering: pixelated;
+  color: var(--al-ink); /* l'icône reste encre sur la case papier, même si le libellé est clair */
   transition:
     filter var(--t-fast),
     transform var(--t-fast);
@@ -543,10 +547,10 @@
   color: #fff;
 }
 .railItem.on .railIco {
-  border-image-source: url('/img/ui/btn-violet.png?v=3');
-  background-image: linear-gradient(#7d48d9, #7d48d9);
-  filter: drop-shadow(0 0 10px rgb(139 92 246 / 60%));
-  animation: railPulse 2.4s ease-in-out infinite;
+  color: var(--al-paper);
+  border-image-source: url('/img/ui/btn-violet.png?v=4');
+  background-image: linear-gradient(#d4232f, #d4232f);
+  filter: drop-shadow(0 3px 4px rgb(4 12 48 / 45%));
 }
 .railItem.on::before {
   content: '';
@@ -555,8 +559,8 @@
   top: 14px;
   width: 4px;
   height: 36px;
-  background: #a78bfa;
-  box-shadow: 0 0 10px #8b5cf6;
+  border-radius: 0 4px 4px 0;
+  background: var(--al-paper);
 }
 @keyframes railPulse {
   50% {
@@ -615,8 +619,8 @@
   padding: 0 var(--s-4);
   border: 3px solid transparent;
   border-radius: 12px;
-  border-image: url('/img/ui/box-card.png?v=3') 12 fill / 24px stretch;
-  background: linear-gradient(#222034, #222034) center / calc(100% - 16px) calc(100% - 16px) no-repeat;
+  border-image: url('/img/ui/box-card.png?v=4') 12 fill / 24px stretch;
+  background: linear-gradient(#efe9db, #efe9db) center / calc(100% - 16px) calc(100% - 16px) no-repeat;
   image-rendering: pixelated;
   font: 800 var(--fs-md) var(--font-display);
   font-variant-numeric: tabular-nums;
@@ -702,7 +706,7 @@
     justify-items: center;
     gap: var(--s-3);
     padding: var(--s-6);
-    background: radial-gradient(circle at 50% 40%, #2a1d4a, #0d0d12 70%);
+    background: radial-gradient(circle at 50% 40%, #2a1d4a, #ece6d6 70%);
     text-align: center;
   }
   /* la page est rendue sur 1280 px puis réduite : on écrit en grand (en vw) pour que ce soit lisible */
@@ -826,8 +830,8 @@
   height: 40px;
   border: 3px solid transparent;
   border-radius: 12px;
-  border-image: url('/img/ui/box-card.png?v=3') 12 fill / 18px stretch;
-  background: linear-gradient(#222034, #222034) center / calc(100% - 12px) calc(100% - 12px) no-repeat;
+  border-image: url('/img/ui/box-card.png?v=4') 12 fill / 18px stretch;
+  background: linear-gradient(#efe9db, #efe9db) center / calc(100% - 12px) calc(100% - 12px) no-repeat;
   image-rendering: pixelated;
   color: var(--text-2);
   transition:

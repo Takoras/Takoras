@@ -21,8 +21,8 @@
 .add input {
   border: 3px solid transparent;
   border-radius: 10px;
-  border-image: url('/img/ui/box-card.png?v=3') 12 fill / 12px stretch;
-  background: linear-gradient(#222034, #222034) center / calc(100% - 16px) calc(100% - 16px) no-repeat;
+  border-image: url('/img/ui/box-card.png?v=4') 12 fill / 12px stretch;
+  background: linear-gradient(#efe9db, #efe9db) center / calc(100% - 16px) calc(100% - 16px) no-repeat;
   image-rendering: pixelated;
   flex: 1;
   min-width: 180px;
@@ -41,8 +41,8 @@
   padding: var(--s-3);
   border: 3px solid transparent;
   border-radius: 16px;
-  border-image: url('/img/ui/box-9.png?v=3') 14 fill / 28px stretch;
-  background: linear-gradient(#39374f, #39374f) center / calc(100% - 16px) calc(100% - 16px) no-repeat;
+  border-image: url('/img/ui/box-9.png?v=4') 14 fill / 28px stretch;
+  background: linear-gradient(#f6f3ea, #f6f3ea) center / calc(100% - 16px) calc(100% - 16px) no-repeat;
   image-rendering: pixelated;
 }
 .who {
@@ -81,8 +81,8 @@
 .dock {
   border: 3px solid transparent;
   border-radius: 14px;
-  border-image: url('/img/ui/box-9.png?v=3') 14 fill / 28px stretch;
-  background: linear-gradient(#39374f, #39374f) center / calc(100% - 16px) calc(100% - 16px) no-repeat;
+  border-image: url('/img/ui/box-9.png?v=4') 14 fill / 28px stretch;
+  background: linear-gradient(#f6f3ea, #f6f3ea) center / calc(100% - 16px) calc(100% - 16px) no-repeat;
   image-rendering: pixelated;
   position: fixed;
   z-index: 46;
@@ -196,8 +196,8 @@
 .form input {
   border: 3px solid transparent;
   border-radius: 10px;
-  border-image: url('/img/ui/box-card-in.png?v=3') 12 fill / 12px stretch;
-  background: linear-gradient(#222034, #222034) center / calc(100% - 16px) calc(100% - 16px) no-repeat;
+  border-image: url('/img/ui/box-card-in.png?v=4') 12 fill / 12px stretch;
+  background: linear-gradient(#efe9db, #efe9db) center / calc(100% - 16px) calc(100% - 16px) no-repeat;
   image-rendering: pixelated;
   flex: 1;
   min-width: 0;
@@ -207,8 +207,8 @@
 .form button {
   border: 3px solid transparent;
   border-radius: 10px;
-  border-image: url('/img/ui/btn-violet.png?v=3') 12 fill / 12px stretch;
-  background: linear-gradient(#7d48d9, #7d48d9) center / calc(100% - 16px) calc(100% - 16px) no-repeat;
+  border-image: url('/img/ui/btn-violet.png?v=4') 12 fill / 12px stretch;
+  background: linear-gradient(#d4232f, #d4232f) center / calc(100% - 16px) calc(100% - 16px) no-repeat;
   image-rendering: pixelated;
   width: 40px;
   height: 40px;
@@ -229,8 +229,8 @@
 .notif {
   border: 3px solid transparent;
   border-radius: 10px;
-  border-image: url('/img/ui/box-9.png?v=3') 14 fill / 14px stretch;
-  background: linear-gradient(#39374f, #39374f) center / calc(100% - 16px) calc(100% - 16px) no-repeat;
+  border-image: url('/img/ui/box-9.png?v=4') 14 fill / 14px stretch;
+  background: linear-gradient(#f6f3ea, #f6f3ea) center / calc(100% - 16px) calc(100% - 16px) no-repeat;
   image-rendering: pixelated;
   pointer-events: auto;
   display: flex;
@@ -326,8 +326,8 @@
 .annHist li {
   border: 3px solid transparent;
   border-radius: 14px;
-  border-image: url('/img/ui/box-card-in.png?v=3') 12 fill / 24px stretch;
-  background: linear-gradient(#222034, #222034) center / calc(100% - 16px) calc(100% - 16px) no-repeat;
+  border-image: url('/img/ui/box-card-in.png?v=4') 12 fill / 24px stretch;
+  background: linear-gradient(#efe9db, #efe9db) center / calc(100% - 16px) calc(100% - 16px) no-repeat;
   image-rendering: pixelated;
   padding: var(--s-3);
 }
@@ -430,8 +430,8 @@
   padding: var(--s-4);
   border: 3px solid transparent;
   border-radius: 16px;
-  border-image: url('/img/ui/box-9.png?v=3') 14 fill / 28px stretch;
-  background: linear-gradient(#39374f, #39374f) center / calc(100% - 16px) calc(100% - 16px) no-repeat;
+  border-image: url('/img/ui/box-9.png?v=4') 14 fill / 28px stretch;
+  background: linear-gradient(#f6f3ea, #f6f3ea) center / calc(100% - 16px) calc(100% - 16px) no-repeat;
   image-rendering: pixelated;
 }
 .meCard {
@@ -472,12 +472,12 @@
   gap: 6px;
   padding: 8px 14px;
   border-radius: 10px;
-  background: var(--surface-2, #222034);
+  background: var(--surface-2, #efe9db);
   color: var(--text-2);
   font-weight: 700;
 }
 .frTabs button[aria-selected='true'] {
-  background: #7d48d9;
+  background: #d4232f;
   box-shadow: 0 3px 0 #4c1d95;
   color: #fff;
 }
@@ -500,8 +500,8 @@
   padding: var(--s-3) var(--s-4);
   border: 3px solid transparent;
   border-radius: 16px;
-  border-image: url('/img/ui/box-card-in.png?v=3') 12 fill / 24px stretch;
-  background: linear-gradient(#222034, #222034) center / calc(100% - 16px) calc(100% - 16px) no-repeat;
+  border-image: url('/img/ui/box-card-in.png?v=4') 12 fill / 24px stretch;
+  background: linear-gradient(#efe9db, #efe9db) center / calc(100% - 16px) calc(100% - 16px) no-repeat;
   image-rendering: pixelated;
 }
 .frAva {
@@ -514,7 +514,7 @@
   bottom: 0;
   width: 14px;
   height: 14px;
-  border: 3px solid #222034;
+  border: 3px solid #efe9db;
   border-radius: 50%;
   background: #52525b;
 }
