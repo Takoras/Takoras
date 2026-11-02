@@ -30,8 +30,7 @@ body {
   /* papier de l'album : un léger grain de fibres, pas de lueur */
   background:
     repeating-linear-gradient(90deg, rgb(20 32 77 / 1.5%) 0 1px, transparent 1px 7px),
-    repeating-linear-gradient(0deg, rgb(20 32 77 / 1%) 0 1px, transparent 1px 11px),
-    color-mix(in oklab, var(--bg) 92%, var(--chap)); /* le papier prend un peu la teinte du chapitre */
+    repeating-linear-gradient(0deg, rgb(20 32 77 / 1%) 0 1px, transparent 1px 11px), var(--bg);
   background-attachment: fixed;
   color: var(--text);
   font-family: var(--font-body);
@@ -53,27 +52,6 @@ h4 {
 /* Titre de page : toujours 32 px gras */
 main h1 {
   font-size: var(--fs-2xl);
-}
-
-/* onglet d'intercalaire sous le titre de la page, à la couleur du chapitre */
-main h1::after {
-  content: '';
-  display: block;
-  width: 56px;
-  height: 6px;
-  margin-top: var(--s-2);
-  border-radius: 3px;
-  background: var(--chap);
-}
-
-/* pas d'onglet sous un titre qui est un logo (nom de série dessiné) */
-main h1:has(img)::after {
-  display: none;
-}
-
-::selection {
-  background: var(--chap);
-  color: var(--al-paper);
 }
 
 a {
@@ -118,7 +96,7 @@ img {
   font-weight: 600;
   letter-spacing: var(--tracking-caps);
   text-transform: uppercase;
-  color: var(--chap);
+  color: var(--accent-hi);
 }
 
 .muted {

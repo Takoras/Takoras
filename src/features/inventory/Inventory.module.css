@@ -274,15 +274,6 @@
   text-align: center;
   border-radius: inherit;
 }
-/* jeton possédé : une vignette papier teintée de la couleur du jeton (sa rareté se lit aussi au 1/x dessous) */
-.card:not(.unk, .gone) .cardBtn {
-  background:
-    radial-gradient(circle at 50% 36%, rgba(var(--g), 0.3), transparent 64%),
-    var(--surface);
-  box-shadow:
-    inset 0 0 0 2px rgba(var(--g), 0.45),
-    var(--shadow-1);
-}
 .cardBtn img {
   width: 76px;
   height: 76px;
