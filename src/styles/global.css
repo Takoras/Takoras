@@ -1,5 +1,3 @@
-@import '@fontsource/archivo-black';
-@import '@fontsource-variable/archivo';
 @import '@fontsource-variable/outfit'; /* police libre (licence OFL) : grotesque géométrique, cahier de refonte § 3.1 */
 @import './tokens.css';
 
@@ -27,10 +25,10 @@ html::-webkit-scrollbar {
 
 body {
   min-height: 100dvh;
-  /* papier de l'album : un léger grain de fibres, pas de lueur */
+  /* lueurs douces comme l'ancien Takoras (violet en haut à droite, orange à gauche) */
   background:
-    repeating-linear-gradient(90deg, rgb(20 32 77 / 1.5%) 0 1px, transparent 1px 7px),
-    repeating-linear-gradient(0deg, rgb(20 32 77 / 1%) 0 1px, transparent 1px 11px), var(--bg);
+    radial-gradient(900px 500px at 85% -10%, rgb(139 92 246 / 16%), transparent 70%),
+    radial-gradient(700px 400px at -10% 60%, rgb(249 115 22 / 7%), transparent 70%), var(--bg);
   background-attachment: fixed;
   color: var(--text);
   font-family: var(--font-body);
@@ -149,9 +147,9 @@ html.lock body {
 
 /* Boutons violets des écrans de jeu (Ring, ouverture) : même texture dessinée que les boutons du site */
 :root .btn.primary {
-  background: linear-gradient(#d4232f, #d4232f) center / calc(100% - 16px) calc(100% - 16px) no-repeat;
+  background: linear-gradient(#7d48d9, #7d48d9) center / calc(100% - 16px) calc(100% - 16px) no-repeat;
   border: 2px solid transparent;
-  border-image: url('/img/ui/btn-violet.png?v=4') 12 fill / 24px stretch;
+  border-image: url('/img/ui/btn-violet.png?v=3') 12 fill / 24px stretch;
   border-radius: 12px;
   image-rendering: pixelated;
   box-shadow: none;
@@ -172,9 +170,9 @@ html.lock body {
 
 /* Boutons sombres des écrans de jeu : même boîte sombre dessinée que le site */
 :root .btn.ghost {
-  background: linear-gradient(#efe9db, #efe9db) center / calc(100% - 16px) calc(100% - 16px) no-repeat;
+  background: linear-gradient(#222034, #222034) center / calc(100% - 16px) calc(100% - 16px) no-repeat;
   border: 2px solid transparent;
-  border-image: url('/img/ui/box-card.png?v=4') 12 fill / 24px stretch;
+  border-image: url('/img/ui/box-card.png?v=3') 12 fill / 24px stretch;
   border-radius: 12px;
   image-rendering: pixelated;
 }
@@ -195,46 +193,4 @@ html.lock body {
    Les effets plein écran (ouverture, Ring, cinématiques) sont hors de #root et gardent la taille réelle de l'écran. */
 #root {
   zoom: var(--z, 1);
-}
-
-/* Scènes plein écran (ouverture, Ring, cinématiques) : elles restent dans le noir, comme une salle de spectacle.
-   On y remet les couleurs de nuit ; les cartes d'infos posées dessus sont des fiches papier de l'album.
-   (opening.css et ring.css sont générés : les retouches de couleur vivent ici.) */
-.opening,
-.rg,
-.cine {
-  --bg: #0d0d12;
-  --bg-raised: #13131a;
-  --surface: #17171f;
-  --surface-2: #1e1e28;
-  --surface-3: #262632;
-  --line: #2a2a36;
-  --line-strong: #3a3a4a;
-  --text: #f2f2f5;
-  --text-2: #b8b8c6;
-  --muted: #8d8da0;
-  --faint: #5c5c6e;
-  --accent-hi: #fca5a5;
-  --r-common: #cbd5e1;
-  --r-rare: #38bdf8;
-  --r-epic: #a78bfa;
-  --r-legend: #fbbf24;
-  --r-myth: #f0abfc;
-  --gold: #f97316;
-  --gold-hi: #fdba74;
-  color-scheme: dark;
-}
-
-.opening .op-stats,
-.opening .op-id {
-  --text: var(--al-ink);
-  --text-2: var(--al-ink-2);
-  --muted: var(--al-ink-2);
-  background: linear-gradient(var(--al-paper), var(--al-paper)) center / calc(100% - 16px) calc(100% - 16px) no-repeat;
-  color: var(--al-ink);
-}
-
-.opening .op-auto.on,
-.rg .rg-go.ready {
-  background: linear-gradient(var(--al-red), var(--al-red)) center / calc(100% - 16px) calc(100% - 16px) no-repeat;
 }

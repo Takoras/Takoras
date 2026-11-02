@@ -40,8 +40,8 @@
   padding: 0 var(--s-6);
   border: 3px solid transparent;
   border-radius: 12px;
-  border-image: url('/img/ui/box-card.png?v=4') 12 fill / 24px stretch;
-  background: linear-gradient(#efe9db, #efe9db) center / calc(100% - 16px) calc(100% - 16px) no-repeat;
+  border-image: url('/img/ui/box-card.png?v=3') 12 fill / 24px stretch;
+  background: linear-gradient(#222034, #222034) center / calc(100% - 16px) calc(100% - 16px) no-repeat;
   image-rendering: pixelated;
   color: var(--text-2);
   font-weight: 700;
@@ -55,8 +55,8 @@
   filter: brightness(1.2);
 }
 .tabs a[aria-current='page'] {
-  border-image-source: url('/img/ui/btn-violet.png?v=4');
-  background: linear-gradient(#d4232f, #d4232f) center / calc(100% - 16px) calc(100% - 16px) no-repeat;
+  border-image-source: url('/img/ui/btn-violet.png?v=3');
+  background: linear-gradient(#7d48d9, #7d48d9) center / calc(100% - 16px) calc(100% - 16px) no-repeat;
   image-rendering: pixelated;
   color: #fff;
 }
@@ -71,8 +71,8 @@
 .shelf {
   border: 3px solid transparent;
   border-radius: 14px;
-  border-image: url('/img/ui/box-card.png?v=4') 12 fill / 24px stretch;
-  background: linear-gradient(#efe9db, #efe9db) center / calc(100% - 16px) calc(100% - 16px) no-repeat;
+  border-image: url('/img/ui/box-card.png?v=3') 12 fill / 24px stretch;
+  background: linear-gradient(#222034, #222034) center / calc(100% - 16px) calc(100% - 16px) no-repeat;
   image-rendering: pixelated;
   display: flex;
   align-items: center;
@@ -94,7 +94,7 @@
   color: var(--muted);
 }
 .shelf[aria-pressed='true'] {
-  border-image-source: url('/img/ui/box-sel.png?v=4');
+  border-image-source: url('/img/ui/box-sel.png?v=3');
 }
 .shelfSoon {
   opacity: 0.55;
@@ -154,8 +154,8 @@
 .vtabs button {
   border: 3px solid transparent;
   border-radius: 10px;
-  border-image: url('/img/ui/box-card.png?v=4') 12 fill / 12px stretch;
-  background: linear-gradient(#efe9db, #efe9db) center / calc(100% - 16px) calc(100% - 16px) no-repeat;
+  border-image: url('/img/ui/box-card.png?v=3') 12 fill / 12px stretch;
+  background: linear-gradient(#222034, #222034) center / calc(100% - 16px) calc(100% - 16px) no-repeat;
   image-rendering: pixelated;
   flex: none;
   display: flex;
@@ -176,7 +176,7 @@
 }
 .vtabs button[aria-selected='true'] {
   color: var(--text);
-  border-image-source: url('/img/ui/box-sel.png?v=4');
+  border-image-source: url('/img/ui/box-sel.png?v=3');
 }
 .vtabs .v_gold[aria-selected='true'] {
   border-color: var(--v-gold);
@@ -206,8 +206,8 @@
 .chips button {
   border: 3px solid transparent;
   border-radius: 10px;
-  border-image: url('/img/ui/box-card.png?v=4') 12 fill / 12px stretch;
-  background: linear-gradient(#efe9db, #efe9db) center / calc(100% - 16px) calc(100% - 16px) no-repeat;
+  border-image: url('/img/ui/box-card.png?v=3') 12 fill / 12px stretch;
+  background: linear-gradient(#222034, #222034) center / calc(100% - 16px) calc(100% - 16px) no-repeat;
   image-rendering: pixelated;
   min-height: 32px;
   padding: 0 var(--s-3);
@@ -217,7 +217,7 @@
 }
 .chips button[aria-pressed='true'] {
   color: var(--text);
-  border-image-source: url('/img/ui/box-sel.png?v=4');
+  border-image-source: url('/img/ui/box-sel.png?v=3');
 }
 .right {
   display: flex;
@@ -230,8 +230,8 @@
 .right select {
   border: 3px solid transparent;
   border-radius: 10px;
-  border-image: url('/img/ui/box-card.png?v=4') 12 fill / 12px stretch;
-  background: linear-gradient(#efe9db, #efe9db) center / calc(100% - 16px) calc(100% - 16px) no-repeat;
+  border-image: url('/img/ui/box-card.png?v=3') 12 fill / 12px stretch;
+  background: linear-gradient(#222034, #222034) center / calc(100% - 16px) calc(100% - 16px) no-repeat;
   image-rendering: pixelated;
   min-height: 40px;
   padding: 0 var(--s-3);
@@ -449,8 +449,8 @@
 .combat {
   border: 3px solid transparent;
   border-radius: 14px;
-  border-image: url('/img/ui/box-card-in.png?v=4') 12 fill / 24px stretch;
-  background: linear-gradient(#efe9db, #efe9db) center / calc(100% - 16px) calc(100% - 16px) no-repeat;
+  border-image: url('/img/ui/box-card-in.png?v=3') 12 fill / 24px stretch;
+  background: linear-gradient(#222034, #222034) center / calc(100% - 16px) calc(100% - 16px) no-repeat;
   image-rendering: pixelated;
   display: grid;
   gap: var(--s-2);
@@ -469,8 +469,8 @@
 .kit {
   border: 3px solid transparent;
   border-radius: 14px;
-  border-image: url('/img/ui/box-card.png?v=4') 12 fill / 24px stretch;
-  background: linear-gradient(#efe9db, #efe9db) center / calc(100% - 16px) calc(100% - 16px) no-repeat;
+  border-image: url('/img/ui/box-card.png?v=3') 12 fill / 24px stretch;
+  background: linear-gradient(#222034, #222034) center / calc(100% - 16px) calc(100% - 16px) no-repeat;
   image-rendering: pixelated;
   padding: var(--s-2) var(--s-3);
 }
@@ -500,8 +500,8 @@
 .item {
   border: 3px solid transparent;
   border-radius: 14px;
-  border-image: url('/img/ui/box-card.png?v=4') 12 fill / 24px stretch;
-  background: linear-gradient(#efe9db, #efe9db) center / calc(100% - 16px) calc(100% - 16px) no-repeat;
+  border-image: url('/img/ui/box-card.png?v=3') 12 fill / 24px stretch;
+  background: linear-gradient(#222034, #222034) center / calc(100% - 16px) calc(100% - 16px) no-repeat;
   image-rendering: pixelated;
   position: relative;
   display: grid;
@@ -554,8 +554,8 @@
   height: 38px;
   border: 3px solid transparent;
   border-radius: 10px;
-  border-image: url('/img/ui/box-card.png?v=4') 12 fill / 12px stretch;
-  background: linear-gradient(#f6f3ea, #f6f3ea) center / calc(100% - 12px) calc(100% - 12px) no-repeat;
+  border-image: url('/img/ui/box-card.png?v=3') 12 fill / 12px stretch;
+  background: linear-gradient(#39374f, #39374f) center / calc(100% - 12px) calc(100% - 12px) no-repeat;
   image-rendering: pixelated;
   font-weight: 800;
   font-size: var(--fs-lg);
@@ -567,8 +567,8 @@
 .stepper input {
   border: 3px solid transparent;
   border-radius: 10px;
-  border-image: url('/img/ui/box-card-in.png?v=4') 12 fill / 12px stretch;
-  background: linear-gradient(#efe9db, #efe9db) center / calc(100% - 16px) calc(100% - 16px) no-repeat;
+  border-image: url('/img/ui/box-card-in.png?v=3') 12 fill / 12px stretch;
+  background: linear-gradient(#222034, #222034) center / calc(100% - 16px) calc(100% - 16px) no-repeat;
   image-rendering: pixelated;
   width: 54px;
   height: 38px;
@@ -757,8 +757,8 @@
 .facts div {
   border: 3px solid transparent;
   border-radius: 14px;
-  border-image: url('/img/ui/box-card-in.png?v=4') 12 fill / 24px stretch;
-  background: linear-gradient(#efe9db, #efe9db) center / calc(100% - 16px) calc(100% - 16px) no-repeat;
+  border-image: url('/img/ui/box-card-in.png?v=3') 12 fill / 24px stretch;
+  background: linear-gradient(#222034, #222034) center / calc(100% - 16px) calc(100% - 16px) no-repeat;
   image-rendering: pixelated;
   display: flex;
   flex-direction: column-reverse;
@@ -797,8 +797,8 @@
 .owned li {
   border: 3px solid transparent;
   border-radius: 14px;
-  border-image: url('/img/ui/box-card-in.png?v=4') 12 fill / 24px stretch;
-  background: linear-gradient(#efe9db, #efe9db) center / calc(100% - 16px) calc(100% - 16px) no-repeat;
+  border-image: url('/img/ui/box-card-in.png?v=3') 12 fill / 24px stretch;
+  background: linear-gradient(#222034, #222034) center / calc(100% - 16px) calc(100% - 16px) no-repeat;
   image-rendering: pixelated;
   padding: 4px var(--s-3);
   color: var(--text-2);
