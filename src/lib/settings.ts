@@ -48,9 +48,11 @@ export const useSettings = create<Store>((set, get) => ({
   },
 }));
 
-// Appareil vraiment faible (2 cœurs ou 2 Go max) : effets allégés en mode « Auto »
+// Appareil vraiment faible (2 cœurs ET 2 Go max) : effets allégés en mode « Auto ».
+// Les deux à la fois : Brave (et d'autres navigateurs anti-pistage) faussent le nombre de cœurs au hasard,
+// parfois à 2, ce qui coupait toutes les animations et le doodle sur des PC normaux.
 const nav = typeof navigator === 'undefined' ? undefined : (navigator as Navigator & { deviceMemory?: number });
-export const LOWFX = (nav?.hardwareConcurrency ?? 8) <= 2 || (nav?.deviceMemory ?? 8) <= 2;
+export const LOWFX = (nav?.hardwareConcurrency ?? 8) <= 2 && (nav?.deviceMemory ?? 8) <= 2;
 export const reducedFx = (fx: Fx = useSettings.getState().fx) => fx === 'reduced' || (fx === 'auto' && LOWFX);
 export const speedFactor = () => ({ normal: 1, rapide: 0.5, instant: 0 })[useSettings.getState().speed];
 export const locale = (lang: Lang = useSettings.getState().lang) => (lang === 'en' ? 'en-US' : 'fr-FR');
