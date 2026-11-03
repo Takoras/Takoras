@@ -4,7 +4,7 @@ import { SerieName } from '@/ui/SerieName';
 import { PULLS } from '@/engines/env';
 import { useT } from '@/i18n/useT';
 import { installOpeningHost } from '../eco/openPulls';
-import { Actions, Upgrades } from './Actions';
+import { Actions } from './Actions';
 import { AutoConfig } from './AutoConfig';
 import { PullPicker } from './PullPicker';
 import { Live } from './Feeds';
@@ -58,9 +58,6 @@ export default function Home() {
         </Sat>
         <Sat className={`${s.satAuto}`}>
           <AutoConfig />
-        </Sat>
-        <Sat className={`${s.satUps} ${s.upsSide}`}>
-          <Upgrades />
         </Sat>
         <Sat className={`${s.satQuests} ${s.stack}`}>
           <Starter />

@@ -117,10 +117,9 @@ export function Actions({ serie = 'Takoras' }: { serie?: string } = {}) {
         </div>
       </DropSwap>
       {coin && !admin ? <p className={s.soonNote}>{t('ui.serie_open_soon')}</p> : null}
-      {/* sur grand écran, les améliorations sont dans la colonne de gauche (Upgrades) */}
-      <div className={s.upsCenter}>
-        <Upgrades />
-      </div>
+      {/* stock max et recharge ne servent qu'à la série Takoras (tirages gratuits) : juste sous les boutons,
+          et ils tombent et disparaissent quand on choisit une série payée en pièces */}
+      <DropSwap k={coin ? 'coin' : 'stock'}>{coin ? <span /> : <Upgrades />}</DropSwap>
       <Effects />
       {info}
     </div>

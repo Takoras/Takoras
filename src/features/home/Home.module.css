@@ -2,7 +2,7 @@
 .stage {
   display: grid;
   gap: var(--s-6);
-  grid-template-areas: 'center' 'quests' 'pick' 'auto' 'ups';
+  grid-template-areas: 'center' 'quests' 'pick' 'auto';
 }
 
 .center {
@@ -648,8 +648,7 @@
   .stage {
     grid-template:
       'pick center quests' auto
-      'auto center quests' auto
-      'ups center quests' 1fr
+      'auto center quests' 1fr
       / 260px 1fr 300px;
     align-items: start;
   }
