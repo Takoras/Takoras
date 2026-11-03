@@ -1,4 +1,5 @@
 import { useEffect, useRef, useState } from 'react';
+import { createPortal } from 'react-dom';
 import { SERIES, texOf } from '@/data/jetons';
 import { reducedFx } from '@/lib/settings';
 import { openPulls } from '../eco/openPulls';
@@ -72,12 +73,13 @@ export function FallRain({ serie }: { serie: string }) {
     };
     let W = 0,
       H = 0;
+    // demi-résolution : le fond est flou, ça ne se voit pas et ça fait 4 fois moins de pixels à dessiner
     const resize = () => {
-      // pleine résolution inutile pour un fond flou : 1 pixel du canvas = 1 pixel CSS
       W = window.innerWidth;
       H = window.innerHeight;
-      cv.width = W;
-      cv.height = H;
+      cv.width = Math.ceil(W / 2);
+      cv.height = Math.ceil(H / 2);
+      ctx.setTransform(0.5, 0, 0, 0.5, 0, 0);
       ctx.imageSmoothingEnabled = true;
     };
     resize();
@@ -97,6 +99,36 @@ export function FallRain({ serie }: { serie: string }) {
       len: 40 + Math.random() * 160,
     }));
     drops.sort((a, b) => a.z - b.z); // du plus loin au plus proche (l'ordre ne change jamais)
+    // nappes de couleur qui dérivent (lumière d'ambiance) : un dégradé pré-dessiné, juste déplacé
+    const blobImg = document.createElement('canvas');
+    blobImg.width = blobImg.height = 256;
+    const bg = blobImg.getContext('2d');
+    if (bg) {
+      const g = bg.createRadialGradient(128, 128, 0, 128, 128, 128);
+      g.addColorStop(0, 'rgba(255,255,255,1)');
+      g.addColorStop(1, 'rgba(255,255,255,0)');
+      bg.fillStyle = g;
+      bg.fillRect(0, 0, 256, 256);
+    }
+    const tint = (c: string) => {
+      const k = document.createElement('canvas');
+      k.width = k.height = 256;
+      const g = k.getContext('2d');
+      if (g) {
+        g.drawImage(blobImg, 0, 0);
+        g.globalCompositeOperation = 'source-in';
+        g.fillStyle = c;
+        g.fillRect(0, 0, 256, 256);
+      }
+      return k;
+    };
+    const blobs = [
+      { img: tint('#7c3aed'), x: 0.2, y: 0.3, r: 0.55, sp: 0.07, ph: 0 },
+      { img: tint('#2747b5'), x: 0.8, y: 0.5, r: 0.6, sp: 0.05, ph: 2 },
+      { img: tint('#47c2ea'), x: 0.5, y: 0.8, r: 0.4, sp: 0.09, ph: 4 },
+    ];
+    // poussière : de tout petits points qui montent vite (ça donne la vitesse de chute)
+    const dust = Array.from({ length: W < 700 ? 30 : 60 }, () => ({ x: Math.random(), y: Math.random(), z: Math.random() }));
     // pointeur : léger décalage de perspective (les proches bougent plus)
     let px = 0,
       tx = 0;
@@ -111,6 +143,26 @@ export function FallRain({ serie }: { serie: string }) {
       time += dt;
       px += (tx - px) * Math.min(1, dt * 3);
       ctx.clearRect(0, 0, W, H);
+      ctx.globalCompositeOperation = 'lighter';
+      for (const b of blobs) {
+        const r = Math.max(W, H) * b.r,
+          bx = (b.x + Math.sin(time * b.sp + b.ph) * 0.08) * W - px * 20,
+          by = (b.y + Math.cos(time * b.sp * 0.8 + b.ph) * 0.06) * H;
+        ctx.globalAlpha = 0.16;
+        ctx.drawImage(b.img, bx - r, by - r, r * 2, r * 2);
+      }
+      ctx.globalCompositeOperation = 'source-over';
+      ctx.fillStyle = '#c4b5fd';
+      for (const p of dust) {
+        p.y -= dt * (0.5 + p.z * 1.6);
+        if (p.y < -0.02) {
+          p.y = 1.02;
+          p.x = Math.random();
+        }
+        ctx.globalAlpha = 0.15 + p.z * 0.45;
+        const sz = 1 + p.z * 2.5;
+        ctx.fillRect(p.x * W - px * 30 * p.z, p.y * H, sz, sz * (2 + p.z * 4));
+      }
       for (const st of streaks) {
         st.y -= dt * (1.4 + st.z * 2.2);
         if (st.y < -0.3) {
@@ -143,6 +195,22 @@ export function FallRain({ serie }: { serie: string }) {
       ctx.globalAlpha = 1;
     };
 
+    // le fond s'arrête à la bande « En direct » ([data-rain-end]) : en dessous, fond uni.
+    // On coupe le canvas en fondu à cet endroit, et on arrête de dessiner quand on est descendu plus bas.
+    let cut = H;
+    const measure = () => {
+      const end = document.querySelector('[data-rain-end]');
+      const r = end?.getBoundingClientRect();
+      cut = r ? r.top + r.height / 2 : H;
+      cv.style.setProperty('--cut', `${Math.round(cut)}px`);
+    };
+    const onScroll = () => {
+      measure();
+      if (cut <= 0) stop();
+      else start();
+    };
+    window.addEventListener('scroll', onScroll, { passive: true });
+
     let raf = 0,
       last = 0;
     // 30 images par seconde suffisent pour un fond flou : deux fois moins de travail
@@ -153,8 +221,9 @@ export function FallRain({ serie }: { serie: string }) {
       last = now;
       draw(dt);
     };
-    const start = () => {
-      if (raf || document.hidden) return;
+    function start() {
+      measure();
+      if (raf || document.hidden || cut <= 0) return;
       if (reducedFx() || matchMedia('(prefers-reduced-motion: reduce)').matches) {
         // une seule image fixe quand les effets sont allégés
         [300, 1200].forEach((ms) => setTimeout(() => draw(0), ms)); // après le chargement des images
@@ -162,11 +231,11 @@ export function FallRain({ serie }: { serie: string }) {
       }
       last = 0;
       raf = requestAnimationFrame(loop);
-    };
-    const stop = () => {
+    }
+    function stop() {
       cancelAnimationFrame(raf);
       raf = 0;
-    };
+    }
     const onVis = () => (document.hidden ? stop() : start());
     document.addEventListener('visibilitychange', onVis);
     start();
@@ -175,10 +244,12 @@ export function FallRain({ serie }: { serie: string }) {
       document.removeEventListener('visibilitychange', onVis);
       window.removeEventListener('pointermove', onMove);
       window.removeEventListener('resize', resize);
+      window.removeEventListener('scroll', onScroll);
     };
   }, [serie]);
 
-  return <canvas ref={ref} className={s.rain} aria-hidden />;
+  // hors du zoom du site (#root) : le canvas couvre vraiment toute la largeur de la fenêtre
+  return createPortal(<canvas ref={ref} className={s.rain} aria-hidden />, document.body);
 }
 
 // Le jeton du centre, en chute libre. Changer de série : l'ancien file vers le bas, le nouveau tombe à sa place.

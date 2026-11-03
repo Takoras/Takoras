@@ -65,7 +65,7 @@ export default function Home() {
         </Sat>
       </div>
       {/* « En direct » : une bande en biais qui traverse tout l'écran */}
-      <div className={s.liveDiag}>
+      <div className={s.liveDiag} data-rain-end>
         <Live />
       </div>
       {/* classement des tirages ouverts, sous « En direct » */}

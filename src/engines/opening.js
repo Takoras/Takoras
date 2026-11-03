@@ -104,7 +104,11 @@ let skipSpawn = false;
 async function chute() {
   const hero = heroCoin(), img = hero.querySelector('img');
   if (!img) return onde();
-  const r = img.getBoundingClientRect();
+  // on mesure le jeton droit (#coin), pas l'image penchée : sa boîte tournée est plus grande, d'où un saut de taille
+  const r = hero.getBoundingClientRect();
+  // angle actuel du jeton qui tombe (il tangue entre 34° et 50°) : la chute part exactement de là
+  const tumble = img.parentElement ? getComputedStyle(img.parentElement).rotate : 'none';
+  const a0 = tumble && tumble !== 'none' ? parseFloat(tumble) : 42;
   const tr = $('op-coin').getBoundingClientRect();
   const c = tr.width ? { x: tr.left + tr.width / 2, y: tr.top + tr.height / 2, s: tr.width } : { ...center(), s: Math.min(240, Math.max(180, innerWidth * 0.26)) };
   const dx = c.x - (r.left + r.width / 2), dy = c.y - (r.top + r.height / 2), k = c.s / r.width;
@@ -117,7 +121,7 @@ async function chute() {
   const face = d.firstElementChild;
   // chute : il accélère, dépasse un peu le centre, rebondit et se pose droit
   await d.animate([
-    { transform: 'translate(0,0) rotate(42deg) scale(1)', filter: 'blur(0.5px)' },
+    { transform: `translate(0,0) rotate(${a0}deg) scale(1)`, filter: 'blur(0.5px)' },
     { transform: `translate(${dx}px,${dy + 26}px) rotate(-6deg) scale(${k * 1.04})`, filter: 'blur(1.5px)', offset: 0.62, easing: 'cubic-bezier(.2,.8,.3,1)' },
     { transform: `translate(${dx}px,${dy}px) rotate(0deg) scale(${k})`, filter: 'blur(0)' },
   ], { duration: 640, easing: 'cubic-bezier(.55,0,.85,.35)', fill: 'forwards' }).finished;

@@ -55,9 +55,17 @@
   --rot: 0deg;
   --lift: 0px;
   --dur: 7s;
-  rotate: var(--rot);
   translate: 0 var(--lift);
-  animation: podFloat var(--dur) ease-in-out infinite;
+}
+/* le joueur (photo, nom, score) : droit et lisible, il flotte à son propre rythme */
+.podWho {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+  max-width: 100%;
+  animation: whoFloat calc(var(--dur) * 0.7) ease-in-out infinite;
+  animation-delay: calc(var(--dur) * -0.3);
 }
 .pod > span:first-child {
   box-shadow: 0 0 0 3px var(--ring);
@@ -80,23 +88,26 @@
   height: auto;
   aspect-ratio: 64 / 42;
   margin-top: var(--s-2);
+  /* la marche penche et dérive comme en apesanteur, indépendamment du joueur */
+  rotate: var(--rot);
+  animation: podFloat var(--dur) ease-in-out infinite;
 }
 .p1 {
   --ring: #f59e0b;
   --lift: -28px;
   --dur: 6.2s;
+}
+/* la 1re marche tremble aussi, très lentement */
+.p1 .step {
   animation:
     podFloat var(--dur) ease-in-out infinite,
     podShake 2.6s ease-in-out infinite;
-}
-.p1 .step {
   width: 192px;
 }
 .p2 {
   --ring: #a78bfa;
   --rot: -12deg;
   --dur: 7.4s;
-  animation-delay: -2s;
 }
 .p2 .step {
   width: 160px;
@@ -106,7 +117,6 @@
   --rot: 14deg;
   --lift: 12px;
   --dur: 8.1s;
-  animation-delay: -4s;
 }
 .p3 .step {
   width: 128px;
@@ -114,10 +124,7 @@
 /* Le podium flotte dans l'espace : chaque marche penche, dérive à son rythme ; la 1re est plus haute
    et tremble très lentement, comme en apesanteur. Le texte reste droit et lisible. */
 
-.pod b,
-.pod small {
-  rotate: calc(var(--rot) * -1); /* le nom et le score restent à l'horizontale */
-}
+
 @keyframes podFloat {
   0%,
   100% {
@@ -125,6 +132,15 @@
   }
   50% {
     transform: translateY(-12px);
+  }
+}
+@keyframes whoFloat {
+  0%,
+  100% {
+    transform: translateY(0);
+  }
+  50% {
+    transform: translateY(-7px);
   }
 }
 @keyframes podShake {
@@ -139,11 +155,11 @@
 
 /* le reste du classement dérive doucement, chaque ligne un peu de travers, mais lisible */
 .list li {
-  rotate: var(--lr, 0deg);
-  animation: rowDrift 9s ease-in-out infinite;
+  /* lignes bien droites ; au survol elle avance, s'éclaire, et le rang grossit */
   transition:
-    rotate var(--t-med) var(--ease-out),
-    translate var(--t-med) var(--ease-out);
+    translate var(--t-med) var(--ease-out),
+    background var(--t-med) var(--ease-out),
+    border-color var(--t-med) var(--ease-out);
   display: flex;
   align-items: center;
   gap: var(--s-3);
@@ -152,28 +168,21 @@
   border-radius: 8px;
   background: var(--surface-2);
 }
-.list li:nth-child(odd) {
-  --lr: -0.6deg;
-}
-.list li:nth-child(even) {
-  --lr: 0.6deg;
-  animation-delay: -3s;
-}
-.list li:nth-child(3n) {
-  animation-delay: -6s;
-}
 .list li:hover {
-  --lr: 0deg;
-  translate: 6px 0;
+  translate: 8px 0;
+  background: var(--surface-3);
+  border-color: rgb(167 139 250 / 45%);
 }
-@keyframes rowDrift {
-  0%,
-  100% {
-    transform: translateX(0);
-  }
-  50% {
-    transform: translateX(5px);
-  }
+.list li:hover .rank {
+  scale: 1.35;
+  color: #c4b5fd;
+}
+.list li:hover > span:nth-child(2) {
+  scale: 1.12;
+}
+.rank,
+.list li > span:nth-child(2) {
+  transition: scale var(--t-med) cubic-bezier(0.2, 1.4, 0.4, 1);
 }
 /* titre de la section : il penche à peine et dérive */
 
@@ -188,16 +197,16 @@
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .pod,
-  .p1,
-  .list li,
+  .podWho,
+  .step,
+  .p1 .step,
   .head h2 {
     animation: none;
   }
 }
-:global(html.reduce-fx) .pod,
-:global(html.reduce-fx) .p1,
-:global(html.reduce-fx) .list li,
+:global(html.reduce-fx) .podWho,
+:global(html.reduce-fx) .step,
+:global(html.reduce-fx) .p1 .step,
 :global(html.reduce-fx) .head h2 {
   animation: none;
 }

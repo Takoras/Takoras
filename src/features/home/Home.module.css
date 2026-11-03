@@ -691,19 +691,13 @@
 .satPick .picker button img {
   width: 52px;
   height: 52px;
-  transform-origin: 50% 60%;
-  transition:
-    scale var(--t-med) var(--ease-out),
-    translate var(--t-med) var(--ease-out);
 }
+/* au survol c'est la boîte entière qui grossit (le jeton et le nom ne bougent pas dedans) */
 .satPick .picker button:not(:disabled):hover {
-  transform: translateX(4px);
-}
-/* au survol le jeton de la série grossit et sort un peu de sa pastille */
-.satPick .picker button:not(:disabled):hover img {
-  scale: 1.35;
-  translate: -4px -6px;
-  filter: drop-shadow(0 8px 10px rgb(0 0 0 / 55%));
+  transform: scale(1.06);
+  box-shadow:
+    inset 0 0 0 1px rgb(255 255 255 / 18%),
+    0 12px 26px rgb(0 0 0 / 45%);
 }
 .satPick .picker button[aria-pressed='true'] {
   background: rgb(124 58 237 / 28%);
@@ -817,30 +811,104 @@
   }
 }
 
-/* Ouvrir 1 respire et un reflet passe dessus de temps en temps ; les deux boutons se soulèvent au survol */
-.row > button {
+/* Les deux boutons d'ouverture : de vrais objets du jeu, pas des boutons de formulaire */
+.openOne,
+.openAll {
   position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--s-3);
+  min-height: 64px;
+  padding: 0 var(--s-5);
+  border-radius: 8px;
+  font-family: var(--font-display);
+  font-size: var(--fs-lg);
+  font-weight: 800;
+  white-space: nowrap;
+  cursor: pointer;
   overflow: hidden;
-  transition: transform var(--t-med) var(--ease-out);
+  transition:
+    transform 260ms cubic-bezier(0.2, 1.4, 0.4, 1),
+    background var(--t-fast);
 }
-.row > button:not(:disabled):hover {
-  transform: translateY(-3px) scale(1.03);
+.openOne {
+  border: 0;
+  background: #7c3aed;
+  color: #fff;
+  box-shadow:
+    inset 0 -4px 0 #4c1d95,
+    0 10px 24px rgb(124 58 237 / 35%);
 }
-.row > button:first-child:not(:disabled) {
-  animation: breathe 2.8s ease-in-out infinite;
+.openAll {
+  border: 1px solid rgb(255 255 255 / 14%);
+  background: rgb(23 23 31 / 80%);
+  color: var(--text);
 }
-.row > button:first-child:not(:disabled)::after {
+.openOne:not(:disabled):hover,
+.openAll:not(:disabled):hover {
+  transform: translateY(-3px);
+}
+.openOne:not(:disabled):active,
+.openAll:not(:disabled):active {
+  transform: translateY(1px) scale(0.96, 0.92);
+  transition-duration: 80ms;
+}
+.openOne:disabled,
+.openAll:disabled {
+  opacity: 0.45;
+  cursor: not-allowed;
+}
+/* reflet qui passe de temps en temps sur Ouvrir 1 */
+.openOne::after {
   content: '';
   position: absolute;
   inset: 0;
-  background: linear-gradient(110deg, transparent 35%, rgb(255 255 255 / 28%) 50%, transparent 65%);
+  background: linear-gradient(110deg, transparent 35%, rgb(255 255 255 / 26%) 50%, transparent 65%);
   translate: -120% 0;
   animation: shine 4.5s ease-in-out infinite;
   pointer-events: none;
 }
-@keyframes breathe {
+.openTok {
+  display: grid;
+  perspective: 300px;
+  animation: tokBob 2.2s ease-in-out infinite;
+}
+.openTok img {
+  width: 40px;
+  height: 40px;
+  transition: transform 600ms cubic-bezier(0.2, 0.9, 0.3, 1);
+}
+.openOne:not(:disabled):hover .openTok img {
+  transform: rotateY(360deg) scale(1.15);
+}
+.fan {
+  position: relative;
+  width: 52px;
+  height: 34px;
+}
+.fan img {
+  position: absolute;
+  left: 11px;
+  top: 2px;
+  width: 30px;
+  height: 30px;
+  translate: calc(var(--i) * 3px) calc(var(--i) * -2px);
+  transition:
+    translate 320ms cubic-bezier(0.2, 1.4, 0.4, 1),
+    rotate 320ms cubic-bezier(0.2, 1.4, 0.4, 1);
+}
+.openAll:not(:disabled):hover .fan img {
+  translate: calc((var(--i) - 1) * 16px) calc(var(--i) * -2px);
+  rotate: calc((var(--i) - 1) * 18deg);
+}
+@keyframes tokBob {
+  0%,
+  100% {
+    transform: translateY(0) rotate(-6deg);
+  }
   50% {
-    scale: 1.04;
+    transform: translateY(-3px) rotate(6deg);
   }
 }
 @keyframes shine {
@@ -855,13 +923,29 @@
 
 @media (prefers-reduced-motion: reduce) {
   .title,
-  .row > button:first-child:not(:disabled),
-  .row > button:first-child:not(:disabled)::after {
+  .openOne::after,
+  .openTok {
     animation: none;
   }
 }
 :global(html.reduce-fx) .title,
-:global(html.reduce-fx) .row > button:first-child:not(:disabled),
-:global(html.reduce-fx) .row > button:first-child:not(:disabled)::after {
+:global(html.reduce-fx) .openOne::after,
+:global(html.reduce-fx) .openTok {
   animation: none;
+}
+
+/* écrans étroits : boutons d'ouverture plus serrés pour que le texte tienne */
+@media (max-width: 1100px) {
+  .openOne,
+  .openAll {
+    gap: var(--s-2);
+    padding: 0 var(--s-3);
+    font-size: var(--fs-md);
+  }
+  .fan {
+    width: 40px;
+  }
+  .fan img {
+    left: 5px;
+  }
 }

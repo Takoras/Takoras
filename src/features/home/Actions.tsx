@@ -1,4 +1,5 @@
-import { useRef } from 'react';
+import { useRef, type CSSProperties } from 'react';
+import { MYSTERE } from '@/data/jetons';
 import { useQueryClient } from '@tanstack/react-query';
 import { ecoApi, errorText } from '@/api';
 import { useAuth } from '@/lib/auth';
@@ -51,12 +52,28 @@ export function Actions() {
         </span>
       </div>
       <div className={s.row}>
-        <Button variant="primary" size="lg" disabled={!e.stock} onClick={() => void openPulls(1)} data-nosound>
-          {t('ui.open1')}
-        </Button>
-        <Button size="lg" disabled={e.stock < 2} onClick={() => void openPulls('all')} data-nosound>
-          {t('ui.open_all', { n: Math.min(e.stock, MAX_OPEN) })}
-        </Button>
+        {/* Ouvrir 1 : un jeton « ? » qui flotte, fait un tour au survol ; le bouton s'écrase au clic */}
+        <button type="button" className={s.openOne} disabled={!e.stock} onClick={() => void openPulls(1)} data-nosound>
+          <span className={s.openTok} aria-hidden>
+            <img className="px" src={MYSTERE} alt="" width={40} height={40} />
+          </span>
+          <span>{t('ui.open1')}</span>
+        </button>
+        {/* Tout ouvrir : une pile de jetons qui s'étale en éventail au survol */}
+        <button
+          type="button"
+          className={s.openAll}
+          disabled={e.stock < 2}
+          onClick={() => void openPulls('all')}
+          data-nosound
+        >
+          <span className={s.fan} aria-hidden>
+            {[0, 1, 2].map((i) => (
+              <img key={i} className="px" src={MYSTERE} alt="" width={30} height={30} style={{ '--i': i } as CSSProperties} />
+            ))}
+          </span>
+          <span>{t('ui.open_all', { n: Math.min(e.stock, MAX_OPEN) })}</span>
+        </button>
       </div>
       {/* sur grand écran, les améliorations sont dans la colonne de gauche (Upgrades) */}
       <div className={s.upsCenter}>
