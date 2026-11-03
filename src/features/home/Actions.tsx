@@ -231,12 +231,14 @@ function Up(p: {
 
 // Remplace un bloc par un autre en le faisant tomber : l'ancien part vers le bas, le nouveau arrive du haut
 function DropSwap({ k, children }: { k: string; children: ReactNode }) {
-  const [cur, setCur] = useState({ k, node: children });
+  // « anim » reste vrai pour le bloc arrivé par un échange : sa classe ne change plus jamais pendant son animation
+  // (avant, elle était retirée au bout de 0,6 s alors que l'animation durait 1 s : le bloc se téléportait)
+  const [cur, setCur] = useState({ k, node: children, anim: false });
   const [old, setOld] = useState<{ k: string; node: ReactNode } | null>(null);
   if (k !== cur.k) {
     setOld(cur);
-    setCur({ k, node: children });
-  } else if (children !== cur.node) setCur({ k, node: children });
+    setCur({ k, node: children, anim: true });
+  } else if (children !== cur.node) setCur({ ...cur, node: children });
   useEffect(() => {
     if (!old) return;
     const id = setTimeout(() => setOld(null), 600);
@@ -249,7 +251,7 @@ function DropSwap({ k, children }: { k: string; children: ReactNode }) {
           {old.node}
         </div>
       ) : null}
-      <div key={cur.k} className={old ? s.swapIn : undefined}>
+      <div key={cur.k} className={cur.anim ? s.swapIn : undefined}>
         {cur.node}
       </div>
     </div>
