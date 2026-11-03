@@ -202,8 +202,11 @@
   margin-top: var(--s-2);
 }
 .stock {
+  /* hauteur fixe : passer du compteur au prix ne fait plus sauter « Probas & infos » en dessous */
+  min-height: 5.5rem;
   display: flex;
   align-items: baseline;
+  align-content: center;
   gap: var(--s-2);
   flex-wrap: wrap;
   justify-content: center;
