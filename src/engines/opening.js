@@ -113,7 +113,7 @@ async function chute() {
   const c = tr.width ? { x: tr.left + tr.width / 2, y: tr.top + tr.height / 2, s: tr.width } : { ...center(), s: Math.min(240, Math.max(180, innerWidth * 0.26)) };
   const dx = c.x - (r.left + r.width / 2), dy = c.y - (r.top + r.height / 2), k = c.s / r.width;
   // la page s'assombrit pendant que le jeton tombe
-  const dim = el('inset:0;background:#0d0d12;z-index:1');
+  const dim = el('inset:0;background:radial-gradient(60% 55% at 50% 45%, rgba(39,71,181,.22), transparent 70%), #0b0a12;z-index:1'); // même fond que l'ouverture
   dim.animate([{ opacity: 0 }, { opacity: 1 }], { duration: 640, easing: 'ease-in', fill: 'forwards' });
   const d = el(`left:${r.left}px;top:${r.top}px;width:${r.width}px;height:${r.height}px;z-index:3;perspective:900px`,
     `<img src="${img.src}" alt="" style="width:100%;height:100%;image-rendering:pixelated;display:block">`);

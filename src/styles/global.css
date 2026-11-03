@@ -195,73 +195,16 @@ html.lock body {
   zoom: var(--z, 1);
 }
 
-/* Fond de l'ouverture : on est toujours en chute (comme sur l'accueil). Des nappes bleu et violet de la série
-   dérivent, de la poussière d'étoiles monte, et le halo autour du jeton est teinté au lieu d'être gris.
-   Que des déplacements (transform) : léger pour le navigateur. */
-.opening::before,
-.opening::after {
-  content: '';
-  position: absolute;
-  z-index: -1;
-  pointer-events: none;
-}
+/* Fond de l'ouverture : simple et épuré. Un noir bleuté avec une seule lueur douce derrière le jeton.
+   (Le même fond sert pendant la transition « Chute », pour qu'il n'y ait pas de changement de fond.) */
 .opening.on {
   background:
-    radial-gradient(60% 50% at 22% 25%, rgb(39 71 181 / 30%), transparent 70%),
-    radial-gradient(55% 45% at 80% 75%, rgb(124 58 237 / 24%), transparent 70%),
+    radial-gradient(60% 55% at 50% 45%, rgb(39 71 181 / 22%), transparent 70%),
     #0b0a12;
 }
-.opening::before {
-  inset: -25%;
-  background:
-    radial-gradient(38% 32% at 28% 30%, rgb(39 71 181 / 42%), transparent 70%),
-    radial-gradient(34% 30% at 74% 66%, rgb(124 58 237 / 34%), transparent 70%),
-    radial-gradient(26% 24% at 62% 22%, rgb(71 194 234 / 18%), transparent 70%);
-  animation: opNebula 22s ease-in-out infinite alternate;
-}
-.opening::after {
-  left: 0;
-  right: 0;
-  top: 0;
-  height: 200%;
-  background-image:
-    radial-gradient(1.5px 4px at 12% 18%, rgb(196 181 253 / 70%), transparent),
-    radial-gradient(1px 3px at 34% 62%, rgb(255 255 255 / 55%), transparent),
-    radial-gradient(1.5px 5px at 58% 34%, rgb(147 197 253 / 60%), transparent),
-    radial-gradient(1px 3px at 81% 76%, rgb(196 181 253 / 50%), transparent),
-    radial-gradient(1px 4px at 91% 12%, rgb(255 255 255 / 45%), transparent),
-    radial-gradient(1.5px 4px at 6% 84%, rgb(147 197 253 / 55%), transparent),
-    radial-gradient(1px 3px at 47% 91%, rgb(255 255 255 / 40%), transparent),
-    radial-gradient(1px 4px at 69% 48%, rgb(196 181 253 / 45%), transparent);
-  background-size: 100% 50%;
-  animation: opDust 9s linear infinite;
-}
 .opening .op-glow {
-  background: radial-gradient(closest-side, rgba(var(--tier), 0.12), rgb(39 71 181 / 22%) 45%, transparent);
+  background: radial-gradient(closest-side, rgba(var(--tier), 0.1), transparent);
 }
-@keyframes opNebula {
-  0% {
-    transform: translate(0, 0) rotate(0deg) scale(1);
-  }
-  100% {
-    transform: translate(4%, -3%) rotate(8deg) scale(1.08);
-  }
-}
-@keyframes opDust {
-  0% {
-    transform: translateY(0);
-  }
-  100% {
-    transform: translateY(-50%);
-  }
-}
-@media (prefers-reduced-motion: reduce) {
-  .opening::before,
-  .opening::after {
-    animation: none;
-  }
-}
-html.reduce-fx .opening::before,
-html.reduce-fx .opening::after {
-  animation: none;
+.opening .op-coin::before {
+  background: radial-gradient(closest-side, rgba(var(--tier), 0.12), transparent);
 }
