@@ -856,3 +856,42 @@
   flex-direction: column;
   flex: 1;
 }
+
+/* fiole des testeurs, en haut à droite : elle se balance doucement et pétille au survol */
+.testerBtn {
+  display: grid;
+  place-items: center;
+  width: 48px;
+  height: 48px;
+  border: 1px solid rgb(255 255 255 / 12%);
+  border-radius: 8px;
+  background: var(--surface);
+  cursor: pointer;
+  transition:
+    transform 220ms cubic-bezier(0.2, 1.4, 0.4, 1),
+    border-color var(--t-fast);
+}
+.testerBtn img {
+  width: 32px;
+  height: 32px;
+  transform-origin: 50% 0;
+  animation: vialSway 3s ease-in-out infinite;
+}
+.testerBtn:hover {
+  transform: translateY(-2px) scale(1.06);
+  border-color: #a78bfa;
+}
+@keyframes vialSway {
+  0%,
+  100% {
+    rotate: -8deg;
+  }
+  50% {
+    rotate: 8deg;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .testerBtn img {
+    animation: none;
+  }
+}

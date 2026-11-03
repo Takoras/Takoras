@@ -599,7 +599,7 @@
   --fl: 6s;
   position: relative;
   z-index: 1;
-  translate: calc(var(--px, 0) * -18px * var(--d)) calc(var(--py, 0) * -12px * var(--d));
+  translate: calc(var(--px, 0) * -7px * var(--d)) calc(var(--py, 0) * -5px * var(--d)); /* profondeur plus discrète */
   /* épinglé en haut comme un post-it : il penche, et se balance quand on passe dessus (--swing, useSwing) */
   rotate: calc(var(--tilt) + var(--swing, 0deg));
   transform-origin: 50% 0;

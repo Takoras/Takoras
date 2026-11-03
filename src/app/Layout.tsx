@@ -14,7 +14,7 @@ import { Modal } from '@/ui/Modal';
 import { Announcements, openAnnHistory, unreadAnn, useAnn } from '@/features/social/Announcements';
 import { SocialLayer } from '@/features/social/SocialLayer';
 import { BetaChip, BetaLayer, openPatchnotes } from '@/features/beta/Beta';
-import { openFeedback } from '@/features/beta/store';
+import { openFeedback, openTester } from '@/features/beta/store';
 import { badgeOf, useFriends } from '@/features/social/social';
 import { publicApi } from '@/api';
 import { useOnlinePresence } from '@/lib/online';
@@ -166,6 +166,12 @@ export function Layout() {
           </button>
         ) : null}
         <BetaChip />
+        {user && (me.data?.tester || me.data?.admin) ? (
+          // testeurs (choisis par l'admin) : la fiole ouvre le menu pour tout se donner et forcer des tirages
+          <button type="button" className={s.testerBtn} onClick={openTester} aria-label={t('ui.tester_menu')}>
+            <img className="px" src="/img/potions/chance-5.png" alt="" width={32} height={32} />
+          </button>
+        ) : null}
         {user ? (
           <>
             <span className={s.bal} aria-label={t('app.balance')}>

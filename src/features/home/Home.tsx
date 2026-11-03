@@ -79,7 +79,7 @@ export default function Home() {
 // Satellite de l'accueil : il flotte, penche, et se balance comme un post-it épinglé quand on passe dessus
 function Sat({ className, children }: { className: string; children: ReactNode }) {
   const ref = useRef<HTMLDivElement>(null);
-  useSwing(ref, 0.35);
+  useSwing(ref, 0.15); // balancement plus léger : on doit pouvoir cliquer vite sans viser
   return (
     <div ref={ref} className={`${s.sat} ${className}`}>
       {children}
