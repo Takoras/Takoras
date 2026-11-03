@@ -475,9 +475,8 @@
   color: #bbf7d0;
 }
 .info {
-  font-size: var(--fs-md);
   color: var(--muted);
-  font-size: var(--fs-sm);
+  font-size: var(--fs-md);
   text-decoration: underline dotted;
   text-underline-offset: 3px;
 }
