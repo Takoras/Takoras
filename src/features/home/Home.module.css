@@ -954,3 +954,36 @@
     left: 5px;
   }
 }
+
+/* logo de la série : toutes les 5 s il saute et retombe en s'écrasant (choisi en live) */
+.logoLand {
+  display: inline-block;
+  transform-origin: 50% 100%;
+  animation: logoLand 5s cubic-bezier(0.16, 1, 0.3, 1) infinite;
+}
+@keyframes logoLand {
+  0%,
+  70% {
+    transform: translateY(0) scale(1, 1);
+  }
+  76% {
+    transform: translateY(-14px) scale(0.96, 1.05);
+  }
+  84% {
+    transform: translateY(0) scale(1.08, 0.9);
+  }
+  90% {
+    transform: translateY(-3px) scale(0.98, 1.02);
+  }
+  100% {
+    transform: translateY(0) scale(1, 1);
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .logoLand {
+    animation: none;
+  }
+}
+:global(html.reduce-fx) .logoLand {
+  animation: none;
+}

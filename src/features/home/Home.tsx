@@ -45,7 +45,10 @@ export default function Home() {
           <h1 className={s.title}>
             {/* juste le logo de la série, au centre (le mot « Tirage » reste lu par les lecteurs d'écran) */}
             <span className="visually-hidden">{t('ui.pull')} </span>
-            <SerieName name={pull.name} h="1.5em" doodle />
+            {/* le logo saute et retombe en s'écrasant toutes les 5 s */}
+            <span className={s.logoLand}>
+              <SerieName name={pull.name} h="1.5em" doodle />
+            </span>
           </h1>
           <Actions />
         </div>
