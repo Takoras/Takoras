@@ -206,10 +206,9 @@
   min-height: 5.5rem;
   display: flex;
   align-items: baseline;
-  align-content: center;
+  place-content: center center;
   gap: var(--s-2);
   flex-wrap: wrap;
-  justify-content: center;
 }
 .stockN {
   font-family: var(--font-display);
