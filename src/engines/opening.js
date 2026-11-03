@@ -7,7 +7,8 @@ import './legacy-base.css';
 import './opening.css';
 
 // Crochets vers React (économie, historique, admin)
-const openPulls = (n) => host.openPulls(n);
+// ouvre encore dans la MÊME série que le tirage en cours (Takoras, Bodako…)
+const openPulls = (n) => host.openPulls(n, PULLS[current]?.name || 'Takoras');
 const applyState = (st) => host.applyState(st);
 const ecoDecorate = () => host.ecoDecorate();
 const accRecordPull = (j, serie) => host.accRecordPull(j, serie);
@@ -44,6 +45,7 @@ const far = o => Math.hypot(Math.max(o.x, innerWidth - o.x), Math.max(o.y, inner
 const css = v => getComputedStyle(document.documentElement).getPropertyValue(v).trim();
 
 // couleur des cubes = couleur de la série (Takoras : le bleu du logo)
+const SERIE_LOGO = { Takoras: '/img/logo-takoras.png?v=2', Bodako: '/img/logo-bodako.png?v=1' };
 const SERIE_COL = { Takoras: ['#2747b5', '#47c2ea'], Bodako: ['#1f7a3d', '#8bd36a'] };
 const serieCol = () => SERIE_COL[(sess && PULLS[sess.pull]?.name) || 'Takoras'] || [css('--mid'), css('--hi')];
 function grid(cols) {
@@ -316,6 +318,10 @@ function startOpening() {
   // (le logo n'est recréé qu'au début d'une série d'ouvertures : son entrée animée ne rejoue pas à chaque jeton)
   const tag = $('op-tag');
   if (!tag.querySelector('.op-tag-logo')) tag.innerHTML = `<span class="op-tag-wrap"><img class="px op-tag-logo" src="/img/logo-takoras.png?v=2" alt="${p.name}"></span><span class="op-tag-n"></span>`;
+  // logo de la série du tirage (en haut et sur la fiche du jeton)
+  const logo = SERIE_LOGO[p.name] || SERIE_LOGO.Takoras;
+  const tl = tag.querySelector('.op-tag-logo'); if (tl && tl.getAttribute('src') !== logo) { tl.setAttribute('src', logo); tl.setAttribute('alt', p.name); }
+  const sl = opening.querySelector('.op-serie'); if (sl && sl.getAttribute('src') !== logo) { sl.setAttribute('src', logo); sl.setAttribute('alt', p.name); }
   tag.querySelector('.op-tag-n').textContent = sess.total > 1 ? `${sess.idx + 1}/${sess.total}` : '';
   $('op-odds').classList.remove('bump');
   if ($('op-price')) $('op-price').textContent = (p.price * sess.total).toLocaleString(LOCALE()); // ce bouton peut être réécrit par l'économie

@@ -108,8 +108,9 @@ export function statsOf(name: string, odds: number, variant = '', lvl = 1) {
 
 // Crochets : ce que le moteur demande au reste du site (économie, historique…). React les branche au démarrage.
 export const host = {
-  openPulls: (n: number | 'all') => {
+  openPulls: (n: number | 'all', serie?: string) => {
     void n;
+    void serie;
   },
   applyState: (st: unknown) => {
     void st;

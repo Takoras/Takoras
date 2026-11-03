@@ -79,7 +79,7 @@ let installed = false;
 export function installOpeningHost() {
   if (installed) return;
   installed = true;
-  host.openPulls = (n) => void openPulls(n);
+  host.openPulls = (n, serie) => void openPulls(n, serie);
   host.applyState = (st) => qc.setQueryData(meKey(), st);
   host.ecoDecorate = ecoDecorate;
   host.accRecordPull = () => {
