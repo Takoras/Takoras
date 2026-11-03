@@ -351,11 +351,9 @@
 .chips legend {
   width: 100%;
   margin-bottom: var(--s-2);
-  font-size: var(--fs-xs);
-  font-weight: 600;
-  color: var(--muted);
-  text-transform: uppercase;
-  letter-spacing: var(--tracking-caps);
+  font-size: var(--fs-sm);
+  font-weight: 700;
+  color: var(--text-2);
 }
 
 .chips button {
@@ -477,6 +475,7 @@
   color: #bbf7d0;
 }
 .info {
+  font-size: var(--fs-md);
   color: var(--muted);
   font-size: var(--fs-sm);
   text-decoration: underline dotted;
@@ -871,6 +870,7 @@
 }
 .openTok {
   display: grid;
+  flex: none;
   perspective: 300px;
   animation: tokBob 2.2s ease-in-out infinite;
 }
@@ -888,6 +888,7 @@
 }
 .fan {
   position: relative;
+  flex: none; /* ne rétrécit pas contre le texte */
   width: 52px;
   height: 34px;
 }

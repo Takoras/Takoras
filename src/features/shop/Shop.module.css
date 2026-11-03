@@ -173,7 +173,7 @@
 
 /* stock (petit texte) et variation de prix (pastille) : dans le bas de la carte */
 .stock {
-  font-size: 11px;
+  font-size: var(--fs-xs);
   font-weight: 600;
   color: var(--text-2);
 }
@@ -184,7 +184,7 @@
   margin-left: 4px;
   padding: 0 6px;
   border-radius: var(--r-pill);
-  font-size: 11px;
+  font-size: var(--fs-xs);
   background: rgb(74 222 128 / 15%);
   color: #bbf7d0;
 }

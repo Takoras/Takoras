@@ -177,7 +177,7 @@ textarea.input {
   padding: 2px var(--s-2);
   border-radius: var(--r-pill);
   background: var(--surface-3);
-  font-size: 11px;
+  font-size: var(--fs-xs);
   font-weight: 700;
   vertical-align: middle;
 }
@@ -247,7 +247,7 @@ textarea.input {
   height: 36px;
 }
 .jetons small {
-  font-size: 10px;
+  font-size: var(--fs-xs);
 }
 .msgs {
   list-style: none;

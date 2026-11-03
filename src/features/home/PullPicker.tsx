@@ -9,7 +9,8 @@ export function PullPicker({ value, onChange }: { value: number; onChange: (i: n
   const t = useT();
   return (
     <section className={s.panel} aria-labelledby="pp-t" data-tour="pick">
-      <h2 id="pp-t" className={s.panelT}>
+      {/* titre lu par les lecteurs d'écran seulement : les jetons parlent d'eux-mêmes */}
+      <h2 id="pp-t" className="visually-hidden">
         {t('ui.pulls')}
       </h2>
       <div className={s.picker}>

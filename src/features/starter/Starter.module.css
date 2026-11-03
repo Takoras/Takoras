@@ -60,7 +60,7 @@
   height: 20px;
   border-radius: 50%;
   border: 1px solid var(--line-strong);
-  font-size: 12px;
+  font-size: var(--fs-sm);
 }
 .ok span {
   background: var(--ok);

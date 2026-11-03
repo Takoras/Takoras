@@ -445,7 +445,7 @@ button.tile:focus-visible {
 }
 .premShow small {
   display: block;
-  font-size: 11px;
+  font-size: var(--fs-xs);
   color: #fdba74;
 }
 .compare {

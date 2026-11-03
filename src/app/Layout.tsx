@@ -33,13 +33,14 @@ const Badge = ({ n }: { n: number }) =>
   ) : null;
 
 // Zoom de chaque page, réglé à l'œil sur PC (100 % = taille normale du site)
+// (relevé pour la lisibilité : les pages étaient réduites à 67-75 %, les textes devenaient trop petits)
 const PAGE_ZOOM: [string, number][] = [
-  ['/inventaire', 0.75],
-  ['/combat', 0.75],
-  ['/boutique', 0.67],
+  ['/inventaire', 0.9],
+  ['/combat', 0.9],
+  ['/boutique', 0.85],
 ];
 function pageZoom(path: string) {
-  if (path === '/') return 0.75;
+  if (path === '/') return 0.9;
   return PAGE_ZOOM.find(([p]) => path.startsWith(p))?.[1] ?? 1;
 }
 

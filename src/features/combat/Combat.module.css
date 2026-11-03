@@ -146,7 +146,7 @@
   font-size: var(--fs-xs);
 }
 .dex small {
-  font-size: 10px;
+  font-size: var(--fs-xs);
   color: var(--text-2);
 }
 .empty {
@@ -283,7 +283,7 @@
   font-size: var(--fs-sm);
 }
 .slot small {
-  font-size: 11px;
+  font-size: var(--fs-xs);
   color: var(--muted);
 }
 .emptySlot {
@@ -298,7 +298,7 @@
   position: absolute;
   top: 6px;
   left: 8px;
-  font-size: 10px;
+  font-size: var(--fs-xs);
   color: var(--muted);
 }
 .el {
@@ -423,7 +423,7 @@
   height: 28px;
   border-radius: 50%;
   background: var(--surface-3);
-  font-size: 12px;
+  font-size: var(--fs-sm);
 }
 .budget {
   margin: var(--s-3) 0;
@@ -461,7 +461,7 @@
 }
 .legend {
   margin: var(--s-2) 0;
-  font-size: 11px;
+  font-size: var(--fs-xs);
   color: var(--muted);
 }
 .teGrid {
@@ -504,7 +504,7 @@
   font-size: var(--fs-md);
 }
 .teCard small {
-  font-size: 11px;
+  font-size: var(--fs-xs);
 }
 .pd {
   color: var(--muted);
@@ -514,13 +514,13 @@
   position: absolute;
   top: 4px;
   left: 6px;
-  font-size: 13px;
+  font-size: var(--fs-sm);
 }
 .tpLv {
   position: absolute;
   top: 6px;
   right: 30px;
-  font-size: 10px;
+  font-size: var(--fs-xs);
   color: var(--muted);
 }
 .info {
@@ -613,7 +613,7 @@
   background: radial-gradient(circle at 35% 30%, #a855f7, #0b0614);
 }
 .vLabel {
-  font-size: 11px;
+  font-size: var(--fs-xs);
   color: var(--muted);
 }
 .vLabel b {
@@ -628,7 +628,7 @@
 }
 .vtag > span {
   margin: 0;
-  font-size: 9px;
+  font-size: var(--fs-xs);
   padding: 1px 6px;
 }
 
@@ -653,7 +653,7 @@
 }
 .verTabs button small {
   color: var(--muted);
-  font-size: 11px;
+  font-size: var(--fs-xs);
 }
 .verTabs button[aria-selected='true'] {
   border-image-source: url('/img/ui/box-sel.png?v=3');
@@ -684,7 +684,7 @@
   grid-template-columns: 16px 1fr;
   align-items: center;
   gap: 6px;
-  font-size: 12px;
+  font-size: var(--fs-sm);
 }
 .stats i {
   display: block;
