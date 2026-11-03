@@ -80,10 +80,24 @@ export const ACC = {
   hist: [] as unknown[],
 };
 
+// Couleurs de chaque série (même DA, autre teinte) : fond de l'ouverture, pluie de l'accueil, cubes de transition.
+// main / clair / second, en « r g b » pour les mettre dans rgb(var(--serie) / x%)
+// Séries payées en pièces (pas de stock de tirages) : prix d'un tirage, et prix des 10 (-10 %)
+export const COIN_PULL = { one: 300, ten: 2700 };
+
+export const SERIE_THEME: Record<string, { main: string; hi: string; alt: string }> = {
+  Takoras: { main: '39 71 181', hi: '71 194 234', alt: '124 58 237' },
+  Bodako: { main: '31 122 61', hi: '139 211 106', alt: '20 92 72' }, // nature : feuilles, mousse
+};
+const TAKORAS_THEME = { main: '39 71 181', hi: '71 194 234', alt: '124 58 237' };
+export const serieTheme = (name?: string) => SERIE_THEME[name ?? ''] ?? TAKORAS_THEME;
+
 // Le seul type de pull (même objet que l'ancien site)
 export const PULLS = [
   { group: '', name: 'Takoras', color: 'takoras', price: 100, free: true, img: '/img/jetons/takoras.png' },
-];
+  // Bodako : on peut la choisir et voir sa collection ; l'ouverture attend le tirage par série côté serveur
+  { group: '', name: 'Bodako', color: 'bodako', price: 300, free: false, img: '/img/jetons/bodako.png', soon: true },
+] as { group: string; name: string; color: string; price: number; free: boolean; img: string; soon?: boolean }[];
 
 // Stats affichées dans la fiche d'un jeton (même calcul que l'ancien ui.js)
 export const STAT_MAX = { s_mass: RCFG.STAT_MAX.mass, s_pow: RCFG.STAT_MAX.power, s_size: RCFG.STAT_MAX.r };

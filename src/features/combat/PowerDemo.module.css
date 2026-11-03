@@ -3,9 +3,7 @@
   max-width: 260px;
   aspect-ratio: 1;
   object-fit: cover;
-  border: 3px solid transparent;
-  border-radius: 14px;
-  border-image: url('/img/ui/box-card-in.png?v=3') 12 / 24px stretch;
+  border: 1px solid rgb(255 255 255 / 7%);
+  border-radius: 8px;
   background: #16131f;
-  image-rendering: pixelated;
 }

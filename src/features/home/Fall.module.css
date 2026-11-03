@@ -50,18 +50,16 @@
 }
 
 .in {
-  animation: dropIn 720ms cubic-bezier(0.16, 1, 0.3, 1) both;
+  /* petit temps d'avance pour l'ancien jeton qui part (juste assez, sans attendre) */
+  animation: dropIn 720ms cubic-bezier(0.16, 1, 0.3, 1) 320ms both; /* après le titre */
 }
 
 .out {
   pointer-events: none;
-  animation: dropOut 600ms cubic-bezier(0.6, 0, 0.85, 0.2) both;
+  animation: dropOut 700ms cubic-bezier(0.55, 0, 0.75, 0.3) both;
 }
 
-.out img {
-  width: 100%;
-  height: 100%;
-}
+
 
 .coin {
   position: relative;
@@ -92,8 +90,6 @@
 .tumble {
   width: 100%;
   height: 100%;
-  /* un peu flou : il tombe vite */
-  filter: blur(0.5px);
   animation:
     tumble 5.2s ease-in-out infinite,
     sway 3.7s ease-in-out infinite,
@@ -117,21 +113,37 @@
 
 @keyframes dropIn {
   0% {
-    transform: translateY(-120vh) scaleY(1.6);
-    filter: blur(6px);
+    transform: translateY(-110vh) scale(0.9, 1.25);
+    filter: blur(5px);
     opacity: 0;
   }
-  60% {
-    filter: blur(1px);
+  20% {
     opacity: 1;
+  }
+  70% {
+    transform: translateY(14px) scale(1.06, 0.94);
+    filter: blur(0.5px);
+  }
+  85% {
+    transform: translateY(-6px) scale(0.98, 1.02);
+  }
+  100% {
+    transform: none;
+    filter: none;
   }
 }
 
+/* l'ancien accélère vers le bas, tourne et s'étire, avec un flou qui monte petit à petit */
 @keyframes dropOut {
-  to {
-    transform: translateY(120vh) scaleY(1.8);
-    filter: blur(8px);
-    opacity: 0;
+  0% {
+    transform: none;
+    filter: blur(0);
+    opacity: 1;
+  }
+  100% {
+    transform: translateY(115vh) scale(1, 1.3);
+    filter: blur(5px);
+    opacity: 0.6;
   }
 }
 
@@ -139,12 +151,12 @@
 @keyframes tumble {
   0%,
   100% {
-    rotate: 34deg;
+    rotate: -3deg;
     scale: 1;
   }
   50% {
-    rotate: 50deg;
-    scale: 1.04;
+    rotate: 3deg;
+    scale: 1.03;
   }
 }
 

@@ -2,6 +2,7 @@ import { useEffect, useRef, useState } from 'react';
 import { createPortal } from 'react-dom';
 import { SERIES, texOf } from '@/data/jetons';
 import { reducedFx } from '@/lib/settings';
+import { serieTheme } from '@/engines/env';
 import { openPulls } from '../eco/openPulls';
 import s from './Fall.module.css';
 
@@ -122,10 +123,11 @@ export function FallRain({ serie }: { serie: string }) {
       }
       return k;
     };
+    const th = serieTheme(serie), rgb = (s: string) => `rgb(${s.split(' ').join(',')})`;
     const blobs = [
-      { img: tint('#7c3aed'), x: 0.2, y: 0.3, r: 0.55, sp: 0.07, ph: 0 },
-      { img: tint('#2747b5'), x: 0.8, y: 0.5, r: 0.6, sp: 0.05, ph: 2 },
-      { img: tint('#47c2ea'), x: 0.5, y: 0.8, r: 0.4, sp: 0.09, ph: 4 },
+      { img: tint(rgb(th.alt)), x: 0.2, y: 0.3, r: 0.55, sp: 0.07, ph: 0 },
+      { img: tint(rgb(th.main)), x: 0.8, y: 0.5, r: 0.6, sp: 0.05, ph: 2 },
+      { img: tint(rgb(th.hi)), x: 0.5, y: 0.8, r: 0.4, sp: 0.09, ph: 4 },
     ];
     // poussière : de tout petits points qui montent vite (ça donne la vitesse de chute)
     const dust = Array.from({ length: W < 700 ? 30 : 60 }, () => ({ x: Math.random(), y: Math.random(), z: Math.random() }));
@@ -254,21 +256,22 @@ export function FallRain({ serie }: { serie: string }) {
 
 // Le jeton du centre, en chute libre. Changer de série : l'ancien file vers le bas, le nouveau tombe à sa place.
 // id="coin" : le moteur d'ouverture part de sa position pour la transition.
-export function FallCoin({ img, label }: { img: string; label: string }) {
-  const [shown, setShown] = useState(img);
-  const [leaving, setLeaving] = useState<string | null>(null);
+export function FallCoin({ img, label, serie = 'Takoras', disabled = false }: { img: string; label: string; serie?: string; disabled?: boolean }) {
+  // Les jetons affichés : le jeton actuel, et l'ancien pendant qu'il tombe. L'ancien GARDE le même élément
+  // (même clé) : on lui ajoute juste la classe « out », donc son tremblement continue sans s'arrêter ni rétrécir.
+  const [items, setItems] = useState([{ src: img, k: 0, out: false }]);
   const tiltRef = useRef<HTMLDivElement>(null);
-
-  // nouvelle série : on garde l'ancienne image le temps qu'elle file vers le bas
-  if (img !== shown) {
-    setLeaving(shown);
-    setShown(img);
+  const cur = items.find((x) => !x.out);
+  if (cur && cur.src !== img) {
+    const k = Math.max(...items.map((x) => x.k)) + 1;
+    setItems([...items.map((x) => ({ ...x, out: true })), { src: img, k, out: false }]);
   }
+  const hasOut = items.some((x) => x.out);
   useEffect(() => {
-    if (!leaving) return;
-    const id = setTimeout(() => setLeaving(null), 700);
+    if (!hasOut) return;
+    const id = setTimeout(() => setItems((xs) => xs.filter((x) => !x.out)), 750);
     return () => clearTimeout(id);
-  }, [leaving]);
+  }, [hasOut, items.length]);
 
   const move = (e: React.PointerEvent) => {
     const el = tiltRef.current;
@@ -281,40 +284,39 @@ export function FallCoin({ img, label }: { img: string; label: string }) {
     tiltRef.current?.style.setProperty('--rx', '0deg');
     tiltRef.current?.style.setProperty('--ry', '0deg');
   };
-  const open = () => void openPulls(1);
+  const open = () => {
+    if (!disabled) void openPulls(1, serie); // série pas ouvrable pour ce joueur : le jeton ne lance rien
+  };
 
   return (
     <div className={s.fall}>
       <div className={s.beam} aria-hidden />
-      {leaving ? (
-        <div className={`${s.body} ${s.out}`} aria-hidden>
-          <img className="px" src={leaving} alt="" />
-        </div>
-      ) : null}
-      <div key={shown} className={`${s.body} ${s.in}`}>
-        <div
-          id="coin"
-          className={s.coin}
-          role="button"
-          tabIndex={0}
-          aria-label={`${label} · ouvrir un tirage`}
-          onClick={open}
-          onPointerMove={move}
-          onPointerLeave={leave}
-          onKeyDown={(e) => {
-            if (e.key === 'Enter' || e.key === ' ') {
-              e.preventDefault();
-              open();
-            }
-          }}
-        >
-          <div ref={tiltRef} className={s.tilt}>
-            <div className={s.tumble}>
-              <img className="px" src={shown} alt="" width={260} height={260} />
+      {items.map((it) => (
+        <div key={it.k} className={`${s.body} ${it.out ? s.out : s.in}`} aria-hidden={it.out || undefined}>
+          <div
+            id={it.out ? undefined : 'coin'}
+            className={s.coin}
+            role={it.out ? undefined : 'button'}
+            tabIndex={it.out ? -1 : 0}
+            aria-label={it.out ? undefined : `${label} · ouvrir un tirage`}
+            onClick={it.out ? undefined : open}
+            onPointerMove={it.out ? undefined : move}
+            onPointerLeave={it.out ? undefined : leave}
+            onKeyDown={(e) => {
+              if (!it.out && (e.key === 'Enter' || e.key === ' ')) {
+                e.preventDefault();
+                open();
+              }
+            }}
+          >
+            <div ref={it.out ? undefined : tiltRef} className={s.tilt}>
+              <div className={s.tumble}>
+                <img className="px" src={it.src} alt="" width={260} height={260} />
+              </div>
             </div>
           </div>
         </div>
-      </div>
+      ))}
     </div>
   );
 }

@@ -183,6 +183,64 @@ const CINE = (() => {
   // scene(c) : c = { x, w, h, cx, cy, M, t, dt, st, mys, img, fx }
   // =====================================================================
   const FILMS = {
+    // ---------------------------------------------------------------- Ronce (Bodako, 1/5000) : la forêt se referme sur le jeton, les feuilles tourbillonnent, tout éclate en vert
+    Ronce: {
+      R: 6.4, c: ['#050f08', '#1f4d2e', '#7ccf6a', '#e9ffd9'],
+      init(c) {
+        // feuilles en spirale autour du jeton, et 8 ronces qui partent des bords
+        c.st.leaves = Array.from({ length: 70 }, () => ({ a: rnd(0, TAU), r: rnd(.25, 1.1), v: rnd(.4, 1), s: rnd(0, 9), sz: rnd(2, 4) }));
+        c.st.vines = Array.from({ length: 8 }, (_, i) => ({ a: i / 8 * TAU + rnd(-.2, .2), wob: rnd(0, 9), d: rnd(0, .6) }));
+        c.st.pollen = Array.from({ length: 40 }, () => ({ x: rnd(0, c.w), y: rnd(0, c.h), v: rnd(3, 8), p: rnd(0, 9) }));
+      },
+      music(m, R) {
+        const r = 174.6, pent = [0, 3, 5, 7, 10], n = i => pent[((i % 5) + 5) % 5] + 12 * Math.floor(i / 5);
+        // la forêt : koto calme et nappe chaude
+        [0, 2, 4, 3, 5, 7, 6, 4].forEach((d, i) => m.I.koto(m.hz(r, n(d)), m.T(.3 + i * .38), .07));
+        m.I.warm(chordHz(m, r, [0, 7, 12]), m.T(.2), 3.2, .03);
+        // les ronces poussent : les tambours montent
+        for (let s = 3, i = 0; s < R - .4; s += .2, i++) { if (i % 2 === 0) m.I.taiko(m.T(s), .3 + i * .02); m.I.koto(m.hz(r, n(6 + (i % 7))), m.T(s), .05); }
+        m.I.strings(chordHz(m, r, [0, 3, 7, 12]), m.T(3), 2.6, .03);
+        m.I.whoosh(m.T(R - .8), .7, .14); m.I.swell(m.T(R - 1.2), 1.1, .1);
+        revealHit(m, R, r, [0, 3, 7, 10, 14], 'koto');
+      },
+      scene(c) {
+        const { x, w, h, cx, cy, M, t, st, dt } = c, [bg, dk, ac, li] = this.c, R = this.R;
+        const k = seg(t, 0, R), grow = E.io(seg(t, 1.2, R - .4));
+        x.fillStyle = bg; x.fillRect(0, 0, w, h);
+        glow(x, cx, cy, M * (.6 + .3 * k), dk, .5 + .3 * k);
+        // pollen qui flotte vers le haut
+        st.pollen.forEach(p => { p.y -= p.v * dt * (1 + k * 2); p.x += Math.sin(t + p.p) * dt * 5; if (p.y < 0) { p.y = h; p.x = rnd(0, w); } P(x, p.x, p.y, 1, rgba(li, .2 + .3 * Math.sin(t * 2 + p.p))); });
+        // les ronces : des bords vers le centre, elles ondulent et poussent des épines
+        st.vines.forEach((v, i) => {
+          const g = clamp(grow * 1.15 - v.d * .3), L = M * .62 * g;
+          if (L <= 1) return;
+          for (let s = 0; s < L; s += 2) {
+            const u = s / (M * .62), rr = M * .62 - s, wav = Math.sin(u * 9 + t * 2 + v.wob) * 6 * (1 - u * .6);
+            const a = v.a + wav / Math.max(20, rr);
+            const X = cx + Math.cos(a) * (rr + M * .12), Y = cy + Math.sin(a) * (rr + M * .12);
+            P(x, X, Y, 2, s % 10 < 2 ? ac : dk);
+            if (s % 14 === 0) P(x, X + Math.cos(a + 1.6) * 3, Y + Math.sin(a + 1.6) * 3, 1, li); // épine
+          }
+        });
+        // le tourbillon de feuilles accélère et se resserre
+        st.spin = (st.spin || 0) + dt * lerp(.3, 4, E.in(k, 2));
+        st.leaves.forEach((l, i) => {
+          const a = l.a + st.spin * l.v, rr = M * l.r * lerp(1, .35, E.in(k, 1.6));
+          const X = cx + Math.cos(a) * rr, Y = cy + Math.sin(a) * rr * .8;
+          x.save(); x.translate(X, Y); x.rotate(a + t * 3 + l.s);
+          x.fillStyle = i % 3 ? ac : li; x.fillRect(-l.sz, -1, l.sz * 2, 2); x.fillRect(-1, -l.sz / 2, 2, l.sz);
+          x.restore();
+        });
+        // le jeton mystère, pris dans les ronces, qui tremble de plus en plus
+        const quake = E.in(seg(t, 4, R), 2);
+        coin(x, c.mys, cx + Math.sin(t * 40) * quake * 2, cy + Math.sin(t * 1.4) * 2, M * .27, { tint: ac, tintA: grow * .45, ang: Math.sin(t * .8) * .4 });
+        glow(x, cx, cy, M * (.2 + grow * .25), ac, .3 + grow * .4);
+        c.fx.shake(quake * 3);
+        // explosion de feuilles + flash vert, court (pas d'écran blanc)
+        if (t > R - .18) c.fx.flash(ac, .8);
+        vignette(x, w, h, bg, .78);
+      },
+    },
     // ---------------------------------------------------------------- Vyolis : une salle de verre, des reflets partout
     Vyolis: {
       R: 6.2, c: ['#0b0614', '#5b3a8c', '#c9a6f2', '#ffffff'],

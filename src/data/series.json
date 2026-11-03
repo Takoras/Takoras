@@ -102,5 +102,19 @@
       "glow": "#3cc8ea",
       "img": "/img/jetons/serie-takoras/takoras.gif"
     }
+  ],
+  "Bodako": [
+    {
+      "name": "Mousse",
+      "odds": 2,
+      "glow": "#b8e08a",
+      "img": "/img/jetons/serie-bodako/mousse.png"
+    },
+    {
+      "name": "Ronce",
+      "odds": 5000,
+      "glow": "#5fae7e",
+      "img": "/img/jetons/serie-bodako/ronce.png"
+    }
   ]
 }

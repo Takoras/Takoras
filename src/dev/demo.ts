@@ -5,6 +5,17 @@ type Handler = (route: unknown) => unknown;
 
 const HOST = 'joyskjoofihwhycyreyn.supabase.co';
 
+import { SERIES } from '@/data/jetons';
+
+// Tirage au hasard avec les vraies chances de la série (comme le serveur)
+function pickByOdds(): string {
+  const list = SERIES.Takoras ?? [];
+  const w = list.map((j) => 1 / j.odds);
+  let r = Math.random() * w.reduce((a, b) => a + b, 0);
+  for (let i = 0; i < list.length; i++) if ((r -= w[i] ?? 0) <= 0) return list[i]?.name ?? 'Mobu';
+  return list[0]?.name ?? 'Mobu';
+}
+
 export async function installDemo() {
   // le module de test encode son faux jeton avec Buffer (Node) : petite version navigateur
   const g = globalThis as unknown as { Buffer?: unknown };
@@ -51,7 +62,8 @@ export async function installDemo() {
   await fakeSupabase(
     page as never,
     { stock: 20, coins: 25000, pseudo: 'Testeur' },
-    [['Vyolis'], ['Néphéris'], ['Mobu']],
-    { tuto: false, pnSeen: 999, admin: true },
+    [],
+    // chance normale : chaque jeton sort avec sa vraie proba (1 chance sur odds)
+    { tuto: false, pnSeen: 999, admin: true, pick: pickByOdds },
   );
 }

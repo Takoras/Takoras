@@ -1,3 +1,4 @@
+import { PULLS } from '@/engines/env';
 import { useLayoutEffect, useMemo, useRef, useState, type CSSProperties } from 'react';
 import { SerieName } from '@/ui/SerieName';
 import { Link, NavLink } from 'react-router';
@@ -199,7 +200,7 @@ export default function Bestiary() {
             >
               <img
                 className="px"
-                src={x === 'Takoras' ? '/img/jetons/takoras.png' : texOf(js[0] ?? jetonOf('Mobu'))}
+                src={PULLS.find((p) => p.name === x)?.img ?? texOf(js[0] ?? jetonOf('Mobu'))}
                 alt=""
               />
               <span>

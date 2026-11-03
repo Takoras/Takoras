@@ -4,7 +4,7 @@ import { qc } from '@/lib/queryClient';
 import { useAuth } from '@/lib/auth';
 import { useSettings } from '@/lib/settings';
 import { translate } from '@/i18n';
-import { host } from '@/engines/env';
+import { COIN_PULL, PULLS, host } from '@/engines/env';
 import { sfx } from '@/engines/sound.js';
 import { openUI } from '@/app/ui-store';
 import { toast } from '@/ui/toast';
@@ -21,7 +21,8 @@ const eco = () => {
 
 let busy = false;
 // Ouvre 1 pull ou tout le stock (max 1000) : le serveur retire les pulls et tire les jetons, on joue l'animation
-export async function openPulls(n: number | 'all') {
+export async function openPulls(n: number | 'all', serie = 'Takoras') {
+  if (serie !== 'Takoras') return openCoinPulls(n === 'all' ? 10 : n, serie);
   const user = useAuth.getState().user;
   if (!user) return openUI('account');
   const e = eco(),
@@ -100,4 +101,32 @@ export function installOpeningHost() {
   }, 1000);
   // Une ouverture interrompue (rechargement de page) reprend où elle en était
   if (localStorage.getItem('takoras-session')) void engine();
+}
+
+// Série payée en pièces (Bodako) : 1 ou 10 tirages, le prix est retiré par le serveur (admins seulement pour l'instant)
+async function openCoinPulls(n: number, serie: string) {
+  const user = useAuth.getState().user;
+  if (!user) return openUI('account');
+  const e = eco(),
+    me = meState()?.data;
+  if (!e || !me?.pseudo || busy) return;
+  const cost = n >= 10 ? COIN_PULL.ten : COIN_PULL.one * n;
+  if (e.coins < cost) return sfx.deny();
+  busy = true;
+  try {
+    const { debug, buy } = await engine();
+    const data = (await ecoApi.takePullsSerie(
+      serie,
+      n,
+      me.admin ? { force: debug.force || undefined, luck: debug.luck, p_variant: debug.variant || undefined } : {},
+    )) as { state: Me; results: string[]; variants?: (string | null)[]; lucks?: number[]; ids?: (number | null)[] };
+    qc.setQueryData(meKey(), data.state);
+    buy(data.results.length, data.results, data.variants ?? null, data.lucks ?? null, data.ids ?? null, Math.max(0, PULLS.findIndex((p) => p.name === serie)));
+  } catch (err) {
+    sfx.deny();
+    toast(errorText(err, useSettings.getState().lang), true);
+    void qc.invalidateQueries({ queryKey: ['me'] });
+  } finally {
+    busy = false;
+  }
 }

@@ -277,6 +277,10 @@ export type Database = {
       set_pseudo: { Args: { p: string }; Returns: undefined };
       shop_today: { Args: never; Returns: Json };
       take_pulls: { Args: { force?: string; luck?: number; n: number; p_variant?: string }; Returns: Json };
+      take_pulls_serie: {
+        Args: { p_serie: string; force?: string; luck?: number; n: number; p_variant?: string };
+        Returns: Json;
+      };
       update_profile: {
         Args: { p_avatar: string; p_banner: string | null; p_bio: string; p_showcase: (number | null)[] };
         Returns: undefined;

@@ -1,7 +1,7 @@
 // Ouverture des tirages. Repris de legacy/ (transitions.js + opening.js) ; ce fichier est maintenant la référence (plus régénéré).
 import { SERIES, texOf } from '@/data/jetons';
 import { burstAt } from '@/lib/pfx';
-import { $, ACC, LOCALE, PULLS, SETTINGS, STAT_MAX, VARIANTS, errText, fmt, fmtLuck, jn, jnH, reducedFx, saveSettings, sb, sfx, sparkStyle, speed, statsOf, t, toast, vCls, vOdds, vTag, host } from './env';
+import { $, ACC, LOCALE, PULLS, SETTINGS, serieTheme, STAT_MAX, VARIANTS, errText, fmt, fmtLuck, jn, jnH, reducedFx, saveSettings, sb, sfx, sparkStyle, speed, statsOf, t, toast, vCls, vOdds, vTag, host } from './env';
 import { CINE } from './cinema.js';
 import './legacy-base.css';
 import './opening.css';
@@ -44,7 +44,7 @@ const far = o => Math.hypot(Math.max(o.x, innerWidth - o.x), Math.max(o.y, inner
 const css = v => getComputedStyle(document.documentElement).getPropertyValue(v).trim();
 
 // couleur des cubes = couleur de la série (Takoras : le bleu du logo)
-const SERIE_COL = { Takoras: ['#2747b5', '#47c2ea'] };
+const SERIE_COL = { Takoras: ['#2747b5', '#47c2ea'], Bodako: ['#1f7a3d', '#8bd36a'] };
 const serieCol = () => SERIE_COL[(sess && PULLS[sess.pull]?.name) || 'Takoras'] || [css('--mid'), css('--hi')];
 function grid(cols) {
   const w = Math.ceil(innerWidth / cols), rows = Math.ceil(innerHeight / w);
@@ -108,12 +108,13 @@ async function chute() {
   const r = hero.getBoundingClientRect();
   // angle actuel du jeton qui tombe (il tangue entre 34° et 50°) : la chute part exactement de là
   const tumble = img.parentElement ? getComputedStyle(img.parentElement).rotate : 'none';
-  const a0 = tumble && tumble !== 'none' ? parseFloat(tumble) : 42;
+  const a0 = tumble && tumble !== 'none' ? parseFloat(tumble) : 0;
   const tr = $('op-coin').getBoundingClientRect();
   const c = tr.width ? { x: tr.left + tr.width / 2, y: tr.top + tr.height / 2, s: tr.width } : { ...center(), s: Math.min(240, Math.max(180, innerWidth * 0.26)) };
   const dx = c.x - (r.left + r.width / 2), dy = c.y - (r.top + r.height / 2), k = c.s / r.width;
   // la page s'assombrit pendant que le jeton tombe
-  const dim = el('inset:0;background:radial-gradient(60% 55% at 50% 45%, rgba(39,71,181,.22), transparent 70%), #0b0a12;z-index:1'); // même fond que l'ouverture
+  const sc = serieTheme((sess && PULLS[sess.pull]?.name) || 'Takoras').main.split(' ').join(',');
+  const dim = el(`inset:0;background:radial-gradient(60% 55% at 50% 45%, rgba(${sc},.22), transparent 70%), #0b0a12;z-index:1`); // même fond que l'ouverture
   dim.animate([{ opacity: 0 }, { opacity: 1 }], { duration: 640, easing: 'ease-in', fill: 'forwards' });
   const d = el(`left:${r.left}px;top:${r.top}px;width:${r.width}px;height:${r.height}px;z-index:3;perspective:900px`,
     `<img src="${img.src}" alt="" style="width:100%;height:100%;image-rendering:pixelated;display:block">`);
@@ -309,6 +310,7 @@ function startOpening() {
     save();
   }
   const c = sess.cur, p = PULLS[sess.pull];
+  opening.style.setProperty('--serie', serieTheme(p?.name).main); // teinte du fond selon la série
   run = { result: findJeton(c.name), variant: c.variant || '', queue: c.queue, shown: c.shown, done: false };
   // en haut : le logo de la série (et la position dans la série d'ouvertures)
   // (le logo n'est recréé qu'au début d'une série d'ouvertures : son entrée animée ne rejoue pas à chaque jeton)
@@ -869,7 +871,22 @@ addEventListener('keydown', e => {
   tap();
 });
 
-function buy(n, plan = null, vars = null, lucks = null, ids = null) {
+function buy(n, plan = null, vars = null, lucks = null, ids = null, pull = 0) {
+  current = pull; // série du tirage (0 = Takoras)
+  // Tirage suivant depuis l'écran d'ouverture (un par un) : pas de nouvelle chute depuis l'accueil.
+  // Le jeton qu'on vient d'avoir se retourne sur place, le « ? » revient, le compteur repart à 1/1 — sans coupure.
+  const reopen = n === 1 && opening.classList.contains('on') && !opening.classList.contains('recap') && SETTINGS.speed !== 'instant';
+  if (reopen) {
+    opCoin.animate([{ transform: 'rotateY(0deg)' }, { transform: 'rotateY(90deg)' }], { duration: 140, easing: 'ease-in', fill: 'forwards' }).finished.then(() => {
+      endSession(); startSession(n, plan, vars, lucks, ids);
+      skipSpawn = true;
+      startOpening();
+      sfx.spawn();
+      opCoin.getAnimations().forEach(a => a.cancel());
+      opCoin.animate([{ transform: 'rotateY(-90deg)' }, { transform: 'rotateY(0deg) scale(1.06)', offset: 0.7 }, { transform: 'rotateY(0deg) scale(1)' }], { duration: 260, easing: 'cubic-bezier(.2,.9,.3,1)' });
+    });
+    return;
+  }
   closeOpening(); startSession(n, plan, vars, lucks, ids);
   // « Ouvrir 1 » comme « Tout ouvrir » : le jeton de l'accueil tombe au centre et se retourne (transition « Chute »)
   runTransition();

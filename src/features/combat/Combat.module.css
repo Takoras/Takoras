@@ -121,11 +121,9 @@
   gap: var(--s-2);
 }
 .dex button {
-  border: 3px solid transparent;
-  border-radius: 14px;
-  border-image: url('/img/ui/box-card.png?v=3') 12 fill / 24px stretch;
-  background: linear-gradient(#222034, #222034) center / calc(100% - 16px) calc(100% - 16px) no-repeat;
-  image-rendering: pixelated;
+  border: 1px solid rgb(255 255 255 / 9%);
+  border-radius: 8px;
+  background: var(--surface);
   width: 100%;
   display: grid;
   justify-items: center;
@@ -169,11 +167,9 @@
   align-items: center;
   gap: var(--s-3);
   padding: var(--s-3) var(--s-4);
-  border: 3px solid transparent;
-  border-radius: 16px;
-  border-image: url('/img/ui/box-9.png?v=3') 14 fill / 28px stretch;
-  background: linear-gradient(#39374f, #39374f) center / calc(100% - 16px) calc(100% - 16px) no-repeat;
-  image-rendering: pixelated;
+  border: 1px solid rgb(255 255 255 / 12%);
+  border-radius: 8px;
+  background: var(--surface-2);
 }
 .rankIco {
   font-size: 34px;
@@ -199,11 +195,9 @@
   gap: var(--s-2);
 }
 .play {
-  border: 3px solid transparent;
-  border-radius: 14px;
-  border-image: url('/img/ui/btn-violet.png?v=3') 12 fill / 24px stretch;
-  background: linear-gradient(#7d48d9, #7d48d9) center / calc(100% - 16px) calc(100% - 16px) no-repeat;
-  image-rendering: pixelated;
+  border: 1px solid #8b5cf6;
+  border-radius: 8px;
+  background: var(--accent);
   display: grid;
   place-items: center;
   min-height: 56px;
@@ -212,8 +206,8 @@
   font-weight: 700;
 }
 .play.ghost {
-  border-image-source: url('/img/ui/box-card.png?v=3');
-  background-image: linear-gradient(#222034, #222034);
+  border-color: rgb(255 255 255 / 9%);
+  background-color: var(--surface);
   color: var(--text);
 }
 .play b {
@@ -314,11 +308,9 @@
 
 .help {
   padding: var(--s-3) var(--s-4);
-  border: 3px solid transparent;
-  border-radius: 16px;
-  border-image: url('/img/ui/box-9.png?v=3') 14 fill / 28px stretch;
-  background: linear-gradient(#39374f, #39374f) center / calc(100% - 16px) calc(100% - 16px) no-repeat;
-  image-rendering: pixelated;
+  border: 1px solid rgb(255 255 255 / 12%);
+  border-radius: 8px;
+  background: var(--surface-2);
 }
 .help summary {
   cursor: pointer;
@@ -371,11 +363,9 @@
   font-size: var(--fs-xs);
 }
 .chips span {
-  border: 3px solid transparent;
-  border-radius: 10px;
-  border-image: url('/img/ui/box-card.png?v=3') 12 fill / 12px stretch;
-  background: linear-gradient(#222034, #222034) center / calc(100% - 16px) calc(100% - 16px) no-repeat;
-  image-rendering: pixelated;
+  border: 1px solid rgb(255 255 255 / 9%);
+  border-radius: 8px;
+  background: var(--surface);
   padding: 2px var(--s-2);
 }
 
@@ -443,11 +433,9 @@
   scrollbar-width: none;
 }
 .chipsRow button {
-  border: 3px solid transparent;
-  border-radius: 10px;
-  border-image: url('/img/ui/box-card.png?v=3') 12 fill / 12px stretch;
-  background: linear-gradient(#222034, #222034) center / calc(100% - 16px) calc(100% - 16px) no-repeat;
-  image-rendering: pixelated;
+  border: 1px solid rgb(255 255 255 / 9%);
+  border-radius: 8px;
+  background: var(--surface);
   flex: none;
   min-height: 32px;
   padding: 0 var(--s-3);
@@ -457,7 +445,7 @@
 }
 .chipsRow button[aria-pressed='true'] {
   color: var(--text);
-  border-image-source: url('/img/ui/box-sel.png?v=3');
+  border-color: #a78bfa;
 }
 .legend {
   margin: var(--s-2) 0;
@@ -477,11 +465,9 @@
   position: relative;
 }
 .teCard {
-  border: 3px solid transparent;
-  border-radius: 14px;
-  border-image: url('/img/ui/box-card.png?v=3') 12 / 24px stretch;
-  background: linear-gradient(#222034, #222034) center / calc(100% - 16px) calc(100% - 16px) no-repeat;
-  image-rendering: pixelated;
+  border: 1px solid rgb(255 255 255 / 9%);
+  border-radius: 8px;
+  background: var(--surface);
   position: relative;
   width: 100%;
   height: 100%;
@@ -493,7 +479,7 @@
   text-align: center;
 }
 .sel .teCard {
-  border-image-source: url('/img/ui/box-sel.png?v=3');
+  border-color: #a78bfa;
 }
 .teCard img {
   width: 84px;
@@ -639,11 +625,9 @@
   overflow-x: auto;
 }
 .verTabs button {
-  border: 3px solid transparent;
-  border-radius: 10px;
-  border-image: url('/img/ui/box-card.png?v=3') 12 fill / 12px stretch;
-  background: linear-gradient(#222034, #222034) center / calc(100% - 16px) calc(100% - 16px) no-repeat;
-  image-rendering: pixelated;
+  border: 1px solid rgb(255 255 255 / 9%);
+  border-radius: 8px;
+  background: var(--surface);
   display: inline-flex;
   align-items: center;
   gap: 6px;
@@ -656,7 +640,7 @@
   font-size: var(--fs-xs);
 }
 .verTabs button[aria-selected='true'] {
-  border-image-source: url('/img/ui/box-sel.png?v=3');
+  border-color: #a78bfa;
 }
 .role {
   color: var(--el);
@@ -706,11 +690,9 @@
   align-items: center;
   gap: var(--s-3);
   padding: var(--s-3) var(--s-4);
-  border: 3px solid transparent;
-  border-radius: 14px;
-  border-image: url('/img/ui/box-light-orange.png?v=3') 12 fill / 24px stretch;
-  background: linear-gradient(#39374f, #39374f) center / calc(100% - 16px) calc(100% - 16px) no-repeat;
-  image-rendering: pixelated;
+  border: 1px solid #f97316;
+  border-radius: 8px;
+  background: var(--surface-2);
   color: inherit;
   text-decoration: none;
 }

@@ -274,11 +274,12 @@ li[aria-current] .num {
   width: var(--tile);
   height: var(--tile);
   padding: calc(var(--tile) * 0.16);
-  border: 0;
   font: inherit;
   color: var(--text);
-  background: url('/img/ui/box-dark.png?v=3') center / 100% 100% no-repeat;
-  image-rendering: pixelated;
+  /* case neutre (plus de cadre pixel art) */
+  border: 1px solid rgb(255 255 255 / 10%);
+  border-radius: 8px;
+  background: var(--surface-2);
   transition:
     transform 0.15s,
     filter 0.15s;
@@ -503,11 +504,9 @@ button.tile:focus-visible {
   gap: var(--s-3);
 }
 .how li {
-  border: 3px solid transparent;
-  border-radius: 14px;
-  border-image: url('/img/ui/box-card.png?v=3') 12 fill / 24px stretch;
-  background: linear-gradient(#222034, #222034) center / calc(100% - 16px) calc(100% - 16px) no-repeat;
-  image-rendering: pixelated;
+  border: 1px solid rgb(255 255 255 / 9%);
+  border-radius: 8px;
+  background: var(--surface);
   display: grid;
   gap: 2px;
   padding: var(--s-4);
@@ -533,11 +532,9 @@ button.tile:focus-visible {
   gap: var(--s-3);
 }
 .weekly li {
-  border: 3px solid transparent;
-  border-radius: 14px;
-  border-image: url('/img/ui/box-card.png?v=3') 12 fill / 24px stretch;
-  background: linear-gradient(#222034, #222034) center / calc(100% - 16px) calc(100% - 16px) no-repeat;
-  image-rendering: pixelated;
+  border: 1px solid rgb(255 255 255 / 9%);
+  border-radius: 8px;
+  background: var(--surface);
   display: grid;
   grid-template-columns: 1fr minmax(80px, 160px) auto;
   align-items: center;
@@ -551,7 +548,7 @@ button.tile:focus-visible {
   color: var(--muted);
 }
 .wkReady {
-  border-image-source: url('/img/ui/box-green.png?v=3');
+  border-color: #4ade80;
 }
 .wkDone {
   opacity: 0.6;

@@ -92,7 +92,10 @@ export function BoardSection({ kind: id, title }: { kind: 'pulls' | 'time'; titl
                     <small>{val(r)}</small>
                   </div>
                   {/* marche dessinée à la main : vraie image pixel art, donc avec le doodle */}
-                  <img className={`px ${s.step}`} src={`/img/ui/podium-${i + 1}.png?v=3`} alt={`#${i + 1}`} />
+                  {/* le conteneur flotte et penche, l'image garde son doodle (deux animations séparées) */}
+                  <span className={s.step}>
+                    <img className="px" src={`/img/ui/podium-${i + 1}.png?v=3`} alt={`#${i + 1}`} />
+                  </span>
                 </li>
               ) : (
                 <li key={i} aria-hidden />

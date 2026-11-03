@@ -83,14 +83,18 @@
   font-size: var(--fs-sm);
 }
 .step {
-  /* marches du podium : textures dessinées à la main (le chiffre est dans le dessin) */
+  /* marche du podium : le conteneur penche et flotte ; l'image dedans garde le doodle */
+  display: block;
   max-width: 100%;
-  height: auto;
-  aspect-ratio: 64 / 42;
   margin-top: var(--s-2);
-  /* la marche penche et dérive comme en apesanteur, indépendamment du joueur */
   rotate: var(--rot);
   animation: podFloat var(--dur) ease-in-out infinite;
+}
+.step img {
+  display: block;
+  width: 100%;
+  height: auto;
+  aspect-ratio: 64 / 42;
 }
 .p1 {
   --ring: #f59e0b;
@@ -99,10 +103,8 @@
 }
 /* la 1re marche tremble aussi, très lentement */
 .p1 .step {
-  animation:
-    podFloat var(--dur) ease-in-out infinite,
-    podShake 2.6s ease-in-out infinite;
   width: 192px;
+  animation: podFloat1 var(--dur) ease-in-out infinite;
 }
 .p2 {
   --ring: #a78bfa;
@@ -128,10 +130,10 @@
 @keyframes podFloat {
   0%,
   100% {
-    transform: translateY(0);
+    transform: translateY(0) rotate(-3deg);
   }
   50% {
-    transform: translateY(-12px);
+    transform: translateY(-12px) rotate(3deg);
   }
 }
 @keyframes whoFloat {
@@ -141,6 +143,15 @@
   }
   50% {
     transform: translateY(-7px);
+  }
+}
+@keyframes podFloat1 {
+  0%,
+  100% {
+    transform: translateY(0) rotate(-2deg);
+  }
+  50% {
+    transform: translateY(-12px) rotate(2deg);
   }
 }
 @keyframes podShake {

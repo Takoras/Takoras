@@ -13,6 +13,7 @@ import { FallCoin, FallRain } from './FallStage';
 import { Quests } from '../quests/Quests';
 import { Starter } from '../starter/Starter';
 import { useAuth } from '@/lib/auth';
+import { useMe } from '@/api/queries';
 import { Landing } from '../landing/Landing';
 import s from './Home.module.css';
 
@@ -20,8 +21,9 @@ import s from './Home.module.css';
 export default function Home() {
   const t = useT();
   const [pi, setPi] = useState(0);
-  const pull = PULLS[pi] ?? PULLS[0] ?? { name: 'Takoras', img: '/img/jetons/takoras.png' };
+  const pull: { name: string; img: string; soon?: boolean } = PULLS[pi] ?? PULLS[0] ?? { name: 'Takoras', img: '/img/jetons/takoras.png' };
   const user = useAuth((x) => x.user);
+  const admin = !!useMe().data?.admin; // Bodako : ouvrable par les admins seulement pour l'instant
   const ready = useAuth((x) => x.ready);
   useEffect(installOpeningHost, []);
   // la souris donne de la profondeur : les satellites glissent un peu à l'opposé (variables CSS, pas de rendu React)
@@ -41,16 +43,14 @@ export default function Home() {
       <FallRain serie={pull.name} />
       <div className={s.stage} onPointerMove={parallax} onPointerLeave={unParallax}>
         <div className={s.center} data-tour="pull">
-          <FallCoin img={pull.img} label={pull.name} />
+          <FallCoin img={pull.img} label={pull.name} serie={pull.name} disabled={!!pull.soon && !admin} />
           <h1 className={s.title}>
             {/* juste le logo de la série, au centre (le mot « Tirage » reste lu par les lecteurs d'écran) */}
             <span className="visually-hidden">{t('ui.pull')} </span>
             {/* le logo saute et retombe en s'écrasant toutes les 5 s */}
-            <span className={s.logoLand}>
-              <SerieName name={pull.name} h="1.5em" doodle />
-            </span>
+            <FallingLogo name={pull.name} />
           </h1>
-          <Actions />
+          <Actions serie={pull.name} />
         </div>
         {/* satellites : ils flottent autour du jeton, chacun à sa profondeur */}
         <Sat className={`${s.satPick}`}>
@@ -87,5 +87,32 @@ function Sat({ className, children }: { className: string; children: ReactNode }
     <div ref={ref} className={`${s.sat} ${className}`}>
       {children}
     </div>
+  );
+}
+
+// Logo de la série : au changement, l'ancien tombe vers le bas et le nouveau arrive du haut en rebondissant
+function FallingLogo({ name }: { name: string }) {
+  const [shown, setShown] = useState(name);
+  const [leaving, setLeaving] = useState<string | null>(null);
+  if (name !== shown) {
+    setLeaving(shown);
+    setShown(name);
+  }
+  useEffect(() => {
+    if (!leaving) return;
+    const id = setTimeout(() => setLeaving(null), 650);
+    return () => clearTimeout(id);
+  }, [leaving]);
+  return (
+    <span className={s.logoBox}>
+      {leaving ? (
+        <span className={s.logoOut} aria-hidden>
+          <SerieName name={leaving} h="1.5em" doodle />
+        </span>
+      ) : null}
+      <span key={shown} className={s.logoLand}>
+        <SerieName name={shown} h="1.5em" doodle />
+      </span>
+    </span>
   );
 }

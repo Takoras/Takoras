@@ -21,12 +21,10 @@
 .banner {
   position: relative;
   height: clamp(130px, calc(22vw / var(--z, 1)), 230px);
-  border-radius: 20px;
+  border-radius: 8px;
   overflow: hidden;
-  border: 3px solid transparent;
-  border-image: url('/img/ui/box-9.png?v=3') 14 fill / 28px stretch;
-  background: linear-gradient(#39374f, #39374f) center / calc(100% - 16px) calc(100% - 16px) no-repeat;
-  image-rendering: pixelated;
+  border: 1px solid rgb(255 255 255 / 12%);
+  background: var(--surface-2);
   display: grid;
   place-items: center;
 }
@@ -217,16 +215,14 @@
   gap: var(--s-3);
   min-width: 240px;
   padding: var(--s-3) var(--s-4);
-  border: 3px solid transparent;
-  border-radius: 14px;
-  border-image: url('/img/ui/box-card.png?v=3') 12 fill / 24px stretch;
-  background: linear-gradient(#222034, #222034) center / calc(100% - 16px) calc(100% - 16px) no-repeat;
-  image-rendering: pixelated;
+  border: 1px solid rgb(255 255 255 / 9%);
+  border-radius: 8px;
+  background: var(--surface);
   color: var(--text);
   text-align: left;
 }
 .series button:hover {
-  border-image-source: url('/img/ui/box-sel.png?v=3');
+  border-color: #a78bfa;
 }
 .series img {
   width: 48px;
@@ -252,11 +248,9 @@
 .their li,
 .theirVars li {
   padding: 6px var(--s-3);
-  border: 3px solid transparent;
-  border-radius: 10px;
-  border-image: url('/img/ui/box-card-in.png?v=3') 12 fill / 12px stretch;
-  background: linear-gradient(#222034, #222034) center / calc(100% - 16px) calc(100% - 16px) no-repeat;
-  image-rendering: pixelated;
+  border: 1px solid rgb(255 255 255 / 7%);
+  border-radius: 8px;
+  background: var(--surface);
   font-size: var(--fs-sm);
 }
 .scV {
@@ -273,11 +267,9 @@
   gap: var(--s-2);
 }
 .coll button {
-  border: 3px solid transparent;
-  border-radius: 14px;
-  border-image: url('/img/ui/box-card.png?v=3') 12 fill / 24px stretch;
-  background: linear-gradient(#222034, #222034) center / calc(100% - 16px) calc(100% - 16px) no-repeat;
-  image-rendering: pixelated;
+  border: 1px solid rgb(255 255 255 / 9%);
+  border-radius: 8px;
+  background: var(--surface);
   width: 100%;
   display: grid;
   justify-items: center;
@@ -336,11 +328,9 @@
 }
 
 .private {
-  border: 3px solid transparent;
-  border-radius: 14px;
-  border-image: url('/img/ui/box-card.png?v=3') 12 fill / 24px stretch;
-  background: linear-gradient(#222034, #222034) center / calc(100% - 16px) calc(100% - 16px) no-repeat;
-  image-rendering: pixelated;
+  border: 1px solid rgb(255 255 255 / 9%);
+  border-radius: 8px;
+  background: var(--surface);
   display: grid;
   gap: var(--s-2);
   padding: var(--s-4);
@@ -371,11 +361,9 @@
 .pkTools select,
 .pe input,
 .pe textarea {
-  border: 3px solid transparent;
-  border-radius: 10px;
-  border-image: url('/img/ui/box-card-in.png?v=3') 12 fill / 12px stretch;
-  background: linear-gradient(#222034, #222034) center / calc(100% - 16px) calc(100% - 16px) no-repeat;
-  image-rendering: pixelated;
+  border: 1px solid rgb(255 255 255 / 7%);
+  border-radius: 8px;
+  background: var(--surface);
   min-height: 40px;
   padding: 0 var(--s-3);
   font-size: var(--fs-sm);
@@ -394,11 +382,9 @@
   margin-bottom: var(--s-3);
 }
 .pk button {
-  border: 3px solid transparent;
-  border-radius: 10px;
-  border-image: url('/img/ui/box-card-in.png?v=3') 12 fill / 12px stretch;
-  background: linear-gradient(#222034, #222034) center / calc(100% - 16px) calc(100% - 16px) no-repeat;
-  image-rendering: pixelated;
+  border: 1px solid rgb(255 255 255 / 7%);
+  border-radius: 8px;
+  background: var(--surface);
   width: 100%;
   display: grid;
   justify-items: center;
@@ -451,11 +437,9 @@
   flex-wrap: wrap;
 }
 .banners button {
-  border: 3px solid transparent;
-  border-radius: 10px;
-  border-image: url('/img/ui/box-card-in.png?v=3') 12 fill / 12px stretch;
-  background: linear-gradient(#222034, #222034) center / calc(100% - 16px) calc(100% - 16px) no-repeat;
-  image-rendering: pixelated;
+  border: 1px solid rgb(255 255 255 / 7%);
+  border-radius: 8px;
+  background: var(--surface);
   width: 120px;
   height: 44px;
   overflow: hidden;
@@ -469,7 +453,7 @@
 }
 .banners button[aria-pressed='true'],
 .pps button[aria-pressed='true'] {
-  border-image-source: url('/img/ui/box-sel.png?v=3');
+  border-color: #a78bfa;
 }
 .pps {
   display: flex;
@@ -477,11 +461,9 @@
   flex-wrap: wrap;
 }
 .pps button {
-  border: 3px solid transparent;
-  border-radius: 10px;
-  border-image: url('/img/ui/box-card-in.png?v=3') 12 fill / 12px stretch;
-  background: linear-gradient(#222034, #222034) center / calc(100% - 16px) calc(100% - 16px) no-repeat;
-  image-rendering: pixelated;
+  border: 1px solid rgb(255 255 255 / 7%);
+  border-radius: 8px;
+  background: var(--surface);
   position: relative;
   width: 52px;
   height: 52px;
@@ -587,11 +569,9 @@
   gap: var(--s-2);
   min-height: 48px;
   padding: 0 var(--s-4) 0 var(--s-2);
-  border: 3px solid transparent;
-  border-radius: 12px;
-  border-image: url('/img/ui/box-card-in.png?v=3') 12 fill / 24px stretch;
-  background: linear-gradient(#222034, #222034) center / calc(100% - 16px) calc(100% - 16px) no-repeat;
-  image-rendering: pixelated;
+  border: 1px solid rgb(255 255 255 / 7%);
+  border-radius: 8px;
+  background: var(--surface);
   font-weight: 700;
 }
 .pkSeries img {
@@ -599,8 +579,8 @@
   height: 32px;
 }
 .pkSeries button[aria-selected='true'] {
-  border-image-source: url('/img/ui/box-sel-light.png?v=3');
-  background-image: linear-gradient(#39374f, #39374f);
+  border-color: #a78bfa;
+  background-color: var(--surface-2);
 }
 .pkSoon {
   opacity: 0.5;
@@ -711,7 +691,7 @@
 /* bestiaire du joueur : série choisie en surbrillance, mutations trouvées sous chaque jeton */
 .series button[aria-pressed='true'] {
   /* série choisie : ta boîte « sélectionnée » (plus de contour violet en CSS) */
-  border-image-source: url('/img/ui/box-sel.png?v=3');
+  border-color: #a78bfa;
 }
 .vrow {
   display: flex;

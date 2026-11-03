@@ -42,6 +42,8 @@ export async function fakeSupabase(
     deck?: number[];
     admin?: boolean;
     ranked?: { tuto?: boolean };
+    /** tirage au hasard (mode démo local) ; sans lui, tout sort en Mobu */
+    pick?: () => string;
   } = {},
 ) {
   const st: FakeState = {
@@ -279,7 +281,7 @@ export async function fakeSupabase(
       });
     if (rpc === 'take_pulls') {
       const n = (JSON.parse(route.request().postData() ?? '{}') as { n: number }).n;
-      const results = draws.shift() ?? Array.from({ length: n }, () => 'Mobu');
+      const results = draws.shift() ?? Array.from({ length: n }, () => opts.pick?.() ?? 'Mobu');
       st.stock -= results.length;
       return json({
         state: { ...st },

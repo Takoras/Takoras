@@ -18,11 +18,9 @@
   gap: var(--s-3);
 }
 .pn article {
-  border: 3px solid transparent;
-  border-radius: 14px;
-  border-image: url('/img/ui/box-card-in.png?v=3') 12 fill / 24px stretch;
-  background: linear-gradient(#222034, #222034) center / calc(100% - 16px) calc(100% - 16px) no-repeat;
-  image-rendering: pixelated;
+  border: 1px solid rgb(255 255 255 / 7%);
+  border-radius: 8px;
+  background: var(--surface);
   padding: var(--s-4);
   display: grid;
   gap: var(--s-2);
@@ -146,11 +144,9 @@
   gap: var(--s-2);
 }
 .kinds button {
-  border: 3px solid transparent;
-  border-radius: 10px;
-  border-image: url('/img/ui/box-card-in.png?v=3') 12 fill / 12px stretch;
-  background: linear-gradient(#222034, #222034) center / calc(100% - 16px) calc(100% - 16px) no-repeat;
-  image-rendering: pixelated;
+  border: 1px solid rgb(255 255 255 / 7%);
+  border-radius: 8px;
+  background: var(--surface);
   display: grid;
   justify-items: center;
   gap: 2px;
@@ -162,7 +158,7 @@
   font-size: var(--fs-lg);
 }
 .kinds button[aria-checked='true'] {
-  border-image-source: url('/img/ui/box-sel.png?v=3');
+  border-color: #a78bfa;
 }
 .fb textarea,
 .ts select,
@@ -182,11 +178,9 @@
   align-items: center;
 }
 .fab {
-  border: 3px solid transparent;
-  border-radius: 14px;
-  border-image: url('/img/ui/box-card.png?v=3') 12 fill / 24px stretch;
-  background: linear-gradient(#222034, #222034) center / calc(100% - 16px) calc(100% - 16px) no-repeat;
-  image-rendering: pixelated;
+  border: 1px solid rgb(255 255 255 / 9%);
+  border-radius: 8px;
+  background: var(--surface);
   position: fixed;
   z-index: 44;
   left: calc(var(--rail) + var(--s-3));
@@ -234,18 +228,16 @@
   min-width: 56px;
 }
 .pill {
-  border: 3px solid transparent;
-  border-radius: 10px;
-  border-image: url('/img/ui/box-card-in.png?v=3') 12 fill / 12px stretch;
-  background: linear-gradient(#222034, #222034) center / calc(100% - 16px) calc(100% - 16px) no-repeat;
-  image-rendering: pixelated;
+  border: 1px solid rgb(255 255 255 / 7%);
+  border-radius: 8px;
+  background: var(--surface);
   min-height: 32px;
   padding: 0 var(--s-3);
   font-size: var(--fs-xs);
   font-weight: 700;
 }
 .pill[aria-checked='true'] {
-  border-image-source: url('/img/ui/box-sel.png?v=3');
+  border-color: #a78bfa;
 }
 
 /* Téléphone : petite pastille violette « Donner un avis » en bas à gauche, au-dessus de la barre d'onglets */
@@ -254,9 +246,9 @@
     bottom: calc(var(--tabh) + env(safe-area-inset-bottom) + var(--s-3));
     min-height: 36px;
     padding: 0 var(--s-3);
-    border-image-source: url('/img/ui/btn-violet.png?v=3');
+    border-color: #8b5cf6;
     border-image-width: 12px;
-    background-image: linear-gradient(#7d48d9, #7d48d9);
+    background-color: var(--accent);
     color: #fff;
     font-size: var(--fs-xs);
     font-weight: 700;

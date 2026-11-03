@@ -34,6 +34,9 @@ export const ecoApi = {
   state: () => rpc('eco_state'),
   takePulls: (n: number, opts: { force?: string; luck?: number; p_variant?: string } = {}) =>
     rpc('take_pulls', { n, ...opts }),
+  // tirages d'une série payée en pièces (Bodako) : le serveur retire les pièces, pas le stock
+  takePullsSerie: (serie: string, n: number, opts: { force?: string; luck?: number; p_variant?: string } = {}) =>
+    rpc('take_pulls_serie', { p_serie: serie, n, ...opts }),
   upgradeRegen: () => rpc('upgrade_regen'),
   upgradeStock: () => rpc('upgrade_stock'),
   refundPulls: (ids: number[]) => rpc('refund_pulls', { ids }),

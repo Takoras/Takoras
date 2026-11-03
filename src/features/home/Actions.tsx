@@ -1,8 +1,10 @@
-import { useRef, type CSSProperties } from 'react';
+import { useEffect, useRef, useState, type CSSProperties, type ReactNode } from 'react';
 import { MYSTERE } from '@/data/jetons';
+import { COIN_PULL } from '@/engines/env';
 import { useQueryClient } from '@tanstack/react-query';
 import { ecoApi, errorText } from '@/api';
 import { useAuth } from '@/lib/auth';
+import { useMe } from '@/api/queries';
 import { locale, useSettings } from '@/lib/settings';
 import { useT } from '@/i18n/useT';
 import { sfx } from '@/engines/sound.js';
@@ -18,10 +20,15 @@ import s from './Home.module.css';
 const Coin = () => <img className="px" src="/img/piece.png" alt="" width={16} height={16} />;
 
 // Stock de pulls, boutons d'ouverture et améliorations (stock max, recharge)
-export function Actions() {
+export function Actions({ serie = 'Takoras' }: { serie?: string } = {}) {
   const t = useT();
   const user = useAuth((x) => x.user);
   const e = useEco();
+  const me = useMe();
+  const lang = useSettings((x) => x.lang);
+  // série payée en pièces (Bodako) : pas de stock de tirages, on achète 1 ou 10 tirages
+  const coin = serie !== 'Takoras';
+  const admin = !!me.data?.admin;
   const info = (
     <button type="button" className={s.info} onClick={openInfo}>
       {t('ui.odds_info')}
@@ -44,37 +51,72 @@ export function Actions() {
     );
   return (
     <div className={s.actions}>
-      <div className={s.stock} role="status">
-        <b className={s.stockN}>{e.stock}</b>
-        <span className={s.stockMax}>/{e.max}</span>
-        <span className="muted">
-          {t('ui.pulls_word')} · {e.full ? t('ui.stock_full') : t('ui.plus1_in', { t: mmss(e.nextIn) })}
-        </span>
-      </div>
-      <div className={s.row}>
-        {/* Ouvrir 1 : un jeton « ? » qui flotte, fait un tour au survol ; le bouton s'écrase au clic */}
-        <button type="button" className={s.openOne} disabled={!e.stock} onClick={() => void openPulls(1)} data-nosound>
-          <span className={s.openTok} aria-hidden>
-            <img className="px" src={MYSTERE} alt="" width={40} height={40} />
-          </span>
-          <span>{t('ui.open1')}</span>
-        </button>
-        {/* Tout ouvrir : une pile de jetons qui s'étale en éventail au survol */}
-        <button
-          type="button"
-          className={s.openAll}
-          disabled={e.stock < 2}
-          onClick={() => void openPulls('all')}
-          data-nosound
-        >
-          <span className={s.fan} aria-hidden>
-            {[0, 1, 2].map((i) => (
-              <img key={i} className="px" src={MYSTERE} alt="" width={30} height={30} style={{ '--i': i } as CSSProperties} />
-            ))}
-          </span>
-          <span>{t('ui.open_all', { n: Math.min(e.stock, MAX_OPEN) })}</span>
-        </button>
-      </div>
+      {/* le compteur de tirages tombe quand on passe sur une série payée en pièces, et revient au retour */}
+      <DropSwap k={coin ? 'coin' : 'stock'}>
+        {coin ? (
+          <div className={s.stock} role="status">
+            <span className={s.coinPrice}>
+              <img className="px" src="/img/piece.png" alt="" width={28} height={28} />
+              {COIN_PULL.one.toLocaleString(locale(lang))}
+            </span>
+            <span className="muted">{t('ui.coin_pull_each')}</span>
+          </div>
+        ) : (
+          <div className={s.stock} role="status">
+            <b className={s.stockN}>{e.stock}</b>
+            <span className={s.stockMax}>/{e.max}</span>
+            <span className="muted">
+              {t('ui.pulls_word')} · {e.full ? t('ui.stock_full') : t('ui.plus1_in', { t: mmss(e.nextIn) })}
+            </span>
+          </div>
+        )}
+      </DropSwap>
+      {/* les boutons aussi : les anciens tombent, les nouveaux (avec le prix) arrivent du haut */}
+      <DropSwap k={coin ? 'coin' : 'stock'}>
+        <div className={s.row}>
+          {/* Ouvrir 1 : un jeton « ? » qui flotte, fait un tour au survol ; le bouton s'écrase au clic */}
+          <button
+            type="button"
+            className={s.openOne}
+            disabled={coin ? !admin || e.coins < COIN_PULL.one : !e.stock}
+            onClick={() => void openPulls(1, serie)}
+            data-nosound
+          >
+            <span className={s.openTok} aria-hidden>
+              <img className="px" src={MYSTERE} alt="" width={40} height={40} />
+            </span>
+            <span>{coin ? `${t('ui.open1')} · ${COIN_PULL.one.toLocaleString(locale(lang))}` : t('ui.open1')}</span>
+          </button>
+          {/* Tout ouvrir : une pile de jetons qui s'étale en éventail au survol */}
+          <button
+            type="button"
+            className={s.openAll}
+            disabled={coin ? !admin || e.coins < COIN_PULL.ten : e.stock < 2}
+            onClick={() => void openPulls(coin ? 10 : 'all', serie)}
+            data-nosound
+          >
+            <span className={s.fan} aria-hidden>
+              {[0, 1, 2].map((i) => (
+                <img
+                  key={i}
+                  className="px"
+                  src={MYSTERE}
+                  alt=""
+                  width={30}
+                  height={30}
+                  style={{ '--i': i } as CSSProperties}
+                />
+              ))}
+            </span>
+            <span>
+              {coin
+                ? `${t('ui.open_n', { n: 10 })} · ${COIN_PULL.ten.toLocaleString(locale(lang))}`
+                : t('ui.open_all', { n: Math.min(e.stock, MAX_OPEN) })}
+            </span>
+          </button>
+        </div>
+      </DropSwap>
+      {coin && !admin ? <p className={s.soonNote}>{t('ui.serie_open_soon')}</p> : null}
       {/* sur grand écran, les améliorations sont dans la colonne de gauche (Upgrades) */}
       <div className={s.upsCenter}>
         <Upgrades />
@@ -183,6 +225,33 @@ function Up(p: {
       ) : (
         <small className="muted">{p.top}</small>
       )}
+    </div>
+  );
+}
+
+// Remplace un bloc par un autre en le faisant tomber : l'ancien part vers le bas, le nouveau arrive du haut
+function DropSwap({ k, children }: { k: string; children: ReactNode }) {
+  const [cur, setCur] = useState({ k, node: children });
+  const [old, setOld] = useState<{ k: string; node: ReactNode } | null>(null);
+  if (k !== cur.k) {
+    setOld(cur);
+    setCur({ k, node: children });
+  } else if (children !== cur.node) setCur({ k, node: children });
+  useEffect(() => {
+    if (!old) return;
+    const id = setTimeout(() => setOld(null), 600);
+    return () => clearTimeout(id);
+  }, [old]);
+  return (
+    <div className={s.swap}>
+      {old ? (
+        <div key={old.k} className={s.swapOut} aria-hidden>
+          {old.node}
+        </div>
+      ) : null}
+      <div key={cur.k} className={old ? s.swapIn : undefined}>
+        {cur.node}
+      </div>
     </div>
   );
 }
