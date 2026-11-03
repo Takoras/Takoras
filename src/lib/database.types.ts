@@ -202,6 +202,10 @@ export type Database = {
         Args: { p_coins?: number; p_item?: string; p_jeton?: string; p_pulls?: number; p_qty?: number; p_variant?: string };
         Returns: Json;
       };
+      beta_give_jeton: {
+        Args: { p_serie: string; p_jeton: string; p_variant?: string; p_qty?: number };
+        Returns: Json;
+      };
       beta_of: { Args: { p: string[] }; Returns: { pseudo: string }[] };
       buy_item: { Args: { p_item: string }; Returns: Json };
       change_pseudo: { Args: { p: string }; Returns: undefined };

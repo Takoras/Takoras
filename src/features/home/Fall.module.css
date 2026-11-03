@@ -35,7 +35,12 @@
   width: 70%;
   height: 260%;
   translate: -50% 0;
-  background: linear-gradient(to bottom, transparent, rgba(var(--g, 139, 92, 246), 0.22) 70%, rgba(var(--g, 139, 92, 246), 0.05));
+  background: linear-gradient(
+    to bottom,
+    transparent,
+    rgba(var(--g, 139, 92, 246), 0.22) 70%,
+    rgba(var(--g, 139, 92, 246), 0.05)
+  );
   mask-image: radial-gradient(50% 100% at 50% 100%, #000 30%, transparent 100%);
   filter: blur(18px);
   pointer-events: none;
@@ -58,8 +63,6 @@
   pointer-events: none;
   animation: dropOut 700ms cubic-bezier(0.55, 0, 0.75, 0.3) both;
 }
-
-
 
 .coin {
   position: relative;
@@ -109,7 +112,6 @@
 .coin:active .tumble img {
   scale: 0.94;
 }
-
 
 @keyframes dropIn {
   0% {

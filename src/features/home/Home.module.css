@@ -2,7 +2,7 @@
 .stage {
   display: grid;
   gap: var(--s-6);
-  grid-template-areas: 'center' 'quests' 'pick' 'auto';
+  grid-template-areas: 'center' 'quests' 'pick';
 }
 
 .center {
@@ -228,7 +228,7 @@
   display: grid;
   grid-template-columns: 1fr 1fr;
   gap: var(--s-3);
-  width: 100%;
+  width: min(420px, 88vw);
 }
 .ups {
   display: grid;
@@ -591,7 +591,6 @@
    Accueil « chute libre » : le jeton tombe au centre, tout le reste flotte autour
    ====================================================================== */
 
-
 /* satellites : plus de cadres, ils flottent doucement, penchent un peu et suivent la souris en profondeur */
 .sat {
   --d: 1; /* profondeur : plus c'est grand, plus il glisse avec la souris */
@@ -611,13 +610,6 @@
   --tilt: -2.5deg;
   --d: 1.4;
   --fl: 7s;
-}
-.satAuto {
-  grid-area: auto;
-  --tilt: 1.5deg;
-  --d: 0.8;
-  --fl: 8.5s;
-  animation-delay: -2s;
 }
 .satUps {
   grid-area: ups;
@@ -648,14 +640,11 @@
   .stage {
     grid-template:
       'pick center quests' auto
-      'auto center quests' 1fr
+      '. center quests' 1fr
       / 260px 1fr 300px;
     align-items: start;
   }
   /* décalages irréguliers : rien n'est aligné au cordeau */
-  .satAuto {
-    margin-left: var(--s-6);
-  }
   .satUps {
     margin-left: calc(var(--s-2) * -1);
     margin-top: var(--s-4);
@@ -668,7 +657,7 @@
 /* téléphone à l'horizontale : tout reste en colonnes simples, sans pencher */
 @media (max-height: 520px) and (min-width: 600px) {
   .stage {
-    grid-template-areas: 'center quests' 'center pick' 'center auto';
+    grid-template-areas: 'center quests' 'center pick';
   }
   .sat {
     --tilt: 0deg;
@@ -693,42 +682,14 @@
 }
 /* au survol c'est la boîte entière qui grossit (le jeton et le nom ne bougent pas dedans) */
 .satPick .picker button:not(:disabled):hover {
-  transform: scale(1.06);
+  transform: scale(1.025);
   box-shadow:
     inset 0 0 0 1px rgb(255 255 255 / 18%),
-    0 12px 26px rgb(0 0 0 / 45%);
+    0 8px 18px rgb(0 0 0 / 45%);
 }
 .satPick .picker button[aria-pressed='true'] {
   background: rgb(124 58 237 / 28%);
   box-shadow: inset 0 0 0 2px #a78bfa;
-}
-
-/* réglages de l'ouverture auto : des pastilles légères, sans cadre */
-.satAuto .chips {
-  gap: var(--s-3);
-  margin-bottom: var(--s-4);
-}
-.satAuto .chips button {
-  min-height: 40px;
-  padding: 0 var(--s-4);
-  border: 0;
-  border-radius: 6px;
-  background: rgb(23 23 31 / 70%);
-  box-shadow: inset 0 0 0 1px rgb(255 255 255 / 10%);
-  transition:
-    background var(--t-fast),
-    transform var(--t-fast) var(--ease-out);
-}
-.satAuto .chips button:hover {
-  transform: translateY(-2px);
-}
-.satAuto .chips button[aria-pressed='true'] {
-  background: #7c3aed;
-  box-shadow: none;
-  color: #fff;
-}
-.satAuto .chips button[aria-pressed='true'] small {
-  color: rgb(255 255 255 / 75%);
 }
 
 /* améliorations : capsules flottantes */
@@ -815,11 +776,13 @@
 .openAll {
   position: relative;
   display: flex;
+  flex-direction: column;
   align-items: center;
   justify-content: center;
-  gap: var(--s-3);
+  gap: 2px;
+  line-height: 1.1;
   min-height: 64px;
-  padding: 0 var(--s-5);
+  padding: var(--s-2) var(--s-4);
   border-radius: 8px;
   font-family: var(--font-display);
   font-size: var(--fs-lg);
@@ -858,65 +821,6 @@
   opacity: 0.45;
   cursor: not-allowed;
 }
-/* reflet qui passe de temps en temps sur Ouvrir 1 */
-.openOne::after {
-  content: '';
-  position: absolute;
-  inset: 0;
-  background: linear-gradient(110deg, transparent 35%, rgb(255 255 255 / 26%) 50%, transparent 65%);
-  translate: -120% 0;
-  animation: shine 4.5s ease-in-out infinite;
-  pointer-events: none;
-}
-.openTok {
-  display: grid;
-  flex: none;
-  perspective: 300px;
-  animation: tokBob 2.2s ease-in-out infinite;
-}
-.openTok img {
-  width: 40px;
-  height: 40px;
-  transition:
-    translate 280ms var(--ease-out),
-    scale 280ms var(--ease-out);
-}
-/* au survol le jeton « ? » saute un peu et grossit (plus de tour sur lui-même) */
-.openOne:not(:disabled):hover .openTok img {
-  translate: 0 -5px;
-  scale: 1.18;
-}
-.fan {
-  position: relative;
-  flex: none; /* ne rétrécit pas contre le texte */
-  width: 52px;
-  height: 34px;
-}
-.fan img {
-  position: absolute;
-  left: 11px;
-  top: 2px;
-  width: 30px;
-  height: 30px;
-  translate: calc(var(--i) * 3px) calc(var(--i) * -2px);
-  transition:
-    translate 300ms var(--ease-out),
-    rotate 300ms var(--ease-out);
-  will-change: translate, rotate;
-}
-.openAll:not(:disabled):hover .fan img {
-  translate: calc((var(--i) - 1) * 16px) calc(var(--i) * -2px);
-  rotate: calc((var(--i) - 1) * 18deg);
-}
-@keyframes tokBob {
-  0%,
-  100% {
-    transform: translateY(0) rotate(-6deg);
-  }
-  50% {
-    transform: translateY(-3px) rotate(6deg);
-  }
-}
 @keyframes shine {
   0%,
   60% {
@@ -929,31 +833,13 @@
 
 @media (prefers-reduced-motion: reduce) {
   .title,
-  .openOne::after,
-  .openTok {
+  .openOne {
     animation: none;
   }
 }
 :global(html.reduce-fx) .title,
-:global(html.reduce-fx) .openOne::after,
-:global(html.reduce-fx) .openTok {
+:global(html.reduce-fx) .openOne {
   animation: none;
-}
-
-/* écrans étroits : boutons d'ouverture plus serrés pour que le texte tienne */
-@media (max-width: 1100px) {
-  .openOne,
-  .openAll {
-    gap: var(--s-2);
-    padding: 0 var(--s-3);
-    font-size: var(--fs-md);
-  }
-  .fan {
-    width: 40px;
-  }
-  .fan img {
-    left: 5px;
-  }
 }
 
 /* logo de la série : toutes les 5 s il saute et retombe en s'écrasant (choisi en live) */
@@ -961,8 +847,8 @@
   display: inline-block;
   transform-origin: 50% 100%;
   animation:
-    logoIn 1050ms cubic-bezier(0.33, 1, 0.68, 1) 140ms both, /* le titre tombe en premier (doucement), le jeton suit */
-    logoLand 5s cubic-bezier(0.16, 1, 0.3, 1) 1190ms infinite;
+    logoIn 1050ms cubic-bezier(0.33, 1, 0.68, 1) 140ms both,
+    /* le titre tombe en premier (doucement), le jeton suit */ logoLand 5s cubic-bezier(0.16, 1, 0.3, 1) 1190ms infinite;
 }
 @keyframes logoIn {
   0% {
@@ -1049,7 +935,7 @@
   font-family: var(--font-display);
   font-size: clamp(2.5rem, calc(6vw / var(--z, 1)), 4rem);
   font-weight: 800;
-  color: #fdba74;
+  color: var(--text);
 }
 .coinPrice img {
   width: 0.7em;
@@ -1072,4 +958,32 @@
 }
 .swapIn {
   animation: logoIn 900ms cubic-bezier(0.33, 1, 0.68, 1) 120ms both;
+}
+
+/* Boutons d'ouverture : nets, sans jeton qui flotte. Libellé + prix sur deux lignes : rien n'est coupé */
+.openLbl {
+  font-size: var(--fs-lg);
+  font-weight: 800;
+}
+.openPrice {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-size: var(--fs-md);
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+  opacity: 0.9;
+}
+.openPrice img {
+  width: 18px;
+  height: 18px;
+}
+/* Takoras : un seul gros bouton */
+.rowOne {
+  display: grid;
+  width: min(300px, 80vw);
+}
+.rowOne .openOne {
+  min-height: 68px;
+  font-size: var(--fs-xl);
 }

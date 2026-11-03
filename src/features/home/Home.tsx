@@ -5,7 +5,6 @@ import { PULLS } from '@/engines/env';
 import { useT } from '@/i18n/useT';
 import { installOpeningHost } from '../eco/openPulls';
 import { Actions } from './Actions';
-import { AutoConfig } from './AutoConfig';
 import { PullPicker } from './PullPicker';
 import { Live } from './Feeds';
 import { BoardSection } from '../board/Board';
@@ -17,11 +16,12 @@ import { useMe } from '@/api/queries';
 import { Landing } from '../landing/Landing';
 import s from './Home.module.css';
 
-// Accueil : le pull Takoras au centre, l'ouverture auto à gauche, l'historique à droite, « En direct » en bas
+// Accueil : le pull Takoras au centre, le choix de série à gauche, l'historique à droite, « En direct » en bas
 export default function Home() {
   const t = useT();
   const [pi, setPi] = useState(0);
-  const pull: { name: string; img: string; soon?: boolean } = PULLS[pi] ?? PULLS[0] ?? { name: 'Takoras', img: '/img/jetons/takoras.png' };
+  const pull: { name: string; img: string; soon?: boolean } = PULLS[pi] ??
+    PULLS[0] ?? { name: 'Takoras', img: '/img/jetons/takoras.png' };
   const user = useAuth((x) => x.user);
   const admin = !!useMe().data?.admin; // Bodako : ouvrable par les admins seulement pour l'instant
   const ready = useAuth((x) => x.ready);
@@ -56,9 +56,6 @@ export default function Home() {
         <Sat className={`${s.satPick}`}>
           <PullPicker value={pi} onChange={setPi} />
         </Sat>
-        <Sat className={`${s.satAuto}`}>
-          <AutoConfig />
-        </Sat>
         <Sat className={`${s.satQuests} ${s.stack}`}>
           <Starter />
           <Quests />
@@ -79,7 +76,7 @@ export default function Home() {
 // Satellite de l'accueil : il flotte, penche, et se balance comme un post-it épinglé quand on passe dessus
 function Sat({ className, children }: { className: string; children: ReactNode }) {
   const ref = useRef<HTMLDivElement>(null);
-  useSwing(ref, 0.15); // balancement plus léger : on doit pouvoir cliquer vite sans viser
+  useSwing(ref, 0.06); // balancement très léger : on doit pouvoir cliquer vite sans viser
   return (
     <div ref={ref} className={`${s.sat} ${className}`}>
       {children}

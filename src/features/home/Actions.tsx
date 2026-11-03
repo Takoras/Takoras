@@ -1,5 +1,4 @@
-import { useEffect, useLayoutEffect, useRef, useState, type CSSProperties, type ReactNode } from 'react';
-import { MYSTERE } from '@/data/jetons';
+import { useEffect, useLayoutEffect, useRef, useState, type ReactNode } from 'react';
 import { COIN_PULL } from '@/engines/env';
 import { useQueryClient } from '@tanstack/react-query';
 import { ecoApi, errorText } from '@/api';
@@ -11,7 +10,7 @@ import { sfx } from '@/engines/sound.js';
 import { openUI } from '@/app/ui-store';
 import { Button } from '@/ui/Button';
 import { toast } from '@/ui/toast';
-import { MAX_OPEN, mmss, nextMax, regenCost, TOP_MAX, upgradeCost, useEco } from '../eco/eco';
+import { mmss, nextMax, regenCost, TOP_MAX, upgradeCost, useEco } from '../eco/eco';
 import { openPulls } from '../eco/openPulls';
 import { openInfo } from '../info/store';
 import { Effects } from './Effects';
@@ -28,7 +27,8 @@ export function Actions({ serie = 'Takoras' }: { serie?: string } = {}) {
   const lang = useSettings((x) => x.lang);
   // série payée en pièces (Bodako) : pas de stock de tirages, on achète 1 ou 10 tirages
   const coin = serie !== 'Takoras';
-  const admin = !!me.data?.admin;
+  // séries payées en pièces : admins et testeurs pour l'instant
+  const canCoin = !!(me.data?.admin || me.data?.tester);
   const info = (
     <button type="button" className={s.info} onClick={openInfo}>
       {t('ui.odds_info')}
@@ -73,50 +73,52 @@ export function Actions({ serie = 'Takoras' }: { serie?: string } = {}) {
       </DropSwap>
       {/* les boutons aussi : les anciens tombent, les nouveaux (avec le prix) arrivent du haut */}
       <DropSwap k={coin ? 'coin' : 'stock'}>
-        <div className={s.row}>
-          {/* Ouvrir 1 : un jeton « ? » qui flotte, fait un tour au survol ; le bouton s'écrase au clic */}
-          <button
-            type="button"
-            className={s.openOne}
-            disabled={coin ? !admin || e.coins < COIN_PULL.one : !e.stock}
-            onClick={() => void openPulls(1, serie)}
-            data-nosound
-          >
-            <span className={s.openTok} aria-hidden>
-              <img className="px" src={MYSTERE} alt="" width={40} height={40} />
-            </span>
-            <span>{coin ? `${t('ui.open1')} · ${COIN_PULL.one.toLocaleString(locale(lang))}` : t('ui.open1')}</span>
-          </button>
-          {/* Tout ouvrir : une pile de jetons qui s'étale en éventail au survol */}
-          <button
-            type="button"
-            className={s.openAll}
-            disabled={coin ? !admin || e.coins < COIN_PULL.ten : e.stock < 2}
-            onClick={() => void openPulls(coin ? 10 : 'all', serie)}
-            data-nosound
-          >
-            <span className={s.fan} aria-hidden>
-              {[0, 1, 2].map((i) => (
-                <img
-                  key={i}
-                  className="px"
-                  src={MYSTERE}
-                  alt=""
-                  width={30}
-                  height={30}
-                  style={{ '--i': i } as CSSProperties}
-                />
-              ))}
-            </span>
-            <span>
-              {coin
-                ? `${t('ui.open_n', { n: 10 })} · ${COIN_PULL.ten.toLocaleString(locale(lang))}`
-                : t('ui.open_all', { n: Math.min(e.stock, MAX_OPEN) })}
-            </span>
-          </button>
-        </div>
+        {coin ? (
+          // série payée en pièces : Ouvrir 1 ou 10, le prix sur sa propre ligne (rien n'est coupé)
+          <div className={s.row}>
+            <button
+              type="button"
+              className={s.openOne}
+              disabled={!canCoin || e.coins < COIN_PULL.one}
+              onClick={() => void openPulls(1, serie)}
+              data-nosound
+            >
+              <span className={s.openLbl}>{t('ui.open1')}</span>
+              <span className={s.openPrice}>
+                <img className="px" src="/img/piece.png" alt="" width={18} height={18} />
+                {COIN_PULL.one.toLocaleString(locale(lang))}
+              </span>
+            </button>
+            <button
+              type="button"
+              className={s.openAll}
+              disabled={!canCoin || e.coins < COIN_PULL.ten}
+              onClick={() => void openPulls(10, serie)}
+              data-nosound
+            >
+              <span className={s.openLbl}>{t('ui.open_n', { n: 10 })}</span>
+              <span className={s.openPrice}>
+                <img className="px" src="/img/piece.png" alt="" width={18} height={18} />
+                {COIN_PULL.ten.toLocaleString(locale(lang))}
+              </span>
+            </button>
+          </div>
+        ) : (
+          // Takoras : un seul bouton ; spammer le jeton fait défiler l'ouverture très vite
+          <div className={s.rowOne}>
+            <button
+              type="button"
+              className={s.openOne}
+              disabled={!e.stock}
+              onClick={() => void openPulls(1, serie)}
+              data-nosound
+            >
+              <span className={s.openLbl}>{t('ui.open1')}</span>
+            </button>
+          </div>
+        )}
       </DropSwap>
-      {coin && !admin ? <p className={s.soonNote}>{t('ui.serie_open_soon')}</p> : null}
+      {coin && !canCoin ? <p className={s.soonNote}>{t('ui.serie_open_soon')}</p> : null}
       {/* stock max et recharge ne servent qu'à la série Takoras (tirages gratuits) : juste sous les boutons,
           et ils tombent et disparaissent quand on choisit une série payée en pièces */}
       <DropSwap k={coin ? 'coin' : 'stock'}>{coin ? <span /> : <Upgrades />}</DropSwap>

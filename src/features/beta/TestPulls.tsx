@@ -1,8 +1,7 @@
 import { useEffect, useState } from 'react';
-import { SERIES, VARIANTS } from '@/data/jetons';
+import { VARIANTS } from '@/data/jetons';
+import { JetonPicker, serieOfJeton } from './JetonPicker';
 import { sfx } from '@/engines/sound.js';
-import { useJn } from '@/lib/names';
-import { locale, useSettings } from '@/lib/settings';
 import { useT } from '@/i18n/useT';
 import s from './Beta.module.css';
 
@@ -12,13 +11,14 @@ const LUCKS = [1, 2, 5, 10, 25, 100, 500];
 type Dbg = { luck: number; force: string; variant?: string };
 export function TestPulls() {
   const t = useT();
-  const jn = useJn();
-  const lang = useSettings((x) => x.lang);
-  const fmt = (n: number) => n.toLocaleString(locale(lang));
-  const jetons = SERIES.Takoras ?? [];
+  const [serie, setSerie] = useState('Takoras');
   const [dbg, setDbg] = useState<Dbg | null>(null);
   useEffect(() => {
-    void import('@/engines/opening.js').then((m) => setDbg({ ...(m.debug as Dbg) }));
+    void import('@/engines/opening.js').then((m) => {
+      const d = { ...(m.debug as Dbg) };
+      setDbg(d);
+      if (d.force) setSerie(serieOfJeton(d.force));
+    });
   }, []);
   const setDebug = (p: Partial<Dbg>) =>
     void import('@/engines/opening.js').then((m) => {
@@ -46,16 +46,16 @@ export function TestPulls() {
           </button>
         ))}
       </div>
+      {/* jeton forcé : il sort au prochain tirage de SA série (choisir la série en haut de l'accueil) */}
+      <span className={s.lbl}>{t('ui.ts_force')}</span>
+      <JetonPicker
+        serie={serie}
+        onSerie={setSerie}
+        value={dbg.force}
+        onChange={(force) => setDebug({ force })}
+        randomLabel={t('ui.random')}
+      />
       <div className={s.row}>
-        <span className={s.lbl}>{t('ui.ts_force')}</span>
-        <select value={dbg.force} onChange={(e) => setDebug({ force: e.target.value })} aria-label={t('ui.ts_force')}>
-          <option value="">{t('ui.random')}</option>
-          {jetons.map((j) => (
-            <option key={j.name} value={j.name}>
-              {jn(j.name)} · 1/{fmt(j.odds)}
-            </option>
-          ))}
-        </select>
         <select
           value={dbg.variant ?? ''}
           onChange={(e) => setDebug({ variant: e.target.value })}

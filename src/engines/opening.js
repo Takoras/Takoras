@@ -111,6 +111,8 @@ async function chute() {
   // angle actuel du jeton qui tombe (il tangue entre 34° et 50°) : la chute part exactement de là
   const tumble = img.parentElement ? getComputedStyle(img.parentElement).rotate : 'none';
   const a0 = tumble && tumble !== 'none' ? parseFloat(tumble) : 0;
+  // l'ouverture arrive en fondu (halo, compteur, consigne) et ne tangue pas encore : le « ? » se pose pile sur sa place
+  opening.classList.add('op-enter');
   const tr = $('op-coin').getBoundingClientRect();
   const c = tr.width ? { x: tr.left + tr.width / 2, y: tr.top + tr.height / 2, s: tr.width } : { ...center(), s: Math.min(240, Math.max(180, innerWidth * 0.26)) };
   const dx = c.x - (r.left + r.width / 2), dy = c.y - (r.top + r.height / 2), k = c.s / r.width;
@@ -119,14 +121,15 @@ async function chute() {
   const dim = el(`inset:0;background:radial-gradient(60% 55% at 50% 45%, rgba(${sc},.22), transparent 70%), #0b0a12;z-index:1`); // même fond que l'ouverture
   dim.animate([{ opacity: 0 }, { opacity: 1 }], { duration: 640, easing: 'ease-in', fill: 'forwards' });
   const d = el(`left:${r.left}px;top:${r.top}px;width:${r.width}px;height:${r.height}px;z-index:3;perspective:900px`,
-    `<img src="${img.src}" alt="" style="width:100%;height:100%;image-rendering:pixelated;display:block">`);
+    `<img src="${img.src}" alt="" style="width:100%;height:100%;image-rendering:pixelated;display:block;filter:drop-shadow(0 24px 30px rgb(0 0 0 / 55%))">`);
   hero.style.visibility = 'hidden';
   const face = d.firstElementChild;
+  face.animate([{ filter: 'drop-shadow(0 24px 30px rgb(0 0 0 / 55%))' }, { filter: 'drop-shadow(0 0 0 rgb(0 0 0 / 0%))' }], { duration: 640, fill: 'forwards' });
   // chute : il accélère, dépasse un peu le centre, rebondit et se pose droit
   await d.animate([
-    { transform: `translate(0,0) rotate(${a0}deg) scale(1)`, filter: 'blur(0.5px)' },
-    { transform: `translate(${dx}px,${dy + 26}px) rotate(-6deg) scale(${k * 1.04})`, filter: 'blur(1.5px)', offset: 0.62, easing: 'cubic-bezier(.2,.8,.3,1)' },
-    { transform: `translate(${dx}px,${dy}px) rotate(0deg) scale(${k})`, filter: 'blur(0)' },
+    { transform: `translate(0,0) rotate(${a0}deg) scale(1)` },
+    { transform: `translate(${dx}px,${dy + 26}px) rotate(-6deg) scale(${k * 1.04})`, offset: 0.62, easing: 'cubic-bezier(.2,.8,.3,1)' },
+    { transform: `translate(${dx}px,${dy}px) rotate(0deg) scale(${k})` },
   ], { duration: 640, easing: 'cubic-bezier(.55,0,.85,.35)', fill: 'forwards' }).finished;
   // il se retourne : face du jeton → « ? »
   sfx.spawn();
@@ -135,7 +138,8 @@ async function chute() {
   await face.animate([{ transform: 'rotateY(-90deg)' }, { transform: 'rotateY(0deg) scale(1.06)', offset: 0.7 }, { transform: 'rotateY(0deg) scale(1)' }], { duration: 260, easing: 'cubic-bezier(.2,.9,.3,1)', fill: 'forwards' }).finished;
   skipSpawn = true; // le « ? » de l'ouverture est déjà là : pas d'apparition en grossissant
   showOpening();
-  return 160;
+  setTimeout(() => opening.classList.remove('op-enter'), 700);
+  return 260;
 }
 
 // [nom, description, fonction, durée max en ms (filet de sécurité)]
@@ -159,7 +163,7 @@ function closeOpening() {
   if (typeof stopBg === 'function') stopBg();
   if (typeof endSession === 'function') endSession();
   document.documentElement.classList.remove('lock');
-  opening.classList.remove('on');
+  opening.classList.remove('on', 'op-enter');
   opening.setAttribute('aria-hidden', 'true');
   heroCoin().style.visibility = '';
 }
@@ -422,7 +426,20 @@ function fillInfo(j, variant = '') {
   $('op-stats').innerHTML = sess.cur.stats
     .map(([k, v, w]) => `<div class="stat"><span class="muted">${t(k)}</span><div class="bar"><i data-w="${w}"></i></div><b>${v}</b></div>`).join('');
   requestAnimationFrame(() => requestAnimationFrame(() => $('op-stats').querySelectorAll('i').forEach(i => { i.style.width = i.dataset.w + '%'; })));
+  // la capacité du jeton (celle du Ring), sous les stats, dans la même fiche
+  const box = document.createElement('div');
+  box.className = 'op-abil';
+  $('op-stats').appendChild(box);
+  ringMod().then(m => {
+    if (!box.isConnected) return;
+    const p = m.powerText(j.name);
+    if (!p || p.pw === 'none') return box.remove();
+    box.innerHTML = `<b>${p.name}</b>${p.when ? ` <small>${p.when}</small>` : ''}<p>${p.desc}</p>`;
+  }).catch(() => box.remove());
 }
+// le Ring est chargé à part (gros fichier) : on ne le charge qu'à la première révélation
+let ringP = null;
+const ringMod = () => (ringP ||= import('./ring.js'));
 
 // Pause finale : le haut disparaît, zoom sur le jeton qui tremble, on clique pour révéler
 function hold(restored) {
@@ -560,7 +577,7 @@ function reveal(restored, quiet = false) {
   spin.style.scale = texScale(j) === 1 ? '' : texScale(j); // face, reflet et tranche ensemble // pas d'ombre sur l'image (elle serait coupée en carré en 3D) : le halo est derrière
   setGlareMask(texOf(j));
   // Le jeton se retourne très vite puis ralentit longtemps (plus il est rare, plus ça dure)
-  if (!restored) {
+  if (!restored && !quiet) {
     const turns = j.odds >= GOD ? 10 : j.odds >= MYTHIC ? 8 : j.odds >= RARE ? 6 : j.odds >= FAST ? 4 : 3;
     // rythme selon la rareté (cahier § 16.2) : commune 0,8 s · rare 1,4 s · épique 2,2 s · légendaire 3,2 s · hyper rare 4,5 s
     const ms = Math.max(350, (j.odds >= MYTHIC ? 4500 : j.odds >= 10000 ? 3200 : j.odds >= RARE ? 2200 : j.odds >= 100 ? 1400 : 800) * (speed() || .2));
@@ -599,6 +616,7 @@ function reveal(restored, quiet = false) {
   if (!quiet) { sfx.reveal(j.odds); if (j.odds >= MYTHIC) sfx.impact(); } // après une cinématique, sa musique a déjà fait la révélation
   // dopamine : le jeton claque, des rayons jaillissent derrière, étincelles, flash à sa couleur, secousse
   const lv = j.odds >= MYTHIC ? 2 : j.odds >= RARE ? 1.4 : j.odds >= 100 ? 1 : .6;
+  if (quiet) { addToHistory(j, r.variant); if (r.variant) setTimeout(() => { if (run === r) variantFx(r.variant, j.odds); }, 650); return; }
   pop(lv); rays(lv); tint(.25 + lv * .2, 300 + lv * 250);
   if (lv >= 1) burstAt(opCoin, j.glow, .6 + lv * .2); // particules dessinées à la main, à la couleur du jeton (jetons pas communs)
   burst(Math.round(10 + lv * 12));
@@ -630,7 +648,29 @@ async function cine() {
   clearInterval(r.hb);
   try { await CINE.play(r.result); } catch (e) { console.error('[cinématique]', e); document.querySelectorAll('.cine').forEach(n => n.remove()); }
   if (run !== r) return;
+  // fin de cinématique sans coupure : le jeton du film glisse jusqu'à sa place dans la fiche pendant que le film s'efface
+  const live = document.querySelector('.cine.out .cine-live');
+  const a = live && !live.hidden ? live.getBoundingClientRect() : null;
   reveal(false, true);
+  if (!a || !a.width) return;
+  const col = opening.querySelector('.op-coin-col'), zoom = opCoin.querySelector('.zoom'), face = opCoin.querySelector('.spin img.face');
+  if (!face) return;
+  col.style.transition = zoom.style.transition = 'none';
+  const b = face.getBoundingClientRect();
+  void col.offsetWidth;
+  col.style.transition = zoom.style.transition = '';
+  const ghost = document.createElement('div'); // au-dessus du film qui s'efface
+  ghost.style.cssText = `position:fixed;left:${a.left}px;top:${a.top}px;width:${a.width}px;height:${a.height}px;z-index:96;pointer-events:none`;
+  ghost.innerHTML = `<img src="${live.src}" alt="" style="width:100%;height:100%;image-rendering:pixelated;display:block">`;
+  document.body.appendChild(ghost);
+  opCoin.style.opacity = '0';
+  const dx = b.left + b.width / 2 - (a.left + a.width / 2), dy = b.top + b.height / 2 - (a.top + a.height / 2), k = b.width / a.width;
+  await ghost.animate([
+    { transform: 'none' },
+    { transform: `translate(${dx}px,${dy}px) scale(${k})` },
+  ], { duration: 620, easing: 'cubic-bezier(.3,.8,.25,1)', fill: 'forwards' }).finished;
+  opCoin.style.opacity = '';
+  ghost.remove();
 }
 
 // (ancienne) 1/1 000 000 : mini cinématique. Écran noir d'un coup, montée sonore, une ligne de lumière qui s'étire, puis l'explosion blanche
@@ -689,7 +729,7 @@ const isSpecial = (j, v) => (v && (SETTINGS.autoVars || []).includes(v)) || j.od
 function renderAuto() {
   const b = $('op-auto'); if (!b) return;
   const show = sess && sess.total > 1 && !sess.recap && (sess.idx < sess.total - 1 || !opening.classList.contains('revealed'));
-  b.hidden = !show;
+  b.hidden = true; // plus d'ouverture auto : spammer le clic va aussi vite
   b.classList.toggle('on', !!sess?.auto);
   b.textContent = sess?.auto ? '' + t('auto_stop') : '' + t('auto_go');
   const s = $('op-skip');
@@ -829,7 +869,7 @@ function addToHistory(j, variant = '', luck = +(sess?.lucks || [])[sess?.results
 // Ceux-là ne rouvrent pas. Le spam, lui, continue : si les clics s'enchaînent (3 juste après la révélation),
 // on rouvre tout de suite ; et un clic posé un peu plus tard (le joueur a vu son jeton) rouvre aussi.
 let revealedAt = 0, tapsAfter = 0;
-const GRACE = 350, SPAM = 3;
+const GRACE = 140, SPAM = 2; // spammer le clic enchaîne les tirages très vite
 function tryReopen() {
   tapsAfter++;
   if (performance.now() - revealedAt < GRACE && tapsAfter < SPAM) return; // clic qui « traîne » : ignoré
@@ -936,6 +976,14 @@ async function leave() {
   opening.querySelectorAll('.op-recap-view .eyebrow, .op-recap-view .op-actions').forEach(el => fly(el, [{ opacity: 1 }, { opacity: 0, transform: 'translateY(20px)' }], { duration: 300 }));
   ['.op-bg', '.op-glow', '.op-vignette'].forEach(q => fly(opening.querySelector(q), [{ opacity: getComputedStyle(opening.querySelector(q)).opacity }, { opacity: 0 }], { duration: 600, easing: 'ease-in', delay: 120 }));
   await done(560);
+  // le jeton de l'accueil revient tout de suite : il retombe du haut et rebondit à sa place (plus d'attente, plus d'apparition sèche)
+  const hero = heroCoin();
+  hero.style.visibility = '';
+  hero.animate([
+    { transform: 'translateY(-60vh)', opacity: 0 },
+    { transform: 'translateY(12px)', opacity: 1, offset: 0.72 },
+    { transform: 'none', opacity: 1 },
+  ], { duration: 700, easing: 'cubic-bezier(.3,.7,.4,1)' });
   // L'écran d'ouverture s'efface et l'accueil revient avec un léger zoom
   await Promise.all([
     opening.animate([{ opacity: 1 }, { opacity: 0 }], { duration: 260, easing: 'ease-out', fill: 'forwards' }).finished,

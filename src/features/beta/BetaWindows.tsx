@@ -6,6 +6,7 @@ import { betaApi, errorText, socialApi, tables } from '@/api';
 import { useMe } from '@/api/queries';
 import { itemText, type ShopItem } from '@/data/items';
 import { SERIES, VARIANTS } from '@/data/jetons';
+import { JetonPicker } from './JetonPicker';
 import { sfx } from '@/engines/sound.js';
 import { useAuth } from '@/lib/auth';
 import { useJn } from '@/lib/names';
@@ -300,12 +301,22 @@ function Tester() {
   const [item, setItem] = useState('potion1');
   const [iqty, setIqty] = useState(1);
   const [jeton, setJeton] = useState('Mobu');
+  const [jSerie, setJSerie] = useState('Takoras');
   const [variant, setVariant] = useState('');
   const [qty, setQty] = useState(1);
   if (!me.data?.tester && !me.data?.admin) return null;
-  const give = async (args: Parameters<typeof betaApi.give>[0], label: string) => {
+  const give = async (args: Parameters<typeof betaApi.give>[0], label: string, serie = 'Takoras') => {
     try {
-      const st = await betaApi.give(args);
+      // jeton d'une autre série que Takoras : fonction dédiée côté serveur
+      const st =
+        serie !== 'Takoras' && args.p_jeton
+          ? await betaApi.giveJeton({
+              p_serie: serie,
+              p_jeton: args.p_jeton,
+              p_variant: args.p_variant,
+              p_qty: args.p_qty,
+            })
+          : await betaApi.give(args);
       qc.setQueryData(['me', user?.id], st);
       sfx.upgrade();
       toast(`${label}`);
@@ -317,7 +328,6 @@ function Tester() {
     }
   };
   const items = shop.data ?? [];
-  const jetons = SERIES.Takoras ?? [];
   const clamp = (v: number, max: number) => Math.max(1, Math.min(max, v || 1));
   return (
     <Modal open onClose={close} title={`${t('ui.tester_menu')}`} wide>
@@ -375,14 +385,16 @@ function Tester() {
         </section>
         <section>
           <h3>{t('ui.ts_tokens')}</h3>
+          <JetonPicker
+            serie={jSerie}
+            onSerie={(x) => {
+              setJSerie(x);
+              setJeton([...(SERIES[x] ?? [])].sort((a, b) => a.odds - b.odds)[0]?.name ?? '');
+            }}
+            value={jeton}
+            onChange={setJeton}
+          />
           <div className={s.row}>
-            <select value={jeton} onChange={(e) => setJeton(e.target.value)} aria-label={t('ui.ts_tokens')}>
-              {jetons.map((j) => (
-                <option key={j.name} value={j.name}>
-                  {jn(j.name)} · 1/{fmt(j.odds)}
-                </option>
-              ))}
-            </select>
             <select value={variant} onChange={(e) => setVariant(e.target.value)} aria-label={t('ui.v_none')}>
               <option value="">{t('ui.v_none')}</option>
               {Object.keys(VARIANTS).map((v) => (
@@ -406,6 +418,7 @@ function Tester() {
                 void give(
                   { p_jeton: jeton, p_variant: variant || undefined, p_qty: qty },
                   `${qty}× ${jn(jeton)}${variant ? ` ${t(`ui.v_${variant as 'gold'}`)}` : ''}`,
+                  jSerie,
                 )
               }
             >

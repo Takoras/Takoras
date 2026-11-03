@@ -118,7 +118,7 @@ async function openCoinPulls(n: number, serie: string) {
     const data = (await ecoApi.takePullsSerie(
       serie,
       n,
-      me.admin ? { force: debug.force || undefined, luck: debug.luck, p_variant: debug.variant || undefined } : {},
+      me.admin || me.tester ? { force: debug.force || undefined, luck: debug.luck, p_variant: debug.variant || undefined } : {},
     )) as { state: Me; results: string[]; variants?: (string | null)[]; lucks?: number[]; ids?: (number | null)[] };
     qc.setQueryData(meKey(), data.state);
     buy(data.results.length, data.results, data.variants ?? null, data.lucks ?? null, data.ids ?? null, Math.max(0, PULLS.findIndex((p) => p.name === serie)));

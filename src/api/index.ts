@@ -108,6 +108,8 @@ export const betaApi = {
     p_jeton?: string;
     p_variant?: string;
   }) => rpc('beta_give', a),
+  // jeton de n'importe quelle série (beta_give ne connaît que Takoras)
+  giveJeton: (a: { p_serie: string; p_jeton: string; p_variant?: string; p_qty?: number }) => rpc('beta_give_jeton', a),
 };
 
 export const adminApi = {

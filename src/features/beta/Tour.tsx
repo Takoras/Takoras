@@ -88,7 +88,13 @@ export function Tour({ onDone }: { onDone: () => void }) {
     W = innerWidth / z,
     H = innerHeight / z;
   const box = rawBox
-    ? { left: rawBox.left / z, top: rawBox.top / z, width: rawBox.width / z, height: rawBox.height / z, bottom: rawBox.bottom / z }
+    ? {
+        left: rawBox.left / z,
+        top: rawBox.top / z,
+        width: rawBox.width / z,
+        height: rawBox.height / z,
+        bottom: rawBox.bottom / z,
+      }
     : null;
   const last = i === STEPS.length - 1;
   const pad = 10;

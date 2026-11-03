@@ -123,14 +123,19 @@ export function FallRain({ serie }: { serie: string }) {
       }
       return k;
     };
-    const th = serieTheme(serie), rgb = (s: string) => `rgb(${s.split(' ').join(',')})`;
+    const th = serieTheme(serie),
+      rgb = (s: string) => `rgb(${s.split(' ').join(',')})`;
     const blobs = [
       { img: tint(rgb(th.alt)), x: 0.2, y: 0.3, r: 0.55, sp: 0.07, ph: 0 },
       { img: tint(rgb(th.main)), x: 0.8, y: 0.5, r: 0.6, sp: 0.05, ph: 2 },
       { img: tint(rgb(th.hi)), x: 0.5, y: 0.8, r: 0.4, sp: 0.09, ph: 4 },
     ];
     // poussière : de tout petits points qui montent vite (ça donne la vitesse de chute)
-    const dust = Array.from({ length: W < 700 ? 30 : 60 }, () => ({ x: Math.random(), y: Math.random(), z: Math.random() }));
+    const dust = Array.from({ length: W < 700 ? 30 : 60 }, () => ({
+      x: Math.random(),
+      y: Math.random(),
+      z: Math.random(),
+    }));
     // pointeur : léger décalage de perspective (les proches bougent plus)
     let px = 0,
       tx = 0;
@@ -256,7 +261,17 @@ export function FallRain({ serie }: { serie: string }) {
 
 // Le jeton du centre, en chute libre. Changer de série : l'ancien file vers le bas, le nouveau tombe à sa place.
 // id="coin" : le moteur d'ouverture part de sa position pour la transition.
-export function FallCoin({ img, label, serie = 'Takoras', disabled = false }: { img: string; label: string; serie?: string; disabled?: boolean }) {
+export function FallCoin({
+  img,
+  label,
+  serie = 'Takoras',
+  disabled = false,
+}: {
+  img: string;
+  label: string;
+  serie?: string;
+  disabled?: boolean;
+}) {
   // Les jetons affichés : le jeton actuel, et l'ancien pendant qu'il tombe. L'ancien GARDE le même élément
   // (même clé) : on lui ajoute juste la classe « out », donc son tremblement continue sans s'arrêter ni rétrécir.
   const [items, setItems] = useState([{ src: img, k: 0, out: false }]);
