@@ -829,8 +829,8 @@
   cursor: pointer;
   overflow: hidden;
   transition:
-    transform 260ms cubic-bezier(0.2, 1.4, 0.4, 1),
-    background var(--t-fast);
+    transform 160ms var(--ease-out),
+    filter var(--t-fast);
 }
 .openOne {
   border: 0;
@@ -847,7 +847,7 @@
 }
 .openOne:not(:disabled):hover,
 .openAll:not(:disabled):hover {
-  transform: translateY(-3px);
+  filter: brightness(1.12);
 }
 .openOne:not(:disabled):active,
 .openAll:not(:disabled):active {
@@ -877,10 +877,14 @@
 .openTok img {
   width: 40px;
   height: 40px;
-  transition: transform 600ms cubic-bezier(0.2, 0.9, 0.3, 1);
+  transition:
+    translate 280ms var(--ease-out),
+    scale 280ms var(--ease-out);
 }
+/* au survol le jeton « ? » saute un peu et grossit (plus de tour sur lui-même) */
 .openOne:not(:disabled):hover .openTok img {
-  transform: rotateY(360deg) scale(1.15);
+  translate: 0 -5px;
+  scale: 1.18;
 }
 .fan {
   position: relative;
@@ -895,8 +899,9 @@
   height: 30px;
   translate: calc(var(--i) * 3px) calc(var(--i) * -2px);
   transition:
-    translate 320ms cubic-bezier(0.2, 1.4, 0.4, 1),
-    rotate 320ms cubic-bezier(0.2, 1.4, 0.4, 1);
+    translate 300ms var(--ease-out),
+    rotate 300ms var(--ease-out);
+  will-change: translate, rotate;
 }
 .openAll:not(:disabled):hover .fan img {
   translate: calc((var(--i) - 1) * 16px) calc(var(--i) * -2px);
