@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState, type CSSProperties, type ReactNode } from 'react';
+import { useEffect, useLayoutEffect, useRef, useState, type CSSProperties, type ReactNode } from 'react';
 import { MYSTERE } from '@/data/jetons';
 import { COIN_PULL } from '@/engines/env';
 import { useQueryClient } from '@tanstack/react-query';
@@ -231,9 +231,10 @@ function Up(p: {
 // Remplace un bloc par un autre en le faisant tomber : l'ancien part vers le bas, le nouveau arrive du haut
 function DropSwap({ k, children }: { k: string; children: ReactNode }) {
   // « anim » reste vrai pour le bloc arrivé par un échange : sa classe ne change plus jamais pendant son animation
-  // (avant, elle était retirée au bout de 0,6 s alors que l'animation durait 1 s : le bloc se téléportait)
   const [cur, setCur] = useState({ k, node: children, anim: false });
   const [old, setOld] = useState<{ k: string; node: ReactNode } | null>(null);
+  const box = useRef<HTMLDivElement>(null);
+  const inner = useRef<HTMLDivElement>(null);
   if (k !== cur.k) {
     setOld(cur);
     setCur({ k, node: children, anim: true });
@@ -243,14 +244,27 @@ function DropSwap({ k, children }: { k: string; children: ReactNode }) {
     const id = setTimeout(() => setOld(null), 600);
     return () => clearTimeout(id);
   }, [old]);
+  // la hauteur suit le nouveau bloc en glissant : ce qui est en dessous descend ou remonte doucement (pas de saut)
+  useLayoutEffect(() => {
+    const b = box.current,
+      i = inner.current;
+    if (!b || !i) return;
+    const sync = () => {
+      b.style.height = `${i.offsetHeight}px`;
+    };
+    sync();
+    const ro = new ResizeObserver(sync);
+    ro.observe(i);
+    return () => ro.disconnect();
+  }, [cur.k]);
   return (
-    <div className={s.swap}>
+    <div ref={box} className={s.swap}>
       {old ? (
         <div key={old.k} className={s.swapOut} aria-hidden>
           {old.node}
         </div>
       ) : null}
-      <div key={cur.k} className={cur.anim ? s.swapIn : undefined}>
+      <div ref={inner} key={cur.k} className={cur.anim ? s.swapIn : undefined}>
         {cur.node}
       </div>
     </div>

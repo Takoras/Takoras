@@ -1059,8 +1059,9 @@
 .swap {
   position: relative;
   display: grid;
-  justify-items: center;
+  place-items: start center;
   width: 100%;
+  transition: height 650ms cubic-bezier(0.33, 1, 0.68, 1);
 }
 .swap > * {
   grid-area: 1 / 1;
