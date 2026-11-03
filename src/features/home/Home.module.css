@@ -37,6 +37,7 @@
 }
 
 .title {
+  animation: logoFloat 4.6s ease-in-out infinite;
   white-space: nowrap; /* « Tirage » + logo sur une seule ligne */
   font-size: clamp(2.2rem, calc(6.5vw / var(--z, 1)), 3.6rem);
   text-shadow: 0 0 40px rgb(139 92 246 / 45%);
@@ -241,18 +242,16 @@
   align-items: center;
   gap: var(--s-2) var(--s-3);
   padding: var(--s-3) var(--s-4);
-  border: 3px solid transparent;
-  border-radius: 14px;
-  border-image: url('/img/ui/box-card-in.png?v=3') 12 fill / 24px stretch;
-  background: linear-gradient(#222034, #222034) center / calc(100% - 16px) calc(100% - 16px) no-repeat;
-  image-rendering: pixelated;
+  border: 1px solid rgb(255 255 255 / 7%);
+  border-radius: 8px;
+  background: var(--surface);
   text-align: left;
 }
 .up > :last-child {
   grid-column: 1 / -1;
 }
 .upCan {
-  border-image-source: url('/img/ui/box-orange.png?v=3');
+  border-color: #f97316;
   animation: upGlow 2.2s ease-in-out infinite;
 }
 @keyframes upGlow {
@@ -362,19 +361,17 @@
 .chips button {
   min-height: 36px;
   padding: 0 var(--s-3);
-  border: 3px solid transparent;
-  border-radius: 10px;
-  border-image: url('/img/ui/box-card-in.png?v=3') 12 fill / 12px stretch;
-  background: linear-gradient(#222034, #222034) center / calc(100% - 16px) calc(100% - 16px) no-repeat;
-  image-rendering: pixelated;
+  border: 1px solid rgb(255 255 255 / 7%);
+  border-radius: 8px;
+  background: var(--surface);
   color: var(--text-2);
   font-size: var(--fs-sm);
 }
 
 /* choisi : ta boîte claire à bords violets */
 .chips button[aria-pressed='true'] {
-  border-image-source: url('/img/ui/box-sel-light.png?v=3');
-  background-image: linear-gradient(#39374f, #39374f);
+  border-color: #a78bfa;
+  background-color: var(--surface-2);
   color: var(--text);
 }
 .chips small {
@@ -422,11 +419,9 @@
 }
 
 .track li {
-  border: 3px solid transparent;
-  border-radius: 10px;
-  border-image: url('/img/ui/box-card.png?v=3') 12 fill / 12px stretch;
-  background: linear-gradient(#222034, #222034) center / calc(100% - 16px) calc(100% - 16px) no-repeat;
-  image-rendering: pixelated;
+  border: 1px solid rgb(255 255 255 / 9%);
+  border-radius: 8px;
+  background: var(--surface);
   display: flex;
   align-items: center;
   gap: var(--s-2);
@@ -471,11 +466,9 @@
   justify-content: center;
 }
 .fx li {
-  border: 3px solid transparent;
-  border-radius: 10px;
-  border-image: url('/img/ui/box-card.png?v=3') 12 fill / 12px stretch;
-  background: linear-gradient(#222034, #222034) center / calc(100% - 16px) calc(100% - 16px) no-repeat;
-  image-rendering: pixelated;
+  border: 1px solid rgb(255 255 255 / 9%);
+  border-radius: 8px;
+  background: var(--surface);
   padding: 4px var(--s-3);
   font-size: var(--fs-xs);
 }
@@ -517,18 +510,16 @@
   gap: var(--s-3);
   min-height: 52px;
   padding: 0 var(--s-3);
-  border: 3px solid transparent;
-  border-radius: 14px;
-  border-image: url('/img/ui/box-card-in.png?v=3') 12 fill / 24px stretch;
-  background: linear-gradient(#222034, #222034) center / calc(100% - 16px) calc(100% - 16px) no-repeat;
-  image-rendering: pixelated;
+  border: 1px solid rgb(255 255 255 / 7%);
+  border-radius: 8px;
+  background: var(--surface);
   color: var(--text);
   font-weight: 700;
   text-align: left;
 }
 .picker button[aria-pressed='true'] {
-  border-image-source: url('/img/ui/box-sel-light.png?v=3');
-  background-image: linear-gradient(#39374f, #39374f);
+  border-color: #a78bfa;
+  background-color: var(--surface-2);
 }
 .picker .soon {
   opacity: 0.5;
@@ -689,8 +680,7 @@
 .satPick .picker button {
   min-height: 64px;
   border: 0;
-  border-image: none;
-  border-radius: 999px;
+  border-radius: 8px;
   padding: 0 var(--s-4) 0 var(--s-1);
   background: rgb(23 23 31 / 70%);
   box-shadow: inset 0 0 0 1px rgb(255 255 255 / 8%);
@@ -701,13 +691,19 @@
 .satPick .picker button img {
   width: 52px;
   height: 52px;
-  transition: rotate var(--t-slow) var(--ease-out);
+  transform-origin: 50% 60%;
+  transition:
+    scale var(--t-med) var(--ease-out),
+    translate var(--t-med) var(--ease-out);
 }
 .satPick .picker button:not(:disabled):hover {
-  transform: translateX(6px);
+  transform: translateX(4px);
 }
+/* au survol le jeton de la série grossit et sort un peu de sa pastille */
 .satPick .picker button:not(:disabled):hover img {
-  rotate: 25deg;
+  scale: 1.35;
+  translate: -4px -6px;
+  filter: drop-shadow(0 8px 10px rgb(0 0 0 / 55%));
 }
 .satPick .picker button[aria-pressed='true'] {
   background: rgb(124 58 237 / 28%);
@@ -715,10 +711,15 @@
 }
 
 /* réglages de l'ouverture auto : des pastilles légères, sans cadre */
+.satAuto .chips {
+  gap: var(--s-3);
+  margin-bottom: var(--s-4);
+}
 .satAuto .chips button {
+  min-height: 40px;
+  padding: 0 var(--s-4);
   border: 0;
-  border-image: none;
-  border-radius: 999px;
+  border-radius: 6px;
   background: rgb(23 23 31 / 70%);
   box-shadow: inset 0 0 0 1px rgb(255 255 255 / 10%);
   transition:
@@ -740,8 +741,7 @@
 /* améliorations : capsules flottantes */
 .satUps .up {
   border: 0;
-  border-image: none;
-  border-radius: 20px;
+  border-radius: 8px;
   background: rgb(23 23 31 / 72%);
   box-shadow:
     inset 0 0 0 1px rgb(255 255 255 / 8%),
@@ -765,15 +765,15 @@
   display: none;
 }
 
-/* En direct : une bande de chantier en biais qui traverse tout l'écran */
+/* En direct : une bande sobre, légèrement en biais, qui traverse tout l'écran */
 .liveDiag {
   position: relative;
   z-index: 2;
   margin: var(--s-12) calc(50% - 50vw / var(--z, 1)) var(--s-8);
   padding: var(--s-3) 0;
-  rotate: -3deg;
-  background: #7c3aed;
-  box-shadow: 0 18px 40px rgb(0 0 0 / 45%);
+  rotate: -1.5deg;
+  background: rgb(13 13 18 / 85%);
+  border-block: 1px solid rgb(255 255 255 / 12%);
 }
 .liveDiag .live {
   margin: 0;
@@ -781,22 +781,19 @@
   padding: 0 var(--s-8) 0 calc(var(--rail) + var(--s-8));
 }
 .liveDiag .liveHead {
-  font-size: var(--fs-lg);
+  font-size: var(--fs-md);
+  color: var(--text-2);
   text-transform: uppercase;
-  letter-spacing: 0.06em;
+  letter-spacing: 0.1em;
 }
 .liveDiag .ticker {
   mask-image: none;
 }
 .liveDiag .track li {
   border: 0;
-  border-image: none;
-  border-radius: 999px;
-  background: rgb(13 13 18 / 55%);
+  border-radius: 6px;
+  background: rgb(255 255 255 / 5%);
   font-size: var(--fs-md);
-}
-.liveDiag .dot {
-  background: #fff;
 }
 
 @media (prefers-reduced-motion: reduce) {
@@ -806,5 +803,65 @@
   }
 }
 :global(html.reduce-fx) .sat {
+  animation: none;
+}
+
+/* logo de la série : il flotte et tangue doucement sous le jeton (animation posée sur .title) */
+@keyframes logoFloat {
+  0%,
+  100% {
+    transform: translateY(0) rotate(-2deg);
+  }
+  50% {
+    transform: translateY(-6px) rotate(2deg);
+  }
+}
+
+/* Ouvrir 1 respire et un reflet passe dessus de temps en temps ; les deux boutons se soulèvent au survol */
+.row > button {
+  position: relative;
+  overflow: hidden;
+  transition: transform var(--t-med) var(--ease-out);
+}
+.row > button:not(:disabled):hover {
+  transform: translateY(-3px) scale(1.03);
+}
+.row > button:first-child:not(:disabled) {
+  animation: breathe 2.8s ease-in-out infinite;
+}
+.row > button:first-child:not(:disabled)::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(110deg, transparent 35%, rgb(255 255 255 / 28%) 50%, transparent 65%);
+  translate: -120% 0;
+  animation: shine 4.5s ease-in-out infinite;
+  pointer-events: none;
+}
+@keyframes breathe {
+  50% {
+    scale: 1.04;
+  }
+}
+@keyframes shine {
+  0%,
+  60% {
+    translate: -120% 0;
+  }
+  100% {
+    translate: 120% 0;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .title,
+  .row > button:first-child:not(:disabled),
+  .row > button:first-child:not(:disabled)::after {
+    animation: none;
+  }
+}
+:global(html.reduce-fx) .title,
+:global(html.reduce-fx) .row > button:first-child:not(:disabled),
+:global(html.reduce-fx) .row > button:first-child:not(:disabled)::after {
   animation: none;
 }

@@ -88,9 +88,8 @@ export function BoardSection({ kind: id, title }: { kind: 'pulls' | 'time'; titl
                   <Avatar pseudo={r.pseudo} size={i === 0 ? 84 : 64} />
                   <b>{name(r)}</b>
                   <small>{val(r)}</small>
-                  <div className={s.step} aria-label={`#${i + 1}`}>
-                    {i + 1}
-                  </div>
+                  {/* marche dessinée à la main : vraie image pixel art, donc avec le doodle */}
+                  <img className={`px ${s.step}`} src={`/img/ui/podium-${i + 1}.png?v=3`} alt={`#${i + 1}`} />
                 </li>
               ) : (
                 <li key={i} aria-hidden />

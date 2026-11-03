@@ -98,8 +98,43 @@ async function onde() {
   return 0;
 }
 
+// Transition « Chute » : le jeton de l'accueil continue de tomber jusqu'au centre de l'écran en se redressant,
+// se retourne sur le « ? », et l'ouverture commence exactement là (le « ? » de l'ouverture prend sa place, sans saut).
+let skipSpawn = false;
+async function chute() {
+  const hero = heroCoin(), img = hero.querySelector('img');
+  if (!img) return onde();
+  const r = img.getBoundingClientRect();
+  const tr = $('op-coin').getBoundingClientRect();
+  const c = tr.width ? { x: tr.left + tr.width / 2, y: tr.top + tr.height / 2, s: tr.width } : { ...center(), s: Math.min(240, Math.max(180, innerWidth * 0.26)) };
+  const dx = c.x - (r.left + r.width / 2), dy = c.y - (r.top + r.height / 2), k = c.s / r.width;
+  // la page s'assombrit pendant que le jeton tombe
+  const dim = el('inset:0;background:#0d0d12;z-index:1');
+  dim.animate([{ opacity: 0 }, { opacity: 1 }], { duration: 640, easing: 'ease-in', fill: 'forwards' });
+  const d = el(`left:${r.left}px;top:${r.top}px;width:${r.width}px;height:${r.height}px;z-index:3;perspective:900px`,
+    `<img src="${img.src}" alt="" style="width:100%;height:100%;image-rendering:pixelated;display:block">`);
+  hero.style.visibility = 'hidden';
+  const face = d.firstElementChild;
+  // chute : il accélère, dépasse un peu le centre, rebondit et se pose droit
+  await d.animate([
+    { transform: 'translate(0,0) rotate(42deg) scale(1)', filter: 'blur(0.5px)' },
+    { transform: `translate(${dx}px,${dy + 26}px) rotate(-6deg) scale(${k * 1.04})`, filter: 'blur(1.5px)', offset: 0.62, easing: 'cubic-bezier(.2,.8,.3,1)' },
+    { transform: `translate(${dx}px,${dy}px) rotate(0deg) scale(${k})`, filter: 'blur(0)' },
+  ], { duration: 640, easing: 'cubic-bezier(.55,0,.85,.35)', fill: 'forwards' }).finished;
+  // il se retourne : face du jeton → « ? »
+  sfx.spawn();
+  await face.animate([{ transform: 'rotateY(0deg)' }, { transform: 'rotateY(90deg)' }], { duration: 140, easing: 'ease-in', fill: 'forwards' }).finished;
+  face.src = MYSTERE;
+  await face.animate([{ transform: 'rotateY(-90deg)' }, { transform: 'rotateY(0deg) scale(1.06)', offset: 0.7 }, { transform: 'rotateY(0deg) scale(1)' }], { duration: 260, easing: 'cubic-bezier(.2,.9,.3,1)', fill: 'forwards' }).finished;
+  skipSpawn = true; // le « ? » de l'ouverture est déjà là : pas d'apparition en grossissant
+  showOpening();
+  return 160;
+}
+
+// [nom, description, fonction, durée max en ms (filet de sécurité)]
 const TRANSITIONS = [
-  ['Pixels', 'Des bords vers le jeton, puis se désintègre du centre vers les bords', onde],
+  ['Chute', 'Le jeton de l\'accueil tombe au centre et se retourne sur le « ? »', chute, 1400],
+  ['Pixels', 'Des bords vers le jeton, puis se désintègre du centre vers les bords', onde, DUR],
 ];
 
 let choice = 0;
@@ -131,7 +166,7 @@ async function runTransition() {
   const t0 = performance.now();
   try {
     // Filet de sécurité : si le navigateur ne joue pas l'animation (onglet en arrière-plan…), on ouvre quand même
-    const rest = await Promise.race([TRANSITIONS[choice][2](), done(DUR + 200).then(() => 0)]);
+    const rest = await Promise.race([TRANSITIONS[choice][2](), done((TRANSITIONS[choice][3] ?? DUR) + 200).then(() => 0)]);
     showOpening();
     if (rest) await Promise.race([Promise.all([...fx.children].map(c => c.animate([{ opacity: 1 }, { opacity: 0 }], { duration: rest, fill: 'forwards' }).finished)), done(rest + 200)]);
   } finally {
@@ -286,7 +321,8 @@ function startOpening() {
   opCoin.className = 'op-coin';
   opCoin.innerHTML = `<div class="zoom"><div class="tilt3d"><div class="spin">${coin3D(MYSTERE, 'Jeton mystère')}</div>${'<b class="tw"></b>'.repeat(7)}</div></div>`;
   setGlareMask(MYSTERE);
-  if (c.phase === 'count' && c.shown === 1 && !sess.auto) spawn(); // le « ? » arrive en grossissant
+  if (c.phase === 'count' && c.shown === 1 && !sess.auto && !skipSpawn) spawn(); // le « ? » arrive en grossissant
+  skipSpawn = false;
   $('op-hint').textContent = t(matchMedia('(pointer: coarse)').matches ? 'tap_coin' : 'click_coin');
   $('op-stats').innerHTML = '';
   if (c.phase === 'hold') hold(true);
@@ -831,8 +867,8 @@ addEventListener('keydown', e => {
 
 function buy(n, plan = null, vars = null, lucks = null, ids = null) {
   closeOpening(); startSession(n, plan, vars, lucks, ids);
-  // « Ouvrir 1 » : pas l'animation des cubes à chaque fois, juste un fondu rapide
-  if (n === 1) showOpening(160); else runTransition();
+  // « Ouvrir 1 » comme « Tout ouvrir » : le jeton de l'accueil tombe au centre et se retourne (transition « Chute »)
+  runTransition();
 }
 $('op-next')?.addEventListener('click', next);
 // Pendant un ×10 : un clic n'importe où sur l'écran passe au jeton suivant

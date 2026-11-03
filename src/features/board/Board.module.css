@@ -12,6 +12,7 @@
 }
 .head h2 {
   font-size: var(--fs-2xl);
+  animation: titleDrift 6s ease-in-out infinite;
 }
 .kinds {
   display: flex;
@@ -19,11 +20,9 @@
   gap: var(--s-2);
 }
 .kinds button {
-  border: 3px solid transparent;
-  border-radius: 10px;
-  border-image: url('/img/ui/box-card.png?v=3') 12 fill / 12px stretch;
-  background: linear-gradient(#222034, #222034) center / calc(100% - 16px) calc(100% - 16px) no-repeat;
-  image-rendering: pixelated;
+  border: 1px solid rgb(255 255 255 / 9%);
+  border-radius: 8px;
+  background: var(--surface);
   min-height: 36px;
   padding: 0 var(--s-4);
   color: var(--text-2);
@@ -31,7 +30,7 @@
   font-size: var(--fs-sm);
 }
 .kinds button[aria-pressed='true'] {
-  border-image-source: url('/img/ui/box-sel.png?v=3');
+  border-color: #a78bfa;
   color: var(--text);
 }
 
@@ -53,6 +52,12 @@
   gap: 4px;
   text-align: center;
   min-width: 0;
+  --rot: 0deg;
+  --lift: 0px;
+  --dur: 7s;
+  rotate: var(--rot);
+  translate: 0 var(--lift);
+  animation: podFloat var(--dur) ease-in-out infinite;
 }
 .pod > span:first-child {
   box-shadow: 0 0 0 3px var(--ring);
@@ -72,33 +77,129 @@
 .step {
   /* marches du podium : textures dessinées à la main (le chiffre est dans le dessin) */
   max-width: 100%;
+  height: auto;
   aspect-ratio: 64 / 42;
   margin-top: var(--s-2);
-  background: center bottom / 100% 100% no-repeat;
-  image-rendering: pixelated;
-  color: transparent;
-  font-size: 0;
 }
 .p1 {
   --ring: #f59e0b;
+  --lift: -28px;
+  --dur: 6.2s;
+  animation:
+    podFloat var(--dur) ease-in-out infinite,
+    podShake 2.6s ease-in-out infinite;
 }
 .p1 .step {
   width: 192px;
-  background-image: url('/img/ui/podium-1.png?v=3');
 }
 .p2 {
   --ring: #a78bfa;
+  --rot: -12deg;
+  --dur: 7.4s;
+  animation-delay: -2s;
 }
 .p2 .step {
   width: 160px;
-  background-image: url('/img/ui/podium-2.png?v=3');
 }
 .p3 {
   --ring: #ea580c;
+  --rot: 14deg;
+  --lift: 12px;
+  --dur: 8.1s;
+  animation-delay: -4s;
 }
 .p3 .step {
   width: 128px;
-  background-image: url('/img/ui/podium-3.png?v=3');
+}
+/* Le podium flotte dans l'espace : chaque marche penche, dérive à son rythme ; la 1re est plus haute
+   et tremble très lentement, comme en apesanteur. Le texte reste droit et lisible. */
+
+.pod b,
+.pod small {
+  rotate: calc(var(--rot) * -1); /* le nom et le score restent à l'horizontale */
+}
+@keyframes podFloat {
+  0%,
+  100% {
+    transform: translateY(0);
+  }
+  50% {
+    transform: translateY(-12px);
+  }
+}
+@keyframes podShake {
+  0%,
+  100% {
+    rotate: -1.5deg;
+  }
+  50% {
+    rotate: 1.5deg;
+  }
+}
+
+/* le reste du classement dérive doucement, chaque ligne un peu de travers, mais lisible */
+.list li {
+  rotate: var(--lr, 0deg);
+  animation: rowDrift 9s ease-in-out infinite;
+  transition:
+    rotate var(--t-med) var(--ease-out),
+    translate var(--t-med) var(--ease-out);
+  display: flex;
+  align-items: center;
+  gap: var(--s-3);
+  padding: var(--s-2) var(--s-3);
+  border: 1px solid rgb(255 255 255 / 10%);
+  border-radius: 8px;
+  background: var(--surface-2);
+}
+.list li:nth-child(odd) {
+  --lr: -0.6deg;
+}
+.list li:nth-child(even) {
+  --lr: 0.6deg;
+  animation-delay: -3s;
+}
+.list li:nth-child(3n) {
+  animation-delay: -6s;
+}
+.list li:hover {
+  --lr: 0deg;
+  translate: 6px 0;
+}
+@keyframes rowDrift {
+  0%,
+  100% {
+    transform: translateX(0);
+  }
+  50% {
+    transform: translateX(5px);
+  }
+}
+/* titre de la section : il penche à peine et dérive */
+
+@keyframes titleDrift {
+  0%,
+  100% {
+    transform: rotate(-1.5deg);
+  }
+  50% {
+    transform: rotate(0.5deg) translateY(-3px);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .pod,
+  .p1,
+  .list li,
+  .head h2 {
+    animation: none;
+  }
+}
+:global(html.reduce-fx) .pod,
+:global(html.reduce-fx) .p1,
+:global(html.reduce-fx) .list li,
+:global(html.reduce-fx) .head h2 {
+  animation: none;
 }
 
 .list {
@@ -110,19 +211,8 @@
   width: min(820px, 100%);
   margin: 0 auto;
 }
-.list li {
-  display: flex;
-  align-items: center;
-  gap: var(--s-3);
-  padding: var(--s-2) var(--s-3);
-  border: 3px solid transparent;
-  border-radius: 16px;
-  border-image: url('/img/ui/box-9.png?v=3') 14 fill / 28px stretch;
-  background: linear-gradient(#39374f, #39374f) center / calc(100% - 16px) calc(100% - 16px) no-repeat;
-  image-rendering: pixelated;
-}
 .list li.me {
-  border-image-source: url('/img/ui/box-light-orange.png?v=3');
+  border-color: #f97316;
 }
 .rank {
   width: 28px;

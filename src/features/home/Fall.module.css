@@ -59,25 +59,6 @@
   height: 100%;
 }
 
-/* traînée de chute : le jeton vient d'en haut, ses copies étirées et floues restent derrière lui */
-.trail {
-  position: absolute;
-  inset: 0;
-  pointer-events: none;
-}
-
-.trail img {
-  position: absolute;
-  inset: 0;
-  width: 100%;
-  height: 100%;
-  image-rendering: pixelated;
-  opacity: calc(0.42 / var(--k));
-  transform: translateY(calc(var(--k) * -15%)) scale(calc(1 - var(--k) * 0.06), calc(1 + var(--k) * 0.14));
-  /* flou CSS simple (le filtre SVG animé coûtait cher) */
-  filter: blur(calc(2px + var(--k) * 2px));
-}
-
 .coin {
   position: relative;
   width: 100%;
@@ -108,9 +89,10 @@
   width: 100%;
   height: 100%;
   /* un peu flou : il tombe vite */
-  filter: blur(0.6px);
+  filter: blur(0.5px);
   animation:
-    tumble 4.2s ease-in-out infinite,
+    tumble 5.2s ease-in-out infinite,
+    sway 3.7s ease-in-out infinite,
     buffet 1.7s ease-in-out infinite;
 }
 
@@ -149,13 +131,26 @@
   }
 }
 
+/* penché comme un vrai objet en chute (≈ 42°), il bascule d'un côté à l'autre et respire un peu */
 @keyframes tumble {
   0%,
   100% {
-    rotate: -4deg;
+    rotate: 34deg;
+    scale: 1;
   }
   50% {
-    rotate: 4deg;
+    rotate: 50deg;
+    scale: 1.04;
+  }
+}
+
+@keyframes sway {
+  0%,
+  100% {
+    translate: -14px 0;
+  }
+  50% {
+    translate: 14px -6px;
   }
 }
 
@@ -163,19 +158,19 @@
 @keyframes buffet {
   0%,
   100% {
-    translate: 0 0;
+    transform: translate(0, 0);
   }
   20% {
-    translate: 1px -1px;
+    transform: translate(1px, -1px);
   }
   45% {
-    translate: -1px 1.5px;
+    transform: translate(-1px, 1.5px);
   }
   70% {
-    translate: 1.5px 0.5px;
+    transform: translate(1.5px, 0.5px);
   }
   85% {
-    translate: -0.5px -1px;
+    transform: translate(-0.5px, -1px);
   }
 }
 

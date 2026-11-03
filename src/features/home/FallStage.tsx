@@ -145,11 +145,13 @@ export function FallRain({ serie }: { serie: string }) {
 
     let raf = 0,
       last = 0;
+    // 30 images par seconde suffisent pour un fond flou : deux fois moins de travail
     const loop = (now: number) => {
-      const dt = last ? Math.min(0.05, (now - last) / 1000) : 1 / 60;
+      raf = requestAnimationFrame(loop);
+      if (last && now - last < 31) return;
+      const dt = last ? Math.min(0.08, (now - last) / 1000) : 1 / 30;
       last = now;
       draw(dt);
-      raf = requestAnimationFrame(loop);
     };
     const start = () => {
       if (raf || document.hidden) return;
@@ -219,12 +221,6 @@ export function FallCoin({ img, label }: { img: string; label: string }) {
         </div>
       ) : null}
       <div key={shown} className={`${s.body} ${s.in}`}>
-        {/* traînée de chute : copies étirées et floues au-dessus du jeton */}
-        <div className={s.trail} aria-hidden>
-          {[1, 2, 3].map((k) => (
-            <img key={k} src={shown} alt="" style={{ '--k': k } as React.CSSProperties} />
-          ))}
-        </div>
         <div
           id="coin"
           className={s.coin}
