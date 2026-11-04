@@ -8,6 +8,22 @@ export function useSwing(ref: RefObject<HTMLElement | null>, strength = 1) {
   useEffect(() => {
     const el = ref.current;
     if (!el) return;
+    return attachSwing(el, strength);
+  }, [ref, strength]);
+}
+
+// Même balancement pour chaque élément d'un groupe (boutons, onglets…) qui correspond au sélecteur
+export function useSwingAll(ref: RefObject<HTMLElement | null>, selector: string, strength = 1, key: unknown = 0) {
+  useEffect(() => {
+    const root = ref.current;
+    if (!root) return;
+    const offs = [...root.querySelectorAll<HTMLElement>(selector)].map((el) => attachSwing(el, strength));
+    return () => offs.forEach((f) => f());
+  }, [ref, selector, strength, key]);
+}
+
+export function attachSwing(el: HTMLElement, strength = 1) {
+  {
     const st = { a: 0, v: 0, raf: 0, last: 0, lastX: 0, lastT: 0 };
 
     const step = (now: number) => {
@@ -48,5 +64,5 @@ export function useSwing(ref: RefObject<HTMLElement | null>, strength = 1) {
       el.removeEventListener('pointermove', onMove);
       cancelAnimationFrame(st.raf);
     };
-  }, [ref, strength]);
+  }
 }

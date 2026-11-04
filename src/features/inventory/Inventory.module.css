@@ -911,43 +911,17 @@
 }
 
 /* ======================================================================
-   Bestiaire vivant : chaque jeton dans une boîte légère (peu opaque), qui penche un peu, flotte
-   doucement et se balance au passage de la souris (--swing, useSwing), comme les blocs de l'accueil.
-   Les boîtes arrivent en cascade à l'ouverture (--i = rang dans la grille).
+   Bestiaire : chaque jeton dans une boîte légère (peu opaque), droite et posée ; elles arrivent en cascade
+   (--i = rang dans la grille). Ce qui penche et flotte, ce sont les onglets, étagères et filtres autour.
    ====================================================================== */
 .card .cardBtn {
-  --tilt: 0deg;
-  --fl: 6s;
-  overflow: visible;
   border: 1px solid rgb(255 255 255 / 8%);
   border-radius: 14px;
   background:
     linear-gradient(160deg, rgba(var(--g), calc(0.08 * var(--ga, 0))), transparent 60%), rgb(255 255 255 / 3.5%);
   box-shadow: 0 10px 22px rgb(0 0 0 / 25%);
-  rotate: calc(var(--tilt) + var(--swing, 0deg));
-  transform-origin: 50% 0;
-  animation:
-    cardIn 0.5s cubic-bezier(0.22, 1, 0.36, 1) calc(var(--i, 0) * 35ms) both,
-    cardFloat var(--fl) ease-in-out calc(var(--i, 0) * -0.7s) infinite;
-  transition:
-    border-color var(--t-fast),
-    background-color var(--t-fast);
-}
-.card:nth-child(4n + 1) .cardBtn {
-  --tilt: -1.4deg;
-  --fl: 5.6s;
-}
-.card:nth-child(4n + 2) .cardBtn {
-  --tilt: 1deg;
-  --fl: 6.8s;
-}
-.card:nth-child(4n + 3) .cardBtn {
-  --tilt: -0.6deg;
-  --fl: 7.2s;
-}
-.card:nth-child(4n) .cardBtn {
-  --tilt: 1.6deg;
-  --fl: 6.2s;
+  animation: cardIn 0.5s cubic-bezier(0.22, 1, 0.36, 1) calc(var(--i, 0) * 35ms) both;
+  transition: border-color var(--t-fast);
 }
 .card:hover .cardBtn {
   border-color: rgba(var(--g), calc(0.2 + 0.4 * var(--ga, 0)));
@@ -966,13 +940,36 @@
     scale: 0.94;
   }
 }
-@keyframes cardFloat {
+
+/* onglets, étagères, filtres : penchés, ils flottent doucement et se balancent au survol (--swing) */
+.tabs a,
+.shelf,
+.chips button {
+  --tilt: -1.5deg;
+  --fl: 6s;
+  rotate: calc(var(--tilt) + var(--swing, 0deg));
+  transform-origin: 50% 0;
+  animation: uiFloat var(--fl) ease-in-out infinite;
+}
+.tabs a:nth-child(2n),
+.shelf:nth-child(2n),
+.chips button:nth-child(2n) {
+  --tilt: 1.4deg;
+  --fl: 7s;
+  animation-delay: -2.5s;
+}
+.shelf:nth-child(3n) {
+  --tilt: -0.8deg;
+  --fl: 6.5s;
+  animation-delay: -4s;
+}
+@keyframes uiFloat {
   0%,
   100% {
-    transform: translateY(0);
+    translate: 0 0;
   }
   50% {
-    transform: translateY(-5px);
+    translate: 0 -5px;
   }
 }
 
@@ -997,11 +994,16 @@
   opacity: 0.35;
 }
 
-:global(html.reduce-fx) .card .cardBtn {
-  animation: cardIn 0.3s ease-out both;
+:global(html.reduce-fx) .tabs a,
+:global(html.reduce-fx) .shelf,
+:global(html.reduce-fx) .chips button {
+  animation: none;
 }
 @media (prefers-reduced-motion: reduce) {
-  .card .cardBtn {
+  .card .cardBtn,
+  .tabs a,
+  .shelf,
+  .chips button {
     animation: none;
   }
 }

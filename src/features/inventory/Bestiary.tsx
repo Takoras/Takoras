@@ -17,7 +17,7 @@ import { Button } from '@/ui/Button';
 import { confirm } from '@/ui/confirm';
 import { toast } from '@/ui/toast';
 import { JetonModal } from './JetonModal';
-import { useSwing } from '@/ui/useSwing';
+import { useSwingAll } from '@/ui/useSwing';
 import { BoardSection } from '../board/Board';
 import {
   cKey,
@@ -42,8 +42,10 @@ const Coin = () => <img className={`px ${s.coin}`} src="/img/piece.png" alt="" w
 // Les deux onglets du menu Inventaire
 export function InvTabs() {
   const t = useT();
+  const ref = useRef<HTMLElement>(null);
+  useSwingAll(ref, 'a', 0.5); // les onglets penchent et se balancent au passage de la souris
   return (
-    <nav className={s.tabs} aria-label={t('ui.nav_inv')}>
+    <nav ref={ref} className={s.tabs} aria-label={t('ui.nav_inv')}>
       <NavLink to="/inventaire" end>
         {t('ui.bestiary')}
       </NavLink>
@@ -76,6 +78,11 @@ export default function Bestiary() {
   const [open, setOpen] = useState<{ name: string; v: string } | null>(null);
   const [busy, setBusy] = useState(false);
   const grid = useRef<HTMLUListElement>(null);
+  // étagères et filtres : ils penchent, flottent et se balancent comme les blocs de l'accueil
+  const shelvesRef = useRef<HTMLDivElement>(null);
+  const chipsRef = useRef<HTMLDivElement>(null);
+  useSwingAll(shelvesRef, `.${s.shelf}`, 0.4);
+  useSwingAll(chipsRef, 'button', 0.5);
   const snap = useRef<{ m: Map<string, DOMRect>; dissolve: boolean } | null>(null);
 
   const d = inv.data;
@@ -187,7 +194,7 @@ export default function Bestiary() {
       </header>
       <InvTabs />
       {/* étagères : une carte par série (pull) + la prochaine série à venir */}
-      <div className={s.shelves} role="group" aria-label={t('arena.serie')}>
+      <div ref={shelvesRef} className={s.shelves} role="group" aria-label={t('arena.serie')}>
         {series.map((x) => {
           const js = SERIES[x] ?? [],
             f = d ? js.filter((j) => d.coll.has(cKey(x, j.name))).length : 0;
@@ -245,7 +252,7 @@ export default function Bestiary() {
         </div>
       </div>
       <div className={s.tools}>
-        <div className={s.chips} role="group" aria-label={t('ui.sort_rarity')}>
+        <div ref={chipsRef} className={s.chips} role="group" aria-label={t('ui.sort_rarity')}>
           <button type="button" aria-pressed={view.own} onClick={() => set({ own: !view.own })}>
             ✓ {t('ui.bst_owned_only')}
           </button>
@@ -380,8 +387,8 @@ export default function Bestiary() {
   );
 }
 
-// Un jeton du bestiaire : une boîte légère qui penche, flotte et se balance au passage de la souris (comme les
-// blocs de l'accueil), arrive en cascade ; en dessous, ses 3 mutations en tampons (grisés tant qu'on ne les a pas)
+// Un jeton du bestiaire : une boîte légère, droite et posée (elle arrive juste en cascade) ;
+// en dessous, ses 3 mutations en tampons (grisés tant qu'on ne les a pas)
 function CardView({
   c,
   i,
@@ -399,8 +406,6 @@ function CardView({
   const jn = useJn();
   const lang = useSettings((x) => x.lang);
   const fmt = (n: number) => n.toLocaleString(locale(lang));
-  const btn = useRef<HTMLButtonElement>(null);
-  useSwing(btn, 0.18);
   const { j, g } = c,
     n = c.total,
     locked = !!g && !g.free.length,
@@ -422,7 +427,6 @@ function CardView({
       className={[s.card, !n && (c.seen ? s.gone : s.unk), q && s.sel, locked && s.locked].filter(Boolean).join(' ')}
     >
       <button
-        ref={btn}
         type="button"
         className={s.cardBtn}
         style={{ '--i': Math.min(i, 24) } as CSSProperties}
