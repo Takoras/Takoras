@@ -482,7 +482,7 @@ function startBg(j, mode = 'reveal') {
   bg.stars = Array.from({ length: [0, 0, 0, 40, 55, 75][bg.level] }, () => ({ x: Math.random() * W | 0, y: Math.random() * H | 0, p: Math.random() * 6 }));
   cancelAnimationFrame(bg.raf);
   const t0 = performance.now();
-  const loop = t => { drawBg((t - t0) / 1000); bg.raf = requestAnimationFrame(loop); };
+  const loop = t => { try { drawBg(Math.max(0, (t - t0) / 1000)); } catch { /* image ratée : on continue */ } bg.raf = requestAnimationFrame(loop); };
   bg.raf = requestAnimationFrame(loop);
 }
 function stopBg() { cancelAnimationFrame(bg.raf); bg.mode = ''; }
@@ -549,7 +549,7 @@ function drawBg(t) {
     });
     const period = level >= 5 ? 1.2 : 1.8, ph = (t % period) / period;
     ctx.strokeStyle = col(.8 * (1 - ph)); ctx.lineWidth = 1;
-    ctx.beginPath(); ctx.arc(cx, cy, R0 + ph * W * .55, 0, Math.PI * 2); ctx.stroke();
+    ctx.beginPath(); ctx.arc(cx, cy, Math.max(0, R0 + ph * W * .55), 0, Math.PI * 2); ctx.stroke();
   }
 
   // Étoiles qui scintillent en croix (à partir de 1/10 000)

@@ -12,23 +12,27 @@
   position: relative;
   display: grid;
   justify-items: center;
-  align-content: start;
-  gap: 4px;
+  /* places presque carrées : le jeton en grand au centre, le nom et la mutation lisibles dessous */
+  align-content: center;
+  gap: 6px;
+  aspect-ratio: 1 / 0.9;
   min-height: 150px;
-  padding: var(--s-3) var(--s-2);
+  padding: var(--s-4) var(--s-2);
   text-align: center;
 }
 .slots img {
-  width: 64px;
-  height: 64px;
+  width: clamp(64px, 46%, 104px);
+  height: auto;
+  aspect-ratio: 1;
   image-rendering: pixelated;
   --df: drop-shadow(0 0 3px rgba(var(--g), calc(0.5 * var(--ga, 0))));
 }
 .slots b {
-  font-size: var(--fs-sm);
+  font-size: var(--fs-md);
+  line-height: 1.15;
 }
 .slots small {
-  font-size: var(--fs-xs);
+  font-size: var(--fs-sm);
   color: var(--text-2);
 }
 .empty {

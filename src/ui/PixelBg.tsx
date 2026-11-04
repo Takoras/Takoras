@@ -138,7 +138,7 @@ export function PixelBg({
       });
       // 1/100 000 : anneau de pixels en orbite et ondes de choc ; 1/1 000 000 : deux anneaux
       if (lv >= 4) {
-        const R0 = cw * 0.78;
+        const R0 = Math.max(0, cw * 0.78);
         const rings: [number, number, number][] = [
           [1, 22, 0.9],
           ...(lv >= 5 ? [[-1.4, 14, 1.25] as [number, number, number]] : []),
@@ -156,7 +156,7 @@ export function PixelBg({
         ctx.strokeStyle = col(0.8 * (1 - ph));
         ctx.lineWidth = 1;
         ctx.beginPath();
-        ctx.arc(cx, cy, R0 + ph * W * 0.55, 0, Math.PI * 2);
+        ctx.arc(cx, cy, Math.max(0, R0 + ph * W * 0.55), 0, Math.PI * 2);
         ctx.stroke();
       }
       ctx.globalAlpha = 1;
@@ -222,7 +222,13 @@ export function PixelBg({
       last = 0;
     const t0 = performance.now();
     const loop = (now: number) => {
-      draw((now - t0) / 1000, last ? Math.min(0.05, (now - last) / 1000) : 0);
+      // le premier « now » peut précéder t0 : le temps ne doit jamais être négatif ; et une erreur de dessin
+      // ne doit jamais arrêter la boucle (sinon le fond reste vide)
+      try {
+        draw(Math.max(0, (now - t0) / 1000), last ? Math.min(0.05, Math.max(0, (now - last) / 1000)) : 0);
+      } catch {
+        /* image ratée : on continue à la suivante */
+      }
       last = now;
       // effets réduits : on ne redessine que pendant une transition de couleur ou de niveau
       const settled = lvPrev === lvNow && target.current.rgb.every((v, i) => Math.abs(v - (cur[i] ?? v)) < 0.5);
