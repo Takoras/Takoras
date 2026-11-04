@@ -28,7 +28,8 @@ export default defineConfig({
   },
   build: {
     target: 'es2022',
-    sourcemap: true,
+    // pas de cartes du code en ligne : personne ne peut relire le code source mis en forme (sécurité, lot 1)
+    sourcemap: false,
     rolldownOptions: {
       output: {
         // Moins de petits fichiers au premier chargement (chacun coûte un aller-retour réseau) :
