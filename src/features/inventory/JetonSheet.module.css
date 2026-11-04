@@ -278,20 +278,20 @@
     opacity: 0;
     translate: 0 18px;
     scale: 0.92;
-    transform: rotate(-12deg);
+    transform: rotate(-6deg);
   }
   30% {
     opacity: 1;
     translate: 0 0;
-    scale: 1.02;
-    transform: rotate(8deg);
+    scale: 1.01;
+    transform: rotate(4deg);
   }
   55% {
     scale: 1;
-    transform: rotate(-4deg);
+    transform: rotate(-2deg);
   }
   78% {
-    transform: rotate(1.5deg);
+    transform: rotate(0.8deg);
   }
   100% {
     opacity: 1;
