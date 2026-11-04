@@ -247,47 +247,18 @@ export default function Combat() {
         </div>
 
         <Sat className={s.satTeam}>
-          <section className={s.team} aria-labelledby="team-t">
-            <header>
-              <h2 id="team-t">{t('arena.team')}</h2>
-              <Button size="sm" onClick={() => setEditing(-1)}>
-                {t('arena.edit')}
-              </Button>
-            </header>
-            <ul>
-              {team.map((u, i) =>
-                u ? (
-                  <li key={i}>
-                    <TeamCard
-                      u={u}
-                      onEdit={() => {
-                        sfx.click();
-                        setEditing(i);
-                      }}
-                      onInfo={() => {
-                        sfx.click();
-                        setSheet(u);
-                      }}
-                    />
-                  </li>
-                ) : (
-                  <li key={i}>
-                    <button
-                      type="button"
-                      className={`${s.slot} ${s.emptySlot}`}
-                      onClick={() => {
-                        sfx.click();
-                        setEditing(i);
-                      }}
-                    >
-                      <b aria-hidden>＋</b>
-                      <small>{t('arena.pick')}</small>
-                    </button>
-                  </li>
-                ),
-              )}
-            </ul>
-          </section>
+          <TeamList
+            team={team}
+            onEdit={(i) => {
+              sfx.click();
+              setEditing(i);
+            }}
+            onEditAll={() => setEditing(-1)}
+            onInfo={(u) => {
+              sfx.click();
+              setSheet(u);
+            }}
+          />
         </Sat>
 
         <Sat className={s.satBoard}>
@@ -376,37 +347,82 @@ function Float({
   );
 }
 
-// Mini carte d'un jeton de l'équipe : toucher = le changer tout de suite ; « i » = sa fiche (pouvoir en vidéo)
-function TeamCard({ u, onEdit, onInfo }: { u: Member; onEdit: () => void; onInfo: () => void }) {
-  const t = useT();
+type TeamVProps = {
+  team: (Member | null)[];
+  onEdit: (i: number) => void;
+  onEditAll: () => void;
+  onInfo: (u: Member) => void;
+};
+function useSlotInfo() {
   const jn = useJn();
   const lang = useSettings((x) => x.lang);
-  const j = jetonOf(u.name, u.serie),
-    k = powerInfo(u.name, lang);
+  return (u: Member) => {
+    const j = jetonOf(u.name, u.serie);
+    return { j, k: powerInfo(u.name, lang), name: jn(u.name) };
+  };
+}
+
+// Ton équipe : une ligne par jeton avec un gros numéro (1, 2, 3) ; toucher le jeton = le changer, « i » = sa fiche
+function TeamList({ team, onEdit, onEditAll, onInfo }: TeamVProps) {
+  const t = useT();
+  const info = useSlotInfo();
   return (
-    <div className={s.slotWrap}>
-      <button
-        type="button"
-        className={s.slot}
-        onClick={onEdit}
-        style={glowVars(j, u.variant) as CSSProperties}
-        aria-label={`${jn(u.name)} · ${t('arena.swap')}`}
-      >
-        <img className={vImg(u.variant)} src={texOf(j)} alt="" />
-        <b className={s.slotName}>
-          {jn(u.name)}
-          {u.variant ? <MutationStamp v={u.variant} size="sm" /> : null}
-        </b>
-        <small className={s.ab} style={{ '--c': k.col } as CSSProperties}>
-          {k.name}
-        </small>
-        <span className={s.swap} aria-hidden>
-          ⇄
-        </span>
-      </button>
-      <button type="button" className={s.infoBtn} onClick={onInfo} aria-label={t('arena.details', { n: jn(u.name) })}>
-        i
-      </button>
-    </div>
+    <section className={s.team} aria-labelledby="team-t">
+      <header className={s.teamHead}>
+        <h2 id="team-t">{t('arena.team')}</h2>
+        <Button size="sm" onClick={onEditAll}>
+          {t('arena.edit')}
+        </Button>
+      </header>
+      <ol className={s.teamList}>
+        {team.map((u, i) => {
+          if (!u)
+            return (
+              <li key={i}>
+                <button type="button" className={`${s.teamRow} ${s.teamEmpty}`} onClick={() => onEdit(i)}>
+                  <span className={s.teamN}>{i + 1}</span>
+                  <span className={s.teamPlus} aria-hidden>
+                    ＋
+                  </span>
+                  <span className={s.teamTxt}>
+                    <b>{t('arena.pick')}</b>
+                  </span>
+                </button>
+              </li>
+            );
+          const { j, k, name } = info(u);
+          return (
+            <li key={i}>
+              <div
+                className={s.teamRow}
+                style={{ ...glowVars(j, u.variant), '--c': k.col } as CSSProperties}
+                role="group"
+                aria-label={name}
+              >
+                <span className={s.teamN}>{i + 1}</span>
+                <button type="button" onClick={() => onEdit(i)} aria-label={`${name} · ${t('arena.swap')}`}>
+                  <img className={vImg(u.variant)} src={texOf(j)} alt="" />
+                </button>
+                <span className={s.teamTxt}>
+                  <b>
+                    {name}
+                    {u.variant ? <MutationStamp v={u.variant} size="sm" /> : null}
+                  </b>
+                  <small>{k.name}</small>
+                </span>
+                <button
+                  type="button"
+                  className={s.teamInfo}
+                  onClick={() => onInfo(u)}
+                  aria-label={t('arena.details', { n: name })}
+                >
+                  i
+                </button>
+              </div>
+            </li>
+          );
+        })}
+      </ol>
+    </section>
   );
 }

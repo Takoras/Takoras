@@ -400,87 +400,93 @@
   text-align: center;
 }
 
-/* Équipe : un bloc satellite ; chaque jeton dans une boîte légère comme l'inventaire */
+/* Ton équipe (choisie en live) : un bloc satellite, une ligne par jeton avec un gros numéro */
 .team {
   display: grid;
-  gap: var(--s-3);
+  gap: var(--s-2);
   padding: var(--s-4);
   border: 1px solid rgb(255 255 255 / 10%);
   border-radius: 14px;
   background: rgb(20 20 30 / 70%);
   box-shadow: 0 16px 34px rgb(0 0 0 / 40%);
 }
-.team header {
+.teamHead {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  gap: var(--s-2);
+  margin-bottom: var(--s-1);
 }
-.team h2 {
+.teamHead h2 {
   font-size: var(--fs-lg);
 }
-.team ul {
+.teamList {
   list-style: none;
   display: grid;
-  grid-template-columns: repeat(3, 1fr);
   gap: var(--s-2);
 }
-.slot {
-  position: relative;
-  width: 100%;
-  min-height: 150px;
+.teamRow {
   display: grid;
-  justify-items: center;
-  align-content: center;
-  gap: 2px;
-  padding: var(--s-4) var(--s-2) var(--s-3);
+  grid-template-columns: 34px auto 1fr auto;
+  align-items: center;
+  gap: var(--s-3);
+  width: 100%;
+  padding: var(--s-2) var(--s-3);
   border: 1px solid rgb(255 255 255 / 8%);
-  border-radius: 14px;
-  background:
-    linear-gradient(160deg, rgba(var(--g, 139, 92, 246), calc(0.1 * var(--ga, 0))), transparent 60%),
-    rgb(255 255 255 / 3.5%);
-  text-align: center;
+  border-radius: 12px;
+  background: linear-gradient(90deg, rgba(var(--g, 139, 92, 246), 0.12), transparent 55%), rgb(255 255 255 / 3.5%);
+  text-align: left;
   transition: border-color var(--t-fast);
 }
-.slot:hover {
-  border-color: rgba(var(--g, 139, 92, 246), 0.45);
+.teamRow:hover {
+  border-color: rgba(var(--g, 139, 92, 246), 0.5);
 }
-.slot img {
-  width: 80px;
-  height: 80px;
-  --df: drop-shadow(0 0 3px rgba(var(--g), calc(0.5 * var(--ga, 0))));
+.teamRow img {
+  width: 48px;
+  height: 48px;
 }
-.slot b {
-  font-size: var(--fs-sm);
+.teamN {
+  font-family: var(--font-display);
+  font-size: var(--fs-2xl);
+  font-weight: 800;
+  line-height: 1;
+  color: rgb(255 255 255 / 22%);
 }
-.slot small {
+.teamTxt {
+  display: grid;
+  gap: 2px;
+  min-width: 0;
+}
+.teamTxt b {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  font-weight: 800;
+}
+.teamTxt small {
   font-size: var(--fs-xs);
+  font-weight: 700;
+  color: var(--c, var(--accent-hi));
+}
+.teamInfo {
+  width: 30px;
+  height: 30px;
+  border: 1px solid rgb(255 255 255 / 14%);
+  border-radius: 999px;
+  background: rgb(0 0 0 / 30%);
+  font-weight: 800;
+  color: var(--text-2);
+}
+.teamEmpty {
+  border-style: dashed;
+  background: none;
   color: var(--muted);
 }
-/* grand écran : l'équipe est dans la colonne de gauche → une ligne par jeton (image à gauche, nom et pouvoir) */
-@media (min-width: 1180px) {
-  .team ul {
-    grid-template-columns: 1fr;
-  }
-  .satTeam .slot {
-    grid-template-columns: 64px 1fr;
-    grid-template-rows: auto auto;
-    place-items: center start;
-    column-gap: var(--s-3);
-    min-height: 0;
-    padding: var(--s-3) var(--s-4);
-    text-align: left;
-  }
-  .satTeam .slot img {
-    grid-row: 1 / 3;
-    width: 64px;
-    height: 64px;
-  }
-  .satTeam .emptySlot {
-    grid-template-columns: auto 1fr;
-    min-height: 88px;
-  }
+.teamPlus {
+  width: 48px;
+  font-size: var(--fs-xl);
+  text-align: center;
 }
+
 .emptySlot {
   border: 2px dashed var(--line-strong);
   background: none;
