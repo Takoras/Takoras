@@ -135,7 +135,8 @@
   height: 100%;
   border-radius: inherit;
   background: var(--accent-hi);
-  transition: width var(--t-med) var(--ease-out);
+  /* même durée que les chiffres qui défilent au-dessus */
+  transition: width 0.7s cubic-bezier(0.22, 1, 0.36, 1);
 }
 .vbar i {
   background: linear-gradient(90deg, var(--v-gold), #e0e7ff, #a855f7);

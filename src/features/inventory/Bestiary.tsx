@@ -18,6 +18,9 @@ import { confirm } from '@/ui/confirm';
 import { toast } from '@/ui/toast';
 import { JetonModal } from './JetonModal';
 import { useSwingAll } from '@/ui/useSwing';
+import { Tween } from '@/ui/Tween';
+
+const rnd = (n: number) => String(Math.round(n));
 import { BoardSection } from '../board/Board';
 import {
   cKey,
@@ -234,7 +237,8 @@ export default function Bestiary() {
       <div className={s.progress}>
         <div>
           <b>
-            {found}/{all.length}
+            {/* en changeant de série, les chiffres défilent jusqu'aux nouveaux (pas de saut) */}
+            <Tween value={found} format={rnd} ms={700} />/<Tween value={all.length} format={rnd} ms={700} />
           </b>{' '}
           <span className="muted">{t('ui.bst_found')}</span>
           <span className={s.bar}>
@@ -243,7 +247,7 @@ export default function Bestiary() {
         </div>
         <div>
           <b>
-            {vFound}/{vAll}
+            <Tween value={vFound} format={rnd} ms={700} />/<Tween value={vAll} format={rnd} ms={700} />
           </b>{' '}
           <span className="muted">{t('ui.bst_variants')}</span>
           <span className={`${s.bar} ${s.vbar}`}>
