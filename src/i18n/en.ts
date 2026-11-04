@@ -100,6 +100,7 @@ export const en: Dict = {
     inv_items_sub: 'Potions, hourglasses, recharges… use them whenever you want. Your tokens are in the Bestiary tab.',
     inv_items_empty: 'No items yet. Potions and hourglasses are sold in the shop.',
     bst_title: 'Your collection',
+    bst_mut_only: 'With mutation',
     bst_owned_only: 'Owned',
     bst_none: 'No tokens here.',
     inv_select: 'Select',

@@ -17,7 +17,6 @@ import { Avatar, setAvatar } from '@/ui/Avatar';
 import { Button } from '@/ui/Button';
 import { confirm } from '@/ui/confirm';
 import { Modal } from '@/ui/Modal';
-import { MutationStamp } from '@/ui/MutationStamp';
 import { toast } from '@/ui/toast';
 import { VTag } from '@/ui/VTag';
 import { JetonModal } from '../inventory/JetonModal';
@@ -321,6 +320,7 @@ function Collection({
             <button
               type="button"
               className={iv.cardBtn}
+              style={{ '--i': Math.min(i, 24) } as CSSProperties}
               onClick={() => {
                 sfx.click();
                 onOpen(j.name, !c);
@@ -330,10 +330,15 @@ function Collection({
               <img className="px" src={c ? texOf(j) : MYSTERE} alt="" />
               <b>{c ? jn(j.name) : '???'}</b>
               <small>{c ? `1/${fmt(j.odds)}` : '?'}</small>
-              {c?.size ? (
-                <span className={s.vrow}>
-                  {[...c].map((v) => (
-                    <MutationStamp key={v} v={v} size="xs" />
+              {/* toujours les 3 mutations : en couleur s'il l'a trouvée, grisée sinon */}
+              {c ? (
+                <span className={iv.vstamps}>
+                  {(['gold', 'celeste', 'ombre'] as const).map((v) => (
+                    <i
+                      key={v}
+                      className={c.has(v) ? undefined : iv.vOff}
+                      style={{ backgroundImage: `url(/img/stamps/${v}.png)` }}
+                    />
                   ))}
                 </span>
               ) : null}

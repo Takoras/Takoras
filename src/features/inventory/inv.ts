@@ -89,31 +89,71 @@ export const lvlOf = (d: InvData | undefined, serie: string, name: string) => d?
 
 // Filtres de la grille
 export type Sort = 'rarity' | 'count' | 'recent' | 'name';
-export type View = { serie: string; vtab: string; tier: 'all' | Tier; own: boolean; q: string; sort: Sort };
-export type Card = { j: Jeton; num: number; g?: Group; seen: boolean };
+export type View = {
+  serie: string;
+  /** '' = vue « toutes mutations » (une carte par jeton, ses 3 mutations en tampons) */
+  vtab: string;
+  tier: 'all' | Tier;
+  own: boolean;
+  /** seulement les jetons dont on a déjà trouvé au moins une mutation */
+  mut?: boolean;
+  q: string;
+  sort: Sort;
+};
+export type Card = {
+  j: Jeton;
+  num: number;
+  /** le groupe de la vue (jetons normaux quand vtab = '') */
+  g?: Group;
+  seen: boolean;
+  /** les groupes mutés qu'on possède */
+  vs: Partial<Record<(typeof VKEYS)[number], Group>>;
+  /** mutations déjà trouvées (même vendues) */
+  found: Record<string, number>;
+  /** combien on en a, toutes mutations comprises */
+  total: number;
+};
 export function visibleCards(d: InvData, v: View, jn: (n: string) => string): Card[] {
   const all = SERIES[v.serie] ?? [];
   const byKey = new Map(d.groups.map((g) => [g.key, g]));
   const list = all
-    .map((j, i) => ({
-      j,
-      num: i + 1,
-      g: byKey.get(gKey(v.serie, j.name, v.vtab)),
-      seen: !!d.coll.get(cKey(v.serie, j.name))?.vars[v.vtab],
-    }))
+    .map((j, i): Card => {
+      const g = byKey.get(gKey(v.serie, j.name, v.vtab));
+      const vs: Card['vs'] = {};
+      for (const k of VKEYS) {
+        const x = byKey.get(gKey(v.serie, j.name, k));
+        if (x) vs[k] = x;
+      }
+      const coll = d.coll.get(cKey(v.serie, j.name));
+      const total = v.vtab
+        ? (g?.ids.length ?? 0)
+        : (byKey.get(gKey(v.serie, j.name, ''))?.ids.length ?? 0) +
+          Object.values(vs).reduce((n, x) => n + x.ids.length, 0);
+      return {
+        j,
+        num: i + 1,
+        g,
+        seen: v.vtab ? !!coll?.vars[v.vtab] : !!coll,
+        vs,
+        found: coll?.vars ?? {},
+        total,
+      };
+    })
     .filter(
       (x) =>
         (v.tier === 'all' || tierKey(x.j.odds) === v.tier) &&
-        (!v.own || x.g) &&
+        (!v.own || x.total > 0) &&
+        (!v.mut || VKEYS.some((k) => (x.found[k] ?? 0) > 0)) &&
         jn(x.j.name).toLowerCase().includes(v.q.toLowerCase()),
     );
-  const cnt = (x: Card) => x.g?.ids.length ?? 0,
-    vo = (x: Card) => vOdds(x.j.odds, v.vtab);
+  const cnt = (x: Card) => x.total,
+    vo = (x: Card) => vOdds(x.j.odds, v.vtab),
+    last = (x: Card) => Math.max(x.g?.last ?? 0, ...Object.values(x.vs).map((g) => g.last));
   const by: Record<Sort, (a: Card, b: Card) => number> = {
     rarity: (a, b) => vo(a) - vo(b),
     count: (a, b) => cnt(b) - cnt(a) || a.j.odds - b.j.odds,
     name: (a, b) => jn(a.j.name).localeCompare(jn(b.j.name)),
-    recent: (a, b) => (b.g?.last ?? 0) - (a.g?.last ?? 0),
+    recent: (a, b) => last(b) - last(a),
   };
   return list.sort(by[v.sort]);
 }

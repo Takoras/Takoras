@@ -909,3 +909,99 @@
   text-transform: uppercase;
   color: var(--text-2);
 }
+
+/* ======================================================================
+   Bestiaire vivant : chaque jeton dans une boîte légère (peu opaque), qui penche un peu, flotte
+   doucement et se balance au passage de la souris (--swing, useSwing), comme les blocs de l'accueil.
+   Les boîtes arrivent en cascade à l'ouverture (--i = rang dans la grille).
+   ====================================================================== */
+.card .cardBtn {
+  --tilt: 0deg;
+  --fl: 6s;
+  overflow: visible;
+  border: 1px solid rgb(255 255 255 / 8%);
+  border-radius: 14px;
+  background:
+    linear-gradient(160deg, rgba(var(--g), calc(0.08 * var(--ga, 0))), transparent 60%), rgb(255 255 255 / 3.5%);
+  box-shadow: 0 10px 22px rgb(0 0 0 / 25%);
+  rotate: calc(var(--tilt) + var(--swing, 0deg));
+  transform-origin: 50% 0;
+  animation:
+    cardIn 0.5s cubic-bezier(0.22, 1, 0.36, 1) calc(var(--i, 0) * 35ms) both,
+    cardFloat var(--fl) ease-in-out calc(var(--i, 0) * -0.7s) infinite;
+  transition:
+    border-color var(--t-fast),
+    background-color var(--t-fast);
+}
+.card:nth-child(4n + 1) .cardBtn {
+  --tilt: -1.4deg;
+  --fl: 5.6s;
+}
+.card:nth-child(4n + 2) .cardBtn {
+  --tilt: 1deg;
+  --fl: 6.8s;
+}
+.card:nth-child(4n + 3) .cardBtn {
+  --tilt: -0.6deg;
+  --fl: 7.2s;
+}
+.card:nth-child(4n) .cardBtn {
+  --tilt: 1.6deg;
+  --fl: 6.2s;
+}
+.card:hover .cardBtn {
+  border-color: rgba(var(--g), calc(0.2 + 0.4 * var(--ga, 0)));
+}
+/* jamais trouvé : boîte encore plus discrète */
+.unk .cardBtn {
+  border-style: dashed;
+  border-color: rgb(255 255 255 / 6%);
+  background: rgb(255 255 255 / 1.5%);
+  box-shadow: none;
+}
+@keyframes cardIn {
+  from {
+    opacity: 0;
+    translate: 0 16px;
+    scale: 0.94;
+  }
+}
+@keyframes cardFloat {
+  0%,
+  100% {
+    transform: translateY(0);
+  }
+  50% {
+    transform: translateY(-5px);
+  }
+}
+
+/* les 3 mutations sous le jeton : en couleur si on l'a déjà trouvée, grisée sinon */
+.vstamps {
+  position: relative;
+  display: flex;
+  gap: 4px;
+  margin-top: 4px;
+}
+.vstamps i {
+  width: 18px;
+  height: 18px;
+  background: center / contain no-repeat;
+  image-rendering: pixelated;
+  transition:
+    filter var(--t-fast),
+    opacity var(--t-fast);
+}
+.vstamps i.vOff {
+  filter: grayscale(1) brightness(0.6);
+  opacity: 0.35;
+}
+
+:global(html.reduce-fx) .card .cardBtn {
+  animation: cardIn 0.3s ease-out both;
+}
+@media (prefers-reduced-motion: reduce) {
+  .card .cardBtn {
+    animation: none;
+  }
+}

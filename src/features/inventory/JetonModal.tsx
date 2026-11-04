@@ -31,6 +31,7 @@ export function JetonModal({
   found,
   facts,
   pick,
+  onShow,
   demo,
   onClose,
   children,
@@ -42,6 +43,8 @@ export function JetonModal({
   found?: Partial<Record<string, boolean | number>>;
   facts?: ReactNode;
   pick?: (v: string) => void;
+  /** la mutation montrée change (bestiaire : les boutons de vente suivent) */
+  onShow?: (v: string) => void;
   /** montre la vidéo d'exemple du pouvoir (éditeur d'équipe) */
   demo?: boolean;
   onClose: () => void;
@@ -250,6 +253,7 @@ export function JetonModal({
                           const nv = pv === v ? '' : v;
                           setPv(nv);
                           pick?.(nv);
+                          onShow?.(nv);
                         }}
                       >
                         <span style={{ backgroundImage: `url(/img/stamps/${v}.png)` }} />

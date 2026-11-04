@@ -5,7 +5,7 @@ import { Link, NavLink } from 'react-router';
 import { NeedLogin } from '@/app/NeedLogin';
 import { useQueryClient } from '@tanstack/react-query';
 import { errorText, invApi } from '@/api';
-import { MYSTERE, sellValue, SERIES, texOf, vImg, vOdds, glowVars, jetonOf, TEMPLATE } from '@/data/jetons';
+import { MYSTERE, sellValue, SERIES, texOf, glowVars, jetonOf, TEMPLATE } from '@/data/jetons';
 import { fmtLuck } from '@/engines/env';
 import { moPlay, moSnap } from '@/engines/motion.js';
 import { sfx } from '@/engines/sound.js';
@@ -17,9 +17,11 @@ import { Button } from '@/ui/Button';
 import { confirm } from '@/ui/confirm';
 import { toast } from '@/ui/toast';
 import { JetonModal } from './JetonModal';
+import { useSwing } from '@/ui/useSwing';
 import { BoardSection } from '../board/Board';
 import {
   cKey,
+  gKey,
   needsConfirm,
   quickSelect,
   selTotals,
@@ -64,12 +66,14 @@ export default function Bestiary() {
     vtab: '',
     tier: 'all',
     own: false,
+    mut: false,
     q: '',
     sort: 'rarity',
   });
   const [selecting, setSelecting] = useState(false);
   const [sel, setSel] = useState<Map<string, number>>(new Map());
-  const [open, setOpen] = useState<{ name: string; key: string } | null>(null);
+  // fiche ouverte : le jeton et la mutation montrée (les boutons de vente suivent le tampon touché)
+  const [open, setOpen] = useState<{ name: string; v: string } | null>(null);
   const [busy, setBusy] = useState(false);
   const grid = useRef<HTMLUListElement>(null);
   const snap = useRef<{ m: Map<string, DOMRect>; dissolve: boolean } | null>(null);
@@ -162,10 +166,11 @@ export default function Bestiary() {
       else m.delete(g.key);
       return setSel(m);
     }
-    setOpen({ name: c.j.name, key: g?.key ?? '' });
+    // on ouvre sur les normaux, ou sur la première mutation qu'on possède
+    setOpen({ name: c.j.name, v: g ? '' : (VKEYS.find((k) => c.vs[k]) ?? '') });
   };
 
-  const og = open && d ? d.groups.find((g) => g.key === open.key) : undefined;
+  const og = open && d ? d.groups.find((g) => g.key === gKey(view.serie, open.name, open.v)) : undefined;
   const oc = open && d ? d.coll.get(cKey(view.serie, open.name)) : undefined;
   return (
     <section className={`${s.page} ${selecting ? s.withBar : ''}`}>
@@ -239,31 +244,14 @@ export default function Bestiary() {
           </span>
         </div>
       </div>
-      <div className={s.vtabs} role="tablist" aria-label={t('ui.v_none')}>
-        {(['', ...VKEYS] as const).map((v) => (
-          <button
-            key={v || 'none'}
-            type="button"
-            role="tab"
-            aria-selected={view.vtab === v}
-            className={v ? s[`v_${v}`] : undefined}
-            onClick={() => {
-              if (v !== view.vtab) {
-                sfx.click();
-                setSel(new Map());
-                set({ vtab: v });
-              }
-            }}
-          >
-            {v ? t(`ui.v_${v}`) : t('ui.v_none')}
-            <small>{groups.filter((g) => g.variant === v).reduce((n, g) => n + g.ids.length, 0)}</small>
-          </button>
-        ))}
-      </div>
       <div className={s.tools}>
         <div className={s.chips} role="group" aria-label={t('ui.sort_rarity')}>
           <button type="button" aria-pressed={view.own} onClick={() => set({ own: !view.own })}>
             ✓ {t('ui.bst_owned_only')}
+          </button>
+          {/* seulement les jetons dont on a trouvé au moins une mutation */}
+          <button type="button" aria-pressed={!!view.mut} onClick={() => set({ mut: !view.mut })}>
+            ✦ {t('ui.bst_mut_only')}
           </button>
         </div>
         <div className={s.right}>
@@ -293,11 +281,11 @@ export default function Bestiary() {
         </p>
       ) : cards.length ? (
         <ul ref={grid} className={s.grid}>
-          {cards.map((c) => (
+          {cards.map((c, k) => (
             <CardView
               key={c.j.name}
               c={c}
-              vtab={view.vtab}
+              i={k}
               q={c.g ? (sel.get(c.g.key) ?? 0) : 0}
               selecting={selecting}
               onTap={tap}
@@ -349,7 +337,8 @@ export default function Bestiary() {
         <JetonModal
           name={open.name}
           serie={view.serie}
-          variant={og ? og.variant : view.vtab}
+          variant={open.v}
+          onShow={(v) => setOpen((o) => (o ? { ...o, v } : o))}
           locked={!og && !oc}
           found={oc?.vars}
           facts={
@@ -391,15 +380,17 @@ export default function Bestiary() {
   );
 }
 
+// Un jeton du bestiaire : une boîte légère qui penche, flotte et se balance au passage de la souris (comme les
+// blocs de l'accueil), arrive en cascade ; en dessous, ses 3 mutations en tampons (grisés tant qu'on ne les a pas)
 function CardView({
   c,
-  vtab,
+  i,
   q,
   selecting,
   onTap,
 }: {
   c: Card;
-  vtab: string;
+  i: number;
   q: number;
   selecting: boolean;
   onTap: (c: Card, step?: number) => void;
@@ -408,14 +399,17 @@ function CardView({
   const jn = useJn();
   const lang = useSettings((x) => x.lang);
   const fmt = (n: number) => n.toLocaleString(locale(lang));
+  const btn = useRef<HTMLButtonElement>(null);
+  useSwing(btn, 0.18);
   const { j, g } = c,
-    n = g?.ids.length ?? 0,
-    locked = !!g && !g.free.length;
+    n = c.total,
+    locked = !!g && !g.free.length,
+    all = [g, ...Object.values(c.vs)].filter((x): x is Group => !!x);
   // jamais trouvé : mystère total (fond gris neutre, pas de numéro, pas de rareté, pas de nom)
-  const known = !!g || c.seen;
-  const badge = g?.deck
+  const known = n > 0 || c.seen;
+  const badge = all.some((x) => x.deck)
     ? ['', t('ui.in_deck')]
-    : g?.shown
+    : all.some((x) => x.shown)
       ? ['', t('ui.in_showcase')]
       : locked
         ? ['', t('ui.lock')]
@@ -423,26 +417,40 @@ function CardView({
   return (
     <li
       data-key={c.j.name}
-      data-sig={`${n}|${locked}|${g?.deck ?? 0}|${g?.shown ?? 0}`}
+      data-sig={`${n}|${locked}|${badge?.[1] ?? ''}`}
       style={(known ? glowVars(j) : { '--g': '113, 113, 122' }) as CSSProperties}
-      className={[s.card, !g && (c.seen ? s.gone : s.unk), q && s.sel, locked && s.locked].filter(Boolean).join(' ')}
+      className={[s.card, !n && (c.seen ? s.gone : s.unk), q && s.sel, locked && s.locked].filter(Boolean).join(' ')}
     >
       <button
+        ref={btn}
         type="button"
         className={s.cardBtn}
+        style={{ '--i': Math.min(i, 24) } as CSSProperties}
         onClick={() => onTap(c)}
         aria-pressed={selecting && g ? q > 0 : undefined}
       >
         <span className={s.num}>#{known ? String(c.num).padStart(2, '0') : '?'}</span>
-        {g ? <span className={s.count}>×{n}</span> : null}
+        {n ? <span className={s.count}>×{n}</span> : null}
         {badge ? (
           <span className={s.badge} title={badge[1]}>
             {badge[0]}
           </span>
         ) : null}
-        <img className={g || c.seen ? vImg(vtab) : 'px'} src={g || c.seen ? texOf(j) : MYSTERE} alt="" />
-        <b>{g || c.seen ? jn(j.name) : '???'}</b>
-        {known ? <small>1/{fmt(vOdds(j.odds, vtab))}</small> : <small>?</small>}
+        <img className="px" src={known ? texOf(j) : MYSTERE} alt="" />
+        <b>{known ? jn(j.name) : '???'}</b>
+        {known ? <small>1/{fmt(j.odds)}</small> : <small>?</small>}
+        {known ? (
+          <span className={s.vstamps} aria-label={t('ui.bst_variants')}>
+            {VKEYS.map((v) => (
+              <i
+                key={v}
+                className={(c.found[v] ?? 0) > 0 ? undefined : s.vOff}
+                title={t(`ui.v_${v}`)}
+                style={{ backgroundImage: `url(/img/stamps/${v}.png)` }}
+              />
+            ))}
+          </span>
+        ) : null}
       </button>
       {selecting && g && g.free.length ? (
         <div className={s.step}>

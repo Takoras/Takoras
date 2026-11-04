@@ -99,6 +99,7 @@ export const fr = {
     inv_items_sub: 'Potions, sabliers, recharges… utilise-les quand tu veux. Tes jetons sont dans l’onglet Bestiaire.',
     inv_items_empty: 'Pas encore d’objet. Les potions et sabliers s’achètent en boutique.',
     bst_title: 'Ta collection',
+    bst_mut_only: 'Avec mutation',
     bst_owned_only: 'Possédés',
     bst_none: 'Aucun jeton ici.',
     inv_select: 'Sélectionner',
