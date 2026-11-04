@@ -17,3 +17,45 @@
   flex: 1;
   accent-color: var(--accent);
 }
+
+/* Mon compte : séparé du reste, la suppression en rouge */
+.account {
+  padding-top: var(--s-4);
+  border-top: 1px solid rgb(255 255 255 / 8%);
+}
+.deleteBtn {
+  color: #fca5a5;
+}
+.danger {
+  display: grid;
+  gap: var(--s-3);
+  width: 100%;
+  padding: var(--s-4);
+  border: 1px solid rgb(239 68 68 / 45%);
+  border-radius: 8px;
+  background: rgb(239 68 68 / 8%);
+}
+.danger p {
+  margin: 0;
+  color: var(--text);
+}
+.danger label {
+  display: grid;
+  gap: var(--s-1);
+  font-size: var(--fs-sm);
+  color: var(--text-2);
+}
+.danger input {
+  padding: var(--s-2) var(--s-3);
+  border: 1px solid rgb(255 255 255 / 15%);
+  border-radius: 6px;
+  background: rgb(0 0 0 / 30%);
+  color: var(--text);
+  font: inherit;
+  letter-spacing: 0.05em;
+}
+.dangerBtns {
+  display: flex;
+  justify-content: flex-end;
+  gap: var(--s-2);
+}

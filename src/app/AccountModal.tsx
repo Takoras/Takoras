@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { Link } from 'react-router';
 import { useQueryClient } from '@tanstack/react-query';
 import { accountApi, errorText } from '@/api';
 import { useMe } from '@/api/queries';
@@ -18,12 +19,15 @@ export function AccountModal() {
   const user = useAuth((x) => x.user);
   const me = useMe();
   const open = useUI((x) => x.account);
+  // accord aux CGU (et âge) avant tout : seulement si le serveur dit explicitement « pas encore accepté »
+  const needTerms = !!user && me.isSuccess && me.data.terms === false;
   const needPseudo = !!user && me.isSuccess && !me.data.pseudo;
   const qc = useQueryClient();
   const [pseudo, setPseudo] = useState('');
   const [busy, setBusy] = useState(false);
   const valid = PSEUDO_RE.test(pseudo);
 
+  if (needTerms) return <TermsGate />;
   if (needPseudo) {
     return (
       <Modal open locked onClose={() => undefined} title={t('ui.acc_choose_pseudo')}>
@@ -83,6 +87,62 @@ export function AccountModal() {
         </svg>
         {t('ui.acc_with', { p: 'Discord' })}
       </Button>
+    </Modal>
+  );
+}
+
+// « Avant de jouer » : accepter les CGU et la politique de confidentialité, et confirmer son âge
+// (15 ans ou plus, ou accord des parents). Obligatoire : la fenêtre ne se ferme pas avant.
+function TermsGate() {
+  const t = useT();
+  const lang = useSettings((x) => x.lang);
+  const qc = useQueryClient();
+  const uid = useAuth((x) => x.user?.id);
+  const [cgu, setCgu] = useState(false);
+  const [age, setAge] = useState(false);
+  const [busy, setBusy] = useState(false);
+  const [a, b] = t('ui.terms_accept', { cgu: '\u0000', privacy: '\u0001' }).split('\u0000');
+  const [b1, b2] = (b ?? '').split('\u0001');
+  return (
+    <Modal open locked onClose={() => undefined} title={t('ui.terms_title')}>
+      <form
+        className={s.form}
+        onSubmit={async (e) => {
+          e.preventDefault();
+          if (!cgu || !age || busy) return;
+          setBusy(true);
+          try {
+            const st = await accountApi.acceptTerms();
+            qc.setQueryData(['me', uid], st);
+          } catch (err) {
+            toast(errorText(err, lang), true);
+          } finally {
+            setBusy(false);
+          }
+        }}
+      >
+        <label className={s.check}>
+          <input type="checkbox" checked={cgu} onChange={(e) => setCgu(e.target.checked)} />
+          <span>
+            {a}
+            <Link to="/cgu" target="_blank">
+              {t('ui.terms_cgu')}
+            </Link>
+            {b1}
+            <Link to="/confidentialite" target="_blank">
+              {t('ui.terms_privacy')}
+            </Link>
+            {b2}
+          </span>
+        </label>
+        <label className={s.check}>
+          <input type="checkbox" checked={age} onChange={(e) => setAge(e.target.checked)} />
+          <span>{t('ui.terms_age')}</span>
+        </label>
+        <Button type="submit" variant="primary" disabled={!cgu || !age} loading={busy}>
+          {t('ui.terms_go')}
+        </Button>
+      </form>
     </Modal>
   );
 }

@@ -207,6 +207,9 @@ export type Database = {
         Returns: Json;
       };
       beta_of: { Args: { p: string[] }; Returns: { pseudo: string }[] };
+      accept_terms: { Args: never; Returns: Json };
+      delete_my_account: { Args: never; Returns: undefined };
+      export_my_data: { Args: never; Returns: Json };
       buy_item: { Args: { p_item: string }; Returns: Json };
       change_pseudo: { Args: { p: string }; Returns: undefined };
       claim_daily: { Args: never; Returns: Json };

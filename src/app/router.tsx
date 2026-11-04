@@ -47,6 +47,8 @@ export const router = createBrowserRouter([
       { path: '/profil', lazy: profile },
       { path: '/profil/:pseudo', lazy: profile },
       { path: '/confidentialite', lazy: page(() => import('@/pages/Privacy')) },
+      { path: '/mentions-legales', lazy: page(() => import('@/pages/Legal')) },
+      { path: '/cgu', lazy: page(() => import('@/pages/Terms')) },
       { path: '/admin', element: <AdminGate /> },
       ...(Lab ? [{ path: '/__lab', element: <Lab /> }] : []),
       { path: '*', element: <NotFound /> },

@@ -34,3 +34,26 @@
 .discord:hover {
   background: #4752c4 !important;
 }
+
+/* cases à cocher de l'accord (CGU, âge) : grandes et faciles à toucher */
+.check {
+  display: grid;
+  grid-template-columns: auto 1fr;
+  align-items: start;
+  gap: var(--s-3);
+  padding: var(--s-3);
+  border: 1px solid rgb(255 255 255 / 10%);
+  border-radius: 8px;
+  cursor: pointer;
+  line-height: 1.4;
+}
+.check input {
+  width: 20px;
+  height: 20px;
+  margin-top: 1px;
+  accent-color: var(--accent, #7c3aed);
+}
+.check a {
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}

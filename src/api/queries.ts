@@ -14,6 +14,8 @@ export type Me = {
   beta: boolean;
   tester: boolean;
   reset_at?: string | null;
+  /** a accepté les CGU (absent tant que le serveur ne le renvoie pas : on ne bloque alors personne) */
+  terms?: boolean;
   [k: string]: unknown;
 };
 

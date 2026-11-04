@@ -6,7 +6,7 @@ type Doc = { title: string; updated: string; intro: string; blocks: [string, str
 
 const FR: Doc = {
   title: 'Politique de confidentialité',
-  updated: 'Dernière mise à jour : 27 octobre 2026',
+  updated: 'Dernière mise à jour : 4 novembre 2026',
   intro:
     'La présente politique de confidentialité (ci-après la « Politique ») a pour objet d’informer toute personne utilisant le site et le jeu Takoras (ci-après le « Service ») de la manière dont ses données à caractère personnel sont collectées, utilisées, conservées et protégées, conformément au Règlement (UE) 2016/679 du 27 avril 2016 relatif à la protection des personnes physiques à l’égard du traitement des données à caractère personnel (ci-après le « RGPD ») et à la loi n° 78-17 du 6 janvier 1978 modifiée relative à l’informatique, aux fichiers et aux libertés (ci-après la « loi Informatique et Libertés »). En utilisant le Service, l’utilisateur reconnaît avoir pris connaissance de la présente Politique.',
   blocks: [
@@ -75,7 +75,7 @@ const FR: Doc = {
       '9. Droits des utilisateurs',
       [
         '9.1. Conformément aux articles 15 à 22 du RGPD, l’utilisateur dispose d’un droit d’accès, de rectification, d’effacement, de limitation du traitement, de portabilité de ses données et d’opposition au traitement fondé sur l’intérêt légitime. Il dispose également du droit de définir des directives relatives au sort de ses données après son décès.',
-        '9.2. L’utilisateur peut à tout moment modifier son pseudonyme, sa biographie, sa photo de profil et sa bannière depuis son profil. Il peut demander la suppression de son compte et de l’ensemble des données associées au moyen du bouton « Donner un avis ».',
+        '9.2. L’utilisateur peut à tout moment modifier son pseudonyme, sa biographie, sa photo de profil et sa bannière depuis son profil. Depuis les réglages, il peut télécharger l’ensemble de ses données (bouton « Télécharger mes données ») et supprimer définitivement son compte et toutes les données associées (bouton « Supprimer mon compte »).',
         '9.3. L’Éditeur s’engage à répondre à toute demande dans un délai d’un (1) mois à compter de sa réception, ce délai pouvant être prolongé de deux (2) mois compte tenu de la complexité ou du nombre de demandes, conformément à l’article 12 du RGPD. Une preuve d’identité pourra être demandée en cas de doute raisonnable.',
         '9.4. Si l’utilisateur estime, après avoir contacté l’Éditeur, que ses droits ne sont pas respectés, il peut introduire une réclamation auprès de la Commission nationale de l’informatique et des libertés (CNIL), 3 place de Fontenoy, TSA 80715, 75334 Paris Cedex 07, www.cnil.fr.',
       ],
@@ -83,7 +83,7 @@ const FR: Doc = {
     [
       '10. Mineurs',
       [
-        'Conformément à l’article 45 de la loi Informatique et Libertés, un mineur âgé de moins de quinze (15) ans ne peut utiliser le Service qu’avec le consentement conjoint de lui-même et du ou des titulaires de l’autorité parentale. Le titulaire de l’autorité parentale peut demander la suppression du compte d’un mineur au moyen du bouton « Donner un avis ».',
+        'Conformément à l’article 45 de la loi Informatique et Libertés, un mineur âgé de moins de quinze (15) ans ne peut utiliser le Service qu’avec le consentement conjoint de lui-même et du ou des titulaires de l’autorité parentale. Le titulaire de l’autorité parentale peut supprimer le compte d’un mineur depuis les réglages (bouton « Supprimer mon compte ») ou en faire la demande au moyen du bouton « Donner un avis ».',
       ],
     ],
     [
@@ -97,7 +97,7 @@ const FR: Doc = {
 
 const EN: Doc = {
   title: 'Privacy policy',
-  updated: 'Last updated: 27 October 2026',
+  updated: 'Last updated: 4 November 2026',
   intro:
     'This privacy policy (the “Policy”) explains to anyone using the Takoras website and game (the “Service”) how their personal data is collected, used, stored and protected, in accordance with Regulation (EU) 2016/679 of 27 April 2016 (the “GDPR”) and the French Data Protection Act no. 78-17 of 6 January 1978 as amended. By using the Service, the user acknowledges having read this Policy.',
   blocks: [
@@ -166,7 +166,7 @@ const EN: Doc = {
       '9. Users’ rights',
       [
         '9.1. Under Articles 15 to 22 GDPR, the user has the right of access, rectification, erasure, restriction of processing, data portability and objection to processing based on legitimate interest, as well as the right to give instructions regarding their data after death.',
-        '9.2. The user may change their username, bio, profile picture and banner at any time from their profile, and may request deletion of their account and all associated data using the “Feedback” button.',
+        '9.2. The user may change their username, bio, profile picture and banner at any time from their profile, and, from the settings, may download all their data (“Download my data” button) and permanently delete their account and all associated data (“Delete my account” button).',
         '9.3. The Publisher will answer any request within one (1) month of receipt, which may be extended by two (2) months given the complexity or number of requests, in accordance with Article 12 GDPR. Proof of identity may be requested in case of reasonable doubt.',
         '9.4. If, after contacting the Publisher, the user considers that their rights are not respected, they may lodge a complaint with the French data protection authority (CNIL), 3 place de Fontenoy, TSA 80715, 75334 Paris Cedex 07, www.cnil.fr, or with the supervisory authority of their country of residence.',
       ],
@@ -174,7 +174,7 @@ const EN: Doc = {
     [
       '10. Minors',
       [
-        'Under French law, a minor under fifteen (15) may only use the Service with the joint consent of the minor and the holder(s) of parental authority. A holder of parental authority may request deletion of a minor’s account using the “Feedback” button.',
+        'Under French law, a minor under fifteen (15) may only use the Service with the joint consent of the minor and the holder(s) of parental authority. A holder of parental authority may delete a minor’s account from the settings (“Delete my account” button) or request it using the “Feedback” button.',
       ],
     ],
     [

@@ -238,6 +238,14 @@ export function Layout() {
             <Icon name="help" />
             {t('ui.privacy')}
           </NavLink>
+          <NavLink to="/cgu">
+            <Icon name="help" />
+            {t('ui.terms')}
+          </NavLink>
+          <NavLink to="/mentions-legales">
+            <Icon name="help" />
+            {t('ui.legal_notice')}
+          </NavLink>
           {user ? (
             <button type="button" onClick={() => void signOut()}>
               <Icon name="user" />

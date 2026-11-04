@@ -6,6 +6,10 @@ import { Button } from '@/ui/Button';
 import { openTuto } from '@/features/beta/Beta';
 import { Segmented } from '@/ui/Segmented';
 import { openUI, useUI } from './ui-store';
+import { useState } from 'react';
+import { accountApi, errorText } from '@/api';
+import { signOut, useAuth } from '@/lib/auth';
+import { toast } from '@/ui/toast';
 import s from './SettingsModal.module.css';
 
 // Paramètres : vitesse des ouvertures, langue (sans recharger la page), volume, effets visuels
@@ -85,7 +89,86 @@ export function SettingsModal() {
             {t('ui.tuto_again')}
           </Button>
         </div>
+        <AccountZone />
       </div>
     </Modal>
+  );
+}
+
+// Mon compte : télécharger toutes ses données (RGPD) et supprimer définitivement son compte.
+// La suppression demande d'écrire SUPPRIMER (DELETE en anglais) : impossible de le faire par erreur.
+function AccountZone() {
+  const t = useT();
+  const lang = useSettings((x) => x.lang);
+  const user = useAuth((x) => x.user);
+  const [busy, setBusy] = useState('');
+  const [asking, setAsking] = useState(false);
+  const [typed, setTyped] = useState('');
+  if (!user) return null;
+  const word = lang === 'en' ? 'DELETE' : 'SUPPRIMER';
+  const download = async () => {
+    setBusy('export');
+    try {
+      const data = await accountApi.exportData();
+      const url = URL.createObjectURL(new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' }));
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = 'takoras-mes-donnees.json';
+      a.click();
+      setTimeout(() => URL.revokeObjectURL(url), 1000);
+    } catch (e) {
+      toast(errorText(e, lang), true);
+    } finally {
+      setBusy('');
+    }
+  };
+  const remove = async () => {
+    if (typed.trim().toUpperCase() !== word) return;
+    setBusy('delete');
+    try {
+      await accountApi.deleteAccount();
+      openUI('settings', false);
+      await signOut();
+      toast(t('ui.acc_deleted'));
+    } catch (e) {
+      toast(errorText(e, lang), true);
+    } finally {
+      setBusy('');
+    }
+  };
+  return (
+    <div className={`${s.row} ${s.account}`}>
+      <b>{t('ui.acc_section')}</b>
+      <Button size="sm" loading={busy === 'export'} onClick={() => void download()}>
+        {t('ui.acc_export')}
+      </Button>
+      {asking ? (
+        <div className={s.danger}>
+          <p>{t('ui.acc_delete_confirm')}</p>
+          <label>
+            <span>{t('ui.acc_delete_type')}</span>
+            <input value={typed} onChange={(e) => setTyped(e.target.value)} placeholder={word} autoComplete="off" />
+          </label>
+          <div className={s.dangerBtns}>
+            <Button size="sm" onClick={() => (setAsking(false), setTyped(''))}>
+              {t('ui.cancel')}
+            </Button>
+            <Button
+              size="sm"
+              variant="danger"
+              disabled={typed.trim().toUpperCase() !== word}
+              loading={busy === 'delete'}
+              onClick={() => void remove()}
+            >
+              {t('ui.acc_delete')}
+            </Button>
+          </div>
+        </div>
+      ) : (
+        <Button size="sm" variant="ghost" className={s.deleteBtn} onClick={() => setAsking(true)}>
+          {t('ui.acc_delete')}
+        </Button>
+      )}
+    </div>
   );
 }

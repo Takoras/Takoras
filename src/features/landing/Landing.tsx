@@ -1,4 +1,5 @@
 import { type CSSProperties } from 'react';
+import { Link } from 'react-router';
 import { useQuery } from '@tanstack/react-query';
 import { MYSTERE, SERIES, texOf, glowVars, tierKey, type Jeton } from '@/data/jetons';
 import { useJn } from '@/lib/names';
@@ -103,7 +104,9 @@ export function Landing() {
           {t('ui.pn_title')}
         </button>
         <a href="#credits">{t('ui.land_credits')}</a>
-        <span>{t('ui.land_legal')}</span>
+        <Link to="/mentions-legales">{t('ui.legal_notice')}</Link>
+        <Link to="/cgu">{t('ui.terms')}</Link>
+        <Link to="/confidentialite">{t('ui.privacy')}</Link>
         <Credits />
       </footer>
     </div>

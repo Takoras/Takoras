@@ -28,6 +28,10 @@ export const accountApi = {
   changePseudo: (p: string) => rpc('change_pseudo', { p }),
   updateProfile: (a: { p_avatar: string; p_banner: string | null; p_bio: string; p_showcase: (number | null)[] }) =>
     rpc('update_profile', a),
+  // accord aux CGU, téléchargement de ses données, suppression définitive du compte
+  acceptTerms: () => rpc('accept_terms'),
+  exportData: () => rpc('export_my_data'),
+  deleteAccount: () => rpc('delete_my_account'),
 };
 
 export const ecoApi = {
