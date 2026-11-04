@@ -206,6 +206,15 @@ export function Layout() {
         <div className={s.pz} style={{ '--pz': pageZoom(pathname) } as CSSProperties}>
           <Outlet />
         </div>
+        {/* pied de page discret, en bas de chaque page (la page de présentation des visiteurs a déjà le sien) */}
+        {user ? (
+          <footer className={s.siteFoot}>
+            <span>© Takoras</span>
+            <NavLink to="/mentions-legales">{t('ui.legal_notice')}</NavLink>
+            <NavLink to="/cgu">{t('ui.terms')}</NavLink>
+            <NavLink to="/confidentialite">{t('ui.privacy')}</NavLink>
+          </footer>
+        ) : null}
       </main>
 
       {/* téléphone tenu debout : le jeu se joue à l'horizontale */}

@@ -895,3 +895,25 @@
     animation: none;
   }
 }
+
+/* pied de page des pages connectées : petit, discret, poussé tout en bas */
+.siteFoot {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: var(--s-2) var(--s-5);
+  margin-top: auto;
+  padding: var(--s-10) var(--s-4) var(--s-6);
+  font-size: var(--fs-xs);
+  color: var(--muted);
+}
+.siteFoot a {
+  color: var(--muted);
+  text-decoration: underline;
+  text-decoration-color: rgb(255 255 255 / 20%);
+  text-underline-offset: 3px;
+  transition: color var(--t-fast);
+}
+.siteFoot a:hover {
+  color: var(--text);
+}
