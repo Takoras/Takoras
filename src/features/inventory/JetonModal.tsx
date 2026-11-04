@@ -198,7 +198,17 @@ export function JetonModal({
             <div ref={idBox} className={`${s.id} ${s.box}`}>
               <h2>{locked ? '???' : jn(j.name)}</h2>
               <span className={s.line} aria-hidden />
-              <p className={s.odds}>{locked ? '1/?' : `1/${fmt(vOdds(j.odds, pv))}`}</p>
+              {/* la chance défile jusqu'à sa nouvelle valeur quand on change de mutation */}
+              <p className={s.odds}>
+                {locked ? (
+                  '1/?'
+                ) : (
+                  <>
+                    1/
+                    <Tween value={vOdds(j.odds, pv)} format={(n) => fmt(Math.round(n))} ms={600} />
+                  </>
+                )}
+              </p>
               {facts && !locked ? <ul className={s.facts}>{facts}</ul> : null}
               {/* vidéo d'exemple du pouvoir (éditeur d'équipe) : dans la colonne de gauche, qui a la place */}
               {demo && !locked ? (

@@ -106,11 +106,13 @@
 @keyframes lotOut {
   from {
     opacity: 1;
+    translate: 0 0;
     scale: 1;
   }
   to {
     opacity: 0;
-    scale: 0.8;
+    translate: 0 10px;
+    scale: 0.97;
   }
 }
 .closing .pin {
@@ -186,9 +188,9 @@
   padding: 14px 16px;
   border: 1px solid rgb(255 255 255 / 10%);
   border-radius: 12px;
-  background: rgb(12 11 20 / 68%);
-  backdrop-filter: blur(6px);
+  background: rgb(12 11 20 / 84%);
   box-shadow: 0 12px 26px rgb(0 0 0 / 35%);
+  will-change: transform, opacity;
   rotate: calc(var(--tilt) + var(--swing, 0deg));
   transform-origin: 50% 0;
 }
@@ -196,7 +198,7 @@
   --tilt: -1.5deg;
   --fl: 6s;
   animation:
-    lot 0.3s ease-out var(--d, 0.25s) forwards,
+    lot 0.5s cubic-bezier(0.22, 1, 0.36, 1) var(--d, 0.25s) forwards,
     drift 6s ease-in-out 0.6s infinite;
 }
 .pwBox {
@@ -206,7 +208,7 @@
 }
 .sheet .power > .box {
   animation:
-    lot 0.3s ease-out var(--d, 0.29s) forwards,
+    lot 0.5s cubic-bezier(0.22, 1, 0.36, 1) var(--d, 0.29s) forwards,
     drift var(--fl) ease-in-out 0.6s infinite;
 }
 .sheet .power > .rs {
@@ -290,8 +292,9 @@
 .rs > div,
 .sheet > .actions {
   opacity: 0;
-  scale: 0.8;
-  animation: lot 0.3s ease-out var(--d, 0.25s) forwards;
+  translate: 0 14px;
+  scale: 0.97;
+  animation: lot 0.5s cubic-bezier(0.22, 1, 0.36, 1) var(--d, 0.25s) forwards;
 }
 .power > .box,
 .unknown {
@@ -315,6 +318,7 @@
 @keyframes lot {
   to {
     opacity: 1;
+    translate: 0 0;
     scale: 1;
   }
 }
@@ -779,18 +783,14 @@
   grid-area: 1 / 1;
 }
 .faceOut {
-  animation: faceOut 0.5s ease both;
+  /* l'ancienne face reste opaque dessous pendant que la nouvelle apparaît par-dessus */
+  opacity: 1;
 }
 .faceIn {
   animation: faceIn 0.5s ease both;
 }
 .breath {
   animation: breath 0.5s cubic-bezier(0.34, 1.56, 0.64, 1);
-}
-@keyframes faceOut {
-  to {
-    opacity: 0;
-  }
 }
 @keyframes faceIn {
   from {
