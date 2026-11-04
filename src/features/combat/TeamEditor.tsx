@@ -53,7 +53,7 @@ export function TeamEditor({
   const h0 = useRef(0);
   const setSerie = (sr: string) => {
     const box = slotsRef.current?.closest('dialog')?.firstElementChild as HTMLElement | null | undefined;
-    h0.current = box?.getBoundingClientRect().height ?? 0;
+    h0.current = box?.offsetHeight ?? 0; // taille de mise en page (la page est zoomée : pas getBoundingClientRect)
     setSerie0(sr);
   };
   useLayoutEffect(() => {
@@ -61,18 +61,31 @@ export function TeamEditor({
     const from = h0.current;
     h0.current = 0;
     if (!box || !from || reducedFx()) return;
-    const to = box.getBoundingClientRect().height;
-    if (Math.abs(to - from) < 2) return;
-    box.animate(
-      [
-        { height: `${from}px`, overflow: 'hidden' },
-        { height: `${to}px`, overflow: 'hidden' },
-      ],
-      {
-        duration: 380,
-        easing: 'cubic-bezier(.2, 1.15, .35, 1)',
-      },
-    );
+    // on garde l'ancienne hauteur le temps que la nouvelle grille soit posée (2 images), puis on glisse
+    box.style.height = `${from}px`;
+    box.style.overflow = 'hidden';
+    let raf = requestAnimationFrame(() => {
+      raf = requestAnimationFrame(() => {
+        box.style.height = '';
+        const to = box.offsetHeight;
+        box.style.overflow = '';
+        if (Math.abs(to - from) < 2) return;
+        box.animate(
+          [
+            { height: `${from}px`, overflow: 'hidden' },
+            { height: `${to}px`, overflow: 'hidden' },
+          ],
+          // sans dépassement : elle se pose directement sur sa nouvelle taille
+          { duration: 340, easing: 'cubic-bezier(.25, .8, .25, 1)' },
+        );
+      });
+    });
+    gridRef.current?.animate([{ opacity: 0 }, { opacity: 1 }], { duration: 260, easing: 'ease-out' });
+    return () => {
+      cancelAnimationFrame(raf);
+      box.style.height = '';
+      box.style.overflow = '';
+    };
   }, [serie]);
   const [info, setInfo] = useState<Owned | null>(null);
   // place visée : le prochain jeton choisi la remplace (toucher une place pour la viser)
