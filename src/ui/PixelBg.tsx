@@ -180,9 +180,12 @@ export function PixelBg({
       ctx.clearRect(0, 0, W, H);
       const box = cv.getBoundingClientRect();
       const c = center?.current?.getBoundingClientRect();
-      const cx = c ? (c.left + c.width / 2 - box.left) / PX : W / 2;
-      const cy = c ? (c.top + c.height / 2 - box.top) / PX : H * 0.4;
-      const cw = c ? c.width / PX : W * 0.3;
+      // en proportion de la taille AFFICHÉE du canvas : juste même si la page est zoomée ou la fiche à l'échelle
+      const bw = box.width || 1,
+        bh = box.height || 1;
+      const cx = c ? ((c.left + c.width / 2 - box.left) / bw) * W : W / 2;
+      const cy = c ? ((c.top + c.height / 2 - box.top) / bh) * H : H * 0.4;
+      const cw = c ? (c.width / bw) * W : W * 0.3;
       scene(lvPrev, lvPrev === lvNow ? 0 : 1 - f, t, cx, cy, cw);
       scene(lvNow, lvPrev === lvNow ? 1 : f, t, cx, cy, cw);
 
