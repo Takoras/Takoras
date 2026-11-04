@@ -90,6 +90,8 @@ export default function Bestiary() {
 
   const d = inv.data;
   const cards = useMemo(() => (d ? visibleCards(d, view, jn) : []), [d, view, jn]);
+  // les jetons se balancent au survol, accrochés par le haut (rattaché quand la liste change)
+  useSwingAll(grid, `.${s.cardBtn}`, 0.35, cards);
   // Animation de la grille après une vente / un filtre (les jetons vendus se dissolvent en pixels)
   useLayoutEffect(() => {
     if (snap.current && grid.current)
@@ -109,8 +111,6 @@ export default function Bestiary() {
 
   const groups = d?.groups.filter((g) => g.serie === view.serie) ?? [];
   const all = SERIES[view.serie] ?? [];
-  const count = groups.reduce((n, g) => n + g.ids.length, 0);
-  const value = groups.reduce((n, g) => n + g.ids.length * sellValue(g.odds, g.variant), 0);
   const found = d ? all.filter((j) => d.coll.has(cKey(view.serie, j.name))).length : 0;
   const vFound = d
     ? all.reduce((n, j) => n + VKEYS.filter((v) => d.coll.get(cKey(view.serie, j.name))?.vars[v]).length, 0)
@@ -187,9 +187,6 @@ export default function Bestiary() {
       <header className={s.head} data-tour="inv">
         <div>
           <h1>{t('ui.bst_title')}</h1>
-          <p className="muted">
-            {t('ui.inv_count', { n: fmt(count), k: groups.length })} · {t('ui.inv_value')} {fmt(value)} <Coin />
-          </p>
         </div>
         <Button variant={selecting ? 'primary' : 'ghost'} onClick={toggleMode} aria-pressed={selecting}>
           {selecting ? t('ui.inv_done') : t('ui.inv_select')}

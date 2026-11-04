@@ -20,7 +20,6 @@ export const ITEMS: [string, string][] = [
   ['potion100', '🧪 Potion ×100 (10 tirages)'],
   ['potion250', '🧪 Potion ×250 (10 tirages)'],
   ['potion500', '🧪 Potion ×500 (5 tirages)'],
-  ['instant', '⚡ Recharge éclair (+15 tirages)'],
   ['hourglass', '⏳ Sablier 1 h'],
   ['a_etoile', '✨ Photo animée Étoile'],
   ...Object.keys(BANNER_IMG).map((b): [string, string] => [`b_${b}`, `🎨 Bannière ${bannerName(b, 'fr')}`]),

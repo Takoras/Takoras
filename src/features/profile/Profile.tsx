@@ -1,4 +1,5 @@
-import { useState, type CSSProperties } from 'react';
+import { useRef, useState, type CSSProperties } from 'react';
+import { useSwingAll } from '@/ui/useSwing';
 import { SerieName } from '@/ui/SerieName';
 import { useNavigate, useParams } from 'react-router';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
@@ -306,9 +307,12 @@ function Collection({
       got.set(r.jeton, v);
     });
   const all = [...(SERIES[serie] ?? [])].sort((a, b) => a.odds - b.odds);
+  // les jetons se balancent au survol, accrochés par le haut (comme dans le bestiaire)
+  const gridRef = useRef<HTMLUListElement>(null);
+  useSwingAll(gridRef, `.${iv.cardBtn}`, 0.35, `${serie}|${q.data?.length ?? 0}`);
   // même style que le bestiaire de l'inventaire : jetons posés librement, « ? » pour ceux pas trouvés
   return (
-    <ul className={`${iv.grid} ${s.collGrid}`}>
+    <ul ref={gridRef} className={`${iv.grid} ${s.collGrid}`}>
       {all.map((j, i) => {
         const c = got.get(j.name);
         return (

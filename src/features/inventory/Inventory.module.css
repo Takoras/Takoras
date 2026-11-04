@@ -251,12 +251,6 @@
   border-radius: 16px;
   transition: transform var(--t-fast);
 }
-.card:hover {
-  transform: translateY(-4px);
-}
-.card:hover .cardBtn img {
-  scale: 1.12;
-}
 .cardBtn {
   position: relative;
   display: grid;
@@ -923,7 +917,10 @@
   background:
     linear-gradient(160deg, rgba(var(--g), calc(0.08 * var(--ga, 0))), transparent 60%), rgb(255 255 255 / 3.5%);
   box-shadow: 0 10px 22px rgb(0 0 0 / 25%);
-  animation: cardIn 0.5s cubic-bezier(0.22, 1, 0.36, 1) calc(var(--i, 0) * 35ms) both;
+  /* au survol, le jeton se balance (accroché par le haut, --swing via useSwingAll) au lieu de grossir */
+  rotate: var(--swing, 0deg);
+  transform-origin: 50% 0;
+  animation: cardIn 0.75s ease-out calc(var(--i, 0) * 35ms) both;
   transition: border-color var(--t-fast);
 }
 .card:hover .cardBtn {
@@ -936,11 +933,23 @@
   background: rgb(255 255 255 / 1.5%);
   box-shadow: none;
 }
+/* à l'arrivée, comme accrochées à un étendoir : elles apparaissent et se balancent un peu avant de se poser */
 @keyframes cardIn {
-  from {
+  0% {
     opacity: 0;
-    translate: 0 16px;
-    scale: 0.94;
+    translate: 0 14px;
+    transform: rotate(-7deg);
+  }
+  40% {
+    opacity: 1;
+    translate: 0 0;
+    transform: rotate(4deg);
+  }
+  70% {
+    transform: rotate(-1.5deg);
+  }
+  100% {
+    transform: none;
   }
 }
 
@@ -1008,5 +1017,27 @@
   .shelf,
   .chips button {
     animation: none;
+  }
+}
+
+/* téléphone (à l'horizontale) : jetons, noms et chances plus gros, bien lisibles */
+@media (max-height: 520px), (max-width: 760px) {
+  .grid {
+    grid-template-columns: repeat(auto-fill, minmax(132px, 1fr));
+    gap: var(--s-3);
+  }
+  .cardBtn img {
+    width: 88px;
+    height: 88px;
+  }
+  .cardBtn b {
+    font-size: var(--fs-md);
+  }
+  .cardBtn small {
+    font-size: var(--fs-sm);
+  }
+  .vstamps i {
+    width: 22px;
+    height: 22px;
   }
 }

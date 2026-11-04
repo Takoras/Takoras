@@ -1,4 +1,5 @@
 import { useEffect, useRef, useState, type CSSProperties } from 'react';
+import { useSwingAll } from '@/ui/useSwing';
 import { SerieName } from '@/ui/SerieName';
 import { useQueryClient } from '@tanstack/react-query';
 import { combatApi, errorText } from '@/api';
@@ -55,6 +56,9 @@ export function TeamEditor({
   const inTeam = new Set(team.filter(Boolean).map((u) => ownKey(u?.serie ?? '', u?.name ?? '')));
   // toute la série, du plus commun au plus rare ; ceux qu'on n'a pas sont des « ? »
   const vis = [...(SERIES[serie] ?? [])].sort((a, b) => a.odds - b.odds);
+  // les jetons se balancent au survol, accrochés par le haut (comme dans le bestiaire)
+  const gridRef = useRef<HTMLUListElement>(null);
+  useSwingAll(gridRef, `button.${iv.cardBtn}`, 0.35, `${serie}|${all.length}`);
   void levels; // la fiche montre les stats de base, comme dans le bestiaire
   const vName = (v: string) => (v ? t(`ui.v_${v as 'gold'}`) : t('arena.normal'));
 
@@ -176,7 +180,7 @@ export function TeamEditor({
       </div>
 
       {vis.length ? (
-        <ul className={`${iv.grid} ${s.list}`}>
+        <ul ref={gridRef} className={`${iv.grid} ${s.list}`}>
           {vis.map((j) => {
             const o = by.get(ownKey(serie, j.name)),
               on = !!o && inTeam.has(o.k);
