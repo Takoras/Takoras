@@ -58,6 +58,18 @@
   animation: none;
 }
 
+/* fiche jeton : grande, presque tout l'écran sur téléphone */
+.noRise.wide {
+  width: min(100% - 2 * var(--gutter), 1040px);
+}
+
+@media (max-height: 520px) {
+  .noRise.wide {
+    width: calc(100% - 16px);
+    max-height: calc(100dvh - 16px);
+  }
+}
+
 .title {
   font-size: var(--fs-xl);
   margin-bottom: var(--s-4);

@@ -479,8 +479,9 @@
 
 .back {
   display: grid;
-  grid-template-columns: auto 1fr;
-  align-items: center;
+  grid-template-columns: 1fr;
+  place-items: center;
+  text-align: center;
   gap: var(--s-10);
   width: 100%;
   max-width: 1240px;
@@ -492,50 +493,6 @@
 .back .h2 {
   color: var(--al-cover-ink);
   margin-bottom: var(--s-6);
-}
-
-.pack {
-  display: grid;
-  grid-template-columns: 120px 1fr;
-  grid-template-rows: auto 1fr;
-  gap: var(--s-2) var(--s-6);
-  align-items: center;
-  max-width: 520px;
-  padding: var(--s-6);
-  border-radius: 8px;
-  background: var(--al-paper);
-  color: var(--al-ink);
-  box-shadow: var(--al-shadow-lift);
-  transform: rotate(1.5deg);
-  transition: transform var(--t-med) var(--ease-out);
-}
-
-.pack img {
-  grid-row: 1 / span 2;
-  width: 120px;
-  height: 120px;
-}
-
-.pack > b {
-  font-family: var(--font-album);
-  font-weight: 400;
-  font-size: var(--fs-lg);
-  font-variant-numeric: tabular-nums;
-}
-
-.packStop {
-  transform: rotate(-1deg) scale(1.03);
-}
-
-.packTxt {
-  font-size: var(--fs-sm);
-  line-height: 1.5;
-  color: var(--al-ink-2);
-}
-
-.packTxt b {
-  display: block;
-  color: var(--al-ink);
 }
 
 /* ---------- Pied de page ---------- */
@@ -626,8 +583,7 @@
 @media (prefers-reduced-motion: reduce) {
   .sticker,
   .sticker::after,
-  .play,
-  .pack {
+  .play {
     transition: none;
   }
 }

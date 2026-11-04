@@ -14,6 +14,7 @@ import { mmss, nextMax, regenCost, TOP_MAX, upgradeCost, useEco } from '../eco/e
 import { openPulls } from '../eco/openPulls';
 import { openInfo } from '../info/store';
 import { Effects } from './Effects';
+import { useSwing } from '@/ui/useSwing';
 import s from './Home.module.css';
 
 const Coin = () => <img className="px" src="/img/piece.png" alt="" width={16} height={16} />;
@@ -74,8 +75,8 @@ export function Actions({ serie = 'Takoras' }: { serie?: string } = {}) {
       {/* les boutons aussi : les anciens tombent, les nouveaux (avec le prix) arrivent du haut */}
       <DropSwap k={coin ? 'coin' : 'stock'}>
         {coin ? (
-          // série payée en pièces : Ouvrir 1 ou 10, le prix sur sa propre ligne (rien n'est coupé)
-          <div className={s.row}>
+          // série payée en pièces : un seul bouton Ouvrir 1, le prix sur sa propre ligne (rien n'est coupé)
+          <Float className={s.rowOne} tilt={-1.5} fl={5.5}>
             <button
               type="button"
               className={s.openOne}
@@ -89,23 +90,10 @@ export function Actions({ serie = 'Takoras' }: { serie?: string } = {}) {
                 {COIN_PULL.one.toLocaleString(locale(lang))}
               </span>
             </button>
-            <button
-              type="button"
-              className={s.openAll}
-              disabled={!canCoin || e.coins < COIN_PULL.ten}
-              onClick={() => void openPulls(10, serie)}
-              data-nosound
-            >
-              <span className={s.openLbl}>{t('ui.open_n', { n: 10 })}</span>
-              <span className={s.openPrice}>
-                <img className="px" src="/img/piece.png" alt="" width={18} height={18} />
-                {COIN_PULL.ten.toLocaleString(locale(lang))}
-              </span>
-            </button>
-          </div>
+          </Float>
         ) : (
           // Takoras : un seul bouton ; spammer le jeton fait défiler l'ouverture très vite
-          <div className={s.rowOne}>
+          <Float className={s.rowOne} tilt={-1.5} fl={5.5}>
             <button
               type="button"
               className={s.openOne}
@@ -115,7 +103,7 @@ export function Actions({ serie = 'Takoras' }: { serie?: string } = {}) {
             >
               <span className={s.openLbl}>{t('ui.open1')}</span>
             </button>
-          </div>
+          </Float>
         )}
       </DropSwap>
       {coin && !canCoin ? <p className={s.soonNote}>{t('ui.serie_open_soon')}</p> : null}
@@ -201,8 +189,10 @@ function Up(p: {
   onUp: () => void;
 }) {
   const can = !!p.next && p.coins >= p.cost;
+  const ref = useRef<HTMLDivElement>(null);
+  useSwing(ref, 0.12); // se balance un peu au passage de la souris, comme les blocs autour
   return (
-    <div className={`${s.up} ${can ? s.upCan : ''}`}>
+    <div ref={ref} className={`${s.up} ${can ? s.upCan : ''}`}>
       <img className="px" src={p.icon} alt="" width={40} height={40} />
       <div className={s.upBody}>
         <b>{p.title}</b>
@@ -226,6 +216,31 @@ function Up(p: {
       ) : (
         <small className="muted">{p.top}</small>
       )}
+    </div>
+  );
+}
+
+// Bloc qui flotte doucement et se balance un peu au passage de la souris (comme les satellites de l'accueil)
+function Float({
+  className,
+  tilt,
+  fl,
+  children,
+}: {
+  className?: string;
+  tilt: number;
+  fl: number;
+  children: ReactNode;
+}) {
+  const ref = useRef<HTMLDivElement>(null);
+  useSwing(ref, 0.1);
+  return (
+    <div
+      ref={ref}
+      className={`${className ?? ''} ${s.float}`}
+      style={{ '--tilt': `${tilt}deg`, '--fl': `${fl}s` } as React.CSSProperties}
+    >
+      {children}
     </div>
   );
 }

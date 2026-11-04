@@ -239,6 +239,11 @@
 }
 /* une amélioration : tuile chaude, qui brille quand on peut l'acheter */
 .up {
+  --tilt: -1deg;
+  --fl: 6.2s;
+  rotate: calc(var(--tilt) + var(--swing, 0deg));
+  transform-origin: 50% 0;
+  animation: bobSoft var(--fl) ease-in-out infinite;
   display: grid;
   grid-template-columns: auto 1fr;
   align-items: center;
@@ -254,7 +259,9 @@
 }
 .upCan {
   border-color: #f97316;
-  animation: upGlow 2.2s ease-in-out infinite;
+  animation:
+    upGlow 2.2s ease-in-out infinite,
+    bobSoft var(--fl, 6s) ease-in-out infinite;
 }
 @keyframes upGlow {
   50% {
@@ -644,6 +651,10 @@
       / 260px 1fr 300px;
     align-items: start;
   }
+  /* le choix de série descend à hauteur du milieu du jeton (plus besoin de place pour l'ouverture auto) */
+  .satPick {
+    margin-top: clamp(40px, 13dvh, 150px);
+  }
   /* décalages irréguliers : rien n'est aligné au cordeau */
   .satUps {
     margin-left: calc(var(--s-2) * -1);
@@ -986,4 +997,36 @@
 .rowOne .openOne {
   min-height: 68px;
   font-size: var(--fs-xl);
+}
+
+/* bouton Ouvrir et améliorations : ils flottent un peu, penchent légèrement et se balancent au survol
+   (moins que les satellites : on doit pouvoir cliquer vite) */
+.float {
+  rotate: calc(var(--tilt, 0deg) + var(--swing, 0deg));
+  transform-origin: 50% 0;
+  animation: bobSoft var(--fl, 6s) ease-in-out infinite;
+}
+.up:nth-child(2) {
+  --tilt: 1.2deg;
+  --fl: 7s;
+  animation-delay: -2.5s;
+}
+@keyframes bobSoft {
+  0%,
+  100% {
+    transform: translateY(0);
+  }
+  50% {
+    transform: translateY(-5px);
+  }
+}
+:global(html.reduce-fx) .float,
+:global(html.reduce-fx) .up {
+  animation: none;
+}
+@media (prefers-reduced-motion: reduce) {
+  .float,
+  .up {
+    animation: none;
+  }
 }

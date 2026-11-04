@@ -359,11 +359,6 @@ export default function Bestiary() {
               {og?.deck ? <li>{t('ui.in_deck')}</li> : null}
               {og?.shown ? <li>{t('ui.shown_n', { n: og.shown })}</li> : null}
               {og && og.luck > 1 ? <li>{t('ui.best_luck', { l: fmtLuck(og.luck) })}</li> : null}
-              {og ? (
-                <li>
-                  {t('ui.sell_value')} · {fmt(sellValue(og.odds, og.variant))} <Coin />
-                </li>
-              ) : null}
             </>
           }
           onClose={() => setOpen(null)}

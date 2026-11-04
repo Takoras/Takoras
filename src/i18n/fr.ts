@@ -161,7 +161,7 @@ export const fr = {
     cat_potions: 'Potions de chance',
     cat_utils: 'Objets utiles',
     serie_open_soon: 'Ouverture de cette série : bientôt',
-    coin_pull_each: 'pièces le tirage · 10 tirages pour 2 700',
+    coin_pull_each: 'pièces le tirage',
     open_n: 'Ouvrir {n}',
     land_title: 'Ouvre des jetons. Gagne des duels.',
     land_album: 'Série {s} · album 1',
@@ -201,9 +201,6 @@ export const fr = {
       'Choisis 3 jetons, vise, tire : le dernier qui reste dans l’arène gagne. L’arène rétrécit à chaque tour.',
     land_s_board: 'Classement',
     land_s_board_txt: 'Monte de Bois à Rubis, puis Maître et Takoras, contre des joueurs de ton niveau.',
-    land_auto: 'Ouverture auto',
-    land_auto_txt:
-      'Lance-la, elle ouvre tout ton stock à toute vitesse et s’arrête toute seule sur les beaux jetons. Tu l’ouvres, et elle repart.',
     bp_title: 'Passe de combat',
     bp_season: 'Saison {n}',
     bp_ends: 'Fin dans {n} j',

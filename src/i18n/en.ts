@@ -162,7 +162,7 @@ export const en: Dict = {
     cat_potions: 'Luck potions',
     cat_utils: 'Useful items',
     serie_open_soon: 'Pulls for this series: coming soon',
-    coin_pull_each: 'coins per pull · 10 pulls for 2,700',
+    coin_pull_each: 'coins per pull',
     open_n: 'Open {n}',
     land_title: 'Open tokens. Win duels.',
     land_album: '{s} series · album 1',
@@ -200,9 +200,6 @@ export const en: Dict = {
     land_s_combat_txt: 'Pick 3 tokens, aim, shoot: the last one left in the arena wins. The arena shrinks every turn.',
     land_s_board: 'Ranking',
     land_s_board_txt: 'Climb from Wood to Ruby, then Master and Takoras, against players at your level.',
-    land_auto: 'Auto-open',
-    land_auto_txt:
-      'Start it and it opens your whole stock at full speed, stopping by itself on the good tokens. Open it, and it starts again.',
     bp_title: 'Battle pass',
     bp_season: 'Season {n}',
     bp_ends: 'Ends in {n} d',

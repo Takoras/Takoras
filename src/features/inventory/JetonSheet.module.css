@@ -1,8 +1,16 @@
+/* couleur de la fiche en vraie couleur animable : changer de mutation fait glisser toutes les lueurs */
+@property --gc {
+  syntax: '<color>';
+  inherits: true;
+  initial-value: transparent;
+}
+
 /* Fiche d'un jeton façon vitrine : nom à gauche, jeton au centre, pouvoir à droite */
 /* La fiche est une carte qui se déplie : --u va de 0 (petite carte au centre, 240 × 140) à 1 (fiche entière),
    piloté par un ressort dans JetonModal. Le dépli est un clip (pas de relayout) : fluide même sur téléphone. */
 .sheet {
   --u: 0;
+  --gc: rgb(var(--g));
   --spring: linear(
     0,
     0.041,
@@ -53,17 +61,166 @@
   border: 1px solid rgb(255 255 255 / 12%);
   border-radius: 16px;
   background:
-    linear-gradient(to bottom right, rgba(var(--g), 0.06), transparent 45%, rgb(0 0 0 / 25%)), var(--surface-2);
+    linear-gradient(to bottom right, color-mix(in srgb, var(--gc) 6%, transparent), transparent 45%, rgb(0 0 0 / 25%)),
+    var(--surface-2);
   clip-path: inset(
     max(0px, calc((1 - var(--u)) * (50% - 70px))) max(0px, calc((1 - var(--u)) * (50% - 120px))) round 16px
   );
   will-change: clip-path, transform;
+  transition: --gc 0.6s ease;
 }
 
-/* à la fermeture : la carte se replie et s'efface */
+/* Fermeture = l'ouverture à l'envers : les blocs partent du dernier au premier, le jeton remonte et rétrécit,
+   le fond s'éteint, puis la carte se replie (ressort lancé à 220 ms) et s'efface tout à la fin. */
 .closing {
   opacity: 0;
-  transition: opacity 0.3s ease-in 0.05s;
+  transition: opacity 0.12s ease-in 0.2s;
+}
+.closing .id,
+.closing .power > *,
+.closing .unknown,
+.closing .center .stamps,
+.closing .rs > div,
+.closing > .actions {
+  animation: lotOut 0.16s cubic-bezier(0.4, 0, 1, 1) var(--o, 0s) both;
+}
+.closing > .actions {
+  --o: 0s;
+}
+.closing .rs > div:nth-child(3) {
+  --o: 0.01s;
+}
+.closing .rs > div:nth-child(2) {
+  --o: 0.02s;
+}
+.closing .rs > div:nth-child(1),
+.closing .center .stamps {
+  --o: 0.03s;
+}
+.closing .power > * {
+  --o: 0.04s;
+}
+.closing .id {
+  --o: 0.05s;
+}
+@keyframes lotOut {
+  from {
+    opacity: 1;
+    scale: 1;
+  }
+  to {
+    opacity: 0;
+    scale: 0.8;
+  }
+}
+.closing .pin {
+  animation: pinOut 0.2s cubic-bezier(0.4, 0, 1, 1) 0.04s both;
+}
+@keyframes pinOut {
+  from {
+    transform: none;
+  }
+  to {
+    transform: translateY(-20px) scale(0);
+  }
+}
+.closing .line {
+  animation: shrink 0.2s ease-in both;
+}
+@keyframes shrink {
+  from {
+    scale: 1 1;
+  }
+  to {
+    scale: 0.3 1;
+  }
+}
+.closing .pxbg {
+  animation: bgOut 0.22s ease-in 0.02s both;
+}
+@keyframes bgOut {
+  from {
+    opacity: 0.72;
+  }
+  to {
+    opacity: 0;
+  }
+}
+.closing .rays,
+.closing .aura,
+.closing .sparks,
+.closing .floor {
+  opacity: 0;
+  transition: opacity 0.2s ease-in;
+}
+
+/* croix en haut à droite (on ferme aussi en touchant à côté) */
+.x {
+  position: absolute;
+  top: 12px;
+  right: 12px;
+  z-index: 5;
+  display: grid;
+  place-items: center;
+  width: 44px;
+  height: 44px;
+  border: 1px solid rgb(255 255 255 / 14%);
+  border-radius: 999px;
+  background: rgb(0 0 0 / 45%);
+  backdrop-filter: blur(6px);
+  color: var(--text);
+  transition:
+    scale var(--t-fast),
+    background-color var(--t-fast);
+}
+.x:hover {
+  scale: 1.08;
+  background: rgb(0 0 0 / 65%);
+}
+
+/* boîtes de texte : fond sombre lisible sur le fond pixel art ; elles flottent (drift, comme l'accueil)
+   et se balancent au passage de la souris (--swing, useSwing) */
+.box {
+  --tilt: 0deg;
+  --fl: 6.5s;
+  padding: 14px 16px;
+  border: 1px solid rgb(255 255 255 / 10%);
+  border-radius: 12px;
+  background: rgb(12 11 20 / 68%);
+  backdrop-filter: blur(6px);
+  box-shadow: 0 12px 26px rgb(0 0 0 / 35%);
+  rotate: calc(var(--tilt) + var(--swing, 0deg));
+  transform-origin: 50% 0;
+}
+.sheet .id {
+  --tilt: -1.5deg;
+  --fl: 6s;
+  animation:
+    lot 0.3s ease-out var(--d, 0.25s) forwards,
+    drift 6s ease-in-out 0.6s infinite;
+}
+.pwBox {
+  --tilt: 1.2deg;
+  display: grid;
+  gap: var(--s-2);
+}
+.sheet .power > .box {
+  animation:
+    lot 0.3s ease-out var(--d, 0.29s) forwards,
+    drift var(--fl) ease-in-out 0.6s infinite;
+}
+.sheet .power > .rs {
+  --tilt: -0.8deg;
+  --fl: 7.5s;
+}
+@keyframes drift {
+  0%,
+  100% {
+    transform: translateY(0);
+  }
+  50% {
+    transform: translateY(-6px);
+  }
 }
 
 /* le fond pixel art de l'ouverture, derrière tout ; il arrive en fondu pendant le dépli */
@@ -90,7 +247,12 @@
   width: min(180px, 100%);
   height: 2px;
   margin-top: -2px;
-  background: linear-gradient(to right, rgba(var(--g), 0.6), rgba(var(--g), 0.3), transparent);
+  background: linear-gradient(
+    to right,
+    color-mix(in srgb, var(--gc) 60%, transparent),
+    color-mix(in srgb, var(--gc) 30%, transparent),
+    transparent
+  );
   transform-origin: left;
   scale: 0.3 1;
   animation: grow 0.35s ease-out 0.25s forwards;
@@ -122,7 +284,7 @@
 
 /* le reste arrive une à une, comme les bâtiments du plan */
 .id,
-.power,
+.power > .box,
 .unknown,
 .center .stamps,
 .rs > div,
@@ -131,7 +293,7 @@
   scale: 0.8;
   animation: lot 0.3s ease-out var(--d, 0.25s) forwards;
 }
-.power,
+.power > .box,
 .unknown {
   --d: 0.29s;
 }
@@ -158,7 +320,7 @@
 }
 .stage {
   display: grid;
-  grid-template-columns: 1fr minmax(240px, 300px) 1fr;
+  grid-template-columns: 1fr minmax(260px, 340px) 1fr;
   align-items: center;
   gap: var(--s-5);
 }
@@ -172,13 +334,13 @@
 .id h2 {
   font-size: clamp(1.8rem, calc(4vw / var(--z, 1)), 2.6rem);
   line-height: 1;
-  text-shadow: 0 0 24px rgba(var(--g), 0.45);
+  text-shadow: 0 0 24px color-mix(in srgb, var(--gc) 45%, transparent);
 }
 .odds {
   font-family: var(--font-display);
   font-weight: 800;
   font-size: var(--fs-xl);
-  color: rgb(var(--g));
+  color: var(--gc);
   filter: brightness(1.25);
 }
 .facts {
@@ -198,8 +360,8 @@
   content: '';
   width: 6px;
   height: 6px;
-  background: rgb(var(--g));
-  box-shadow: 0 0 6px rgb(var(--g));
+  background: var(--gc);
+  box-shadow: 0 0 6px var(--gc);
 }
 .facts b {
   color: var(--text);
@@ -216,7 +378,7 @@
 .aura {
   position: absolute;
   left: 50%;
-  top: 175px;
+  top: 190px;
   translate: -50% -50%;
   border-radius: 50%;
   pointer-events: none;
@@ -226,7 +388,11 @@
   width: 360px;
   height: 360px;
   /* 16 rayons réguliers (22,5° chacun : ça tombe juste sur 360°, plus de rayons collés) */
-  background: repeating-conic-gradient(from 0deg, rgba(var(--g), 0.24) 0deg 7deg, transparent 7deg 22.5deg);
+  background: repeating-conic-gradient(
+    from 0deg,
+    color-mix(in srgb, var(--gc) 24%, transparent) 0deg 7deg,
+    transparent 7deg 22.5deg
+  );
   mask-image: radial-gradient(closest-side, #000 40%, transparent 92%);
   animation: spin 26s linear infinite;
   opacity: calc(0.35 + 0.65 * var(--ga, 0));
@@ -235,7 +401,12 @@
 .aura {
   width: 260px;
   height: 260px;
-  background: radial-gradient(closest-side, rgba(var(--g), 0.55), rgba(var(--g), 0.15) 60%, transparent);
+  background: radial-gradient(
+    closest-side,
+    color-mix(in srgb, var(--gc) 55%, transparent),
+    color-mix(in srgb, var(--gc) 15%, transparent) 60%,
+    transparent
+  );
   animation: breathe 3.2s ease-in-out infinite;
 }
 .sparks {
@@ -249,8 +420,8 @@
   bottom: 30px;
   width: 6px;
   height: 6px;
-  background: rgb(var(--g));
-  box-shadow: 0 0 8px rgb(var(--g));
+  background: var(--gc);
+  box-shadow: 0 0 8px var(--gc);
   filter: brightness(1.6);
   opacity: 0;
   animation: rise 3.6s linear infinite;
@@ -288,8 +459,8 @@
 .coin {
   position: relative;
   z-index: 1;
-  width: 230px;
-  height: 230px;
+  width: 260px;
+  height: 260px;
   margin-top: 15px;
   display: grid;
   place-items: center;
@@ -299,8 +470,8 @@
   animation: float 4.5s ease-in-out infinite;
 }
 .coin img {
-  width: 200px;
-  height: 200px;
+  width: 228px;
+  height: 228px;
 }
 .glare {
   display: none; /* plus de petite lumière qui suit la souris (pas propre) */
@@ -356,8 +527,8 @@
   transform: translateY(-3px) rotate(-6deg);
 }
 .stamp[aria-pressed='true'] {
-  background: rgba(var(--g), 0.22);
-  box-shadow: 0 0 0 2px rgba(var(--g), 0.8);
+  background: color-mix(in srgb, var(--gc) 22%, transparent);
+  box-shadow: 0 0 0 2px color-mix(in srgb, var(--gc) 80%, transparent);
   transform: scale(1.08);
 }
 .stamp.off {
@@ -369,7 +540,7 @@
 /* --- Pouvoir et stats */
 .power {
   display: grid;
-  gap: var(--s-2);
+  gap: var(--s-4);
   align-content: center;
 }
 .power small {
@@ -386,15 +557,14 @@
   filter: brightness(1.2);
 }
 .power p {
-  color: var(--text-2);
-  font-size: var(--fs-sm);
+  color: var(--text);
+  font-size: var(--fs-md);
+  line-height: 1.4;
 }
 .rs {
   display: grid;
   gap: 8px;
-  margin-top: var(--s-3);
-  padding: 10px 12px;
-  background: rgb(0 0 0 / 22%);
+  margin: 0;
 }
 /* une ligne par stat : icône + nom, puis barre + valeur ; chaque stat a sa couleur */
 .rs div {
@@ -554,11 +724,19 @@
   }
 }
 
-/* écran bas (téléphone tourné) : la fiche tient entière, sans défiler */
+/* écran bas (téléphone tourné) : la fiche prend tout l'écran, textes plus gros */
 @media (max-height: 720px) {
   .sheet {
     gap: var(--s-3);
-    padding-top: 0;
+    padding: var(--s-4);
+  }
+  .rays,
+  .aura {
+    top: 130px;
+  }
+  .x {
+    width: 48px;
+    height: 48px;
   }
   .rays {
     width: 270px;
@@ -587,5 +765,40 @@
 @media (max-height: 720px) {
   .demo {
     width: 170px;
+  }
+}
+
+/* face du jeton : fondu entre deux mutations, le jeton respire un peu */
+.face {
+  position: relative;
+  display: grid;
+  place-items: center;
+}
+.face > span {
+  display: grid;
+  grid-area: 1 / 1;
+}
+.faceOut {
+  animation: faceOut 0.5s ease both;
+}
+.faceIn {
+  animation: faceIn 0.5s ease both;
+}
+.breath {
+  animation: breath 0.5s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+@keyframes faceOut {
+  to {
+    opacity: 0;
+  }
+}
+@keyframes faceIn {
+  from {
+    opacity: 0;
+  }
+}
+@keyframes breath {
+  40% {
+    scale: 1.07;
   }
 }

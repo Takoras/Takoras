@@ -1,6 +1,6 @@
-import { useEffect, useRef, useState, type CSSProperties } from 'react';
+import { type CSSProperties } from 'react';
 import { useQuery } from '@tanstack/react-query';
-import { MYSTERE, SERIES, texOf, vImg, glowVars, tierKey, type Jeton } from '@/data/jetons';
+import { MYSTERE, SERIES, texOf, glowVars, tierKey, type Jeton } from '@/data/jetons';
 import { useJn } from '@/lib/names';
 import { locale, useSettings } from '@/lib/settings';
 import { useT } from '@/i18n/useT';
@@ -87,7 +87,6 @@ export function Landing() {
       </section>
 
       <section className={s.back} aria-labelledby="land-final">
-        <AutoDemo />
         <div className={s.backText}>
           <h2 id="land-final" className={s.h2}>
             {t('ui.land_final')}
@@ -293,52 +292,6 @@ function SeriesCards() {
           />
         );
       })}
-    </div>
-  );
-}
-
-// Démo de l'ouverture auto : la pochette défile vite et s'arrête sur une rare.
-// Elle ne tourne que quand elle est à l'écran.
-function AutoDemo() {
-  const t = useT();
-  const jn = useJn();
-  const lang = useSettings((x) => x.lang);
-  const list = SERIES[SERIE] ?? [];
-  const box = useRef<HTMLDivElement>(null);
-  const [k, setK] = useState(0);
-  const [seen, setSeen] = useState(false);
-  const rare = list.length - 1 >= 7 ? 7 : list.length - 1;
-  const seq = [0, 1, 0, 2, 1, 0, 3, 1, 0, 2, rare];
-  const stop = k === seq.length - 1;
-
-  useEffect(() => {
-    const el = box.current;
-    if (!el) return;
-    const io = new IntersectionObserver(([e]) => setSeen(!!e?.isIntersecting));
-    io.observe(el);
-    return () => io.disconnect();
-  }, []);
-
-  useEffect(() => {
-    if (!seen || matchMedia('(prefers-reduced-motion: reduce)').matches) return;
-    const id = setTimeout(() => setK((x) => (x + 1) % seq.length), stop ? 2400 : 240);
-    return () => clearTimeout(id);
-  }, [k, seen, stop, seq.length]);
-
-  const j = list[seq[k] ?? 0];
-  if (!j) return null;
-  return (
-    <div
-      ref={box}
-      className={`${s.pack} ${stop ? s.packStop : ''}`}
-      style={glowVars(j, stop ? 'gold' : '') as CSSProperties}
-    >
-      <img className={vImg(stop ? 'gold' : '')} src={texOf(j)} alt="" draggable={false} />
-      <b aria-live="off">{stop ? `${jn(j.name)} · 1/${fmt(j.odds * 20, lang)}` : `×${k + 1}`}</b>
-      <span className={s.packTxt}>
-        <b>{t('ui.land_auto')}</b>
-        {t('ui.land_auto_txt')}
-      </span>
     </div>
   );
 }

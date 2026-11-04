@@ -10,6 +10,7 @@ import { PowerDemo } from '../combat/PowerDemo';
 import { Tween } from '@/ui/Tween';
 import { spring } from '@/ui/spring';
 import { PixelBg } from '@/ui/PixelBg';
+import { useSwing } from '@/ui/useSwing';
 import s from './JetonSheet.module.css';
 
 const VS = ['gold', 'celeste', 'ombre'] as const;
@@ -52,6 +53,13 @@ export function JetonModal({
   const lang = useSettings((x) => x.lang);
   const coin = useRef<HTMLDivElement>(null);
   const card = useRef<HTMLDivElement>(null);
+  // les boîtes de texte flottent et se balancent au passage de la souris, comme les blocs de l'accueil
+  const idBox = useRef<HTMLDivElement>(null);
+  const pwBox = useRef<HTMLDivElement>(null);
+  const rsBox = useRef<HTMLDListElement>(null);
+  useSwing(idBox, 0.25);
+  useSwing(pwBox, 0.25);
+  useSwing(rsBox, 0.25);
   const [closing, setClosing] = useState(false);
   const shut = useRef<number>(0);
   // replier la carte, puis fermer pour de vrai
@@ -64,19 +72,28 @@ export function JetonModal({
         setClosing(false);
         onClose();
       },
-      reducedFx() ? 0 : 260,
+      reducedFx() ? 0 : 330,
     );
   };
   useEffect(() => () => clearTimeout(shut.current), []);
-  // ressorts : dépli plus vif que l'original (raideur 700, amortissement 46), inclinaison (300, 30)
+  // ressorts : dépli vif avec un rebond (raideur 520, amortissement 24), inclinaison (300, 30)
   useEffect(() => {
     const el = card.current;
     if (!el || !name) return;
     let a = 0,
-      b = 0;
+      b = 0,
+      w = 0;
+    // le rebond se voit à l'échelle de la carte (le clip, lui, ne peut pas dépasser la carte)
     const paint = () =>
-      (el.style.transform = `perspective(1000px) rotateX(${a.toFixed(2)}deg) rotateY(${b.toFixed(2)}deg)`);
-    const u = spring((v) => el.style.setProperty('--u', String(Math.max(0, v))), { stiffness: 700, damping: 46 });
+      (el.style.transform = `perspective(1000px) rotateX(${a.toFixed(2)}deg) rotateY(${b.toFixed(2)}deg) scale(${(0.9 + 0.1 * w).toFixed(4)})`);
+    const u = spring(
+      (v) => {
+        w = v;
+        el.style.setProperty('--u', String(Math.max(0, v)));
+        paint();
+      },
+      { stiffness: 520, damping: 24 },
+    );
     const rx = spring((v) => ((a = v), paint()), { stiffness: 300, damping: 30 });
     const ry = spring((v) => ((b = v), paint()), { stiffness: 300, damping: 30 });
     if (reducedFx()) u.jump(1);
@@ -98,7 +115,17 @@ export function JetonModal({
     (el as HTMLDivElement & { fold?: () => void }).fold = () => {
       rx.set(0);
       ry.set(0);
-      u.set(0);
+      // repli rapide sans rebond : il se pose
+      const fold = spring(
+        (v) => {
+          w = v;
+          el.style.setProperty('--u', String(Math.max(0, v)));
+          paint();
+        },
+        { stiffness: 420, damping: 40, from: 1 },
+      );
+      u.stop();
+      fold.set(0);
     };
     return () => {
       u.stop();
@@ -109,7 +136,10 @@ export function JetonModal({
     };
   }, [name]);
   useEffect(() => {
-    if (closing) (card.current as (HTMLDivElement & { fold?: () => void }) | null)?.fold?.();
+    // fermeture = l'ouverture à l'envers : les blocs partent (CSS), le jeton remonte, puis la carte se replie
+    if (!closing) return;
+    const id = setTimeout(() => (card.current as (HTMLDivElement & { fold?: () => void }) | null)?.fold?.(), 60);
+    return () => clearTimeout(id);
   }, [closing]);
   // mutation montrée : celle du jeton, ou celle du tampon touché (pour ce jeton seulement)
   const [over, setOver] = useState<{ n: string | null; v: string } | null>(null);
@@ -159,8 +189,13 @@ export function JetonModal({
             center={coin}
             still={reducedFx()}
           />
+          <button type="button" className={s.x} onClick={close} aria-label={t('ui.close')}>
+            <svg viewBox="0 0 24 24" width="20" height="20" aria-hidden>
+              <path d="M6 6l12 12M18 6 6 18" stroke="currentColor" strokeWidth="2.4" strokeLinecap="round" />
+            </svg>
+          </button>
           <div className={s.stage}>
-            <div className={s.id}>
+            <div ref={idBox} className={`${s.id} ${s.box}`}>
               <h2>{locked ? '???' : jn(j.name)}</h2>
               <span className={s.line} aria-hidden />
               <p className={s.odds}>{locked ? '1/?' : `1/${fmt(vOdds(j.odds, pv))}`}</p>
@@ -190,8 +225,8 @@ export function JetonModal({
                   onPointerLeave={untilt}
                   style={texScale(j) !== 1 ? { scale: String(texScale(j)) } : undefined}
                 >
-                  <img
-                    className={locked ? 'px' : vImg(pv)}
+                  <Face
+                    cls={locked ? 'px' : vImg(pv)}
                     src={locked ? MYSTERE : texOf(j)}
                     alt={locked ? '' : jn(j.name)}
                   />
@@ -235,13 +270,13 @@ export function JetonModal({
             ) : (
               <div className={s.power}>
                 {k.pw !== 'none' ? (
-                  <>
+                  <div ref={pwBox} className={`${s.box} ${s.pwBox}`}>
                     <small>{k.when}</small>
                     <b>{k.name}</b>
                     <p>{k.desc}</p>
-                  </>
+                  </div>
                 ) : null}
-                <dl className={s.rs}>
+                <dl ref={rsBox} className={`${s.rs} ${s.box}`}>
                   {stats.map(([ico, l, v, max, txt]) => (
                     <div key={l} title={l} style={{ '--sc': STAT_COL[ico] } as CSSProperties}>
                       <dt>
@@ -266,6 +301,35 @@ export function JetonModal({
         </div>
       ) : null}
     </Modal>
+  );
+}
+
+// Face du jeton : changer de mutation fond l'ancienne face dans la nouvelle (pas de remplacement sec),
+// avec une petite respiration du jeton
+function Face({ cls, src, alt }: { cls: string; src: string; alt: string }) {
+  const [cur, setCur] = useState({ cls, src });
+  const [old, setOld] = useState<{ cls: string; src: string; k: number } | null>(null);
+  if (cls !== cur.cls || src !== cur.src) {
+    setOld({ ...cur, k: (old?.k ?? 0) + 1 });
+    setCur({ cls, src });
+  }
+  useEffect(() => {
+    if (!old) return;
+    const id = setTimeout(() => setOld(null), 600);
+    return () => clearTimeout(id);
+  }, [old]);
+  return (
+    <span className={`${s.face} ${old ? s.breath : ''}`}>
+      {/* le fondu est sur un span : les images de mutation ont déjà leur propre animation (art.css) */}
+      {old ? (
+        <span className={s.faceOut} aria-hidden>
+          <img className={old.cls} src={old.src} alt="" />
+        </span>
+      ) : null}
+      <span className={old ? s.faceIn : undefined}>
+        <img className={cur.cls} src={cur.src} alt={alt} />
+      </span>
+    </span>
   );
 }
 

@@ -4,7 +4,17 @@ import s from './Landing.module.css';
 
 // Une vignette collée dans l'album : elle a du poids. Quand le doigt ou la souris passe dessus,
 // elle se décolle un peu et se balance sur un ressort, puis revient se poser.
-export function Sticker({ tilt, big, label, children }: { tilt: number; big?: boolean; label: string; children: ReactNode }) {
+export function Sticker({
+  tilt,
+  big,
+  label,
+  children,
+}: {
+  tilt: number;
+  big?: boolean;
+  label: string;
+  children: ReactNode;
+}) {
   const ref = useRef<HTMLDivElement>(null);
   useSwing(ref);
   return (
