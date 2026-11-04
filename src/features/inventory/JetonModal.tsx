@@ -286,7 +286,7 @@ function Face({ cls, src, alt }: { cls: string; src: string; alt: string }) {
   }
   useEffect(() => {
     if (!old) return;
-    const id = setTimeout(() => setOld(null), 900);
+    const id = setTimeout(() => setOld(null), 500);
     return () => clearTimeout(id);
   }, [old]);
   return (

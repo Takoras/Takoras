@@ -67,7 +67,7 @@
     max(0px, calc((1 - var(--u)) * (50% - 70px))) max(0px, calc((1 - var(--u)) * (50% - 120px))) round 16px
   );
   will-change: clip-path, transform;
-  transition: --gc 0.6s ease;
+  transition: --gc 0.45s ease;
 }
 
 /* Fermeture = l'ouverture à l'envers : les blocs partent du dernier au premier, le jeton remonte et rétrécit,
@@ -186,13 +186,13 @@
   --tilt: -4deg;
   --fl: 6s;
   animation:
-    lot 0.5s cubic-bezier(0.22, 1, 0.36, 1) var(--d, 0.25s) forwards,
-    drift 6s ease-in-out 0.6s infinite;
+    boxIn 0.5s ease-out var(--d, 0.25s) both,
+    drift 6s ease-in-out 0.9s infinite;
 }
 .sheet .power > .box {
   animation:
-    lot 0.5s cubic-bezier(0.22, 1, 0.36, 1) var(--d, 0.29s) forwards,
-    drift var(--fl) ease-in-out 0.6s infinite;
+    boxIn 0.5s ease-out var(--d, 0.29s) both,
+    drift var(--fl) ease-in-out 0.9s infinite;
 }
 .sheet .power > .rs {
   --tilt: 3deg;
@@ -271,6 +271,34 @@
 }
 .sheet > .actions {
   --d: 0.42s;
+}
+/* les boîtes sortent d'un coup et se balancent (accrochées en haut) avant de se poser : 0,5 s */
+@keyframes boxIn {
+  0% {
+    opacity: 0;
+    translate: 0 18px;
+    scale: 0.92;
+    transform: rotate(-12deg);
+  }
+  30% {
+    opacity: 1;
+    translate: 0 0;
+    scale: 1.02;
+    transform: rotate(8deg);
+  }
+  55% {
+    scale: 1;
+    transform: rotate(-4deg);
+  }
+  78% {
+    transform: rotate(1.5deg);
+  }
+  100% {
+    opacity: 1;
+    translate: 0 0;
+    scale: 1;
+    transform: none;
+  }
 }
 @keyframes lot {
   to {
@@ -661,9 +689,9 @@
   grid-area: 1 / 1;
 }
 .faceOut {
-  /* l'ancienne face reste opaque dessous pendant que la nouvelle apparaît par-dessus ;
-     ensuite seulement elle s'efface, pour que son halo (doré, céleste…) parte en fondu lui aussi */
-  animation: faceOut 0.4s ease-in-out 0.45s both;
+  /* la nouvelle face couvre vite l'ancienne (0,3 s), puis l'ancienne s'efface avec son halo (doré, céleste…) :
+     tout finit en 0,45 s, en même temps que la couleur des lueurs et du fond */
+  animation: faceOut 0.25s ease-in 0.2s both;
 }
 @keyframes faceOut {
   to {
@@ -671,7 +699,7 @@
   }
 }
 .faceIn {
-  animation: faceIn 0.5s ease both;
+  animation: faceIn 0.3s cubic-bezier(0.22, 1, 0.36, 1) both;
 }
 .breath {
   animation: breath 0.5s cubic-bezier(0.34, 1.56, 0.64, 1);
