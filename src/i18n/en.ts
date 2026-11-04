@@ -726,6 +726,10 @@ export const en: Dict = {
   },
   ring: {
     pw: {
+      nova: [
+        'Supernova',
+        'Doesn’t shoot: charges in place. At the start of next turn, it explodes and blasts every enemy around it.',
+      ],
       haste: ['Helping hand', 'Your allies’ powers come back 1 turn sooner.'],
       guard: ['Bubble', 'Your closest ally can’t be pushed this turn.'],
       grow: ['Inflate', 'Bigger and heavier this turn.'],

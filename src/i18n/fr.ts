@@ -729,6 +729,10 @@ export const fr = {
   },
   ring: {
     pw: {
+      nova: [
+        'Supernova',
+        'Ne tire pas : se charge sur place. Au début du tour suivant, il explose et souffle tous les ennemis autour de lui.',
+      ],
       haste: ['Coup de pouce', 'Les pouvoirs de tes alliés reviennent 1 tour plus tôt.'],
       guard: ['Bulle', 'Ton allié le plus proche ne peut pas être poussé ce tour.'],
       grow: ['Gonfler', 'Plus gros et plus lourd ce tour.'],

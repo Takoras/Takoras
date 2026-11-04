@@ -1,23 +1,8 @@
-import { Link } from 'react-router';
 import { useSettings } from '@/lib/settings';
 import s from './Privacy.module.css';
 
 // Une page de texte légal (FR / EN) : titre, date, intro, puis des sections numérotées.
 export type Doc = { title: string; updated: string; intro: string; blocks: [string, string[]][] };
-
-// les autres pages légales, en bas de chaque page
-const LINKS = {
-  fr: [
-    ['/mentions-legales', 'Mentions légales'],
-    ['/cgu', 'Conditions d’utilisation'],
-    ['/confidentialite', 'Confidentialité'],
-  ],
-  en: [
-    ['/mentions-legales', 'Legal notice'],
-    ['/cgu', 'Terms of use'],
-    ['/confidentialite', 'Privacy'],
-  ],
-} as const;
 
 export function LegalDoc({ fr, en }: { fr: Doc; en: Doc }) {
   const lang = useSettings((x) => x.lang);
@@ -35,13 +20,6 @@ export function LegalDoc({ fr, en }: { fr: Doc; en: Doc }) {
           ))}
         </section>
       ))}
-      <nav className={s.links}>
-        {LINKS[lang === 'en' ? 'en' : 'fr'].map(([to, label]) => (
-          <Link key={to} to={to}>
-            {label}
-          </Link>
-        ))}
-      </nav>
     </article>
   );
 }
