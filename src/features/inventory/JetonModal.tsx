@@ -1,6 +1,6 @@
-import { useRef, useState, type CSSProperties, type PointerEvent, type ReactNode } from 'react';
+import { useEffect, useRef, useState, type CSSProperties, type PointerEvent, type ReactNode } from 'react';
 import { StatIcon } from '@/ui/StatIcon';
-import { hexRGB, jetonOf, MYSTERE, texOf, texScale, vImg, vOdds, glowVars, type Variant } from '@/data/jetons';
+import { hexRGB, jetonOf, MYSTERE, texOf, texScale, tierKey, vImg, vOdds, glowVars, type Variant } from '@/data/jetons';
 import { powerInfo, RING_MAX, ringStats } from '@/data/kit';
 import { useJn } from '@/lib/names';
 import { locale, reducedFx, useSettings } from '@/lib/settings';
@@ -8,10 +8,15 @@ import { useT } from '@/i18n/useT';
 import { Modal } from '@/ui/Modal';
 import { PowerDemo } from '../combat/PowerDemo';
 import { Tween } from '@/ui/Tween';
+import { spring } from '@/ui/spring';
 import s from './JetonSheet.module.css';
 
 const VS = ['gold', 'celeste', 'ombre'] as const;
 
+// La fiche s'ouvre comme une carte qui se déplie (même mouvement que la carte « Les séries » de la présentation) :
+// petite carte au centre qui s'agrandit en ressort, la page d'album se trace derrière, le jeton tombe au milieu
+// en rebondissant, puis le nom, le pouvoir, les stats et les tampons apparaissent un par un. Toute la carte penche
+// vers la souris. À la fermeture elle se replie avant de disparaître.
 // Fiche d'un jeton, façon vitrine : le jeton en grand au centre (aura qui tourne, étincelles, il penche sous le doigt),
 // son nom et ce que tu en as à gauche, son pouvoir à droite, et les 3 tampons de mutation en dessous
 // (grisés si pas encore trouvés ; toucher un tampon trouvé montre le jeton dans cette mutation).
@@ -45,6 +50,66 @@ export function JetonModal({
   const jn = useJn();
   const lang = useSettings((x) => x.lang);
   const coin = useRef<HTMLDivElement>(null);
+  const card = useRef<HTMLDivElement>(null);
+  const [closing, setClosing] = useState(false);
+  const shut = useRef<number>(0);
+  // replier la carte, puis fermer pour de vrai
+  const close = () => {
+    if (shut.current) return;
+    setClosing(true);
+    shut.current = window.setTimeout(
+      () => {
+        shut.current = 0;
+        setClosing(false);
+        onClose();
+      },
+      reducedFx() ? 0 : 300,
+    );
+  };
+  useEffect(() => () => clearTimeout(shut.current), []);
+  // ressorts de l'original : dépli (raideur 400, amortissement 35), inclinaison (300, 30)
+  useEffect(() => {
+    const el = card.current;
+    if (!el || !name) return;
+    let a = 0,
+      b = 0;
+    const paint = () =>
+      (el.style.transform = `perspective(1000px) rotateX(${a.toFixed(2)}deg) rotateY(${b.toFixed(2)}deg)`);
+    const u = spring((v) => el.style.setProperty('--u', String(Math.max(0, v))), { stiffness: 400, damping: 35 });
+    const rx = spring((v) => ((a = v), paint()), { stiffness: 300, damping: 30 });
+    const ry = spring((v) => ((b = v), paint()), { stiffness: 300, damping: 30 });
+    if (reducedFx()) u.jump(1);
+    else u.set(1);
+    const move = (e: globalThis.PointerEvent) => {
+      if (e.pointerType !== 'mouse' || reducedFx()) return;
+      const r = el.getBoundingClientRect();
+      const mx = (e.clientX - (r.left + r.width / 2)) / (r.width / 2),
+        my = (e.clientY - (r.top + r.height / 2)) / (r.height / 2);
+      rx.set(-Math.max(-1, Math.min(1, my)) * 4);
+      ry.set(Math.max(-1, Math.min(1, mx)) * 4);
+    };
+    const leave = () => {
+      rx.set(0);
+      ry.set(0);
+    };
+    el.addEventListener('pointermove', move);
+    el.addEventListener('pointerleave', leave);
+    (el as HTMLDivElement & { fold?: () => void }).fold = () => {
+      rx.set(0);
+      ry.set(0);
+      u.set(0);
+    };
+    return () => {
+      u.stop();
+      rx.stop();
+      ry.stop();
+      el.removeEventListener('pointermove', move);
+      el.removeEventListener('pointerleave', leave);
+    };
+  }, [name]);
+  useEffect(() => {
+    if (closing) (card.current as (HTMLDivElement & { fold?: () => void }) | null)?.fold?.();
+  }, [closing]);
   // mutation montrée : celle du jeton, ou celle du tampon touché (pour ce jeton seulement)
   const [over, setOver] = useState<{ n: string | null; v: string } | null>(null);
   const pv = over && over.n === name ? over.v : variant;
@@ -82,12 +147,80 @@ export function JetonModal({
         ...(pv ? { '--g': VCOL[pv as Variant] } : {}),
       }) as unknown as CSSProperties;
   return (
-    <Modal open={!!name} onClose={onClose} wide noX>
+    <Modal open={!!name} onClose={close} wide noX bare>
       {name ? (
-        <div className={s.sheet} style={vars}>
+        <div key={name} ref={card} className={`${s.sheet} ${closing ? s.closing : ''}`} style={vars}>
+          {/* la page d'album qui se trace derrière la fiche */}
+          <svg className={s.roads} preserveAspectRatio="none" aria-hidden>
+            <line
+              x1="0%"
+              y1="35%"
+              x2="100%"
+              y2="35%"
+              pathLength={1}
+              className={s.r1}
+              style={{ '--d': '0.2s' } as CSSProperties}
+            />
+            <line
+              x1="0%"
+              y1="65%"
+              x2="100%"
+              y2="65%"
+              pathLength={1}
+              className={s.r1}
+              style={{ '--d': '0.3s' } as CSSProperties}
+            />
+            <line
+              x1="30%"
+              y1="0%"
+              x2="30%"
+              y2="100%"
+              pathLength={1}
+              className={s.r2}
+              style={{ '--d': '0.4s' } as CSSProperties}
+            />
+            <line
+              x1="70%"
+              y1="0%"
+              x2="70%"
+              y2="100%"
+              pathLength={1}
+              className={s.r2}
+              style={{ '--d': '0.5s' } as CSSProperties}
+            />
+            {[20, 50, 80].map((y, i) => (
+              <line
+                key={`h${y}`}
+                x1="0%"
+                y1={`${y}%`}
+                x2="100%"
+                y2={`${y}%`}
+                pathLength={1}
+                className={s.r3}
+                style={{ '--d': `${0.6 + i * 0.1}s` } as CSSProperties}
+              />
+            ))}
+            {[15, 45, 55, 85].map((x, i) => (
+              <line
+                key={`v${x}`}
+                x1={`${x}%`}
+                y1="0%"
+                x2={`${x}%`}
+                y2="100%"
+                pathLength={1}
+                className={s.r3}
+                style={{ '--d': `${0.7 + i * 0.1}s` } as CSSProperties}
+              />
+            ))}
+          </svg>
+          <span className={s.badge}>
+            <i />
+            {locked ? '???' : t(`ui.${tierKey(vOdds(j.odds, pv))}` as 'ui.r_myth')}
+          </span>
           <div className={s.stage}>
             <div className={s.id}>
               <h2>{locked ? '???' : jn(j.name)}</h2>
+              <span className={s.line} aria-hidden />
               <p className={s.odds}>{locked ? '1/?' : `1/${fmt(vOdds(j.odds, pv))}`}</p>
               {facts && !locked ? <ul className={s.facts}>{facts}</ul> : null}
               {/* vidéo d'exemple du pouvoir (éditeur d'équipe) : dans la colonne de gauche, qui a la place */}
@@ -107,25 +240,27 @@ export function JetonModal({
                   ))}
                 </span>
               )}
-              <div
-                ref={coin}
-                className={s.coin}
-                onPointerMove={tilt}
-                onPointerLeave={untilt}
-                style={texScale(j) !== 1 ? { scale: String(texScale(j)) } : undefined}
-              >
-                <img
-                  className={locked ? 'px' : vImg(pv)}
-                  src={locked ? MYSTERE : texOf(j)}
-                  alt={locked ? '' : jn(j.name)}
-                />
-                {locked ? null : (
-                  <i
-                    className={s.glare}
-                    style={{ maskImage: `url(${texOf(j)})`, WebkitMaskImage: `url(${texOf(j)})` }}
+              <span className={s.pin}>
+                <div
+                  ref={coin}
+                  className={s.coin}
+                  onPointerMove={tilt}
+                  onPointerLeave={untilt}
+                  style={texScale(j) !== 1 ? { scale: String(texScale(j)) } : undefined}
+                >
+                  <img
+                    className={locked ? 'px' : vImg(pv)}
+                    src={locked ? MYSTERE : texOf(j)}
+                    alt={locked ? '' : jn(j.name)}
                   />
-                )}
-              </div>
+                  {locked ? null : (
+                    <i
+                      className={s.glare}
+                      style={{ maskImage: `url(${texOf(j)})`, WebkitMaskImage: `url(${texOf(j)})` }}
+                    />
+                  )}
+                </div>
+              </span>
               <i className={s.floor} aria-hidden />
               {locked ? null : (
                 <div className={s.stamps} role="group" aria-label={t('ui.bst_variants')}>

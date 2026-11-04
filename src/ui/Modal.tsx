@@ -13,6 +13,7 @@ export function Modal({
   locked,
   wide,
   noX,
+  bare,
 }: {
   open: boolean;
   onClose: () => void;
@@ -22,6 +23,8 @@ export function Modal({
   wide?: boolean;
   /** pas de croix : on ferme en touchant à côté (ou Échap) */
   noX?: boolean;
+  /** pas de cadre : le contenu dessine sa propre carte (fiche jeton qui se déplie) */
+  bare?: boolean;
 }) {
   const ref = useRef<HTMLDialogElement>(null);
   const t = useT();
@@ -42,7 +45,7 @@ export function Modal({
     // eslint-disable-next-line jsx-a11y/click-events-have-key-events, jsx-a11y/no-noninteractive-element-interactions
     <dialog
       ref={ref}
-      className={[s.dialog, wide && s.wide].filter(Boolean).join(' ')}
+      className={[s.dialog, wide && s.wide, bare && s.noRise].filter(Boolean).join(' ')}
       aria-label={typeof title === 'string' ? title : undefined}
       onCancel={(e) => {
         e.preventDefault();
@@ -53,7 +56,7 @@ export function Modal({
       }}
     >
       {open ? (
-        <div className={s.card}>
+        <div className={bare ? s.bare : s.card}>
           {title ? <h2 className={s.title}>{title}</h2> : null}
           {locked || noX ? null : (
             <button type="button" className={s.close} onClick={onClose} aria-label={t('ui.close')}>

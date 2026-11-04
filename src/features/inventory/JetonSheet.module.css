@@ -1,8 +1,211 @@
 /* Fiche d'un jeton façon vitrine : nom à gauche, jeton au centre, pouvoir à droite */
+/* La fiche est une carte qui se déplie : --u va de 0 (petite carte au centre, 240 × 140) à 1 (fiche entière),
+   piloté par un ressort dans JetonModal. Le dépli est un clip (pas de relayout) : fluide même sur téléphone. */
 .sheet {
+  --u: 0;
+  --spring: linear(
+    0,
+    0.041,
+    0.145,
+    0.288,
+    0.449,
+    0.61,
+    0.76,
+    0.89,
+    0.994,
+    1.072,
+    1.124,
+    1.153,
+    1.163,
+    1.158,
+    1.141,
+    1.118,
+    1.092,
+    1.066,
+    1.041,
+    1.02,
+    1.002,
+    0.989,
+    0.98,
+    0.975,
+    0.973,
+    0.974,
+    0.977,
+    0.98,
+    0.985,
+    0.989,
+    0.993,
+    0.996,
+    0.999,
+    1.002,
+    1.003,
+    1.004,
+    1
+  );
+
+  position: relative;
+  isolation: isolate;
   display: grid;
   gap: var(--s-5);
-  padding-top: var(--s-4); /* de la place au-dessus : les rayons s'effacent avant le bord, jamais coupés */
+  max-height: inherit;
+  overflow-y: auto;
+  padding: var(--s-8) var(--s-6) var(--s-6); /* de la place au-dessus : les rayons s'effacent avant le bord, jamais coupés */
+  border: 1px solid rgb(255 255 255 / 12%);
+  border-radius: 16px;
+  background:
+    linear-gradient(to bottom right, rgba(var(--g), 0.06), transparent 45%, rgb(0 0 0 / 25%)), var(--surface-2);
+  clip-path: inset(
+    max(0px, calc((1 - var(--u)) * (50% - 70px))) max(0px, calc((1 - var(--u)) * (50% - 120px))) round 16px
+  );
+  will-change: clip-path, transform;
+}
+
+/* à la fermeture : la carte se replie et s'efface */
+.closing {
+  opacity: 0;
+  transition: opacity 0.3s ease-in 0.05s;
+}
+
+/* la page d'album : lignes qui se tracent une à une, teintées par le jeton */
+.roads {
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
+}
+.roads line {
+  stroke-dasharray: 1;
+  stroke-dashoffset: 1;
+  animation: draw var(--t) ease-in-out var(--d) forwards;
+}
+.r1 {
+  --t: 0.8s;
+  stroke: rgba(var(--g), 0.22);
+  stroke-width: 4;
+}
+.r2 {
+  --t: 0.6s;
+  stroke: rgba(var(--g), 0.16);
+  stroke-width: 3;
+}
+.r3 {
+  --t: 0.5s;
+  stroke: rgb(255 255 255 / 6%);
+  stroke-width: 1.5;
+}
+@keyframes draw {
+  to {
+    stroke-dashoffset: 0;
+  }
+}
+
+/* pastille de rareté en haut à droite (le « Live » de l'original) */
+.badge {
+  position: absolute;
+  top: var(--s-4);
+  right: var(--s-4);
+  z-index: 3;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 4px 10px;
+  border-radius: 999px;
+  background: rgb(255 255 255 / 5%);
+  backdrop-filter: blur(4px);
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--text-2);
+  transition:
+    scale 0.2s,
+    background-color 0.2s;
+}
+.badge i {
+  width: 6px;
+  height: 6px;
+  border-radius: 999px;
+  background: rgb(var(--g));
+  box-shadow: 0 0 6px rgb(var(--g));
+}
+.sheet:hover .badge {
+  scale: 1.05;
+  background: rgb(255 255 255 / 8%);
+}
+
+/* trait sous le nom : il s'allonge à l'ouverture */
+.line {
+  display: block;
+  width: min(180px, 100%);
+  height: 2px;
+  margin-top: -2px;
+  background: linear-gradient(to right, rgba(var(--g), 0.6), rgba(var(--g), 0.3), transparent);
+  transform-origin: left;
+  scale: 0.3 1;
+  animation: grow 0.4s ease-out 0.45s forwards;
+}
+@keyframes grow {
+  to {
+    scale: 1 1;
+  }
+}
+.sheet .id h2 {
+  transition: translate 0.45s var(--spring);
+}
+.sheet:hover .id h2 {
+  translate: 4px 0;
+}
+
+/* le jeton tombe au centre comme l'épingle : petit dépassement, puis repos */
+.pin {
+  display: grid;
+  justify-items: center;
+  transform: translateY(-20px) scale(0);
+  animation: pin 0.6s var(--spring) 0.3s forwards;
+}
+@keyframes pin {
+  to {
+    transform: none;
+  }
+}
+
+/* le reste arrive une à une, comme les bâtiments du plan */
+.id,
+.power,
+.unknown,
+.center .stamps,
+.rs > div,
+.sheet > .actions {
+  opacity: 0;
+  scale: 0.8;
+  animation: lot 0.4s ease-out var(--d, 0.5s) forwards;
+}
+.power,
+.unknown {
+  --d: 0.55s;
+}
+.rs > div:nth-child(1) {
+  --d: 0.6s;
+}
+.rs > div:nth-child(2) {
+  --d: 0.65s;
+}
+.rs > div:nth-child(3) {
+  --d: 0.7s;
+}
+.center .stamps {
+  --d: 0.65s;
+}
+.sheet > .actions {
+  --d: 0.75s;
+}
+@keyframes lot {
+  to {
+    opacity: 1;
+    scale: 1;
+  }
 }
 .stage {
   display: grid;
@@ -342,6 +545,19 @@
 :global(html.reduce-fx) .sparks {
   display: none;
 }
+/* effets réduits : la fiche s'ouvre d'un coup, sans tracé ni cascade */
+:global(html.reduce-fx) .pin,
+:global(html.reduce-fx) .line,
+:global(html.reduce-fx) .roads line,
+:global(html.reduce-fx) .id,
+:global(html.reduce-fx) .power,
+:global(html.reduce-fx) .unknown,
+:global(html.reduce-fx) .stamps,
+:global(html.reduce-fx) .rs > div,
+:global(html.reduce-fx) .actions {
+  animation-duration: 1ms;
+  animation-delay: 0s;
+}
 
 /* Téléphone : tout en colonne, le jeton en premier */
 @media (max-width: 760px) {
@@ -376,6 +592,9 @@
   }
   .id {
     justify-items: center;
+  }
+  .line {
+    transform-origin: center;
   }
   .facts {
     justify-items: center;

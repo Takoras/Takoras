@@ -32,6 +32,16 @@
   padding: var(--s-6);
 }
 
+.bare {
+  position: relative;
+  max-height: inherit;
+}
+
+/* la carte sans cadre fait sa propre entrée */
+.noRise[open] {
+  animation: none;
+}
+
 .title {
   font-size: var(--fs-xl);
   margin-bottom: var(--s-4);
