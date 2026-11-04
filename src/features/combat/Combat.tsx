@@ -60,12 +60,7 @@ export default function Combat() {
   const [ptab, setPtab] = useState<'play' | 'rank'>('play');
   const [searching, setSearching] = useState(false);
   const [sheet, setSheet] = useState<{ u: Member; i: number } | null>(null);
-  // l'élément d'où sort la fenêtre d'équipe (bouton « Modifier l'équipe » ou la place touchée)
-  const fromEl = useRef<HTMLElement | null>(null);
-  const editFrom = (i: number, el: HTMLElement | null) => {
-    fromEl.current = el;
-    setEditing(i);
-  };
+  const editFrom = (i: number) => setEditing(i);
   // Quitter la page ferme le Ring (plus de boucle d'animation ni d'écouteur qui traîne)
   useEffect(
     () => () => {
@@ -255,11 +250,11 @@ export default function Combat() {
         <Sat className={s.satTeam}>
           <TeamList
             team={team}
-            onEdit={(i, el) => {
+            onEdit={(i) => {
               sfx.click();
-              editFrom(i, el);
+              editFrom(i);
             }}
-            onEditAll={(el) => editFrom(-1, el)}
+            onEditAll={() => editFrom(-1)}
             onInfo={(u, i) => {
               sfx.click();
               setSheet({ u, i });
@@ -293,7 +288,6 @@ export default function Combat() {
           levels={inv.data}
           team={team}
           focus={editing >= 0 ? editing : undefined}
-          from={() => (fromEl.current?.isConnected ? fromEl.current : null)}
           onClose={() => setEditing(null)}
         />
       ) : null}
@@ -311,7 +305,7 @@ export default function Combat() {
             onClick={() => {
               const i = sheet.i;
               setSheet(null);
-              editFrom(i, document.querySelector<HTMLElement>(`[data-slot="${i}"]`));
+              editFrom(i);
             }}
           >
             {t('arena.swap')}
@@ -360,13 +354,13 @@ function Float({
 
 type TeamVProps = {
   team: (Member | null)[];
-  onEdit: (i: number, el: HTMLElement) => void;
-  onEditAll: (el: HTMLElement) => void;
+  onEdit: (i: number) => void;
+  onEditAll: () => void;
   onInfo: (u: Member, i: number) => void;
 };
 
 // Ton équipe : une grande case par jeton (numéro, jeton, nom, sa chance) ; toucher la case = le changer,
-// « i » = sa fiche ; « Modifier l'équipe » s'ouvre en fenêtre de choix
+// « i » = sa fiche
 function TeamList({ team, onEdit, onEditAll, onInfo }: TeamVProps) {
   const t = useT();
   const jn = useJn();
@@ -375,7 +369,7 @@ function TeamList({ team, onEdit, onEditAll, onInfo }: TeamVProps) {
     <section className={s.team} aria-labelledby="team-t">
       <header className={s.teamHead}>
         <h2 id="team-t">{t('arena.team')}</h2>
-        <Button size="sm" onClick={(e) => onEditAll(e.currentTarget)}>
+        <Button size="sm" onClick={onEditAll}>
           {t('arena.edit')}
         </Button>
       </header>
@@ -384,12 +378,7 @@ function TeamList({ team, onEdit, onEditAll, onInfo }: TeamVProps) {
           if (!u)
             return (
               <li key={i}>
-                <button
-                  type="button"
-                  data-slot={i}
-                  className={`${s.teamRow} ${s.teamEmpty}`}
-                  onClick={(e) => onEdit(i, e.currentTarget)}
-                >
+                <button type="button" data-slot={i} className={`${s.teamRow} ${s.teamEmpty}`} onClick={() => onEdit(i)}>
                   <span className={s.teamN}>{i + 1}</span>
                   <span className={s.teamPlus} aria-hidden>
                     ＋
@@ -409,7 +398,7 @@ function TeamList({ team, onEdit, onEditAll, onInfo }: TeamVProps) {
                 <button
                   type="button"
                   className={s.teamHit}
-                  onClick={(e) => onEdit(i, e.currentTarget.parentElement ?? e.currentTarget)}
+                  onClick={() => onEdit(i)}
                   aria-label={`${name} · ${t('arena.swap')}`}
                 />
                 <span className={s.teamN}>{i + 1}</span>

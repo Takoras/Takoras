@@ -13,6 +13,10 @@
   width: min(100% - 2 * var(--gutter), 720px);
 }
 
+.xl {
+  width: min(100% - 2 * var(--gutter), 1120px);
+}
+
 .dialog::backdrop {
   background: rgb(5 5 10 / 72%);
   backdrop-filter: blur(4px);
@@ -53,9 +57,8 @@
   max-height: inherit;
 }
 
-/* la carte sans cadre fait sa propre entrée ; la fenêtre « morph » sort d'un bouton */
-.noRise[open],
-.morph[open] {
+/* la carte sans cadre fait sa propre entrée */
+.noRise[open] {
   animation: none;
 }
 

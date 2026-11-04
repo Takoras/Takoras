@@ -15,7 +15,7 @@ export function Modal({
   noX,
   bare,
   fading,
-  morph,
+  xl,
 }: {
   open: boolean;
   onClose: () => void;
@@ -29,8 +29,8 @@ export function Modal({
   bare?: boolean;
   /** le fond s'efface (la fenêtre va se fermer) */
   fading?: boolean;
-  /** pas d'entrée par défaut : la fenêtre sort d'un bouton (ui/morph.ts) */
-  morph?: boolean;
+  /** très large (choix de l'équipe : toute une série de jetons) */
+  xl?: boolean;
 }) {
   const ref = useRef<HTMLDialogElement>(null);
   const t = useT();
@@ -51,9 +51,7 @@ export function Modal({
     // eslint-disable-next-line jsx-a11y/click-events-have-key-events, jsx-a11y/no-noninteractive-element-interactions
     <dialog
       ref={ref}
-      className={[s.dialog, wide && s.wide, bare && s.noRise, morph && s.morph, fading && s.fading]
-        .filter(Boolean)
-        .join(' ')}
+      className={[s.dialog, wide && s.wide, bare && s.noRise, xl && s.xl, fading && s.fading].filter(Boolean).join(' ')}
       aria-label={typeof title === 'string' ? title : undefined}
       onCancel={(e) => {
         e.preventDefault();

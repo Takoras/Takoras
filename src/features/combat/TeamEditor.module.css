@@ -3,7 +3,10 @@
   list-style: none;
   display: grid;
   grid-template-columns: repeat(3, minmax(0, 1fr));
-  gap: var(--s-2);
+  gap: var(--s-3);
+  /* fenêtre large : les 3 places restent à taille humaine, centrées */
+  max-width: 720px;
+  margin-inline: auto;
 }
 .slots li {
   border: 1px solid rgb(255 255 255 / 7%);
@@ -107,12 +110,16 @@
 
 /* Liste : même style que le bestiaire (jetons posés librement), dans une zone qui défile */
 .list {
-  /* toute la série visible d'un coup, pas de zone qui défile */
+  /* toute la série visible d'un coup, pas de zone qui défile ; des cases assez larges pour les noms */
   padding: 4px 2px;
+}
+ul.list {
+  grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+  gap: var(--s-4) var(--s-3);
 }
 .list img {
   /* jamais étiré */
-  width: 76px;
+  width: 96px;
   max-width: 100%;
   height: auto;
   aspect-ratio: 1;

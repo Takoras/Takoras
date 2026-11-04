@@ -1,5 +1,4 @@
-import { useEffect, useLayoutEffect, useRef, useState, type CSSProperties } from 'react';
-import { morph } from '@/ui/morph';
+import { useEffect, useRef, useState, type CSSProperties } from 'react';
 import { useSwingAll } from '@/ui/useSwing';
 import { SerieName } from '@/ui/SerieName';
 import { useQueryClient } from '@tanstack/react-query';
@@ -30,15 +29,12 @@ export function TeamEditor({
   levels,
   team: start,
   focus,
-  from,
-  onClose: done,
+  onClose,
 }: {
   groups: Group[];
   levels: InvData;
   team: Team;
   focus?: number;
-  /** le bouton d'où la fenêtre sort (et où elle revient en se fermant) */
-  from?: () => HTMLElement | null;
   onClose: () => void;
 }) {
   const t = useT();
@@ -125,22 +121,8 @@ export function TeamEditor({
     [],
   );
 
-  // la fenêtre sort du bouton « Modifier l'équipe » (ou de la place touchée), et y retourne en se fermant
-  const [closing, setClosing] = useState(false);
-  useLayoutEffect(() => {
-    const d = slotsRef.current?.closest('dialog');
-    if (d) void morph(d, from?.() ?? null);
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
-  const onClose = () => {
-    if (closing) return;
-    setClosing(true);
-    const d = slotsRef.current?.closest('dialog');
-    void (d ? morph(d, from?.() ?? null, true) : Promise.resolve()).then(done);
-  };
-
   return (
-    <Modal open onClose={onClose} title={t('arena.team')} wide morph fading={closing}>
+    <Modal open onClose={onClose} title={t('arena.team')} xl>
       <ul ref={slotsRef} className={s.slots}>
         {team.map((u, i) => {
           if (!u)
