@@ -1,16 +1,15 @@
 import { useEffect, useRef, useState, type CSSProperties, type PointerEvent, type ReactNode } from 'react';
-import { StatIcon } from '@/ui/StatIcon';
 import { hexRGB, jetonOf, MYSTERE, texOf, texScale, vImg, vOdds, glowVars, type Variant } from '@/data/jetons';
-import { powerInfo, RING_MAX, ringStats } from '@/data/kit';
+import { powerInfo } from '@/data/kit';
 import { useJn } from '@/lib/names';
-import { locale, reducedFx, useSettings } from '@/lib/settings';
+import { reducedFx, useSettings } from '@/lib/settings';
 import { useT } from '@/i18n/useT';
 import { Modal } from '@/ui/Modal';
 import { PowerDemo } from '../combat/PowerDemo';
-import { Tween } from '@/ui/Tween';
 import { spring } from '@/ui/spring';
 import { PixelBg } from '@/ui/PixelBg';
 import { useSwing } from '@/ui/useSwing';
+import { TokenId, TokenStats } from '@/ui/TokenCards';
 import s from './JetonSheet.module.css';
 
 const VS = ['gold', 'celeste', 'ombre'] as const;
@@ -55,10 +54,8 @@ export function JetonModal({
   const card = useRef<HTMLDivElement>(null);
   // les boîtes de texte flottent et se balancent au passage de la souris, comme les blocs de l'accueil
   const idBox = useRef<HTMLDivElement>(null);
-  const pwBox = useRef<HTMLDivElement>(null);
-  const rsBox = useRef<HTMLDListElement>(null);
+  const rsBox = useRef<HTMLDivElement>(null);
   useSwing(idBox, 0.25);
-  useSwing(pwBox, 0.25);
   useSwing(rsBox, 0.25);
   const [closing, setClosing] = useState(false);
   const shut = useRef<number>(0);
@@ -145,10 +142,8 @@ export function JetonModal({
   const [over, setOver] = useState<{ n: string | null; v: string } | null>(null);
   const pv = over && over.n === name ? over.v : variant;
   const setPv = (v: string) => setOver({ n: name, v });
-  const fmt = (n: number) => n.toLocaleString(locale(lang));
   const j = jetonOf(name ?? '', serie);
-  const k = powerInfo(j.name, lang),
-    rs = ringStats(j.name, 1, pv);
+  const k = powerInfo(j.name, lang);
   const tilt = (e: PointerEvent) => {
     const c = coin.current;
     if (!c || reducedFx()) return;
@@ -164,11 +159,6 @@ export function JetonModal({
     coin.current?.style.removeProperty('transform');
     coin.current?.style.setProperty('--gl', '0');
   };
-  const stats = [
-    ['mass', t('ring.mass'), rs.mass, RING_MAX.mass, (n: number) => n.toFixed(2)],
-    ['power', t('ring.powerS'), rs.power, RING_MAX.power, (n: number) => fmt(Math.round(n))],
-    ['size', t('ring.size'), rs.r, RING_MAX.r, (n: number) => String(Math.round(n))],
-  ] as const;
   const vars = (locked
     ? { '--g': '113, 113, 122', '--ga': 0 }
     : {
@@ -195,28 +185,22 @@ export function JetonModal({
             </svg>
           </button>
           <div className={s.stage}>
-            <div ref={idBox} className={`${s.id} ${s.box}`}>
-              <h2>{locked ? '???' : jn(j.name)}</h2>
-              <span className={s.line} aria-hidden />
-              {/* la chance défile jusqu'à sa nouvelle valeur quand on change de mutation */}
-              <p className={s.odds}>
-                {locked ? (
-                  '1/?'
-                ) : (
-                  <>
-                    1/
-                    <Tween value={vOdds(j.odds, pv)} format={(n) => fmt(Math.round(n))} ms={600} />
-                  </>
-                )}
-              </p>
+            {/* même fiche que la révélation du tirage : logo de la série, nom, chance en pastille */}
+            <TokenId
+              ref={idBox}
+              className={`${s.id} ${s.box}`}
+              serie={serie ?? 'Takoras'}
+              name={locked ? '???' : jn(j.name)}
+              odds={locked ? null : vOdds(j.odds, pv)}
+            >
               {facts && !locked ? <ul className={s.facts}>{facts}</ul> : null}
-              {/* vidéo d'exemple du pouvoir (éditeur d'équipe) : dans la colonne de gauche, qui a la place */}
+              {/* vidéo d'exemple du pouvoir (éditeur d'équipe) */}
               {demo && !locked ? (
                 <div className={s.demo}>
                   <PowerDemo name={j.name} />
                 </div>
               ) : null}
-            </div>
+            </TokenId>
             <div className={s.center}>
               <i className={s.rays} aria-hidden />
               <i className={s.aura} aria-hidden />
@@ -279,31 +263,8 @@ export function JetonModal({
               <p className={`muted ${s.unknown}`}>{t('ui.bst_unknown')}</p>
             ) : (
               <div className={s.power}>
-                {k.pw !== 'none' ? (
-                  <div ref={pwBox} className={`${s.box} ${s.pwBox}`}>
-                    <small>{k.when}</small>
-                    <b>{k.name}</b>
-                    <p>{k.desc}</p>
-                  </div>
-                ) : null}
-                <dl ref={rsBox} className={`${s.rs} ${s.box}`}>
-                  {stats.map(([ico, l, v, max, txt]) => (
-                    <div key={l} title={l} style={{ '--sc': STAT_COL[ico] } as CSSProperties}>
-                      <dt>
-                        <StatIcon k={ico} />
-                        <span>{l}</span>
-                      </dt>
-                      <dd>
-                        <span className={s.bar}>
-                          <i style={{ width: `${Math.min(100, (v / max) * 100)}%` }} />
-                        </span>
-                        <b>
-                          <Tween value={v} format={txt} />
-                        </b>
-                      </dd>
-                    </div>
-                  ))}
-                </dl>
+                {/* même fiche que la révélation du tirage : stats en barres puis la capacité */}
+                <TokenStats ref={rsBox} className={`${s.rs} ${s.box}`} name={j.name} odds={j.odds} variant={pv} />
               </div>
             )}
           </div>
@@ -325,7 +286,7 @@ function Face({ cls, src, alt }: { cls: string; src: string; alt: string }) {
   }
   useEffect(() => {
     if (!old) return;
-    const id = setTimeout(() => setOld(null), 600);
+    const id = setTimeout(() => setOld(null), 900);
     return () => clearTimeout(id);
   }, [old]);
   return (

@@ -130,3 +130,15 @@
   justify-content: flex-end;
   margin-top: var(--s-3);
 }
+
+/* fiches de la révélation du tirage, penchées comme elles ; elles se redressent au survol */
+.idc {
+  rotate: -3deg;
+}
+.stc {
+  rotate: 2deg;
+}
+.idc:hover,
+.stc:hover {
+  rotate: 0deg;
+}

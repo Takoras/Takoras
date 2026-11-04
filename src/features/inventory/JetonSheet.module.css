@@ -126,17 +126,6 @@
     transform: translateY(-20px) scale(0);
   }
 }
-.closing .line {
-  animation: shrink 0.2s ease-in both;
-}
-@keyframes shrink {
-  from {
-    scale: 1 1;
-  }
-  to {
-    scale: 0.3 1;
-  }
-}
 .closing .pxbg {
   animation: bgOut 0.22s ease-in 0.02s both;
 }
@@ -185,26 +174,20 @@
 .box {
   --tilt: 0deg;
   --fl: 6.5s;
-  padding: 14px 16px;
-  border: 1px solid rgb(255 255 255 / 10%);
-  border-radius: 12px;
-  background: rgb(12 11 20 / 84%);
-  box-shadow: 0 12px 26px rgb(0 0 0 / 35%);
-  will-change: transform, opacity;
   rotate: calc(var(--tilt) + var(--swing, 0deg));
   transform-origin: 50% 0;
+  will-change: transform, opacity;
+}
+/* comme la révélation : elles se redressent au survol */
+.box:hover {
+  --tilt: 0deg;
 }
 .sheet .id {
-  --tilt: -1.5deg;
+  --tilt: -4deg;
   --fl: 6s;
   animation:
     lot 0.5s cubic-bezier(0.22, 1, 0.36, 1) var(--d, 0.25s) forwards,
     drift 6s ease-in-out 0.6s infinite;
-}
-.pwBox {
-  --tilt: 1.2deg;
-  display: grid;
-  gap: var(--s-2);
 }
 .sheet .power > .box {
   animation:
@@ -212,7 +195,7 @@
     drift var(--fl) ease-in-out 0.6s infinite;
 }
 .sheet .power > .rs {
-  --tilt: -0.8deg;
+  --tilt: 3deg;
   --fl: 7.5s;
 }
 @keyframes drift {
@@ -244,32 +227,6 @@
 }
 
 /* trait sous le nom : il s'allonge à l'ouverture */
-.line {
-  display: block;
-  width: min(180px, 100%);
-  height: 2px;
-  margin-top: -2px;
-  background: linear-gradient(
-    to right,
-    color-mix(in srgb, var(--gc) 60%, transparent),
-    color-mix(in srgb, var(--gc) 30%, transparent),
-    transparent
-  );
-  transform-origin: left;
-  scale: 0.3 1;
-  animation: grow 0.35s ease-out 0.25s forwards;
-}
-@keyframes grow {
-  to {
-    scale: 1 1;
-  }
-}
-.sheet .id h2 {
-  transition: translate 0.45s var(--spring);
-}
-.sheet:hover .id h2 {
-  translate: 4px 0;
-}
 
 /* le jeton tombe au centre comme l'épingle : petit dépassement, puis repos */
 .pin {
@@ -331,21 +288,7 @@
 
 /* --- Nom, chance, ce que tu en as */
 .id {
-  display: grid;
-  gap: var(--s-2);
-  align-content: center;
-}
-.id h2 {
-  font-size: clamp(1.8rem, calc(4vw / var(--z, 1)), 2.6rem);
-  line-height: 1;
-  text-shadow: 0 0 24px color-mix(in srgb, var(--gc) 45%, transparent);
-}
-.odds {
-  font-family: var(--font-display);
-  font-weight: 800;
-  font-size: var(--fs-xl);
-  color: var(--gc);
-  filter: brightness(1.25);
+  align-self: center;
 }
 .facts {
   list-style: none;
@@ -547,67 +490,6 @@
   gap: var(--s-4);
   align-content: center;
 }
-.power small {
-  color: var(--muted);
-  font-size: var(--fs-xs);
-  text-transform: uppercase;
-  letter-spacing: var(--tracking-caps);
-}
-.power > b {
-  font-family: var(--font-display);
-  font-size: var(--fs-xl);
-  line-height: 1.1;
-  color: rgb(var(--pw, var(--g)));
-  filter: brightness(1.2);
-}
-.power p {
-  color: var(--text);
-  font-size: var(--fs-md);
-  line-height: 1.4;
-}
-.rs {
-  display: grid;
-  gap: 8px;
-  margin: 0;
-}
-/* une ligne par stat : icône + nom, puis barre + valeur ; chaque stat a sa couleur */
-.rs div {
-  display: grid;
-  grid-template-columns: 1fr;
-  gap: 3px;
-}
-.rs dt {
-  display: flex;
-  align-items: center;
-  gap: 6px;
-  font-size: var(--fs-sm);
-  font-weight: 700;
-  color: rgb(var(--sc));
-}
-.rs dd {
-  display: grid;
-  grid-template-columns: 1fr 52px;
-  align-items: center;
-  gap: var(--s-2);
-  margin: 0;
-  min-width: 150px;
-}
-.rs b {
-  text-align: right;
-  font-size: var(--fs-md, 15px);
-  font-variant-numeric: tabular-nums;
-}
-.bar {
-  height: 10px;
-  background: rgb(255 255 255 / 8%);
-}
-.bar i {
-  display: block;
-  height: 100%;
-  transition: width 0.45s cubic-bezier(0.2, 0.8, 0.3, 1); /* la jauge glisse jusqu'à sa nouvelle valeur */
-  background: rgb(var(--sc, var(--g)));
-  box-shadow: 0 0 6px rgb(var(--sc, var(--g)) / 50%);
-}
 .unknown {
   align-self: center;
 }
@@ -670,7 +552,6 @@
 }
 /* effets réduits : la fiche s'ouvre d'un coup, sans tracé ni cascade */
 :global(html.reduce-fx) .pin,
-:global(html.reduce-fx) .line,
 :global(html.reduce-fx) .pxbg,
 :global(html.reduce-fx) .id,
 :global(html.reduce-fx) .power,
@@ -715,9 +596,6 @@
   }
   .id {
     justify-items: center;
-  }
-  .line {
-    transform-origin: center;
   }
   .facts {
     justify-items: center;
@@ -783,8 +661,14 @@
   grid-area: 1 / 1;
 }
 .faceOut {
-  /* l'ancienne face reste opaque dessous pendant que la nouvelle apparaît par-dessus */
-  opacity: 1;
+  /* l'ancienne face reste opaque dessous pendant que la nouvelle apparaît par-dessus ;
+     ensuite seulement elle s'efface, pour que son halo (doré, céleste…) parte en fondu lui aussi */
+  animation: faceOut 0.4s ease-in-out 0.45s both;
+}
+@keyframes faceOut {
+  to {
+    opacity: 0;
+  }
 }
 .faceIn {
   animation: faceIn 0.5s ease both;

@@ -421,7 +421,7 @@ function fillInfo(j, variant = '') {
   const lk = +(sess.lucks || [])[sess.idx] || 0; // chance active quand ce jeton a été tiré
   $('op-rarity').innerHTML = '1/' + vOdds(j.odds, variant).toLocaleString(LOCALE()) + (lk > 1 ? ` <span class="op-luck">×${fmtLuck(lk)}</span>` : '');
   // Mêmes stats que dans l'inventaire (stables pour un même jeton)
-  const S = statsOf(j.name, j.odds);
+  const S = statsOf(j.name, j.odds, variant);
   sess.cur.stats = ['s_mass', 's_pow', 's_size'].map(k => [k, S[k], Math.min(100, S[k] / STAT_MAX[k] * 100)]);
   $('op-stats').innerHTML = sess.cur.stats
     .map(([k, v, w]) => `<div class="stat"><span class="muted">${t(k)}</span><div class="bar"><i data-w="${w}"></i></div><b>${v}</b></div>`).join('');
