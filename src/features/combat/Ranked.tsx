@@ -45,7 +45,7 @@ export function RankBadge({ r, size = 44 }: { r: Rank; size?: number }) {
   );
 }
 
-// Carte du rang : badge, nom, Elo, bilan et progression jusqu'à la prochaine division
+// Carte du rang : badge, nom, Elo, place au classement et barre jusqu'à la prochaine division
 export function RankCard({ me }: { me: RankedMe | undefined }) {
   const t = useT();
   const lang = useSettings((x) => x.lang);
@@ -67,7 +67,6 @@ export function RankCard({ me }: { me: RankedMe | undefined }) {
           <span className={s.heroElo}>
             {elo.toLocaleString(locale(lang))} <small>Elo</small>
           </span>
-          {me?.games ? <span>{t('arena.record', { w: me.wins, l: me.losses })}</span> : null}
           {me?.games ? <span>{t('arena.eloTop', { n: me.top })}</span> : null}
         </div>
         <div
@@ -80,19 +79,11 @@ export function RankCard({ me }: { me: RankedMe | undefined }) {
         >
           <i style={{ width: `${pct}%` }} />
         </div>
-        <small className={s.heroNext}>
-          {next
-            ? t('arena.nextDiv', { n: (next.min - elo).toLocaleString(locale(lang)), r: name(next) })
-            : t('arena.maxRank')}
-        </small>
       </div>
     </div>
   );
 }
 
-// Route des rangs : un chemin qui serpente, les badges flottent dessus ; la partie déjà faite est colorée
-// Route des rangs : les 8 rangs côte à côte (sans défilement), reliés par une barre qui se remplit jusqu'à toi.
-// Sous chaque badge, les divisions (1, 2, 3) en petites pastilles ; ton rang flotte et brille.
 // Recherche d'un adversaire : on redemande au serveur toutes les 3 s (l'écart d'Elo toléré grandit avec l'attente)
 export function SearchModal({
   elo,

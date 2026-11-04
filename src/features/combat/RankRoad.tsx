@@ -97,7 +97,6 @@ export function RankRoad({ elo }: { elo: number }) {
 
   const P = pts(w);
   const d = curve(P);
-  const next = ROAD[cur.idx + 1];
 
   // l'étape penche en 3D vers la souris (±10°), revient droite en partant
   const tilt = (e: PointerEvent<HTMLButtonElement>) => {
@@ -116,9 +115,6 @@ export function RankRoad({ elo }: { elo: number }) {
     <section className={s.road} aria-labelledby="road-t">
       <header className={s.head}>
         <h2 id="road-t">{t('arena.road')}</h2>
-        <span className={s.next}>
-          {next ? t('arena.nextDiv', { n: fmt(next.min - elo), r: name(next) }) : t('arena.maxRank')}
-        </span>
       </header>
       <div ref={scroller} className={s.scroll}>
         <div
