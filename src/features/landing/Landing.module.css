@@ -19,8 +19,7 @@
   position: fixed;
   inset: 0;
   z-index: -1;
-  background:
-    radial-gradient(1200px 700px at 70% 10%, var(--al-cover) 0%, var(--al-cover-deep) 100%);
+  background: radial-gradient(1200px 700px at 70% 10%, var(--al-cover) 0%, var(--al-cover-deep) 100%);
 }
 
 .page ::selection {
@@ -37,7 +36,9 @@
   max-width: 1240px;
   margin: 0 auto;
   border-radius: 6px;
-  box-shadow: 0 24px 48px rgb(0 0 0 / 55%), 0 4px 8px rgb(0 0 0 / 40%);
+  box-shadow:
+    0 24px 48px rgb(0 0 0 / 55%),
+    0 4px 8px rgb(0 0 0 / 40%);
 }
 
 .spread:first-child {
@@ -113,7 +114,9 @@
   font-family: var(--font-album);
   font-size: var(--fs-xl);
   cursor: pointer;
-  box-shadow: inset 0 -4px 0 var(--al-red-deep), var(--al-shadow);
+  box-shadow:
+    inset 0 -4px 0 var(--al-red-deep),
+    var(--al-shadow);
   transition:
     transform var(--t-fast) var(--ease-out),
     box-shadow var(--t-fast) var(--ease-out);
@@ -121,12 +124,16 @@
 
 .play:hover {
   transform: translateY(-2px);
-  box-shadow: inset 0 -4px 0 var(--al-red-deep), var(--al-shadow-lift);
+  box-shadow:
+    inset 0 -4px 0 var(--al-red-deep),
+    var(--al-shadow-lift);
 }
 
 .play:active {
   transform: translateY(1px);
-  box-shadow: inset 0 -1px 0 var(--al-red-deep), var(--al-shadow);
+  box-shadow:
+    inset 0 -1px 0 var(--al-red-deep),
+    var(--al-shadow);
 }
 
 .play:focus-visible,
@@ -187,10 +194,22 @@
   grid-row: 1 / span 2;
 }
 
-.slot:nth-child(1) { grid-column: 1; grid-row: 1; }
-.slot:nth-child(2) { grid-column: 2; grid-row: 1; }
-.slot:nth-child(3) { grid-column: 1; grid-row: 2; }
-.slot:nth-child(4) { grid-column: 2; grid-row: 2; }
+.slot:nth-child(1) {
+  grid-column: 1;
+  grid-row: 1;
+}
+.slot:nth-child(2) {
+  grid-column: 2;
+  grid-row: 1;
+}
+.slot:nth-child(3) {
+  grid-column: 1;
+  grid-row: 2;
+}
+.slot:nth-child(4) {
+  grid-column: 2;
+  grid-row: 2;
+}
 
 .empty {
   width: 100%;
@@ -431,6 +450,29 @@
 .cardBody dd {
   margin: 0;
   font-weight: 600;
+}
+
+/* le verre liquide remplit la case de l'illustration */
+.glass {
+  width: 100%;
+  height: 100%;
+  border-radius: inherit;
+}
+
+/* ---------- Les plus rares / les séries ---------- */
+
+.rares {
+  margin: var(--s-8) 0 0;
+  justify-self: start;
+}
+
+.seriesCards {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-start;
+  gap: var(--s-10) var(--s-6);
+  margin-top: var(--s-6);
+  padding-bottom: var(--s-6);
 }
 
 /* ---------- Quatrième de couverture ---------- */

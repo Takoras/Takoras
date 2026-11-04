@@ -10,6 +10,10 @@ import { tables } from '@/api';
 import { Live } from '../home/Feeds';
 import { openInfo } from '../info/store';
 import { Sticker } from './Sticker';
+import { CardStack } from '@/ui/CardStack';
+import { ExpandCard } from '@/ui/ExpandCard';
+import { GlassIconReveal } from '@/ui/GlassReveal';
+import { SerieName } from '@/ui/SerieName';
 import '@fontsource/archivo-black';
 import '@fontsource-variable/archivo';
 import s from './Landing.module.css';
@@ -69,6 +73,21 @@ export function Landing() {
         </div>
       </section>
 
+      <section className={s.spread} aria-labelledby="land-rares">
+        <div className={`${s.leaf} ${s.left}`}>
+          <h2 id="land-rares" className={s.h2}>
+            {t('ui.land_rares')}
+          </h2>
+          <p className={s.stepTxt}>{t('ui.land_rares_txt')}</p>
+          <Rares />
+        </div>
+        <div className={`${s.leaf} ${s.right}`}>
+          <h2 className={s.h2}>{t('ui.land_series')}</h2>
+          <p className={s.stepTxt}>{t('ui.land_series_txt')}</p>
+          <SeriesCards />
+        </div>
+      </section>
+
       <section className={s.back} aria-labelledby="land-final">
         <AutoDemo />
         <div className={s.backText}>
@@ -109,11 +128,7 @@ function Slots({ list }: { list: Jeton[] }) {
       ))}
       {star >= 0 && list[star] ? (
         <li className={s.starSlot}>
-          <Sticker
-            tilt={-3}
-            big
-            label={t('ui.land_slot', { n: star + 1, name: jn(STAR) })}
-          >
+          <Sticker tilt={-3} big label={t('ui.land_slot', { n: star + 1, name: jn(STAR) })}>
             <span className={s.gloss} style={glowVars(list[star]) as CSSProperties}>
               <img className="px" src={texOf(list[star])} alt="" draggable={false} />
             </span>
@@ -182,7 +197,10 @@ function Blueprint() {
   const jn = useJn();
   const lang = useSettings((x) => x.lang);
   const list = SERIES[SERIE] ?? [];
-  const idx = Math.max(0, list.findIndex((x) => x.name === STAR));
+  const idx = Math.max(
+    0,
+    list.findIndex((x) => x.name === STAR),
+  );
   const j = list[idx];
   if (!j) return null;
   const rows: [string, string][] = [
@@ -193,8 +211,22 @@ function Blueprint() {
   ];
   return (
     <div className={s.card}>
+      {/* le jeton se révèle dans du verre liquide (clic = rejouer) ; sans WebGL, le sprite seul */}
       <div className={s.cardArt} style={glowVars(j) as CSSProperties}>
-        <img className="px" src={texOf(j)} alt="" draggable={false} />
+        <GlassIconReveal
+          className={s.glass}
+          logo={texOf(j)}
+          label={`${jn(j.name)} · ${t('ui.land_glass_hint')}`}
+          look="dark"
+          pixel
+          originalColors
+          keepPlate
+          loop={false}
+          background="#1e1e28"
+          plateColor="#17171f"
+          logoScale={0.8}
+          tuning={{ present: 2.2 }}
+        />
       </div>
       <div className={s.cardBody}>
         <h3>
@@ -210,6 +242,59 @@ function Blueprint() {
         </dl>
         <p className={s.stepTxt}>{t('ui.land_bp_txt')}</p>
       </div>
+    </div>
+  );
+}
+
+// Les 3 jetons les plus rares de la série, en pile : le plus rare devant
+function Rares() {
+  const t = useT();
+  const jn = useJn();
+  const lang = useSettings((x) => x.lang);
+  const top = [...(SERIES[SERIE] ?? [])].sort((a, b) => a.odds - b.odds).slice(-3);
+  return (
+    <CardStack
+      className={s.rares}
+      cards={top.map((j) => ({
+        icon: <img className="px" src={texOf(j)} alt="" draggable={false} />,
+        title: jn(j.name),
+        description: t('ui.land_rares_odds', { n: fmt(j.odds, lang) }),
+        date: t(`ui.${tierKey(j.odds)}` as 'ui.r_myth'),
+        color: `var(--${tierKey(j.odds).replace('_', '-')})`,
+      }))}
+    />
+  );
+}
+
+// Une carte par série : elle penche vers la souris et se déplie sur sa page (vignettes + la plus rare au centre)
+function SeriesCards() {
+  const t = useT();
+  const jn = useJn();
+  const lang = useSettings((x) => x.lang);
+  return (
+    <div className={s.seriesCards}>
+      {Object.entries(SERIES).map(([name, list]) => {
+        const sorted = [...list].sort((a, b) => a.odds - b.odds);
+        const star = sorted[sorted.length - 1];
+        if (!star) return null;
+        return (
+          <ExpandCard
+            key={name}
+            label={name}
+            icon={<img className="px" src={texOf(star)} alt="" draggable={false} />}
+            badge={t('ui.land_series_count', { n: list.length })}
+            title={<SerieName name={name} h="1.6em" />}
+            detail={t('ui.land_series_star', { name: jn(star.name), n: fmt(star.odds, lang) })}
+            hint={t('ui.land_series_hint')}
+            sprites={sorted
+              .slice(0, -1)
+              .slice(0, 6)
+              .map((j) => texOf(j))}
+            star={texOf(star)}
+            color={star.glow}
+          />
+        );
+      })}
     </div>
   );
 }
@@ -245,7 +330,11 @@ function AutoDemo() {
   const j = list[seq[k] ?? 0];
   if (!j) return null;
   return (
-    <div ref={box} className={`${s.pack} ${stop ? s.packStop : ''}`} style={glowVars(j, stop ? 'gold' : '') as CSSProperties}>
+    <div
+      ref={box}
+      className={`${s.pack} ${stop ? s.packStop : ''}`}
+      style={glowVars(j, stop ? 'gold' : '') as CSSProperties}
+    >
       <img className={vImg(stop ? 'gold' : '')} src={texOf(j)} alt="" draggable={false} />
       <b aria-live="off">{stop ? `${jn(j.name)} · 1/${fmt(j.odds * 20, lang)}` : `×${k + 1}`}</b>
       <span className={s.packTxt}>

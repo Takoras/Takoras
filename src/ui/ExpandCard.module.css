@@ -1,0 +1,436 @@
+/* Carte qui se déplie : mesures et délais de l'original (240 × 140 → 360 × 280, tracés de 0,5 à 0,8 s,
+   vignettes à 0,5–0,75 s, épingle en ressort à 0,3 s). La taille et l'inclinaison sont pilotées par spring.ts. */
+
+.wrap {
+  --bg: var(--al-paper, #17171f);
+  --muted: var(--al-paper-2, #1e1e28);
+  --fg: var(--al-ink, #f2f2f5);
+  --fg-2: var(--al-ink-2, #b8b8c6);
+  /* ressort amorti à 0,5 (raideur 400, amortissement 20) : petit dépassement puis repos */
+  --spring: linear(
+    0,
+    0.041,
+    0.145,
+    0.288,
+    0.449,
+    0.61,
+    0.76,
+    0.89,
+    0.994,
+    1.072,
+    1.124,
+    1.153,
+    1.163,
+    1.158,
+    1.141,
+    1.118,
+    1.092,
+    1.066,
+    1.041,
+    1.02,
+    1.002,
+    0.989,
+    0.98,
+    0.975,
+    0.973,
+    0.974,
+    0.977,
+    0.98,
+    0.985,
+    0.989,
+    0.993,
+    0.996,
+    0.999,
+    1.002,
+    1.003,
+    1.004,
+    1
+  );
+
+  position: relative;
+  display: block;
+  max-width: 100%;
+  padding: 0;
+  border: 0;
+  background: none;
+  color: var(--fg);
+  font: inherit;
+  text-align: left;
+  cursor: pointer;
+  user-select: none;
+  perspective: 1000px;
+}
+
+.wrap:focus-visible {
+  outline: none;
+}
+
+.wrap:focus-visible .card {
+  outline: 2px solid var(--c);
+  outline-offset: 3px;
+}
+
+.card {
+  --w: 240px;
+  --h: 140px;
+
+  position: relative;
+  width: min(var(--w), 100%);
+  height: var(--h);
+  overflow: hidden;
+  border: 1px solid var(--al-line, #3a3a4a);
+  border-radius: 1rem;
+  background: var(--bg);
+  transform-style: preserve-3d;
+}
+
+.wash {
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(
+    to bottom right,
+    color-mix(in srgb, var(--muted) 20%, transparent),
+    transparent,
+    color-mix(in srgb, var(--muted) 40%, transparent)
+  );
+}
+
+/* ---------- le plan (ouvert) ---------- */
+
+.map {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  background: var(--muted);
+  opacity: 0;
+  transition: opacity 0.4s ease 0.1s;
+}
+
+.open .map {
+  opacity: 1;
+}
+
+.roads {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+}
+
+.roads line {
+  stroke-dasharray: 1;
+  stroke-dashoffset: 1;
+  animation: draw var(--t) ease-in-out var(--d) forwards;
+}
+
+@keyframes draw {
+  to {
+    stroke-dashoffset: 0;
+  }
+}
+
+.main {
+  --t: 0.8s;
+
+  stroke: color-mix(in srgb, var(--fg) 25%, transparent);
+  stroke-width: 4;
+}
+
+.mid {
+  --t: 0.6s;
+
+  stroke: color-mix(in srgb, var(--fg) 20%, transparent);
+  stroke-width: 3;
+}
+
+.thin {
+  --t: 0.5s;
+
+  stroke: color-mix(in srgb, var(--fg) 10%, transparent);
+  stroke-width: 1.5;
+}
+
+/* les « bâtiments » : des cases d'album avec une vignette dedans */
+.lot {
+  position: absolute;
+  display: grid;
+  place-items: center;
+  border: 1px solid color-mix(in srgb, var(--fg-2) 20%, transparent);
+  border-radius: 2px;
+  background: color-mix(in srgb, var(--fg-2) 26%, transparent);
+  opacity: 0;
+  scale: 0.8;
+  animation: lot 0.4s ease-out var(--d) forwards;
+}
+
+.lot img {
+  width: auto;
+  height: 82%;
+  max-width: 82%;
+  object-fit: contain;
+}
+
+@keyframes lot {
+  to {
+    opacity: 1;
+    scale: 1;
+  }
+}
+
+.l0 {
+  --d: 0.5s;
+
+  top: 40%;
+  left: 10%;
+  width: 15%;
+  height: 20%;
+}
+
+.l1 {
+  --d: 0.6s;
+
+  top: 15%;
+  left: 35%;
+  width: 12%;
+  height: 15%;
+}
+
+.l2 {
+  --d: 0.7s;
+
+  top: 70%;
+  left: 75%;
+  width: 18%;
+  height: 18%;
+}
+
+.l3 {
+  --d: 0.55s;
+
+  top: 20%;
+  right: 10%;
+  width: 10%;
+  height: 25%;
+}
+
+.l4 {
+  --d: 0.65s;
+
+  top: 55%;
+  left: 5%;
+  width: 8%;
+  height: 12%;
+}
+
+.l5 {
+  --d: 0.75s;
+
+  top: 8%;
+  left: 75%;
+  width: 14%;
+  height: 10%;
+}
+
+/* l'épingle : la vignette la plus rare tombe au centre en rebondissant */
+.pin {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 56px;
+  height: 56px;
+  translate: -50% -50%;
+  transform: translateY(-20px) scale(0);
+  animation: pin 0.6s var(--spring) 0.3s forwards;
+}
+
+.pin img {
+  width: 100%;
+  height: 100%;
+  filter: drop-shadow(0 0 10px color-mix(in srgb, var(--c) 50%, transparent));
+}
+
+@keyframes pin {
+  to {
+    transform: none;
+  }
+}
+
+.fade {
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(to top, var(--bg), transparent 50%);
+  opacity: 0.6;
+}
+
+/* quadrillage de 20 px, à peine visible, qui s'efface à l'ouverture */
+.grid {
+  position: absolute;
+  inset: 0;
+  opacity: 0.03;
+  background:
+    linear-gradient(var(--fg) 0.5px, transparent 0.5px) 0 0 / 20px 20px,
+    linear-gradient(90deg, var(--fg) 0.5px, transparent 0.5px) 0 0 / 20px 20px;
+  transition: opacity 0.3s;
+}
+
+.open .grid {
+  opacity: 0;
+}
+
+/* ---------- contenu ---------- */
+
+.content {
+  position: relative;
+  z-index: 10;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  height: 100%;
+  padding: 1.25rem;
+}
+
+.top {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+}
+
+.icon {
+  display: inline-grid;
+  width: 26px;
+  height: 26px;
+  filter: drop-shadow(0 0 4px color-mix(in srgb, var(--c) 30%, transparent));
+  transition:
+    opacity 0.3s,
+    filter 0.3s;
+}
+
+.icon img {
+  width: 100%;
+  height: 100%;
+}
+
+.hover .icon {
+  filter: drop-shadow(0 0 8px color-mix(in srgb, var(--c) 60%, transparent));
+}
+
+.open .icon {
+  opacity: 0;
+}
+
+.badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 4px 8px;
+  border-radius: 999px;
+  background: color-mix(in srgb, var(--fg) 5%, transparent);
+  backdrop-filter: blur(4px);
+  font-size: 10px;
+  font-weight: 600;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+  color: var(--fg-2);
+  transition:
+    scale 0.2s,
+    background-color 0.2s;
+}
+
+.badge i {
+  width: 6px;
+  height: 6px;
+  border-radius: 999px;
+  background: var(--c);
+}
+
+.hover .badge {
+  scale: 1.05;
+  background: color-mix(in srgb, var(--fg) 8%, transparent);
+}
+
+.bottom {
+  display: grid;
+  gap: 4px;
+}
+
+.title {
+  font-size: 0.875rem;
+  font-weight: 600;
+  letter-spacing: -0.01em;
+  transition: translate 0.45s var(--spring);
+}
+
+.hover .title {
+  translate: 4px 0;
+}
+
+/* la ligne de détail s'ouvre en hauteur (pas de saut) */
+.detail {
+  display: grid;
+  grid-template-rows: 0fr;
+  opacity: 0;
+  translate: 0 -10px;
+  font-family: ui-monospace, monospace;
+  font-size: 0.75rem;
+  color: var(--fg-2);
+  transition:
+    grid-template-rows 0.25s,
+    opacity 0.25s,
+    translate 0.25s;
+}
+
+.detail > span {
+  overflow: hidden;
+}
+
+.open .detail {
+  grid-template-rows: 1fr;
+  opacity: 1;
+  translate: 0 0;
+}
+
+.line {
+  height: 1px;
+  background: linear-gradient(
+    to right,
+    color-mix(in srgb, var(--c) 50%, transparent),
+    color-mix(in srgb, var(--c) 30%, transparent),
+    transparent
+  );
+  transform-origin: left;
+  scale: 0.3 1;
+  transition: scale 0.4s ease-out;
+}
+
+.hover .line,
+.open .line {
+  scale: 1 1;
+}
+
+.hint {
+  position: absolute;
+  bottom: -24px;
+  left: 50%;
+  font-size: 10px;
+  white-space: nowrap;
+  color: var(--fg-2);
+  opacity: 0;
+  translate: -50% 4px;
+  transition:
+    opacity 0.2s,
+    translate 0.2s;
+}
+
+.hover:not(.open) .hint {
+  opacity: 1;
+  translate: -50% 0;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .roads line,
+  .lot,
+  .pin {
+    animation-duration: 1ms;
+    animation-delay: 0s;
+  }
+}

@@ -37,7 +37,9 @@ export default function Home() {
     e.currentTarget.style.setProperty('--py', '0');
   };
   // visiteur (pas connecté) : la page de présentation
-  if (ready && !user) return <Landing />;
+  // en local, « ?landing » affiche la page de présentation même connecté (pour la vérifier)
+  if ((ready && !user) || (import.meta.env.DEV && new URLSearchParams(location.search).has('landing')))
+    return <Landing />;
   return (
     <>
       <FallRain serie={pull.name} />
