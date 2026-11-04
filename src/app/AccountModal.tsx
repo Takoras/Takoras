@@ -1,5 +1,4 @@
 import { useState } from 'react';
-import { Link } from 'react-router';
 import { useQueryClient } from '@tanstack/react-query';
 import { accountApi, errorText } from '@/api';
 import { useMe } from '@/api/queries';
@@ -91,6 +90,7 @@ export function AccountModal() {
   );
 }
 
+// (fenêtre affichée HORS du routeur, dans boot.tsx : liens <a> simples, jamais <Link> — sinon tout le site plante)
 // « Avant de jouer » : accepter les CGU et la politique de confidentialité, et confirmer son âge
 // (15 ans ou plus, ou accord des parents). Obligatoire : la fenêtre ne se ferme pas avant.
 function TermsGate() {
@@ -125,13 +125,13 @@ function TermsGate() {
           <input type="checkbox" checked={cgu} onChange={(e) => setCgu(e.target.checked)} />
           <span>
             {a}
-            <Link to="/cgu" target="_blank">
+            <a href="/cgu" target="_blank" rel="noopener noreferrer">
               {t('ui.terms_cgu')}
-            </Link>
+            </a>
             {b1}
-            <Link to="/confidentialite" target="_blank">
+            <a href="/confidentialite" target="_blank" rel="noopener noreferrer">
               {t('ui.terms_privacy')}
-            </Link>
+            </a>
             {b2}
           </span>
         </label>
