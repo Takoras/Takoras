@@ -1,24 +1,45 @@
+/* ======================================================================
+   Menu Combat, même DA que l'accueil : le rang flotte au centre avec JOUER,
+   l'équipe et le classement sont des blocs « satellites » qui penchent, flottent et se balancent.
+   ====================================================================== */
 .page {
   display: grid;
   gap: var(--s-8);
-  width: min(560px, 100%);
+  width: 100%;
   margin: 0 auto;
 }
-.colMain,
-.colSide {
+.stage {
   display: grid;
+  grid-template-areas: 'center' 'team' 'board';
+  gap: var(--s-8);
+  align-items: start;
+  min-width: 0;
+}
+.center {
+  grid-area: center;
+  display: grid;
+  justify-items: center;
   gap: var(--s-5);
-  align-content: start;
   min-width: 0;
 }
-/* la route des rangs prend toute la largeur, sous les deux colonnes */
+/* le rang en grand, centré (badge au-dessus, nom, Elo, barre) */
+.heroWrap {
+  width: 100%;
+  display: grid;
+  justify-items: center;
+}
+.heroWrap > div {
+  flex-direction: column;
+  gap: var(--s-2);
+  padding: 0;
+  text-align: center;
+}
+.heroWrap > div > div:last-child {
+  justify-items: center;
+  width: min(440px, 100%);
+}
+/* la route des rangs prend toute la largeur, en bas */
 .roadRow {
-  grid-column: 1 / -1;
-  min-width: 0;
-}
-/* le rang, en énorme, sur toute la largeur en haut */
-.heroRow {
-  grid-column: 1 / -1;
   min-width: 0;
 }
 /* Téléphone / tablette : onglets Jouer · Classement */
@@ -26,20 +47,11 @@
   display: flex;
   justify-content: center;
 }
-.sideRank,
-.sideDex {
-  display: grid;
-  gap: var(--s-8);
-  align-content: start;
-  min-width: 0;
-}
 @media (max-width: 999px) {
-  .t_play .colSide,
+  .t_play .satBoard,
   .t_play .roadRow,
-  .t_rank .colMain,
-  .t_dex .colMain,
-  .t_rank .sideDex,
-  .t_dex .sideRank {
+  .t_rank .center,
+  .t_rank .satTeam {
     display: none;
   }
 }
@@ -47,18 +59,129 @@
   .mtabs {
     display: none;
   }
-}
-/* PC : la page prend la largeur, colonne principale + colonne (top Elo, bestiaire) */
-@media (min-width: 1000px) {
-  .page {
-    width: 100%;
-    grid-template-columns: minmax(0, 1fr) 380px;
-    align-items: start;
+  .stage {
+    grid-template:
+      'center board' auto
+      'team board' auto
+      / minmax(0, 1fr) minmax(280px, 340px);
   }
 }
-@media (min-width: 1400px) {
-  .page {
-    grid-template-columns: minmax(0, 1fr) 460px;
+@media (min-width: 1180px) {
+  .stage {
+    grid-template: 'team center board' auto / minmax(250px, 300px) minmax(0, 1fr) minmax(270px, 340px);
+  }
+  .satTeam {
+    margin-top: clamp(40px, 12dvh, 140px);
+  }
+  .satBoard {
+    margin-top: var(--s-6);
+  }
+}
+
+/* téléphone tenu à l'horizontale : deux colonnes (rang compact + JOUER | équipe), tout tient sans défiler */
+@media (max-height: 520px) and (min-width: 600px) and (max-width: 999px) {
+  .stage {
+    grid-template-areas: 'center team';
+    grid-template-columns: minmax(0, 1fr) minmax(0, 1.1fr);
+    gap: var(--s-5);
+  }
+  .t_play .stage {
+    align-items: center;
+  }
+  .t_rank .stage {
+    grid-template-areas: 'board';
+    grid-template-columns: 1fr;
+  }
+  .center {
+    gap: var(--s-3);
+  }
+  /* rang compact : badge à gauche du nom, sans « Ton rang » ni la ligne de progression */
+  .heroWrap > div {
+    flex-direction: row;
+    gap: var(--s-3);
+    text-align: left;
+  }
+  .heroWrap > div > div:first-child {
+    width: 84px;
+    height: 84px;
+  }
+  .heroWrap > div > div:first-child > * {
+    width: 100% !important;
+    height: 100% !important;
+  }
+  .heroWrap > div > div:last-child {
+    justify-items: start;
+    gap: 2px;
+  }
+  .heroWrap > div > div:last-child > :first-child,
+  .heroWrap > div > div:last-child > :nth-child(n + 4) {
+    display: none;
+  }
+  .play {
+    min-height: 60px;
+  }
+  .slot {
+    min-height: 120px;
+  }
+  .slot img {
+    width: 64px;
+    height: 64px;
+  }
+}
+
+/* satellites : ils penchent un peu, flottent doucement et se balancent au passage de la souris (--swing) */
+.sat {
+  --tilt: 0deg;
+  --fl: 6.5s;
+  position: relative;
+  min-width: 0;
+  rotate: calc(var(--tilt) + var(--swing, 0deg));
+  transform-origin: 50% 0;
+  animation: satDrift var(--fl) ease-in-out infinite;
+}
+.satTeam {
+  grid-area: team;
+  --tilt: -1.8deg;
+  --fl: 7s;
+}
+.satBoard {
+  grid-area: board;
+  --tilt: 2deg;
+  --fl: 7.5s;
+  animation-delay: -2s;
+}
+@keyframes satDrift {
+  0%,
+  100% {
+    transform: translateY(0);
+  }
+  50% {
+    transform: translateY(-8px);
+  }
+}
+/* boutons qui flottent un peu (moins que les satellites : on doit pouvoir cliquer vite) */
+.float {
+  rotate: calc(var(--tilt, 0deg) + var(--swing, 0deg));
+  transform-origin: 50% 0;
+  animation: btnBob var(--fl, 6s) ease-in-out infinite;
+}
+@keyframes btnBob {
+  0%,
+  100% {
+    transform: translateY(0);
+  }
+  50% {
+    transform: translateY(-5px);
+  }
+}
+:global(html.reduce-fx) .sat,
+:global(html.reduce-fx) .float {
+  animation: none;
+}
+@media (prefers-reduced-motion: reduce) {
+  .sat,
+  .float {
+    animation: none;
   }
 }
 
@@ -188,55 +311,110 @@
   text-align: right;
 }
 
-/* Entraînement (à gauche) et Jouer (à droite) : même taille, seul l'aplat d'accent distingue Jouer */
-.playRow {
+/* JOUER en grand (comme « Ouvrir 1 » sur l'accueil), Entraînement et « ? » en dessous */
+.playCol {
   display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: var(--s-2);
+  justify-items: center;
+  gap: var(--s-3);
+  width: min(340px, 86vw);
+}
+.playMain {
+  width: 100%;
+}
+.subRow {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--s-3);
 }
 .play {
-  border: 1px solid #8b5cf6;
-  border-radius: 8px;
-  background: var(--accent);
   display: grid;
   place-items: center;
-  min-height: 56px;
-  padding: var(--s-2) var(--s-3);
+  width: 100%;
+  min-height: 72px;
+  padding: var(--s-2) var(--s-5);
+  border: 0;
+  border-radius: 8px;
+  background: #7c3aed;
   color: #fff;
-  font-weight: 700;
+  font-family: var(--font-display);
+  font-size: var(--fs-xl);
+  font-weight: 800;
+  letter-spacing: 0.02em;
+  box-shadow:
+    inset 0 -4px 0 #4c1d95,
+    0 10px 24px rgb(124 58 237 / 35%);
+  transition:
+    transform 160ms var(--ease-out),
+    filter var(--t-fast);
+}
+.play:not(:disabled):hover {
+  filter: brightness(1.12);
+}
+.play:not(:disabled):active {
+  transform: translateY(2px);
 }
 .play.ghost {
-  border-color: rgb(255 255 255 / 9%);
-  background-color: var(--surface);
+  min-height: 50px;
+  padding: var(--s-2) var(--s-6);
+  border: 1px solid rgb(255 255 255 / 14%);
+  background: rgb(23 23 31 / 80%);
   color: var(--text);
+  font-size: var(--fs-md);
+  box-shadow: 0 8px 18px rgb(0 0 0 / 30%);
 }
 .play b {
-  font-size: var(--fs-md);
-}
-.play small {
-  font-size: var(--fs-xs);
-  font-weight: 500;
-  opacity: 0.85;
+  font: inherit;
 }
 .play:disabled {
   opacity: 0.55;
   cursor: not-allowed;
   filter: saturate(0.6);
 }
+/* revoir le tuto */
+.helpBtn {
+  display: grid;
+  place-items: center;
+  width: 50px;
+  height: 50px;
+  border: 1px solid rgb(255 255 255 / 14%);
+  border-radius: 999px;
+  background: rgb(23 23 31 / 80%);
+  color: var(--text-2);
+  font-family: var(--font-display);
+  font-size: var(--fs-lg);
+  font-weight: 800;
+  box-shadow: 0 8px 18px rgb(0 0 0 / 30%);
+  transition:
+    color var(--t-fast),
+    background-color var(--t-fast);
+}
+.helpBtn:hover {
+  color: var(--text);
+  background: rgb(40 40 54 / 90%);
+}
+.lockBox {
+  width: min(420px, 100%);
+}
 .need {
   text-align: center;
 }
 
-/* Équipe */
+/* Équipe : un bloc satellite ; chaque jeton dans une boîte légère comme l'inventaire */
 .team {
   display: grid;
   gap: var(--s-3);
-  margin-top: var(--s-3);
+  padding: var(--s-4);
+  border: 1px solid rgb(255 255 255 / 10%);
+  border-radius: 14px;
+  background: rgb(20 20 30 / 70%);
+  box-shadow: 0 16px 34px rgb(0 0 0 / 40%);
 }
 .team header {
   display: flex;
   justify-content: space-between;
   align-items: center;
+  gap: var(--s-2);
 }
 .team h2 {
   font-size: var(--fs-lg);
@@ -248,29 +426,28 @@
   gap: var(--s-2);
 }
 .slot {
-  /* jeton de l'équipe posé librement : juste un halo doux derrière lui (plus d'ombre colorée dessous) */
-  border-radius: 18px;
-  transition: transform var(--t-fast);
   position: relative;
   width: 100%;
-  min-height: 170px;
+  min-height: 150px;
   display: grid;
   justify-items: center;
   align-content: center;
   gap: 2px;
-  padding: var(--s-5) var(--s-2) var(--s-3);
+  padding: var(--s-4) var(--s-2) var(--s-3);
+  border: 1px solid rgb(255 255 255 / 8%);
+  border-radius: 14px;
+  background:
+    linear-gradient(160deg, rgba(var(--g, 139, 92, 246), calc(0.1 * var(--ga, 0))), transparent 60%),
+    rgb(255 255 255 / 3.5%);
   text-align: center;
+  transition: border-color var(--t-fast);
 }
 .slot:hover {
-  transform: translateY(-4px);
-}
-.slot:hover img {
-  scale: 1.1;
+  border-color: rgba(var(--g, 139, 92, 246), 0.45);
 }
 .slot img {
-  transition: scale var(--t-fast);
-  width: 88px;
-  height: 88px;
+  width: 80px;
+  height: 80px;
   --df: drop-shadow(0 0 3px rgba(var(--g), calc(0.5 * var(--ga, 0))));
 }
 .slot b {
@@ -279,6 +456,30 @@
 .slot small {
   font-size: var(--fs-xs);
   color: var(--muted);
+}
+/* grand écran : l'équipe est dans la colonne de gauche → une ligne par jeton (image à gauche, nom et pouvoir) */
+@media (min-width: 1180px) {
+  .team ul {
+    grid-template-columns: 1fr;
+  }
+  .satTeam .slot {
+    grid-template-columns: 64px 1fr;
+    grid-template-rows: auto auto;
+    place-items: center start;
+    column-gap: var(--s-3);
+    min-height: 0;
+    padding: var(--s-3) var(--s-4);
+    text-align: left;
+  }
+  .satTeam .slot img {
+    grid-row: 1 / 3;
+    width: 64px;
+    height: 64px;
+  }
+  .satTeam .emptySlot {
+    grid-template-columns: auto 1fr;
+    min-height: 88px;
+  }
 }
 .emptySlot {
   border: 2px dashed var(--line-strong);

@@ -1,4 +1,5 @@
-import { useEffect, useState, type CSSProperties } from 'react';
+import { useEffect, useRef, useState, type CSSProperties, type ReactNode } from 'react';
+import { useSwing } from '@/ui/useSwing';
 import { useQueryClient } from '@tanstack/react-query';
 import { useMe } from '@/api/queries';
 import { combatApi } from '@/api';
@@ -10,7 +11,6 @@ import { openUI } from '@/app/ui-store';
 import { useAuth } from '@/lib/auth';
 import { useJn } from '@/lib/names';
 import { useSettings } from '@/lib/settings';
-import { Rich } from '@/i18n/Rich';
 import { useT } from '@/i18n/useT';
 import { Button } from '@/ui/Button';
 import { Segmented } from '@/ui/Segmented';
@@ -169,11 +169,8 @@ export default function Combat() {
 
   return (
     <section className={`${s.page} ${s['t_' + ptab]}`}>
-      {/* ton rang en énorme, tout en haut, sur toute la largeur */}
-      <div className={s.heroRow}>
-        <RankCard me={rk} />
-      </div>
-      {/* téléphone : 2 onglets au lieu d'une longue page */}
+      <h1 className="visually-hidden">{t('arena.title')}</h1>
+      {/* téléphone / tablette : 2 onglets au lieu d'une longue page */}
       <div className={s.mtabs}>
         <Segmented
           value={ptab}
@@ -185,99 +182,118 @@ export default function Combat() {
           ]}
         />
       </div>
-      <div className={s.colMain}>
-        <h1 className="visually-hidden">{t('arena.title')}</h1>
-        {ranked.isPending ? null : !tutoOk ? (
-          <div className={rs.lock}>
-            <h2>{t('arena.tutoLock')}</h2>
-            <p className="muted">{t('arena.tutoLockTxt')}</p>
-            <Button variant="primary" onClick={() => void firstTuto()}>
-              {t('arena.tutoStart')}
-            </Button>
+      {/* comme l'accueil : le rang flotte au centre avec JOUER ; l'équipe et le classement flottent autour */}
+      <div className={s.stage}>
+        <div className={s.center}>
+          <div className={s.heroWrap}>
+            <RankCard me={rk} />
           </div>
-        ) : (
-          <div className={s.playRow} data-tour="fight">
-            <button type="button" className={`${s.play} ${s.ghost}`} disabled={!full} onClick={() => void train()}>
-              <b>{t('arena.train')}</b>
-            </button>
-            {rk?.live ? (
-              <button type="button" className={s.play} onClick={() => void enterMatch(rk.live ?? '')}>
-                <b>{t('arena.resume')}</b>
-              </button>
-            ) : (
-              <button
-                type="button"
-                className={s.play}
-                disabled={!full}
-                onClick={() => {
-                  sfx.click();
-                  setSearching(true);
-                }}
-              >
-                <b>{t('arena.play')}</b>
-              </button>
-            )}
-          </div>
-        )}
-        {full ? null : <small className={`muted ${s.need}`}>{t('arena.need3')}</small>}
-
-        <section className={s.team} aria-labelledby="team-t">
-          <header>
-            <h2 id="team-t">{t('arena.team')}</h2>
-            <Button size="sm" onClick={() => setEditing(-1)}>
-              {t('arena.edit')}
-            </Button>
-          </header>
-          <ul>
-            {team.map((u, i) =>
-              u ? (
-                <li key={i}>
-                  <TeamCard
-                    u={u}
-                    onEdit={() => {
-                      sfx.click();
-                      setEditing(i);
-                    }}
-                    onInfo={() => {
-                      sfx.click();
-                      setSheet(u);
-                    }}
-                  />
-                </li>
+          {ranked.isPending ? null : !tutoOk ? (
+            <div className={`${rs.lock} ${s.lockBox}`}>
+              <h2>{t('arena.tutoLock')}</h2>
+              <Button variant="primary" onClick={() => void firstTuto()}>
+                {t('arena.tutoStart')}
+              </Button>
+            </div>
+          ) : (
+            <div className={s.playCol} data-tour="fight">
+              {rk?.live ? (
+                <Float className={s.playMain} tilt={-1.2} fl={5.5}>
+                  <button type="button" className={s.play} onClick={() => void enterMatch(rk.live ?? '')}>
+                    <b>{t('arena.resume')}</b>
+                  </button>
+                </Float>
               ) : (
-                <li key={i}>
+                <Float className={s.playMain} tilt={-1.2} fl={5.5}>
                   <button
                     type="button"
-                    className={`${s.slot} ${s.emptySlot}`}
+                    className={s.play}
+                    disabled={!full}
                     onClick={() => {
                       sfx.click();
-                      setEditing(i);
+                      setSearching(true);
                     }}
                   >
-                    <b aria-hidden>＋</b>
-                    <small>{t('arena.pick')}</small>
+                    <b>{t('arena.play')}</b>
                   </button>
-                </li>
-              ),
-            )}
-          </ul>
-        </section>
-
-        <details className={s.help}>
-          <summary>{t('arena.howTitle')}</summary>
-          <p className="muted">
-            <Rich text={t('arena.howText')} />
-          </p>
-          <Button size="sm" onClick={() => void playTuto()}>
-            {t('arena.tuto')}
-          </Button>
-        </details>
-      </div>
-      <aside className={s.colSide}>
-        <div className={s.sideRank}>
-          <RankAround elo={elo} />
+                </Float>
+              )}
+              <div className={s.subRow}>
+                <Float tilt={1.5} fl={6.5}>
+                  <button
+                    type="button"
+                    className={`${s.play} ${s.ghost}`}
+                    disabled={!full}
+                    onClick={() => void train()}
+                  >
+                    <b>{t('arena.train')}</b>
+                  </button>
+                </Float>
+                {/* revoir le tuto : un petit « ? » au lieu d'un bloc d'explications */}
+                <Float tilt={-3} fl={7}>
+                  <button
+                    type="button"
+                    className={s.helpBtn}
+                    onClick={() => void playTuto()}
+                    aria-label={t('arena.tuto')}
+                    title={t('arena.tuto')}
+                  >
+                    ?
+                  </button>
+                </Float>
+              </div>
+            </div>
+          )}
         </div>
-      </aside>
+
+        <Sat className={s.satTeam}>
+          <section className={s.team} aria-labelledby="team-t">
+            <header>
+              <h2 id="team-t">{t('arena.team')}</h2>
+              <Button size="sm" onClick={() => setEditing(-1)}>
+                {t('arena.edit')}
+              </Button>
+            </header>
+            <ul>
+              {team.map((u, i) =>
+                u ? (
+                  <li key={i}>
+                    <TeamCard
+                      u={u}
+                      onEdit={() => {
+                        sfx.click();
+                        setEditing(i);
+                      }}
+                      onInfo={() => {
+                        sfx.click();
+                        setSheet(u);
+                      }}
+                    />
+                  </li>
+                ) : (
+                  <li key={i}>
+                    <button
+                      type="button"
+                      className={`${s.slot} ${s.emptySlot}`}
+                      onClick={() => {
+                        sfx.click();
+                        setEditing(i);
+                      }}
+                    >
+                      <b aria-hidden>＋</b>
+                      <small>{t('arena.pick')}</small>
+                    </button>
+                  </li>
+                ),
+              )}
+            </ul>
+          </section>
+        </Sat>
+
+        <Sat className={s.satBoard}>
+          <RankAround elo={elo} />
+        </Sat>
+      </div>
       <div className={s.roadRow}>
         <RankRoad elo={elo} />
       </div>
@@ -321,6 +337,42 @@ export default function Combat() {
         />
       ) : null}
     </section>
+  );
+}
+
+// Bloc satellite (comme l'accueil) : il penche un peu, flotte et se balance au passage de la souris
+function Sat({ className, children }: { className?: string; children: ReactNode }) {
+  const ref = useRef<HTMLDivElement>(null);
+  useSwing(ref, 0.06);
+  return (
+    <div ref={ref} className={`${s.sat} ${className ?? ''}`}>
+      {children}
+    </div>
+  );
+}
+
+// Bouton qui flotte doucement et se balance un peu (comme Ouvrir sur l'accueil)
+function Float({
+  className,
+  tilt,
+  fl,
+  children,
+}: {
+  className?: string;
+  tilt: number;
+  fl: number;
+  children: ReactNode;
+}) {
+  const ref = useRef<HTMLDivElement>(null);
+  useSwing(ref, 0.1);
+  return (
+    <div
+      ref={ref}
+      className={`${s.float} ${className ?? ''}`}
+      style={{ '--tilt': `${tilt}deg`, '--fl': `${fl}s` } as CSSProperties}
+    >
+      {children}
+    </div>
   );
 }
 
