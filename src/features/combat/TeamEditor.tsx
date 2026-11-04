@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState, type CSSProperties } from 'react';
+import { useEffect, useLayoutEffect, useRef, useState, type CSSProperties } from 'react';
 import { useSwingAll } from '@/ui/useSwing';
 import { SerieName } from '@/ui/SerieName';
 import { useQueryClient } from '@tanstack/react-query';
@@ -48,7 +48,32 @@ export function TeamEditor({
   const [team, setTeam] = useState<Team>(() =>
     start.map((u) => (u && by.has(ownKey(u.serie, u.name)) ? { ...u } : null)),
   );
-  const [serie, setSerie] = useState(series[0] ?? 'Takoras');
+  const [serie, setSerie0] = useState(series[0] ?? 'Takoras');
+  // changer de série : la fenêtre grandit ou rapetisse en douceur (pas de saut de taille)
+  const h0 = useRef(0);
+  const setSerie = (sr: string) => {
+    const box = slotsRef.current?.closest('dialog')?.firstElementChild as HTMLElement | null | undefined;
+    h0.current = box?.getBoundingClientRect().height ?? 0;
+    setSerie0(sr);
+  };
+  useLayoutEffect(() => {
+    const box = slotsRef.current?.closest('dialog')?.firstElementChild as HTMLElement | null | undefined;
+    const from = h0.current;
+    h0.current = 0;
+    if (!box || !from || reducedFx()) return;
+    const to = box.getBoundingClientRect().height;
+    if (Math.abs(to - from) < 2) return;
+    box.animate(
+      [
+        { height: `${from}px`, overflow: 'hidden' },
+        { height: `${to}px`, overflow: 'hidden' },
+      ],
+      {
+        duration: 380,
+        easing: 'cubic-bezier(.2, 1.15, .35, 1)',
+      },
+    );
+  }, [serie]);
   const [info, setInfo] = useState<Owned | null>(null);
   // place visée : le prochain jeton choisi la remplace (toucher une place pour la viser)
   const [target, setTarget] = useState<number | null>(focus ?? null);
