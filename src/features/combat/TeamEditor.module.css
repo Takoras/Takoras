@@ -47,6 +47,7 @@
   color: var(--text-2);
 }
 .rm {
+  z-index: 1;
   position: absolute;
   top: 4px;
   right: 4px;
@@ -181,8 +182,20 @@ ul.list {
 .pickSlot {
   display: grid;
   place-items: center;
+  cursor: pointer;
   font: 700 var(--fs-xl) / 1 var(--font-display);
   color: var(--text-2);
   min-width: 64px;
   min-height: 64px;
+}
+
+/* toute la case se touche pour la viser (pas seulement le numéro ou le jeton au centre) */
+.pickSlot::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+}
+.slots li:has(.pickSlot):hover {
+  border-color: rgb(167 139 250 / 55%);
 }

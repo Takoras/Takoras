@@ -39,7 +39,26 @@
 }
 
 .dialog[open] {
-  animation: rise var(--t-med) var(--ease-out);
+  animation: none;
+}
+/* le contenu arrive juste après le dépli de la carte (comme la fiche d'un jeton), et part en premier */
+.card > * {
+  animation: inside 0.32s 0.1s var(--ease-out) backwards;
+}
+.card.out > * {
+  opacity: 0;
+  transition: opacity 0.12s;
+}
+@keyframes inside {
+  from {
+    opacity: 0;
+    transform: translateY(6px);
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .card > * {
+    animation: none;
+  }
 }
 
 .card {
@@ -95,11 +114,4 @@
 .close:hover {
   background: var(--surface-2);
   color: var(--text);
-}
-
-@keyframes rise {
-  from {
-    opacity: 0;
-    transform: translateY(12px) scale(0.98);
-  }
 }
