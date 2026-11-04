@@ -3,7 +3,6 @@ import { useEffect, useRef, useState, type CSSProperties } from 'react';
 import { locale, useSettings } from '@/lib/settings';
 import { useT } from '@/i18n/useT';
 import { sfx } from '@/engines/sound.js';
-import { RCFG } from '@/engines/ring-config.js';
 import { Button } from '@/ui/Button';
 import { Modal } from '@/ui/Modal';
 import { Link } from 'react-router';
@@ -94,48 +93,6 @@ export function RankCard({ me }: { me: RankedMe | undefined }) {
 // Route des rangs : un chemin qui serpente, les badges flottent dessus ; la partie déjà faite est colorée
 // Route des rangs : les 8 rangs côte à côte (sans défilement), reliés par une barre qui se remplit jusqu'à toi.
 // Sous chaque badge, les divisions (1, 2, 3) en petites pastilles ; ton rang flotte et brille.
-const TIERS = RCFG.RANKS.map((r) => ({ k: r.k, col: r.col, steps: ROAD.filter((x) => x.k === r.k) }));
-export function RankRoad({ elo }: { elo: number }) {
-  const t = useT();
-  const name = useRankName();
-  const cur = rankOf(elo);
-  const here = TIERS.findIndex((x) => x.k === cur.k);
-  return (
-    <section className={s.road} aria-labelledby="road-t">
-      <h2 id="road-t">{t('arena.road')}</h2>
-      <ol className={s.tiers} style={{ '--done': here } as CSSProperties}>
-        {TIERS.map((x, i) => {
-          const first = x.steps[0] as Rank,
-            on = i === here;
-          const shown = on ? cur : first;
-          return (
-            <li
-              key={x.k}
-              className={i < here ? s.done : on ? s.here : undefined}
-              aria-current={on ? 'step' : undefined}
-              style={{ '--rc': x.col, animationDelay: `${i * -0.5}s` } as CSSProperties}
-            >
-              {on ? <em>{t('arena.you')}</em> : null}
-              <span className={s.tierBadge}>
-                <RankBadge r={shown} size={on ? 84 : 64} />
-              </span>
-              <b>{on ? name(cur) : t(`arena.r_${x.k}` as 'arena.r_wood')}</b>
-              <small>{first.min > 0 ? `${first.min}+` : `< ${x.steps.at(-1)?.max ?? ''}`}</small>
-              {x.steps.length > 1 ? (
-                <span className={s.pips} aria-hidden>
-                  {x.steps.map((d) => (
-                    <i key={d.idx} className={d.idx < cur.idx ? s.pipDone : d.idx === cur.idx ? s.pipNow : undefined} />
-                  ))}
-                </span>
-              ) : null}
-            </li>
-          );
-        })}
-      </ol>
-    </section>
-  );
-}
-
 // Recherche d'un adversaire : on redemande au serveur toutes les 3 s (l'écart d'Elo toléré grandit avec l'attente)
 export function SearchModal({
   elo,
