@@ -13,16 +13,15 @@ import { toast } from '@/ui/toast';
 import { Effects } from '../home/Effects';
 import { NeedLogin } from '@/app/NeedLogin';
 import { InvTabs } from './Bestiary';
+import { useSwingAll } from '@/ui/useSwing';
 import s from './Inventory.module.css';
 
-// rangés par catégorie : potions, recharges (tirages), le reste
+// rangés par catégorie : potions de chance, objets utiles (sabliers…)
 const ITEM_CATS = [
-  ['potion', 'Potions'],
-  ['pulls', 'Recharges'],
-  ['other', 'Autres'],
+  ['potion', 'ui.cat_potions'],
+  ['other', 'ui.cat_utils'],
 ] as const;
-const itemCat = (kind: string) =>
-  kind === 'potion' ? 'potion' : kind === 'instant' || kind === 'hourglass' ? 'pulls' : 'other';
+const itemCat = (kind: string) => (kind === 'potion' ? 'potion' : 'other');
 
 type Row = { item: string; kind: string; data: ShopItem['data']; qty: number };
 
@@ -36,6 +35,8 @@ export default function Items() {
     queryFn: async () => (await invApi.items()) as unknown as Row[],
   });
   const box = useRef<HTMLDivElement>(null);
+  // les objets se balancent au survol, accrochés par le haut (comme les jetons du bestiaire)
+  useSwingAll(box, `.${s.item}`, 0.35, items.data);
   const snap = useRef<Map<string, DOMRect> | null>(null);
   useLayoutEffect(() => {
     if (snap.current && box.current) moPlay(snap.current, box.current, '[data-key]', { dissolve: true });
@@ -48,7 +49,6 @@ export default function Items() {
       <header className={s.head}>
         <div>
           <h1>{t('ui.inv_items_title')}</h1>
-          <p className="muted">{t('ui.items_n', { n: list.reduce((n, x) => n + x.qty, 0) })}</p>
         </div>
       </header>
       <InvTabs />
@@ -64,12 +64,13 @@ export default function Items() {
           {ITEM_CATS.map(([k, label]) => {
             const part = list.filter((x) => itemCat(x.kind) === k);
             return part.length ? (
-              <section key={k} aria-label={label}>
-                <h2 className={s.itemCatTitle}>{label}</h2>
+              <section key={k} aria-label={t(label)}>
+                <h2 className={s.itemCatTitle}>{t(label)}</h2>
                 <ul className={s.items}>
-                  {part.map((it) => (
+                  {part.map((it, i) => (
                     <ItemCard
                       key={it.item}
+                      i={i}
                       it={it}
                       before={() => {
                         if (box.current) snap.current = moSnap(box.current, '[data-key]');
@@ -93,7 +94,7 @@ export default function Items() {
   );
 }
 
-function ItemCard({ it, before }: { it: Row; before: () => void }) {
+function ItemCard({ it, i, before }: { it: Row; i: number; before: () => void }) {
   const t = useT();
   const lang = useSettings((x) => x.lang);
   const user = useAuth((x) => x.user);
@@ -119,7 +120,12 @@ function ItemCard({ it, before }: { it: Row; before: () => void }) {
   };
   const clamp = (v: number) => Math.max(1, Math.min(it.qty, v || 1));
   return (
-    <li className={s.item} data-key={it.item} data-sig={it.qty} style={{ '--g': '139, 92, 246' } as CSSProperties}>
+    <li
+      className={s.item}
+      data-key={it.item}
+      data-sig={it.qty}
+      style={{ '--g': '139, 92, 246', '--i': Math.min(i, 24) } as CSSProperties}
+    >
       <span className={s.qty}>×{it.qty}</span>
       <div className={s.itemIcon}>
         <img

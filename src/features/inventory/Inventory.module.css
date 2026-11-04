@@ -480,15 +480,25 @@
   gap: var(--s-3);
 }
 .item {
-  border: 1px solid rgb(255 255 255 / 9%);
-  border-radius: 8px;
-  background: var(--surface);
+  /* même boîte que les jetons du bestiaire : légère, droite, arrive en cascade, se balance au survol */
+  border: 1px solid rgb(255 255 255 / 8%);
+  border-radius: 14px;
+  background:
+    linear-gradient(160deg, rgba(var(--g), calc(0.08 * var(--ga, 0))), transparent 60%), rgb(255 255 255 / 3.5%);
+  box-shadow: 0 10px 22px rgb(0 0 0 / 25%);
   position: relative;
   display: grid;
   grid-template-rows: auto auto 1fr auto;
   gap: var(--s-2);
   padding: var(--s-5) var(--s-4) var(--s-4);
   text-align: center;
+  rotate: var(--swing, 0deg);
+  transform-origin: 50% 0;
+  animation: cardIn 0.75s ease-out calc(var(--i, 0) * 35ms) both;
+  transition: border-color var(--t-fast);
+}
+.item:hover {
+  border-color: rgba(var(--g), 0.45);
 }
 .item h2 {
   font-size: var(--fs-md);
@@ -497,21 +507,37 @@
   font-size: var(--fs-sm);
 }
 .qty {
+  /* même pastille que le « ×N » des jetons */
   position: absolute;
-  top: var(--s-2);
-  right: var(--s-2);
-  padding: 2px var(--s-2);
+  top: 5px;
+  right: 6px;
+  padding: 0 6px;
   border-radius: var(--r-pill);
   background: var(--surface-3);
-  font-size: var(--fs-sm);
+  font-size: var(--fs-xs);
   font-weight: 700;
 }
 .itemIcon {
+  position: relative;
   display: grid;
   place-items: center;
   height: 88px;
 }
+/* halo rond derrière l'objet, comme derrière les jetons */
+.itemIcon::before {
+  content: '';
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  width: 108px;
+  height: 108px;
+  translate: -50% -50%;
+  border-radius: 50%;
+  background: radial-gradient(closest-side, rgba(var(--g), 0.3), transparent);
+  pointer-events: none;
+}
 .itemIcon img {
+  position: relative;
   width: 72px;
   height: 72px;
   object-fit: contain;
