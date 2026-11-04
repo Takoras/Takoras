@@ -3,8 +3,7 @@ import { useSwing } from '@/ui/useSwing';
 import { useQueryClient } from '@tanstack/react-query';
 import { useMe } from '@/api/queries';
 import { combatApi } from '@/api';
-import { jetonOf, texOf, vImg, glowVars } from '@/data/jetons';
-import { powerInfo } from '@/data/kit';
+import { jetonOf, texOf, vImg, vOdds, glowVars } from '@/data/jetons';
 import { RCFG } from '@/engines/ring-config.js';
 import { sfx } from '@/engines/sound.js';
 import { openUI } from '@/app/ui-store';
@@ -22,7 +21,7 @@ import { call, fetchMatch, toLocal, useRanked, watchMatch, type RankedMe } from 
 import { RankAround, RankCard, RankRoad, SearchModal } from './Ranked';
 import rs from './Ranked.module.css';
 import { TeamEditor } from './TeamEditor';
-import { TokenSheet } from './TokenSheet';
+import { JetonModal } from '../inventory/JetonModal';
 import s from './Combat.module.css';
 
 // Le Ring (canvas, sons, effets) n'est téléchargé qu'au lancement d'une partie
@@ -59,7 +58,13 @@ export default function Combat() {
   const [editing, setEditing] = useState<number | null>(null);
   const [ptab, setPtab] = useState<'play' | 'rank'>('play');
   const [searching, setSearching] = useState(false);
-  const [sheet, setSheet] = useState<Member | null>(null);
+  const [sheet, setSheet] = useState<{ u: Member; i: number } | null>(null);
+  // l'élément d'où sort la fenêtre d'équipe (bouton « Modifier l'équipe » ou la place touchée)
+  const fromEl = useRef<HTMLElement | null>(null);
+  const editFrom = (i: number, el: HTMLElement | null) => {
+    fromEl.current = el;
+    setEditing(i);
+  };
   // Quitter la page ferme le Ring (plus de boucle d'animation ni d'écouteur qui traîne)
   useEffect(
     () => () => {
@@ -249,14 +254,14 @@ export default function Combat() {
         <Sat className={s.satTeam}>
           <TeamList
             team={team}
-            onEdit={(i) => {
+            onEdit={(i, el) => {
               sfx.click();
-              setEditing(i);
+              editFrom(i, el);
             }}
-            onEditAll={() => setEditing(-1)}
-            onInfo={(u) => {
+            onEditAll={(el) => editFrom(-1, el)}
+            onInfo={(u, i) => {
               sfx.click();
-              setSheet(u);
+              setSheet({ u, i });
             }}
           />
         </Sat>
@@ -287,25 +292,30 @@ export default function Combat() {
           levels={inv.data}
           team={team}
           focus={editing >= 0 ? editing : undefined}
+          from={() => (fromEl.current?.isConnected ? fromEl.current : null)}
           onClose={() => setEditing(null)}
         />
       ) : null}
       {sheet ? (
-        <TokenSheet
-          name={sheet.name}
-          serie={sheet.serie}
-          variant={sheet.variant}
-          lvl={lvl(sheet)}
+        <JetonModal
+          name={sheet.u.name}
+          serie={sheet.u.serie}
+          variant={sheet.u.variant}
+          found={{ [sheet.u.variant]: true }}
+          demo
           onClose={() => setSheet(null)}
-          action={{
-            label: t('arena.edit'),
-            primary: true,
-            onClick: () => {
+        >
+          <Button
+            variant="primary"
+            onClick={() => {
+              const i = sheet.i;
               setSheet(null);
-              setEditing(-1);
-            },
-          }}
-        />
+              editFrom(i, document.querySelector<HTMLElement>(`[data-slot="${i}"]`));
+            }}
+          >
+            {t('arena.swap')}
+          </Button>
+        </JetonModal>
       ) : null}
     </section>
   );
@@ -349,28 +359,22 @@ function Float({
 
 type TeamVProps = {
   team: (Member | null)[];
-  onEdit: (i: number) => void;
-  onEditAll: () => void;
-  onInfo: (u: Member) => void;
+  onEdit: (i: number, el: HTMLElement) => void;
+  onEditAll: (el: HTMLElement) => void;
+  onInfo: (u: Member, i: number) => void;
 };
-function useSlotInfo() {
-  const jn = useJn();
-  const lang = useSettings((x) => x.lang);
-  return (u: Member) => {
-    const j = jetonOf(u.name, u.serie);
-    return { j, k: powerInfo(u.name, lang), name: jn(u.name) };
-  };
-}
 
-// Ton équipe : une ligne par jeton avec un gros numéro (1, 2, 3) ; toucher le jeton = le changer, « i » = sa fiche
+// Ton équipe : une grande case par jeton (numéro, jeton, nom, sa chance) ; toucher la case = le changer,
+// « i » = sa fiche ; « Modifier l'équipe » s'ouvre en fenêtre de choix
 function TeamList({ team, onEdit, onEditAll, onInfo }: TeamVProps) {
   const t = useT();
-  const info = useSlotInfo();
+  const jn = useJn();
+  const lang = useSettings((x) => x.lang);
   return (
     <section className={s.team} aria-labelledby="team-t">
       <header className={s.teamHead}>
         <h2 id="team-t">{t('arena.team')}</h2>
-        <Button size="sm" onClick={onEditAll}>
+        <Button size="sm" onClick={(e) => onEditAll(e.currentTarget)}>
           {t('arena.edit')}
         </Button>
       </header>
@@ -379,7 +383,12 @@ function TeamList({ team, onEdit, onEditAll, onInfo }: TeamVProps) {
           if (!u)
             return (
               <li key={i}>
-                <button type="button" className={`${s.teamRow} ${s.teamEmpty}`} onClick={() => onEdit(i)}>
+                <button
+                  type="button"
+                  data-slot={i}
+                  className={`${s.teamRow} ${s.teamEmpty}`}
+                  onClick={(e) => onEdit(i, e.currentTarget)}
+                >
                   <span className={s.teamN}>{i + 1}</span>
                   <span className={s.teamPlus} aria-hidden>
                     ＋
@@ -390,30 +399,31 @@ function TeamList({ team, onEdit, onEditAll, onInfo }: TeamVProps) {
                 </button>
               </li>
             );
-          const { j, k, name } = info(u);
+          const j = jetonOf(u.name, u.serie);
+          const name = jn(u.name);
           return (
             <li key={i}>
-              <div
-                className={s.teamRow}
-                style={{ ...glowVars(j, u.variant), '--c': k.col } as CSSProperties}
-                role="group"
-                aria-label={name}
-              >
+              <div className={s.teamRow} data-slot={i} style={glowVars(j, u.variant) as CSSProperties}>
+                {/* toute la case change le jeton (bouton posé dessous) ; seul « i » ouvre la fiche */}
+                <button
+                  type="button"
+                  className={s.teamHit}
+                  onClick={(e) => onEdit(i, e.currentTarget.parentElement ?? e.currentTarget)}
+                  aria-label={`${name} · ${t('arena.swap')}`}
+                />
                 <span className={s.teamN}>{i + 1}</span>
-                <button type="button" onClick={() => onEdit(i)} aria-label={`${name} · ${t('arena.swap')}`}>
-                  <img className={vImg(u.variant)} src={texOf(j)} alt="" />
-                </button>
+                <img className={vImg(u.variant)} src={texOf(j)} alt="" />
                 <span className={s.teamTxt}>
                   <b>
                     {name}
                     {u.variant ? <MutationStamp v={u.variant} size="sm" /> : null}
                   </b>
-                  <small>{k.name}</small>
+                  <small>1/{Math.round(vOdds(j.odds, u.variant)).toLocaleString(lang)}</small>
                 </span>
                 <button
                   type="button"
                   className={s.teamInfo}
-                  onClick={() => onInfo(u)}
+                  onClick={() => onInfo(u, i)}
                   aria-label={t('arena.details', { n: name })}
                 >
                   i

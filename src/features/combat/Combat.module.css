@@ -68,7 +68,7 @@
 }
 @media (min-width: 1180px) {
   .stage {
-    grid-template: 'team center board' auto / minmax(250px, 300px) minmax(0, 1fr) minmax(270px, 340px);
+    grid-template: 'team center board' auto / minmax(340px, 400px) minmax(0, 1fr) minmax(270px, 330px);
   }
   .satTeam {
     margin-top: clamp(40px, 12dvh, 140px);
@@ -426,11 +426,12 @@
 }
 .teamRow {
   display: grid;
-  grid-template-columns: 34px auto 1fr auto;
+  grid-template-columns: 30px auto 1fr auto;
   align-items: center;
-  gap: var(--s-3);
+  gap: var(--s-4);
   width: 100%;
-  padding: var(--s-2) var(--s-3);
+  min-height: 84px;
+  padding: var(--s-3) var(--s-4);
   border: 1px solid rgb(255 255 255 / 8%);
   border-radius: 12px;
   background: linear-gradient(90deg, rgba(var(--g, 139, 92, 246), 0.12), transparent 55%), rgb(255 255 255 / 3.5%);
@@ -440,9 +441,30 @@
 .teamRow:hover {
   border-color: rgba(var(--g, 139, 92, 246), 0.5);
 }
+.teamList li > .teamRow {
+  position: relative;
+  cursor: pointer;
+}
+.teamList li > .teamRow > :not(.teamHit) {
+  pointer-events: none;
+}
+.teamList li > .teamRow > .teamInfo {
+  position: relative;
+  z-index: 1;
+  pointer-events: auto;
+}
+.teamHit {
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+}
+.teamHit:focus-visible {
+  outline: 2px solid var(--accent-hi);
+  outline-offset: 2px;
+}
 .teamRow img {
-  width: 48px;
-  height: 48px;
+  width: 58px;
+  height: 58px;
 }
 .teamN {
   font-family: var(--font-display);
@@ -463,9 +485,10 @@
   font-weight: 800;
 }
 .teamTxt small {
-  font-size: var(--fs-xs);
-  font-weight: 700;
-  color: var(--c, var(--accent-hi));
+  font-size: var(--fs-sm);
+  font-weight: 800;
+  font-variant-numeric: tabular-nums;
+  color: rgb(var(--g, 167, 139, 250));
 }
 .teamInfo {
   width: 30px;
@@ -482,7 +505,7 @@
   color: var(--muted);
 }
 .teamPlus {
-  width: 48px;
+  width: 58px;
   font-size: var(--fs-xl);
   text-align: center;
 }

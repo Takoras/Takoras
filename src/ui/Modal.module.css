@@ -53,8 +53,9 @@
   max-height: inherit;
 }
 
-/* la carte sans cadre fait sa propre entrée */
-.noRise[open] {
+/* la carte sans cadre fait sa propre entrée ; la fenêtre « morph » sort d'un bouton */
+.noRise[open],
+.morph[open] {
   animation: none;
 }
 
