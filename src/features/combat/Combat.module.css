@@ -23,6 +23,9 @@
   min-width: 0;
 }
 /* le rang en grand, centré (badge au-dessus, nom, Elo, barre) */
+.heroFloat {
+  width: 100%;
+}
 .heroWrap {
   width: 100%;
   display: grid;
@@ -95,7 +98,7 @@
   .center {
     gap: var(--s-3);
   }
-  /* rang compact : badge à gauche du nom, sans « Ton rang » ni la ligne de progression */
+  /* rang compact : badge à gauche du nom, sans la barre de progression */
   .heroWrap > div {
     flex-direction: row;
     gap: var(--s-3);
@@ -113,8 +116,7 @@
     justify-items: start;
     gap: 2px;
   }
-  .heroWrap > div > div:last-child > :first-child,
-  .heroWrap > div > div:last-child > :nth-child(n + 4) {
+  .heroWrap > div > div:last-child > :nth-child(n + 3) {
     display: none;
   }
   .play {

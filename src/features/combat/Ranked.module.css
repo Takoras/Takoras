@@ -129,13 +129,6 @@
   display: grid;
   gap: var(--s-2);
 }
-.heroTag {
-  font-size: var(--fs-sm);
-  text-transform: uppercase;
-  letter-spacing: var(--tracking-caps);
-  color: var(--muted);
-  font-weight: 700;
-}
 .heroName {
   font-family: var(--font-display);
   font-size: clamp(3rem, calc(8vw / var(--z, 1)), 6rem);

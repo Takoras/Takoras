@@ -186,9 +186,12 @@ export default function Combat() {
       {/* comme l'accueil : le rang flotte au centre avec JOUER ; l'équipe et le classement flottent autour */}
       <div className={s.stage}>
         <div className={s.center}>
-          <div className={s.heroWrap}>
-            <RankCard me={rk} />
-          </div>
+          {/* le rang flotte et se balance au survol, comme tout le reste */}
+          <Float className={s.heroFloat} tilt={0.8} fl={7.5}>
+            <div className={s.heroWrap}>
+              <RankCard me={rk} />
+            </div>
+          </Float>
           {ranked.isPending ? null : !tutoOk ? (
             <div className={`${rs.lock} ${s.lockBox}`}>
               <h2>{t('arena.tutoLock')}</h2>

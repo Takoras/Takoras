@@ -61,13 +61,12 @@ export function RankCard({ me }: { me: RankedMe | undefined }) {
         <RankBadge r={r} size={200} />
       </div>
       <div className={s.heroMain}>
-        <small className={s.heroTag}>{t('arena.rank')}</small>
         <b className={s.heroName}>{name(r)}</b>
         <div className={s.heroLine}>
           <span className={s.heroElo}>
             {elo.toLocaleString(locale(lang))} <small>Elo</small>
           </span>
-          {me?.games ? <span>{t('arena.eloTop', { n: me.top })}</span> : null}
+          {me?.top ? <span>{t('arena.eloTop', { n: me.top })}</span> : null}
         </div>
         <div
           className={s.heroBar}
