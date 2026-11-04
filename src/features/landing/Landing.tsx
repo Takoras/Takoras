@@ -78,12 +78,10 @@ export function Landing() {
           <h2 id="land-rares" className={s.h2}>
             {t('ui.land_rares')}
           </h2>
-          <p className={s.stepTxt}>{t('ui.land_rares_txt')}</p>
           <Rares />
         </div>
         <div className={`${s.leaf} ${s.right}`}>
           <h2 className={s.h2}>{t('ui.land_series')}</h2>
-          <p className={s.stepTxt}>{t('ui.land_series_txt')}</p>
           <SeriesCards />
         </div>
       </section>
@@ -216,7 +214,7 @@ function Blueprint() {
         <GlassIconReveal
           className={s.glass}
           logo={texOf(j)}
-          label={`${jn(j.name)} · ${t('ui.land_glass_hint')}`}
+          label={jn(j.name)}
           look="dark"
           pixel
           originalColors
@@ -251,7 +249,8 @@ function Rares() {
   const t = useT();
   const jn = useJn();
   const lang = useSettings((x) => x.lang);
-  const top = [...(SERIES[SERIE] ?? [])].sort((a, b) => a.odds - b.odds).slice(-3);
+  const list = SERIES[SERIE] ?? [];
+  const top = [...list].sort((a, b) => a.odds - b.odds).slice(-3);
   return (
     <CardStack
       className={s.rares}
@@ -259,8 +258,8 @@ function Rares() {
         icon: <img className="px" src={texOf(j)} alt="" draggable={false} />,
         title: jn(j.name),
         description: t('ui.land_rares_odds', { n: fmt(j.odds, lang) }),
-        date: t(`ui.${tierKey(j.odds)}` as 'ui.r_myth'),
-        color: `var(--${tierKey(j.odds).replace('_', '-')})`,
+        date: `N° ${String(list.indexOf(j) + 1).padStart(3, '0')}`,
+        color: j.glow,
       }))}
     />
   );
@@ -285,7 +284,6 @@ function SeriesCards() {
             badge={t('ui.land_series_count', { n: list.length })}
             title={<SerieName name={name} h="1.6em" />}
             detail={t('ui.land_series_star', { name: jn(star.name), n: fmt(star.odds, lang) })}
-            hint={t('ui.land_series_hint')}
             sprites={sorted
               .slice(0, -1)
               .slice(0, 6)

@@ -14,6 +14,7 @@ export function Modal({
   wide,
   noX,
   bare,
+  fading,
 }: {
   open: boolean;
   onClose: () => void;
@@ -25,6 +26,8 @@ export function Modal({
   noX?: boolean;
   /** pas de cadre : le contenu dessine sa propre carte (fiche jeton qui se déplie) */
   bare?: boolean;
+  /** le fond s'efface (la fenêtre va se fermer) */
+  fading?: boolean;
 }) {
   const ref = useRef<HTMLDialogElement>(null);
   const t = useT();
@@ -45,7 +48,7 @@ export function Modal({
     // eslint-disable-next-line jsx-a11y/click-events-have-key-events, jsx-a11y/no-noninteractive-element-interactions
     <dialog
       ref={ref}
-      className={[s.dialog, wide && s.wide, bare && s.noRise].filter(Boolean).join(' ')}
+      className={[s.dialog, wide && s.wide, bare && s.noRise, fading && s.fading].filter(Boolean).join(' ')}
       aria-label={typeof title === 'string' ? title : undefined}
       onCancel={(e) => {
         e.preventDefault();

@@ -245,7 +245,6 @@ function Feedback() {
   return (
     <Modal open onClose={close} title={t('ui.fb_title')}>
       <div className={s.fb}>
-        <p className="muted">{t('ui.fb_sub')}</p>
         <div className={s.kinds} role="radiogroup" aria-label={t('ui.fb_title')}>
           {FB_KINDS.map(([k, ico]) => (
             <button
@@ -332,7 +331,6 @@ function Tester() {
   return (
     <Modal open onClose={close} title={`${t('ui.tester_menu')}`} wide>
       <div className={s.ts}>
-        <p className="muted">{t('ui.tester_sub')}</p>
         <section>
           <h3>{t('ui.pulls')}</h3>
           <div className={s.row}>
@@ -428,7 +426,6 @@ function Tester() {
         </section>
         <section>
           <h3>{t('ui.ts_pulls_test')}</h3>
-          <p className="muted">{t('ui.ts_pulls_hint')}</p>
           <TestPulls />
         </section>
       </div>

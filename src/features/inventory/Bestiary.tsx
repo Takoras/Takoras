@@ -6,7 +6,7 @@ import { NeedLogin } from '@/app/NeedLogin';
 import { useQueryClient } from '@tanstack/react-query';
 import { errorText, invApi } from '@/api';
 import { MYSTERE, sellValue, SERIES, texOf, vImg, vOdds, glowVars, jetonOf, TEMPLATE } from '@/data/jetons';
-import { statsOf, fmtLuck } from '@/engines/env';
+import { fmtLuck } from '@/engines/env';
 import { moPlay, moSnap } from '@/engines/motion.js';
 import { sfx } from '@/engines/sound.js';
 import { useAuth } from '@/lib/auth';
@@ -20,7 +20,6 @@ import { JetonModal } from './JetonModal';
 import { BoardSection } from '../board/Board';
 import {
   cKey,
-  lvlOf,
   needsConfirm,
   quickSelect,
   selTotals,
@@ -299,7 +298,6 @@ export default function Bestiary() {
               key={c.j.name}
               c={c}
               vtab={view.vtab}
-              lvl={lvlOf(d, view.serie, c.j.name)}
               q={c.g ? (sel.get(c.g.key) ?? 0) : 0}
               selecting={selecting}
               onTap={tap}
@@ -401,14 +399,12 @@ export default function Bestiary() {
 function CardView({
   c,
   vtab,
-  lvl,
   q,
   selecting,
   onTap,
 }: {
   c: Card;
   vtab: string;
-  lvl: number;
   q: number;
   selecting: boolean;
   onTap: (c: Card, step?: number) => void;
@@ -451,14 +447,7 @@ function CardView({
         ) : null}
         <img className={g || c.seen ? vImg(vtab) : 'px'} src={g || c.seen ? texOf(j) : MYSTERE} alt="" />
         <b>{g || c.seen ? jn(j.name) : '???'}</b>
-        {known ? (
-          <small>
-            <span>1/{fmt(vOdds(j.odds, vtab))}</span>
-            {g ? ` · ${fmt(statsOf(j.name, j.odds, vtab, lvl).power)}` : ' · ×0'}
-          </small>
-        ) : (
-          <small>?</small>
-        )}
+        {known ? <small>1/{fmt(vOdds(j.odds, vtab))}</small> : <small>?</small>}
       </button>
       {selecting && g && g.free.length ? (
         <div className={s.step}>

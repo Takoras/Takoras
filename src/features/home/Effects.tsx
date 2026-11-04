@@ -17,7 +17,8 @@ export function Effects() {
   if (!pots.length && !fast) return null;
   return (
     <ul className={s.fx} aria-label={t('ui.fx_total', { m: dec(Number(me.data.luck ?? 1), lang) })}>
-      {pots.length ? (
+      {/* le total seulement quand plusieurs potions se cumulent (sinon il redit la même chose) */}
+      {pots.length > 1 ? (
         <li className={s.fxTotal}>{t('ui.fx_total', { m: dec(Number(me.data.luck ?? 1), lang) })}</li>
       ) : null}
       {pots.map((p, i) => (

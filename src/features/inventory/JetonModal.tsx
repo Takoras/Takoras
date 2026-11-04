@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState, type CSSProperties, type PointerEvent, type ReactNode } from 'react';
 import { StatIcon } from '@/ui/StatIcon';
-import { hexRGB, jetonOf, MYSTERE, texOf, texScale, tierKey, vImg, vOdds, glowVars, type Variant } from '@/data/jetons';
+import { hexRGB, jetonOf, MYSTERE, texOf, texScale, vImg, vOdds, glowVars, type Variant } from '@/data/jetons';
 import { powerInfo, RING_MAX, ringStats } from '@/data/kit';
 import { useJn } from '@/lib/names';
 import { locale, reducedFx, useSettings } from '@/lib/settings';
@@ -9,6 +9,7 @@ import { Modal } from '@/ui/Modal';
 import { PowerDemo } from '../combat/PowerDemo';
 import { Tween } from '@/ui/Tween';
 import { spring } from '@/ui/spring';
+import { PixelBg } from '@/ui/PixelBg';
 import s from './JetonSheet.module.css';
 
 const VS = ['gold', 'celeste', 'ombre'] as const;
@@ -63,11 +64,11 @@ export function JetonModal({
         setClosing(false);
         onClose();
       },
-      reducedFx() ? 0 : 300,
+      reducedFx() ? 0 : 260,
     );
   };
   useEffect(() => () => clearTimeout(shut.current), []);
-  // ressorts de l'original : dépli (raideur 400, amortissement 35), inclinaison (300, 30)
+  // ressorts : dépli plus vif que l'original (raideur 700, amortissement 46), inclinaison (300, 30)
   useEffect(() => {
     const el = card.current;
     if (!el || !name) return;
@@ -75,7 +76,7 @@ export function JetonModal({
       b = 0;
     const paint = () =>
       (el.style.transform = `perspective(1000px) rotateX(${a.toFixed(2)}deg) rotateY(${b.toFixed(2)}deg)`);
-    const u = spring((v) => el.style.setProperty('--u', String(Math.max(0, v))), { stiffness: 400, damping: 35 });
+    const u = spring((v) => el.style.setProperty('--u', String(Math.max(0, v))), { stiffness: 700, damping: 46 });
     const rx = spring((v) => ((a = v), paint()), { stiffness: 300, damping: 30 });
     const ry = spring((v) => ((b = v), paint()), { stiffness: 300, damping: 30 });
     if (reducedFx()) u.jump(1);
@@ -147,76 +148,17 @@ export function JetonModal({
         ...(pv ? { '--g': VCOL[pv as Variant] } : {}),
       }) as unknown as CSSProperties;
   return (
-    <Modal open={!!name} onClose={close} wide noX bare>
+    <Modal open={!!name} onClose={close} wide noX bare fading={closing}>
       {name ? (
         <div key={name} ref={card} className={`${s.sheet} ${closing ? s.closing : ''}`} style={vars}>
-          {/* la page d'album qui se trace derrière la fiche */}
-          <svg className={s.roads} preserveAspectRatio="none" aria-hidden>
-            <line
-              x1="0%"
-              y1="35%"
-              x2="100%"
-              y2="35%"
-              pathLength={1}
-              className={s.r1}
-              style={{ '--d': '0.2s' } as CSSProperties}
-            />
-            <line
-              x1="0%"
-              y1="65%"
-              x2="100%"
-              y2="65%"
-              pathLength={1}
-              className={s.r1}
-              style={{ '--d': '0.3s' } as CSSProperties}
-            />
-            <line
-              x1="30%"
-              y1="0%"
-              x2="30%"
-              y2="100%"
-              pathLength={1}
-              className={s.r2}
-              style={{ '--d': '0.4s' } as CSSProperties}
-            />
-            <line
-              x1="70%"
-              y1="0%"
-              x2="70%"
-              y2="100%"
-              pathLength={1}
-              className={s.r2}
-              style={{ '--d': '0.5s' } as CSSProperties}
-            />
-            {[20, 50, 80].map((y, i) => (
-              <line
-                key={`h${y}`}
-                x1="0%"
-                y1={`${y}%`}
-                x2="100%"
-                y2={`${y}%`}
-                pathLength={1}
-                className={s.r3}
-                style={{ '--d': `${0.6 + i * 0.1}s` } as CSSProperties}
-              />
-            ))}
-            {[15, 45, 55, 85].map((x, i) => (
-              <line
-                key={`v${x}`}
-                x1={`${x}%`}
-                y1="0%"
-                x2={`${x}%`}
-                y2="100%"
-                pathLength={1}
-                className={s.r3}
-                style={{ '--d': `${0.7 + i * 0.1}s` } as CSSProperties}
-              />
-            ))}
-          </svg>
-          <span className={s.badge}>
-            <i />
-            {locked ? '???' : t(`ui.${tierKey(vOdds(j.odds, pv))}` as 'ui.r_myth')}
-          </span>
+          {/* le fond pixel art de l'ouverture : plus le jeton est rare, plus il est chargé */}
+          <PixelBg
+            className={s.pxbg}
+            odds={locked ? 1 : vOdds(j.odds, pv)}
+            glow={locked ? '#71717a' : pv && pv in VHEX ? VHEX[pv as Variant] : j.glow}
+            center={coin}
+            still={reducedFx()}
+          />
           <div className={s.stage}>
             <div className={s.id}>
               <h2>{locked ? '???' : jn(j.name)}</h2>
@@ -329,6 +271,9 @@ export function JetonModal({
 
 // Une couleur par stat (même code partout : fiche, éditeur d'équipe)
 export const STAT_COL = { mass: '96, 165, 250', power: '251, 113, 133', size: '74, 222, 128' } as const;
+
+// Couleur du fond selon la mutation montrée
+const VHEX: Record<Variant, string> = { gold: '#facc15', celeste: '#bac8ff', ombre: '#8b5cf6' };
 
 // Couleur de l'aura selon la mutation montrée
 const VCOL: Record<Variant, string> = { gold: '250, 204, 21', celeste: '186, 200, 255', ombre: '139, 92, 246' };

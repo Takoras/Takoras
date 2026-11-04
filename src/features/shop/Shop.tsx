@@ -354,7 +354,6 @@ function Packs() {
             <div className={s.body}>
               <div>
                 <h3>{p.n > 1 ? t('ui.pk_pots', { m: p.mult, n: p.n }) : t('ui.pk_pot', { m: p.mult })}</h3>
-                <p className="muted">{t('ui.pk_pot_d', { m: p.mult })}</p>
               </div>
               <div className={s.foot}>
                 <b className={s.price}>{eur(p.eur)}</b>

@@ -69,7 +69,6 @@ export function AccountModal() {
 
   return (
     <Modal open={open && !user} onClose={() => openUI('account', false)} title={t('ui.login')}>
-      <p className="muted">{t('ui.acc_oauth_p')}</p>
       <Button
         className={s.discord}
         block

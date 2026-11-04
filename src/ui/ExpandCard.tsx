@@ -10,7 +10,6 @@ export function ExpandCard({
   badge,
   title,
   detail,
-  hint,
   sprites,
   star,
   color = '#34d399',
@@ -21,7 +20,6 @@ export function ExpandCard({
   title: ReactNode;
   /** ligne qui apparaît sous le titre une fois la carte ouverte */
   detail: ReactNode;
-  hint: string;
   /** jusqu'à 6 petites vignettes posées sur le plan */
   sprites: string[];
   /** la vignette qui tombe au centre */
@@ -197,7 +195,6 @@ export function ExpandCard({
           </div>
         </div>
       </div>
-      <span className={s.hint}>{hint}</span>
     </button>
   );
 }
