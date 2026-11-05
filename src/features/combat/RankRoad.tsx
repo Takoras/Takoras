@@ -1,19 +1,20 @@
-import { useEffect, useRef, useState, type CSSProperties } from 'react';
+import { useRef, useState, type CSSProperties } from 'react';
 import { RCFG } from '@/engines/ring-config.js';
 import { sfx } from '@/engines/sound.js';
 import { useT } from '@/i18n/useT';
 import { locale, useSettings } from '@/lib/settings';
-import { Modal } from '@/ui/Modal';
-import { useSwingAll } from '@/ui/useSwing';
+import { useSwing } from '@/ui/useSwing';
 import { RankBadge, useRankName } from './Ranked';
 import { rankOf, ROAD, type Rank } from './rankedApi';
 import s from './RankRoad.module.css';
 
-// Route des rangs en escalier : une marche par rang, de plus en plus haute, qui flotte comme le podium de l'accueil.
-// Le badge du rang est posé dessus, en grand. Rangs pas encore atteints : badge en silhouette (on le découvre
-// au survol). Toucher une marche ouvre la fiche du rang (comme la fiche d'un jeton) avec ses divisions.
+// Panneau des rangs, en bas du combat : le badge du rang en très grand au milieu, son nom dessous en grosses
+// lettres, puis une barre qui va de sa 1re division au rang suivant ; sur chaque cran, le petit badge de la
+// division est planté sur un poteau, et son Elo est écrit dessous. La barre se remplit jusqu'à ton Elo.
+// Les flèches parcourent tous les rangs (on arrive sur le tien). Fond : le badge du rang en motif discret.
 const TIERS = RCFG.RANKS.map((r) => ({ k: r.k, col: r.col, steps: ROAD.filter((x) => x.k === r.k) }));
-type Tier = (typeof TIERS)[number];
+const N = TIERS.length;
+const START = 1000;
 
 export function RankRoad({ elo }: { elo: number }) {
   const t = useT();
@@ -22,99 +23,98 @@ export function RankRoad({ elo }: { elo: number }) {
   const fmt = (n: number) => n.toLocaleString(locale(lang));
   const cur = rankOf(elo);
   const here = TIERS.findIndex((x) => x.k === cur.k);
-  const [open, setOpen] = useState<number | null>(null);
-  const list = useRef<HTMLOListElement>(null);
-  const scroller = useRef<HTMLDivElement>(null);
-  // les badges se balancent au passage de la souris, accrochés par le haut
-  useSwingAll(list, `.${s.badge}`, 0.5);
-  // téléphone : l'escalier défile jusqu'à ta marche
-  useEffect(() => {
-    const sc = scroller.current;
-    const li = list.current?.children[here] as HTMLElement | undefined;
-    if (sc && li && sc.scrollWidth > sc.clientWidth)
-      sc.scrollLeft = li.offsetLeft - sc.clientWidth / 2 + li.offsetWidth / 2;
-  }, [here]);
+  const [view, setView] = useState(here);
+  const emblem = useRef<HTMLDivElement>(null);
+  useSwing(emblem, 0.3);
 
-  const label = (x: Tier) => t(`arena.r_${x.k}` as 'arena.r_wood');
-  const minOf = (x: Tier) => x.steps[0]?.min ?? 0;
-  const eloTxt = (x: Tier) => (minOf(x) > 0 ? `${fmt(minOf(x))}+` : `< ${fmt(minOf(TIERS[1] ?? x))}`);
-  const o = open !== null ? TIERS[open] : undefined;
+  const tier = TIERS[view] ?? TIERS[0];
+  if (!tier) return null;
+  const next = TIERS[view + 1]?.steps[0];
+  // les crans : les divisions du rang, puis la 1re division du rang suivant (le but)
+  const marks: Rank[] = [...tier.steps, ...(next ? [next] : [])];
+  const at = (r: Rank) => Math.max(r.min, START);
+  // remplissage : morceau par morceau entre deux crans, jusqu'à ton Elo
+  const fill = (() => {
+    if (marks.length < 2) return elo >= (marks[0]?.min ?? 0) ? 1 : 0;
+    for (let i = 0; i < marks.length - 1; i++) {
+      const a = at(marks[i] as Rank),
+        b = at(marks[i + 1] as Rank);
+      if (elo < b) return Math.max(0, (i + Math.max(0, (elo - a) / (b - a))) / (marks.length - 1));
+    }
+    return 1;
+  })();
+  const locked = view > here;
+  const shown: Rank = view === here ? cur : (tier.steps[0] as Rank);
+  // motif du fond : le badge du rang (sprite) répété, très discret
+  const pat = `/img/ranks/rank${Math.min(18, (tier.steps[0]?.idx ?? 0) + 1)}.png`;
+  const go = (d: number) => {
+    sfx.click();
+    setView((v) => Math.max(0, Math.min(N - 1, v + d)));
+  };
 
   return (
-    <section className={s.road} aria-labelledby="road-t">
-      <h2 id="road-t">{t('arena.road')}</h2>
-      <div ref={scroller} className={s.scroll}>
-        <ol ref={list} className={s.stairs}>
-          {TIERS.map((x, i) => {
-            const state = i < here ? s.passed : i === here ? s.here : s.locked;
-            const shown: Rank = i === here ? cur : (x.steps[0] ?? cur);
-            return (
-              <li
-                key={x.k}
-                className={state}
-                style={{ '--rc': x.col, '--i': i } as CSSProperties}
-                aria-current={i === here ? 'step' : undefined}
-              >
-                <button
-                  type="button"
-                  className={s.stepBtn}
-                  onClick={() => {
-                    sfx.click();
-                    setOpen(i);
-                  }}
-                  aria-label={`${label(x)} · ${eloTxt(x)}`}
-                >
-                  {i === here ? <em className={s.you}>{t('arena.you')}</em> : null}
-                  <span className={s.badge}>
-                    <RankBadge r={shown} size={i === here ? 96 : 76} />
-                  </span>
-                  {/* la marche : un bloc pixel à la couleur du rang, avec sa tranche */}
-                  <span className={s.block}>
-                    <b>{i === here ? name(cur) : label(x)}</b>
-                    <small>{eloTxt(x)}</small>
-                    {x.steps.length > 1 ? (
-                      <span className={s.pips} aria-hidden>
-                        {x.steps.map((r) => (
-                          <i
-                            key={r.idx}
-                            className={r.idx < cur.idx ? s.pipDone : r.idx === cur.idx ? s.pipNow : undefined}
-                          />
-                        ))}
-                      </span>
-                    ) : null}
-                  </span>
-                </button>
-              </li>
-            );
-          })}
-        </ol>
+    <section
+      className={`${s.panel} ${locked ? s.locked : ''}`}
+      style={{ '--rc': tier.col, '--pat': `url(${pat})` } as CSSProperties}
+      aria-labelledby="road-t"
+    >
+      <h2 id="road-t" className={s.title}>
+        {t('arena.road')}
+      </h2>
+
+      <button
+        type="button"
+        className={`${s.arrow} ${s.prev}`}
+        onClick={() => go(-1)}
+        disabled={view <= 0}
+        aria-label="‹"
+      >
+        ‹
+      </button>
+      <button
+        type="button"
+        className={`${s.arrow} ${s.next}`}
+        onClick={() => go(1)}
+        disabled={view >= N - 1}
+        aria-label="›"
+      >
+        ›
+      </button>
+
+      {/* le badge en très grand, et le nom du rang en grosses lettres dessous ; ils repartent à chaque rang */}
+      <div className={s.hero} key={tier.k}>
+        <div ref={emblem} className={s.emblem}>
+          {view === here ? <em className={s.you}>{t('arena.you')}</em> : null}
+          <RankBadge r={shown} size={220} />
+        </div>
+        <b className={s.name}>{view === here ? name(cur) : t(`arena.r_${tier.k}` as 'arena.r_wood')}</b>
       </div>
 
-      {/* fiche d'un rang : le badge en grand et ses divisions */}
-      {o ? (
-        <Modal open onClose={() => setOpen(null)} title={label(o)}>
-          <div className={s.sheet} style={{ '--rc': o.col } as CSSProperties}>
-            <div className={s.sheetBadge}>
-              <RankBadge r={open === here ? cur : (o.steps[0] ?? cur)} size={150} />
+      {/* la barre des divisions */}
+      <div className={s.track} key={`b-${tier.k}`} style={{ '--n': marks.length } as CSSProperties}>
+        <div className={s.bar}>
+          <i className={s.fill} style={{ '--p': fill } as CSSProperties} />
+        </div>
+        {marks.map((r, i) => {
+          const on = elo >= at(r);
+          const goal = i === marks.length - 1 && !!next;
+          return (
+            <div
+              key={r.idx}
+              className={`${s.mark} ${on ? s.on : ''} ${goal ? s.goal : ''} ${r.idx === cur.idx ? s.now : ''}`}
+              style={{ '--x': marks.length > 1 ? i / (marks.length - 1) : 0.5, '--k': i } as CSSProperties}
+            >
+              <span className={s.pin}>
+                <span className={s.pb}>
+                  <RankBadge r={r} size={goal ? 58 : 46} />
+                </span>
+                {goal ? <small>{t(`arena.r_${r.k}` as 'arena.r_wood')}</small> : null}
+              </span>
+              <span className={s.elo}>{fmt(r.min > 0 ? r.min : START)}</span>
             </div>
-            <ol className={s.divs}>
-              {o.steps.map((r, k) => {
-                const st = r.idx < cur.idx ? s.dDone : r.idx === cur.idx ? s.dNow : s.dLocked;
-                return (
-                  <li key={r.idx} className={st} style={{ '--k': k } as CSSProperties}>
-                    <RankBadge r={r} size={48} />
-                    <b>{name(r)}</b>
-                    <small>
-                      {r.idx === cur.idx ? `${t('arena.you')} · ` : ''}
-                      {r.min > 0 ? `${fmt(r.min)}+` : `< ${fmt(r.max ?? 0)}`}
-                    </small>
-                  </li>
-                );
-              })}
-            </ol>
-          </div>
-        </Modal>
-      ) : null}
+          );
+        })}
+      </div>
     </section>
   );
 }

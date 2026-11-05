@@ -1,152 +1,73 @@
-/* Route des rangs en escalier : une marche pixel par rang, de plus en plus haute, qui flotte (comme le podium
-   de l'accueil) ; le badge en grand dessus. Pas de trait ni de halo : ce sont les rangs qui se montrent. */
-.road {
-  display: grid;
-  gap: var(--s-4);
-  margin-top: var(--s-6);
-}
-.road h2 {
-  font-size: var(--fs-xl);
-}
-.scroll {
-  overflow: auto hidden;
-  scrollbar-width: thin;
-  /* place pour que les badges et « Toi » puissent monter sans être coupés */
-  padding-top: var(--s-6);
-}
-.stairs {
-  list-style: none;
-  display: grid;
-  grid-template-columns: repeat(8, minmax(112px, 1fr));
-  align-items: end;
-  gap: var(--s-3);
-  min-width: 960px;
-  padding: 0 var(--s-2) var(--s-4);
-}
-.stairs li {
-  --h: calc(64px + var(--i) * 18px); /* chaque marche un peu plus haute que la précédente */
-  --tilt: calc((var(--i) - 3.5) * 0.4deg);
-  animation: drift calc(6s + var(--i) * 0.45s) calc(var(--i) * -0.7s) ease-in-out infinite;
-}
-.stepBtn {
+/* Panneau des rangs (bas du combat) : fond à la couleur du rang avec son badge en motif, le badge en très grand,
+   son nom en grosses lettres penchées, puis la barre des divisions avec un petit badge planté sur chaque cran. */
+.panel {
   position: relative;
   display: grid;
   justify-items: center;
-  width: 100%;
-  cursor: pointer;
-  border-radius: 10px;
+  margin-top: var(--s-8);
+  padding: var(--s-8) var(--s-4) var(--s-6);
+  overflow: hidden;
+  border: 3px solid #0d0d12;
+  border-radius: 24px;
+  background: radial-gradient(
+    70% 80% at 50% 30%,
+    color-mix(in srgb, var(--rc) 34%, #17171f),
+    color-mix(in srgb, var(--rc) 10%, #0f0f16)
+  );
+  box-shadow:
+    inset 0 4px 0 rgb(255 255 255 / 6%),
+    0 10px 0 rgb(0 0 0 / 35%);
+  transition: background 0.4s;
 }
-.stepBtn:focus-visible {
-  outline: 2px solid var(--accent-hi);
-  outline-offset: 4px;
+/* motif : le badge du rang répété en diagonale, très discret */
+.panel::before {
+  content: '';
+  position: absolute;
+  inset: -40%;
+  z-index: 0;
+  background: var(--pat) 0 0 / 72px 72px repeat;
+  image-rendering: pixelated;
+  opacity: 0.07;
+  rotate: -14deg;
+  filter: grayscale(0.3);
+  animation: patSlide 40s linear infinite;
+  pointer-events: none;
 }
-
-/* badge posé sur la marche, accroché par le haut : il se balance au survol */
-.badge {
+.panel > * {
   position: relative;
   z-index: 1;
+}
+.title {
+  position: absolute;
+  top: var(--s-4);
+  left: var(--s-5);
+  font-size: var(--fs-lg);
+  font-weight: 900;
+  letter-spacing: var(--tracking-caps);
+  text-transform: uppercase;
+}
+
+/* badge + nom */
+.hero {
   display: grid;
-  place-items: center;
-  margin-bottom: -10px;
+  justify-items: center;
+  animation: heroIn 0.45s var(--ease-spring);
+}
+.emblem {
+  position: relative;
   transform-origin: 50% 0;
   rotate: var(--swing, 0deg);
-  transition:
-    translate 0.25s var(--ease-spring),
-    filter 0.25s;
+  filter: drop-shadow(0 10px 0 rgb(0 0 0 / 35%));
 }
-.stepBtn:hover .badge {
-  translate: 0 -8px;
-}
-
-/* la marche : bloc pixel à la couleur du rang, face claire en haut, tranche sombre dessous */
-.block {
-  display: grid;
-  align-content: start;
-  justify-items: center;
-  gap: 2px;
-  width: 100%;
-  height: var(--h);
-  padding: var(--s-3) var(--s-1) 0;
-  border: 3px solid color-mix(in srgb, var(--rc) 40%, #000);
-  border-radius: 6px;
-  background: color-mix(in srgb, var(--rc) 38%, #17171f);
-  box-shadow:
-    inset 0 5px 0 rgb(255 255 255 / 18%),
-    inset 0 -6px 0 rgb(0 0 0 / 20%),
-    0 8px 0 color-mix(in srgb, var(--rc) 22%, #000);
-  rotate: var(--tilt);
-  transition:
-    translate 0.25s var(--ease-spring),
-    background-color 0.2s;
-}
-.stepBtn:hover .block {
-  translate: 0 -4px;
-}
-.block b {
-  font-size: var(--fs-sm);
-  font-weight: 800;
-  line-height: 1.15;
-  color: #fff;
-  text-align: center;
-}
-.block small {
-  font-size: var(--fs-xs);
-  font-weight: 700;
-  color: rgb(255 255 255 / 72%);
-  font-variant-numeric: tabular-nums;
-}
-.pips {
-  display: flex;
-  gap: 4px;
-  margin-top: 4px;
-}
-.pips i {
-  width: 9px;
-  height: 9px;
-  background: rgb(0 0 0 / 35%);
-}
-.pips .pipDone {
-  background: #fff;
-}
-.pips .pipNow {
-  background: #fff;
-  outline: 2px solid rgb(0 0 0 / 45%);
-  animation: blink 1.2s steps(2, jump-none) infinite;
-}
-
-/* pas encore atteint : marche grise, badge en silhouette ; au survol on découvre le rang */
-.locked .block {
-  border-color: color-mix(in srgb, var(--rc) 12%, #101016);
-  background: color-mix(in srgb, var(--rc) 13%, #1e1e28);
-  box-shadow:
-    inset 0 5px 0 rgb(255 255 255 / 6%),
-    0 8px 0 color-mix(in srgb, var(--rc) 10%, #0d0d12);
-}
-.locked .block b {
-  color: var(--text-2);
-}
-.locked .block small {
-  color: var(--muted);
-}
-.locked .badge {
-  filter: brightness(0.12) saturate(0);
-}
-.locked .stepBtn:hover .badge {
-  filter: none;
-}
-.locked .stepBtn:hover .block {
-  background: color-mix(in srgb, var(--rc) 26%, #1e1e28);
-}
-
-/* ton rang : marche plus vive et « Toi » qui saute au-dessus */
-.here .block {
-  border-color: #fff;
-  background: color-mix(in srgb, var(--rc) 55%, #17171f);
+.emblem > :last-child {
+  animation: bob 3.6s ease-in-out infinite;
 }
 .you {
   position: absolute;
   z-index: 2;
-  top: -34px;
+  top: 0;
+  left: 50%;
+  translate: -50% 0;
   padding: 3px 10px;
   border-radius: 7px;
   background: #7d48d9;
@@ -156,109 +77,212 @@
   font-style: normal;
   font-weight: 900;
   letter-spacing: var(--tracking-caps);
-  animation: hop 1.8s ease-in-out infinite;
 }
-.you::after {
-  content: '';
-  position: absolute;
-  left: 50%;
-  bottom: -9px;
-  translate: -50% 0;
-  border: 6px solid transparent;
-  border-top-color: #7d48d9;
+.name {
+  margin-top: calc(-1 * var(--s-3));
+  font-family: var(--font-display);
+  font-size: clamp(2.2rem, 6vw, 3.6rem);
+  font-weight: 900;
+  line-height: 1;
+  text-transform: uppercase;
+  letter-spacing: 0.02em;
+  color: color-mix(in srgb, var(--rc) 65%, #fff);
+  text-shadow:
+    0 5px 0 color-mix(in srgb, var(--rc) 30%, #000),
+    3px 3px 0 #0d0d12,
+    -3px 3px 0 #0d0d12;
+  rotate: -3deg;
 }
 
-/* fiche d'un rang (fenêtre) : le badge en grand, puis ses divisions */
-.sheet {
+/* la barre des divisions, légèrement penchée comme le nom */
+.track {
+  position: relative;
+  width: min(640px, 88%);
+  height: 150px;
+  margin-top: var(--s-4);
+  rotate: -2deg;
+}
+.bar {
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 34px;
+  height: 26px;
+  overflow: hidden;
+  border: 4px solid #0d0d12;
+  border-radius: 6px;
+  background: #2a2a36;
+  box-shadow:
+    inset 0 -6px 0 rgb(0 0 0 / 30%),
+    0 6px 0 rgb(0 0 0 / 35%);
+}
+.fill {
+  position: absolute;
+  inset: 0 auto 0 0;
+  width: calc(var(--p) * 100%);
+  background: linear-gradient(180deg, color-mix(in srgb, var(--rc) 55%, #fff) 0 30%, var(--rc) 30%);
+  animation: grow 0.9s 0.15s var(--ease-out) backwards;
+}
+.mark {
+  position: absolute;
+  left: calc(var(--x) * 100%);
+  bottom: 0;
   display: grid;
   justify-items: center;
-  gap: var(--s-4);
+  translate: -50% 0;
+  animation: markIn 0.35s calc(0.2s + var(--k) * 0.08s) var(--ease-spring) backwards;
 }
-.sheetBadge {
-  animation: bob 3.4s ease-in-out infinite;
-}
-.divs {
-  list-style: none;
+/* petit badge planté sur un poteau au-dessus du cran */
+.pin {
+  position: relative;
   display: grid;
-  gap: var(--s-2);
-  width: 100%;
+  justify-items: center;
+  margin-bottom: 64px;
 }
-.divs li {
+.pin::after {
+  content: '';
+  position: absolute;
+  top: 100%;
+  width: 4px;
+  height: 44px;
+  background: #0d0d12;
+}
+.pin small {
+  margin-top: 2px;
+  font-size: var(--fs-xs);
+  font-weight: 900;
+  text-transform: uppercase;
+  color: #fff;
+  text-shadow: 0 2px 0 #0d0d12;
+}
+.goal .pin {
+  margin-bottom: 52px;
+}
+.goal .pin::after {
+  height: 32px;
+}
+/* cran pas encore atteint : badge en silhouette */
+.pb {
   display: grid;
-  grid-template-columns: 48px 1fr auto;
-  align-items: center;
-  gap: var(--s-3);
-  padding: var(--s-2) var(--s-3);
-  border: 1px solid rgb(255 255 255 / 8%);
-  border-radius: 10px;
-  animation: slide 0.3s calc(0.15s + var(--k) * 0.08s) var(--ease-out) backwards;
 }
-.divs b {
-  font-size: var(--fs-md);
+.mark:not(.on) .pb {
+  filter: brightness(0.15) saturate(0);
 }
-.divs small {
+.now .pb {
+  animation: bob 1.6s ease-in-out infinite;
+}
+.elo {
+  position: absolute;
+  bottom: 0;
   font-size: var(--fs-sm);
-  font-weight: 700;
-  color: var(--muted);
+  font-weight: 800;
+  color: rgb(255 255 255 / 70%);
   font-variant-numeric: tabular-nums;
-}
-/* pas encore atteinte : visible (on découvre le rang dans sa fiche), juste en retrait */
-.dLocked {
-  opacity: 0.6;
-}
-.dNow {
-  border-color: color-mix(in srgb, var(--rc) 70%, transparent) !important;
-  background: color-mix(in srgb, var(--rc) 20%, transparent);
-}
-.dNow small {
-  color: var(--text);
+  text-shadow: 0 2px 0 rgb(0 0 0 / 45%);
 }
 
-@keyframes drift {
-  0%,
-  100% {
-    transform: translateY(0);
+/* flèches : parcourir tous les rangs */
+.arrow {
+  position: absolute;
+  z-index: 2;
+  top: 42%;
+  width: 48px;
+  height: 48px;
+  border: 3px solid #0d0d12;
+  border-radius: 12px;
+  background: color-mix(in srgb, var(--rc) 25%, #1e1e28);
+  box-shadow: 0 4px 0 #0d0d12;
+  font-size: var(--fs-2xl);
+  font-weight: 900;
+  line-height: 1;
+  color: #fff;
+  transition:
+    translate var(--t-fast),
+    box-shadow var(--t-fast),
+    opacity var(--t-fast);
+}
+.arrow:hover:not(:disabled) {
+  translate: 0 -2px;
+  box-shadow: 0 6px 0 #0d0d12;
+}
+.arrow:active:not(:disabled) {
+  translate: 0 3px;
+  box-shadow: 0 1px 0 #0d0d12;
+}
+.arrow:disabled {
+  opacity: 0.25;
+}
+.prev {
+  left: var(--s-4);
+}
+.next {
+  right: var(--s-4);
+}
+
+@media (max-width: 700px) {
+  .panel {
+    padding-top: var(--s-10);
   }
-  50% {
-    transform: translateY(-7px);
+  .emblem img,
+  .emblem > span {
+    width: 150px !important;
+    height: 150px !important;
+  }
+  .arrow {
+    top: 30%;
+    width: 40px;
+    height: 40px;
+  }
+  .prev {
+    left: var(--s-2);
+  }
+  .next {
+    right: var(--s-2);
+  }
+  .track {
+    width: 84%;
   }
 }
-@keyframes hop {
-  0%,
-  100% {
-    transform: translateY(0);
-  }
-  50% {
-    transform: translateY(-5px);
-  }
-}
+
 @keyframes bob {
   50% {
     transform: translateY(-8px);
   }
 }
-@keyframes blink {
-  50% {
-    background: rgb(0 0 0 / 35%);
-  }
-}
-@keyframes slide {
+@keyframes heroIn {
   from {
     opacity: 0;
-    transform: translateX(-10px);
+    transform: scale(0.7);
+  }
+}
+@keyframes markIn {
+  from {
+    opacity: 0;
+    transform: translateY(14px);
+  }
+}
+@keyframes grow {
+  from {
+    width: 0;
+  }
+}
+@keyframes patSlide {
+  to {
+    background-position: 72px 72px;
   }
 }
 @media (prefers-reduced-motion: reduce) {
-  .stairs li,
-  .you,
-  .sheetBadge,
-  .pips .pipNow,
-  .divs li {
+  .panel::before,
+  .hero,
+  .emblem > :last-child,
+  .fill,
+  .mark,
+  .now .pb {
     animation: none;
   }
 }
-:global(html.reduce-fx) .stairs li,
-:global(html.reduce-fx) .you,
-:global(html.reduce-fx) .sheetBadge {
+:global(html.reduce-fx) .panel::before,
+:global(html.reduce-fx) .emblem > :last-child,
+:global(html.reduce-fx) .now .pb {
   animation: none;
 }
