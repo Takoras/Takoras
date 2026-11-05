@@ -1,252 +1,123 @@
-/* Comparaison de deux jetons pendant un match : ton jeton (violet) à gauche, le sien (orange) à droite,
-   les stats face à face au milieu ; la valeur la plus forte de chaque ligne ressort. */
+/* Comparaison de deux jetons pendant un match : même fiche que l'inventaire (JetonSheet.module.css),
+   coupée en deux moitiés — le tien à gauche, le sien à droite — chacune avec son fond pixel et ses couleurs. */
 .cmp {
-  display: grid;
-  gap: var(--s-4);
+  padding: var(--s-6) var(--s-4) var(--s-5);
 }
 .pick {
+  position: relative;
+  z-index: 2;
   display: flex;
   gap: var(--s-2);
 }
 .pick button {
-  width: 52px;
-  height: 52px;
+  width: 48px;
+  height: 48px;
   padding: 4px;
-  border: 3px solid #0d0d12;
-  border-radius: 12px;
-  background: #1e1e28;
-  opacity: 0.55;
+  border: 1px solid rgb(255 255 255 / 12%);
+  border-radius: 8px;
+  background: rgb(20 20 30 / 80%);
+  opacity: 0.5;
   transition:
     opacity var(--t-fast),
-    translate 0.25s var(--ease-spring),
-    border-color var(--t-fast);
+    scale 380ms cubic-bezier(0.2, 1.4, 0.4, 1);
 }
 .pick button:hover {
   opacity: 1;
-  translate: 0 -3px;
+  scale: 1.08;
 }
 .pick button.on {
   opacity: 1;
-  border-color: #a78bfa;
+  border-color: rgb(167 139 250 / 70%);
 }
 .pick img {
   width: 100%;
   height: 100%;
 }
 
-.grid {
-  display: grid;
-  grid-template-columns: minmax(0, 1fr) minmax(0, 1.2fr) minmax(0, 1fr);
-  align-items: center;
-  gap: var(--s-4);
-}
-.side {
-  display: grid;
-  justify-items: center;
-  gap: var(--s-2);
-  padding: var(--s-4);
-  border: 3px solid #0d0d12;
-  border-radius: 18px;
-  text-align: center;
-  animation: sideIn 0.5s cubic-bezier(0.2, 1.3, 0.4, 1) backwards;
-}
-.me {
-  background: color-mix(in srgb, #a78bfa 18%, #15131f);
-  rotate: -1.5deg;
-  --from: -40px;
-}
-.foe {
-  background: color-mix(in srgb, #fb923c 16%, #17131a);
-  rotate: 1.5deg;
-  --from: 40px;
-  animation-delay: 80ms;
-}
-.coin {
-  display: grid;
-  animation: float 3.4s ease-in-out infinite;
-}
-.coin img {
-  width: clamp(96px, 12vw, 150px);
-  height: auto;
-  aspect-ratio: 1;
-}
-.foe .coin {
-  animation-delay: -1.7s;
-}
-.name {
-  font-family: var(--font-display);
-  font-size: var(--fs-2xl);
-  font-weight: 900;
-  line-height: 1;
-  color: #fff;
-  -webkit-text-stroke: 6px #0d0d12;
-  paint-order: stroke fill;
-}
-.me .name {
-  color: #ddd6fe;
-}
-.foe .name {
-  color: #fed7aa;
-}
-.state {
-  padding: 2px 10px;
-  border-radius: 7px;
-  background: rgb(0 0 0 / 35%);
-  font-size: var(--fs-xs);
-  font-weight: 800;
-  color: var(--text-2);
-}
-.video {
-  width: 100%;
-  max-width: 220px;
-}
-.video video {
-  width: 100%;
-  height: auto;
-  border: 3px solid #0d0d12;
-  border-radius: 12px;
-}
-
-/* son attaque, sous la vidéo */
-.pw {
-  max-width: 240px;
-  font-size: var(--fs-sm);
-  line-height: 1.35;
-  color: var(--text-2);
-}
-.pw b {
-  color: var(--pc, #fff);
-}
-
-/* stats face à face */
-.stats {
+.halves {
   position: relative;
   display: grid;
-  gap: var(--s-4);
+  grid-template-columns: minmax(0, 1fr) auto minmax(0, 1fr);
+  align-items: center;
+  gap: var(--s-3);
+}
+.col {
+  position: relative;
+  isolation: isolate;
+  display: grid;
+  justify-items: center;
+  gap: var(--s-3);
+  padding: var(--s-3);
+  overflow: hidden;
+  border-radius: 12px;
+}
+.coinWrap {
+  position: relative;
+  display: grid;
+  justify-items: center;
+  width: 100%;
+  height: 210px;
+}
+/* rayons et halo de la fiche, centrés sur le jeton */
+.coinWrap > i {
+  top: 105px !important;
+  scale: 0.75;
+}
+.coin {
+  position: relative;
+  z-index: 1;
+  width: 150px;
+  height: 150px;
+  margin-top: 30px;
+  animation: float 4.5s ease-in-out infinite;
+}
+.foe .coin {
+  animation-delay: -2.2s;
+}
+.boxes {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+  align-items: start;
+  gap: var(--s-3);
+  width: 100%;
 }
 .vs {
-  justify-self: center;
   font-family: var(--font-display);
-  font-size: 2.6rem;
+  font-size: 2.4rem;
   font-weight: 900;
-  line-height: 1;
-  color: #fde68a;
-  -webkit-text-stroke: 7px #0d0d12;
-  paint-order: stroke fill;
+  color: var(--text-2);
   rotate: -6deg;
-  animation: vsIn 0.6s 0.15s cubic-bezier(0.2, 1.6, 0.4, 1) backwards;
-}
-.row {
-  display: grid;
-  grid-template-columns: 3.4em 1fr 34px 1fr 3.4em;
-  align-items: center;
-  gap: var(--s-2);
-  animation: rowIn 0.4s calc(0.25s + var(--k) * 0.1s) cubic-bezier(0.2, 1.3, 0.4, 1) backwards;
-}
-.val {
-  font-size: var(--fs-md);
-  font-weight: 900;
-  font-variant-numeric: tabular-nums;
-  color: var(--text-2);
-  text-align: center;
-  transition: scale 0.3s var(--ease-spring);
-}
-.win {
-  color: #fff;
-  scale: 1.2;
-}
-.row > .val:first-child.win {
-  color: #c4b5fd;
-}
-.row > .val:last-child.win {
-  color: #fdba74;
-}
-.ico {
-  display: grid;
-  place-items: center;
-  color: var(--text-2);
-}
-.ico img {
-  width: 26px;
-  height: 26px;
-}
-.bar {
-  display: flex;
-  height: 16px;
-  padding: 2px;
-  border: 3px solid #0d0d12;
-  border-radius: 5px;
-  background: #24242f;
-}
-.barMe {
-  justify-content: flex-end;
-}
-.bar i {
-  display: block;
-  height: 100%;
-  border-radius: 2px;
-  animation: barIn 0.6s calc(0.3s + var(--k) * 0.1s) cubic-bezier(0.2, 1, 0.3, 1) backwards;
-}
-.barMe i {
-  background: linear-gradient(180deg, #ddd6fe 0 35%, #a78bfa 35%);
-}
-.barFoe i {
-  background: linear-gradient(180deg, #fed7aa 0 35%, #fb923c 35%);
 }
 
-@media (max-width: 760px) {
-  .grid {
+@media (max-width: 860px) {
+  .boxes {
+    grid-template-columns: 1fr;
+  }
+}
+@media (max-width: 600px) {
+  .halves {
     grid-template-columns: 1fr 1fr;
-  }
-  .stats {
-    grid-column: 1 / -1;
-    grid-row: 2;
-  }
-  .video {
-    max-width: 150px;
-  }
-  .name {
-    font-size: var(--fs-xl);
   }
   .vs {
     display: none;
   }
+  .coinWrap {
+    height: 150px;
+  }
+  .coin {
+    width: 100px;
+    height: 100px;
+    margin-top: 20px;
+  }
 }
 
-@keyframes sideIn {
-  from {
-    opacity: 0;
-    transform: translateX(var(--from)) scale(0.85);
-  }
-}
-@keyframes vsIn {
-  from {
-    opacity: 0;
-    transform: scale(2.4);
-  }
-}
-@keyframes rowIn {
-  from {
-    opacity: 0;
-    transform: translateY(10px);
-  }
-}
-@keyframes barIn {
-  from {
-    width: 0;
-  }
-}
 @keyframes float {
   50% {
-    transform: translateY(-8px);
+    translate: 0 -10px;
   }
 }
 @media (prefers-reduced-motion: reduce) {
-  .side,
-  .coin,
-  .vs,
-  .row,
-  .bar i {
+  .coin {
     animation: none;
   }
 }

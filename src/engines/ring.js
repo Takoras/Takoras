@@ -68,7 +68,7 @@ const RT = {
     power: 'Pouvoir', on: 'Activé', validate: 'Valider', validated: 'Validé ✓', pass: 'Passer le tour', turn: 'Tour {n}/{m}', sudden: 'Mort subite !', foeOk: '✓ L’adversaire a validé',
     hSel: 'Tape un de tes jetons', hAim: 'Glisse vers l’arrière pour viser : tu peux partir de n’importe où sur l’écran', hVal: 'Valide quand tu es prêt', hWait: 'En attente de l’adversaire…',
     reveal: 'Feu !', out: 'Éjecté !', win: 'Victoire !', lose: 'Défaite…', draw: 'Égalité', again: 'Rejouer', back: 'Retour', quit: 'Abandonner le match ?', you: 'Toi', bot: 'Robot',
-    why: { forfeit: 'Abandon', stale: 'Match fermé (les deux joueurs étaient partis) · Elo inchangé', afk: 'Absent 3 tours de suite', out: 'Tous ses jetons sont sortis du ring', count: 'Plus de jetons au dernier tour', turns: 'Plus de jetons restants à la fin', center: 'Jetons plus proches du centre', draw: 'Personne ne gagne' },
+    why: { forfeit: 'Abandon', stale: 'Match fermé (les deux joueurs étaient partis) · Elo inchangé', afk: 'Absent 3 tours de suite', out: 'Tous ses jetons sont sortis du ring', outMe: 'Tous tes jetons sont sortis du ring', count: 'Plus de jetons au dernier tour', turns: 'Plus de jetons restants à la fin', center: 'Jetons plus proches du centre', draw: 'Personne ne gagne' },
     turns: '{n} tours', mass: 'Poids', powerS: 'Puissance', size: 'Taille', koS: 'Éjecté',
     massD: 'Plus il est lourd, plus il est dur à pousser et plus il pousse fort.', powD: 'La force max de son tir : jusqu’où il peut aller.', sizeD: 'Plus il est gros, plus il touche facilement… mais plus il est facile à toucher.', statsLegend: 'Poids : dur à pousser, pousse fort · Puissance : force du tir · ⭕ Taille : touche plus facilement, mais cible plus facile',
     t1: 'Tape un de tes jetons pour le choisir.', t2: 'Glisse vers l’arrière pour viser. Plus tu tires loin, plus c’est fort. Regarde la trajectoire !',
@@ -136,7 +136,7 @@ const RT = {
     power: 'Power', on: 'On', validate: 'Confirm', validated: 'Confirmed ✓', pass: 'Skip turn', turn: 'Turn {n}/{m}', sudden: 'Sudden death!', foeOk: '✓ Opponent is ready',
     hSel: 'Tap one of your tokens', hAim: 'Drag backwards to aim: you can start anywhere on the screen', hVal: 'Confirm when you’re ready', hWait: 'Waiting for the opponent…',
     reveal: 'Go!', out: 'Out!', win: 'Victory!', lose: 'Defeat…', draw: 'Draw', again: 'Play again', back: 'Back', quit: 'Forfeit the match?', you: 'You', bot: 'Bot',
-    why: { forfeit: 'Forfeit', stale: 'Match closed (both players had left) · Elo unchanged', afk: 'Away for 3 turns in a row', out: 'All their tokens left the ring', count: 'More tokens on the last turn', turns: 'More tokens left at the end', center: 'Tokens closer to the center', draw: 'Nobody wins' },
+    why: { forfeit: 'Forfeit', stale: 'Match closed (both players had left) · Elo unchanged', afk: 'Away for 3 turns in a row', out: 'All their tokens left the ring', outMe: 'All your tokens left the ring', count: 'More tokens on the last turn', turns: 'More tokens left at the end', center: 'Tokens closer to the center', draw: 'Nobody wins' },
     turns: '{n} turns', mass: 'Weight', powerS: 'Power', size: 'Size', koS: 'Knocked out',
     massD: 'The heavier, the harder to push and the harder it pushes.', powD: 'Its max shot strength: how far it can go.', sizeD: 'The bigger, the easier it hits… but the easier it is to hit.', statsLegend: 'Weight: hard to push, pushes hard · Power: shot strength · ⭕ Size: hits more easily, but easier to hit',
     t1: 'Tap one of your tokens to pick it.', t2: 'Drag backwards to aim. The further you pull, the harder the shot. Watch the path!',
@@ -179,19 +179,24 @@ const rgImg = name => {
 function startRing(teams, opts = {}) {
   closeRing();
   const on = opts.online || null;
-  Object.assign(RNG, { dispR: null, me: on ? on.me : 0, online: on, st: on ? RG.clone(on.state) : RG.create(teams, opts.map), phase: 'aim', sel: null, aim: null, pow: false, drag: null, prev: null, foe: null, foeOk: false, locked: false, play: null, parts: [], trails: {}, spin: {}, shake: 0,
+  Object.assign(RNG, { dispR: null, me: on ? on.me : 0, online: on, st: on ? RG.clone(on.state) : RG.create(teams, opts.map), phase: 'aim', sel: null, aim: null, pow: false, drag: null, prev: null, foe: null, foeOk: false, locked: false, play: null, parts: [], trails: {}, spin: {}, shake: 0, koSeen: null, selSeen: null,
     ai: opts.ai || 'normal', names: opts.names || [rt('you'), rt('bot')], onEnd: opts.onEnd || null, tuto: opts.tuto ? { step: 0, must: !!opts.must, onDone: opts.onDone || null } : null, last: 0 });
   teams.flat().forEach(j => rgImg(j.name));
   const o = document.createElement('div');
   o.className = 'rg'; o.id = 'rg';
+  // Barre du haut : ton équipe à gauche, le chrono au milieu, la sienne à droite (touche un jeton = sa fiche).
+  // Puis l'arène, puis les deux gros boutons (pouvoir, valider). Aucun texte d'aide : le tuto s'en charge.
   o.innerHTML = `
     <div class="rg-top">
       <button class="rg-x" data-quit aria-label="${t('close')}">✕</button>
-      <div class="rg-score"><span class="me" id="rg-n0"></span><b id="rg-turn"></b><span class="foe" id="rg-n1"></span></div>
-      <div class="rg-timer" id="rg-timer"><svg viewBox="0 0 36 36"><circle cx="18" cy="18" r="15.5"/><circle class="p" cx="18" cy="18" r="15.5" pathLength="100"/></svg><b></b></div>
+      <div class="rg-plate me"><span class="rg-pn">${esc(RNG.names[ME()])}</span><div class="rg-team me" id="rg-t0"></div></div>
+      <div class="rg-mid">
+        <div class="rg-timer" id="rg-timer"><svg viewBox="0 0 36 36"><circle cx="18" cy="18" r="15.5"/><circle class="p" cx="18" cy="18" r="15.5" pathLength="100"/></svg><b></b></div>
+        <b class="rg-turn" id="rg-turn"></b>
+      </div>
+      <div class="rg-plate foe"><span class="rg-pn">${esc(RNG.names[FOE()])}<i class="rg-ok" id="rg-ok" aria-label="${rt('foeOk')}">✓</i></span><div class="rg-team foe" id="rg-t1"></div></div>
     </div>
-    <div class="rg-names"><span>${esc(RNG.names[ME()])}</span><span class="rg-ok" id="rg-ok">${rt('foeOk')}</span><span>${esc(RNG.names[FOE()])}</span></div>
-    <div class="rg-stage" id="rg-stage"><canvas id="rg-cv"></canvas><div class="rg-banner" id="rg-banner"></div><div class="rg-team foe" id="rg-t1"></div><div class="rg-team me" id="rg-t0"></div></div>
+    <div class="rg-stage" id="rg-stage"><canvas id="rg-cv"></canvas><div class="rg-banner" id="rg-banner"></div></div>
     <p class="rg-hint" id="rg-hint"></p>
     <div class="rg-bot">
       <button class="rg-pw" id="rg-pw" disabled></button>
@@ -199,7 +204,7 @@ function startRing(teams, opts = {}) {
     </div>`;
   document.body.appendChild(o);
   RNG.el = o; RNG.cv = o.querySelector('#rg-cv'); RNG.ctx = RNG.cv.getContext('2d');
-  document.documentElement.classList.add('lock');
+  document.documentElement.classList.add('lock', 'ring-on');
   requestAnimationFrame(() => o.classList.add('on'));
   rgResize(); addEventListener('resize', rgResize);
   const stage = o.querySelector('#rg-stage');
@@ -225,7 +230,7 @@ function closeRing() {
   cancelAnimationFrame(RNG.raf); clearTimeout(RNG.foeT); clearTimeout(RNG.okT); RFX.reset();
   removeEventListener('resize', rgResize); removeEventListener('pointermove', rgMove); removeEventListener('pointerup', rgUp); removeEventListener('pointercancel', rgUp);
   document.querySelectorAll('.rg, .rg-res').forEach(x => { x.classList.remove('on'); setTimeout(() => x.remove(), 250); });
-  document.documentElement.classList.remove('lock');
+  document.documentElement.classList.remove('lock', 'ring-on');
   RNG.st = null; RNG.el = null; RNG.online = null; RNG.me = 0;
 }
 // Le ring prend toute la place disponible (carré). Rendu en deux couches « pixel art » basse résolution (décor et effets,
@@ -292,7 +297,6 @@ function rgTurnStart() {
 }
 function rgHud() {
   const st = RNG.st, o = RNG.el; if (!o) return;
-  [0, 1].forEach(s => { o.querySelector('#rg-n' + (s === ME() ? 0 : 1)).innerHTML = st.bodies.filter(b => b.side === s).map(b => `<i class="${b.alive ? '' : 'off'}"></i>`).join(''); });
   rgPanels();
   o.querySelector('#rg-turn').textContent = st.sudden ? rt('sudden') : st.map ? '' : rt('turn', { n: Math.min(st.turn, RCFG.TURNS), m: RCFG.TURNS });
   const b = st.bodies.find(x => x.id === RNG.sel), pwB = o.querySelector('#rg-pw'), go = o.querySelector('#rg-go');
@@ -301,13 +305,16 @@ function rgHud() {
     pwB.disabled = !rd || RNG.locked || RNG.phase !== 'aim';
     pwB.className = 'rg-pw' + (RNG.pow ? ' on' : '') + (rd ? ' ready' : '');
     pwB.style.setProperty('--c', PW_COL[p.pw]);
-    pwB.innerHTML = `<b>✦ ${esc(p.name)}${rgPips(b)}</b><small>${b.stun ? rt('stunned') : RNG.pow ? rt('on') : rd ? esc(p.desc) : b.spent || b.left === 0 ? rt('used') : rt('inCd', { n: b.cd })}</small>`;
-  } else { pwB.disabled = true; pwB.className = 'rg-pw'; pwB.innerHTML = `<b>✦ ${rt('power')}</b><small>${rt('pick')}</small>`; }
+    // le pouvoir du jeton choisi : son nom et ses charges ; s'il n'est pas prêt, dans combien de tours
+    pwB.innerHTML = `<b>✦ ${esc(p.name)}${rgPips(b)}</b>${b.stun ? `<small>${rt('stunned')}</small>` : !rd ? `<small>${b.spent || b.left === 0 ? rt('used') : rt('inCd', { n: b.cd })}</small>` : ''}`;
+  } else { pwB.disabled = true; pwB.className = 'rg-pw'; pwB.style.removeProperty('--c'); pwB.innerHTML = `<b>✦ ${rt('power')}</b>`; }
   const canGo = RNG.phase === 'aim' && !RNG.locked && rgHasMove();
   go.disabled = RNG.phase !== 'aim' || RNG.locked;
+  const was = go.className;
   go.className = 'rg-go' + (canGo ? ' ready' : '') + (RNG.locked ? ' done' : '');
+  if (was !== go.className && (canGo || RNG.locked) && !reducedFx()) go.animate([{ transform: 'scale(.9)' }, { transform: 'scale(1.06)' }, { transform: 'none' }], { duration: 320, easing: 'cubic-bezier(.2, 1.4, .4, 1)' });
   go.textContent = RNG.locked ? rt('validated') : canGo ? rt('validate') : rt('pass');
-  o.querySelector('#rg-hint').textContent = RNG.phase !== 'aim' ? '' : RNG.locked ? rt('hWait') : !b ? rt('hSel') : !RNG.aim ? rt('hAim') : rt('hVal');
+  o.querySelector('#rg-hint').textContent = '';
 }
 
 // ---------- Les deux équipes dans les coins (la sienne en haut à droite, la tienne en bas à gauche) : touche pour la fiche
@@ -317,12 +324,23 @@ function rgPanels() {
     const box = RNG.el.querySelector('#rg-t' + (side === ME() ? 0 : 1));
     box.innerHTML = st.bodies.filter(b => b.side === side).map(b => {
       const p = powerText(b.name), rd = RG.ready(b);
-      return `<button class="rg-tc${b.alive ? '' : b.held ? ' held' : ' ko'}${b.id === RNG.sel ? ' sel' : ''}${RNG.pows?.has(b.id) ? ' on' : ''}" data-id="${b.id}" style="--c:${PW_COL[p.pw]}" aria-label="${esc(jn(b.name))}">
+      // pastille : prêt (✦ ou charges), dans N tours, utilisé, paralysé, avalé, éjecté
+      const tag = b.held ? b.held.left : !b.alive ? '✕' : b.stun ? '!' : rd ? (b.left != null ? rgPips(b) : '✦') : b.spent || b.left === 0 ? '·' : b.cd;
+      return `<button class="rg-tc${b.alive ? '' : b.held ? ' held' : ' ko'}${b.id === RNG.sel ? ' sel' : ''}${RNG.pows?.has(b.id) ? ' on' : ''}${rd && b.alive ? ' rd' : ''}" data-id="${b.id}" style="--c:${PW_COL[p.pw]}" aria-label="${esc(jn(b.name))}">
         <img class="px${vCls(b.variant)}" src="${texOf(jetonOf(b.name))}" alt="">
-        <span class="rg-tcp">${b.held ? b.held.left : !b.alive ? '✕' : b.stun ? '!' : rd ? (b.left != null ? rgPips(b) : '✦') : b.spent || b.left === 0 ? '·' : b.cd}</span>
+        <span class="rg-tcp">${tag}</span>
       </button>`;
     }).join('');
   });
+  // petits rebonds : le jeton choisi saute, un jeton éjecté tremble puis s'éteint
+  if (reducedFx()) return;
+  const ko = new Set(st.bodies.filter(b => !b.alive).map(b => b.id)), seen = RNG.koSeen || new Set();
+  RNG.el.querySelectorAll('.rg-tc').forEach(el => {
+    const id = +el.dataset.id;
+    if (ko.has(id) && !seen.has(id)) el.animate([{ transform: 'translateX(-5px) rotate(-8deg)' }, { transform: 'translateX(5px) rotate(8deg)' }, { transform: 'translateX(-3px) rotate(-4deg)' }, { transform: 'none' }], { duration: 420, easing: 'ease-out' });
+    if (id === RNG.sel && RNG.selSeen !== id) el.animate([{ transform: 'translateY(0) scale(1)' }, { transform: 'translateY(-10px) scale(1.12)' }, { transform: 'translateY(0) scale(.96)' }, { transform: 'none' }], { duration: 380, easing: 'ease-out' });
+  });
+  RNG.koSeen = ko; RNG.selSeen = RNG.sel;
 }
 // Stats physiques avec leur explication (fiche du match, fiches du site, éditeur d'équipe)
 function ringStatsHTML(name, lvl = 1, variant = '', compact = false) {
@@ -859,20 +877,11 @@ function rgTeamMark(c, b, x, y, rr, t, live) {
   const S = sideCol(b), px = RNG.view.px;
   // ombre portée (ellipse sombre)
   c.fillStyle = 'rgba(0,0,0,.45)'; c.beginPath(); c.ellipse(x + rr * .12, y + rr * .32, rr * 1.02, rr * .72, 0, 0, 7); c.fill();
-  // halo de camp
-  const g = c.createRadialGradient(x, y, rr * .7, x, y, rr * 1.45); g.addColorStop(0, `rgba(${S.rgb},.35)`); g.addColorStop(1, `rgba(${S.rgb},0)`);
-  c.fillStyle = g; c.beginPath(); c.arc(x, y, rr * 1.45, 0, 7); c.fill();
-  // anneau en 8 segments qui tourne (sens opposé pour l'adversaire)
-  const rot = (b.side ? -1 : 1) * t * .6, seg = 6.283 / 8;
-  c.lineWidth = px * 1.5; c.strokeStyle = S.md;
-  for (let k = 0; k < 8; k++) { c.beginPath(); c.arc(x, y, rr + px * 2.5, rot + k * seg, rot + k * seg + seg * .62); c.stroke(); }
-  // pouvoir activé pendant la visée : anneau de la couleur du pouvoir qui pulse
-  if (live && RNG.pows?.has(b.id) && RNG.phase === 'aim') {
-    const pc = PW_COL[b.pw]; c.strokeStyle = pc; c.lineWidth = px * 1.5; c.globalAlpha = .6 + .4 * Math.sin(t * 8);
-    c.beginPath(); c.arc(x, y, rr + px * 5, 0, 7); c.stroke(); c.globalAlpha = 1;
-  }
+  // un seul anneau fin et fixe : violet = toi, orange = lui ; à la couleur du pouvoir s'il est activé ce tour
+  const on = live && RNG.pows?.has(b.id) && RNG.phase === 'aim';
+  c.lineWidth = px * (on ? 2.5 : 1.5); c.strokeStyle = on ? PW_COL[b.pw] : S.md;
+  c.beginPath(); c.arc(x, y, rr + px * 2, 0, 7); c.stroke();
 }
-
 function rgDraw(dt) {
   const M = RNG.ctx, V = RNG.view, R = (RNG.dispR ?? RG.ringR(RNG.st)) * V.s, R0 = rgR0() * V.s, [ox, oy] = w2s(0, 0), t = performance.now() / 1000;
   const lo = RNG.lo.getContext('2d'), hi = RNG.hi.getContext('2d');
@@ -918,15 +927,8 @@ function rgDraw(dt) {
   // repères de camp, auras des pouvoirs et des variantes
   for (const b of list) {
     const [x, y] = w2s(b.x, b.y), rr = b.r * V.s;
-    if (b.variant && !reducedFx()) {
-      const col = b.variant === 'gold' ? '253,230,138' : b.variant === 'celeste' ? '165,243,252' : '124,58,237';
-      const ag = c.createRadialGradient(x, y, rr * .9, x, y, rr * 1.9); ag.addColorStop(0, `rgba(${col},.55)`); ag.addColorStop(1, `rgba(${col},0)`);
-      c.fillStyle = ag; c.beginPath(); c.arc(x, y, rr * 1.9, 0, 7); c.fill();
-      if (b.variant === 'celeste') for (let k = 0; k < 6; k++) { const a = t * 1.5 + k * 1.047; c.fillStyle = '#e0f2fe'; c.fillRect(x + Math.cos(a) * rr * 1.5 - V.px, y + Math.sin(a) * rr * 1.5 - V.px, V.px * 2, V.px * 2); }
-      if (b.variant === 'ombre') for (let k = 0; k < 4; k++) { const a = -t * 1.2 + k * 1.57; c.fillStyle = 'rgba(46,16,101,.85)'; c.fillRect(x + Math.cos(a) * rr * 1.35 - V.px * 1.5, y + Math.sin(a) * rr * 1.35 - V.px * 1.5, V.px * 3, V.px * 3); }
-    }
     rgTeamMark(c, b, x, y, rr, t, !P);
-    RFX.aura(c, b, x, y, rr, t);
+    if (P) RFX.aura(c, b, x, y, rr, t); // aura du pouvoir : seulement pendant le tir (à la visée, l anneau suffit)
   }
   blit(lo);
 
@@ -947,10 +949,8 @@ function rgDraw(dt) {
   const sel = !P && RNG.st.bodies.find(b => b.id === RNG.sel && b.alive);
   if (sel && RNG.phase === 'aim') {
     const [sx, sy] = w2s(sel.x, sel.y), px = V.px;
-    // jeton choisi : 4 coins de visée qui respirent
-    const o = sel.r * V.s + px * 5 + Math.sin(t * 6) * px, L = px * 4;
-    c.fillStyle = '#fff';
-    for (const [dx, dy] of [[-1, -1], [1, -1], [1, 1], [-1, 1]]) { c.fillRect(sx + dx * o - (dx > 0 ? L : 0), sy + dy * o - (dy > 0 ? px : 0), L, px); c.fillRect(sx + dx * o - (dx > 0 ? px : 0), sy + dy * o - (dy > 0 ? L : 0), px, L); }
+    // jeton choisi : un anneau blanc fixe, un peu plus large que celui de son camp
+    c.strokeStyle = '#fff'; c.lineWidth = px * 2; c.beginPath(); c.arc(sx, sy, sel.r * V.s + px * 4, 0, 7); c.stroke();
     if (RNG.prev && RNG.aim) {
       const col = RNG.aim.f < .5 ? '#a78bfa' : RNG.aim.f < .8 ? '#fb923c' : '#f43f5e';
       // pouvoirs qui ne font pas rouler le jeton : on montre la FORME de l'effet au lieu de la flèche
@@ -1098,15 +1098,6 @@ function rgToken(c, b, t, fall) {
     const live = RNG.st?.bodies.find(z => z.id === b.id), held = live?.full != null ? RNG.st.bodies.find(z => z.id === live.full) : null;
     if (held) { const hi = rgImg(held.name), br = Math.max(9, rr * .42), bx = x - rr * .7, by = y - rr * .9; c.save(); c.fillStyle = 'rgba(11,9,20,.85)'; c.strokeStyle = '#9fb6ff'; c.lineWidth = 2; c.beginPath(); c.arc(bx, by, br, 0, 7); c.fill(); c.stroke(); if (hi.complete && hi.naturalWidth) { c.imageSmoothingEnabled = false; c.drawImage(hi, bx - br * .8, by - br * .8, br * 1.6, br * 1.6); } c.restore(); }
   }
-  // pouvoir prêt (pendant la visée) : petite gemme pixel
-  if (fall === false && !b.tmp && RNG.phase === 'aim') {
-    const live = RNG.st?.bodies.find(z => z.id === b.id);
-    if (live && RG.ready(live)) {
-      const gx = Math.round(x + rr * .74), gy = Math.round(y - rr * .74), gr = Math.max(4, Math.round(rr * .2));
-      c.fillStyle = '#0b0914'; c.beginPath(); c.moveTo(gx, gy - gr - 2); c.lineTo(gx + gr + 2, gy); c.lineTo(gx, gy + gr + 2); c.lineTo(gx - gr - 2, gy); c.fill();
-      c.fillStyle = PW_COL[b.pw]; c.beginPath(); c.moveTo(gx, gy - gr); c.lineTo(gx + gr, gy); c.lineTo(gx, gy + gr); c.lineTo(gx - gr, gy); c.fill();
-    }
-  }
 }
 
 // ---------- Fin du match
@@ -1119,7 +1110,7 @@ function rgResult(e) {
   box.className = 'rg-res ' + (draw ? 'draw' : me ? 'win' : 'lose');
   box.innerHTML = `<div class="rg-rbox">
     <h2>${draw ? rt('draw') : me ? rt('win') : rt('lose')}</h2>
-    <small class="muted">${rtL().why[e?.why] || ''}</small>
+    <small class="muted">${rtL().why[e?.why === 'out' && !me && !draw ? 'outMe' : e?.why] || ''}</small>
     <div class="rg-rleft"><span class="me">${RG.alive(st, ME()).map(b => `<img class="px${vCls(b.variant)}" src="${texOf(jetonOf(b.name))}" alt="">`).join('') || '—'}</span><b>vs</b><span class="foe">${RG.alive(st, FOE()).map(b => `<img class="px${vCls(b.variant)}" src="${texOf(jetonOf(b.name))}" alt="">`).join('') || '—'}</span></div>
     <small class="muted">${rt('turns', { n: st.map ? st.turn - 1 : Math.min(st.turn, RCFG.TURNS + 3) })}</small>
     ${dElo == null ? '' : `<p class="rg-elo ${dElo >= 0 ? 'up' : 'down'}"><b>${dElo >= 0 ? '+' : ''}${dElo} Elo</b><small>${fmt(elo.after[ME()])}</small></p>`}

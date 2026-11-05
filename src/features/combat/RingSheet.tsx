@@ -1,10 +1,13 @@
-import { useSyncExternalStore, type CSSProperties } from 'react';
-import { glowVars, jetonOf, texOf, vImg } from '@/data/jetons';
-import { RCFG } from '@/engines/ring-config.js';
+import { useRef, useSyncExternalStore, type CSSProperties } from 'react';
+import { glowVars, jetonOf, texOf, vImg, vOdds, type Variant } from '@/data/jetons';
 import { host, sfx } from '@/engines/env';
-import { powerInfo } from '@/data/kit';
 import { useJn } from '@/lib/names';
-import { useSettings } from '@/lib/settings';
+import { reducedFx } from '@/lib/settings';
+import { useT } from '@/i18n/useT';
+import { PixelBg } from '@/ui/PixelBg';
+import { TokenId, TokenStats } from '@/ui/TokenCards';
+import { useSwingAll } from '@/ui/useSwing';
+import js from '../inventory/JetonSheet.module.css';
 import { Modal } from '@/ui/Modal';
 import { JetonModal } from '../inventory/JetonModal';
 import { PowerDemo } from './PowerDemo';
@@ -59,12 +62,8 @@ export function RingSheetHost() {
   return <Compare a={sh.a} b={sh.b} mine={sh.mine ?? [sh.a]} onClose={close} onPick={(a) => set({ ...sh, a })} />;
 }
 
-const ROWS = [
-  ['power', '/img/stats/puissance.png', (n: number) => String(Math.round(n))],
-  ['mass', null, (n: number) => n.toFixed(2)],
-  ['r', '/img/stats/taille.png', (n: number) => String(Math.round(n))],
-] as const;
-
+// Comparaison : la même DA que la fiche d'un jeton (inventaire) — fond pixel, boîtes transparentes qui se balancent,
+// stats en barres à la couleur du jeton, vidéo du pouvoir — mais en deux moitiés : le tien à gauche, le sien à droite.
 function Compare({
   a,
   b,
@@ -78,33 +77,54 @@ function Compare({
   onClose: () => void;
   onPick: (a: RingTok) => void;
 }) {
+  const t = useT();
   const jn = useJn();
-  const lang = useSettings((x) => x.lang);
-  const M = RCFG.STAT_MAX as Record<string, number>;
-  const side = (x: RingTok, who: 'me' | 'foe') => {
+  const root = useRef<HTMLDivElement>(null);
+  useSwingAll(root, `.${js.box}`, 0.25, a.id);
+  const half = (x: RingTok, who: 'me' | 'foe') => {
     const j = jetonOf(x.name);
-    const k = powerInfo(x.name, lang);
     return (
-      <div className={`${s.side} ${s[who]}`} style={glowVars(j, x.variant) as CSSProperties}>
-        <span className={s.coin}>
-          <img className={vImg(x.variant)} src={texOf(j)} alt="" />
-        </span>
-        <b className={s.name}>{jn(x.name)}</b>
-        {x.state ? <small className={s.state}>{x.state}</small> : null}
-        <div className={s.video}>
-          <PowerDemo name={x.name} />
+      <div
+        className={`${s.col} ${s[who]}`}
+        style={{ ...glowVars(j, x.variant), '--gc': 'rgb(var(--g))', '--ga': 1 } as CSSProperties}
+      >
+        <PixelBg className={js.pxbg} odds={vOdds(j.odds, x.variant as Variant)} glow={j.glow} still={reducedFx()} />
+        <div className={s.coinWrap}>
+          <i className={js.rays} aria-hidden />
+          <i className={js.aura} aria-hidden />
+          <img className={`${vImg(x.variant)} ${s.coin}`} src={texOf(j)} alt="" />
         </div>
-        {k.pw !== 'none' ? (
-          <p className={s.pw} style={{ '--pc': k.col } as CSSProperties}>
-            <b>{k.name}</b> {k.desc}
-          </p>
-        ) : null}
+        <div className={s.boxes}>
+          <TokenId
+            className={`${js.id} ${js.box}`}
+            serie="Takoras"
+            name={jn(x.name)}
+            odds={vOdds(j.odds, x.variant as Variant)}
+          >
+            {x.state ? (
+              <ul className={js.facts}>
+                <li>{x.state}</li>
+              </ul>
+            ) : null}
+            <div className={js.demo}>
+              <PowerDemo name={x.name} />
+            </div>
+          </TokenId>
+          <div className={js.power}>
+            <TokenStats className={`${js.rs} ${js.box}`} name={x.name} odds={j.odds} variant={x.variant} lvl={x.lvl} />
+          </div>
+        </div>
       </div>
     );
   };
   return (
-    <Modal open onClose={onClose} xl>
-      <div className={s.cmp}>
+    <Modal open onClose={onClose} wide noX bare>
+      <div ref={root} className={`${js.sheet} ${s.cmp}`} style={{ '--u': 1 } as CSSProperties} key={a.id}>
+        <button type="button" className={js.x} onClick={onClose} aria-label={t('ui.close')}>
+          <svg viewBox="0 0 24 24" width="20" height="20" aria-hidden>
+            <path d="M6 6l12 12M18 6 6 18" stroke="currentColor" strokeWidth="2.4" strokeLinecap="round" />
+          </svg>
+        </button>
         {mine.length > 1 ? (
           <div className={s.pick} role="group">
             {mine.map((m) => (
@@ -124,39 +144,12 @@ function Compare({
             ))}
           </div>
         ) : null}
-        <div className={s.grid} key={a.id}>
-          {side(a, 'me')}
-          <div className={s.stats}>
-            <span className={s.vs}>VS</span>
-            {ROWS.map(([k, ico, f], i) => {
-              const x = a.base[k],
-                y = b.base[k],
-                max = M[k] ?? 1;
-              const win = x > y ? 'me' : x < y ? 'foe' : '';
-              return (
-                <div key={k} className={s.row} style={{ '--k': i } as CSSProperties}>
-                  <b className={`${s.val} ${win === 'me' ? s.win : ''}`}>{f(x)}</b>
-                  <span className={`${s.bar} ${s.barMe}`}>
-                    <i style={{ width: `${Math.min(100, (x / max) * 100)}%` }} />
-                  </span>
-                  <span className={s.ico} aria-hidden>
-                    {ico ? (
-                      <img className="px" src={ico} alt="" />
-                    ) : (
-                      <svg viewBox="0 0 16 16" width="22" height="22" fill="currentColor">
-                        <path d="M6 2h4v2h2l2 10H2L4 4h2z" shape-rendering="crispEdges" />
-                      </svg>
-                    )}
-                  </span>
-                  <span className={`${s.bar} ${s.barFoe}`}>
-                    <i style={{ width: `${Math.min(100, (y / max) * 100)}%` }} />
-                  </span>
-                  <b className={`${s.val} ${win === 'foe' ? s.win : ''}`}>{f(y)}</b>
-                </div>
-              );
-            })}
-          </div>
-          {side(b, 'foe')}
+        <div className={s.halves}>
+          {half(a, 'me')}
+          <b className={s.vs} aria-hidden>
+            VS
+          </b>
+          {half(b, 'foe')}
         </div>
       </div>
     </Modal>
