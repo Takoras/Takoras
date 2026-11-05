@@ -35,7 +35,7 @@ export function RankRoad({ elo }: { elo: number }) {
   const emblem = useRef<HTMLDivElement>(null);
   const tm = useRef(0);
   // tout le panneau se balance un peu au survol ; le badge aussi, à chaque rang affiché
-  useSwing(panel, 0.08);
+  useSwing(panel, 0.03);
   useSwingAll(stage, `.${s.in} .${s.emblem}`, 0.3, view);
   useEffect(() => () => clearTimeout(tm.current), []);
 
