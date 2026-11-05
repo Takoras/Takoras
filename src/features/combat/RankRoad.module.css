@@ -1,5 +1,5 @@
 /* Panneau des rangs (bas du combat) : fond pixel des fiches jeton à la couleur du rang, un peu penché et qui se
-   balance au survol ; badge en très grand (doodle), nom en grosses lettres qui ondulent, barre en cases pixel. */
+   balance au survol ; badge en très grand (doodle), nom en grosses lettres qui ondulent, barre d'un seul tenant. */
 .panel {
   position: relative;
   isolation: isolate;
@@ -32,30 +32,49 @@
   text-transform: uppercase;
 }
 
-/* badge + nom */
-.hero {
-  position: relative;
+/* le rang qui part et celui qui arrive occupent la même case */
+.stage {
+  display: grid;
+  width: 100%;
+}
+.slide {
+  grid-area: 1 / 1;
   display: grid;
   justify-items: center;
+}
+.in {
   animation: heroIn 0.5s var(--ease-spring);
 }
-/* changement de rang : il arrive de côté, en vitesse (penché par l'élan), dépasse un peu et rebondit en place */
-.moving {
-  animation: slideIn 0.6s cubic-bezier(0.2, 0.9, 0.3, 1);
+/* changement de rang, façon cartoon : l'ancien file vite de son côté (étiré par la vitesse), le nouveau arrive
+   juste derrière, s'écrase en freinant, dépasse et rebondit en place ; la barre et ses badges suivent d'un souffle */
+.arrive,
+.arrive .track {
+  animation: arrive var(--ms) 90ms linear backwards;
 }
-.speed {
-  position: absolute;
-  inset: 10% -40%;
-  z-index: -1;
-  background: repeating-linear-gradient(
-    180deg,
-    transparent 0 14px,
-    color-mix(in srgb, var(--rc) 70%, #fff) 14px 17px,
-    transparent 17px 38px
-  );
-  opacity: 0;
-  animation: speed 0.45s ease-out;
+.arrive .track {
+  animation-delay: 140ms;
+}
+/* pendant l'arrivée, le nom, la barre et ses badges restent avec le rang (pas d'apparition à part) */
+.arrive .mark,
+.arrive .fill {
+  animation: none;
+}
+.arrive .name span {
+  animation: wave 2.6s calc(var(--l) * -0.14s) ease-in-out infinite;
+}
+.out,
+.out .track {
   pointer-events: none;
+  animation: leave 0.3s cubic-bezier(0.55, 0, 1, 0.45) forwards;
+}
+.out .track {
+  animation-delay: 30ms;
+}
+
+/* badge + nom */
+.hero {
+  display: grid;
+  justify-items: center;
 }
 .emblem {
   transform-origin: 50% 0;
@@ -95,88 +114,69 @@
 .track {
   position: relative;
   width: min(640px, 88%);
-  height: 150px;
+  height: 120px;
   margin-top: var(--s-4);
   rotate: -2deg;
 }
-.cells {
+.bar {
   position: absolute;
   left: 0;
   right: 0;
-  bottom: 34px;
-  display: grid;
-  grid-template-columns: repeat(var(--n), 1fr);
-  gap: 3px;
+  top: 48px;
   height: 24px;
-  padding: 3px;
-  border: 3px solid #0d0d12;
-  border-radius: 6px;
-  background: #0d0d12;
-}
-.cells i {
+  overflow: hidden;
+  border: 4px solid #0d0d12;
+  border-radius: 7px;
   background: #24242f;
 }
-/* cases allumées une à une, à la couleur du rang (2 tons pixel) */
-.cells .cellOn {
+.fill {
+  position: absolute;
+  inset: 0 auto 0 0;
+  width: calc(var(--p) * 100%);
   background: linear-gradient(180deg, color-mix(in srgb, var(--rc) 50%, #fff) 0 34%, var(--rc) 34%);
-  animation: cellIn 0.22s calc(0.3s + var(--c) * 0.035s) steps(2, jump-none) backwards;
+  animation: grow 0.9s 0.2s cubic-bezier(0.22, 1, 0.36, 1) backwards;
 }
-/* la prochaine case clignote */
-.cells .cellNow {
-  animation: blink 0.9s steps(2, jump-none) infinite;
-}
+/* chaque division : son badge posé sur la barre, son Elo dessous */
 .mark {
   position: absolute;
   left: calc(var(--x) * 100%);
-  bottom: 0;
+  top: 0;
   display: grid;
   justify-items: center;
+  width: 110px;
   translate: -50% 0;
   animation: markIn 0.4s calc(0.25s + var(--k) * 0.09s) cubic-bezier(0.2, 1.6, 0.4, 1) backwards;
 }
-/* petit badge planté sur un poteau au-dessus du cran */
-.pin {
-  position: relative;
+.pb {
   display: grid;
-  justify-items: center;
-  margin-bottom: 64px;
+  place-items: center;
+  height: 88px;
+  margin-top: 16px;
 }
-.pin::after {
-  content: '';
+.goal .pb {
+  margin-top: 0;
+  height: 104px;
+}
+/* division pas encore atteinte : badge en silhouette */
+.mark:not(.on) .pb {
+  filter: brightness(0.15) saturate(0);
+}
+.now .pb > * {
+  animation: hop 1.6s ease-in-out infinite;
+}
+.goalName {
   position: absolute;
-  top: 100%;
-  width: 4px;
-  height: 44px;
-  background: #0d0d12;
-}
-.pin small {
-  margin-top: 2px;
+  top: -14px;
   font-size: var(--fs-xs);
   font-weight: 900;
   text-transform: uppercase;
+  white-space: nowrap;
   color: #fff;
   -webkit-text-stroke: 4px #0d0d12;
   paint-order: stroke fill;
 }
-.goal .pin {
-  margin-bottom: 52px;
-}
-.goal .pin::after {
-  height: 32px;
-}
-.pb {
-  display: grid;
-}
-/* cran pas encore atteint : badge en silhouette */
-.mark:not(.on) .pb {
-  filter: brightness(0.15) saturate(0);
-}
-.now .pb {
-  animation: hop 1.4s ease-in-out infinite;
-}
 .elo {
-  position: absolute;
-  bottom: 0;
+  white-space: nowrap;
   font-size: var(--fs-sm);
   font-weight: 900;
   color: #fff;
@@ -228,11 +228,11 @@
   }
   .title {
     position: static;
+    display: grid;
+    place-items: center;
     min-height: 38px;
     margin-bottom: var(--s-2);
     padding: 0 44px;
-    display: grid;
-    place-items: center;
     font-size: var(--fs-xs);
     letter-spacing: 0.04em;
     text-align: center;
@@ -261,9 +261,8 @@
   }
   .track {
     width: 76%;
-    height: 130px;
   }
-  .pin small {
+  .goalName {
     font-size: 0.7rem;
   }
 }
@@ -274,33 +273,30 @@
     transform: scale(0.6);
   }
 }
-@keyframes slideIn {
+@keyframes arrive {
   0% {
-    opacity: 0.2;
-    transform: translateX(calc(var(--dir) * 75%)) skewX(calc(var(--dir) * -16deg));
+    transform: translateX(calc(var(--dir) * 110%)) scale(1.18, 0.86);
+    animation-timing-function: cubic-bezier(0.2, 0.7, 0.3, 1);
   }
   55% {
-    opacity: 1;
-    transform: translateX(calc(var(--dir) * -7%)) skewX(calc(var(--dir) * 6deg));
+    transform: translateX(calc(var(--dir) * -7%)) scale(0.9, 1.1);
+    animation-timing-function: ease-in-out;
   }
-  78% {
-    transform: translateX(calc(var(--dir) * 2.5%)) skewX(calc(var(--dir) * -2deg));
+  74% {
+    transform: translateX(calc(var(--dir) * 3%)) scale(1.05, 0.96);
+    animation-timing-function: ease-in-out;
+  }
+  88% {
+    transform: translateX(calc(var(--dir) * -1%)) scale(0.98, 1.02);
+    animation-timing-function: ease-out;
   }
   100% {
     transform: none;
   }
 }
-@keyframes speed {
-  0% {
-    opacity: 0;
-    transform: translateX(calc(var(--dir) * 30%));
-  }
-  30% {
-    opacity: 0.35;
-  }
-  100% {
-    opacity: 0;
-    transform: translateX(calc(var(--dir) * -30%));
+@keyframes leave {
+  to {
+    transform: translateX(calc(var(--dir) * -115%)) scale(1.2, 0.85);
   }
 }
 @keyframes bob {
@@ -337,14 +333,9 @@
     transform: translateY(3px) rotate(2deg);
   }
 }
-@keyframes cellIn {
+@keyframes grow {
   from {
-    background: #fff;
-  }
-}
-@keyframes blink {
-  50% {
-    background: color-mix(in srgb, var(--rc) 55%, #24242f);
+    width: 0;
   }
 }
 @keyframes markIn {
@@ -359,7 +350,7 @@
     transform: translateY(0);
   }
   40% {
-    transform: translateY(-7px);
+    transform: translateY(-6px);
   }
 }
 @keyframes arrowIn {
@@ -369,16 +360,17 @@
   }
 }
 @media (prefers-reduced-motion: reduce) {
-  .hero,
-  .moving,
-  .speed,
+  .in,
+  .arrive,
+  .arrive .track,
+  .out,
+  .out .track,
   .bob,
   .name,
   .name span,
-  .cells .cellOn,
-  .cells .cellNow,
+  .fill,
   .mark,
-  .now .pb,
+  .now .pb > *,
   .arrow {
     animation: none;
   }
@@ -386,8 +378,7 @@
 :global(html.reduce-fx) .bob,
 :global(html.reduce-fx) .name,
 :global(html.reduce-fx) .name span,
-:global(html.reduce-fx) .now .pb,
-:global(html.reduce-fx) .cells .cellNow {
+:global(html.reduce-fx) .now .pb > * {
   animation: none;
 }
 :global(html.no-svgfx) .name {
