@@ -18,7 +18,7 @@ import s from './RankRoad.module.css';
 const TIERS = RCFG.RANKS.map((r) => ({ k: r.k, col: r.col, steps: ROAD.filter((x) => x.k === r.k) }));
 const N = TIERS.length;
 const START = 1000;
-const SLIDE_MS = 620;
+const SLIDE_MS = 900;
 // richesse du fond selon le rang (même échelle que la rareté des jetons)
 const BG_ODDS = [1, 60, 300, 1000, 5000, 10_000, 100_000, 1_000_000];
 
@@ -72,11 +72,12 @@ export function RankRoad({ elo }: { elo: number }) {
         </button>
       ) : null}
 
-      {/* le rang qui part et celui qui arrive glissent ensemble, dans la même case */}
+      {/* le rang qui part et celui qui arrive glissent ensemble, dans la même case ; le rang qui part garde
+          sa clé : c'est le même élément qui s'en va (rien n'est recréé au clic, donc pas de saccade) */}
       <div ref={stage} className={s.stage} style={{ '--ms': `${SLIDE_MS}ms` } as CSSProperties}>
-        {out ? <Slide key={`o-${out.i}`} i={out.i} elo={elo} className={s.out ?? ''} dir={out.dir} /> : null}
+        {out ? <Slide key={`s-${out.i}`} i={out.i} elo={elo} className={s.out ?? ''} dir={out.dir} /> : null}
         <Slide
-          key={`i-${view}`}
+          key={`s-${view}`}
           i={view}
           elo={elo}
           className={`${s.in} ${dir ? s.arrive : ''}`}

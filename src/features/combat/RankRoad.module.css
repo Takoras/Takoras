@@ -41,6 +41,7 @@
   grid-area: 1 / 1;
   display: grid;
   justify-items: center;
+  transform-origin: 50% 85%; /* il s'écrase sur sa base en arrivant */
 }
 .in {
   animation: heroIn 0.5s var(--ease-spring);
@@ -49,10 +50,10 @@
    juste derrière, s'écrase en freinant, dépasse et rebondit en place ; la barre et ses badges suivent d'un souffle */
 .arrive,
 .arrive .track {
-  animation: arrive var(--ms) 90ms linear backwards;
+  animation: arrive var(--ms) linear backwards;
 }
 .arrive .track {
-  animation-delay: 140ms;
+  animation-delay: 60ms;
 }
 /* pendant l'arrivée et le départ, le nom, la barre et ses badges restent avec le rang (pas d'apparition à part :
    le rang qui part est remonté au moment de partir, ses apparitions le cacheraient) */
@@ -72,7 +73,7 @@
   animation: leave 0.3s cubic-bezier(0.55, 0, 1, 0.45) forwards;
 }
 .out .track {
-  animation-delay: 30ms;
+  animation-delay: 20ms;
 }
 
 /* badge + nom */
@@ -277,21 +278,34 @@
     transform: scale(0.6);
   }
 }
+/* arrivée : il fonce en place (étiré), puis « boing » : il tremble comme une gelée, de moins en moins fort */
 @keyframes arrive {
   0% {
-    transform: translateX(calc(var(--dir) * 110%)) scale(1.18, 0.86);
-    animation-timing-function: cubic-bezier(0.2, 0.7, 0.3, 1);
+    transform: translateX(calc(var(--dir) * 110%)) scale(1.2, 0.85);
+    animation-timing-function: cubic-bezier(0.25, 0.8, 0.4, 1);
   }
-  55% {
-    transform: translateX(calc(var(--dir) * -7%)) scale(0.9, 1.1);
+  28% {
+    transform: translateX(calc(var(--dir) * -3%)) scale(0.82, 1.18);
     animation-timing-function: ease-in-out;
   }
-  74% {
-    transform: translateX(calc(var(--dir) * 3%)) scale(1.05, 0.96);
+  42% {
+    transform: translateX(calc(var(--dir) * 1.5%)) scale(1.13, 0.89);
     animation-timing-function: ease-in-out;
   }
-  88% {
-    transform: translateX(calc(var(--dir) * -1%)) scale(0.98, 1.02);
+  56% {
+    transform: scale(0.92, 1.08);
+    animation-timing-function: ease-in-out;
+  }
+  69% {
+    transform: scale(1.05, 0.96);
+    animation-timing-function: ease-in-out;
+  }
+  81% {
+    transform: scale(0.98, 1.02);
+    animation-timing-function: ease-in-out;
+  }
+  91% {
+    transform: scale(1.01, 0.99);
     animation-timing-function: ease-out;
   }
   100% {
