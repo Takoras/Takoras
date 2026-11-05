@@ -132,6 +132,8 @@ const RG = (() => {
       if (b.pw === 'roots') alive(st, side).forEach(a => { a.t.bounce = true; });
       // Gélatine (Mobu) : gonfle et rend tous ses chocs plus élastiques
       if (b.pw === 'jelly') { b.r = b.base.r * k.p.r; b.mass = b.base.mass * k.p.mass; }
+      // Épines (Ronce) : s'enracine (plus lourde ce tour), les chocs avec elle piquent l'ennemi
+      if (b.pw === 'thorns') b.mass = b.base.mass * k.p.mass;
       // Rempart (Rouillé) : ne tire pas, devient un mur fixe qui renvoie plus fort tout ennemi qui le touche
       if (b.pw === 'rampart') { T.anchor = true; T.reflect = k.p.mult; ev.push({ t: 'rampart', id: b.id, at: 0 }); }
       // Miroir (Lumis) : tes jetons ne bougent pas face à l'ennemi et le renvoient ×2
@@ -319,6 +321,9 @@ const RG = (() => {
         // Faille (Oblivion) : la trajectoire se fissure
         if (T.pw === 'rift' && T.shooter && s > C.STOP_SPEED && steps % 5 === 0) { if (!st.rift || st.rift.armed) st.rift = { pts: [], side: b.side, armed: false }; st.rift.pts.push([q(b.x), q(b.y), steps]); if (st.rift.pts.length === 1) ev.push({ t: 'rift', id: b.id, at: tm }); }
         if (T.pw === 'icetrail' && T.shooter && s > C.STOP_SPEED && steps % kit(b.name).p.every === 0) { (st.ice ||= []).push([q(b.x), q(b.y), steps]); if (!st.iceNew) ev.push({ t: 'ice', id: b.id, at: tm }); st.iceNew = true; }
+        // Tapis de mousse (Mousse) : traînée qui colle les ennemis (point = [x, y, image, camp])
+        if (T.pw === 'moss' && T.shooter && s > C.STOP_SPEED && steps % kit(b.name).p.every === 0) { (st.moss ||= []).push([q(b.x), q(b.y), steps, b.side]); if (!st.mossNew) ev.push({ t: 'moss', id: b.id, at: tm }); st.mossNew = true; }
+        if (st.moss && s > C.STOP_SPEED && !b.tmp && !T.stuck) { for (const [mx, my, , ms] of st.moss) if (ms !== b.side && len(b.x - mx, b.y - my) < b.r + 40) { T.fric = Math.max(T.fric, C.MOSS_FRIC); T.stuck = true; ev.push({ t: 'stuck', id: b.id, x: b.x, y: b.y, at: tm }); break; } }
         if (st.ice && s > C.STOP_SPEED && !b.tmp) { for (const [ix, iy] of st.ice) if (len(b.x - ix, b.y - iy) < b.r + 40) { T.fric = Math.min(T.fric, C.ICE_FRIC); break; } }
         b.x += b.vx * dt; b.y += b.vy * dt;
         // frottement
@@ -362,8 +367,16 @@ const RG = (() => {
         Cc.x += nx * ov * iC / (iA + iC); Cc.y += ny * ov * iC / (iA + iC);
         const vrel = (Cc.vx - A.vx) * nx + (Cc.vy - A.vy) * ny;
         if (vrel >= 0) continue;
+        // Épines (Ronce) : le choc avec un ennemi repousse plus fort, et l'ennemi est piqué (pas de tir au tour suivant)
+        const th = A.t.pw === 'thorns' && Cc.side !== A.side ? A : Cc.t.pw === 'thorns' && A.side !== Cc.side ? Cc : null;
         const j = -(1 + C.RESTITUTION) * vrel / (iA + iC) * (A.t.pw === 'jelly' || Cc.t.pw === 'jelly' ? kit((A.t.pw === 'jelly' ? A : Cc).name).p.bounce : 1);
         A.vx -= j * iA * nx; A.vy -= j * iA * ny; Cc.vx += j * iC * nx; Cc.vy += j * iC * ny;
+        if (th) {
+          // seul l'ennemi est renvoyé plus fort (Ronce, enracinée, ne recule pas davantage)
+          const O = th === A ? Cc : A, k = (kit(th.name).p.bounce - 1) * j * (O === Cc ? iC : -iA);
+          O.vx += k * nx; O.vy += k * ny;
+          if (!O.tmp && !O.stunNext) { O.stunNext = true; ev.push({ t: 'thorn', id: th.id, to: O.id, x: q((A.x + Cc.x) / 2), y: q((A.y + Cc.y) / 2), at: tm }); }
+        }
         // Avatar (Takoras) : chaque coup sur un ennemi libère une onde de choc autour du point d'impact
         for (const [X, O] of [[A, Cc], [Cc, A]]) if (X.t.avatar && O.side !== X.side && !O.tmp && (X.t.wave || 0) < 4) {
           X.t.wave = (X.t.wave || 0) + 1; const p = kit(X.name).p, ix = (A.x + Cc.x) / 2, iy = (A.y + Cc.y) / 2;
@@ -518,6 +531,8 @@ const RG = (() => {
     }
     // la patinoire de Givre reste 2 tours puis fond
     if (st.ice) { st.iceLeft = st.iceNew ? 2 : (st.iceLeft || 1) - 1; delete st.iceNew; if (st.iceLeft <= 0) { delete st.ice; delete st.iceLeft; } }
+    // le tapis de mousse reste 2 tours aussi
+    if (st.moss) { st.mossLeft = st.mossNew ? 2 : (st.mossLeft || 1) - 1; delete st.mossNew; if (st.mossLeft <= 0) { delete st.moss; delete st.mossLeft; } }
     if (st.holes) { st.holes.forEach(h => { h.left--; }); st.holes = st.holes.filter(h => h.left > 0); if (!st.holes.length) delete st.holes; }
     // sur une map : le ring rétrécit, ceux qui se retrouvent dehors tombent
     if (st.map) {

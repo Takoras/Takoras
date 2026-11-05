@@ -23,6 +23,8 @@ const RT = {
       jelly: ['Gélatine', 'Gonfle, et tout ce qui le touche rebondit 1,5× plus fort.'],
       pinball: ['Flipper', 'Rebondit sur le bord au lieu de sortir, et repart plus vite (3 rebonds).'],
       rampart: ['Rempart', 'Ne tire pas : devient un mur fixe qui renvoie ×1,6 l’ennemi qui le touche.'],
+      moss: ['Tapis de mousse', 'Laisse une traînée de mousse qui reste 2 tours : les ennemis qui passent dessus collent et s’arrêtent net.'],
+      thorns: ['Épines', 'Se couvre de ronces et s’enracine ce tour : l’ennemi qui le touche est renvoyé ×1,7 et reste piqué (pas de tir au tour suivant).'],
       icetrail: ['Patinoire', 'Laisse une traînée de glace qui reste 2 tours : tout ce qui passe dessus glisse loin.'],
       surf: ['Ressac', 'Ne bouge pas : une grosse vague en cône emporte les ennemis dans la direction visée.'],
       ora: ['Rafale', 'Frappe ×1,6 : l’ennemi touché part loin. Longue recharge.'],
@@ -91,6 +93,8 @@ const RT = {
       jelly: ['Jelly', 'Inflates, and anything that hits it bounces 1.5× harder.'],
       pinball: ['Pinball', 'Bounces off the edge instead of falling, faster each time (3 bounces).'],
       rampart: ['Rampart', 'Doesn’t shoot: becomes a fixed wall that sends enemies back ×1.6.'],
+      moss: ['Moss carpet', 'Leaves a moss trail for 2 turns: enemies crossing it get stuck and stop dead.'],
+      thorns: ['Thorns', 'Covered in brambles and rooted this turn: the enemy it touches is sent back ×1.7 and stays stung (can’t shoot next turn).'],
       icetrail: ['Ice rink', 'Leaves an ice trail for 2 turns: anything crossing it slides far.'],
       surf: ['Backwash', 'Doesn’t move: a big cone-shaped wave sweeps enemies away where you aim.'],
       ora: ['Barrage', 'Hits ×1.6: the enemy flies far. Long cooldown.'],
@@ -151,7 +155,7 @@ const RT = {
 };
 const rtL = () => RT[SETTINGS.lang] || RT.fr;
 const rt = (k, v = {}) => String(rtL()[k] ?? RT.fr[k]).replace(/\{(\w+)\}/g, (_, x) => v[x] ?? '');
-const PW_COL = { nova: '#fb923c', ring: '#f08a3c', beam: '#ff4d6a', devour: '#9fb6ff', grow: '#7dd3fc', bounce: '#f9a8d4', scrap: '#fb923c', slide: '#a5f3fc', eruption: '#f97316', flare: '#fb923c', zerog: '#93c5fd', sun: '#fbbf24', cyclone: '#d9364f', rift: '#3fc7b6', current: '#f0453a', avatar: '#9fb6ff', jelly: '#7dd3fc', pinball: '#f9a8d4', rampart: '#d97706', icetrail: '#a5f3fc', surf: '#38bdf8', ora: '#f43f5e', blink: '#c9a6f2', mirror: '#f7a8d8', shade: '#7c8cf8', starfall: '#f6d39a', grab: '#6366f1', yinyang: '#f0453a', telekinesis: '#f08a3c', stun: '#d9364f', blackhole: '#3fc7b6', freeze: '#a5f3fc', wave: '#38bdf8', curve: '#60a5fa', double: '#f43f5e', ghost: '#c4b5fd',
+const PW_COL = { nova: '#fb923c', ring: '#f08a3c', beam: '#ff4d6a', devour: '#9fb6ff', grow: '#7dd3fc', bounce: '#f9a8d4', scrap: '#fb923c', slide: '#a5f3fc', eruption: '#f97316', flare: '#fb923c', zerog: '#93c5fd', sun: '#fbbf24', cyclone: '#d9364f', rift: '#3fc7b6', current: '#f0453a', avatar: '#9fb6ff', jelly: '#7dd3fc', pinball: '#f9a8d4', rampart: '#d97706', icetrail: '#a5f3fc', moss: '#8fd16a', thorns: '#5fae7e', surf: '#38bdf8', ora: '#f43f5e', blink: '#c9a6f2', mirror: '#f7a8d8', shade: '#7c8cf8', starfall: '#f6d39a', grab: '#6366f1', yinyang: '#f0453a', telekinesis: '#f08a3c', stun: '#d9364f', blackhole: '#3fc7b6', freeze: '#a5f3fc', wave: '#38bdf8', curve: '#60a5fa', double: '#f43f5e', ghost: '#c4b5fd',
   rescue: '#4ade80', shrink: '#818cf8', magnet: '#fde68a', anchor: '#94a3b8', second: '#fb7185', roots: '#e879f9', shield: '#f1f5f9', void: '#a855f7', split: '#ffffff', haste: '#86efac', guard: '#7dd3fc', none: '#888' };
 // charges restantes : petits carrés pleins / vides
 const rgPips = b => { const u = RG.kit(b.name).uses; if (!u) return ''; const l = b.left ?? u; return `<span class="rg-pips">${'<i></i>'.repeat(l)}${'<i class="off"></i>'.repeat(Math.max(0, u - l))}</span>`; };
@@ -221,7 +225,9 @@ function startRing(teams, opts = {}) {
     }
   };
   sfx.whoosh?.();
-  if (RNG.st.map) setTimeout(() => RNG.st && rgBanner(`${rt('map_' + RNG.st.map.id)}`, MAP_THEME[RNG.st.map.id]?.rim || '#c4b5fd', false, 1300), 350);
+  // l'arène se construit : le terrain grandit en rebondissant, puis les jetons tombent un à un à leur place
+  RNG.intro = reducedFx() ? null : performance.now(); RNG.landed = new Set();
+  if (RNG.st.map) setTimeout(() => RNG.st && rgBanner(`${rt('map_' + RNG.st.map.id)}`, MAP_THEME[RNG.st.map.id]?.rim || '#c4b5fd', false, 1300), RNG.intro ? 1500 : 350);
   rgTurnStart();
   RNG.raf = requestAnimationFrame(rgFrame);
 }
@@ -374,7 +380,7 @@ function rgInfo(id) {
 // ---------- Visée au lance-pierre : tape un jeton, puis glisse (depuis le jeton ou n'importe où) vers l'arrière
 function rgPt(e) { const r = RNG.cv.getBoundingClientRect(); return [e.clientX - r.left, e.clientY - r.top]; }
 function rgDown(e) {
-  if (!RNG.st) return;
+  if (!RNG.st || RNG.intro) return;
   e.preventDefault();
   const [px, py] = rgPt(e), [wx, wy] = s2w(px, py);
   const near = b => RG.len(b.x - wx, b.y - wy) < b.r * 1.3 + 15;
@@ -540,7 +546,7 @@ function rgReveal(srv) {
     const bodies = r.ids.map(id => before.bodies.find(b => b.id === id) || { ...before.bodies.find(b => b.id === id - 100), id, tmp: true });
     // ce que l'écran montre pendant l'animation : l'état d'AVANT le tour, mis à jour au fil des événements
     // (sinon les murs s'abîment et la glace apparaît dès qu'on valide)
-    const seen = new Set([...(before.ice || []), ...(before.rift?.pts || [])].map(p => p[0] + ',' + p[1]));
+    const seen = new Set([...(before.ice || []), ...(before.moss || []), ...(before.rift?.pts || [])].map(p => p[0] + ',' + p[1]));
     const view = { walls: before.map ? before.map.walls.map(o => ({ ...o })) : [], seen, rift: before.rift || null, holes: before.holes || null };
     RNG.play = { r, bodies, f: 0, ei: 0, slow: 0, fall: [], view };
     RFX.start(RNG.play);
@@ -620,7 +626,7 @@ function rgFrame(now) {
   RNG.raf = requestAnimationFrame(rgFrame);
   const dt = Math.min(.05, (now - (RNG.last || now)) / 1000); RNG.last = now;
   if (RNG.online) rgOnlineClock();
-  else if (RNG.phase === 'aim' && !RNG.locked && !RNG.tuto && !RNG.info) {
+  else if (RNG.phase === 'aim' && !RNG.locked && !RNG.tuto && !RNG.info && !RNG.intro) {
     RNG.timer -= dt;
     if (RNG.timer <= 0) { RNG.timer = 0; rgLock(true); }
   }
@@ -749,6 +755,15 @@ function rgPersist(c, t) {
     path(ice); c.strokeStyle = 'rgba(224,242,254,.28)'; c.lineWidth = 40 * V.s; c.stroke();
     path(ice); c.strokeStyle = 'rgba(255,255,255,.5)'; c.lineWidth = Math.max(px, 3 * V.s); c.stroke();
     ice.forEach((p, i) => { if (i % 3) return; const [x, y] = w2s(p[0], p[1]), tw = .5 + .5 * Math.sin(t * 4 + i); c.fillStyle = `rgba(255,255,255,${.5 * tw})`; c.fillRect(x + ((i * 7) % 13 - 6) * px, y + ((i * 5) % 11 - 5) * px, px, px); });
+    c.restore();
+  }
+  // Tapis de mousse : une bande verte mousseuse, avec des touffes et quelques brins plus clairs
+  const moss = shown(st.moss || []);
+  if (moss.length > 1) {
+    c.save(); c.lineCap = 'round'; c.lineJoin = 'round';
+    path(moss); c.strokeStyle = 'rgba(58,94,38,.55)'; c.lineWidth = 88 * V.s; c.stroke();
+    path(moss); c.strokeStyle = 'rgba(143,209,106,.35)'; c.lineWidth = 52 * V.s; c.stroke();
+    moss.forEach((p, i) => { const [x, y] = w2s(p[0], p[1]); for (let k = 0; k < 3; k++) { const ox = (((i * 13 + k * 29) % 17) - 8) * px * 1.6, oy = (((i * 7 + k * 31) % 15) - 7) * px * 1.6; c.fillStyle = k ? '#5f9e3f' : '#b8e08a'; c.fillRect(Math.round((x + ox) / px) * px, Math.round((y + oy) / px) * px, px * 2, px * (k ? 2 : 3)); } });
     c.restore();
   }
   // Faille : une fissure turquoise ; armée (elle s'ouvre à la fin du tour), elle pulse
@@ -882,6 +897,9 @@ function rgTeamMark(c, b, x, y, rr, t, live) {
   c.lineWidth = px * (on ? 2.5 : 1.5); c.strokeStyle = on ? PW_COL[b.pw] : S.md;
   c.beginPath(); c.arc(x, y, rr + px * 2, 0, 7); c.stroke();
 }
+// courbes de l'entrée : dépasse puis se pose (terrain), rebondit (jetons qui tombent)
+const rgBackOut = p => { const c1 = 1.9, c3 = c1 + 1; return 1 + c3 * (p - 1) ** 3 + c1 * (p - 1) ** 2; };
+const rgBounceOut = p => { const n = 7.5625, d = 2.75; if (p < 1 / d) return n * p * p; if (p < 2 / d) return n * (p -= 1.5 / d) * p + .75; if (p < 2.5 / d) return n * (p -= 2.25 / d) * p + .9375; return n * (p -= 2.625 / d) * p + .984375; };
 function rgDraw(dt) {
   const M = RNG.ctx, V = RNG.view, R = (RNG.dispR ?? RG.ringR(RNG.st)) * V.s, R0 = rgR0() * V.s, [ox, oy] = w2s(0, 0), t = performance.now() / 1000;
   const lo = RNG.lo.getContext('2d'), hi = RNG.hi.getContext('2d');
@@ -893,7 +911,11 @@ function rgDraw(dt) {
   M.setTransform(V.dpr, 0, 0, V.dpr, 0, 0); M.clearRect(0, 0, V.size, V.size); M.translate(sx0, sy0);
   for (const L of [lo, hi]) { L.setTransform(1 / V.px, 0, 0, 1 / V.px, 0, 0); L.clearRect(0, 0, V.size, V.size); L.translate(sx0, sy0); }
   const zk = rgZoomK(), zx = RNG.zoom?.x ?? 0, zy = RNG.zoom?.y ?? 0;
-  const blit = L => { M.save(); M.setTransform(V.dpr * zk, 0, 0, V.dpr * zk, V.dpr * zx * (1 - zk), V.dpr * zy * (1 - zk)); M.imageSmoothingEnabled = false; M.drawImage(L.canvas, 0, 0, L.canvas.width * V.px, L.canvas.height * V.px); M.restore(); };
+  // entrée de l'arène : le terrain grandit depuis le centre (dépasse un peu, puis se pose)
+  const it = RNG.intro ? (performance.now() - RNG.intro) / 1000 : 9;
+  const ks = it >= .6 ? 1 : rgBackOut(Math.max(0, it / .6)), kc = V.size / 2 * (1 - ks);
+  if (it > .42 && !RNG.landed?.has('ring')) { RNG.landed?.add('ring'); sfx.impact?.(); RNG.shake = Math.max(RNG.shake, 5); }
+  const blit = L => { M.save(); M.setTransform(V.dpr * zk * ks, 0, 0, V.dpr * zk * ks, V.dpr * (zx * (1 - zk) + kc), V.dpr * (zy * (1 - zk) + kc)); M.imageSmoothingEnabled = false; M.drawImage(L.canvas, 0, 0, L.canvas.width * V.px, L.canvas.height * V.px); M.restore(); };
 
   // ----- Couche basse (pixel) : sol, effets au sol, traînées, repères de camp, auras
   let c = lo;
@@ -908,9 +930,21 @@ function rgDraw(dt) {
     const fi = Math.min(P.r.frames.length - 1, Math.floor(P.f)), fr = P.r.frames[fi], nx = P.r.frames[Math.min(P.r.frames.length - 1, fi + 1)], k = P.f - fi;
     list = P.bodies.map((b, i) => { const a = fr[i], z = nx[i] || a; return a ? { ...b, x: a[0] + ((z?.[0] ?? a[0]) - a[0]) * k, y: a[1] + ((z?.[1] ?? a[1]) - a[1]) * k, r: a[2] } : null; }).filter(Boolean);
   } else list = RNG.st.bodies.filter(b => b.alive);
+  // entrée : chaque jeton tombe du haut de l'écran et rebondit à sa place (le tien d'abord, puis le sien)
+  if (it < 9 && !P) {
+    const order = [...RNG.st.bodies].sort((a, b) => (a.side === ME() ? 0 : 1) - (b.side === ME() ? 0 : 1) || a.i - b.i);
+    list = list.map(b => {
+      const p = Math.min(1, Math.max(0, (it - .55 - order.indexOf(b) * .09) / .55));
+      if (p <= 0) return null;
+      if (p > .37 && !RNG.landed.has(b.id)) { RNG.landed.add(b.id); sfx.click?.(); const [x, y] = w2s(b.x, b.y); rgSparks(x, y, 8, sideCol(b).hi, 2); }
+      return { ...b, y: b.y - FL() * 1400 * (1 - rgBounceOut(p)) };
+    }).filter(Boolean);
+    if (it > .55 + order.length * .09 + .6) { RNG.intro = null; rgHud(); }
+  }
   RFX.under(c, list, t, dt);
-  // traînées des jetons rapides (et rotation des jetons qui roulent)
-  for (const b of list) {
+  // traînées des jetons rapides (et rotation des jetons qui roulent) ; rien pendant l'entrée (les jetons tombent)
+  if (it < 9) RNG.trails = {};
+  else for (const b of list) {
     const tr = RNG.trails[b.id] ||= [];
     const lp = tr[tr.length - 1]; if (lp) RNG.spin[b.id] = (RNG.spin[b.id] || 0) + RG.len(b.x - lp[0], b.y - lp[1]) / b.r * (b.side ? -1 : 1);
     tr.push([b.x, b.y]); if (tr.length > 14) tr.shift();
@@ -1249,7 +1283,7 @@ const RSND = (() => {
   return S;
 })();
 RSND.freeze = RSND.slide; RSND.wave = RSND.curve; // sons des nouveaux pouvoirs
-Object.assign(RSND, { nova: RSND.shield, ring: RSND.anchor, beam: RSND.curve, devour: RSND.split, sun: RSND.shield, cyclone: RSND.curve, rift: RSND.blackhole, current: RSND.boing, avatar: RSND.split, jelly: RSND.grow, pinball: RSND.bounce, rampart: RSND.anchor, icetrail: RSND.slide, surf: RSND.curve, ora: RSND.double, blink: RSND.ghost, mirror: RSND.shield, shade: RSND.shrink, starfall: RSND.split, grab: RSND.magnet, yinyang: RSND.split, telekinesis: RSND.curve, stun: RSND.anchor });
+Object.assign(RSND, { nova: RSND.shield, ring: RSND.anchor, beam: RSND.curve, devour: RSND.split, sun: RSND.shield, cyclone: RSND.curve, rift: RSND.blackhole, current: RSND.boing, avatar: RSND.split, jelly: RSND.grow, pinball: RSND.bounce, rampart: RSND.anchor, icetrail: RSND.slide, surf: RSND.curve, ora: RSND.double, blink: RSND.ghost, mirror: RSND.shield, shade: RSND.shrink, starfall: RSND.split, grab: RSND.magnet, yinyang: RSND.split, telekinesis: RSND.curve, stun: RSND.anchor, moss: RSND.roots, thorns: RSND.snap });
 
 // ---------- Effets visuels des pouvoirs
 const RFX = (() => {
@@ -1319,6 +1353,9 @@ const RFX = (() => {
     if (e.t === 'hole') { const [x, y] = w2s(e.x, e.y); RNG.parts.push({ hole: true, x, y, life: 1, size: 40 }); RNG.parts.push({ wave: true, x, y, col: '#3fc7b6', rad: 520 * RNG.view.s, life: 1, inward: true }); rgFlashCol('#021012'); RNG.shake = 16; RSND.blackhole?.(); }
     if (e.t === 'holepull') { const [x, y] = w2s(e.x, e.y); RNG.parts.push({ wave: true, x, y, col: '#3fc7b6', rad: 520 * RNG.view.s, life: .8, inward: true }); }
     if (e.t === 'stun') { const p = at2(e.to); if (p) { RNG.parts.push({ text: rt('stunned'), x: p[0], y: p[1] - 24, col: '#ffd6dc', size: 16, life: 1 }); burst(p[0], p[1], 20, '#d9364f', 3.5); RNG.parts.push({ ring: true, x: p[0], y: p[1], col: '#d9364f', size: 1.4, life: 1 }); } }
+    if (e.t === 'moss') { const p = at2(e.id); if (p) { burst(p[0], p[1], 18, '#b8e08a', 2.5); burst(p[0], p[1], 10, '#5f9e3f', 2); } }
+    if (e.t === 'stuck') { const [x, y] = w2s(e.x, e.y); burst(x, y, 16, '#8fd16a', 2.2, { vy: -.6 }); RNG.parts.push({ ring: true, x, y, col: '#8fd16a', size: 1.2, life: 1 }); RSND.roots?.(); }
+    if (e.t === 'thorn') { const [x, y] = w2s(e.x, e.y), p = at2(e.to); for (let k = 0; k < 12; k++) { const a = k / 12 * 6.283; part({ x, y, vx: Math.cos(a) * 5, vy: Math.sin(a) * 5, col: k % 2 ? '#5fae7e' : '#d8f0c8', size: k % 2 ? 4 : 2.5 }); } burst(x, y, 14, '#2f5a3e', 3.5); if (p) RNG.parts.push({ ring: true, x: p[0], y: p[1], col: '#5fae7e', size: 1.4, life: 1 }); rgPunch(x, y, .05); RNG.shake = Math.max(RNG.shake, 9); RSND.snap?.(); }
     if (e.t === 'blink') { const [fx, fy] = w2s(e.fx, e.fy), [x, y] = w2s(e.x, e.y); burst(fx, fy, 24, '#c9a6f2', 3.5); burst(x, y, 30, '#ffffff', 4); RNG.parts.push({ ring: true, x, y, col: '#c9a6f2', size: 1.6, life: 1 }); RSND.ghost?.(); }
     if (e.t === 'sun') { const p = at2(e.id); if (p) { const R = RG.kit(body(e.id).name).p.radius * RNG.view.s; RNG.parts.push({ wave: true, x: p[0], y: p[1], col: '#fbbf24', rad: R, life: 1, inward: true }); burst(p[0], p[1], 40, '#fde68a', 4); for (let k = 0; k < 14; k++) { const a = k / 14 * 6.283; part({ x: p[0] + Math.cos(a) * 40, y: p[1] + Math.sin(a) * 40, vx: Math.cos(a) * 1.4, vy: Math.sin(a) * 1.4, col: k % 2 ? '#fbbf24' : '#fff7d6', size: 3 }); } rgFlashCol('#fbbf24'); RNG.shake = 8; } }
     if (e.t === 'cyclone') { const [x, y] = w2s(e.x, e.y), R = RG.kit(body(e.id).name).p.radius * RNG.view.s; for (let k = 0; k < 60; k++) { const a = k / 60 * 6.283 * 3, rr = R * (k / 60); part({ x: x + Math.cos(a) * rr, y: y + Math.sin(a) * rr, vx: -Math.sin(a) * 4, vy: Math.cos(a) * 4, col: k % 3 ? '#d9364f' : '#ffd6dc', size: 2 + (k % 3) }); } RNG.parts.push({ ring: true, x, y, col: '#ffd6dc', size: 2.4, life: 1 }); RNG.shake = 12; rgPunch(x, y, .05); }

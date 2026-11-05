@@ -27,6 +27,8 @@ export const PW_COL: Record<string, string> = {
   pinball: '#f9a8d4',
   rampart: '#d97706',
   icetrail: '#a5f3fc',
+  moss: '#8fd16a',
+  thorns: '#5fae7e',
   surf: '#38bdf8',
   ora: '#f43f5e',
   blink: '#c9a6f2',

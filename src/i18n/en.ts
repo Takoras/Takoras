@@ -739,6 +739,11 @@ export const en: Dict = {
       jelly: ['Jelly', 'Inflates, and anything that hits it bounces 1.5× harder.'],
       pinball: ['Pinball', 'Bounces off the edge instead of falling, faster each time (3 bounces).'],
       rampart: ['Rampart', 'Doesn’t shoot: becomes a fixed wall that sends enemies back ×1.6.'],
+      moss: ['Moss carpet', 'Leaves a moss trail for 2 turns: enemies crossing it get stuck and stop dead.'],
+      thorns: [
+        'Thorns',
+        'Covered in brambles and rooted this turn: the enemy it touches is sent back ×1.7 and stays stung (can’t shoot next turn).',
+      ],
       icetrail: ['Ice rink', 'Leaves an ice trail for 2 turns: anything crossing it slides far.'],
       surf: ['Backwash', 'Doesn’t move: a big cone-shaped wave sweeps enemies away where you aim.'],
       ora: ['Barrage', 'Hits ×1.6: the enemy flies far. Long cooldown.'],

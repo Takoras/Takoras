@@ -62,6 +62,27 @@ const SCENES: Record<string, Scene> = {
     ],
     turns: [[{ i: 0, ax: 1000, ay: -80, f: 0.6, pow: true }, down(0.6)]],
   },
+  // Tapis de mousse : Mousse trace une bande de mousse, l'ennemi qui fonce dessus s'y colle et s'arrête net
+  moss: {
+    mine: [['Mousse', -1150, 450]],
+    foes: [
+      ['Nyx', -250, -650],
+      ['Carmin', 750, -950],
+    ],
+    turns: [
+      [{ i: 0, ax: 1000, ay: -30, f: 1, pow: true }, null],
+      [null, down(0.9)],
+    ],
+  },
+  // Épines : Ronce se couvre de ronces, l'ennemi qui la percute est renvoyé loin (et piqué)
+  thorns: {
+    mine: [['Ronce', 0, -150]],
+    foes: [
+      ['Carmin', 0, -950],
+      ['Nyx', 750, 250],
+    ],
+    turns: [[still(), down(1)]],
+  },
   // Supernova : Soléo souffle les ennemis tout autour de lui
   nova: {
     mine: [['Soléo', 0, 250]],

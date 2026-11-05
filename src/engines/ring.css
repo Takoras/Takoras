@@ -175,9 +175,14 @@
   .rg-bot { grid-template-columns: 1fr 1.2fr; }
   .rg-pw, .rg-go { min-height: 60px; }
 }
+/* entrée de l'arène : le chrono et les boutons arrivent en sautant une fois le terrain posé */
+.rg-mid { animation: rgPop .45s .35s cubic-bezier(.2, 1.6, .4, 1) backwards; }
+.rg-bot > * { animation: rgPop .45s 1.05s cubic-bezier(.2, 1.6, .4, 1) backwards; }
+.rg-bot > :last-child { animation-delay: 1.13s; }
+@keyframes rgPop { from { opacity: 0; transform: translateY(18px) scale(.7); } }
 @keyframes rgPlateIn { from { opacity: 0; transform: translateX(var(--from)); } }
 @keyframes rgWiggle { 0%, 100% { rotate: 0deg; } 25% { rotate: -1.5deg; } 75% { rotate: 1.5deg; } }
-@media (prefers-reduced-motion: reduce) { .rg-plate, .rg-pw.on { animation: none; } }
+@media (prefers-reduced-motion: reduce) { .rg-plate, .rg-pw.on, .rg-mid, .rg-bot > * { animation: none; } }
 
 /* la page sous l'arène est cachée tant que l'arène est ouverte */
 html.ring-on #main { visibility: hidden; }
