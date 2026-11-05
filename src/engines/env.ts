@@ -126,4 +126,8 @@ export const host = {
   toggleAdmin: (): void => undefined,
   // Confirmation (abandon du Ring…) : remplacée au démarrage par la fenêtre maison du site
   ask: (text: string): Promise<boolean> => Promise.resolve(window.confirm(text)),
+  // Fiche d'un jeton pendant un match (React : features/combat/RingSheet.tsx) ; null = fermer
+  ringSheet: (p: unknown): void => {
+    void p;
+  },
 };

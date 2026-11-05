@@ -2,7 +2,7 @@
 // Ce fichier est la référence : il n'est plus régénéré. Les règles (physique) restent dans ring-engine.js, inchangé.
 import { RCFG } from './ring-config.js';
 import { RG } from './ring-engine.js';
-import { SETTINGS, esc, fmt, hexRGB, host, jetonOf, jn, jnH, reducedFx, sfx, texOf, vCls, vTag, t, at } from './env';
+import { SETTINGS, esc, fmt, host, jetonOf, jn, jnH, reducedFx, sfx, texOf, vCls, t } from './env';
 import './legacy-base.css';
 import './ring.css';
 
@@ -221,6 +221,7 @@ function startRing(teams, opts = {}) {
   RNG.raf = requestAnimationFrame(rgFrame);
 }
 function closeRing() {
+  host.ringSheet(null); RNG.info = false;
   cancelAnimationFrame(RNG.raf); clearTimeout(RNG.foeT); clearTimeout(RNG.okT); RFX.reset();
   removeEventListener('resize', rgResize); removeEventListener('pointermove', rgMove); removeEventListener('pointerup', rgUp); removeEventListener('pointercancel', rgUp);
   document.querySelectorAll('.rg, .rg-res').forEach(x => { x.classList.remove('on'); setTimeout(() => x.remove(), 250); });
@@ -333,43 +334,25 @@ function ringStatsHTML(name, lvl = 1, variant = '', compact = false) {
     ${row('size', '<img class="px rs-ico" src="/img/stats/taille.png" alt="">', rt('size'), s.r, M.r, s.r, rt('sizeD'))}
   </div>`;
 }
-// Fiche d'un jeton pendant le match (le chrono s'arrête en entraînement)
+// Fiche d'un jeton pendant le match (le chrono s'arrête en entraînement). La fiche est en React (RingSheet) :
+// un de tes jetons = sa fiche (vidéo du pouvoir, le jeton, stats + attaque) ; un jeton adverse = comparaison
+// avec ton jeton choisi (ou le premier encore en jeu), le tien à gauche, le sien à droite.
+function rgTok(b) {
+  const rd = RG.ready(b);
+  const state = !b.alive ? rt('koS') : b.stun ? rt('stunned') : rd ? rt('ready') : b.spent || b.left === 0 ? rt('used') : rt('inCd', { n: b.cd });
+  return { id: b.id, name: b.name, variant: b.variant || '', lvl: b.lvl || 1, alive: b.alive, base: { ...b.base }, state };
+}
 function rgInfo(id) {
-  const b = RNG.st?.bodies.find(x => x.id === id); if (!b) return;
-  RNG.el.querySelector('.rg-info')?.remove();
-  const p = powerText(b.name), rd = RG.ready(b);
-  const state = !b.alive ? rt('koS') : b.stun ? rt('stunned') : rd ? rt('ready') + rgPips(b) : b.spent || b.left === 0 ? rt('used') : rt('inCd', { n: b.cd });
-  // ton jeton choisi + un jeton adverse : on compare les deux
-  const mine = b.side !== ME() && RNG.st.bodies.find(x => x.id === RNG.sel && x.alive && x.side === ME());
-  const o = document.createElement('div'); o.className = 'rg-info';
-  o.innerHTML = `<div class="rg-ic ${b.side === ME() ? 'me' : 'foe'}" style="--g:${hexRGB(jetonOf(b.name).glow)}">
-    <button class="rg-icx" aria-label="${t('close')}">✕</button>
-    <div class="rg-ih"><img class="px${vCls(b.variant)}" src="${texOf(jetonOf(b.name))}" alt=""><div><b>${jnH(b.name)} ${vTag(b.variant)}</b><small>${esc(RNG.names[b.side])} · ${at('lvl')} ${b.lvl}</small></div></div>
-    <div class="rg-ip" style="--c:${PW_COL[p.pw]}"><b>✦ ${esc(p.name)}</b><p>${esc(p.desc)}</p><small>${state}${p.when ? ' · ' + p.when : ''}</small></div>
-    ${mine ? rgCompare(mine, b) : ringStatsHTML(b.name, b.lvl, b.variant)}
-  </div>`;
-  RNG.el.appendChild(o); RNG.info = true; sfx.click();
-  o.animate([{ opacity: 0, transform: 'scale(.94)' }, { opacity: 1, transform: 'none' }], { duration: 180, easing: 'ease-out' });
-  o.onclick = () => { o.remove(); RNG.info = false; };
+  const st = RNG.st, b = st?.bodies.find(x => x.id === id); if (!b) return;
+  const mine = st.bodies.filter(x => x.side === ME() && x.alive);
+  const foe = b.side !== ME();
+  const a = foe ? (mine.find(x => x.id === RNG.sel) || mine[0]) : b;
+  RNG.info = true;
+  host.ringSheet({
+    a: rgTok(a || b), b: foe && a ? rgTok(b) : undefined, mine: mine.map(rgTok),
+    onClose: () => { RNG.info = false; },
+  });
 }
-
-// Comparaison : mes stats (avec bonus de rôle et d'équipe) contre les siennes, et qui gagne sur chaque stat
-function rgCompare(a, b) {
-  const M = RCFG.STAT_MAX, f = (v, k) => (k === 'mass' ? v.toFixed(2) : fmt(Math.round(v)));
-  const rows = [['mass', '<svg viewBox="0 0 16 16" width="16" height="16" fill="currentColor" aria-hidden="true"><path d="M6 2h4v2h2l2 10H2L4 4h2z" shape-rendering="crispEdges"/></svg>', rt('mass')], ['power', '<img class="px rs-ico" src="/img/stats/puissance.png" alt="">', rt('powerS')], ['r', '<img class="px rs-ico" src="/img/stats/taille.png" alt="">', rt('size')]];
-  const wins = rows.filter(([k]) => a.base[k] > b.base[k]).length;
-  const bar = (v, k, side) => `<span class="rg-cb ${side}"><i style="width:${Math.min(100, v / M[k] * 100)}%"></i></span>`;
-  return `<div class="rg-cmp">
-    <div class="rg-ch"><span class="me"><img class="px${vCls(a.variant)}" src="${texOf(jetonOf(a.name))}" alt="">${jnH(a.name)}</span><span>vs</span><span class="foe">${jnH(b.name)}<img class="px${vCls(b.variant)}" src="${texOf(jetonOf(b.name))}" alt=""></span></div>
-    ${rows.map(([k, ico, l]) => {
-      const x = a.base[k], y = b.base[k], w = x > y ? 'me' : x < y ? 'foe' : '';
-      return `<div class="rg-cr ${w}"><b class="me">${f(x, k)}</b>${bar(x, k, 'me')}<small>${ico} ${l}</small>${bar(y, k, 'foe')}<b class="foe">${f(y, k)}</b></div>`;
-    }).join('')}
-    <p class="rg-cv">${rt(wins >= 2 ? 'cmpWin' : wins === 1 ? 'cmpEven' : 'cmpLose')}</p>
-    <small class="muted">${rt('cmpHint')}</small>
-  </div>`;
-}
-
 // ---------- Visée au lance-pierre : tape un jeton, puis glisse (depuis le jeton ou n'importe où) vers l'arrière
 function rgPt(e) { const r = RNG.cv.getBoundingClientRect(); return [e.clientX - r.left, e.clientY - r.top]; }
 function rgDown(e) {
