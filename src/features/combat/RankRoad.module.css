@@ -54,12 +54,16 @@
 .arrive .track {
   animation-delay: 140ms;
 }
-/* pendant l'arrivée, le nom, la barre et ses badges restent avec le rang (pas d'apparition à part) */
+/* pendant l'arrivée et le départ, le nom, la barre et ses badges restent avec le rang (pas d'apparition à part :
+   le rang qui part est remonté au moment de partir, ses apparitions le cacheraient) */
 .arrive .mark,
-.arrive .fill {
+.arrive .fill,
+.out .mark,
+.out .fill {
   animation: none;
 }
-.arrive .name span {
+.arrive .name span,
+.out .name span {
   animation: wave 2.6s calc(var(--l) * -0.14s) ease-in-out infinite;
 }
 .out,
