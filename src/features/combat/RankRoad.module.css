@@ -281,31 +281,31 @@
 /* arrivée : il fonce en place (étiré), puis « boing » : il tremble comme une gelée, de moins en moins fort */
 @keyframes arrive {
   0% {
-    transform: translateX(calc(var(--dir) * 110%)) scale(1.2, 0.85);
+    transform: translateX(calc(var(--dir) * 110%)) scale(1.1, 0.93);
     animation-timing-function: cubic-bezier(0.25, 0.8, 0.4, 1);
   }
   28% {
-    transform: translateX(calc(var(--dir) * -3%)) scale(0.82, 1.18);
+    transform: translateX(calc(var(--dir) * -1.5%)) scale(0.92, 1.08);
     animation-timing-function: ease-in-out;
   }
   42% {
-    transform: translateX(calc(var(--dir) * 1.5%)) scale(1.13, 0.89);
+    transform: translateX(calc(var(--dir) * 0.6%)) scale(1.06, 0.95);
     animation-timing-function: ease-in-out;
   }
   56% {
-    transform: scale(0.92, 1.08);
+    transform: scale(0.97, 1.03);
     animation-timing-function: ease-in-out;
   }
   69% {
-    transform: scale(1.05, 0.96);
+    transform: scale(1.02, 0.985);
     animation-timing-function: ease-in-out;
   }
   81% {
-    transform: scale(0.98, 1.02);
+    transform: scale(0.995, 1.005);
     animation-timing-function: ease-in-out;
   }
   91% {
-    transform: scale(1.01, 0.99);
+    transform: scale(1.003, 0.997);
     animation-timing-function: ease-out;
   }
   100% {
