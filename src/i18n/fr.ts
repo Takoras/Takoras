@@ -743,12 +743,12 @@ export const fr = {
       pinball: ['Flipper', 'Rebondit sur le bord au lieu de sortir, et repart plus vite (3 rebonds).'],
       rampart: ['Rempart', 'Ne tire pas : devient un mur fixe qui renvoie ×1,6 l’ennemi qui le touche.'],
       moss: [
-        'Tapis de mousse',
-        'Laisse une traînée de mousse qui reste 2 tours : les ennemis qui passent dessus collent et s’arrêtent net.',
+        'Morceau de mousse',
+        'Au lancer, pose un morceau de mousse là où elle est. L’ennemi qui le touche est ralenti : ses tirs ont 30 % de force en moins pendant 2 tours.',
       ],
-      thorns: [
-        'Épines',
-        'Se couvre de ronces et s’enracine ce tour : l’ennemi qui le touche est renvoyé ×1,7 et reste piqué (pas de tir au tour suivant).',
+      forest: [
+        'Forêt vivante',
+        'Ne tire pas : fait pousser 3 buissons de ronces là où tu vises. Ils renvoient les jetons et piquent les ennemis qui les touchent (pas de tir au tour suivant). Ils fanent après 2 tours.',
       ],
       icetrail: ['Patinoire', 'Laisse une traînée de glace qui reste 2 tours : tout ce qui passe dessus glisse loin.'],
       surf: ['Ressac', 'Ne bouge pas : une grosse vague en cône emporte les ennemis dans la direction visée.'],

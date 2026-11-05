@@ -743,9 +743,9 @@ export const en: Dict = {
         'Moss patch',
         'On launch, drops a moss patch where it stands. The enemy that touches it is slowed: its shots have 30% less force for 2 turns.',
       ],
-      thorns: [
-        'Thorns',
-        'Covered in brambles and rooted this turn: the enemy it touches is sent back ×1.7 and stays stung (can’t shoot next turn).',
+      forest: [
+        'Living forest',
+        'Doesn’t shoot: grows 3 bramble bushes where you aim. They bounce tokens back and sting enemies that touch them (no shot next turn). They wither after 2 turns.',
       ],
       icetrail: ['Ice rink', 'Leaves an ice trail for 2 turns: anything crossing it slides far.'],
       surf: ['Backwash', 'Doesn’t move: a big cone-shaped wave sweeps enemies away where you aim.'],
