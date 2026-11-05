@@ -115,6 +115,24 @@
     wave 2.6s calc(var(--l) * -0.14s) ease-in-out infinite;
 }
 
+/* reflet (Émeraude et plus) : une copie des lettres, sans contour, posée par-dessus ; une bande de lumière la
+   traverse de gauche à droite, lettre après lettre, puis repart après une pause */
+.sweep span {
+  position: relative;
+}
+.sweep span::after {
+  content: attr(data-c);
+  position: absolute;
+  inset: 0;
+  color: transparent;
+  -webkit-text-stroke: 0;
+  background: linear-gradient(105deg, transparent 0 40%, rgb(255 255 255 / 95%) 48% 52%, transparent 60% 100%) 0 0 /
+    300% 100% no-repeat;
+  background-clip: text;
+  animation: sweep 2.8s calc(var(--l) * 0.045s) ease-in-out infinite;
+  pointer-events: none;
+}
+
 /* la barre, légèrement penchée comme le nom */
 .track {
   position: relative;
@@ -351,6 +369,15 @@
     transform: translateY(3px) rotate(2deg);
   }
 }
+@keyframes sweep {
+  0% {
+    background-position: 100% 0;
+  }
+  45%,
+  100% {
+    background-position: 0 0;
+  }
+}
 @keyframes grow {
   from {
     width: 0;
@@ -389,7 +416,8 @@
   .fill,
   .mark,
   .now .pb > *,
-  .arrow {
+  .arrow,
+  .sweep span::after {
     animation: none;
   }
 }

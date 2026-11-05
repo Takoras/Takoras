@@ -19,6 +19,7 @@ const TIERS = RCFG.RANKS.map((r) => ({ k: r.k, col: r.col, steps: ROAD.filter((x
 const N = TIERS.length;
 const START = 1000;
 const SLIDE_MS = 900;
+const SWEEP_FROM = TIERS.findIndex((x) => x.k === 'emerald'); // rangs dont le nom a un reflet qui passe
 // richesse du fond selon le rang (même échelle que la rareté des jetons)
 const BG_ODDS = [1, 60, 300, 1000, 5000, 10_000, 100_000, 1_000_000];
 
@@ -140,9 +141,10 @@ function Slide({
             <RankBadge r={shown} size={220} />
           </span>
         </div>
-        <b className={s.name} aria-label={title}>
+        {/* à partir d'Émeraude, un reflet de lumière balaie le nom */}
+        <b className={`${s.name} ${i >= SWEEP_FROM ? s.sweep : ''}`} aria-label={title}>
           {[...title].map((c, k) => (
-            <span key={k} style={{ '--l': k } as CSSProperties} aria-hidden>
+            <span key={k} data-c={c === ' ' ? '\u00a0' : c} style={{ '--l': k } as CSSProperties} aria-hidden>
               {c === ' ' ? ' ' : c}
             </span>
           ))}
