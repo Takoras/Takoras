@@ -115,8 +115,8 @@
     wave 2.6s calc(var(--l) * -0.14s) ease-in-out infinite;
 }
 
-/* reflet (Émeraude et plus) : une copie des lettres, sans contour, posée par-dessus ; une bande de lumière la
-   traverse de gauche à droite, lettre après lettre, puis repart après une pause */
+/* reflet (Émeraude et plus) : une copie des lettres, sans contour, posée par-dessus ; deux bandes de lumière
+   nettes la traversent par à-coups, lettre après lettre, puis repartent après une pause */
 .sweep span {
   position: relative;
 }
@@ -126,10 +126,19 @@
   inset: 0;
   color: transparent;
   -webkit-text-stroke: 0;
-  background: linear-gradient(105deg, transparent 0 40%, rgb(255 255 255 / 95%) 48% 52%, transparent 60% 100%) 0 0 /
-    300% 100% no-repeat;
+  /* reflet pixel : deux bandes nettes (une large, une fine), sans dégradé */
+  background: linear-gradient(
+      110deg,
+      transparent 0 44%,
+      rgb(255 255 255 / 92%) 44% 49%,
+      transparent 49% 51.5%,
+      rgb(255 255 255 / 92%) 51.5% 53%,
+      transparent 53% 100%
+    )
+    0 0 / 300% 100% no-repeat;
   background-clip: text;
-  animation: sweep 2.8s calc(var(--l) * 0.045s) ease-in-out infinite;
+  /* il avance par à-coups, comme une animation image par image */
+  animation: sweep 2.6s calc(var(--l) * 0.06s) steps(14, jump-none) infinite;
   pointer-events: none;
 }
 
