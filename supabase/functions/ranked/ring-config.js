@@ -19,7 +19,7 @@ const RCFG = {
   // Mur { x1, y1, x2, y2, w (épaisseur), k (< 1 amortit, > 1 renvoie plus vite), hp (coups avant de casser) }.
   // Placement symétrique par le centre (les deux camps ont exactement le même terrain), loin des départs (y = ±1120).
   ICE_FRIC: .15,          // frottement sur la patinoire de Givre
-  MOSS_FRIC: 7,           // frottement sur le tapis de mousse de Mousse (les ennemis s'y collent)
+  MOSS_SLOW: .3,          // Mousse : un ennemi ralenti tire avec 30 % de force en moins (pendant 2 tours)
   WALL_HP: 5, WALL_HIT: 120,  // un mur casse au 5e vrai choc (vitesse d'impact > 120)
   MAPS: [
     { id: 'arene', R: 1450, fric: 1, zones: [], walls: [], pool: false },
@@ -116,8 +116,8 @@ const RCFG = {
     Zénith:   { mass: 1.75, power: 1650, r: 126, pw: 'beam',     cd: 0, p: { range: 2600, width: 70, push: 2100 } }, // œil : rayon (1 fois par match), s'arrête au 1er mur ou au 1er jeton
     Oblivion: { mass: 1.15, power: 1980, r: 110, pw: 'rift',     cd: 0, p: { pull: 1600, range: 520 } }, // planète fissurée : faille qui aspire les ennemis proches puis s'ouvre au tour suivant
     // Série Bodako (nature)
-    Mousse:   { mass: 1.05, power: 1880, r: 110, pw: 'moss',     cd: 0, uses: 3, p: { every: 6 } }, // mousse : tapis collant derrière elle
-    Ronce:    { mass: 1.45, power: 1860, r: 118, pw: 'thorns',   cd: 3, p: { bounce: 1.7, mass: 1.6 } }, // ronce : s'enracine, ses épines repoussent et piquent
+    Mousse:   { mass: 1.05, power: 1880, r: 110, pw: 'moss',     cd: 0, uses: 3, p: { r: 125, turns: 3, slow: 2 } }, // mousse : morceau de mousse qui ralentit l'ennemi qui le touche
+    Ronce:    { mass: 1.45, power: 1860, r: 118, pw: 'forest',   cd: 3, p: { range: 1150, r: 78, spread: 230, k: 1.25, turns: 2 } }, // ronce : forêt vivante (3 buissons de ronces)
     Takoras:  { mass: 1.15, power: 2000, r: 110, pw: 'devour',   cd: 0, p: { spread: .55, open: .34, spit: .9, turns: 3 } }, // se coupe en deux, avale l'ennemi pris entre les moitiés, le recrache
   },
   DEFAULT_TOKEN: { role: 'fighter', mass: 1, power: 1800, r: 107, pw: 'none', cd: 0, p: {} }, // jeton d'une future collection sans pouvoir

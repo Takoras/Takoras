@@ -23,8 +23,8 @@ const RT = {
       jelly: ['Gélatine', 'Gonfle, et tout ce qui le touche rebondit 1,5× plus fort.'],
       pinball: ['Flipper', 'Rebondit sur le bord au lieu de sortir, et repart plus vite (3 rebonds).'],
       rampart: ['Rempart', 'Ne tire pas : devient un mur fixe qui renvoie ×1,6 l’ennemi qui le touche.'],
-      moss: ['Tapis de mousse', 'Laisse une traînée de mousse qui reste 2 tours : les ennemis qui passent dessus collent et s’arrêtent net.'],
-      thorns: ['Épines', 'Se couvre de ronces et s’enracine ce tour : l’ennemi qui le touche est renvoyé ×1,7 et reste piqué (pas de tir au tour suivant).'],
+      moss: ['Morceau de mousse', 'Au lancer, pose un morceau de mousse là où elle est. L’ennemi qui le touche est ralenti : ses tirs ont 30 % de force en moins pendant 2 tours.'],
+      forest: ['Forêt vivante', 'Ne tire pas : fait pousser 3 buissons de ronces là où tu vises. Ils renvoient les jetons et piquent les ennemis qui les touchent (pas de tir au tour suivant). Ils fanent après 2 tours.'],
       icetrail: ['Patinoire', 'Laisse une traînée de glace qui reste 2 tours : tout ce qui passe dessus glisse loin.'],
       surf: ['Ressac', 'Ne bouge pas : une grosse vague en cône emporte les ennemis dans la direction visée.'],
       ora: ['Rafale', 'Frappe ×1,6 : l’ennemi touché part loin. Longue recharge.'],
@@ -66,7 +66,7 @@ const RT = {
       guard: ['Bulle', 'Ton allié le plus proche ne peut pas être poussé ce tour.'],
       none: ['—', 'Pas de pouvoir.'],
     },
-    once: '1 fois par match', every: 'recharge {n} tours', uses: '{n} fois par match', left: 'encore {n}', stunned: 'Paralysé ce tour', linked: 'Lié', ready: 'Prêt', used: 'Utilisé', inCd: 'dans {n} tour(s)', pick: 'Choisis un jeton',
+    slowed: 'Ralenti {n} tour(s)', once: '1 fois par match', every: 'recharge {n} tours', uses: '{n} fois par match', left: 'encore {n}', stunned: 'Paralysé ce tour', linked: 'Lié', ready: 'Prêt', used: 'Utilisé', inCd: 'dans {n} tour(s)', pick: 'Choisis un jeton',
     power: 'Pouvoir', on: 'Activé', validate: 'Valider', validated: 'Validé ✓', pass: 'Passer le tour', turn: 'Tour {n}/{m}', sudden: 'Mort subite !', foeOk: '✓ L’adversaire a validé',
     hSel: 'Tape un de tes jetons', hAim: 'Glisse vers l’arrière pour viser : tu peux partir de n’importe où sur l’écran', hVal: 'Valide quand tu es prêt', hWait: 'En attente de l’adversaire…',
     reveal: 'Feu !', out: 'Éjecté !', win: 'Victoire !', lose: 'Défaite…', draw: 'Égalité', again: 'Rejouer', back: 'Retour', quit: 'Abandonner le match ?', you: 'Toi', bot: 'Robot',
@@ -93,8 +93,8 @@ const RT = {
       jelly: ['Jelly', 'Inflates, and anything that hits it bounces 1.5× harder.'],
       pinball: ['Pinball', 'Bounces off the edge instead of falling, faster each time (3 bounces).'],
       rampart: ['Rampart', 'Doesn’t shoot: becomes a fixed wall that sends enemies back ×1.6.'],
-      moss: ['Moss carpet', 'Leaves a moss trail for 2 turns: enemies crossing it get stuck and stop dead.'],
-      thorns: ['Thorns', 'Covered in brambles and rooted this turn: the enemy it touches is sent back ×1.7 and stays stung (can’t shoot next turn).'],
+      moss: ['Moss patch', 'On launch, drops a moss patch where it stands. The enemy that touches it is slowed: its shots have 30% less force for 2 turns.'],
+      forest: ['Living forest', 'Doesn’t shoot: grows 3 bramble bushes where you aim. They bounce tokens back and sting enemies that touch them (no shot next turn). They wither after 2 turns.'],
       icetrail: ['Ice rink', 'Leaves an ice trail for 2 turns: anything crossing it slides far.'],
       surf: ['Backwash', 'Doesn’t move: a big cone-shaped wave sweeps enemies away where you aim.'],
       ora: ['Barrage', 'Hits ×1.6: the enemy flies far. Long cooldown.'],
@@ -136,7 +136,7 @@ const RT = {
       guard: ['Bubble', 'Your closest ally can’t be pushed this turn.'],
       none: ['—', 'No power.'],
     },
-    once: 'once per match', every: '{n}-turn cooldown', uses: '{n} times per match', left: '{n} left', stunned: 'Paralysed this turn', linked: 'Linked', ready: 'Ready', used: 'Used', inCd: 'in {n} turn(s)', pick: 'Pick a token',
+    slowed: 'Slowed {n} turn(s)', once: 'once per match', every: '{n}-turn cooldown', uses: '{n} times per match', left: '{n} left', stunned: 'Paralysed this turn', linked: 'Linked', ready: 'Ready', used: 'Used', inCd: 'in {n} turn(s)', pick: 'Pick a token',
     power: 'Power', on: 'On', validate: 'Confirm', validated: 'Confirmed ✓', pass: 'Skip turn', turn: 'Turn {n}/{m}', sudden: 'Sudden death!', foeOk: '✓ Opponent is ready',
     hSel: 'Tap one of your tokens', hAim: 'Drag backwards to aim: you can start anywhere on the screen', hVal: 'Confirm when you’re ready', hWait: 'Waiting for the opponent…',
     reveal: 'Go!', out: 'Out!', win: 'Victory!', lose: 'Defeat…', draw: 'Draw', again: 'Play again', back: 'Back', quit: 'Forfeit the match?', you: 'You', bot: 'Bot',
@@ -155,7 +155,7 @@ const RT = {
 };
 const rtL = () => RT[SETTINGS.lang] || RT.fr;
 const rt = (k, v = {}) => String(rtL()[k] ?? RT.fr[k]).replace(/\{(\w+)\}/g, (_, x) => v[x] ?? '');
-const PW_COL = { nova: '#fb923c', ring: '#f08a3c', beam: '#ff4d6a', devour: '#9fb6ff', grow: '#7dd3fc', bounce: '#f9a8d4', scrap: '#fb923c', slide: '#a5f3fc', eruption: '#f97316', flare: '#fb923c', zerog: '#93c5fd', sun: '#fbbf24', cyclone: '#d9364f', rift: '#3fc7b6', current: '#f0453a', avatar: '#9fb6ff', jelly: '#7dd3fc', pinball: '#f9a8d4', rampart: '#d97706', icetrail: '#a5f3fc', moss: '#8fd16a', thorns: '#5fae7e', surf: '#38bdf8', ora: '#f43f5e', blink: '#c9a6f2', mirror: '#f7a8d8', shade: '#7c8cf8', starfall: '#f6d39a', grab: '#6366f1', yinyang: '#f0453a', telekinesis: '#f08a3c', stun: '#d9364f', blackhole: '#3fc7b6', freeze: '#a5f3fc', wave: '#38bdf8', curve: '#60a5fa', double: '#f43f5e', ghost: '#c4b5fd',
+const PW_COL = { nova: '#fb923c', ring: '#f08a3c', beam: '#ff4d6a', devour: '#9fb6ff', grow: '#7dd3fc', bounce: '#f9a8d4', scrap: '#fb923c', slide: '#a5f3fc', eruption: '#f97316', flare: '#fb923c', zerog: '#93c5fd', sun: '#fbbf24', cyclone: '#d9364f', rift: '#3fc7b6', current: '#f0453a', avatar: '#9fb6ff', jelly: '#7dd3fc', pinball: '#f9a8d4', rampart: '#d97706', icetrail: '#a5f3fc', moss: '#8fd16a', forest: '#5fae7e', surf: '#38bdf8', ora: '#f43f5e', blink: '#c9a6f2', mirror: '#f7a8d8', shade: '#7c8cf8', starfall: '#f6d39a', grab: '#6366f1', yinyang: '#f0453a', telekinesis: '#f08a3c', stun: '#d9364f', blackhole: '#3fc7b6', freeze: '#a5f3fc', wave: '#38bdf8', curve: '#60a5fa', double: '#f43f5e', ghost: '#c4b5fd',
   rescue: '#4ade80', shrink: '#818cf8', magnet: '#fde68a', anchor: '#94a3b8', second: '#fb7185', roots: '#e879f9', shield: '#f1f5f9', void: '#a855f7', split: '#ffffff', haste: '#86efac', guard: '#7dd3fc', none: '#888' };
 // charges restantes : petits carrés pleins / vides
 const rgPips = b => { const u = RG.kit(b.name).uses; if (!u) return ''; const l = b.left ?? u; return `<span class="rg-pips">${'<i></i>'.repeat(l)}${'<i class="off"></i>'.repeat(Math.max(0, u - l))}</span>`; };
@@ -363,7 +363,7 @@ function ringStatsHTML(name, lvl = 1, variant = '', compact = false) {
 // avec ton jeton choisi (ou le premier encore en jeu), le tien à gauche, le sien à droite.
 function rgTok(b) {
   const rd = RG.ready(b);
-  const state = !b.alive ? rt('koS') : b.stun ? rt('stunned') : rd ? rt('ready') : b.spent || b.left === 0 ? rt('used') : rt('inCd', { n: b.cd });
+  const state = (!b.alive ? rt('koS') : b.stun ? rt('stunned') : rd ? rt('ready') : b.spent || b.left === 0 ? rt('used') : rt('inCd', { n: b.cd })) + (b.alive && b.slow ? ' · ' + rt('slowed', { n: b.slow }) : '');
   return { id: b.id, name: b.name, variant: b.variant || '', lvl: b.lvl || 1, alive: b.alive, base: { ...b.base }, state };
 }
 function rgInfo(id) {
@@ -546,8 +546,8 @@ function rgReveal(srv) {
     const bodies = r.ids.map(id => before.bodies.find(b => b.id === id) || { ...before.bodies.find(b => b.id === id - 100), id, tmp: true });
     // ce que l'écran montre pendant l'animation : l'état d'AVANT le tour, mis à jour au fil des événements
     // (sinon les murs s'abîment et la glace apparaît dès qu'on valide)
-    const seen = new Set([...(before.ice || []), ...(before.moss || []), ...(before.rift?.pts || [])].map(p => p[0] + ',' + p[1]));
-    const view = { walls: before.map ? before.map.walls.map(o => ({ ...o })) : [], seen, rift: before.rift || null, holes: before.holes || null };
+    const seen = new Set([...(before.ice || []), ...(before.rift?.pts || [])].map(p => p[0] + ',' + p[1]));
+    const view = { walls: before.map ? before.map.walls.map(o => ({ ...o })) : [], seen, rift: before.rift || null, holes: before.holes || null, moss: before.moss || [], bush: before.bush || [] };
     RNG.play = { r, bodies, f: 0, ei: 0, slow: 0, fall: [], view };
     RFX.start(RNG.play);
     RNG.reveal = null; RNG.phase = 'play'; RNG.prev = null;
@@ -699,7 +699,7 @@ function rgZones(c, t) {
 }
 // Murs : pierre en briques (amortit) ou mur rebondisseur rose lumineux, chevrons qui défilent (renvoie plus vite)
 // Visée en forme d'effet : Téléportation (destination), Ressac (cône), Pluie d'étoiles (zone), Télékinésie (cible)
-const SHAPE_PW = new Set(['blink', 'surf', 'starfall', 'telekinesis', 'beam', 'ring']);
+const SHAPE_PW = new Set(['blink', 'surf', 'starfall', 'telekinesis', 'beam', 'ring', 'forest']);
 function rgShapeAim(c, sel, sx, sy, col, t) {
   if (!RNG.pows?.has(sel.id)) return false;
   const k = RG.kit(sel.name), pw = k.pw; if (!SHAPE_PW.has(pw)) return false;
@@ -714,6 +714,13 @@ function rgShapeAim(c, sel, sx, sy, col, t) {
     c.beginPath(); c.arc(x, y, rad, 0, 7); c.fill(); c.stroke();
     if (pw === 'blink') { c.globalAlpha = .45; rgToken(c, { ...sel, x: X, y: Y }, t, false); }
     else for (let i = 0; i < 4; i++) { const a = t * 1.5 + i * 1.571; c.fillStyle = '#fff7e6'; c.fillRect(x + Math.cos(a) * rad * .55 - px, y + Math.sin(a) * rad * .55 - px, px * 2, px * 2); }
+  } else if (pw === 'forest') {
+    // Forêt vivante : les 3 buissons à l'endroit visé (en triangle, comme dans le moteur)
+    const p = k.p, R = RG.ringR(RNG.st), lim = R - p.r * 1.5; let X = sel.x + wx * f * p.range, Y = sel.y + wy * f * p.range; const L = RG.len(X, Y); if (L > lim) { X = X / L * lim; Y = Y / L * lim; }
+    const pts = [[X + wx * p.spread * .55, Y + wy * p.spread * .55], [X - wy * p.spread - wx * p.spread * .35, Y + wx * p.spread - wy * p.spread * .35], [X + wy * p.spread - wx * p.spread * .35, Y - wx * p.spread - wy * p.spread * .35]];
+    const [cx, cy] = w2s(X, Y);
+    c.setLineDash([px * 3, px * 2]); c.strokeStyle = 'rgba(255,255,255,.35)'; c.lineWidth = px; c.beginPath(); c.moveTo(sx, sy); c.lineTo(cx, cy); c.stroke(); c.setLineDash([]);
+    for (const [bx, by] of pts) { const [x, y] = w2s(bx, by), rr = p.r * V.s; c.fillStyle = 'rgba(95,174,126,.22)'; c.strokeStyle = '#5fae7e'; c.lineWidth = px * 2; c.beginPath(); c.arc(x, y, rr, 0, 7); c.fill(); c.stroke(); }
   } else if (pw === 'surf') {
     const R = k.p.radius * V.s, half = Math.acos(k.p.cone), a0 = Math.atan2(uy, ux);
     c.fillStyle = `rgba(56,189,248,${.12 + .15 * f})`; c.strokeStyle = '#7dd3fc'; c.lineWidth = px * 2;
@@ -757,14 +764,31 @@ function rgPersist(c, t) {
     ice.forEach((p, i) => { if (i % 3) return; const [x, y] = w2s(p[0], p[1]), tw = .5 + .5 * Math.sin(t * 4 + i); c.fillStyle = `rgba(255,255,255,${.5 * tw})`; c.fillRect(x + ((i * 7) % 13 - 6) * px, y + ((i * 5) % 11 - 5) * px, px, px); });
     c.restore();
   }
-  // Tapis de mousse : une bande verte mousseuse, avec des touffes et quelques brins plus clairs
-  const moss = shown(st.moss || []);
-  if (moss.length > 1) {
-    c.save(); c.lineCap = 'round'; c.lineJoin = 'round';
-    path(moss); c.strokeStyle = 'rgba(58,94,38,.55)'; c.lineWidth = 88 * V.s; c.stroke();
-    path(moss); c.strokeStyle = 'rgba(143,209,106,.35)'; c.lineWidth = 52 * V.s; c.stroke();
-    moss.forEach((p, i) => { const [x, y] = w2s(p[0], p[1]); for (let k = 0; k < 3; k++) { const ox = (((i * 13 + k * 29) % 17) - 8) * px * 1.6, oy = (((i * 7 + k * 31) % 15) - 7) * px * 1.6; c.fillStyle = k ? '#5f9e3f' : '#b8e08a'; c.fillRect(Math.round((x + ox) / px) * px, Math.round((y + oy) / px) * px, px * 2, px * (k ? 2 : 3)); } });
-    c.restore();
+  // Morceaux de mousse : une touffe verte posée au sol (pendant le tour, elle apparaît au lancer, disparaît quand un ennemi la prend)
+  const taken = P ? new Set(P.r.ev.filter(e => e.t === 'mosshit' && e.at / RCFG.DT <= P.f).map(e => e.x + ',' + e.y)) : null;
+  const mossList = P ? [...(P.view?.moss || []), ...P.r.ev.filter(e => e.t === 'moss').map(e => ({ x: e.x, y: e.y, r: RG.kit('Mousse').p.r }))] : st.moss || [];
+  for (const m of mossList) {
+    if (taken?.has(m.x + ',' + m.y)) continue;
+    const [x, y] = w2s(m.x, m.y), R = m.r * V.s;
+    // une touffe de mousse bien visible : base sombre, dôme vert, reflets clairs et brins qui dépassent
+    c.fillStyle = 'rgba(0,0,0,.35)'; c.beginPath(); c.ellipse(x + R * .08, y + R * .22, R * 1.05, R * .75, 0, 0, 7); c.fill();
+    c.fillStyle = '#4f8a35'; c.beginPath(); c.ellipse(x, y, R, R * .82, 0, 0, 7); c.fill();
+    c.fillStyle = '#8fd16a'; c.beginPath(); c.ellipse(x - R * .12, y - R * .12, R * .72, R * .55, 0, 0, 7); c.fill();
+    for (let k = 0; k < 18; k++) { const a = k * 2.4, d = ((k * 7) % 9) / 9 * R * .85, tx = x + Math.cos(a) * d, ty = y + Math.sin(a) * d * .8; c.fillStyle = k % 3 ? '#c9eaa0' : '#3d6e29'; c.fillRect(Math.round(tx / px) * px, Math.round(ty / px) * px, px * 3, px * 3); }
+  }
+  // Buissons de la Forêt vivante : touffes de ronces sombres avec des épines claires (ils apparaissent quand ils poussent)
+  const grown = P ? P.r.ev.filter(e => e.t === 'bush' && e.at / RCFG.DT <= P.f).map(e => ({ x1: e.x, y1: e.y, w: RG.kit('Ronce').p.r * 2 })) : [];
+  for (const o of [...(P ? P.view?.bush || [] : st.bush || []), ...grown]) {
+    const [x, y] = w2s(o.x1, o.y1), R = o.w / 2 * V.s;
+    c.fillStyle = 'rgba(0,0,0,.4)'; c.beginPath(); c.ellipse(x + R * .1, y + R * .3, R * 1.05, R * .7, 0, 0, 7); c.fill();
+    for (let k = 0; k < 9; k++) { const a = k / 9 * 6.283, cx = x + Math.cos(a) * R * .45, cy = y + Math.sin(a) * R * .45; c.fillStyle = k % 2 ? '#2f5a3e' : '#3f7a52'; c.beginPath(); c.arc(cx, cy, R * .55, 0, 7); c.fill(); }
+    c.fillStyle = '#5fae7e'; c.beginPath(); c.arc(x, y, R * .5, 0, 7); c.fill();
+    for (let k = 0; k < 10; k++) { const a = k / 10 * 6.283 + .3; c.fillStyle = '#d8f0c8'; c.fillRect(Math.round((x + Math.cos(a) * R * .95) / px) * px, Math.round((y + Math.sin(a) * R * .95) / px) * px, px * 2, px * 2); }
+  }
+  // jetons ralentis par la mousse : une petite couronne de mousse fixe
+  if (!P) for (const b of st.bodies) if (b.alive && b.slow) {
+    const [x, y] = w2s(b.x, b.y), R = b.r * V.s;
+    for (let k = 0; k < 10; k++) { const a = k / 10 * 6.283; c.fillStyle = k % 2 ? '#6aa84f' : '#b8e08a'; c.fillRect(Math.round((x + Math.cos(a) * (R + px * 4)) / px) * px, Math.round((y + Math.sin(a) * (R + px * 4)) / px) * px, px * 3, px * 3); }
   }
   // Faille : une fissure turquoise ; armée (elle s'ouvre à la fin du tour), elle pulse
   const rf = P ? (st.rift && shown(st.rift.pts).length ? { ...st.rift, pts: shown(st.rift.pts) } : P.view?.rift) : st.rift;
@@ -1283,7 +1307,7 @@ const RSND = (() => {
   return S;
 })();
 RSND.freeze = RSND.slide; RSND.wave = RSND.curve; // sons des nouveaux pouvoirs
-Object.assign(RSND, { nova: RSND.shield, ring: RSND.anchor, beam: RSND.curve, devour: RSND.split, sun: RSND.shield, cyclone: RSND.curve, rift: RSND.blackhole, current: RSND.boing, avatar: RSND.split, jelly: RSND.grow, pinball: RSND.bounce, rampart: RSND.anchor, icetrail: RSND.slide, surf: RSND.curve, ora: RSND.double, blink: RSND.ghost, mirror: RSND.shield, shade: RSND.shrink, starfall: RSND.split, grab: RSND.magnet, yinyang: RSND.split, telekinesis: RSND.curve, stun: RSND.anchor, moss: RSND.roots, thorns: RSND.snap });
+Object.assign(RSND, { nova: RSND.shield, ring: RSND.anchor, beam: RSND.curve, devour: RSND.split, sun: RSND.shield, cyclone: RSND.curve, rift: RSND.blackhole, current: RSND.boing, avatar: RSND.split, jelly: RSND.grow, pinball: RSND.bounce, rampart: RSND.anchor, icetrail: RSND.slide, surf: RSND.curve, ora: RSND.double, blink: RSND.ghost, mirror: RSND.shield, shade: RSND.shrink, starfall: RSND.split, grab: RSND.magnet, yinyang: RSND.split, telekinesis: RSND.curve, stun: RSND.anchor, moss: RSND.grow, forest: RSND.roots });
 
 // ---------- Effets visuels des pouvoirs
 const RFX = (() => {
@@ -1353,9 +1377,10 @@ const RFX = (() => {
     if (e.t === 'hole') { const [x, y] = w2s(e.x, e.y); RNG.parts.push({ hole: true, x, y, life: 1, size: 40 }); RNG.parts.push({ wave: true, x, y, col: '#3fc7b6', rad: 520 * RNG.view.s, life: 1, inward: true }); rgFlashCol('#021012'); RNG.shake = 16; RSND.blackhole?.(); }
     if (e.t === 'holepull') { const [x, y] = w2s(e.x, e.y); RNG.parts.push({ wave: true, x, y, col: '#3fc7b6', rad: 520 * RNG.view.s, life: .8, inward: true }); }
     if (e.t === 'stun') { const p = at2(e.to); if (p) { RNG.parts.push({ text: rt('stunned'), x: p[0], y: p[1] - 24, col: '#ffd6dc', size: 16, life: 1 }); burst(p[0], p[1], 20, '#d9364f', 3.5); RNG.parts.push({ ring: true, x: p[0], y: p[1], col: '#d9364f', size: 1.4, life: 1 }); } }
-    if (e.t === 'moss') { const p = at2(e.id); if (p) { burst(p[0], p[1], 18, '#b8e08a', 2.5); burst(p[0], p[1], 10, '#5f9e3f', 2); } }
-    if (e.t === 'stuck') { const [x, y] = w2s(e.x, e.y); burst(x, y, 16, '#8fd16a', 2.2, { vy: -.6 }); RNG.parts.push({ ring: true, x, y, col: '#8fd16a', size: 1.2, life: 1 }); RSND.roots?.(); }
-    if (e.t === 'thorn') { const [x, y] = w2s(e.x, e.y), p = at2(e.to); for (let k = 0; k < 12; k++) { const a = k / 12 * 6.283; part({ x, y, vx: Math.cos(a) * 5, vy: Math.sin(a) * 5, col: k % 2 ? '#5fae7e' : '#d8f0c8', size: k % 2 ? 4 : 2.5 }); } burst(x, y, 14, '#2f5a3e', 3.5); if (p) RNG.parts.push({ ring: true, x: p[0], y: p[1], col: '#5fae7e', size: 1.4, life: 1 }); rgPunch(x, y, .05); RNG.shake = Math.max(RNG.shake, 9); RSND.snap?.(); }
+    if (e.t === 'moss') { const [x, y] = w2s(e.x, e.y); burst(x, y, 22, '#b8e08a', 2.6); burst(x, y, 12, '#5f9e3f', 2); RNG.parts.push({ ring: true, x, y, col: '#8fd16a', size: 1.3, life: 1 }); }
+    if (e.t === 'mosshit') { const [x, y] = w2s(e.x, e.y), p = at2(e.id); burst(x, y, 26, '#8fd16a', 3.2); burst(x, y, 12, '#e5f5d0', 2.4, { vy: -1 }); if (p) RNG.parts.push({ ring: true, x: p[0], y: p[1], col: '#8fd16a', size: 1.5, life: 1 }); RSND.slide?.(); }
+    if (e.t === 'bush') { const [x, y] = w2s(e.x, e.y); setTimeout(() => { burst(x, y, 24, '#5fae7e', 3.5); burst(x, y, 12, '#2f5a3e', 2.8, { size: 5 }); RNG.parts.push({ ring: true, x, y, col: '#5fae7e', size: 1.8, life: 1 }); RNG.shake = Math.max(RNG.shake, 7); RSND.roots?.(); }, e.n * 120); }
+    if (e.t === 'sting') { const [x, y] = w2s(e.x, e.y), p = at2(e.id); for (let k = 0; k < 10; k++) { const a = k / 10 * 6.283; part({ x, y, vx: Math.cos(a) * 4.5, vy: Math.sin(a) * 4.5, col: k % 2 ? '#5fae7e' : '#d8f0c8', size: k % 2 ? 4 : 2.5 }); } if (p) RNG.parts.push({ ring: true, x: p[0], y: p[1], col: '#d9364f', size: 1.3, life: 1 }); rgPunch(x, y, .04); RSND.snap?.(); }
     if (e.t === 'blink') { const [fx, fy] = w2s(e.fx, e.fy), [x, y] = w2s(e.x, e.y); burst(fx, fy, 24, '#c9a6f2', 3.5); burst(x, y, 30, '#ffffff', 4); RNG.parts.push({ ring: true, x, y, col: '#c9a6f2', size: 1.6, life: 1 }); RSND.ghost?.(); }
     if (e.t === 'sun') { const p = at2(e.id); if (p) { const R = RG.kit(body(e.id).name).p.radius * RNG.view.s; RNG.parts.push({ wave: true, x: p[0], y: p[1], col: '#fbbf24', rad: R, life: 1, inward: true }); burst(p[0], p[1], 40, '#fde68a', 4); for (let k = 0; k < 14; k++) { const a = k / 14 * 6.283; part({ x: p[0] + Math.cos(a) * 40, y: p[1] + Math.sin(a) * 40, vx: Math.cos(a) * 1.4, vy: Math.sin(a) * 1.4, col: k % 2 ? '#fbbf24' : '#fff7d6', size: 3 }); } rgFlashCol('#fbbf24'); RNG.shake = 8; } }
     if (e.t === 'cyclone') { const [x, y] = w2s(e.x, e.y), R = RG.kit(body(e.id).name).p.radius * RNG.view.s; for (let k = 0; k < 60; k++) { const a = k / 60 * 6.283 * 3, rr = R * (k / 60); part({ x: x + Math.cos(a) * rr, y: y + Math.sin(a) * rr, vx: -Math.sin(a) * 4, vy: Math.cos(a) * 4, col: k % 3 ? '#d9364f' : '#ffd6dc', size: 2 + (k % 3) }); } RNG.parts.push({ ring: true, x, y, col: '#ffd6dc', size: 2.4, life: 1 }); RNG.shake = 12; rgPunch(x, y, .05); }

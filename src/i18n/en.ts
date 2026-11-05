@@ -739,7 +739,10 @@ export const en: Dict = {
       jelly: ['Jelly', 'Inflates, and anything that hits it bounces 1.5× harder.'],
       pinball: ['Pinball', 'Bounces off the edge instead of falling, faster each time (3 bounces).'],
       rampart: ['Rampart', 'Doesn’t shoot: becomes a fixed wall that sends enemies back ×1.6.'],
-      moss: ['Moss carpet', 'Leaves a moss trail for 2 turns: enemies crossing it get stuck and stop dead.'],
+      moss: [
+        'Moss patch',
+        'On launch, drops a moss patch where it stands. The enemy that touches it is slowed: its shots have 30% less force for 2 turns.',
+      ],
       thorns: [
         'Thorns',
         'Covered in brambles and rooted this turn: the enemy it touches is sent back ×1.7 and stays stung (can’t shoot next turn).',
@@ -976,6 +979,8 @@ export const en: Dict = {
     Rouillé: 'Rusty',
     Carmin: 'Crimson',
     Zénith: 'Zenith',
+    Mousse: 'Moss',
+    Ronce: 'Bramble',
   },
   app: {
     soon_t: 'Coming soon',

@@ -62,26 +62,30 @@ const SCENES: Record<string, Scene> = {
     ],
     turns: [[{ i: 0, ax: 1000, ay: -80, f: 0.6, pow: true }, down(0.6)]],
   },
-  // Tapis de mousse : Mousse trace une bande de mousse, l'ennemi qui fonce dessus s'y colle et s'arrête net
+  // Morceau de mousse : Mousse pose sa mousse en partant ; l'ennemi qui fonce dessus la ramasse (couronne de mousse = ralenti)
   moss: {
-    mine: [['Mousse', -1150, 450]],
+    mine: [['Mousse', -250, 250]],
     foes: [
-      ['Nyx', -250, -650],
-      ['Carmin', 750, -950],
+      ['Nyx', -250, -700],
+      ['Carmin', 750, -900],
     ],
     turns: [
-      [{ i: 0, ax: 1000, ay: -30, f: 1, pow: true }, null],
-      [null, down(0.9)],
+      [{ i: 0, ax: 1000, ay: 300, f: 0.55, pow: true }, null],
+      [null, down(0.7)],
+      [null, null],
     ],
   },
-  // Épines : Ronce se couvre de ronces, l'ennemi qui la percute est renvoyé loin (et piqué)
-  thorns: {
-    mine: [['Ronce', 0, -150]],
+  // Forêt vivante : Ronce fait pousser 3 buissons devant l'ennemi, qui fonce dedans, rebondit et reste piqué
+  forest: {
+    mine: [['Ronce', 0, 700]],
     foes: [
-      ['Carmin', 0, -950],
-      ['Nyx', 750, 250],
+      ['Carmin', 0, -900],
+      ['Nyx', 750, -300],
     ],
-    turns: [[still(), down(1)]],
+    turns: [
+      [{ i: 0, ax: 0, ay: -1000, f: 0.55, pow: true }, down(0.9)],
+      [null, null],
+    ],
   },
   // Supernova : Soléo souffle les ennemis tout autour de lui
   nova: {
