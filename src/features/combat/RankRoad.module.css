@@ -82,6 +82,10 @@
   justify-items: center;
 }
 .emblem {
+  /* hauteur fixe : les badges dessinés (Maître, Takoras) sont un peu plus grands, le panneau ne doit pas bouger */
+  display: grid;
+  place-items: center;
+  height: 220px;
   transform-origin: 50% 0;
   rotate: var(--swing, 0deg);
 }
@@ -286,6 +290,9 @@
   .bob > span {
     width: 128px !important;
     height: 128px !important;
+  }
+  .emblem {
+    height: 132px;
   }
   .name {
     font-size: clamp(1.7rem, 9vw, 2.4rem);
