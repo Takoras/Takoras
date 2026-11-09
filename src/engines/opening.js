@@ -341,7 +341,7 @@ function startOpening() {
   opCoin.innerHTML = `<div class="zoom"><div class="tilt3d"><div class="spin">${coin3D(MYSTERE, 'Jeton mystère')}</div>${'<b class="tw"></b>'.repeat(7)}</div></div>`;
   setGlareMask(MYSTERE);
   // style d'ouverture à l'essai (admins) : décor et effets propres (opening-styles.js)
-  renderPicker(opening);
+  try { renderPicker(opening); } catch (e) { console.error('[sélecteur de style]', e); }
   styleStart({ opening, coin: opCoin, host: opening, main: opening.querySelector('.op-main'), fx: { shake, flash, tint, rays, burst } });
   if (c.phase === 'count' && c.shown === 1 && !sess.auto && !skipSpawn) spawn(); // le « ? » arrive en grossissant
   skipSpawn = false;

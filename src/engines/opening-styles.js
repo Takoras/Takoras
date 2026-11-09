@@ -545,6 +545,16 @@ S.gift = {
 
 // ------------------------------------------------------------------ branchement sur l'écran d'ouverture
 let cur = null; // { id, ...état du style pour le jeton en cours }
+// Filet de sécurité : si un style plante, on range son décor et l'ouverture continue en mode normal
+function safe(fn, fallback = undefined) {
+  try {
+    return fn();
+  } catch (e) {
+    console.error('[style d\'ouverture]', e);
+    styleClean();
+    return fallback;
+  }
+}
 export function styleStart(env) {
   styleClean();
   const id = currentStyle();
@@ -553,14 +563,14 @@ export function styleStart(env) {
   if (!box) return;
   cur = { id, box, ...env, spin: env.coin.querySelector('.spin') };
   env.opening.classList.add('sty-' + id);
-  S[id].start(cur);
+  safe(() => S[id].start(cur));
 }
 export const styleActive = () => !!cur;
 export function styleTap(k, i) {
-  if (cur) S[cur.id].tap(cur, k, i);
+  if (cur) safe(() => S[cur.id].tap(cur, k, i));
 }
 export function styleHold() {
-  if (cur) S[cur.id].hold?.(cur);
+  if (cur) safe(() => S[cur.id].hold?.(cur));
 }
 // quiet : après une cinématique (le film a déjà fait la révélation) → on range juste le décor
 export function styleReveal(j, lv, quiet) {
@@ -570,7 +580,7 @@ export function styleReveal(j, lv, quiet) {
     styleClean();
     return null;
   }
-  return S[c.id].reveal(c, j, lv) || {};
+  return safe(() => S[c.id].reveal(c, j, lv) || {}, null);
 }
 export function styleClean() {
   if (!cur) return;
@@ -579,11 +589,13 @@ export function styleClean() {
   } catch {
     // rien : on repart de zéro de toute façon
   }
-  cur.opening.classList.remove('sty-' + cur.id);
-  cur.coin.querySelectorAll('.sty-cracks, .sty-slot, .sty-gift').forEach((n) => n.remove());
-  cur.box.style.transformOrigin = '';
-  cur.box.getAnimations().forEach((a) => a.cancel());
+  const c = cur;
   cur = null;
+  c.opening.classList.remove('sty-' + c.id);
+  c.coin.querySelectorAll('.sty-cracks, .sty-slot, .sty-gift').forEach((n) => n.remove());
+  c.box.style.transformOrigin = '';
+  c.box.getAnimations().forEach((a) => a.cancel());
+  if (c.spin) c.spin.style.opacity = '';
 }
 
 // Petit sélecteur en haut à gauche de l'écran d'ouverture (admins seulement)
