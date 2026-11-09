@@ -5,6 +5,7 @@ import { useMe } from '@/api/queries';
 import { useResetWatch } from '@/lib/resetWatch';
 import { kickDoodle } from '@/lib/doodle';
 import { installMouseDepth } from '@/lib/mouseDepth';
+import { qc } from '@/lib/queryClient';
 import { sfx } from '@/engines/sound.js';
 import { useAuth, signOut } from '@/lib/auth';
 import { locale, reducedFx } from '@/lib/settings';
@@ -54,6 +55,16 @@ export function Layout() {
   const more = useUI((x) => x.more);
   useResetWatch();
   // Chaque page arrive en douceur : ses blocs montent et apparaissent l'un après l'autre
+  // l'inventaire est préparé en avance (code + collection) : la page s'ouvre déjà remplie, sans saut
+  const uid = useAuth((x) => x.user?.id);
+  useEffect(() => {
+    if (!uid) return;
+    const id = setTimeout(() => {
+      void import('@/features/inventory/Bestiary');
+      void import('@/features/inventory/inv').then((m) => qc.prefetchQuery(m.invQuery(uid)));
+    }, 1500);
+    return () => clearTimeout(id);
+  }, [uid]);
   useEffect(installMouseDepth, []); // les blocs glissent un tout petit peu avec la souris (inventaire, combat…)
   useEffect(() => {
     // nouvelle page : toujours en haut (avant, on gardait parfois la position de la page d'avant)

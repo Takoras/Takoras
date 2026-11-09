@@ -72,18 +72,20 @@ export function parseColl(rows: RawColl[] | null) {
   return m;
 }
 
+// Même requête pour la page et pour le préchargement (Layout la lance en avance : la page arrive déjà remplie)
+export const invQuery = (uid: string | undefined) => ({
+  queryKey: ['inv', uid],
+  enabled: !!uid,
+  queryFn: async (): Promise<InvData> => {
+    const [g, c, l] = await Promise.all([invApi.groups(), invApi.collection(), combatApi.levels()]);
+    const levels = new Map<string, number>();
+    (l ?? []).forEach((r) => levels.set(cKey(r.serie || 'Takoras', r.jeton), r.lvl));
+    return { groups: parseGroups(g as unknown as RawGroup[]), coll: parseColl(c as RawColl[]), levels };
+  },
+});
 export function useInventory() {
   const uid = useAuth((s) => s.user?.id);
-  return useQuery({
-    queryKey: ['inv', uid],
-    enabled: !!uid,
-    queryFn: async (): Promise<InvData> => {
-      const [g, c, l] = await Promise.all([invApi.groups(), invApi.collection(), combatApi.levels()]);
-      const levels = new Map<string, number>();
-      (l ?? []).forEach((r) => levels.set(cKey(r.serie || 'Takoras', r.jeton), r.lvl));
-      return { groups: parseGroups(g as unknown as RawGroup[]), coll: parseColl(c as RawColl[]), levels };
-    },
-  });
+  return useQuery(invQuery(uid));
 }
 export const lvlOf = (d: InvData | undefined, serie: string, name: string) => d?.levels.get(cKey(serie, name)) ?? 1;
 

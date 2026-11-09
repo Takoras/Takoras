@@ -108,6 +108,8 @@ export default function Bestiary() {
 
   if (!user) return <NeedLogin title={t('ui.bst_title')} />;
   if (inv.isError) return <p className="muted">{t('ui.err_generic')}</p>;
+  // tant que la collection n'est pas arrivée : rien (sinon la page s'affichait vide puis tout sautait en place)
+  if (!d) return <section className={s.page} aria-busy />;
 
   const groups = d?.groups.filter((g) => g.serie === view.serie) ?? [];
   const all = SERIES[view.serie] ?? [];
