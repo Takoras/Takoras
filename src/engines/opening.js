@@ -29,7 +29,7 @@ if (!document.getElementById('opening')) {
 }
 
 // les boîtes de la fiche se balancent quand la souris passe dessus (comme dans l'inventaire)
-['.op-id', '.op-stats', '.op-actions'].forEach((q) => { const n = document.querySelector('#opening ' + q); if (n) attachSwing(n, 1); });
+['.op-id', '.op-stats', '.op-actions'].forEach((q) => { const n = document.querySelector('#opening ' + q); if (n) attachSwing(n, 1.5); });
 
 // Transitions d'ouverture d'un pull (0,5 s max) + menu debug (taper « debug »)
 const fx = $('fx'), opening = $('opening');
@@ -130,47 +130,35 @@ async function chute() {
   const sc = serieTheme((sess && PULLS[sess.pull]?.name) || 'Takoras').main.split(' ').join(',');
   const dim = el(`inset:0;background:radial-gradient(60% 55% at 50% 45%, rgba(${sc},.22), transparent 70%), #0b0a12;z-index:1`);
   dim.animate([{ opacity: 0 }, { opacity: 1 }], { duration: 260, easing: 'ease-out', fill: 'forwards' });
-  const d = el(`left:${r.left}px;top:${r.top}px;width:${r.width}px;height:${r.height}px;z-index:3`,
+  const d = el(`left:${r.left}px;top:${r.top}px;width:${r.width}px;height:${r.height}px;z-index:3;will-change:transform`,
     `<img src="${img.src}" alt="" style="width:100%;height:100%;image-rendering:pixelated;display:block">`);
   hero.style.visibility = 'hidden';
   const face = d.firstElementChild;
-  // 1. élan : il se tasse et s'illumine
+  face.decode?.().catch(() => {});
+  // le gros de la mise en place est fait : on attend une image pour que l'animation parte sans à-coup
+  await new Promise(r => requestAnimationFrame(() => requestAnimationFrame(r)));
+  // 1. élan : il se tasse
   await d.animate([
-    { transform: `rotate(${a0}deg) scale(1)`, filter: 'brightness(1)' },
-    { transform: `rotate(${a0}deg) scale(.8, .88)`, filter: 'brightness(1.8)' },
+    { transform: `rotate(${a0}deg) scale(1)` },
+    { transform: `rotate(${a0}deg) scale(.8, .88)` },
   ], { duration: 90, easing: 'ease-out', fill: 'forwards' }).finished;
   // 2. il fonce au centre en tournant (petit arc), grossit trop, puis se pose ; il devient « ? » en plein vol
   const D = 400;
   const fly = d.animate([
-    { transform: `translate(0,0) rotate(${a0}deg) scale(.82)`, filter: 'brightness(1.8)' },
-    { transform: `translate(${dx * 0.55}px,${dy * 0.55 - 50}px) rotate(${a0 + 200}deg) scale(${k * 0.85})`, filter: 'brightness(1.2)', offset: 0.45 },
-    { transform: `translate(${dx}px,${dy}px) rotate(${a0 + 360}deg) scale(${k * 1.2})`, filter: 'brightness(2)', offset: 0.78 },
-    { transform: `translate(${dx}px,${dy}px) rotate(${a0 + 360}deg) scale(${k * 0.96})`, filter: 'brightness(1.2)', offset: 0.9 },
-    { transform: `translate(${dx}px,${dy}px) rotate(${a0 + 360}deg) scale(${k})`, filter: 'none' },
+    { transform: `translate(0,0) rotate(${a0}deg) scale(.82)` },
+    { transform: `translate(${dx * 0.55}px,${dy * 0.55 - 50}px) rotate(${a0 + 200}deg) scale(${k * 0.85})`, offset: 0.45 },
+    { transform: `translate(${dx}px,${dy}px) rotate(${a0 + 360}deg) scale(${k * 1.2})`, offset: 0.78 },
+    { transform: `translate(${dx}px,${dy}px) rotate(${a0 + 360}deg) scale(${k * 0.96})`, offset: 0.9 },
+    { transform: `translate(${dx}px,${dy}px) rotate(${a0 + 360}deg) scale(${k})` },
   ], { duration: D, easing: 'cubic-bezier(.35,.05,.25,1)', fill: 'forwards' });
-  // traînée : quelques échos du jeton qui s'effacent derrière lui
-  const trail = setInterval(() => {
-    const g = d.cloneNode(true);
-    g.style.zIndex = '2';
-    g.getAnimations?.().forEach(a => a.cancel());
-    g.style.transform = getComputedStyle(d).transform;
-    fx.appendChild(g);
-    g.animate([{ opacity: .45 }, { opacity: 0 }], { duration: 220, easing: 'ease-out' }).finished.then(() => g.remove());
-  }, 35);
   setTimeout(() => { face.src = MYSTERE; }, D * 0.4);
-  // 3. impact au centre : flash, onde, secousse, son
+  // 3. il se pose : petit coup sourd et une lueur brève
   setTimeout(() => {
-    clearInterval(trail);
     sfx.hold();
-    const ring = el(`left:${c.x}px;top:${c.y}px;width:${c.s}px;height:${c.s}px;z-index:4;border:8px solid rgba(255,255,255,.9);border-radius:50%;box-sizing:border-box`);
-    ring.animate([{ transform: 'translate(-50%,-50%) scale(.6)', opacity: 1 }, { transform: 'translate(-50%,-50%) scale(2.3)', opacity: 0 }], { duration: 380, easing: 'cubic-bezier(.1,.7,.3,1)', fill: 'forwards' });
-    const fl = el('inset:0;z-index:5;background:radial-gradient(circle at 50% 45%, rgba(255,255,255,.55), transparent 60%)');
+    const fl = el('inset:0;z-index:5;background:radial-gradient(circle at 50% 45%, rgba(255,255,255,.3), transparent 55%)');
     fl.animate([{ opacity: 1 }, { opacity: 0 }], { duration: 260, easing: 'ease-out', fill: 'forwards' });
-    if (!reducedFx()) document.body.animate([{ transform: 'translate(6px,-4px)' }, { transform: 'translate(-5px,3px)' }, { transform: 'translate(3px,-2px)' }, { transform: 'none' }], { duration: 200 });
-    burstAt(d, '#ffffff', .8);
   }, D * 0.78);
   await fly.finished;
-  clearInterval(trail);
   // bascule sur le vrai écran : même jeton, même place
   opening.style.opacity = '';
   real.style.visibility = '';
@@ -287,6 +275,7 @@ function steps(X) {
 let run = null;
 const opCoin = $('op-coin');
 const MYSTERE = '/img/jetons/mystere.png';
+new Image().src = MYSTERE; // déjà en mémoire quand le jeton se change en « ? » en plein vol
 
 // Le « ? » apparaît tout petit et grossit en douceur
 function spawn() {

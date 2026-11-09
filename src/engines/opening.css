@@ -413,8 +413,6 @@ html.lock #root {
 }
 
 /* ---------- Styles d'ouverture à l'essai (admins, opening-styles.js) ---------- */
-.sty-pfx { position: fixed; inset: 0; width: 100vw; height: 100vh; pointer-events: none; z-index: 40; image-rendering: pixelated; }
-.sty-ring { position: fixed; border-style: solid; border-radius: 50%; pointer-events: none; z-index: 39; box-sizing: border-box; }
 
 /* Coquille : fissures en pixels (canvas 64 × 64 agrandi sans lissage) + halo lumineux qui grandit à chaque coup */
 .sty-cracks { position: absolute; inset: 0; width: 100%; height: 100%; z-index: 2; pointer-events: none; image-rendering: pixelated;
@@ -431,4 +429,13 @@ html.lock #root {
   .opening.revealed .op-id { animation: opIn .5s cubic-bezier(.2, 1.15, .3, 1) .12s both, opDrift 6s ease-in-out .9s infinite; }
   .opening.revealed .op-stats { animation: opIn .5s cubic-bezier(.2, 1.15, .3, 1) .2s both, opDrift 7.5s ease-in-out 1s infinite; }
 }
-@keyframes opDrift { 0%, 100% { translate: 0 0; } 50% { translate: 0 -6px; } }
+/* flotte doucement ET suit un peu la souris (profondeur, --mpx/--mpy écrits par mouseDepth.ts) */
+@keyframes opDrift {
+  0%, 100% { translate: calc(var(--mpx, 0) * -14px * var(--dp, 1)) calc(var(--mpy, 0) * -10px * var(--dp, 1)); }
+  50% { translate: calc(var(--mpx, 0) * -14px * var(--dp, 1)) calc(var(--mpy, 0) * -10px * var(--dp, 1) - 6px); }
+}
+.op-stats { --dp: 1.4; }
+.op-coin-col { translate: calc(var(--mpx, 0) * 8px) calc(var(--mpy, 0) * 6px); }
+/* les deux moitiés de la coque qui tombent à la révélation */
+.sty-half { position: fixed; z-index: 45; pointer-events: none; }
+.sty-half img { position: absolute; inset: 0; width: 100%; height: 100%; image-rendering: pixelated; }

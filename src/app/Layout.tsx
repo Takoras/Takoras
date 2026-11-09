@@ -197,12 +197,6 @@ export function Layout() {
       </div>
 
       <Announcements />
-      {/* fond vivant : poussière de pixels qui dérive doucement derrière tout le site */}
-      <div className={s.ambient} aria-hidden>
-        {Array.from({ length: 12 }, (_, i) => (
-          <i key={i} />
-        ))}
-      </div>
       <main id="main" className={s.main} key={pathname}>
         {/* zoom propre à chaque page (choisi à l'œil) : le contenu de la page seulement, pas la barre ni le haut */}
         <div className={s.pz} style={{ '--pz': pageZoom(pathname) } as CSSProperties}>

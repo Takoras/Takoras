@@ -36,6 +36,21 @@
   font-size: clamp(34px, 3.8vw, 56px);
   line-height: 1;
 }
+/* jeton rare (1/1000 et plus) : reflet lumineux qui balaie le nom, à la couleur du jeton */
+.shine {
+  background: linear-gradient(90deg, #fff, var(--gc, rgb(var(--g, 201, 182, 255))), #fff) 0 0 / 200% 100%;
+  background-clip: text;
+  color: transparent;
+  animation: nameSweep 3s linear infinite;
+}
+@keyframes nameSweep {
+  to {
+    background-position: -200% 0;
+  }
+}
+:global(html.reduce-fx) .shine {
+  animation: none;
+}
 
 /* la chance en pastille à la couleur du jeton */
 .rarity {

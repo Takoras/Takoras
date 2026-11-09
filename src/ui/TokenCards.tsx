@@ -25,7 +25,8 @@ export const TokenId = forwardRef<
           <SerieName name={serie} h="2.2em" />
         </span>
       ) : null}
-      <h2 className={s.name}>{name}</h2>
+      {/* jeton rare : un reflet à sa couleur balaie le nom (comme à la révélation du tirage) */}
+      <h2 className={`${s.name} ${odds != null && odds >= 1000 ? s.shine : ''}`}>{name}</h2>
       {/* la chance défile jusqu'à sa nouvelle valeur (changement de mutation) */}
       <span className={s.rarity}>
         {odds == null ? (
