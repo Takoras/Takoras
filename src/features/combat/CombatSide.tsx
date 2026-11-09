@@ -71,7 +71,7 @@ export function EloTop() {
               <li key={r.pseudo} style={{ '--rc': rk.col } as CSSProperties}>
                 <span className={s.topPos}>{i + 1}</span>
                 <RankBadge r={rk} size={22} />
-                <Link to={`/profile/${encodeURIComponent(r.pseudo)}`}>{r.pseudo}</Link>
+                <Link to={`/profil/${encodeURIComponent(r.pseudo)}`}>{r.pseudo}</Link>
                 <b>{r.elo.toLocaleString(locale(lang))}</b>
               </li>
             );
@@ -80,7 +80,7 @@ export function EloTop() {
       ) : (
         <p className="muted">{q.isPending ? '…' : t('arena.eloEmpty')}</p>
       )}
-      <Link to="/leaderboard" className={s.topAll}>
+      <Link to="/classement" className={s.topAll}>
         {t('arena.aroundAll')} →
       </Link>
     </section>
@@ -91,7 +91,7 @@ export function EloTop() {
 export function PassLink() {
   const t = useT();
   return (
-    <Link to="/pass" className={s.passLink}>
+    <Link to="/passe" className={s.passLink}>
       <span aria-hidden></span>
       <span>
         <b>{t('ui.bp_title')}</b>

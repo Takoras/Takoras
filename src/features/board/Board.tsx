@@ -55,7 +55,7 @@ export function BoardSection({ kind: id, title }: { kind: 'pulls' | 'time'; titl
   const mine = (r: Row) => !!me.data?.pseudo && r.pseudo === me.data.pseudo;
   const name = (r: Row) => (
     <>
-      <Link to={`/profile/${encodeURIComponent(r.pseudo)}`}>{r.pseudo}</Link>
+      <Link to={`/profil/${encodeURIComponent(r.pseudo)}`}>{r.pseudo}</Link>
       {mine(r) ? <span className="muted"> ({t('ui.you_tag')})</span> : null}
     </>
   );

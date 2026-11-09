@@ -3,7 +3,7 @@ import { fakeSupabase } from './fake-supabase';
 
 test('boutique : catégories, stock, achat, prix modifié, code promo', async ({ page }) => {
   await fakeSupabase(page, { coins: 5000 });
-  await page.goto('/shop');
+  await page.goto('/boutique');
   await expect(page.getByRole('heading', { level: 1 })).toBeVisible();
   await expect(page.getByText('+20%')).toBeVisible(); // potion ×10 plus chère que d'habitude
   await expect(page.getByText('Épuisé').first()).toBeVisible(); // sablier : 2/2 achetés

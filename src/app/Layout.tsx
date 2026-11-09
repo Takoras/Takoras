@@ -35,9 +35,9 @@ const Badge = ({ n }: { n: number }) =>
 // Zoom de chaque page, réglé à l'œil sur PC (100 % = taille normale du site)
 // (relevé pour la lisibilité : les pages étaient réduites à 67-75 %, les textes devenaient trop petits)
 const PAGE_ZOOM: [string, number][] = [
-  ['/inventory', 0.9],
+  ['/inventaire', 0.9],
   ['/combat', 0.9],
-  ['/shop', 0.85],
+  ['/boutique', 0.85],
 ];
 function pageZoom(path: string) {
   if (path === '/') return 0.9;
@@ -135,7 +135,7 @@ export function Layout() {
                 <Icon name={n.icon} size={24} />
               </span>
               <span className={s.railTxt}>{t(n.key)}</span>
-              {n.to === '/friends' ? <Badge n={frN} /> : null}
+              {n.to === '/amis' ? <Badge n={frN} /> : null}
             </NavLink>
           ))}
         </div>
@@ -178,7 +178,7 @@ export function Layout() {
               <img className="px" src="/img/piece.png" alt="" width={20} height={20} />
               {me.data ? me.data.coins.toLocaleString(locale()) : me.isError ? '—' : '…'}
             </span>
-            <NavLink to="/profile" className={s.me} aria-label={t('app.account')}>
+            <NavLink to="/profil" className={s.me} aria-label={t('app.account')}>
               <Avatar pseudo={me.data?.pseudo ?? '?'} size={40} />
             </NavLink>
           </>
@@ -210,9 +210,9 @@ export function Layout() {
         {user ? (
           <footer className={s.siteFoot}>
             <span>© Takoras</span>
-            <NavLink to="/legal">{t('ui.legal_notice')}</NavLink>
-            <NavLink to="/terms">{t('ui.terms')}</NavLink>
-            <NavLink to="/privacy">{t('ui.privacy')}</NavLink>
+            <NavLink to="/mentions-legales">{t('ui.legal_notice')}</NavLink>
+            <NavLink to="/cgu">{t('ui.terms')}</NavLink>
+            <NavLink to="/confidentialite">{t('ui.privacy')}</NavLink>
           </footer>
         ) : null}
       </main>
@@ -239,19 +239,19 @@ export function Layout() {
             <Icon name="scroll" />
             {t('ui.pn_title')}
           </button>
-          <NavLink to="/profile">
+          <NavLink to="/profil">
             <Icon name="user" />
             {t('app.account')}
           </NavLink>
-          <NavLink to="/privacy">
+          <NavLink to="/confidentialite">
             <Icon name="help" />
             {t('ui.privacy')}
           </NavLink>
-          <NavLink to="/terms">
+          <NavLink to="/cgu">
             <Icon name="help" />
             {t('ui.terms')}
           </NavLink>
-          <NavLink to="/legal">
+          <NavLink to="/mentions-legales">
             <Icon name="help" />
             {t('ui.legal_notice')}
           </NavLink>

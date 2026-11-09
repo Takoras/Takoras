@@ -97,7 +97,7 @@ function usePriceRealtime() {
           body: `${itemText(it, lang)[0]} : ${f(c.old_price)} → ${f(c.new_price)}`,
           tone: down ? 'down' : 'up',
           img: itemImg(it),
-          go: () => void nav('/shop'),
+          go: () => void nav('/boutique'),
         },
         7000,
       );
@@ -194,7 +194,7 @@ export function Conversation({ f, min, inline = false }: { f: Friend; min: boole
       {inline ? (
         <header className={s.dockHead}>
           <Avatar pseudo={f.pseudo} size={28} />
-          <Link to={`/profile/${encodeURIComponent(f.pseudo)}`} className={s.dockName}>
+          <Link to={`/profil/${encodeURIComponent(f.pseudo)}`} className={s.dockName}>
             {f.pseudo}
           </Link>
         </header>
@@ -204,7 +204,7 @@ export function Conversation({ f, min, inline = false }: { f: Friend; min: boole
             ‹
           </button>
           <Avatar pseudo={f.pseudo} size={28} />
-          <Link to={`/profile/${encodeURIComponent(f.pseudo)}`} className={s.dockName}>
+          <Link to={`/profil/${encodeURIComponent(f.pseudo)}`} className={s.dockName}>
             {f.pseudo}
           </Link>
           <button

@@ -3,7 +3,7 @@ import { fakeSupabase } from './fake-supabase';
 
 test('amis : pastille, accepter une demande, plus de chat', async ({ page, isMobile }) => {
   await fakeSupabase(page);
-  await page.goto('/friends');
+  await page.goto('/amis');
   await expect(page.getByRole('heading', { level: 1 })).toBeVisible();
   // 1 demande (les messages ne comptent plus : le chat est retiré)
   // Amis est dans la barre latérale (PC et téléphone) : la pastille est sur son icône

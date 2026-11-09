@@ -190,7 +190,7 @@ export function RankAround({ elo }: { elo: number }) {
             >
               <span className={s.pos}>#{r.pos}</span>
               <RankBadge r={rk} size={22} />
-              {r.me ? <b>{r.pseudo}</b> : <Link to={`/profile/${encodeURIComponent(r.pseudo)}`}>{r.pseudo}</Link>}
+              {r.me ? <b>{r.pseudo}</b> : <Link to={`/profil/${encodeURIComponent(r.pseudo)}`}>{r.pseudo}</Link>}
               <small>{name(rk)}</small>
               <b className={s.aroundElo}>{r.elo.toLocaleString(locale(lang))}</b>
             </li>

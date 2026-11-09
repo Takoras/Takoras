@@ -1,5 +1,5 @@
 import { lazy, Suspense } from 'react';
-import { createBrowserRouter, Navigate, useLocation } from 'react-router';
+import { createBrowserRouter } from 'react-router';
 import Home from '@/features/home/Home';
 import AdminGate from '@/features/admin/AdminGate';
 import NotFound from '@/pages/NotFound';
@@ -18,35 +18,16 @@ const Combat = lazy(() => import('@/features/combat/Combat'));
 // Labo des moteurs : seulement en développement (absent du site en ligne)
 const Lab = import.meta.env.DEV ? lazy(() => import('@/pages/Lab')) : null;
 
-// Anciennes adresses en français (liens déjà partagés) → nouvelle adresse en anglais, même suite (/profil/Pseudo → /profile/Pseudo)
-const OLD: [string, string][] = [
-  ['/inventaire/objets', '/inventory/items'],
-  ['/inventaire', '/inventory'],
-  ['/bestiaire', '/bestiary'],
-  ['/boutique', '/shop'],
-  ['/classement', '/leaderboard'],
-  ['/amis', '/friends'],
-  ['/passe', '/pass'],
-  ['/profil', '/profile'],
-  ['/confidentialite', '/privacy'],
-  ['/mentions-legales', '/legal'],
-  ['/cgu', '/terms'],
-];
-function OldPath({ from, to }: { from: string; to: string }) {
-  const { pathname, search, hash } = useLocation();
-  return <Navigate replace to={to + pathname.slice(from.length) + search + hash} />;
-}
-
 export const router = createBrowserRouter([
   {
     element: <Layout />,
     children: [
       { path: '/', element: <Home /> },
-      { path: '/inventory', lazy: bestiary },
-      { path: '/bestiary', lazy: bestiary },
-      { path: '/inventory/items', lazy: page(() => import('@/features/inventory/Items')) },
-      { path: '/shop', lazy: page(() => import('@/features/shop/Shop')) },
-      { path: '/leaderboard', lazy: page(() => import('@/features/board/Board')) },
+      { path: '/inventaire', lazy: bestiary },
+      { path: '/bestiaire', lazy: bestiary },
+      { path: '/inventaire/objets', lazy: page(() => import('@/features/inventory/Items')) },
+      { path: '/boutique', lazy: page(() => import('@/features/shop/Shop')) },
+      { path: '/classement', lazy: page(() => import('@/features/board/Board')) },
       {
         path: '/combat',
         element: (
@@ -61,18 +42,14 @@ export const router = createBrowserRouter([
           </Suspense>
         ),
       },
-      { path: '/friends', lazy: page(() => import('@/features/social/Friends')) },
-      { path: '/pass', lazy: page(() => import('@/features/pass/Pass')) },
-      { path: '/profile', lazy: profile },
-      { path: '/profile/:pseudo', lazy: profile },
-      { path: '/privacy', lazy: page(() => import('@/pages/Privacy')) },
-      { path: '/legal', lazy: page(() => import('@/pages/Legal')) },
-      { path: '/terms', lazy: page(() => import('@/pages/Terms')) },
+      { path: '/amis', lazy: page(() => import('@/features/social/Friends')) },
+      { path: '/passe', lazy: page(() => import('@/features/pass/Pass')) },
+      { path: '/profil', lazy: profile },
+      { path: '/profil/:pseudo', lazy: profile },
+      { path: '/confidentialite', lazy: page(() => import('@/pages/Privacy')) },
+      { path: '/mentions-legales', lazy: page(() => import('@/pages/Legal')) },
+      { path: '/cgu', lazy: page(() => import('@/pages/Terms')) },
       { path: '/admin', element: <AdminGate /> },
-      ...OLD.flatMap(([from, to]) => [
-        { path: from, element: <OldPath from={from} to={to} /> },
-        { path: `${from}/*`, element: <OldPath from={from} to={to} /> },
-      ]),
       ...(Lab ? [{ path: '/__lab', element: <Lab /> }] : []),
       { path: '*', element: <NotFound /> },
     ],

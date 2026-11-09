@@ -693,7 +693,7 @@ export async function fakeSupabase(
           id: 1,
           kind: 'bug',
           body: 'Le bouton vendre bug',
-          page: '/inventory',
+          page: '/inventaire',
           device: '375×760',
           pseudo: 'Bob',
           status: 'new',

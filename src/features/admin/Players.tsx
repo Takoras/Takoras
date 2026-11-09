@@ -221,7 +221,7 @@ function PlayerBody({ id, P }: { id: string; P: Player }) {
           </small>
         </div>
         {P.pseudo ? (
-          <Link className={s.link} to={`/profile/${encodeURIComponent(P.pseudo)}`}>
+          <Link className={s.link} to={`/profil/${encodeURIComponent(P.pseudo)}`}>
             Voir le profil
           </Link>
         ) : null}
