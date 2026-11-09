@@ -436,6 +436,3 @@ html.lock #root {
 }
 .op-stats { --dp: 1.4; }
 .op-coin-col { translate: calc(var(--mpx, 0) * 8px) calc(var(--mpy, 0) * 6px); }
-/* les deux moitiés de la coque qui tombent à la révélation */
-.sty-half { position: fixed; z-index: 45; pointer-events: none; }
-.sty-half img { position: absolute; inset: 0; width: 100%; height: 100%; image-rendering: pixelated; }

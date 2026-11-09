@@ -86,7 +86,26 @@ const S = {};
 // À la fin, la coque éclate.
 const G = 64; // grille du dessin des jetons
 const DIRS = [[1, 0], [1, 1], [0, 1], [-1, 1], [-1, 0], [-1, -1], [0, -1], [1, -1]];
-const inCoin = (x, y) => (x - 31.5) ** 2 + (y - 31.5) ** 2 < 27 ** 2;
+// les fissures courent sur tout le dessin du « ? » (ses pixels non transparents), jusqu'au bord
+const MASK = new Uint8Array(G * G).fill(1);
+{
+  const im = new Image();
+  im.onload = () => {
+    try {
+      const cv = document.createElement('canvas');
+      cv.width = cv.height = G;
+      const x = cv.getContext('2d', { willReadFrequently: true });
+      x.imageSmoothingEnabled = false;
+      x.drawImage(im, 0, 0, G, G);
+      const d = x.getImageData(0, 0, G, G).data;
+      for (let n = 0; n < G * G; n++) MASK[n] = d[n * 4 + 3] > 40 ? 1 : 0;
+    } catch {
+      // image illisible : on garde tout le carré
+    }
+  };
+  im.src = '/img/jetons/mystere.png';
+}
+const inCoin = (x, y) => x >= 0 && y >= 0 && x < G && y < G && MASK[y * G + x] === 1;
 // une fissure : marche en escalier (pas de diagonale lisse) qui part d'un point et peut se diviser
 function grow(cr, from, dir, len) {
   let [x, y] = from,
@@ -259,59 +278,9 @@ S.crack = {
       if (n++ % 2 === 0) noise({ dur: 0.05, vol: 0.05, type: 'highpass', f: R(2000, 4000) });
     }, 130);
   },
-  reveal(c, j, lv) {
-    clearInterval(c.holdT);
-    c.box.classList.remove('sty-crk-hold');
-    cancelAnimationFrame(c.ph.raf);
-    c.ph.raf = 0;
-    c.box.style.transform = '';
-    c.cr.cv.remove();
-    // la coque se casse en deux le long d'une fente en zigzag : les deux moitiés s'écartent et tombent,
-    // le jeton est dessous (pas d'explosion, pas de particules)
-    const crk = (() => {
-      try {
-        return c.cr.cv.toDataURL();
-      } catch {
-        return '';
-      }
-    })();
-    const zig = [];
-    for (let n = 0; n <= 8; n++) zig.push([50 + (n % 2 ? 7 : -7) + R(-3, 3), (n / 8) * 100]);
-    const left = `polygon(0% 0%, ${zig.map(([x, y]) => `${x.toFixed(1)}% ${y}%`).join(', ')}, 0% 100%)`;
-    const right = `polygon(100% 0%, ${zig.map(([x, y]) => `${x.toFixed(1)}% ${y}%`).join(', ')}, 100% 100%)`;
-    const r0 = c.box.getBoundingClientRect();
-    [
-      [left, -1],
-      [right, 1],
-    ].forEach(([clip, side]) => {
-      const h = document.createElement('div');
-      h.className = 'sty-half';
-      h.style.cssText = `left:${r0.left}px;top:${r0.top}px;width:${r0.width}px;height:${r0.height}px;clip-path:${clip}`;
-      h.innerHTML = `<img class="px" src="/img/jetons/mystere.png" alt="">${crk ? `<img class="px" src="${crk}" alt="">` : ''}`;
-      c.host.appendChild(h);
-      h.animate(
-        [
-          { transform: 'none', opacity: 1 },
-          { transform: `translate(${side * 26}px,-10px) rotate(${side * 10}deg)`, opacity: 1, offset: 0.25 },
-          { transform: `translate(${side * 60}px,${innerHeight * 0.5}px) rotate(${side * 38}deg)`, opacity: 0 },
-        ],
-        { duration: 900, easing: 'cubic-bezier(.4,0,.8,.4)', fill: 'forwards' },
-      ).finished.then(() => h.remove());
-    });
-    c.fx.tint(0.18 + lv * 0.08, 380);
-    c.fx.shake(0.4);
-    c.box.animate(
-      [
-        { transform: 'scale(.86)' },
-        { transform: 'scale(1.06)', offset: 0.5 },
-        { transform: 'none' },
-      ],
-      { duration: 420, easing: 'cubic-bezier(.2,.8,.3,1)' },
-    );
-    noise({ dur: 0.18, vol: 0.22, type: 'highpass', f: 2600 }); // la coque craque
-    tone('sine', 110, { dur: 0.5, vol: 0.35, to: 40 });
-    arp(4, 5 + Math.round(lv * 2), { type: 'triangle', vol: 0.06, gap: 0.05 });
-    return { noSpin: true, lock: 500 };
+  // révélation : celle d'origine (petite onde, le jeton tourne) ; la Coquille range juste ses fissures
+  reveal() {
+    return null;
   },
   clean(c) {
     clearInterval(c.holdT);
@@ -362,7 +331,9 @@ export function styleReveal(j, lv, quiet) {
     styleClean();
     return null;
   }
-  return safe(() => S[c.id].reveal(c, j, lv) || {}, null);
+  const own = safe(() => S[c.id].reveal(c, j, lv), null);
+  if (!own) styleClean(); // révélation classique d'opening.js
+  return own || null;
 }
 export function styleClean() {
   if (!cur) return;
