@@ -2,7 +2,18 @@
 // Le déroulé reste le même (clics → compteur 1/X → pause → révélation) ; chaque style change ce qu'on voit et ce qu'on
 // entend à chaque clic, pendant la pause et à la révélation. Choix gardé dans le navigateur (takoras-op-style).
 import { SERIES, texOf } from '@/data/jetons';
-import { ACC, reducedFx, sfx } from './env';
+import { qc } from '@/lib/queryClient';
+import { reducedFx, sfx } from './env';
+
+// admin : on retient la dernière valeur connue. Après un tirage, l'état du compte est remplacé par la réponse du
+// serveur, qui ne contient pas « admin » : sans ça, le sélecteur disparaissait dès la première ouverture.
+let admin = false;
+const readAdmin = () => {
+  for (const [, d] of qc.getQueriesData({ queryKey: ['me'] })) if (d && typeof d.admin === 'boolean') admin = d.admin;
+  return admin;
+};
+qc.getQueryCache().subscribe(readAdmin);
+const isAdmin = readAdmin;
 
 export const STYLES = [
   ['', 'Normal'],
@@ -14,7 +25,7 @@ export const STYLES = [
 ];
 const KEY = 'takoras-op-style';
 export function currentStyle() {
-  if (!ACC.isAdmin) return '';
+  if (!isAdmin()) return '';
   try {
     const s = localStorage.getItem(KEY) || '';
     return STYLES.some(([id]) => id === s) ? s : '';
@@ -578,7 +589,7 @@ export function styleClean() {
 // Petit sélecteur en haut à gauche de l'écran d'ouverture (admins seulement)
 export function renderPicker(opening) {
   let p = opening.querySelector('.sty-pick');
-  if (!ACC.isAdmin) {
+  if (!isAdmin()) {
     p?.remove();
     return;
   }

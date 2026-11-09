@@ -46,7 +46,7 @@ export async function openPulls(n: number | 'all', serie = 'Takoras') {
       capped?: number;
       capped_coins?: number;
     };
-    qc.setQueryData(meKey(), data.state);
+    qc.setQueryData(meKey(), (old: object | undefined) => ({ ...old, ...(data.state as object) })); // garde admin, testeur… (absents de la réponse)
     buy(data.results.length, data.results, data.variants ?? null, data.lucks ?? null, data.ids ?? null);
     // limite de 500 exemplaires par jeton : le surplus est vendu tout de suite
     if (data.capped)
@@ -80,7 +80,7 @@ export function installOpeningHost() {
   if (installed) return;
   installed = true;
   host.openPulls = (n, serie) => void openPulls(n, serie);
-  host.applyState = (st) => qc.setQueryData(meKey(), st);
+  host.applyState = (st) => qc.setQueryData(meKey(), (old: object | undefined) => ({ ...old, ...(st as object) }));
   host.ecoDecorate = ecoDecorate;
   host.accRecordPull = () => {
     void qc.invalidateQueries({ queryKey: ['history'] });
@@ -120,7 +120,7 @@ async function openCoinPulls(n: number, serie: string) {
       n,
       me.admin || me.tester ? { force: debug.force || undefined, luck: debug.luck, p_variant: debug.variant || undefined } : {},
     )) as { state: Me; results: string[]; variants?: (string | null)[]; lucks?: number[]; ids?: (number | null)[] };
-    qc.setQueryData(meKey(), data.state);
+    qc.setQueryData(meKey(), (old: object | undefined) => ({ ...old, ...(data.state as object) })); // garde admin, testeur… (absents de la réponse)
     buy(data.results.length, data.results, data.variants ?? null, data.lucks ?? null, data.ids ?? null, Math.max(0, PULLS.findIndex((p) => p.name === serie)));
   } catch (err) {
     sfx.deny();
