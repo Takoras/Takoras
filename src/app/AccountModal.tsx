@@ -125,11 +125,11 @@ function TermsGate() {
           <input type="checkbox" checked={cgu} onChange={(e) => setCgu(e.target.checked)} />
           <span>
             {a}
-            <a href="/cgu" target="_blank" rel="noopener noreferrer">
+            <a href="/terms" target="_blank" rel="noopener noreferrer">
               {t('ui.terms_cgu')}
             </a>
             {b1}
-            <a href="/confidentialite" target="_blank" rel="noopener noreferrer">
+            <a href="/privacy" target="_blank" rel="noopener noreferrer">
               {t('ui.terms_privacy')}
             </a>
             {b2}

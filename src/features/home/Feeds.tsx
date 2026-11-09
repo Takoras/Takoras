@@ -109,7 +109,7 @@ export function Live() {
                     <b>{t('ui.you')}</b>
                   ) : (
                     // les copies (pour la boucle) sont cachées : leurs liens ne doivent pas être atteignables au clavier
-                    <Link to={`/profil/${encodeURIComponent(r.pseudo)}`} tabIndex={i >= rows.length ? -1 : undefined}>
+                    <Link to={`/profile/${encodeURIComponent(r.pseudo)}`} tabIndex={i >= rows.length ? -1 : undefined}>
                       {r.pseudo}
                     </Link>
                   )}{' '}

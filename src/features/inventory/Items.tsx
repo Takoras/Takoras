@@ -85,7 +85,7 @@ export default function Items() {
       ) : (
         <div className={s.empty}>
           <p className="muted">{t('ui.inv_items_empty')}</p>
-          <Link className={s.link} to="/boutique">
+          <Link className={s.link} to="/shop">
             {t('ui.nav_shop')}
           </Link>
         </div>

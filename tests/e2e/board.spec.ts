@@ -9,7 +9,7 @@ test('classements : tirages ouverts sur l’accueil, temps de jeu dans l’inven
   await expect(pulls.getByRole('link', { name: 'Alpha' })).toBeVisible();
   await pulls.getByRole('radio', { name: 'Depuis toujours' }).click();
   await expect.poll(() => calls.filter((c) => c === 'leaderboard').length).toBeGreaterThanOrEqual(2);
-  await page.goto('/inventaire');
+  await page.goto('/inventory');
   const time = page.getByRole('region', { name: 'Temps de jeu' });
   await expect(time.getByText('2 h 05').first()).toBeVisible();
   // plus d'onglet Classement dans le menu

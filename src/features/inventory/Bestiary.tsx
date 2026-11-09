@@ -49,10 +49,10 @@ export function InvTabs() {
   useSwingAll(ref, 'a', 0.5); // les onglets penchent et se balancent au passage de la souris
   return (
     <nav ref={ref} className={s.tabs} aria-label={t('ui.nav_inv')}>
-      <NavLink to="/inventaire" end>
+      <NavLink to="/inventory" end>
         {t('ui.bestiary')}
       </NavLink>
-      <NavLink to="/inventaire/objets">{t('ui.items')}</NavLink>
+      <NavLink to="/inventory/items">{t('ui.items')}</NavLink>
     </nav>
   );
 }
