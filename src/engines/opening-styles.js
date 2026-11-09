@@ -16,7 +16,7 @@ qc.getQueryCache().subscribe(readAdmin);
 const isAdmin = readAdmin;
 
 export const STYLES = [
-  ['', 'Normal'],
+  ['', 'Ancienne'],
   ['boing', 'Boing'],
   ['crack', 'Coquille'],
   ['slot', 'Roulette'],
@@ -24,13 +24,15 @@ export const STYLES = [
   ['gift', 'Cadeau'],
 ];
 const KEY = 'takoras-op-style';
+// La Coquille est l'ouverture de tout le monde ; les admins peuvent encore essayer les autres (sélecteur)
+export const DEFAULT_STYLE = 'crack';
 export function currentStyle() {
-  if (!isAdmin()) return '';
+  if (!isAdmin()) return DEFAULT_STYLE;
   try {
-    const s = localStorage.getItem(KEY) || '';
-    return STYLES.some(([id]) => id === s) ? s : '';
+    const s = localStorage.getItem(KEY);
+    return s !== null && STYLES.some(([id]) => id === s) ? s : DEFAULT_STYLE;
   } catch {
-    return '';
+    return DEFAULT_STYLE;
   }
 }
 export function setStyle(s) {
@@ -256,56 +258,158 @@ S.boing = {
   },
 };
 
-// 2. COQUILLE : chaque clic fissure la coque (de la lumière passe par les fentes, des éclats tombent) ; à la fin elle éclate
-function crackPath(cx, cy, len, ang) {
-  let x = cx,
-    y = cy,
-    pts = [`${x},${y}`];
-  for (let s = 0; s < len; s += 4) {
-    ang += R(-0.7, 0.7);
-    x = Math.round(x + Math.cos(ang) * 4);
-    y = Math.round(y + Math.sin(ang) * 4);
-    pts.push(`${x},${y}`);
+// 2. COQUILLE : chaque clic frappe le jeton (il part et tourne un peu, comme sous un coup) et fissure la coque ;
+// les fissures sont dessinées en vrais pixels (grille 64 × 64 du jeton) avec de la lumière qui passe par les fentes.
+// À la fin, la coque éclate.
+const G = 64; // grille du dessin des jetons
+const DIRS = [[1, 0], [1, 1], [0, 1], [-1, 1], [-1, 0], [-1, -1], [0, -1], [1, -1]];
+const inCoin = (x, y) => (x - 31.5) ** 2 + (y - 31.5) ** 2 < 27 ** 2;
+// une fissure : marche en escalier (pas de diagonale lisse) qui part d'un point et peut se diviser
+function grow(cr, from, dir, len) {
+  let [x, y] = from,
+    d = dir;
+  const out = [];
+  const put = (nx, ny) => {
+    if (!inCoin(nx, ny)) return false;
+    x = nx;
+    y = ny;
+    out.push([x, y]);
+    return true;
+  };
+  for (let s = 0; s < len; s++) {
+    if (Math.random() < 0.35) d = (d + (Math.random() < 0.5 ? 1 : 7)) % 8;
+    const [dx, dy] = DIRS[d];
+    // diagonale = deux pas en escalier (pas de trait lisse : look pixel art)
+    const ok = dx && dy ? (Math.random() < 0.5 ? put(x + dx, y) && put(x, y + dy) : put(x, y + dy) && put(x + dx, y)) : put(x + dx, y + dy);
+    if (!ok) break;
+    if (s > 3 && Math.random() < 0.12) cr.tips.push({ p: [x, y], d: (d + (Math.random() < 0.5 ? 2 : 6)) % 8 });
   }
-  return pts.join(' ');
+  if (out.length) cr.tips.push({ p: out.at(-1), d });
+  return out;
+}
+function drawCracks(c) {
+  const { cx, cells, k } = c.cr;
+  cx.clearRect(0, 0, G, G);
+  const glow = c.cr.rgb;
+  // halo : les pixels autour de la fente, couleur de la lumière, de plus en plus forts
+  const near = new Map();
+  for (const [x, y] of cells)
+    for (let ox = -2; ox <= 2; ox++)
+      for (let oy = -2; oy <= 2; oy++) {
+        const dd = Math.abs(ox) + Math.abs(oy);
+        if (!dd || dd > 3) continue;
+        const key = `${x + ox},${y + oy}`;
+        near.set(key, Math.min(near.get(key) ?? 9, dd));
+      }
+  for (const [key, dd] of near) {
+    const [x, y] = key.split(',').map(Number);
+    if (!inCoin(x, y)) continue;
+    cx.fillStyle = `rgba(${glow}, ${(dd === 1 ? 0.75 : dd === 2 ? 0.38 : 0.16) * (0.5 + k * 0.5)})`;
+    cx.fillRect(x, y, 1, 1);
+  }
+  // la fente : bord sombre puis cœur blanc
+  for (const [x, y] of cells) {
+    cx.fillStyle = '#ffffff';
+    cx.fillRect(x, y, 1, 1);
+  }
+  // quelques pixels très chauds qui scintillent
+  cx.fillStyle = `rgb(${glow})`;
+  for (const [x, y] of cells) if ((x * 7 + y * 13 + c.cr.t) % 11 === 0) cx.fillRect(x, y, 1, 1);
 }
 S.crack = {
   start(c) {
-    const svg = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
-    svg.setAttribute('viewBox', '0 0 64 64');
-    svg.setAttribute('class', 'sty-cracks');
-    c.box.appendChild(svg);
-    c.svg = svg;
-    c.ang = R(0, 6.28);
+    const cv = document.createElement('canvas');
+    cv.width = cv.height = G;
+    cv.className = 'sty-cracks';
+    c.box.appendChild(cv);
+    const tier = getComputedStyle(c.opening).getPropertyValue('--tier').trim() || '235, 235, 255';
+    c.cr = { cv, cx: cv.getContext('2d'), cells: [], tips: [], k: 0, t: 0, rgb: tier };
+    // d'où vient le clic (pour pousser le jeton dans l'autre sens)
+    c.onPtr = (e) => {
+      c.px = e.clientX;
+      c.py = e.clientY;
+    };
+    c.opening.addEventListener('pointerdown', c.onPtr, true);
   },
   tap(c, k, i) {
-    const n = i === 1 ? 1 : 2;
-    for (let q = 0; q < n; q++) {
-      c.ang += R(1.2, 2.6);
-      const p = document.createElementNS('http://www.w3.org/2000/svg', 'polyline');
-      p.setAttribute('points', crackPath(32 + R(-6, 6), 32 + R(-6, 6), 12 + k * 22, c.ang));
-      c.svg.appendChild(p);
-      const L = p.getTotalLength?.() || 40;
-      p.style.strokeDasharray = `${L}`;
-      p.animate([{ strokeDashoffset: L }, { strokeDashoffset: 0 }], { duration: 120, easing: 'ease-out', fill: 'forwards' });
+    const cr = c.cr;
+    cr.k = k;
+    cr.rgb = getComputedStyle(c.opening).getPropertyValue('--tier').trim() || cr.rgb;
+    // premier clic : impact au centre ; ensuite on prolonge les fissures et on en ouvre de nouvelles
+    const add = [];
+    if (i === 1 || !cr.tips.length) {
+      const o = [32 + Math.round(R(-5, 5)), 32 + Math.round(R(-5, 5))];
+      add.push(o);
+      for (let q = 0; q < 3; q++) add.push(...grow(cr, o, Math.floor(R(0, 8)), 5 + Math.round(R(0, 4))));
+    } else {
+      const tips = cr.tips.splice(0, Math.min(cr.tips.length, 2 + Math.round(k * 3)));
+      for (const tp of tips) add.push(...grow(cr, tp.p, tp.d, 3 + Math.round(R(2, 4) + k * 5)));
+      if (Math.random() < 0.5) {
+        const o = pick(cr.cells.length ? cr.cells : [[32, 32]]);
+        add.push(...grow(cr, o, Math.floor(R(0, 8)), 4 + Math.round(k * 6)));
+      }
     }
-    c.svg.style.setProperty('--glow', String(2 + k * 10));
-    c.svg.style.opacity = String(0.7 + k * 0.3);
-    c.box.animate([{ transform: 'translateX(0)' }, { transform: `translateX(${R(4, 8) * (i % 2 ? 1 : -1)}px) rotate(${R(-4, 4)}deg)` }, { transform: 'none' }], { duration: 140, easing: 'ease-out' });
+    // la fissure s'ouvre en une fraction de seconde (pixel par pixel)
+    let n = 0;
+    const step = () => {
+      const m = Math.ceil(add.length / 5);
+      cr.cells.push(...add.slice(n, n + m));
+      n += m;
+      cr.t++;
+      drawCracks(c);
+      if (n < add.length) requestAnimationFrame(step);
+    };
+    step();
+    c.box.style.setProperty('--glow', String(1 + k * 6));
+    c.box.style.setProperty('--crk', String(0.5 + k * 0.5));
+    // le coup : le jeton part à l'opposé du clic, tourne un peu, puis revient en ressort
     const m = mid(c.coin);
-    emit(c.host, Array.from({ length: fewer(3 + Math.round(k * 6)) }, () => ({ x: m.x + R(-m.w * 0.35, m.w * 0.35), y: m.y + R(-m.w * 0.3, m.w * 0.2), vx: R(-160, 160), vy: R(-260, -60), c: pick(MYST), g: 1300, life: R(0.6, 1), s: pick([4, 6, 8]), floor: m.r.bottom + 40, bounce: 0.3, edge: '#120e1f' })));
-    noise({ dur: 0.07, vol: 0.18 + k * 0.1, type: 'highpass', f: 2200 - k * 900, q: 0.8 });
-    noise({ dur: 0.12, vol: 0.08, type: 'bandpass', f: 600 + i * 40, q: 3, delay: 0.02 });
+    let dx = m.x - (c.px ?? m.x + R(-1, 1)),
+      dy = m.y - (c.py ?? m.y + R(-1, 1));
+    const L = Math.hypot(dx, dy) || 1;
+    if (L < 8) {
+      const a = R(0, Math.PI * 2);
+      dx = Math.cos(a);
+      dy = Math.sin(a);
+    } else {
+      dx /= L;
+      dy /= L;
+    }
+    const f = 14 + k * 22,
+      rot = (dx >= 0 ? 1 : -1) * (8 + k * 14) * R(0.7, 1.2);
+    c.box.getAnimations().forEach((an) => an.cancel());
+    c.box.animate(
+      [
+        { transform: 'none', filter: 'brightness(1)' },
+        { transform: `translate(${dx * f}px,${dy * f}px) rotate(${rot}deg) scale(.94)`, filter: 'brightness(1.8)', offset: 0.18 },
+        { transform: `translate(${-dx * f * 0.25}px,${-dy * f * 0.25}px) rotate(${-rot * 0.35}deg)`, filter: 'brightness(1)', offset: 0.55 },
+        { transform: `translate(${dx * f * 0.08}px,${dy * f * 0.08}px) rotate(${rot * 0.1}deg)`, offset: 0.8 },
+        { transform: 'none' },
+      ],
+      { duration: 380, easing: 'cubic-bezier(.2,.7,.3,1)' },
+    );
+    // éclats de coque qui sautent du côté frappé
+    emit(c.host, Array.from({ length: fewer(4 + Math.round(k * 8)) }, () => ({ x: m.x - dx * m.w * 0.35 + R(-12, 12), y: m.y - dy * m.w * 0.35 + R(-12, 12), vx: -dx * R(150, 420) + R(-120, 120), vy: -dy * R(150, 420) - R(80, 260), c: pick(MYST), g: 1400, life: R(0.6, 1.1), s: pick([4, 6, 8]), floor: m.r.bottom + 60, bounce: 0.3, edge: '#120e1f' })));
+    emit(c.host, Array.from({ length: fewer(3 + Math.round(k * 4)) }, () => ({ x: m.x + R(-10, 10), y: m.y + R(-10, 10), vx: R(-260, 260), vy: R(-260, 260), c: '#ffffff', life: R(0.15, 0.3), s: 4 })));
+    noise({ dur: 0.07, vol: 0.2 + k * 0.1, type: 'highpass', f: 2400 - k * 900, q: 0.8 });
+    noise({ dur: 0.12, vol: 0.09, type: 'bandpass', f: 600 + i * 40, q: 3, delay: 0.02 });
+    tone('sine', 180 - k * 60, { dur: 0.14, vol: 0.22, to: 60 });
     tone('triangle', 900 + k * 700, { dur: 0.05, vol: 0.05, to: 400 });
   },
   hold(c) {
-    c.svg.classList.add('pulse');
-    c.holdSnd = setInterval(() => noise({ dur: 0.05, vol: 0.05, type: 'highpass', f: R(2000, 4000) }), 260);
+    c.box.classList.add('sty-crk-hold');
+    let n = 0;
+    c.holdT = setInterval(() => {
+      c.cr.t++;
+      drawCracks(c);
+      if (n++ % 2 === 0) noise({ dur: 0.05, vol: 0.05, type: 'highpass', f: R(2000, 4000) });
+    }, 130);
   },
   reveal(c, j, lv) {
-    clearInterval(c.holdSnd);
+    clearInterval(c.holdT);
+    c.box.classList.remove('sty-crk-hold');
     const m = mid(c.coin);
-    c.svg.remove();
+    c.cr.cv.remove();
     // éclats de coque qui partent dans tous les sens, puis retombent
     emit(c.host, radial(m, 60, { sp: [400, 1100], up: 250, cols: MYST, g: 1600, life: [0.9, 1.5], s: [6, 14], floor: innerHeight - 6, shrink: false, edge: '#120e1f' }));
     emit(c.host, radial(m, 30, { sp: [200, 600], cols: [j.glow, '#ffffff'], life: [0.4, 0.8], s: [4, 6] }));
@@ -329,7 +433,12 @@ S.crack = {
     return { noSpin: true, lock: 500 };
   },
   clean(c) {
-    clearInterval(c.holdSnd);
+    clearInterval(c.holdT);
+    c.box.classList.remove('sty-crk-hold');
+    c.box.style.removeProperty('--glow');
+    c.box.style.removeProperty('--crk');
+    c.opening.removeEventListener('pointerdown', c.onPtr, true);
+    c.cr?.cv.remove();
   },
 };
 
@@ -562,7 +671,7 @@ export function styleStart(env) {
   const box = env.coin.querySelector('.tilt3d');
   if (!box) return;
   cur = { id, box, ...env, spin: env.coin.querySelector('.spin') };
-  env.opening.classList.add('sty-' + id);
+  env.opening.classList.add('op-sty-' + id);
   safe(() => S[id].start(cur));
 }
 export const styleActive = () => !!cur;
@@ -591,7 +700,7 @@ export function styleClean() {
   }
   const c = cur;
   cur = null;
-  c.opening.classList.remove('sty-' + c.id);
+  c.opening.classList.remove('op-sty-' + c.id);
   c.coin.querySelectorAll('.sty-cracks, .sty-slot, .sty-gift').forEach((n) => n.remove());
   c.box.style.transformOrigin = '';
   c.box.getAnimations().forEach((a) => a.cancel());

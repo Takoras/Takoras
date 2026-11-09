@@ -419,12 +419,11 @@ html.lock #root {
 .sty-pfx { position: fixed; inset: 0; width: 100vw; height: 100vh; pointer-events: none; z-index: 40; image-rendering: pixelated; }
 .sty-ring { position: fixed; border-style: solid; border-radius: 50%; pointer-events: none; z-index: 39; box-sizing: border-box; }
 
-/* Coquille : fissures lumineuses par-dessus le « ? » */
-.sty-cracks { position: absolute; inset: 0; width: 100%; height: 100%; z-index: 2; pointer-events: none; overflow: visible; --glow: 2;
-  filter: drop-shadow(0 0 calc(var(--glow) * 1px) #fff) drop-shadow(0 0 calc(var(--glow) * 2px) rgb(var(--tier, 255 255 255))); }
-.sty-cracks polyline { fill: none; stroke: #fff; stroke-width: 1.6; stroke-linecap: square; stroke-linejoin: miter; shape-rendering: crispEdges; }
-.sty-cracks.pulse { animation: styCrack .35s ease-in-out infinite alternate; }
-@keyframes styCrack { to { --glow: 16; opacity: 1; } }
+/* Coquille : fissures en pixels (canvas 64 × 64 agrandi sans lissage) + halo lumineux qui grandit à chaque coup */
+.sty-cracks { position: absolute; inset: 0; width: 100%; height: 100%; z-index: 2; pointer-events: none; image-rendering: pixelated;
+  filter: drop-shadow(0 0 calc(var(--glow, 1) * 1px) rgb(255 255 255 / 90%)) drop-shadow(0 0 calc(var(--glow, 1) * 3px) rgba(var(--tier, 255, 255, 255), .8)); }
+.sty-crk-hold .sty-cracks { animation: styCrack .3s ease-in-out infinite alternate; }
+@keyframes styCrack { to { filter: drop-shadow(0 0 4px #fff) drop-shadow(0 0 22px rgba(var(--tier, 255, 255, 255), 1)); } }
 
 /* Roulette : fenêtre de machine à sous, ampoules autour */
 .sty-slot { position: absolute; inset: 0; z-index: 2; }

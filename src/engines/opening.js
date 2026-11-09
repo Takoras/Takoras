@@ -314,8 +314,10 @@ function startOpening() {
   if (!sess.cur) {
     // Jeton tiré par le serveur (plan) ; sinon tirage local (tests admin « sans stock »)
     const result = (sess.plan && findJeton(sess.plan[sess.idx])) || draw(seriesOf());
-    const queue = steps(result.odds);
-    sess.cur = { name: result.name, variant: (sess.vars || [])[sess.idx] || '', queue, n0: queue.length, shown: 1, phase: 'count' };
+    // jeton muté (Doré, Céleste, Ombre) : le compteur monte jusqu'à sa vraie chance (Mobu doré → 1/20, pas 1/2)
+    const variant = (sess.vars || [])[sess.idx] || '';
+    const queue = steps(variant ? vOdds(result.odds, variant) : result.odds);
+    sess.cur = { name: result.name, variant, queue, n0: queue.length, shown: 1, phase: 'count' };
     save();
   }
   const c = sess.cur, p = PULLS[sess.pull];
@@ -916,7 +918,7 @@ function tap() {
   $('op-hint').textContent = '';
   if (!run.queue.length) {
     // En instantané (ou pour les communs), on révèle directement, sans pause ni cinématique
-    if (run.result.odds < FAST || SETTINGS.speed === 'instant') { run.done = true; setTimeout(reveal, 120); }
+    if (run.shown < FAST || SETTINGS.speed === 'instant') { run.done = true; setTimeout(reveal, 120); } // chance affichée (mutation comprise) : une vraie pause dès 1/60
     else setTimeout(hold, 200);
   }
 }
