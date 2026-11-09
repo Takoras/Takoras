@@ -21,6 +21,7 @@ import { installGridCss } from './lib/gridCss';
 import { confirm } from './ui/confirm';
 import './styles/global.css';
 import './styles/art.css';
+import './styles/flat.css'; // essai « à plat » (sans ombres ni contours) : retirer cette ligne pour annuler
 
 // Anciens liens #… → nouvelle adresse, avant le premier affichage
 const legacy = redirectLegacyHash();

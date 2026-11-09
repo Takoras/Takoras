@@ -1,0 +1,9 @@
+/* ESSAI « à plat » : plus aucune ombre ni contour sur les boîtes du site (demande du 9 nov. 2026).
+   Pour annuler : supprimer ce fichier et son import dans src/boot.tsx (ou annuler le commit « Essai à plat »).
+   Les images, dessins et vidéos ne sont pas touchés (leurs lueurs restent) ; le contour de focus clavier reste. */
+*:not(img, canvas, video, svg, svg *),
+*::before,
+*::after {
+  box-shadow: none !important;
+  border-color: transparent !important;
+}
