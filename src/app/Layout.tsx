@@ -4,6 +4,7 @@ import { NavLink, Outlet, useLocation, useNavigate } from 'react-router';
 import { useMe } from '@/api/queries';
 import { useResetWatch } from '@/lib/resetWatch';
 import { kickDoodle } from '@/lib/doodle';
+import { installMouseDepth } from '@/lib/mouseDepth';
 import { sfx } from '@/engines/sound.js';
 import { useAuth, signOut } from '@/lib/auth';
 import { locale, reducedFx } from '@/lib/settings';
@@ -53,6 +54,7 @@ export function Layout() {
   const more = useUI((x) => x.more);
   useResetWatch();
   // Chaque page arrive en douceur : ses blocs montent et apparaissent l'un après l'autre
+  useEffect(installMouseDepth, []); // les blocs glissent un tout petit peu avec la souris (inventaire, combat…)
   useEffect(() => {
     // nouvelle page : toujours en haut (avant, on gardait parfois la position de la page d'avant)
     window.scrollTo({ top: 0, left: 0, behavior: 'instant' as ScrollBehavior });

@@ -1067,3 +1067,27 @@
     height: 22px;
   }
 }
+
+/* profondeur à la souris (comme l'accueil) : chaque bloc glisse un tout petit peu, à sa profondeur (--mpx/--mpy, mouseDepth.ts) */
+.head,
+.tabs,
+.shelves,
+.progress,
+.tools,
+.grid,
+.items {
+  translate: calc(var(--mpx, 0) * -8px * var(--dp, 1)) calc(var(--mpy, 0) * -6px * var(--dp, 1));
+}
+.page .head {
+  --dp: 0.6;
+}
+.page .shelves {
+  --dp: 1.3;
+}
+.page .progress {
+  --dp: 0.9;
+}
+.grid,
+.items {
+  --dp: 1.6;
+}

@@ -1,47 +1,10 @@
-// Styles d'ouverture à l'essai (réservés aux admins) : 5 façons très différentes d'ouvrir un tirage.
-// Le déroulé reste le même (clics → compteur 1/X → pause → révélation) ; chaque style change ce qu'on voit et ce qu'on
-// entend à chaque clic, pendant la pause et à la révélation. Choix gardé dans le navigateur (takoras-op-style).
-import { SERIES, texOf } from '@/data/jetons';
-import { qc } from '@/lib/queryClient';
+// Ouverture « Coquille » : chaque clic frappe le jeton mystère (il part en apesanteur et sa coque se fissure),
+// la lumière passe par les fentes, et à la révélation la coque éclate en morceaux.
+// Le déroulé reste celui d'opening.js (clics → compteur 1/X → pause → révélation) ; ce fichier fait le spectacle.
 import { reducedFx, sfx } from './env';
 
-// admin : on retient la dernière valeur connue. Après un tirage, l'état du compte est remplacé par la réponse du
-// serveur, qui ne contient pas « admin » : sans ça, le sélecteur disparaissait dès la première ouverture.
-let admin = false;
-const readAdmin = () => {
-  for (const [, d] of qc.getQueriesData({ queryKey: ['me'] })) if (d && typeof d.admin === 'boolean') admin = d.admin;
-  return admin;
-};
-qc.getQueryCache().subscribe(readAdmin);
-const isAdmin = readAdmin;
-
-export const STYLES = [
-  ['', 'Ancienne'],
-  ['boing', 'Boing'],
-  ['crack', 'Coquille'],
-  ['slot', 'Roulette'],
-  ['combo', 'Combo'],
-  ['gift', 'Cadeau'],
-];
-const KEY = 'takoras-op-style';
-// La Coquille est l'ouverture de tout le monde ; les admins peuvent encore essayer les autres (sélecteur)
-export const DEFAULT_STYLE = 'crack';
-export function currentStyle() {
-  if (!isAdmin()) return DEFAULT_STYLE;
-  try {
-    const s = localStorage.getItem(KEY);
-    return s !== null && STYLES.some(([id]) => id === s) ? s : DEFAULT_STYLE;
-  } catch {
-    return DEFAULT_STYLE;
-  }
-}
-export function setStyle(s) {
-  try {
-    localStorage.setItem(KEY, s);
-  } catch {
-    // stockage bloqué : le choix ne sera pas gardé
-  }
-}
+// Une seule ouverture maintenant : la Coquille (les essais Boing, Roulette, Combo et Cadeau ont été retirés)
+export const currentStyle = () => 'crack';
 
 // ------------------------------------------------------------------ outils communs
 const R = (a, b) => a + Math.random() * (b - a);
@@ -90,6 +53,14 @@ function stepP(now) {
     }
     const a = Math.min(1, (p.life - age) / Math.min(0.35, p.life * 0.5));
     cx.globalAlpha = a;
+    if (p.kind === 'shard') {
+      drawShard(cx, p, age);
+      return true;
+    }
+    if (p.kind === 'star') {
+      drawStar(cx, p, age);
+      return true;
+    }
     const s = Math.round(p.s * (p.shrink ? 0.4 + 0.6 * (1 - age / p.life) : 1));
     if (p.edge) {
       cx.fillStyle = p.edge;
@@ -102,6 +73,97 @@ function stepP(now) {
   cx.globalAlpha = 1;
   P.raf = P.list.length ? requestAnimationFrame(stepP) : 0;
   if (!P.raf) cx.clearRect(0, 0, cv.width, cv.height);
+}
+// Éclat de coque : un vrai morceau de la texture du « ? » (triangle), qui tourne en volant
+function drawShard(cx, p, age) {
+  p.rot += p.vr / 60;
+  cx.save();
+  cx.translate(Math.round(p.x), Math.round(p.y));
+  cx.rotate(p.rot);
+  cx.imageSmoothingEnabled = false;
+  cx.beginPath();
+  p.poly.forEach(([x, y], n) => (n ? cx.lineTo(x * p.k, y * p.k) : cx.moveTo(x * p.k, y * p.k)));
+  cx.closePath();
+  cx.save();
+  cx.clip();
+  // le morceau de texture, placé pour que le triangle tombe pile sur sa partie de l'image
+  cx.drawImage(p.img, -p.ox * p.k, -p.oy * p.k, 64 * p.k, 64 * p.k);
+  cx.restore();
+  // liseré lumineux sur la cassure (couleur du jeton), qui s'éteint
+  cx.globalAlpha *= Math.max(0, 1 - age * 1.6);
+  cx.strokeStyle = p.c;
+  cx.lineWidth = Math.max(2, Math.round(p.k));
+  cx.stroke();
+  cx.restore();
+}
+// Étincelle en étoile à 4 branches, en pixels, qui scintille
+function drawStar(cx, p, age) {
+  const k = Math.round(p.s),
+    tw = 0.55 + 0.45 * Math.sin(age * p.tw + p.ph),
+    arm = Math.max(1, Math.round((2 + p.arm * tw) * (1 - age / p.life * 0.5)));
+  const x = Math.round(p.x),
+    y = Math.round(p.y);
+  cx.fillStyle = p.c;
+  cx.fillRect(x - k * arm, y - k / 2, k * (2 * arm + 1) - k + k, k);
+  cx.fillRect(x - k / 2, y - k * arm, k, k * (2 * arm + 1) - k + k);
+  cx.fillStyle = '#ffffff';
+  cx.fillRect(x - k / 2, y - k / 2, k, k);
+}
+// La coque se brise en morceaux de texture : grille de cellules coupées en deux triangles (bords un peu de travers)
+const MYST_IMG = Object.assign(new Image(), { src: '/img/jetons/mystere.png' });
+function shards(m, col, { n = 5, up = 300, sp = [250, 650] } = {}) {
+  const k = m.w / 64,
+    cell = 64 / n,
+    out = [];
+  const jit = () => R(-cell * 0.22, cell * 0.22);
+  const pts = [];
+  for (let gy = 0; gy <= n; gy++) for (let gx = 0; gx <= n; gx++) pts.push([gx * cell + (gx % n ? jit() : 0), gy * cell + (gy % n ? jit() : 0)]);
+  const P2 = (gx, gy) => pts[gy * (n + 1) + gx];
+  for (let gy = 0; gy < n; gy++)
+    for (let gx = 0; gx < n; gx++) {
+      const a = P2(gx, gy),
+        b = P2(gx + 1, gy),
+        c2 = P2(gx + 1, gy + 1),
+        d = P2(gx, gy + 1);
+      const tris = Math.random() < 0.5 ? [[a, b, c2], [a, c2, d]] : [[a, b, d], [b, c2, d]];
+      for (const t of tris) {
+        const ox = (t[0][0] + t[1][0] + t[2][0]) / 3,
+          oy = (t[0][1] + t[1][1] + t[2][1]) / 3;
+        // hors du disque du jeton : pas de morceau (le « ? » est rond)
+        if ((ox - 32) ** 2 + (oy - 32) ** 2 > 31 ** 2) continue;
+        const dx = ox - 32,
+          dy = oy - 32,
+          L = Math.hypot(dx, dy) || 1,
+          v = R(sp[0], sp[1]);
+        out.push({
+          kind: 'shard',
+          img: MYST_IMG,
+          k,
+          ox,
+          oy,
+          poly: t.map(([x, y]) => [x - ox, y - oy]),
+          x: m.r.left + ox * k,
+          y: m.r.top + oy * k,
+          vx: (dx / L) * v + R(-60, 60),
+          vy: (dy / L) * v - up * R(0.6, 1.2),
+          rot: 0,
+          vr: R(-12, 12),
+          g: 1500,
+          life: R(1.1, 1.7),
+          c: col,
+          drag: 0.99,
+          floor: innerHeight + 200,
+        });
+      }
+    }
+  return out;
+}
+function stars(c, n, cols, { sp = [120, 420], life = [0.6, 1.2], g = -60 } = {}) {
+  return Array.from({ length: fewer(n) }, () => {
+    const a = R(0, Math.PI * 2),
+      v = R(sp[0], sp[1]);
+    return { kind: 'star', x: c.x + Math.cos(a) * R(10, 40), y: c.y + Math.sin(a) * R(10, 40), vx: Math.cos(a) * v, vy: Math.sin(a) * v, c: pick(cols), s: pick([3, 4]), arm: pick([2, 3, 4]), tw: R(10, 22), ph: R(0, 6), g, life: R(life[0], life[1]), drag: 0.96 };
+  });
 }
 function radial(c, n, { sp = [300, 700], cols, g = 0, life = [0.5, 0.9], s = [4, 8], up = 0, floor, shrink = true, edge } = {}) {
   return Array.from({ length: fewer(n) }, () => {
@@ -189,75 +251,6 @@ const CONF = ['#ff5d8f', '#ffd23f', '#3ee0a0', '#47b8ff', '#b07cff', '#ffffff'];
 // révélation), reveal (révélation ; renvoie { noSpin } pour remplacer la rotation habituelle), clean (on repart à zéro).
 const S = {};
 
-// 1. BOING : le jeton est en gelée, il saute de plus en plus haut, s'écrase et rebondit ; à la fin, méga saut
-S.boing = {
-  start(c) {
-    c.box.style.transformOrigin = '50% 100%';
-  },
-  tap(c, k, i) {
-    const h = 18 + k * 90;
-    c.box.getAnimations().forEach((a) => a.cancel());
-    c.box.animate(
-      [
-        { transform: 'translateY(0) scale(1.25,.72)' },
-        { transform: `translateY(${-h}px) scale(.82,1.22)`, offset: 0.3 },
-        { transform: `translateY(${-h * 1.04}px) scale(1,1)`, offset: 0.45 },
-        { transform: 'translateY(0) scale(1.32,.68)', offset: 0.75 },
-        { transform: 'translateY(0) scale(.92,1.08)', offset: 0.87 },
-        { transform: 'translateY(0) scale(1.03,.97)', offset: 0.95 },
-        { transform: 'none' },
-      ],
-      { duration: 420 + k * 120, easing: 'cubic-bezier(.3,.6,.4,1)' },
-    );
-    const f = NOTE(i + 2);
-    tone('sine', f * 0.6, { dur: 0.32, vol: 0.16, to: f * 1.6, vib: 18 });
-    setTimeout(() => {
-      const m = mid(c.coin);
-      emit(c.host, [-1, 1].flatMap((dir) => Array.from({ length: fewer(4) }, () => ({ x: m.x + dir * m.w * 0.3, y: m.r.bottom - 6, vx: dir * R(80, 220), vy: R(-120, -40), c: pick(['#ffffff', '#cfc8f0']), g: 300, life: R(0.3, 0.5), s: 6 }))));
-      tone('sine', 120, { dur: 0.12, vol: 0.12, to: 60 });
-    }, (420 + k * 120) * 0.72);
-  },
-  hold(c) {
-    c.holdAnim = c.box.animate([{ transform: 'scale(1.1,.9)' }, { transform: 'scale(.9,1.1)' }], { duration: 160, iterations: Infinity, direction: 'alternate', easing: 'ease-in-out' });
-    c.holdSnd = setInterval(() => tone('sine', R(300, 380), { dur: 0.1, vol: 0.04, to: R(500, 600) }), 320);
-  },
-  reveal(c, j, lv) {
-    c.holdAnim?.cancel();
-    clearInterval(c.holdSnd);
-    const H = Math.min(innerHeight * 0.55, 420);
-    c.box.animate(
-      [
-        { transform: 'none' },
-        { transform: 'translateY(0) scale(1.45,.55)', offset: 0.14 },
-        { transform: `translateY(${-H}px) scale(.7,1.4)`, offset: 0.42 },
-        { transform: `translateY(${-H * 1.05}px) scale(1,1)`, offset: 0.52 },
-        { transform: 'translateY(0) scale(.85,1.2)', offset: 0.72 },
-        { transform: 'translateY(0) scale(1.6,.5)', offset: 0.78 },
-        { transform: 'translateY(-30px) scale(.9,1.12)', offset: 0.86 },
-        { transform: 'translateY(0) scale(1.15,.88)', offset: 0.93 },
-        { transform: 'none' },
-      ],
-      { duration: 1300, easing: 'linear' },
-    );
-    tone('sine', 160, { dur: 0.5, vol: 0.18, to: 900, delay: 0.18, vib: 30 });
-    setTimeout(() => {
-      const m = mid(c.coin);
-      c.fx.shake(1.4);
-      ring(c.host, { ...m, y: m.r.bottom - 10 }, j.glow, 3.2, 600, 8);
-      emit(c.host, radial({ x: m.x, y: m.r.bottom - 10 }, 70, { sp: [350, 900], up: 500, cols: [j.glow, ...CONF], g: 1400, life: [0.9, 1.6], floor: innerHeight - 8 }));
-      tone('sine', 90, { dur: 0.4, vol: 0.35, to: 40 });
-      tone('sine', 200, { dur: 0.6, vol: 0.14, to: 700, vib: 40, delay: 0.05 });
-      arp(5, 4 + Math.round(lv * 2), { type: 'triangle', vol: 0.06, delay: 0.1 });
-      c.fx.tint(0.3 + lv * 0.2, 500);
-    }, 1300 * 0.78);
-    return { lock: 1300 };
-  },
-  clean(c) {
-    c.holdAnim?.cancel();
-    clearInterval(c.holdSnd);
-  },
-};
-
 // 2. COQUILLE : chaque clic frappe le jeton (il part et tourne un peu, comme sous un coup) et fissure la coque ;
 // les fissures sont dessinées en vrais pixels (grille 64 × 64 du jeton) avec de la lumière qui passe par les fentes.
 // À la fin, la coque éclate.
@@ -325,13 +318,14 @@ function floatLoop(c) {
     const ph = c.ph,
       dt = Math.min(0.05, (now - last) / 1000);
     last = now;
-    const lim = Math.min(170, innerWidth * 0.18);
-    ph.vx += -ph.x * 2.2 * dt;
-    ph.vy += -ph.y * 2.2 * dt;
-    const damp = Math.pow(0.35, dt); // perd ~65 % de sa vitesse par seconde
+    const lim = Math.min(80, innerWidth * 0.08);
+    ph.vx += -ph.x * 3 * dt;
+    ph.vy += -ph.y * 3 * dt;
+    ph.va += -ph.a * 2.5 * dt; // il se remet doucement droit
+    const damp = Math.pow(0.03, dt); // freine fort : vif au départ, puis glisse doucement
     ph.vx *= damp;
     ph.vy *= damp;
-    ph.va *= Math.pow(0.3, dt);
+    ph.va *= Math.pow(0.05, dt);
     ph.x += ph.vx * dt;
     ph.y += ph.vy * dt;
     ph.a += ph.va * dt;
@@ -340,7 +334,7 @@ function floatLoop(c) {
       if (Math.abs(ph[ax]) > lim) {
         ph[ax] = Math.sign(ph[ax]) * lim;
         ph[v] *= -0.55;
-        ph.va += R(-90, 90);
+        ph.va += R(-20, 20);
       }
     }
     ph.sq = Math.max(0, ph.sq - dt * 6);
@@ -412,11 +406,12 @@ S.crack = {
       dx /= L;
       dy /= L;
     }
+    // départ vif puis ça freine vite : ~40 à 60 px de course, quelques degrés de rotation seulement
     const ph = c.ph,
-      imp = 260 + k * 320;
-    ph.vx = ph.vx * 0.3 + dx * imp;
-    ph.vy = ph.vy * 0.3 + dy * imp;
-    ph.va = ph.va * 0.3 + (dx >= 0 ? 1 : -1) * R(160, 320) * (0.7 + k * 0.6);
+      imp = 170 + k * 90;
+    ph.vx = ph.vx * 0.2 + dx * imp;
+    ph.vy = ph.vy * 0.2 + dy * imp;
+    ph.va = ph.va * 0.2 + (dx >= 0 ? 1 : -1) * R(40, 70) * (0.8 + k * 0.4);
     ph.sq = 1; // petit écrasement au moment du coup
     floatLoop(c);
     c.box.animate([{ filter: 'brightness(2.2)' }, { filter: 'none' }], { duration: 160, easing: 'ease-out' });
@@ -446,9 +441,9 @@ S.crack = {
     c.box.style.transform = '';
     const m = mid(c.box);
     c.cr.cv.remove();
-    // éclats de coque qui partent dans tous les sens, puis retombent
-    emit(c.host, radial(m, 60, { sp: [400, 1100], up: 250, cols: MYST, g: 1600, life: [0.9, 1.5], s: [6, 14], floor: innerHeight - 6, shrink: false, edge: '#120e1f' }));
-    emit(c.host, radial(m, 30, { sp: [200, 600], cols: [j.glow, '#ffffff'], life: [0.4, 0.8], s: [4, 6] }));
+    // la coque se brise en vrais morceaux (texture du « ? ») qui tournent et retombent, et des étoiles scintillent
+    emit(c.host, shards(m, j.glow, { n: 5, up: 260, sp: [260, 720] }));
+    emit(c.host, stars(m, 26, [j.glow, '#ffffff', '#fff3b0'], { sp: [140, 520], life: [0.7, 1.4] }));
     ring(c.host, m, '#ffffff', 2.8, 450, 10);
     ring(c.host, m, j.glow, 4, 800, 6);
     c.fx.flash(0.6, 420);
@@ -477,216 +472,6 @@ S.crack = {
     c.box.style.removeProperty('--crk');
     c.opening.removeEventListener('pointerdown', c.onPtr, true);
     c.cr?.cv.remove();
-  },
-};
-
-// 3. ROULETTE : une fenêtre de machine à sous ; chaque clic fait tourner le rouleau d'un cran, puis il s'emballe et s'arrête pile
-S.slot = {
-  start(c) {
-    const list = Object.values(SERIES).flat().filter((j) => j.img);
-    const imgs = Array.from({ length: 90 }, () => texOf(pick(list)));
-    const w = document.createElement('div');
-    w.className = 'sty-slot';
-    w.innerHTML = `<div class="sty-win"><div class="sty-strip">${imgs.map((s) => `<img class="px" src="${s}" alt="">`).join('')}</div></div>${'<i class="sty-bulb"></i>'.repeat(14)}`;
-    c.box.appendChild(w);
-    c.slot = w;
-    c.strip = w.querySelector('.sty-strip');
-    c.pos = 0;
-    c.spin.style.opacity = '0';
-    w.querySelectorAll('.sty-bulb').forEach((b, n) => {
-      const a = (n / 14) * Math.PI * 2;
-      b.style.left = `${50 + Math.cos(a) * 54}%`;
-      b.style.top = `${50 + Math.sin(a) * 54}%`;
-    });
-    c.bulbs = [...w.querySelectorAll('.sty-bulb')];
-  },
-  lights(c, step) {
-    c.bulbs.forEach((b, n) => b.classList.toggle('on', (n + step) % 3 === 0));
-  },
-  cell: (c) => c.strip.parentElement.offsetHeight || 200,
-  tap(c, k, i) {
-    const h = S.slot.cell(c),
-      from = c.pos;
-    c.pos = Math.min(80, c.pos + 1 + Math.round(k * 2));
-    c.strip.getAnimations().forEach((a) => a.cancel());
-    c.strip.animate([{ transform: `translateY(${-from * h}px)` }, { transform: `translateY(${-c.pos * h - h * 0.12}px)`, offset: 0.7 }, { transform: `translateY(${-c.pos * h}px)` }], { duration: 260, easing: 'cubic-bezier(.2,.8,.3,1)', fill: 'forwards' });
-    S.slot.lights(c, i);
-    c.slot.animate([{ transform: 'scale(1.06)' }, { transform: 'none' }], { duration: 160, easing: 'ease-out' });
-    for (let q = 0; q < 1 + Math.round(k * 2); q++) tone('square', 1300 + q * 120, { dur: 0.03, vol: 0.035, delay: q * 0.05 });
-    tone('triangle', NOTE(i + 3), { dur: 0.18, vol: 0.07, delay: 0.06 });
-  },
-  hold(c) {
-    c.slot.classList.add('fast');
-    const h = S.slot.cell(c);
-    c.strip.getAnimations().forEach((a) => a.cancel());
-    c.strip.animate([{ transform: `translateY(${-c.pos * h}px)` }, { transform: `translateY(${-(c.pos + 6) * h}px)` }], { duration: 360, iterations: Infinity, easing: 'linear' });
-    let n = 0;
-    c.holdSnd = setInterval(() => {
-      S.slot.lights(c, n++);
-      tone('square', 1500, { dur: 0.02, vol: 0.025 });
-    }, 70);
-  },
-  reveal(c, j, lv) {
-    clearInterval(c.holdSnd);
-    c.slot.classList.remove('fast');
-    const img = document.createElement('img');
-    img.className = 'px';
-    img.src = texOf(j);
-    img.alt = '';
-    const cells = c.strip.children.length;
-    c.strip.appendChild(img);
-    const h = S.slot.cell(c),
-      from = c.pos,
-      to = cells;
-    const D = 1100 + lv * 300;
-    c.strip.getAnimations().forEach((a) => a.cancel());
-    c.strip.animate([{ transform: `translateY(${-from * h}px)` }, { transform: `translateY(${-to * h - h * 0.18}px)`, offset: 0.86 }, { transform: `translateY(${-to * h}px)` }], { duration: D, easing: 'cubic-bezier(.12,.75,.2,1)', fill: 'forwards' });
-    // cliquetis qui ralentit
-    const ticks = 18;
-    for (let q = 0; q < ticks; q++) {
-      const t = (D * 0.86 * (1 - (1 - q / ticks) ** 2.2)) / 1000;
-      tone('square', 1400, { dur: 0.025, vol: 0.04, delay: t });
-    }
-    let n = 0;
-    const lt = setInterval(() => S.slot.lights(c, n++), 90);
-    setTimeout(() => {
-      clearInterval(lt);
-      c.bulbs.forEach((b) => b.classList.add('on'));
-      c.slot.classList.add('win');
-      const m = mid(c.coin);
-      c.fx.shake(1);
-      ring(c.host, m, '#ffd23f', 3, 600, 8);
-      emit(c.host, radial(m, 60, { sp: [300, 800], up: 700, cols: ['#ffd23f', '#ffb000', '#fff3b0'], g: 1500, life: [1, 1.7], s: [8, 10], floor: innerHeight - 8, shrink: false, edge: '#7a4a00' }));
-      tone('sine', 100, { dur: 0.4, vol: 0.3, to: 45 });
-      [0, 2, 4, 5, 7].forEach((n2, q) => tone('square', NOTE(n2 + 5), { dur: 0.22, vol: 0.05, delay: 0.05 + q * 0.07 }));
-      c.fx.tint(0.3 + lv * 0.2, 500);
-      // la machine s'efface, le vrai jeton reste
-      setTimeout(() => {
-        c.spin.style.opacity = '';
-        c.slot.animate([{ opacity: 1 }, { opacity: 0, transform: 'scale(1.15)' }], { duration: 300, fill: 'forwards' }).finished.then(() => c.slot.remove());
-      }, 700);
-    }, D * 0.86);
-    return { noSpin: true, lock: D };
-  },
-  clean(c) {
-    clearInterval(c.holdSnd);
-    c.spin.style.opacity = '';
-  },
-};
-
-// 4. COMBO : chaque clic est un coup de poing (gros « ×N », arrêt sur image, l'écran zoome) ; à la fin, pluie de pièces
-S.combo = {
-  start(c) {
-    const b = document.createElement('div');
-    b.className = 'sty-combo';
-    c.host.appendChild(b);
-    c.combo = b;
-    c.zoom0 = 1;
-  },
-  tap(c, k, i) {
-    const cols = ['#ffffff', '#ffe066', '#ffb347', '#ff6b6b', '#ff4fd8', '#9d7bff'];
-    const col = cols[Math.min(cols.length - 1, Math.floor(k * cols.length))];
-    c.combo.innerHTML = `<b style="color:${col}">×${i}</b>`;
-    const m = mid(c.coin);
-    c.combo.style.left = `${m.x + m.w * 0.55}px`;
-    c.combo.style.top = `${m.y - m.w * 0.45}px`;
-    c.combo.firstChild.animate([{ transform: `scale(2.4) rotate(${R(-14, 14)}deg)`, opacity: 0 }, { transform: 'scale(.9) rotate(-6deg)', opacity: 1, offset: 0.4 }, { transform: 'scale(1) rotate(-6deg)' }], { duration: 220, easing: 'cubic-bezier(.2,.9,.3,1.4)', fill: 'forwards' });
-    // arrêt sur image : le jeton blanchit, l'écran fait un « punch »
-    c.box.animate([{ filter: 'brightness(4) saturate(0)', transform: 'scale(.9)' }, { filter: 'brightness(4) saturate(0)', transform: 'scale(.9)', offset: 0.35 }, { filter: 'none', transform: 'scale(1.08)', offset: 0.6 }, { filter: 'none', transform: 'none' }], { duration: 200, easing: 'linear' });
-    c.zoom0 = 1 + k * 0.1;
-    c.main.animate([{ transform: `scale(${c.zoom0 + 0.05})` }, { transform: `scale(${c.zoom0})` }], { duration: 160, easing: 'ease-out', fill: 'forwards' });
-    emit(c.host, radial(m, 10 + Math.round(k * 10), { sp: [500, 1100], cols: ['#ffffff', col], life: [0.18, 0.32], s: [4, 6] }));
-    ring(c.host, m, col, 1.8 + k, 260, 5);
-    c.fx.shake(0.4 + k * 0.6);
-    tone('sine', 140, { dur: 0.16, vol: 0.32, to: 50 });
-    noise({ dur: 0.08, vol: 0.2, type: 'lowpass', f: 3000, to: 400 });
-    tone('square', NOTE(i + 4), { dur: 0.12, vol: 0.05 });
-  },
-  hold(c) {
-    c.combo.classList.add('max');
-    c.holdSnd = setInterval(() => tone('square', NOTE(12), { dur: 0.06, vol: 0.03 }), 240);
-  },
-  reveal(c, j, lv) {
-    clearInterval(c.holdSnd);
-    const m = mid(c.coin);
-    // gros arrêt sur image, puis tout part
-    c.main.animate([{ transform: `scale(${c.zoom0 + 0.12})` }, { transform: `scale(${c.zoom0 + 0.12})`, offset: 0.4 }, { transform: 'scale(1)' }], { duration: 520, easing: 'cubic-bezier(.2,.8,.3,1)', fill: 'forwards' });
-    c.combo.firstChild?.animate([{ transform: 'scale(1) rotate(-6deg)' }, { transform: 'scale(1.8) rotate(-6deg)', opacity: 1, offset: 0.3 }, { transform: 'scale(2.2) rotate(-6deg)', opacity: 0 }], { duration: 700, fill: 'forwards' });
-    c.fx.flash(0.75, 380);
-    tone('sine', 70, { dur: 0.6, vol: 0.45, to: 30 });
-    noise({ dur: 0.35, vol: 0.3, type: 'lowpass', f: 4000, to: 200 });
-    setTimeout(() => {
-      c.fx.shake(1.5);
-      ring(c.host, m, j.glow, 4.5, 700, 10);
-      // pluie de pièces depuis le haut de l'écran
-      emit(c.host, Array.from({ length: fewer(70) }, () => ({ x: R(0, innerWidth), y: R(-200, -20), vx: R(-60, 60), vy: R(100, 500), c: pick(['#ffd23f', '#ffc400', '#fff1a8']), g: 1700, life: R(1.6, 2.4), s: pick([8, 10, 12]), floor: innerHeight - 10, bounce: 0.5, shrink: false, edge: '#7a4a00' })));
-      emit(c.host, radial(m, 40, { sp: [400, 1000], cols: [j.glow, '#ffffff'], life: [0.4, 0.8], s: [4, 8] }));
-      [0, 2, 4, 7, 9, 12].forEach((n, q) => tone('square', NOTE(n + 3), { dur: 0.2, vol: 0.05, delay: q * 0.06 }));
-      for (let q = 0; q < 10; q++) tone('triangle', R(1800, 2600), { dur: 0.05, vol: 0.03, delay: 0.3 + q * 0.07 });
-    }, 200);
-    return { lock: 600 };
-  },
-  clean(c) {
-    clearInterval(c.holdSnd);
-    c.combo?.remove();
-    c.main.getAnimations().forEach((a) => a.cancel());
-  },
-};
-
-// 5. CADEAU : un paquet en pixel art ; chaque clic le fait sauter, le couvercle se soulève et de la lumière s'échappe
-S.gift = {
-  start(c) {
-    const g = document.createElement('div');
-    g.className = 'sty-gift';
-    g.innerHTML = '<div class="sty-glowgap"></div><div class="sty-body"><i></i></div><div class="sty-lid"><i></i><b></b><b></b></div>';
-    c.box.appendChild(g);
-    c.gift = g;
-    c.lid = g.querySelector('.sty-lid');
-    c.gap = g.querySelector('.sty-glowgap');
-    c.spin.style.opacity = '0';
-  },
-  tap(c, k, i) {
-    const up = 6 + k * 34;
-    c.gift.animate([{ transform: 'none' }, { transform: `translateY(-14px) rotate(${i % 2 ? 7 : -7}deg) scale(1.06,.94)`, offset: 0.3 }, { transform: `rotate(${i % 2 ? -3 : 3}deg)`, offset: 0.65 }, { transform: 'none' }], { duration: 300, easing: 'cubic-bezier(.3,.7,.4,1)' });
-    c.lid.animate([{ transform: 'none' }, { transform: `translateY(${-up}px) rotate(${i % 2 ? -6 : 6}deg)`, offset: 0.35 }, { transform: 'none' }], { duration: 300, easing: 'cubic-bezier(.3,.7,.4,1)' });
-    c.gap.style.opacity = String(0.2 + k * 0.8);
-    c.gap.animate([{ opacity: 1, transform: 'scaleY(1.6)' }, { opacity: 0.2 + k * 0.8, transform: 'none' }], { duration: 300 });
-    const m = mid(c.coin);
-    emit(c.host, Array.from({ length: fewer(3 + Math.round(k * 5)) }, () => ({ x: m.x + R(-m.w * 0.3, m.w * 0.3), y: m.y - m.w * 0.12, vx: R(-120, 120), vy: R(-420, -200), c: pick(CONF), g: 900, life: R(0.6, 1), s: 6 })));
-    tone('sine', 150, { dur: 0.12, vol: 0.2, to: 70 });
-    noise({ dur: 0.1, vol: 0.08, type: 'bandpass', f: 2500, q: 0.6 });
-    tone('sine', NOTE(i + 7), { dur: 0.5, vol: 0.06 });
-    tone('sine', NOTE(i + 7) * 2.01, { dur: 0.25, vol: 0.02 });
-  },
-  hold(c) {
-    c.gift.classList.add('rattle');
-    c.gap.style.opacity = '1';
-    c.holdSnd = setInterval(() => tone('sine', R(120, 160), { dur: 0.06, vol: 0.08, to: 80 }), 140);
-  },
-  reveal(c, j, lv) {
-    clearInterval(c.holdSnd);
-    c.gift.classList.remove('rattle');
-    const m = mid(c.coin);
-    c.lid.animate([{ transform: 'none' }, { transform: `translate(${R(-80, 80)}px,${-innerHeight * 0.7}px) rotate(${pick([-1, 1]) * 620}deg)`, opacity: 1, offset: 0.8 }, { transform: `translate(0,${-innerHeight}px) rotate(720deg)`, opacity: 0 }], { duration: 900, easing: 'cubic-bezier(.15,.7,.4,1)', fill: 'forwards' });
-    c.gift.querySelector('.sty-body').animate([{ transform: 'none', opacity: 1 }, { transform: 'translateY(60%) scale(1.1,.6)', opacity: 0 }], { duration: 420, delay: 120, easing: 'ease-in', fill: 'forwards' });
-    c.gap.animate([{ opacity: 1, transform: 'scale(1)' }, { opacity: 0, transform: 'scale(3,6)' }], { duration: 500, fill: 'forwards' });
-    c.spin.style.opacity = '';
-    c.spin.animate([{ transform: 'translateY(40%) scale(.3)', opacity: 0 }, { transform: 'translateY(-14%) scale(1.15)', opacity: 1, offset: 0.55 }, { transform: 'translateY(3%) scale(.96)', offset: 0.8 }, { transform: 'none' }], { duration: 700, easing: 'cubic-bezier(.2,.8,.3,1)' });
-    emit(c.host, radial({ x: m.x, y: m.y + m.w * 0.1 }, 90, { sp: [300, 900], up: 650, cols: CONF, g: 1100, life: [1.2, 2], s: [6, 10], floor: innerHeight - 8, shrink: false }));
-    ring(c.host, m, '#ffffff', 2.4, 420, 8);
-    c.fx.flash(0.4, 400);
-    c.fx.shake(0.8);
-    // bouchon qui saute + petite fanfare
-    tone('sine', 900, { dur: 0.08, vol: 0.2, to: 300 });
-    noise({ dur: 0.2, vol: 0.25, type: 'highpass', f: 1500 });
-    [0, 4, 7, 12].forEach((n, q) => tone('triangle', NOTE(0) * 2 ** (n / 12) * 2, { dur: 0.4, vol: 0.07, delay: 0.12 + q * 0.08 }));
-    for (let q = 0; q < 6; q++) noise({ dur: 0.04, vol: 0.06, type: 'bandpass', f: R(2000, 5000), q: 2, delay: 0.2 + q * 0.09 });
-    setTimeout(() => c.gift.remove(), 1000);
-    return { noSpin: true, lock: 700 };
-  },
-  clean(c) {
-    clearInterval(c.holdSnd);
-    c.spin.style.opacity = '';
   },
 };
 
@@ -739,33 +524,8 @@ export function styleClean() {
   const c = cur;
   cur = null;
   c.opening.classList.remove('op-sty-' + c.id);
-  c.coin.querySelectorAll('.sty-cracks, .sty-slot, .sty-gift').forEach((n) => n.remove());
+  c.coin.querySelectorAll('.sty-cracks').forEach((n) => n.remove());
   c.box.style.transformOrigin = '';
   c.box.getAnimations().forEach((a) => a.cancel());
   if (c.spin) c.spin.style.opacity = '';
-}
-
-// Petit sélecteur en haut à gauche de l'écran d'ouverture (admins seulement)
-export function renderPicker(opening) {
-  let p = opening.querySelector('.sty-pick');
-  if (!isAdmin()) {
-    p?.remove();
-    return;
-  }
-  if (!p) {
-    p = document.createElement('div');
-    p.className = 'sty-pick';
-    p.addEventListener('pointerdown', (e) => e.stopPropagation());
-    p.addEventListener('click', (e) => {
-      const b = e.target.closest('button');
-      if (!b) return;
-      e.stopPropagation();
-      setStyle(b.dataset.s);
-      renderPicker(opening);
-      p.dispatchEvent(new CustomEvent('sty-change', { bubbles: true }));
-    });
-    opening.appendChild(p);
-  }
-  const on = currentStyle();
-  p.innerHTML = STYLES.map(([id, name]) => `<button type="button" data-s="${id}" class="${id === on ? 'on' : ''}">${name}</button>`).join('');
 }

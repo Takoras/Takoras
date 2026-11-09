@@ -1004,3 +1004,20 @@
 .slot > small {
   position: relative;
 }
+
+/* profondeur à la souris (comme l'accueil) : chaque bloc glisse un tout petit peu, à sa profondeur (--mpx/--mpy, mouseDepth.ts) */
+.eloTop,
+.playCol,
+.team,
+.dex {
+  translate: calc(var(--mpx, 0) * -8px * var(--dp, 1)) calc(var(--mpy, 0) * -6px * var(--dp, 1));
+}
+.page .eloTop {
+  --dp: 0.7;
+}
+.page .team {
+  --dp: 1.5;
+}
+.page .dex {
+  --dp: 1.2;
+}

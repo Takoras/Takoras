@@ -413,9 +413,6 @@ html.lock #root {
 }
 
 /* ---------- Styles d'ouverture à l'essai (admins, opening-styles.js) ---------- */
-.sty-pick { position: absolute; top: 12px; left: 12px; z-index: 30; display: flex; flex-wrap: wrap; gap: 6px; max-width: 60vw; }
-.sty-pick button { font: 700 12px/1 var(--font-body, system-ui); padding: 7px 10px; border-radius: 8px; border: 1px solid rgb(255 255 255 / 14%); background: rgb(0 0 0 / 45%); color: #cfc8ea; cursor: pointer; }
-.sty-pick button.on { background: #7d48d9; border-color: #a98bff; color: #fff; }
 .sty-pfx { position: fixed; inset: 0; width: 100vw; height: 100vh; pointer-events: none; z-index: 40; image-rendering: pixelated; }
 .sty-ring { position: fixed; border-style: solid; border-radius: 50%; pointer-events: none; z-index: 39; box-sizing: border-box; }
 
@@ -425,36 +422,13 @@ html.lock #root {
 .sty-crk-hold .sty-cracks { animation: styCrack .3s ease-in-out infinite alternate; }
 @keyframes styCrack { to { filter: drop-shadow(0 0 4px #fff) drop-shadow(0 0 22px rgba(var(--tier, 255, 255, 255), 1)); } }
 
-/* Roulette : fenêtre de machine à sous, ampoules autour */
-.sty-slot { position: absolute; inset: 0; z-index: 2; }
-.sty-win { position: absolute; inset: 6%; overflow: hidden; border-radius: 14%; background: #120e22;
-  box-shadow: 0 0 0 6px #ffd23f, 0 0 0 10px #7a4a00, inset 0 18px 18px -8px rgb(0 0 0 / 80%), inset 0 -18px 18px -8px rgb(0 0 0 / 80%); }
-.sty-strip { display: flex; flex-direction: column; height: 100%; will-change: transform; }
-.sty-strip img { flex: 0 0 100%; width: 100%; height: 100%; object-fit: contain; padding: 10%; box-sizing: border-box; image-rendering: pixelated; }
-.sty-strip img:not(:last-child) { filter: brightness(.3) saturate(.5); }
-.sty-slot.fast .sty-strip { filter: blur(1.5px); }
-.sty-bulb { position: absolute; width: 9%; height: 9%; translate: -50% -50%; background: #4a3600; border: 2px solid #1b1030; }
-.sty-bulb.on { background: #ffe066; box-shadow: 0 0 12px #ffd23f, 0 0 2px #fff; }
-.sty-slot.win .sty-win { animation: styWin .18s steps(2) 5; }
-@keyframes styWin { 50% { box-shadow: 0 0 0 6px #fff, 0 0 0 10px #ffd23f, 0 0 40px 10px #ffd23f; } }
-
-/* Combo : gros compteur de coups */
-.sty-combo { position: fixed; z-index: 41; pointer-events: none; }
-.sty-combo b { display: block; font: 900 clamp(40px, 7vw, 76px)/1 'Archivo Black', var(--font-display, system-ui); -webkit-text-stroke: 4px #1b1030; paint-order: stroke fill;
-  text-shadow: 5px 5px 0 #1b1030; transform-origin: 30% 70%; white-space: nowrap; }
-.sty-combo.max b { animation: styMax .24s ease-in-out infinite alternate; }
-@keyframes styMax { to { scale: 1.15; filter: brightness(1.4); } }
-
-/* Cadeau : paquet en pixel art */
-.sty-gift { position: absolute; inset: 0; z-index: 2; transform-origin: 50% 100%; }
-.sty-gift.rattle { animation: styRattle .09s linear infinite; }
-@keyframes styRattle { 25% { transform: translate(-3px, -2px) rotate(-3deg) scale(1.06, .95); } 75% { transform: translate(3px, -1px) rotate(3deg) scale(.96, 1.05); } }
-.sty-body, .sty-lid { position: absolute; background: rgb(var(--serie, 125 72 217)); border: 4px solid #1b1030;
-  box-shadow: inset -8px -8px 0 rgb(0 0 0 / 28%), inset 8px 8px 0 rgb(255 255 255 / 16%); }
-.sty-body { left: 12%; right: 12%; bottom: 6%; height: 52%; }
-.sty-lid { left: 6%; right: 6%; top: 28%; height: 18%; filter: brightness(1.15); transform-origin: 50% 100%; }
-.sty-body i, .sty-lid i { position: absolute; left: 42%; width: 16%; top: 0; bottom: 0; background: #ffd23f; border-left: 4px solid #1b1030; border-right: 4px solid #1b1030; }
-.sty-lid b { position: absolute; bottom: 100%; width: 24%; height: 0; padding-bottom: 24%; background: #ffd23f; border: 4px solid #1b1030; rotate: 45deg; translate: 0 50%; }
-.sty-lid b:nth-of-type(1) { left: 26%; } .sty-lid b:nth-of-type(2) { right: 26%; }
-.sty-glowgap { position: absolute; left: 10%; right: 10%; top: 40%; height: 8%; opacity: .2; border-radius: 50%; mix-blend-mode: screen;
-  background: radial-gradient(closest-side, #fff, rgb(255 230 160 / 80%) 40%, transparent); filter: blur(4px); }
+/* Fiche du jeton à l'ouverture : les boîtes penchent un peu, flottent et se balancent au passage de la souris,
+   comme la fiche de l'inventaire (--swing écrit par attachSwing) */
+.op-id, .op-stats, .op-actions { rotate: calc(var(--tilt, 0deg) + var(--swing, 0deg)); transform-origin: 50% 0; }
+@media (min-width: 761px) {
+  .op-id { --tilt: -3deg; }
+  .op-stats { --tilt: 2.5deg; }
+  .opening.revealed .op-id { animation: opIn .5s cubic-bezier(.2, 1.15, .3, 1) .12s both, opDrift 6s ease-in-out .9s infinite; }
+  .opening.revealed .op-stats { animation: opIn .5s cubic-bezier(.2, 1.15, .3, 1) .2s both, opDrift 7.5s ease-in-out 1s infinite; }
+}
+@keyframes opDrift { 0%, 100% { translate: 0 0; } 50% { translate: 0 -6px; } }

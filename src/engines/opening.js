@@ -3,7 +3,8 @@ import { SERIES, texOf } from '@/data/jetons';
 import { burstAt } from '@/lib/pfx';
 import { $, ACC, LOCALE, PULLS, SETTINGS, serieTheme, STAT_MAX, VARIANTS, errText, fmt, fmtLuck, jn, jnH, reducedFx, saveSettings, sb, sfx, sparkStyle, speed, statsOf, t, toast, vCls, vOdds, vTag, host } from './env';
 import { CINE } from './cinema.js';
-import { renderPicker, styleActive, styleClean, styleHold, styleReveal, styleStart, styleTap } from './opening-styles.js';
+import { attachSwing } from '@/ui/useSwing';
+import { styleActive, styleClean, styleHold, styleReveal, styleStart, styleTap } from './opening-styles.js';
 import './legacy-base.css';
 import './opening.css';
 
@@ -26,6 +27,9 @@ if (!document.getElementById('opening')) {
   document.body.insertAdjacentHTML('beforeend', "<div class=\"opening\" id=\"opening\" aria-hidden=\"true\">\n    <div class=\"op-bg\" id=\"op-bg\"></div>\n    <div class=\"op-rays\"></div>\n    <div class=\"op-glow\"></div>\n    <div class=\"op-vignette\"></div>\n    <div class=\"op-bars\"></div>\n    <div class=\"op-top\">\n      <div class=\"eyebrow\" id=\"op-tag\">Pull Takoras</div>\n      <div class=\"op-odds\" id=\"op-odds\">1/1</div>\n    </div>\n    <div class=\"op-autobar\"><button class=\"op-auto\" id=\"op-auto\" hidden></button><button class=\"op-auto op-skip\" id=\"op-skip\" hidden></button></div>\n    <div class=\"op-main\">\n      <div class=\"op-coin-col\">\n        <button class=\"op-coin\" id=\"op-coin\" aria-label=\"Cliquer sur le jeton\"></button>\n        <p class=\"op-hint\" id=\"op-hint\">Clique sur le jeton</p>\n      </div>\n      <div class=\"op-info\" id=\"op-info\">\n        <div class=\"op-id\"><img class=\"op-serie\" src=\"/img/logo-takoras.png?v=2\" alt=\"Takoras\">\n        <h2 class=\"op-name\" id=\"op-name\"></h2>\n        <div class=\"op-rarity\" id=\"op-rarity\"></div></div>\n        <div class=\"op-stats\" id=\"op-stats\"></div>\n        <p class=\"op-note\" data-i18n=\"stats_note\">Statistiques provisoires · combats bientôt</p>\n        <div class=\"op-actions\">\n          <button class=\"btn primary\" id=\"op-next\" hidden>Suivant</button>\n          <button class=\"btn primary\" id=\"op-recap\" hidden data-i18n=\"see_recap\">Voir le récap</button>\n          <button class=\"btn primary\" id=\"op-again\">Pull encore · <span id=\"op-price\">100</span> ◆</button>\n          <button class=\"btn ghost\" id=\"op-back\" data-i18n=\"back\">Retour</button>\n        </div>\n      </div>\n    </div>\n    <button class=\"op-recap-x\" id=\"op-recap-x\" aria-label=\"Fermer\">✕</button>\n    <div class=\"op-recap-view\">\n      <div class=\"eyebrow\" id=\"op-recap-tag\">Récap</div>\n      <h2 class=\"op-name\" id=\"op-recap-title\">Tes jetons</h2>\n      <div class=\"op-recap-grid\" id=\"op-recap-grid\"></div>\n      <div class=\"op-actions\">\n        <button class=\"btn primary\" id=\"op-recap-again\">Pull ×10 encore · <span id=\"op-recap-price\">1 000</span> ◆</button>\n        <button class=\"btn ghost\" id=\"op-recap-back\" data-i18n=\"back\">Retour</button>\n      </div>\n    </div>\n  </div>\n  <div class=\"fx\" id=\"fx\"></div>");
   document.querySelectorAll('#opening [data-i18n]').forEach((el) => { el.textContent = t(el.dataset.i18n); });
 }
+
+// les boîtes de la fiche se balancent quand la souris passe dessus (comme dans l'inventaire)
+['.op-id', '.op-stats', '.op-actions'].forEach((q) => { const n = document.querySelector('#opening ' + q); if (n) attachSwing(n, 1); });
 
 // Transitions d'ouverture d'un pull (0,5 s max) + menu debug (taper « debug »)
 const fx = $('fx'), opening = $('opening');
@@ -109,43 +113,74 @@ async function chute() {
   if (!img) return onde();
   // on mesure le jeton droit (#coin), pas l'image penchée : sa boîte tournée est plus grande, d'où un saut de taille
   const r = hero.getBoundingClientRect();
-  // angle actuel du jeton qui tombe (il tangue entre 34° et 50°) : la chute part exactement de là
   const tumble = img.parentElement ? getComputedStyle(img.parentElement).rotate : 'none';
   const a0 = tumble && tumble !== 'none' ? parseFloat(tumble) : 0;
-  // l'ouverture arrive en fondu (halo, compteur, consigne) et ne tangue pas encore : le « ? » se pose pile sur sa place
+  // l'écran d'ouverture est posé tout de suite mais invisible : on vise la VRAIE place du « ? » (même taille,
+  // même endroit), puis on bascule d'un coup, sans fondu ni changement de taille
   opening.classList.add('op-enter');
-  const tr = $('op-coin').getBoundingClientRect();
+  skipSpawn = true;
+  showOpening();
+  opening.style.opacity = '0';
+  const real = $('op-coin');
+  real.style.visibility = 'hidden';
+  const tr = (real.querySelector('.spin') || real).getBoundingClientRect();
   const c = tr.width ? { x: tr.left + tr.width / 2, y: tr.top + tr.height / 2, s: tr.width } : { ...center(), s: Math.min(240, Math.max(180, innerWidth * 0.26)) };
   const dx = c.x - (r.left + r.width / 2), dy = c.y - (r.top + r.height / 2), k = c.s / r.width;
-  // la page s'assombrit pendant que le jeton tombe
+  // fond de l'ouverture qui arrive vite derrière
   const sc = serieTheme((sess && PULLS[sess.pull]?.name) || 'Takoras').main.split(' ').join(',');
-  const dim = el(`inset:0;background:radial-gradient(60% 55% at 50% 45%, rgba(${sc},.22), transparent 70%), #0b0a12;z-index:1`); // même fond que l'ouverture
-  dim.animate([{ opacity: 0 }, { opacity: 1 }], { duration: 640, easing: 'ease-in', fill: 'forwards' });
-  const d = el(`left:${r.left}px;top:${r.top}px;width:${r.width}px;height:${r.height}px;z-index:3;perspective:900px`,
-    `<img src="${img.src}" alt="" style="width:100%;height:100%;image-rendering:pixelated;display:block;filter:drop-shadow(0 24px 30px rgb(0 0 0 / 55%))">`);
+  const dim = el(`inset:0;background:radial-gradient(60% 55% at 50% 45%, rgba(${sc},.22), transparent 70%), #0b0a12;z-index:1`);
+  dim.animate([{ opacity: 0 }, { opacity: 1 }], { duration: 260, easing: 'ease-out', fill: 'forwards' });
+  const d = el(`left:${r.left}px;top:${r.top}px;width:${r.width}px;height:${r.height}px;z-index:3`,
+    `<img src="${img.src}" alt="" style="width:100%;height:100%;image-rendering:pixelated;display:block">`);
   hero.style.visibility = 'hidden';
   const face = d.firstElementChild;
-  face.animate([{ filter: 'drop-shadow(0 24px 30px rgb(0 0 0 / 55%))' }, { filter: 'drop-shadow(0 0 0 rgb(0 0 0 / 0%))' }], { duration: 640, fill: 'forwards' });
-  // chute : il accélère, dépasse un peu le centre, rebondit et se pose droit
+  // 1. élan : il se tasse et s'illumine
   await d.animate([
-    { transform: `translate(0,0) rotate(${a0}deg) scale(1)` },
-    { transform: `translate(${dx}px,${dy + 26}px) rotate(-6deg) scale(${k * 1.04})`, offset: 0.62, easing: 'cubic-bezier(.2,.8,.3,1)' },
-    { transform: `translate(${dx}px,${dy}px) rotate(0deg) scale(${k})` },
-  ], { duration: 640, easing: 'cubic-bezier(.55,0,.85,.35)', fill: 'forwards' }).finished;
-  // il se retourne : face du jeton → « ? »
-  sfx.spawn();
-  await face.animate([{ transform: 'rotateY(0deg)' }, { transform: 'rotateY(90deg)' }], { duration: 140, easing: 'ease-in', fill: 'forwards' }).finished;
-  face.src = MYSTERE;
-  await face.animate([{ transform: 'rotateY(-90deg)' }, { transform: 'rotateY(0deg) scale(1.06)', offset: 0.7 }, { transform: 'rotateY(0deg) scale(1)' }], { duration: 260, easing: 'cubic-bezier(.2,.9,.3,1)', fill: 'forwards' }).finished;
-  skipSpawn = true; // le « ? » de l'ouverture est déjà là : pas d'apparition en grossissant
-  showOpening();
-  setTimeout(() => opening.classList.remove('op-enter'), 700);
-  return 260;
+    { transform: `rotate(${a0}deg) scale(1)`, filter: 'brightness(1)' },
+    { transform: `rotate(${a0}deg) scale(.8, .88)`, filter: 'brightness(1.8)' },
+  ], { duration: 90, easing: 'ease-out', fill: 'forwards' }).finished;
+  // 2. il fonce au centre en tournant (petit arc), grossit trop, puis se pose ; il devient « ? » en plein vol
+  const D = 400;
+  const fly = d.animate([
+    { transform: `translate(0,0) rotate(${a0}deg) scale(.82)`, filter: 'brightness(1.8)' },
+    { transform: `translate(${dx * 0.55}px,${dy * 0.55 - 50}px) rotate(${a0 + 200}deg) scale(${k * 0.85})`, filter: 'brightness(1.2)', offset: 0.45 },
+    { transform: `translate(${dx}px,${dy}px) rotate(${a0 + 360}deg) scale(${k * 1.2})`, filter: 'brightness(2)', offset: 0.78 },
+    { transform: `translate(${dx}px,${dy}px) rotate(${a0 + 360}deg) scale(${k * 0.96})`, filter: 'brightness(1.2)', offset: 0.9 },
+    { transform: `translate(${dx}px,${dy}px) rotate(${a0 + 360}deg) scale(${k})`, filter: 'none' },
+  ], { duration: D, easing: 'cubic-bezier(.35,.05,.25,1)', fill: 'forwards' });
+  // traînée : quelques échos du jeton qui s'effacent derrière lui
+  const trail = setInterval(() => {
+    const g = d.cloneNode(true);
+    g.style.zIndex = '2';
+    g.getAnimations?.().forEach(a => a.cancel());
+    g.style.transform = getComputedStyle(d).transform;
+    fx.appendChild(g);
+    g.animate([{ opacity: .45 }, { opacity: 0 }], { duration: 220, easing: 'ease-out' }).finished.then(() => g.remove());
+  }, 35);
+  setTimeout(() => { face.src = MYSTERE; }, D * 0.4);
+  // 3. impact au centre : flash, onde, secousse, son
+  setTimeout(() => {
+    clearInterval(trail);
+    sfx.hold();
+    const ring = el(`left:${c.x}px;top:${c.y}px;width:${c.s}px;height:${c.s}px;z-index:4;border:8px solid rgba(255,255,255,.9);border-radius:50%;box-sizing:border-box`);
+    ring.animate([{ transform: 'translate(-50%,-50%) scale(.6)', opacity: 1 }, { transform: 'translate(-50%,-50%) scale(2.3)', opacity: 0 }], { duration: 380, easing: 'cubic-bezier(.1,.7,.3,1)', fill: 'forwards' });
+    const fl = el('inset:0;z-index:5;background:radial-gradient(circle at 50% 45%, rgba(255,255,255,.55), transparent 60%)');
+    fl.animate([{ opacity: 1 }, { opacity: 0 }], { duration: 260, easing: 'ease-out', fill: 'forwards' });
+    if (!reducedFx()) document.body.animate([{ transform: 'translate(6px,-4px)' }, { transform: 'translate(-5px,3px)' }, { transform: 'translate(3px,-2px)' }, { transform: 'none' }], { duration: 200 });
+    burstAt(d, '#ffffff', .8);
+  }, D * 0.78);
+  await fly.finished;
+  clearInterval(trail);
+  // bascule sur le vrai écran : même jeton, même place
+  opening.style.opacity = '';
+  real.style.visibility = '';
+  setTimeout(() => opening.classList.remove('op-enter'), 500);
+  return 160; // le fond et les échos s'effacent vite
 }
 
 // [nom, description, fonction, durée max en ms (filet de sécurité)]
 const TRANSITIONS = [
-  ['Chute', 'Le jeton de l\'accueil tombe au centre et se retourne sur le « ? »', chute, 1400],
+  ['Chute', 'Le jeton de l\'accueil fonce au centre en tournant et devient le « ? »', chute, 900],
   ['Pixels', 'Des bords vers le jeton, puis se désintègre du centre vers les bords', onde, DUR],
 ];
 
@@ -175,7 +210,7 @@ async function runTransition() {
   if (busy) return;
   busy = true;
   if (SETTINGS.speed === 'instant') { showOpening(); busy = false; return; } // pas de transition en instantané
-  sfx.corrupt();
+  if (choice === 0) sfx.whoosh(); else sfx.corrupt();
   const t0 = performance.now();
   try {
     // Filet de sécurité : si le navigateur ne joue pas l'animation (onglet en arrière-plan…), on ouvre quand même
@@ -184,6 +219,7 @@ async function runTransition() {
     if (rest) await Promise.race([Promise.all([...fx.children].map(c => c.animate([{ opacity: 1 }, { opacity: 0 }], { duration: rest, fill: 'forwards' }).finished)), done(rest + 200)]);
   } finally {
     fx.innerHTML = '';
+    opening.style.opacity = ''; $('op-coin').style.visibility = ''; // jamais d'écran invisible si l'animation a été coupée
     document.querySelector('main').getAnimations().forEach(a => a.cancel());
     busy = false;
     window.lastTransitionMs = Math.round(performance.now() - t0);
@@ -342,8 +378,7 @@ function startOpening() {
   opCoin.className = 'op-coin';
   opCoin.innerHTML = `<div class="zoom"><div class="tilt3d"><div class="spin">${coin3D(MYSTERE, 'Jeton mystère')}</div>${'<b class="tw"></b>'.repeat(7)}</div></div>`;
   setGlareMask(MYSTERE);
-  // style d'ouverture à l'essai (admins) : décor et effets propres (opening-styles.js)
-  try { renderPicker(opening); } catch (e) { console.error('[sélecteur de style]', e); }
+  // ouverture « Coquille » : fissures, coups et éclats (opening-styles.js)
   styleStart({ opening, coin: opCoin, host: opening, main: opening.querySelector('.op-main'), fx: { shake, flash, tint, rays, burst } });
   if (c.phase === 'count' && c.shown === 1 && !sess.auto && !skipSpawn) spawn(); // le « ? » arrive en grossissant
   skipSpawn = false;
@@ -961,8 +996,6 @@ function buy(n, plan = null, vars = null, lucks = null, ids = null, pull = 0) {
   runTransition();
 }
 $('op-next')?.addEventListener('click', next);
-// changement de style (admins) : s'applique tout de suite si on n'a pas encore cliqué sur le « ? »
-opening.addEventListener('sty-change', () => { if (run && !run.done && run.shown === 1 && !run.holding) startOpening(); });
 // Pendant un ×10 : un clic n'importe où sur l'écran passe au jeton suivant
 opening.addEventListener('click', e => {
   if (e.target.closest?.('button, select, .debug') || $('op-next').hidden || !opening.classList.contains('revealed')) return;
