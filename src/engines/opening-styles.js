@@ -316,8 +316,44 @@ function drawCracks(c) {
   cx.fillStyle = `rgb(${glow})`;
   for (const [x, y] of cells) if ((x * 7 + y * 13 + c.cr.t) % 11 === 0) cx.fillRect(x, y, 1, 1);
 }
+// Le jeton qui flotte : vitesse et rotation qui s'amortissent lentement (espace), un léger rappel vers le centre
+// pour ne jamais sortir de l'écran, et un rebond doux sur les bords de la zone.
+function floatLoop(c) {
+  if (c.ph.raf) return;
+  let last = performance.now();
+  const tick = (now) => {
+    const ph = c.ph,
+      dt = Math.min(0.05, (now - last) / 1000);
+    last = now;
+    const lim = Math.min(170, innerWidth * 0.18);
+    ph.vx += -ph.x * 2.2 * dt;
+    ph.vy += -ph.y * 2.2 * dt;
+    const damp = Math.pow(0.35, dt); // perd ~65 % de sa vitesse par seconde
+    ph.vx *= damp;
+    ph.vy *= damp;
+    ph.va *= Math.pow(0.3, dt);
+    ph.x += ph.vx * dt;
+    ph.y += ph.vy * dt;
+    ph.a += ph.va * dt;
+    for (const ax of ['x', 'y']) {
+      const v = ax === 'x' ? 'vx' : 'vy';
+      if (Math.abs(ph[ax]) > lim) {
+        ph[ax] = Math.sign(ph[ax]) * lim;
+        ph[v] *= -0.55;
+        ph.va += R(-90, 90);
+      }
+    }
+    ph.sq = Math.max(0, ph.sq - dt * 6);
+    const sq = 1 - ph.sq * 0.1;
+    c.box.style.transform = `translate(${ph.x.toFixed(1)}px,${ph.y.toFixed(1)}px) rotate(${ph.a.toFixed(1)}deg) scale(${sq.toFixed(3)})`;
+    const moving = Math.abs(ph.vx) + Math.abs(ph.vy) + Math.abs(ph.va) > 2 || Math.abs(ph.x) + Math.abs(ph.y) > 0.5;
+    ph.raf = moving ? requestAnimationFrame(tick) : 0;
+  };
+  c.ph.raf = requestAnimationFrame(tick);
+}
 S.crack = {
   start(c) {
+    c.ph = { x: 0, y: 0, vx: 0, vy: 0, a: 0, va: 0, sq: 0, raf: 0 };
     const cv = document.createElement('canvas');
     cv.width = cv.height = G;
     cv.className = 'sty-cracks';
@@ -362,8 +398,9 @@ S.crack = {
     step();
     c.box.style.setProperty('--glow', String(1 + k * 6));
     c.box.style.setProperty('--crk', String(0.5 + k * 0.5));
-    // le coup : le jeton part à l'opposé du clic, tourne un peu, puis revient en ressort
-    const m = mid(c.coin);
+    // le coup : le jeton est projeté à l'opposé du clic et part en tournant, comme en apesanteur ;
+    // il dérive doucement (il ne revient pas d'un coup) jusqu'au coup suivant
+    const m = mid(c.box);
     let dx = m.x - (c.px ?? m.x + R(-1, 1)),
       dy = m.y - (c.py ?? m.y + R(-1, 1));
     const L = Math.hypot(dx, dy) || 1;
@@ -375,19 +412,14 @@ S.crack = {
       dx /= L;
       dy /= L;
     }
-    const f = 14 + k * 22,
-      rot = (dx >= 0 ? 1 : -1) * (8 + k * 14) * R(0.7, 1.2);
-    c.box.getAnimations().forEach((an) => an.cancel());
-    c.box.animate(
-      [
-        { transform: 'none', filter: 'brightness(1)' },
-        { transform: `translate(${dx * f}px,${dy * f}px) rotate(${rot}deg) scale(.94)`, filter: 'brightness(1.8)', offset: 0.18 },
-        { transform: `translate(${-dx * f * 0.25}px,${-dy * f * 0.25}px) rotate(${-rot * 0.35}deg)`, filter: 'brightness(1)', offset: 0.55 },
-        { transform: `translate(${dx * f * 0.08}px,${dy * f * 0.08}px) rotate(${rot * 0.1}deg)`, offset: 0.8 },
-        { transform: 'none' },
-      ],
-      { duration: 380, easing: 'cubic-bezier(.2,.7,.3,1)' },
-    );
+    const ph = c.ph,
+      imp = 260 + k * 320;
+    ph.vx = ph.vx * 0.3 + dx * imp;
+    ph.vy = ph.vy * 0.3 + dy * imp;
+    ph.va = ph.va * 0.3 + (dx >= 0 ? 1 : -1) * R(160, 320) * (0.7 + k * 0.6);
+    ph.sq = 1; // petit écrasement au moment du coup
+    floatLoop(c);
+    c.box.animate([{ filter: 'brightness(2.2)' }, { filter: 'none' }], { duration: 160, easing: 'ease-out' });
     // éclats de coque qui sautent du côté frappé
     emit(c.host, Array.from({ length: fewer(4 + Math.round(k * 8)) }, () => ({ x: m.x - dx * m.w * 0.35 + R(-12, 12), y: m.y - dy * m.w * 0.35 + R(-12, 12), vx: -dx * R(150, 420) + R(-120, 120), vy: -dy * R(150, 420) - R(80, 260), c: pick(MYST), g: 1400, life: R(0.6, 1.1), s: pick([4, 6, 8]), floor: m.r.bottom + 60, bounce: 0.3, edge: '#120e1f' })));
     emit(c.host, Array.from({ length: fewer(3 + Math.round(k * 4)) }, () => ({ x: m.x + R(-10, 10), y: m.y + R(-10, 10), vx: R(-260, 260), vy: R(-260, 260), c: '#ffffff', life: R(0.15, 0.3), s: 4 })));
@@ -408,7 +440,11 @@ S.crack = {
   reveal(c, j, lv) {
     clearInterval(c.holdT);
     c.box.classList.remove('sty-crk-hold');
-    const m = mid(c.coin);
+    cancelAnimationFrame(c.ph.raf);
+    c.ph.raf = 0;
+    const from = c.box.style.transform || 'none';
+    c.box.style.transform = '';
+    const m = mid(c.box);
     c.cr.cv.remove();
     // éclats de coque qui partent dans tous les sens, puis retombent
     emit(c.host, radial(m, 60, { sp: [400, 1100], up: 250, cols: MYST, g: 1600, life: [0.9, 1.5], s: [6, 14], floor: innerHeight - 6, shrink: false, edge: '#120e1f' }));
@@ -419,7 +455,7 @@ S.crack = {
     c.fx.shake(1.3);
     c.box.animate(
       [
-        { transform: 'scale(.4)', filter: 'brightness(4)' },
+        { transform: `${from} scale(.4)`, filter: 'brightness(4)' },
         { transform: 'scale(1.22)', filter: 'brightness(1.6)', offset: 0.4 },
         { transform: 'scale(.95)', filter: 'brightness(1.1)', offset: 0.7 },
         { transform: 'none', filter: 'none' },
@@ -434,6 +470,8 @@ S.crack = {
   },
   clean(c) {
     clearInterval(c.holdT);
+    if (c.ph) cancelAnimationFrame(c.ph.raf);
+    c.box.style.transform = '';
     c.box.classList.remove('sty-crk-hold');
     c.box.style.removeProperty('--glow');
     c.box.style.removeProperty('--crk');
