@@ -34,7 +34,7 @@
 }
 .cats button[aria-pressed='true'] {
   color: var(--text);
-  border-color: #a78bfa;
+  border-color: #8eaaff;
 }
 .h2 {
   font-size: var(--fs-lg);
@@ -145,7 +145,7 @@
 /* Packs en euros (achats intégrés) : ta boîte pêche à rayures, texte foncé */
 .card.pack {
   /* 10 % plus sombre : les objets ressortent mieux */
-  border-color: #fdba74;
+  border-color: #ffe07a;
   border-image-slice: 12 fill;
   border-image-width: 24px;
   background-color: #e6caa2;

@@ -102,12 +102,12 @@
     var css = document.createElement('style');
     css.textContent =
       '#gate{position:fixed;left:50%;bottom:3vmin;transform:translateX(-50%);z-index:10000;display:grid;grid-template-columns:auto 1fr auto auto;align-items:center;gap:2.2vmin;' +
-      'width:min(92vw,120vmin);padding:2.2vmin 2.6vmin;border-radius:3vmin;background:#1b1530;border:.4vmin solid #3b2a5c;box-shadow:0 2vmin 6vmin rgba(0,0,0,.55);' +
+      'width:min(92vw,120vmin);padding:2.2vmin 2.6vmin;border-radius:3vmin;background:#151a2b;border:.4vmin solid #28304d;box-shadow:0 2vmin 6vmin rgba(0,0,0,.55);' +
       'color:#f2f2f5;font-family:system-ui,-apple-system,sans-serif;animation:gateIn .5s cubic-bezier(.2,1.2,.4,1) both}' +
       '@keyframes gateIn{from{opacity:0;transform:translate(-50%,4vmin)}}' +
       '#gate img{width:9vmin;height:9vmin;image-rendering:pixelated;border-radius:2vmin}' +
       '#gate div{display:grid;gap:.6vmin;text-align:left}#gate b{font-size:3.6vmin}#gate small{font-size:2.6vmin;color:#b9b4cf}' +
-      '#gate-install{font:inherit;font-size:3.4vmin;font-weight:800;padding:1.6vmin 4.4vmin;border:0;border-radius:2vmin;background:#7d48d9;color:#fff;box-shadow:0 .8vmin 0 #4c1d95}' +
+      '#gate-install{font:inherit;font-size:3.4vmin;font-weight:800;padding:1.6vmin 4.4vmin;border:0;border-radius:2vmin;background:#3d6bff;color:#fff;box-shadow:0 .8vmin 0 #2443b3}' +
       '#gate-x{font:inherit;font-size:3vmin;width:7vmin;height:7vmin;border:0;border-radius:50%;background:rgba(255,255,255,.08);color:#b9b4cf}' +
       '#gate p{grid-column:1/-1;margin:0;font-size:3vmin;color:#f2f2f5;text-align:center}';
     document.head.appendChild(css);

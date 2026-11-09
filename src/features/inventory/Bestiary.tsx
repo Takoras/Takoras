@@ -1,4 +1,4 @@
-import { PULLS } from '@/engines/env';
+import { PULLS, serieTheme } from '@/engines/env';
 import { useLayoutEffect, useMemo, useRef, useState, type CSSProperties } from 'react';
 import { SerieName } from '@/ui/SerieName';
 import { Link, NavLink } from 'react-router';
@@ -231,7 +231,11 @@ export default function Bestiary() {
           </span>
         </div>
       </div>
-      <div className={s.progress}>
+      {/* barres de la collection à la couleur de la série (bleu Takoras, vert Bodako…) */}
+      <div
+        className={s.progress}
+        style={{ '--sc': serieTheme(view.serie).main, '--sc-hi': serieTheme(view.serie).hi } as CSSProperties}
+      >
         <div>
           <b>
             {/* en changeant de série, les chiffres défilent jusqu'aux nouveaux (pas de saut) */}

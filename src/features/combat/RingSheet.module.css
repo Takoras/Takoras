@@ -27,7 +27,7 @@
 }
 .pick button.on {
   opacity: 1;
-  border-color: rgb(167 139 250 / 70%);
+  border-color: rgb(142 170 255 / 70%);
 }
 .pick img {
   width: 100%;

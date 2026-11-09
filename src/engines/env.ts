@@ -86,10 +86,10 @@ export const ACC = {
 export const COIN_PULL = { one: 300, ten: 2700 };
 
 export const SERIE_THEME: Record<string, { main: string; hi: string; alt: string }> = {
-  Takoras: { main: '39 71 181', hi: '71 194 234', alt: '124 58 237' },
+  Takoras: { main: '39 71 181', hi: '71 194 234', alt: '61 107 255' },
   Bodako: { main: '31 122 61', hi: '139 211 106', alt: '20 92 72' }, // nature : feuilles, mousse
 };
-const TAKORAS_THEME = { main: '39 71 181', hi: '71 194 234', alt: '124 58 237' };
+const TAKORAS_THEME = { main: '39 71 181', hi: '71 194 234', alt: '61 107 255' };
 export const serieTheme = (name?: string) => SERIE_THEME[name ?? ''] ?? TAKORAS_THEME;
 
 // Le seul type de pull (même objet que l'ancien site)

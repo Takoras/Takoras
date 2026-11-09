@@ -118,7 +118,7 @@ export default function Pass() {
     try {
       const res = (await passApi.claim(tr, prem)) as { state: unknown };
       qc.setQueryData(['me', user.id], res.state);
-      burstAt(el ?? null, prem ? '#fbbf24' : '#a78bfa', 1.3);
+      burstAt(el ?? null, prem ? '#fbbf24' : '#8eaaff', 1.3);
       sfx.upgrade();
       toast(`${t('ui.bp_got')}`);
       void q.refetch();
@@ -287,7 +287,7 @@ export default function Pass() {
                             duration: 260,
                             easing: 'cubic-bezier(.2,.8,.3,1)',
                           });
-                          burstAt(tile, p ? '#fbbf24' : '#a78bfa', 0.8);
+                          burstAt(tile, p ? '#fbbf24' : '#8eaaff', 0.8);
                         }
                         sfx.click();
                         await new Promise((ok) => setTimeout(ok, wait));

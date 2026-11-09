@@ -342,7 +342,7 @@
   overflow: hidden; /* la barre ne défile pas et ne se pousse pas */
   overscroll-behavior: none;
   touch-action: manipulation;
-  background: linear-gradient(180deg, #17131f, #0e0c15);
+  background: linear-gradient(180deg, #17171b, #0e0e11);
   box-shadow:
     inset -2px 0 0 #262036,
     6px 0 24px rgb(0 0 0 / 35%);
@@ -406,9 +406,9 @@
   color: #fff;
 }
 .railItem.on .railIco {
-  border-color: #8b5cf6;
+  border-color: #4f7bff;
   background-color: var(--accent);
-  filter: drop-shadow(0 0 10px rgb(139 92 246 / 60%));
+  filter: drop-shadow(0 0 10px rgb(61 107 255 / 60%));
   animation: railPulse 2.4s ease-in-out infinite;
 }
 .railItem.on::before {
@@ -418,8 +418,8 @@
   top: 14px;
   width: 4px;
   height: 36px;
-  background: #a78bfa;
-  box-shadow: 0 0 10px #8b5cf6;
+  background: #8eaaff;
+  box-shadow: 0 0 10px #4f7bff;
 }
 @keyframes railPulse {
   50% {
@@ -563,7 +563,7 @@
     justify-items: center;
     gap: var(--s-3);
     padding: var(--s-6);
-    background: radial-gradient(circle at 50% 40%, #2a1d4a, #0d0d12 70%);
+    background: radial-gradient(circle at 50% 40%, #1d2440, #0e0e11 70%);
     text-align: center;
   }
   /* la page est rendue sur 1280 px puis réduite : on écrit en grand (en vw) pour que ce soit lisible */
@@ -578,9 +578,9 @@
     width: calc(16vw / var(--z, 1));
     height: calc(26vw / var(--z, 1));
     margin-bottom: var(--s-4);
-    border: calc(1vw / var(--z, 1)) solid #a78bfa;
+    border: calc(1vw / var(--z, 1)) solid #8eaaff;
     border-radius: calc(2vw / var(--z, 1));
-    box-shadow: 0 0 24px rgb(139 92 246 / 50%);
+    box-shadow: 0 0 24px rgb(61 107 255 / 50%);
     animation: turnPhone 2.4s ease-in-out infinite;
   }
 }
@@ -702,7 +702,7 @@
 .previewChip {
   padding: 6px 12px;
   border-radius: 999px;
-  background: #f97316;
+  background: #f2c230;
   color: #2a0f1c;
   font-size: var(--fs-sm);
   font-weight: 800;
@@ -744,7 +744,7 @@
 }
 .testerBtn:hover {
   transform: translateY(-2px) scale(1.06);
-  border-color: #a78bfa;
+  border-color: #8eaaff;
 }
 @keyframes vialSway {
   0%,

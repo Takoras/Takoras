@@ -124,7 +124,7 @@ function ItemCard({ it, i, before }: { it: Row; i: number; before: () => void })
       className={s.item}
       data-key={it.item}
       data-sig={it.qty}
-      style={{ '--g': '139, 92, 246', '--i': Math.min(i, 24) } as CSSProperties}
+      style={{ '--g': '61, 107, 255', '--i': Math.min(i, 24) } as CSSProperties}
     >
       <span className={s.qty}>×{it.qty}</span>
       <div className={s.itemIcon}>

@@ -197,7 +197,7 @@
   padding: 0 var(--s-3);
 }
 .form button {
-  border: 1px solid #8b5cf6;
+  border: 1px solid #4f7bff;
   border-radius: 8px;
   background: var(--accent);
   width: 40px;
@@ -461,8 +461,8 @@
   font-weight: 700;
 }
 .frTabs button[aria-selected='true'] {
-  background: #7d48d9;
-  box-shadow: 0 3px 0 #4c1d95;
+  background: #3d6bff;
+  box-shadow: 0 3px 0 #2443b3;
   color: #fff;
 }
 .cnt {

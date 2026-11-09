@@ -32,15 +32,15 @@ const POTION_GLOW: Record<number, string> = {
   5: '251, 191, 36',
   10: '103, 232, 249',
   25: '244, 114, 182',
-  50: '251, 146, 60',
+  50: '245, 205, 82',
   100: '255, 255, 255',
 };
 const glowOf = (it: Item) =>
   it.kind === 'potion'
-    ? (POTION_GLOW[it.data.mult ?? 0] ?? '139, 92, 246')
+    ? (POTION_GLOW[it.data.mult ?? 0] ?? '61, 107, 255')
     : it.kind === 'banner'
-      ? '249, 115, 22'
-      : '139, 92, 246';
+      ? '242, 194, 48'
+      : '61, 107, 255';
 const Coin = ({ size = 14 }: { size?: number }) => (
   <img className="px" src="/img/piece.png" alt="" width={size} height={size} />
 );
@@ -318,7 +318,7 @@ function Packs() {
       </h2>
       <ul className={s.grid}>
         {PACKS.map((p) => (
-          <li key={p.id} className={`${s.card} ${s.pack}`} style={{ '--g': '249, 115, 22' } as React.CSSProperties}>
+          <li key={p.id} className={`${s.card} ${s.pack}`} style={{ '--g': '242, 194, 48' } as React.CSSProperties}>
             <div className={s.icon}>
               <img className="px" src={p.img} alt="" />
             </div>
@@ -347,7 +347,7 @@ function Packs() {
       </h2>
       <ul className={s.grid}>
         {POTION_PACKS.map((p) => (
-          <li key={p.id} className={`${s.card} ${s.pack}`} style={{ '--g': '249, 115, 22' } as React.CSSProperties}>
+          <li key={p.id} className={`${s.card} ${s.pack}`} style={{ '--g': '242, 194, 48' } as React.CSSProperties}>
             <div className={s.icon}>
               <img className="px" src={p.img} alt="" />
             </div>

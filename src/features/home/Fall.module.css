@@ -38,8 +38,8 @@
   background: linear-gradient(
     to bottom,
     transparent,
-    rgba(var(--g, 139, 92, 246), 0.22) 70%,
-    rgba(var(--g, 139, 92, 246), 0.05)
+    rgba(var(--g, 61, 107, 255), 0.22) 70%,
+    rgba(var(--g, 61, 107, 255), 0.05)
   );
   mask-image: radial-gradient(50% 100% at 50% 100%, #000 30%, transparent 100%);
   filter: blur(18px);

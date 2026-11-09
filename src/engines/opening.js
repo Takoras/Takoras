@@ -37,7 +37,7 @@ const DUR = 500;
 
 const el = (css = '', html = '') => { const d = document.createElement('div'); d.style.cssText = css; d.innerHTML = html; fx.appendChild(d); return d; };
 const done = ms => new Promise(r => setTimeout(r, ms));
-const glowRGB = () => getComputedStyle(document.documentElement).getPropertyValue('--glow').trim() || '139, 92, 246';
+const glowRGB = () => getComputedStyle(document.documentElement).getPropertyValue('--glow').trim() || '61, 107, 255';
 function origin() {
   const r = heroCoin().getBoundingClientRect();
   return { x: r.left + r.width / 2, y: r.top + r.height / 2, r: r.width / 2 };
@@ -237,7 +237,7 @@ const texScale = j => (j?.grid || 64) / 64;
 const SKIP = 1 / 5; // environ 1 clic sur 5 saute discrètement une étape
 
 // Couleur du compteur selon la rareté atteinte
-const TIERS = [[10, '200, 200, 210'], [50, '74, 222, 128'], [200, '56, 189, 248'], [1000, '167, 139, 250'], [5000, '251, 191, 36'], [25000, '244, 114, 182'], [Infinity, '240, 240, 255']];
+const TIERS = [[10, '200, 200, 210'], [50, '74, 222, 128'], [200, '56, 189, 248'], [1000, '142, 170, 255'], [5000, '251, 191, 36'], [25000, '244, 114, 182'], [Infinity, '240, 240, 255']];
 const FAST = 60;   // en dessous de 1/60 : retournement direct, pas de pause
 const RARE = 1000; // à partir de 1/1000 : zoom plus fort et révélation plus spectaculaire
 // Pendant le compteur : pas de couleur, juste du blanc de plus en plus lumineux

@@ -27,8 +27,7 @@ body {
   min-height: 100dvh;
   /* lueurs douces comme l'ancien Takoras (violet en haut à droite, orange à gauche) */
   background:
-    radial-gradient(900px 500px at 85% -10%, rgb(139 92 246 / 16%), transparent 70%),
-    radial-gradient(700px 400px at -10% 60%, rgb(249 115 22 / 7%), transparent 70%), var(--bg);
+    radial-gradient(900px 500px at 85% -10%, rgb(61 107 255 / 6%), transparent 70%), var(--bg);
   background-attachment: fixed;
   color: var(--text);
   font-family: var(--font-body);
@@ -153,13 +152,13 @@ html.lock body {
   box-shadow: none;
   color: #fff;
   text-shadow: 0 1px 0 rgb(40 10 80 / 70%);
-  filter: drop-shadow(0 3px 0 #4c1d95);
+  filter: drop-shadow(0 3px 0 #2443b3);
 }
 :root .btn.primary.sm {
   border-image-width: 12px;
 }
 :root .btn.primary:not(:disabled):hover {
-  filter: brightness(1.12) drop-shadow(0 3px 0 #4c1d95);
+  filter: brightness(1.12) drop-shadow(0 3px 0 #2443b3);
 }
 :root .btn.primary:not(:disabled):active {
   filter: brightness(0.88);
@@ -195,7 +194,7 @@ html.lock body {
    (Le même fond sert pendant la transition « Chute », pour qu'il n'y ait pas de changement de fond.) */
 .opening.on {
   /* --serie : teinte de la série en cours (posée par le moteur d'ouverture) */
-  background: radial-gradient(60% 55% at 50% 45%, rgb(var(--serie, 39 71 181) / 22%), transparent 70%), #0b0a12;
+  background: radial-gradient(60% 55% at 50% 45%, rgb(var(--serie, 39 71 181) / 22%), transparent 70%), #0b0b0e;
 }
 .opening .op-glow {
   background: radial-gradient(closest-side, rgba(var(--tier), 0.1), transparent);

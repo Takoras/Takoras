@@ -14,7 +14,7 @@
   font-size: var(--fs-sm);
 }
 .luck button[aria-pressed='true'] {
-  border-color: #a78bfa;
+  border-color: #8eaaff;
 }
 .table {
   overflow-x: auto;

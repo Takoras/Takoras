@@ -30,7 +30,7 @@
   font-size: var(--fs-sm);
 }
 .kinds button[aria-pressed='true'] {
-  border-color: #a78bfa;
+  border-color: #8eaaff;
   color: var(--text);
 }
 
@@ -97,7 +97,7 @@
   aspect-ratio: 64 / 47;
 }
 .p1 {
-  --ring: #f59e0b;
+  --ring: #e8b422;
   --lift: -28px;
   --dur: 6.2s;
 }
@@ -107,7 +107,7 @@
   animation: podFloat1 var(--dur) ease-in-out infinite;
 }
 .p2 {
-  --ring: #a78bfa;
+  --ring: #8eaaff;
   --rot: -12deg;
   --dur: 7.4s;
 }
@@ -115,7 +115,7 @@
   width: 160px;
 }
 .p3 {
-  --ring: #ea580c;
+  --ring: #d9a514;
   --rot: 14deg;
   --lift: 12px;
   --dur: 8.1s;
@@ -182,7 +182,7 @@
 .list li:hover {
   translate: 8px 0;
   background: var(--surface-3);
-  border-color: rgb(167 139 250 / 45%);
+  border-color: rgb(142 170 255 / 45%);
 }
 .list li:hover .rank {
   scale: 1.35;
@@ -232,7 +232,7 @@
   margin: 0 auto;
 }
 .list li.me {
-  border-color: #f97316;
+  border-color: #f2c230;
 }
 .rank {
   width: 28px;

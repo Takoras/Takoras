@@ -40,7 +40,7 @@
   animation: logoFloat 4.6s ease-in-out infinite;
   white-space: nowrap; /* « Tirage » + logo sur une seule ligne */
   font-size: clamp(2.2rem, calc(6.5vw / var(--z, 1)), 3.6rem);
-  text-shadow: 0 0 40px rgb(139 92 246 / 45%);
+  text-shadow: 0 0 40px rgb(61 107 255 / 45%);
 }
 
 /* Jeton héros */
@@ -58,8 +58,8 @@
   inset: -45%;
   border-radius: 50%;
   background:
-    radial-gradient(closest-side, rgb(139 92 246 / 32%), rgb(139 92 246 / 8%) 55%, transparent),
-    repeating-conic-gradient(from 0deg, rgb(167 139 250 / 13%) 0deg 6deg, transparent 6deg 20deg);
+    radial-gradient(closest-side, rgb(61 107 255 / 32%), rgb(61 107 255 / 8%) 55%, transparent),
+    repeating-conic-gradient(from 0deg, rgb(142 170 255 / 13%) 0deg 6deg, transparent 6deg 20deg);
   mask-image: radial-gradient(closest-side, #000 35%, transparent 100%);
   animation: spin 60s linear infinite;
   pointer-events: none;
@@ -76,7 +76,7 @@
   width: 5px;
   height: 5px;
   background: #c4b5fd;
-  box-shadow: 0 0 8px #a78bfa;
+  box-shadow: 0 0 8px #8eaaff;
   opacity: 0;
   animation: mote 5s linear infinite;
 }
@@ -258,14 +258,14 @@
   grid-column: 1 / -1;
 }
 .upCan {
-  border-color: #f97316;
+  border-color: #f2c230;
   animation:
     upGlow 2.2s ease-in-out infinite,
     bobSoft var(--fl, 6s) ease-in-out infinite;
 }
 @keyframes upGlow {
   50% {
-    filter: drop-shadow(0 0 10px rgb(249 115 22 / 45%));
+    filter: drop-shadow(0 0 10px rgb(242 194 48 / 45%));
   }
 }
 .up > img {
@@ -286,7 +286,7 @@
 }
 .upVal em {
   font-style: normal;
-  color: #fdba74;
+  color: #ffe07a;
 }
 .upBar {
   height: 6px;
@@ -295,7 +295,7 @@
 .upBar i {
   display: block;
   height: 100%;
-  background: linear-gradient(90deg, #f97316, #fbbf24);
+  background: linear-gradient(90deg, #f2c230, #fbbf24);
 }
 :global(html.reduce-fx) .upCan {
   animation: none;
@@ -377,7 +377,7 @@
 
 /* choisi : ta boîte claire à bords violets */
 .chips button[aria-pressed='true'] {
-  border-color: #a78bfa;
+  border-color: #8eaaff;
   background-color: var(--surface-2);
   color: var(--text);
 }
@@ -525,7 +525,7 @@
   text-align: left;
 }
 .picker button[aria-pressed='true'] {
-  border-color: #a78bfa;
+  border-color: #8eaaff;
   background-color: var(--surface-2);
 }
 .picker .soon {
@@ -699,8 +699,8 @@
     0 8px 18px rgb(0 0 0 / 45%);
 }
 .satPick .picker button[aria-pressed='true'] {
-  background: rgb(124 58 237 / 28%);
-  box-shadow: inset 0 0 0 2px #a78bfa;
+  background: rgb(61 107 255 / 28%);
+  box-shadow: inset 0 0 0 2px #8eaaff;
 }
 
 /* améliorations : capsules flottantes */
@@ -714,7 +714,7 @@
 }
 .satUps .upCan {
   box-shadow:
-    inset 0 0 0 2px #f97316,
+    inset 0 0 0 2px #f2c230,
     0 10px 24px rgb(0 0 0 / 35%);
 }
 .satUps .up + .up {
@@ -807,11 +807,11 @@
 }
 .openOne {
   border: 0;
-  background: #7c3aed;
+  background: #3d6bff;
   color: #fff;
   box-shadow:
-    inset 0 -4px 0 #4c1d95,
-    0 10px 24px rgb(124 58 237 / 35%);
+    inset 0 -4px 0 #2443b3,
+    0 10px 24px rgb(61 107 255 / 35%);
 }
 .openAll {
   border: 1px solid rgb(255 255 255 / 14%);

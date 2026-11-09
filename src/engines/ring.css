@@ -14,7 +14,7 @@
 .rg-plate.me { justify-items: start; --from: -30px; }
 .rg-plate.foe { justify-items: end; --from: 30px; animation-delay: .06s; }
 .rg-pn { display: flex; align-items: center; gap: 6px; max-width: 100%; font-family: var(--font-display); font-size: 15px; font-weight: 900; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-.rg-plate.me .rg-pn { color: #c4b5fd; } .rg-plate.foe .rg-pn { color: #fdba74; }
+.rg-plate.me .rg-pn { color: #c4b5fd; } .rg-plate.foe .rg-pn { color: #ffe07a; }
 /* l'adversaire a validé : une coche verte qui saute à côté de son nom */
 .rg-ok { display: grid; place-items: center; width: 22px; height: 22px; border: 2px solid #0d0d12; border-radius: 6px; background: #4ade80; color: #0d0d12; font-style: normal; font-size: 13px; font-weight: 900; opacity: 0; scale: 0; transition: opacity .2s, scale .35s cubic-bezier(.2, 1.8, .4, 1); }
 .rg-ok.on { opacity: 1; scale: 1; }
@@ -24,7 +24,7 @@
 .rg-timer { position: relative; width: 56px; height: 56px; border: 3px solid #0d0d12; border-radius: 50%; background: #1e1e28; }
 .rg-timer svg { width: 100%; height: 100%; transform: rotate(-90deg); }
 .rg-timer circle { fill: none; stroke: #2a2a36; stroke-width: 5; }
-.rg-timer circle.p { stroke: #a78bfa; stroke-dasharray: calc(var(--p, 1) * 100) 100; transition: stroke-dasharray .1s linear; }
+.rg-timer circle.p { stroke: #8eaaff; stroke-dasharray: calc(var(--p, 1) * 100) 100; transition: stroke-dasharray .1s linear; }
 .rg-timer b { position: absolute; inset: 0; display: grid; place-items: center; font-family: var(--font-display); font-size: 20px; font-weight: 900; }
 .rg-timer.low circle.p { stroke: #fb7185; } .rg-timer.low b { color: #fb7185; animation: rgPulse .5s infinite alternate; }
 
@@ -32,8 +32,8 @@
 .rg-team { display: flex; gap: 6px; }
 .rg-tc { position: relative; width: 52px; height: 52px; padding: 4px; border: 3px solid #0d0d12; border-radius: 12px; background: #1e1e28; box-shadow: 0 3px 0 #0d0d12; cursor: pointer;
   transition: translate .2s cubic-bezier(.2, 1.4, .4, 1), box-shadow .2s, border-color .2s, filter .3s; }
-.rg-team.me .rg-tc { background: color-mix(in srgb, #a78bfa 22%, #1a1826); }
-.rg-team.foe .rg-tc { background: color-mix(in srgb, #fb923c 20%, #1c1716); }
+.rg-team.me .rg-tc { background: color-mix(in srgb, #8eaaff 22%, #1a1826); }
+.rg-team.foe .rg-tc { background: color-mix(in srgb, #f5cd52 20%, #1c1716); }
 .rg-tc:hover { translate: 0 -3px; box-shadow: 0 6px 0 #0d0d12; }
 .rg-tc img { width: 100%; height: 100%; image-rendering: pixelated; object-fit: contain; }
 .rg-tc.sel { border-color: #fff; translate: 0 -4px; box-shadow: 0 7px 0 #0d0d12; }
@@ -71,8 +71,8 @@
 .rg-pw.on b { color: #0d0d12; }
 .rg-pw:disabled { opacity: .55; cursor: default; box-shadow: 0 3px 0 #0d0d12; }
 .rg-go { font-family: var(--font-display); font-size: 22px; font-weight: 900; letter-spacing: .02em; background: #2a2a36; color: var(--muted); }
-.rg-go.ready { background: #7c3aed; color: #fff; box-shadow: inset 0 -5px 0 #4c1d95, 0 5px 0 #0d0d12; }
-.rg-go.ready:not(:disabled):hover { box-shadow: inset 0 -5px 0 #4c1d95, 0 7px 0 #0d0d12; }
+.rg-go.ready { background: #3d6bff; color: #fff; box-shadow: inset 0 -5px 0 #2443b3, 0 5px 0 #0d0d12; }
+.rg-go.ready:not(:disabled):hover { box-shadow: inset 0 -5px 0 #2443b3, 0 7px 0 #0d0d12; }
 .rg-go.done { background: #166534; color: #bbf7d0; }
 .rg-go:disabled { cursor: default; }
 
@@ -96,7 +96,7 @@
 .rs-l { font-size: 12.5px; font-weight: 600; white-space: nowrap; }
 .rs-b { height: 8px; border-radius: 4px; background: rgba(255, 255, 255, .08); overflow: hidden; }
 .rs-b i { display: block; height: 100%; border-radius: 4px; }
-.rs-row.mass .rs-b i { background: linear-gradient(90deg, #7c3aed, #a78bfa); } .rs-row.pow .rs-b i { background: linear-gradient(90deg, #ea580c, #fb923c); } .rs-row.size .rs-b i { background: linear-gradient(90deg, #0284c7, #38bdf8); }
+.rs-row.mass .rs-b i { background: linear-gradient(90deg, #3d6bff, #8eaaff); } .rs-row.pow .rs-b i { background: linear-gradient(90deg, #d9a514, #f5cd52); } .rs-row.size .rs-b i { background: linear-gradient(90deg, #0284c7, #38bdf8); }
 .rs-row b { font-size: 12px; text-align: right; font-variant-numeric: tabular-nums; }
 .rs.compact { gap: 3px; width: 100%; padding: 0 2px; }
 .rs.compact .rs-row { grid-template-columns: 16px 1fr; gap: 4px; }

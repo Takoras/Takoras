@@ -1,51 +1,51 @@
 /*
  * Design tokens de Takoras. Toute couleur, taille, rayon, ombre ou durée du site vient d'ici.
- * Identité : salle d'arcade de nuit. Fond presque noir, surfaces mates, UN accent violet réservé à l'action
- * principale, l'orange pour la monnaie et l'urgence, et la lumière vient des jetons eux-mêmes (--g).
+ * Identité : salle d'arcade de nuit. Fond noir neutre, surfaces mates, UN accent bleu (le bleu du logo Takoras)
+ * réservé à l'action principale, l'or des pièces pour la monnaie, et la lumière vient des jetons eux-mêmes (--g).
  */
 :root {
   color-scheme: dark;
 
-  /* Album à vignettes (accueil) aux couleurs de nuit : fond nuit, pages mates, vignettes, violet pour l'action */
-  --al-cover: #1b1530;
-  --al-cover-deep: #0b0a10;
+  /* Album à vignettes (accueil) aux couleurs de nuit : fond nuit, pages mates, vignettes, bleu pour l'action */
+  --al-cover: #151a2b;
+  --al-cover-deep: #0a0a0d;
   --al-cover-ink: #f2f2f5;
-  --al-paper: #17171f;
-  --al-paper-2: #1e1e28;
-  --al-line: #3a3a4a;
+  --al-paper: #17171b;
+  --al-paper-2: #1e1e24;
+  --al-line: #393942;
   --al-ink: #f2f2f5;
   --al-ink-2: #b8b8c6;
-  --al-num: #a78bfa; /* numéros des cases : violet clair lisible sur le sombre */
-  --al-red: #7c3aed; /* action principale (violet d'avant) : blanc dessus = 5,7:1 */
-  --al-red-deep: #4c1d95;
+  --al-num: #8eaaff; /* numéros des cases : bleu clair lisible sur le sombre */
+  --al-red: #3d6bff; /* action principale : bleu Takoras */
+  --al-red-deep: #2443b3;
   --al-shadow: 0 2px 3px rgb(0 0 0 / 35%), 0 10px 22px rgb(0 0 0 / 40%);
   --al-shadow-lift: 0 6px 8px rgb(0 0 0 / 35%), 0 22px 40px rgb(0 0 0 / 50%);
   --font-album: 'Archivo Black', 'Archivo Variable', system-ui, sans-serif;
   --font-album-body: 'Archivo Variable', system-ui, sans-serif;
 
   /* Fonds et surfaces (du plus profond au plus proche) */
-  --bg: #0d0d12;
-  --bg-raised: #13131a;
-  --surface: #17171f;
-  --surface-2: #1e1e28;
-  --surface-3: #262632;
-  --line: #2a2a36;
-  --line-strong: #3a3a4a;
+  --bg: #0e0e11;
+  --bg-raised: #141418;
+  --surface: #17171b;
+  --surface-2: #1b1b21;
+  --surface-3: #25252d;
+  --line: #2a2a32;
+  --line-strong: #393942;
 
   /* Texte */
   --text: #f2f2f5;
   --text-2: #b8b8c6;
-  --muted: #8d8da0;
+  --muted: #8e8e9a;
   --faint: #5c5c6e; /* décoratif seulement (pas pour du texte) */
 
   /* Accent (action principale) et secondaire (monnaie, urgence) */
-  --accent: #7c3aed; /* fond des boutons principaux : blanc dessus = 5,7:1 */
-  --accent-hover: #6d28d9;
-  --accent-hi: #a78bfa; /* violet clair pour du texte sur fond sombre */
-  --accent-lo: #4c1d95;
+  --accent: #3d6bff; /* fond des boutons principaux : le bleu du logo Takoras (blanc dessus lisible) */
+  --accent-hover: #2f58e0;
+  --accent-hi: #8eaaff; /* bleu clair pour du texte sur fond sombre */
+  --accent-lo: #2443b3;
   --accent-ink: #ffffff;
-  --gold: #f97316;
-  --gold-hi: #fdba74;
+  --gold: #f2c230; /* or des pièces */
+  --gold-hi: #ffe07a;
 
   /* États */
   --ok: #4ade80;
@@ -58,7 +58,7 @@
   /* Raretés (texte et lueur) */
   --r-common: #cbd5e1;
   --r-rare: #38bdf8;
-  --r-epic: #a78bfa;
+  --r-epic: #b79bff;
   --r-legend: #fbbf24;
   --r-myth: #f0abfc;
 
@@ -71,8 +71,8 @@
   --me: #22c55e;
   --foe: #f43f5e;
 
-  /* Lueur d'un jeton : triplet RGB réécrit par composant (style="--g: 139, 92, 246") */
-  --g: 139, 92, 246;
+  /* Lueur d'un jeton : triplet RGB réécrit par composant (style="--g: 61, 107, 255") */
+  --g: 61, 107, 255;
   --ga: 0; /* halo éteint par défaut ; glowVars() l'allume pour les jetons très rares et les mutations */
 
   /* Typo */
@@ -135,7 +135,7 @@
   /* Compatibilité : variables de l'ancien site encore lues par les écrans portés tels quels (Ring, cinéma) */
   --border: var(--line);
   --mid: var(--accent);
-  --glow: 139, 92, 246;
+  --glow: 61, 107, 255;
 
   /* Mobile : hauteur de la barre d'onglets et du clavier (mise à jour par JS) */
   --tabh: 0px; /* plus de barre d'onglets en bas : la navigation est dans la barre latérale */

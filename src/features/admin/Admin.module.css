@@ -116,7 +116,7 @@ textarea.input {
   background: var(--surface);
 }
 .table tr.on {
-  background: rgb(124 58 237 / 16%);
+  background: rgb(61 107 255 / 16%);
 }
 .table .input {
   width: 100px;
@@ -338,7 +338,7 @@ textarea.input {
 .chip[aria-pressed='true'] {
   border-color: var(--accent-hi);
   color: var(--text);
-  background: rgb(124 58 237 / 18%);
+  background: rgb(61 107 255 / 18%);
 }
 .fb {
   list-style: none;

@@ -1,7 +1,7 @@
 /* Mêmes valeurs que la révélation du tirage (opening.css + global.css « .opening .op-id / .op-stats ») :
    fiches neutres, penchées, qui se redressent et grossissent un peu au survol. */
 .card {
-  --tc: var(--gc, rgb(var(--g, 167, 139, 250)));
+  --tc: var(--gc, rgb(var(--g, 142, 170, 255)));
 
   border: 1px solid rgb(255 255 255 / 12%);
   border-radius: 8px;

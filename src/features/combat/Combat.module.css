@@ -337,15 +337,15 @@
   padding: var(--s-2) var(--s-5);
   border: 0;
   border-radius: 8px;
-  background: #7c3aed;
+  background: #3d6bff;
   color: #fff;
   font-family: var(--font-display);
   font-size: var(--fs-xl);
   font-weight: 800;
   letter-spacing: 0.02em;
   box-shadow:
-    inset 0 -4px 0 #4c1d95,
-    0 10px 24px rgb(124 58 237 / 35%);
+    inset 0 -4px 0 #2443b3,
+    0 10px 24px rgb(61 107 255 / 35%);
   transition:
     transform 160ms var(--ease-out),
     filter var(--t-fast);
@@ -436,12 +436,12 @@
   padding: var(--s-3) var(--s-4);
   border: 1px solid rgb(255 255 255 / 8%);
   border-radius: 12px;
-  background: linear-gradient(90deg, rgba(var(--g, 139, 92, 246), 0.12), transparent 55%), rgb(255 255 255 / 3.5%);
+  background: linear-gradient(90deg, rgba(var(--g, 61, 107, 255), 0.12), transparent 55%), rgb(255 255 255 / 3.5%);
   text-align: left;
   transition: border-color var(--t-fast);
 }
 .teamRow:hover {
-  border-color: rgba(var(--g, 139, 92, 246), 0.5);
+  border-color: rgba(var(--g, 61, 107, 255), 0.5);
 }
 .teamList li > .teamRow {
   position: relative;
@@ -490,7 +490,7 @@
   font-size: var(--fs-sm);
   font-weight: 800;
   font-variant-numeric: tabular-nums;
-  color: rgb(var(--g, 167, 139, 250));
+  color: rgb(var(--g, 142, 170, 255));
 }
 .teamInfo {
   width: 30px;
@@ -616,7 +616,7 @@
   padding: var(--s-3) var(--s-2);
   border-radius: var(--r-md);
   background:
-    radial-gradient(circle at 50% 35%, rgba(var(--g, 139, 92, 246), calc(0.16 * var(--ga, 0))), transparent 65%),
+    radial-gradient(circle at 50% 35%, rgba(var(--g, 61, 107, 255), calc(0.16 * var(--ga, 0))), transparent 65%),
     var(--bg-raised);
   border: 1px solid var(--line);
   text-align: center;
@@ -677,7 +677,7 @@
 }
 .chipsRow button[aria-pressed='true'] {
   color: var(--text);
-  border-color: #a78bfa;
+  border-color: #8eaaff;
 }
 .legend {
   margin: var(--s-2) 0;
@@ -711,7 +711,7 @@
   text-align: center;
 }
 .sel .teCard {
-  border-color: #a78bfa;
+  border-color: #8eaaff;
 }
 .teCard img {
   width: 84px;
@@ -872,7 +872,7 @@
   font-size: var(--fs-xs);
 }
 .verTabs button[aria-selected='true'] {
-  border-color: #a78bfa;
+  border-color: #8eaaff;
 }
 .role {
   color: var(--el);
@@ -922,7 +922,7 @@
   align-items: center;
   gap: var(--s-3);
   padding: var(--s-3) var(--s-4);
-  border: 1px solid #f97316;
+  border: 1px solid #f2c230;
   border-radius: 8px;
   background: var(--surface-2);
   color: inherit;
@@ -996,7 +996,7 @@
   height: 120px;
   translate: -50% -50%;
   border-radius: 50%;
-  background: radial-gradient(closest-side, rgba(var(--g, 139, 92, 246), calc(0.5 * var(--ga, 0))), transparent);
+  background: radial-gradient(closest-side, rgba(var(--g, 61, 107, 255), calc(0.5 * var(--ga, 0))), transparent);
   pointer-events: none;
 }
 .slot > img,

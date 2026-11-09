@@ -45,7 +45,7 @@ function moEmit(p) {
 
 // Dissout une image en pixels. part = proportion de pixels (1 = tout le dessin, .25 = petite « bouffée »)
 const MO_GRID = 24;
-function moDissolve(img, rect, part = 1, fallback = '139, 92, 246') {
+function moDissolve(img, rect, part = 1, fallback = '61, 107, 255') {
   if (reducedFx() || !rect || !rect.width) return;
   const n = MO_GRID, cell = Math.max(rect.width, rect.height) / n;
   let px = null;

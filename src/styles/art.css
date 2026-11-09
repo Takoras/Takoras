@@ -94,27 +94,27 @@ img.v-ombre {
 @keyframes vOmbre {
   0% {
     filter: url('#dd0') url('#vombre') brightness(1) drop-shadow(0 0 1px #d8b4fe)
-      drop-shadow(0 0 10px rgb(124 58 237 / 90%));
+      drop-shadow(0 0 10px rgb(61 107 255 / 90%));
   }
   16% {
     filter: url('#dd0') url('#vombre') brightness(1) drop-shadow(0 0 1px #d8b4fe)
-      drop-shadow(0 0 10px rgb(124 58 237 / 90%));
+      drop-shadow(0 0 10px rgb(61 107 255 / 90%));
   }
   33% {
     filter: url('#dd1') url('#vombre') brightness(1) drop-shadow(0 0 1px #d8b4fe)
-      drop-shadow(0 0 10px rgb(124 58 237 / 90%));
+      drop-shadow(0 0 10px rgb(61 107 255 / 90%));
   }
   50% {
     filter: url('#dd1') url('#vombre') brightness(1) drop-shadow(0 0 1px #d8b4fe)
-      drop-shadow(0 0 10px rgb(124 58 237 / 90%));
+      drop-shadow(0 0 10px rgb(61 107 255 / 90%));
   }
   66% {
     filter: url('#dd2') url('#vombre') brightness(1) drop-shadow(0 0 1px #d8b4fe)
-      drop-shadow(0 0 10px rgb(124 58 237 / 90%));
+      drop-shadow(0 0 10px rgb(61 107 255 / 90%));
   }
   83% {
     filter: url('#dd2') url('#vombre') brightness(1) drop-shadow(0 0 1px #d8b4fe)
-      drop-shadow(0 0 10px rgb(124 58 237 / 90%));
+      drop-shadow(0 0 10px rgb(61 107 255 / 90%));
   }
 }
 
@@ -132,7 +132,7 @@ html.reduce-fx img.v-celeste {
 }
 html.reduce-fx img.v-ombre {
   animation: none !important;
-  filter: url('#vombre') drop-shadow(0 0 1px #d8b4fe) drop-shadow(0 0 10px rgb(124 58 237 / 90%)) !important;
+  filter: url('#vombre') drop-shadow(0 0 1px #d8b4fe) drop-shadow(0 0 10px rgb(61 107 255 / 90%)) !important;
 }
 
 /* Safari / iPhone (pas de filtre SVG) : le doodle devient un petit tremblement image par image,
@@ -164,7 +164,7 @@ html.no-svgfx img.v-celeste {
 html.no-svgfx img.v-ombre {
   animation: doodleT 0.9s steps(1) infinite !important;
   filter: grayscale(0.7) brightness(0.5) sepia(0.5) hue-rotate(225deg) saturate(2) contrast(1.35)
-    drop-shadow(0 0 1px #d8b4fe) drop-shadow(0 0 10px rgb(124 58 237 / 90%)) !important;
+    drop-shadow(0 0 1px #d8b4fe) drop-shadow(0 0 10px rgb(61 107 255 / 90%)) !important;
 }
 html.no-svgfx.reduce-fx img.px {
   animation: none !important;

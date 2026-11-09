@@ -222,7 +222,7 @@
   text-align: left;
 }
 .series button:hover {
-  border-color: #a78bfa;
+  border-color: #8eaaff;
 }
 .series img {
   width: 48px;
@@ -453,7 +453,7 @@
 }
 .banners button[aria-pressed='true'],
 .pps button[aria-pressed='true'] {
-  border-color: #a78bfa;
+  border-color: #8eaaff;
 }
 .pps {
   display: flex;
@@ -579,7 +579,7 @@
   height: 32px;
 }
 .pkSeries button[aria-selected='true'] {
-  border-color: #a78bfa;
+  border-color: #8eaaff;
   background-color: var(--surface-2);
 }
 .pkSoon {
@@ -691,7 +691,7 @@
 /* bestiaire du joueur : série choisie en surbrillance, mutations trouvées sous chaque jeton */
 .series button[aria-pressed='true'] {
   /* série choisie : ta boîte « sélectionnée » (plus de contour violet en CSS) */
-  border-color: #a78bfa;
+  border-color: #8eaaff;
 }
 .vrow {
   display: flex;

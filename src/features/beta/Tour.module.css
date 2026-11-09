@@ -8,7 +8,7 @@
   position: fixed;
   border-radius: 16px;
   box-shadow:
-    0 0 0 3px #a78bfa,
+    0 0 0 3px #8eaaff,
     0 0 0 9999px rgb(5 5 10 / 72%);
   transition: all 0.35s var(--ease-out);
   pointer-events: none;

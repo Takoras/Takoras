@@ -65,7 +65,7 @@ export function Quests() {
     try {
       const r = (await questApi.claimDaily()) as { amount: number; streak: number; state: unknown };
       coinRain(el, 4);
-      burstAt(el, '#fb923c', 1.2);
+      burstAt(el, '#f5cd52', 1.2);
       sfx.upgrade();
       toast(t('ui.daily_got', { n: n(r.amount), s: r.streak }));
       refresh(r.state);
