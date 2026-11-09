@@ -3,6 +3,7 @@ import { SERIES, texOf } from '@/data/jetons';
 import { burstAt } from '@/lib/pfx';
 import { $, ACC, LOCALE, PULLS, SETTINGS, serieTheme, STAT_MAX, VARIANTS, errText, fmt, fmtLuck, jn, jnH, reducedFx, saveSettings, sb, sfx, sparkStyle, speed, statsOf, t, toast, vCls, vOdds, vTag, host } from './env';
 import { CINE } from './cinema.js';
+import { renderPicker, styleActive, styleClean, styleHold, styleReveal, styleStart, styleTap } from './opening-styles.js';
 import './legacy-base.css';
 import './opening.css';
 
@@ -159,6 +160,7 @@ function showOpening(fade = 0) {
   if (fade) opening.animate([{ opacity: 0 }, { opacity: 1 }], { duration: fade });
 }
 function closeOpening() {
+  styleClean();
   document.querySelectorAll('.dust').forEach(l => l.remove());
   if (typeof stopBg === 'function') stopBg();
   if (typeof endSession === 'function') endSession();
@@ -312,12 +314,13 @@ function startOpening() {
   if (!sess.cur) {
     // Jeton tiré par le serveur (plan) ; sinon tirage local (tests admin « sans stock »)
     const result = (sess.plan && findJeton(sess.plan[sess.idx])) || draw(seriesOf());
-    sess.cur = { name: result.name, variant: (sess.vars || [])[sess.idx] || '', queue: steps(result.odds), shown: 1, phase: 'count' };
+    const queue = steps(result.odds);
+    sess.cur = { name: result.name, variant: (sess.vars || [])[sess.idx] || '', queue, n0: queue.length, shown: 1, phase: 'count' };
     save();
   }
   const c = sess.cur, p = PULLS[sess.pull];
   opening.style.setProperty('--serie', serieTheme(p?.name).main); // teinte du fond selon la série
-  run = { result: findJeton(c.name), variant: c.variant || '', queue: c.queue, shown: c.shown, done: false };
+  run = { result: findJeton(c.name), variant: c.variant || '', queue: c.queue, n0: c.n0 || c.queue.length || 1, shown: c.shown, done: false };
   // en haut : le logo de la série (et la position dans la série d'ouvertures)
   // (le logo n'est recréé qu'au début d'une série d'ouvertures : son entrée animée ne rejoue pas à chaque jeton)
   const tag = $('op-tag');
@@ -337,6 +340,9 @@ function startOpening() {
   opCoin.className = 'op-coin';
   opCoin.innerHTML = `<div class="zoom"><div class="tilt3d"><div class="spin">${coin3D(MYSTERE, 'Jeton mystère')}</div>${'<b class="tw"></b>'.repeat(7)}</div></div>`;
   setGlareMask(MYSTERE);
+  // style d'ouverture à l'essai (admins) : décor et effets propres (opening-styles.js)
+  renderPicker(opening);
+  styleStart({ opening, coin: opCoin, host: opening, main: opening.querySelector('.op-main'), fx: { shake, flash, tint, rays, burst } });
   if (c.phase === 'count' && c.shown === 1 && !sess.auto && !skipSpawn) spawn(); // le « ? » arrive en grossissant
   skipSpawn = false;
   $('op-hint').textContent = t(matchMedia('(pointer: coarse)').matches ? 'tap_coin' : 'click_coin');
@@ -451,6 +457,7 @@ function hold(restored) {
   opening.classList.toggle('cinema', r.result.odds >= MYTHIC); // bandes noires façon film + battement de cœur
   opCoin.classList.remove('hit');
   if (!restored) { flash(.18, 260); sfx.hold(); } // mini flash : le compteur ne montera plus
+  styleHold();
   if (r.result.odds >= MYTHIC) { // suspense : une note qui monte à chaque pulsation (plus de « boum boum »)
     let step = 0;
     r.hb = setInterval(() => { if (run !== r || r.done) clearInterval(r.hb); else sfx.suspense(step++); }, 1100);
@@ -576,8 +583,18 @@ function reveal(restored, quiet = false) {
   spin.innerHTML = coin3D(texOf(j), j.name, '', vCls(r.variant)); // la mutation se voit dès la rotation
   spin.style.scale = texScale(j) === 1 ? '' : texScale(j); // face, reflet et tranche ensemble // pas d'ombre sur l'image (elle serait coupée en carré en 3D) : le halo est derrière
   setGlareMask(texOf(j));
+  // style d'ouverture à l'essai : il fait sa propre révélation (et dit s'il garde la rotation)
+  const lv = j.odds >= MYTHIC ? 2 : j.odds >= RARE ? 1.4 : j.odds >= 100 ? 1 : .6;
+  const own = restored ? (styleClean(), null) : styleReveal(j, lv, quiet);
+  if (own && !quiet) {
+    if (!own.noSpin) spin.animate([{ transform: 'rotateY(0) scale(.92)' }, { transform: 'rotateY(1440deg) scale(1)' }], { duration: own.lock || 900, easing: 'cubic-bezier(.1, .8, .15, 1)' });
+    const lock = Math.min(own.lock || 500, j.odds >= RARE ? 1600 : 700);
+    r.spinEnd = performance.now() + lock;
+    opening.classList.add('spinning');
+    setTimeout(() => { if (run === r) opening.classList.remove('spinning'); }, lock);
+  }
   // Le jeton se retourne très vite puis ralentit longtemps (plus il est rare, plus ça dure)
-  if (!restored && !quiet) {
+  else if (!restored && !quiet) {
     const turns = j.odds >= GOD ? 10 : j.odds >= MYTHIC ? 8 : j.odds >= RARE ? 6 : j.odds >= FAST ? 4 : 3;
     // rythme selon la rareté (cahier § 16.2) : commune 0,8 s · rare 1,4 s · épique 2,2 s · légendaire 3,2 s · hyper rare 4,5 s
     const ms = Math.max(350, (j.odds >= MYTHIC ? 4500 : j.odds >= 10000 ? 3200 : j.odds >= RARE ? 2200 : j.odds >= 100 ? 1400 : 800) * (speed() || .2));
@@ -613,10 +630,10 @@ function reveal(restored, quiet = false) {
   sess.cur.phase = 'revealed';
   sess.results.push(j.name); (sess.rvars ||= []).push(r.variant || '');
   save();
-  if (!quiet) { sfx.reveal(j.odds); if (j.odds >= MYTHIC) sfx.impact(); } // après une cinématique, sa musique a déjà fait la révélation
+  if (!quiet) { if (!own) sfx.reveal(j.odds); if (j.odds >= MYTHIC) sfx.impact(); } // après une cinématique, sa musique a déjà fait la révélation
   // dopamine : le jeton claque, des rayons jaillissent derrière, étincelles, flash à sa couleur, secousse
-  const lv = j.odds >= MYTHIC ? 2 : j.odds >= RARE ? 1.4 : j.odds >= 100 ? 1 : .6;
   if (quiet) { addToHistory(j, r.variant); if (r.variant) setTimeout(() => { if (run === r) variantFx(r.variant, j.odds); }, 650); return; }
+  if (own) { addToHistory(j, r.variant); if (r.variant) setTimeout(() => { if (run === r) variantFx(r.variant, j.odds); }, 900); return; }
   pop(lv); rays(lv); tint(.25 + lv * .2, 300 + lv * 250);
   if (lv >= 1) burstAt(opCoin, j.glow, .6 + lv * .2); // particules dessinées à la main, à la couleur du jeton (jetons pas communs)
   burst(Math.round(10 + lv * 12));
@@ -646,6 +663,7 @@ async function cine() {
   const r = run;
   r.done = true;
   clearInterval(r.hb);
+  styleClean(); // le film prend le relais : le décor du style d'ouverture (et ses sons) s'arrête
   try { await CINE.play(r.result); } catch (e) { console.error('[cinématique]', e); document.querySelectorAll('.cine').forEach(n => n.remove()); }
   if (run !== r) return;
   // fin de cinématique sans coupure : le jeton du film glisse jusqu'à sa place dans la fiche pendant que le film s'efface
@@ -887,11 +905,14 @@ function tap() {
   const next = run.queue.shift();
   countTo(run.shown, next);
   run.shown = next;
-  sfx.tick(next);
   sess.cur.queue = run.queue; sess.cur.shown = next; save();
   setTier(next);
-  opCoin.classList.remove('hit'); void opCoin.offsetWidth; opCoin.classList.add('hit');
-  effects(next);
+  if (styleActive()) styleTap(1 - run.queue.length / run.n0, run.n0 - run.queue.length);
+  else {
+    sfx.tick(next);
+    opCoin.classList.remove('hit'); void opCoin.offsetWidth; opCoin.classList.add('hit');
+    effects(next);
+  }
   $('op-hint').textContent = '';
   if (!run.queue.length) {
     // En instantané (ou pour les communs), on révèle directement, sans pause ni cinématique
@@ -938,6 +959,8 @@ function buy(n, plan = null, vars = null, lucks = null, ids = null, pull = 0) {
   runTransition();
 }
 $('op-next')?.addEventListener('click', next);
+// changement de style (admins) : s'applique tout de suite si on n'a pas encore cliqué sur le « ? »
+opening.addEventListener('sty-change', () => { if (run && !run.done && run.shown === 1 && !run.holding) startOpening(); });
 // Pendant un ×10 : un clic n'importe où sur l'écran passe au jeton suivant
 opening.addEventListener('click', e => {
   if (e.target.closest?.('button, select, .debug') || $('op-next').hidden || !opening.classList.contains('revealed')) return;
