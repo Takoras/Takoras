@@ -1,8 +1,6 @@
 // Généré par scripts/port/i18n.mjs depuis l'ancien site, puis maintenu à la main.
 export const fr = {
   ui: {
-    err_page: 'Cette page n’a pas pu s’ouvrir.',
-    err_reload: 'Recharger',
     nav_home: 'Accueil',
     nav_board: 'Classement',
     pulls: 'Tirages',

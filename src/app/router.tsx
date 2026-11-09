@@ -3,7 +3,6 @@ import { createBrowserRouter, Navigate, useLocation } from 'react-router';
 import Home from '@/features/home/Home';
 import AdminGate from '@/features/admin/AdminGate';
 import NotFound from '@/pages/NotFound';
-import RouteError from '@/pages/RouteError';
 import { Layout } from './Layout';
 
 // Pages chargées à la demande (seul l'accueil est dans le premier téléchargement)
@@ -41,7 +40,6 @@ function OldPath({ from, to }: { from: string; to: string }) {
 export const router = createBrowserRouter([
   {
     element: <Layout />,
-    errorElement: <RouteError />,
     children: [
       { path: '/', element: <Home /> },
       { path: '/inventory', lazy: bestiary },
