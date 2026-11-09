@@ -489,7 +489,8 @@ function hold(restored) {
     r.hb = setInterval(() => { if (run !== r || r.done) clearInterval(r.hb); else sfx.suspense(step++); }, 1100);
   }
   $('op-hint').textContent = t('click_reveal');
-  setTimeout(() => { if (run === r) r.canReveal = true; }, 450 * Math.max(.5, speed())); // évite de révéler par accident en spammant
+  // évite de révéler par accident ; en plein spam, la pause est courte (on veut aller vite)
+  setTimeout(() => { if (run === r) r.canReveal = true; }, rhythm().fast ? 140 : 450 * Math.max(.5, speed()));
 }
 
 // Révélation : le jeton tourne en se penchant, la face change à mi-chemin, puis il glisse à gauche et la fiche arrive
@@ -614,7 +615,7 @@ function reveal(restored, quiet = false) {
   const own = restored ? (styleClean(), null) : styleReveal(j, lv, quiet);
   if (own && !quiet) {
     if (!own.noSpin) spin.animate([{ transform: 'rotateY(0) scale(.92)' }, { transform: 'rotateY(1440deg) scale(1)' }], { duration: own.lock || 900, easing: 'cubic-bezier(.1, .8, .15, 1)' });
-    const lock = Math.min(own.lock || 500, j.odds >= RARE ? 1600 : 700);
+    const lock = rhythm().fast && j.odds < RARE ? 200 : Math.min(own.lock || 500, j.odds >= RARE ? 1600 : 700);
     r.spinEnd = performance.now() + lock;
     opening.classList.add('spinning');
     setTimeout(() => { if (run === r) opening.classList.remove('spinning'); }, lock);
@@ -636,7 +637,7 @@ function reveal(restored, quiet = false) {
     }, ms * .7);
     // On ne peut pas passer à la suite tout de suite : 0,5 s max pour les jetons communs,
     // toute la rotation pour les vrais rares (1/1000 et plus)
-    const lock = j.odds >= RARE ? ms : Math.min(ms, 500);
+    const lock = j.odds >= RARE ? ms : rhythm().fast ? 200 : Math.min(ms, 500); // en plein spam : on enchaîne vite
     r.spinEnd = performance.now() + lock;
     opening.classList.add('spinning');
     setTimeout(() => { if (run === r) opening.classList.remove('spinning'); }, lock);
@@ -909,25 +910,44 @@ function addToHistory(j, variant = '', luck = +(sess?.lucks || [])[sess?.results
   renderHist();
 }
 
-// Le « clic de trop » : on spamme, le jeton se révèle, on veut s'arrêter… mais 1 ou 2 clics partent encore.
-// Ceux-là ne rouvrent pas. Le spam, lui, continue : si les clics s'enchaînent (3 juste après la révélation),
-// on rouvre tout de suite ; et un clic posé un peu plus tard (le joueur a vu son jeton) rouvre aussi.
+// Détecteur de spam : on suit le rythme des derniers clics.
+// - Rythme rapide et régulier (≈ 4 clics/s et plus) : tout va vite (le compteur saute des paliers, la pause avant la
+//   révélation est courte, et un clic sur le jeton révélé rouvre tout de suite).
+// - Le rythme ralentit (le dernier écart est bien plus long que les précédents) : le joueur veut s'arrêter. Les clics
+//   qui « traînent » juste après la révélation ne rouvrent plus rien ; il a le temps de voir son jeton et de partir.
+// - Un clic posé tranquillement un peu plus tard rouvre normalement.
 let revealedAt = 0, tapsAfter = 0;
-const GRACE = 140, SPAM = 2; // spammer le clic enchaîne les tirages très vite
+const taps = [];
+function noteTap() {
+  taps.push(performance.now());
+  if (taps.length > 8) taps.shift();
+}
+function rhythm() {
+  if (taps.length < 3) return { fast: false, slowing: false };
+  const iv = taps.slice(1).map((t, i) => t - taps[i]);
+  const last = iv[iv.length - 1], prev = iv.slice(-4, -1);
+  const avg = prev.length ? prev.reduce((a, b) => a + b, 0) / prev.length : last;
+  return { fast: avg < 260 && last < 330, slowing: last > Math.max(280, avg * 1.6) };
+}
+const LET_GO = 650; // après la révélation, un clic « lent » attend ce délai avant de rouvrir
 function tryReopen() {
   tapsAfter++;
-  if (performance.now() - revealedAt < GRACE && tapsAfter < SPAM) return; // clic qui « traîne » : ignoré
+  const { fast, slowing } = rhythm();
+  if (fast && !slowing) return openPulls(1); // spam : on enchaîne
+  if (performance.now() - revealedAt < LET_GO) return; // il ralentit : on le laisse regarder (et partir)
   openPulls(1);
 }
 
 function tap() {
   if (sess?.auto) return; // ouverture auto en cours : les clics ne doivent pas s'en mêler (ça la faisait dérailler)
+  noteTap();
   if (run?.done && opening.classList.contains('revealed') && spinning()) return stopSpin();
   // un par un : une fois le jeton révélé, toucher le jeton ouvre le pull suivant (il n'y a plus de bouton « Ouvrir encore »)
   if (run?.done && sess && sess.total === 1 && opening.classList.contains('revealed') && !spinning()) return tryReopen();
   if (!run || run.done) return;
   if (run.holding) { if (run.canReveal) (run.result.odds >= RARE && SETTINGS.speed !== 'instant' ? cine() : reveal()); return; }
   if (!run.queue.length) return; // entre le dernier palier et la pause
+  if (rhythm().fast && run.queue.length > 2) run.queue.shift(); // spam : on saute un palier (ça monte deux fois plus vite)
   const next = run.queue.shift();
   countTo(run.shown, next);
   run.shown = next;
@@ -954,8 +974,8 @@ opening.addEventListener('pointerdown', e => {
   if (sess?.auto) return;
   // toucher n'importe où fait monter le jeton (pas besoin de viser le jeton)
   if (run && !run.done) { e.preventDefault(); return tap(); }
-  if (run?.done && opening.classList.contains('revealed') && spinning()) { e.preventDefault(); return stopSpin(); }
-  if (run?.done && sess && sess.total === 1 && opening.classList.contains('revealed') && !spinning()) { e.preventDefault(); tryReopen(); }
+  if (run?.done && opening.classList.contains('revealed') && spinning()) { e.preventDefault(); noteTap(); return stopSpin(); }
+  if (run?.done && sess && sess.total === 1 && opening.classList.contains('revealed') && !spinning()) { e.preventDefault(); noteTap(); tryReopen(); }
 });
 addEventListener('keydown', e => {
   if (!opening.classList.contains('on') || (e.key !== ' ' && e.key !== 'Enter') || e.target.closest?.('select, .debug') || (e.key === 'Enter' && e.target.closest?.('button:not(#op-coin)'))) return;
