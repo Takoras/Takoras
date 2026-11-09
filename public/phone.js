@@ -5,6 +5,11 @@
 //   la hauteur visible fasse ~640 px (largeur = 640 × largeur/hauteur de l'écran), recalculée quand la taille change.
 //   La classe « phone » sert au message « tourne ton téléphone » et au plein écran au premier toucher.
 (function () {
+  // www.takoras.com → takoras.com (une seule adresse : la connexion Discord ne revient que sur celle-là)
+  if (location.hostname === 'www.takoras.com') {
+    location.replace('https://takoras.com' + location.pathname + location.search + location.hash);
+    return;
+  }
   var d = document.documentElement;
   var coarse = window.matchMedia && matchMedia('(pointer: coarse)').matches;
   var phone = coarse && Math.min(screen.width, screen.height) < 600;

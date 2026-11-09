@@ -11,6 +11,11 @@
     "directory": "./dist",
     "not_found_handling": "single-page-application"
   },
+  // takoras.com et www.takoras.com sont branchés sur ce site (www renvoie vers takoras.com, voir public/phone.js)
+  "routes": [
+    { "pattern": "takoras.com", "custom_domain": true },
+    { "pattern": "www.takoras.com", "custom_domain": true }
+  ],
   "preview_urls": true,
   "previews": {}
 }
