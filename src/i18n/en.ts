@@ -3,6 +3,8 @@ import type { Dict } from './types';
 
 export const en: Dict = {
   ui: {
+    err_page: 'This page couldn’t open.',
+    err_reload: 'Reload',
     nav_home: 'Home',
     nav_board: 'Leaderboard',
     pulls: 'Pulls',
