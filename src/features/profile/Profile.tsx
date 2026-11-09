@@ -527,7 +527,7 @@ function EditProfile({ p, onClose }: { p: Prof; onClose: () => void }) {
       onClose();
       void qc.invalidateQueries({ queryKey: ['me', user?.id] });
       await qc.invalidateQueries({ queryKey: ['profile'] });
-      if (name !== p.pseudo) void nav(`/profil/${encodeURIComponent(name)}`);
+      if (name !== p.pseudo) void nav(`/profile/${encodeURIComponent(name)}`);
     } catch (e) {
       sfx.deny();
       toast(errorText(e, lang), true);
@@ -605,7 +605,7 @@ function EditProfile({ p, onClose }: { p: Prof; onClose: () => void }) {
                     if (!owned) {
                       onClose();
                       toast(t('ui.pp_shop'));
-                      return void nav('/boutique');
+                      return void nav('/shop');
                     }
                     sfx.click();
                     setAv(a);

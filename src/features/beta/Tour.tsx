@@ -23,7 +23,7 @@ const STEPS: Step[] = [
     en: ['Pulls', 'Pick which series to open. More are coming soon.'],
   },
   {
-    to: '/inventaire',
+    to: '/inventory',
     sel: '[data-tour="inv"]',
     fr: ['Ta collection', 'Tous tes jetons, par série. Touche-en un pour voir sa fiche.'],
     en: ['Your collection', 'All your tokens, by series. Tap one to see its card.'],
@@ -35,7 +35,7 @@ const STEPS: Step[] = [
     en: ['Fights', 'Pick 3 tokens and fight other players in ranked.'],
   },
   {
-    to: '/passe',
+    to: '/pass',
     sel: '[data-tour="pass"]',
     fr: ['Le passe', 'Gagne de l’XP en jouant et récupère une récompense à chaque palier.'],
     en: ['The pass', 'Earn XP by playing and claim a reward at every tier.'],

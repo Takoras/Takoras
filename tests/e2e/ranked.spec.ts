@@ -6,7 +6,7 @@ test('classement : /classement mène au Combat, classement Elo fusionné (top + 
   page,
 }, info) => {
   await fakeSupabase(page, {}, [], { deck: [11, 16, 17] });
-  await page.goto('/classement');
+  await page.goto('/leaderboard');
   await expect(page).toHaveURL(/\/combat$/);
   void info;
   const tab = page.getByRole('radio', { name: 'Classement' });

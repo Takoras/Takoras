@@ -53,13 +53,13 @@ test('CSP : aucune violation sur tout le site', async ({ page, isMobile }) => {
   await page.waitForTimeout(1500);
   await page.keyboard.press('Escape');
   await check('accueil');
-  for (const path of ['/inventaire', '/inventaire/objets', '/boutique', '/profil', '/profil/Ami', '/amis', '/admin']) {
+  for (const path of ['/inventory', '/inventory/items', '/shop', '/profile', '/profile/Ami', '/friends', '/admin']) {
     await page.goto(path);
     await expect(page.locator('main h1, main h2').first()).toBeVisible();
     await check(path);
   }
   // fiche jeton
-  await page.goto('/inventaire');
+  await page.goto('/inventory');
   await page.getByRole('button', { name: /×4 Mobu/ }).click();
   await page.waitForTimeout(400);
   await check('fiche jeton');

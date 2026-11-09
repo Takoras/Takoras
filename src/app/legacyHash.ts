@@ -1,18 +1,19 @@
-// Les anciens liens (#inventaire, #profil/Pseudo, #bestiaire…) mènent à la nouvelle adresse (/inventaire, /profil/Pseudo).
+// Les anciens liens (#inventaire, #profil/Pseudo, #bestiaire…) mènent à la nouvelle adresse (/inventory, /profile/Pseudo).
 // Les fragments de connexion Supabase (#access_token=…) ne sont pas touchés.
 const MAP: Record<string, string> = {
   accueil: '/',
-  bestiaire: '/inventaire',
-  inventaire: '/inventaire',
-  boutique: '/boutique',
+  bestiaire: '/inventory',
+  inventaire: '/inventory',
+  boutique: '/shop',
   classement: '/combat',
   combat: '/combat',
-  amis: '/amis',
-  profil: '/profil',
+  amis: '/friends',
+  profil: '/profile',
 };
 export function redirectLegacyHash(loc: Pick<Location, 'hash'> = location): string | null {
   const m = /^#([a-z]+)(?:\/(.*))?$/.exec(loc.hash);
   const base = m?.[1] ? MAP[m[1]] : undefined;
   if (!m || base === undefined) return null;
-  return m[2] ? `${base === '/' ? '' : base}/${m[2]}` : base;
+  const rest = base === '/inventory' && m[2] === 'objets' ? 'items' : m[2];
+  return rest ? `${base === '/' ? '' : base}/${rest}` : base;
 }

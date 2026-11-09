@@ -9,7 +9,7 @@ test.beforeEach(async ({ page }) => {
   });
 });
 
-const ROUTES = ['/', '/inventaire', '/boutique', '/combat', '/amis'];
+const ROUTES = ['/', '/inventory', '/shop', '/combat', '/friends'];
 
 for (const path of ROUTES) {
   test(`${path} : charge sans erreur ni problème d’accessibilité grave`, async ({ page }) => {
@@ -28,7 +28,7 @@ for (const path of ROUTES) {
 
 test('les anciens liens #… redirigent', async ({ page }) => {
   await page.goto('/#boutique');
-  await expect(page).toHaveURL(/\/boutique$/);
+  await expect(page).toHaveURL(/\/shop$/);
 });
 
 test('la langue change sans recharger la page', async ({ page, isMobile }) => {
@@ -49,14 +49,14 @@ test('connexion : la fenêtre propose Discord', async ({ page }) => {
 // Pages connectées (Supabase simulé) : pas de problème d'accessibilité grave non plus
 import { fakeSupabase } from './fake-supabase';
 for (const path of [
-  '/inventaire',
-  '/inventaire/objets',
-  '/profil',
-  '/profil/Ami',
-  '/amis',
+  '/inventory',
+  '/inventory/items',
+  '/profile',
+  '/profile/Ami',
+  '/friends',
   '/combat',
-  '/passe',
-  '/boutique',
+  '/pass',
+  '/shop',
 ]) {
   test(`${path} (connecté) : accessibilité`, async ({ page }) => {
     await fakeSupabase(page);

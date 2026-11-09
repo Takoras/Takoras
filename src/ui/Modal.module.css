@@ -18,8 +18,8 @@
 }
 
 .dialog::backdrop {
-  background: rgb(5 5 10 / 72%);
-  backdrop-filter: blur(4px);
+  /* pas de flou (backdrop-filter) : recalculé sur tout l'écran à chaque image, il faisait ramer la fiche jeton (~25 images/s) */
+  background: rgb(5 5 10 / 80%);
   transition: opacity 0.26s ease-in;
 }
 

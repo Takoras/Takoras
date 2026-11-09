@@ -3,7 +3,7 @@ import { fakeSupabase } from './fake-supabase';
 
 test('bestiaire : grille, filtres, fiche, vente, verrou', async ({ page }) => {
   const { calls } = await fakeSupabase(page, { coins: 100 });
-  await page.goto('/inventaire');
+  await page.goto('/inventory');
   await expect(page.getByRole('heading', { level: 1, name: 'Ta collection' })).toBeVisible();
   await expect(page.locator('ul li[data-key]')).toHaveCount(17); // toute la collection, même les jetons jamais vus
   await expect(page.getByText('3/17')).toBeVisible(); // Mobu, Vyolis, Pikko déjà trouvés
@@ -38,7 +38,7 @@ test('bestiaire : grille, filtres, fiche, vente, verrou', async ({ page }) => {
 
 test('bestiaire : sélection multiple et vente d’un rare avec confirmation', async ({ page }) => {
   const { calls } = await fakeSupabase(page);
-  await page.goto('/inventaire');
+  await page.goto('/inventory');
   await page.getByRole('button', { name: 'Sélectionner' }).click();
   await page.getByRole('region', { name: 'Vendre' }).getByRole('button', { name: 'Tout' }).click();
   await expect(page.getByText('6 sélectionné(s)')).toBeVisible();
@@ -51,7 +51,7 @@ test('bestiaire : sélection multiple et vente d’un rare avec confirmation', a
 
 test('objets : utiliser une potion', async ({ page }) => {
   await fakeSupabase(page);
-  await page.goto('/inventaire/objets');
+  await page.goto('/inventory/items');
   await expect(page.getByText('×3')).toBeVisible();
   await page.getByRole('button', { name: 'Tout utiliser' }).click();
   // la potion est partie : plus que la catégorie Recharges

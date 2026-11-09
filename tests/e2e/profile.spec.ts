@@ -3,7 +3,7 @@ import { fakeSupabase } from './fake-supabase';
 
 test('mon profil : stats, vitrine, modifier la bio et la photo', async ({ page }) => {
   const { calls } = await fakeSupabase(page);
-  await page.goto('/profil');
+  await page.goto('/profile');
   await expect(page.getByRole('heading', { level: 1, name: /Testeur/ })).toBeVisible();
   await expect(page.getByText('120')).toBeVisible();
   await expect(page.getByText('test@example.com')).toBeVisible(); // zone privée (seulement sur mon profil)
@@ -26,7 +26,7 @@ test('mon profil : stats, vitrine, modifier la bio et la photo', async ({ page }
 
 test('profil d’un autre joueur : vitrine, collection, demande d’ami', async ({ page }) => {
   await fakeSupabase(page);
-  await page.goto('/profil/Ami');
+  await page.goto('/profile/Ami');
   await expect(page.getByRole('heading', { level: 1, name: /Ami/ })).toBeVisible();
   await expect(page.getByText('test@example.com')).toHaveCount(0);
   await page.getByRole('button', { name: /Mobu/ }).first().click();
@@ -38,6 +38,6 @@ test('profil d’un autre joueur : vitrine, collection, demande d’ami', async 
 
 test('profil introuvable', async ({ page }) => {
   await fakeSupabase(page);
-  await page.goto('/profil/Personne');
+  await page.goto('/profile/Personne');
   await expect(page.getByRole('heading', { name: 'Joueur introuvable' })).toBeVisible();
 });

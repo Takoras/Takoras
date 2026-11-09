@@ -104,9 +104,9 @@ export function Landing() {
           {t('ui.pn_title')}
         </button>
         <a href="#credits">{t('ui.land_credits')}</a>
-        <Link to="/mentions-legales">{t('ui.legal_notice')}</Link>
-        <Link to="/cgu">{t('ui.terms')}</Link>
-        <Link to="/confidentialite">{t('ui.privacy')}</Link>
+        <Link to="/legal">{t('ui.legal_notice')}</Link>
+        <Link to="/terms">{t('ui.terms')}</Link>
+        <Link to="/privacy">{t('ui.privacy')}</Link>
         <Credits />
       </footer>
     </div>
