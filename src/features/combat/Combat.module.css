@@ -436,7 +436,7 @@
   padding: var(--s-3) var(--s-4);
   border: 1px solid rgb(255 255 255 / 8%);
   border-radius: 12px;
-  background: linear-gradient(90deg, rgba(var(--g, 61, 107, 255), 0.12), transparent 55%), rgb(255 255 255 / 3.5%);
+  background: rgb(255 255 255 / 3.5%);
   text-align: left;
   transition: border-color var(--t-fast);
 }
@@ -467,6 +467,7 @@
 .teamRow img {
   width: 58px;
   height: 58px;
+  --df: brightness(1); /* pas de lueur derrière les jetons de l'équipe */
 }
 .teamN {
   font-family: var(--font-display);

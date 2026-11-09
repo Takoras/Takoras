@@ -259,14 +259,7 @@
 }
 .upCan {
   border-color: #f2c230;
-  animation:
-    upGlow 2.2s ease-in-out infinite,
-    bobSoft var(--fl, 6s) ease-in-out infinite;
-}
-@keyframes upGlow {
-  50% {
-    filter: drop-shadow(0 0 10px rgb(242 194 48 / 45%));
-  }
+  animation: bobSoft var(--fl, 6s) ease-in-out infinite;
 }
 .up > img {
   width: 40px;

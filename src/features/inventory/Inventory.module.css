@@ -525,25 +525,12 @@
   place-items: center;
   height: 88px;
 }
-/* halo rond derrière l'objet, comme derrière les jetons */
-.itemIcon::before {
-  content: '';
-  position: absolute;
-  left: 50%;
-  top: 50%;
-  width: 108px;
-  height: 108px;
-  translate: -50% -50%;
-  border-radius: 50%;
-  background: radial-gradient(closest-side, rgba(var(--g), 0.3), transparent);
-  pointer-events: none;
-}
 .itemIcon img {
   position: relative;
   width: 72px;
   height: 72px;
   object-fit: contain;
-  --df: drop-shadow(0 6px 14px rgba(var(--g), calc(0.45 * var(--ga, 0))));
+  --df: brightness(1); /* pas de lueur sur les objets */
 }
 .use {
   display: flex;
