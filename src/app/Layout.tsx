@@ -13,6 +13,7 @@ import { useT } from '@/i18n/useT';
 import { Avatar } from '@/ui/Avatar';
 import { Button } from '@/ui/Button';
 import { Modal } from '@/ui/Modal';
+import { Tween } from '@/ui/Tween';
 import { Announcements, openAnnHistory, unreadAnn, useAnn } from '@/features/social/Announcements';
 import { SocialLayer } from '@/features/social/SocialLayer';
 import { BetaChip, BetaLayer, openPatchnotes } from '@/features/beta/Beta';
@@ -170,7 +171,14 @@ export function Layout() {
           <>
             <span className={s.bal} aria-label={t('app.balance')}>
               <img className="px" src="/img/piece.png" alt="" width={20} height={20} />
-              {me.data ? me.data.coins.toLocaleString(locale()) : me.isError ? '—' : '…'}
+              {/* le solde défile vers sa nouvelle valeur (dépense ou gain), au lieu de changer d'un coup */}
+              {me.data ? (
+                <Tween value={me.data.coins} ms={900} format={(n) => Math.round(n).toLocaleString(locale())} />
+              ) : me.isError ? (
+                '—'
+              ) : (
+                '…'
+              )}
             </span>
             <NavLink to="/profile" className={s.me} aria-label={t('app.account')}>
               <Avatar pseudo={me.data?.pseudo ?? '?'} size={40} />

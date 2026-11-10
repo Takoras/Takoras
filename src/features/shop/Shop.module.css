@@ -65,7 +65,7 @@
   grid-template-columns: minmax(0, 1fr) minmax(0, 1.1fr);
   align-items: center;
   gap: var(--s-4);
-  min-height: 300px;
+  height: 320px; /* même taille cachée ou révélée */
   padding: var(--s-6) var(--s-8);
   border-radius: 16px;
   background: rgb(255 255 255 / 3%);
@@ -394,6 +394,8 @@
     grid-template-columns: 1fr;
   }
   .hero {
+    height: auto;
+    min-height: 320px;
     grid-template-columns: 1fr;
     justify-items: center;
     text-align: center;
@@ -419,54 +421,86 @@
   }
 }
 
-/* ---------- cases mystère ---------- */
+/* ---------- cases à révéler : un cache sur toute la case (même taille qu'une case révélée) ---------- */
+.card {
+  position: relative;
+}
 .myst .box {
-  width: 100%;
+  visibility: hidden;
+}
+.cover {
+  position: absolute;
+  inset: 0;
+  z-index: 2;
+  display: grid;
+  place-content: center;
+  justify-items: center;
+  gap: var(--s-3);
+  padding: 0;
   border: 0;
+  border-radius: 14px;
   color: var(--text);
   font: inherit;
   cursor: pointer;
-  background: rgb(142 170 255 / 6%);
+  /* damier de pixels bleu Takoras (de loin : une surface mate un peu vivante) */
+  background:
+    repeating-conic-gradient(rgb(61 107 255 / 26%) 0 25%, rgb(61 107 255 / 17%) 0 50%) 0 0 / 12px 12px,
+    var(--surface);
+  rotate: var(--swing, 0deg);
+  transform-origin: 50% 0;
+  transition: background-color var(--t-fast);
 }
-.myst .box:hover:not(:disabled) {
-  background: rgb(142 170 255 / 12%);
+.cover:hover:not(:disabled) {
+  background:
+    repeating-conic-gradient(rgb(61 107 255 / 34%) 0 25%, rgb(61 107 255 / 24%) 0 50%) 0 0 / 12px 12px,
+    var(--surface-2);
 }
-.myst .box:disabled {
+.cover:disabled {
   cursor: default;
 }
-/* le « ? » respire doucement : il y a quelque chose dedans */
-.myst .art {
-  animation: breathe 2.4s ease-in-out infinite;
+.hero.myst {
+  padding: 0;
 }
-.myst:hover .art {
-  animation-duration: 0.9s;
+.hero.myst .cover {
+  border-radius: 16px;
+}
+/* pendant la révélation, le cache vire au blanc */
+.whiten::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  background: #fff;
+  opacity: 0;
+  animation: whiten 1.2s cubic-bezier(0.6, 0, 0.9, 0.4) forwards;
+}
+@keyframes whiten {
+  to {
+    opacity: 1;
+  }
+}
+/* éclair blanc au moment où l'objet apparaît */
+.flash {
+  position: absolute;
+  inset: -6px;
+  z-index: 3;
+  border-radius: 18px;
+  background: #fff;
+  pointer-events: none;
 }
 .gainTag {
   display: inline-flex;
   align-items: center;
-  gap: 3px;
+  gap: 4px;
+  padding: 4px 12px;
+  border-radius: var(--r-pill);
   background: rgb(242 194 48 / 18%);
   color: var(--gold-hi);
-}
-.gainBig {
-  position: static;
-  margin-top: var(--s-2);
-  padding: 4px 12px;
+  font-family: var(--font-display);
   font-size: var(--fs-md);
 }
-.heroMyst {
-  width: 100%;
-  border: 0;
-  color: var(--text);
-  font: inherit;
-  text-align: left;
-  cursor: pointer;
-}
-.heroMyst:disabled {
-  cursor: default;
-}
-.heroMyst .heroArt img {
-  animation: breathe 2.4s ease-in-out infinite;
+.gainBig {
+  font-size: var(--fs-lg);
 }
 /* « +100 » qui s'envole au-dessus d'une case révélée */
 .gain {
@@ -482,19 +516,4 @@
   font-family: var(--font-display);
   font-size: var(--fs-lg);
   pointer-events: none;
-}
-@keyframes breathe {
-  0%,
-  100% {
-    scale: 1;
-  }
-  50% {
-    scale: 1.06;
-  }
-}
-@media (prefers-reduced-motion: reduce) {
-  .myst .art,
-  .heroMyst .heroArt img {
-    animation: none;
-  }
 }

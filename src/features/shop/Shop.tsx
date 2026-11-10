@@ -8,7 +8,7 @@ import { locale, reducedFx, useSettings } from '@/lib/settings';
 import { useT } from '@/i18n/useT';
 import type { Key } from '@/i18n';
 import { sfx } from '@/engines/sound.js';
-import { moDissolve, moPlay, moSnap } from '@/engines/motion.js';
+import { moDissolve } from '@/engines/motion.js';
 import { Button } from '@/ui/Button';
 import { PixelBg } from '@/ui/PixelBg';
 import { toast } from '@/ui/toast';
@@ -98,15 +98,22 @@ export default function Shop() {
     0.35,
     cat + (shop.data?.items.map((x) => (isHidden(x) ? 'h' : 'r')).join('') ?? ''),
   );
-  // changer de rayon : les cases glissent à leur nouvelle place, les nouvelles arrivent (comme les séries de l'inventaire)
-  const snap = useRef<Map<string, DOMRect> | null>(null);
+  // changer de rayon : les cases du nouveau rayon apparaissent en fondu, l'une après l'autre (comme à l'arrivée)
+  const switched = useRef(false);
   useLayoutEffect(() => {
-    if (snap.current && gridRef.current) moPlay(snap.current, gridRef.current, '[data-key]', { dissolve: true });
-    snap.current = null;
+    if (!switched.current || !gridRef.current || reducedFx()) return;
+    [...gridRef.current.children].forEach((c, i) =>
+      (c as HTMLElement).animate([{ opacity: 0 }, { opacity: 1 }], {
+        duration: 380,
+        delay: i * 45,
+        easing: 'ease-out',
+        fill: 'backwards',
+      }),
+    );
   }, [cat]);
   const pick = (k: string) => {
     if (k === cat) return;
-    if (gridRef.current) snap.current = moSnap(gridRef.current, '[data-key]');
+    switched.current = true;
     sfx.click();
     setCat(k);
   };
@@ -173,27 +180,63 @@ export default function Shop() {
     }
   };
 
-  // révéler une case mystère : elle se retourne, l'objet apparaît, +100 pièces
+  // révéler une case : le cache gonfle et rebondit de plus en plus fort en blanchissant (≈ 1,2 s), comme s'il allait
+  // exploser, puis éclair blanc et l'objet apparaît (+100 pièces)
   const reveal = async (slot: number, el: HTMLElement) => {
     if (!data || !user) return;
     if (revealing.current.has(slot)) return;
     revealing.current.add(slot);
-    const flip = (a: string, b: string, ms: number, ease: string) =>
-      reducedFx() ? Promise.resolve() : el.animate([{ transform: a }, { transform: b }], { duration: ms, easing: ease }).finished;
+    const cover = el.querySelector<HTMLElement>(`.${s.cover}`);
+    const fast = reducedFx();
     try {
-      const out = flip('perspective(700px) rotateY(0)', 'perspective(700px) rotateY(90deg)', 220, 'cubic-bezier(.5,0,.9,.4)');
-      const r = (await shopApi.reveal(slot)) as { gain: number; state: object; shop: ShopData };
-      await out;
+      sfx.riser(fast ? 0.2 : 1.2);
+      const swell =
+        fast || !cover
+          ? Promise.resolve()
+          : cover.animate(
+              [
+                { transform: 'scale(1)', filter: 'brightness(1)' },
+                { transform: 'scale(1.03)', filter: 'brightness(1.3)', offset: 0.2 },
+                { transform: 'scale(0.99)', offset: 0.32 },
+                { transform: 'scale(1.05)', filter: 'brightness(1.9)', offset: 0.5 },
+                { transform: 'scale(0.98)', offset: 0.6 },
+                { transform: 'scale(1.07)', filter: 'brightness(2.8)', offset: 0.74 },
+                { transform: 'scale(1.01)', offset: 0.82 },
+                { transform: 'scale(1.1)', filter: 'brightness(4) saturate(0)', offset: 0.92 },
+                { transform: 'scale(1.13)', filter: 'brightness(6) saturate(0)' },
+              ],
+              { duration: 1200, easing: 'cubic-bezier(.45,0,.55,1)', fill: 'forwards' },
+            ).finished;
+      cover?.classList.add(s.whiten ?? '');
+      const [r] = (await Promise.all([shopApi.reveal(slot), swell])) as [
+        { gain: number; state: object; shop: ShopData },
+        unknown,
+      ];
+      // éclair blanc par-dessus la case, puis l'objet est là
+      const flash = document.createElement('div');
+      flash.className = s.flash ?? '';
+      el.appendChild(flash);
       qc.setQueryData(['me', user.id], (old: object | undefined) => ({ ...old, ...r.state }));
       qc.setQueryData(['shop'], { ...r.shop, at: Date.now() });
       await new Promise((ok) => requestAnimationFrame(() => requestAnimationFrame(ok)));
       const it = r.shop.items.find((x) => slotOf(x, 0) === slot);
       sfx.reveal(it && !isHidden(it) ? oddsOf(it) : 1);
-      void flip('perspective(700px) rotateY(-90deg)', 'perspective(700px) rotateY(0)', 520, 'cubic-bezier(.2,.9,.3,1.15)');
+      if (!fast)
+        el.animate([{ scale: '1.08' }, { scale: '0.98', offset: 0.55 }, { scale: '1' }], {
+          duration: 480,
+          easing: 'cubic-bezier(.2,.8,.3,1)',
+        });
+      flash
+        .animate([{ opacity: 1 }, { opacity: 0 }], { duration: fast ? 120 : 420, easing: 'ease-out', fill: 'forwards' })
+        .finished.then(
+          () => flash.remove(),
+          () => flash.remove(),
+        );
       if (r.gain) gainPop(el, r.gain);
     } catch (e) {
       sfx.deny();
-      el.getAnimations().forEach((a) => a.cancel());
+      cover?.getAnimations().forEach((a) => a.cancel());
+      cover?.classList.remove(s.whiten ?? '');
       toast(errorText(e, lang), true);
     } finally {
       revealing.current.delete(slot);
@@ -230,8 +273,8 @@ export default function Shop() {
             ) : null}
             <div ref={shelvesRef} className={s.shelves} role="group" aria-label={t('ui.shop_title')}>
               {CATS.map((c) => {
+                // les rayons restent toujours accessibles, même vides aujourd'hui
                 const inCat = items.filter((it) => catOf(it) === c.k);
-                if (!inCat.length) return null;
                 return (
                   <button
                     key={c.k}
@@ -417,64 +460,62 @@ function gainPop(el: HTMLElement, n: number) {
   ).finished.then(() => d.remove(), () => d.remove());
 }
 
-// Case mystère : on ne sait pas ce qu'il y a dedans ; la toucher la révèle (+100 pièces)
+// Case pas encore révélée : la même case qu'un objet (même taille), entièrement recouverte d'un cache ; la toucher la
+// révèle (+100 pièces)
 function Mystery({ slot, gain, logged, onReveal }: { slot: number; gain: number; logged: boolean; onReveal: (el: HTMLElement) => void }) {
   const t = useT();
   const ref = useRef<HTMLLIElement>(null);
   return (
     <li ref={ref} className={`${s.card} ${s.myst}`} data-key={slot}>
+      <div className={s.box} aria-hidden>
+        <div className={s.art} />
+        <h3>&nbsp;</h3>
+        <p>&nbsp;</p>
+        <div className={s.buy}>
+          <b className={s.price}>&nbsp;</b>
+          <Button size="sm" tabIndex={-1}>
+            &nbsp;
+          </Button>
+        </div>
+      </div>
       <button
         type="button"
-        className={s.box}
+        className={s.cover}
         disabled={!logged}
         aria-label={t('ui.shop_reveal_a', { n: gain })}
         onClick={() => ref.current && onReveal(ref.current)}
       >
-        <span className={`${s.badge} ${s.gainTag}`}>
-          +{gain} <Coin size={12} />
+        <span className={s.gainTag}>
+          +{gain} <Coin size={16} />
         </span>
-        <div className={s.art}>
-          <img className="px" src="/img/jetons/mystere.png" alt="" />
-        </div>
-        <h3>{t('ui.shop_myst')}</h3>
-        <p className="muted">{t('ui.shop_reveal')}</p>
       </button>
     </li>
   );
 }
 
-// La vedette tant qu'elle n'est pas révélée : on voit sa réduction, pas ce que c'est
+// La vedette tant qu'elle n'est pas révélée : toute la case est cachée, on ne voit que « À la une » et sa réduction
 function MysteryHero({ off, gain, logged, onReveal }: { off: number; gain: number; logged: boolean; onReveal: (el: HTMLElement) => void }) {
   const t = useT();
-  const ref = useRef<HTMLButtonElement>(null);
-  const art = useRef<HTMLDivElement>(null);
+  const ref = useRef<HTMLDivElement>(null);
   useSwing(ref, 0.12);
   return (
-    <button
-      ref={ref}
-      type="button"
-      className={`${s.hero} ${s.heroMyst}`}
-      disabled={!logged}
-      aria-label={t('ui.shop_reveal_a', { n: gain })}
-      onClick={() => ref.current && onReveal(ref.current)}
-      style={{ '--g': '142, 170, 255' } as CSSProperties}
-    >
-      <PixelBg className={s.heroBg} odds={1000} glow="#8eaaff" center={art} still={reducedFx()} />
-      <div ref={art} className={s.heroArt}>
-        <img className="px" src="/img/jetons/mystere.png" alt="" />
-      </div>
-      <div className={s.heroInfo}>
+    <div ref={ref} className={`${s.hero} ${s.myst}`}>
+      <button
+        type="button"
+        className={s.cover}
+        disabled={!logged}
+        aria-label={t('ui.shop_reveal_a', { n: gain })}
+        onClick={() => ref.current && onReveal(ref.current)}
+      >
         <span className={s.featRow}>
           <span className={s.feat}>{t('ui.shop_feat')}</span>
           {off > 0 ? <b className={s.off}>−{off}%</b> : null}
         </span>
-        <h2>{t('ui.shop_myst')}</h2>
-        <p>{t('ui.shop_reveal')}</p>
-        <span className={`${s.badge} ${s.gainTag} ${s.gainBig}`}>
-          +{gain} <Coin size={16} />
+        <span className={`${s.gainTag} ${s.gainBig}`}>
+          +{gain} <Coin size={18} />
         </span>
-      </div>
-    </button>
+      </button>
+    </div>
   );
 }
 
