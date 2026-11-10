@@ -115,6 +115,12 @@
       "odds": 5000,
       "glow": "#5fae7e",
       "img": "/img/jetons/serie-bodako/ronce.png?g=80"
+    },
+    {
+      "name": "Coton",
+      "odds": 10000,
+      "glow": "#f2c4b6",
+      "img": "/img/jetons/serie-bodako/coton.gif?g=80"
     }
   ]
 }

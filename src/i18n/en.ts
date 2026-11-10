@@ -1001,6 +1001,7 @@ export const en: Dict = {
     Zénith: 'Zenith',
     Mousse: 'Moss',
     Ronce: 'Bramble',
+    Coton: 'Cotton',
   },
   app: {
     soon_t: 'Coming soon',
