@@ -20,6 +20,7 @@ import { botTeam, useDeck, type Member } from './team';
 import { call, fetchMatch, toLocal, useRanked, watchMatch, type RankedMe } from './rankedApi';
 import { RankAround, RankCard, SearchModal } from './Ranked';
 import { RankRoad } from './RankRoad';
+import { useStaggerIn } from '@/ui/useStaggerIn';
 import rs from './Ranked.module.css';
 import { TeamEditor } from './TeamEditor';
 import { JetonModal } from '../inventory/JetonModal';
@@ -67,6 +68,14 @@ export default function Combat() {
       if (loaded?.RNG.st) loaded.closeRing();
     },
     [],
+  );
+
+  // la page attend son rang et son équipe, puis ses blocs apparaissent l'un après l'autre (plus de saut au chargement)
+  const pageRef = useRef<HTMLElement>(null);
+  useStaggerIn(
+    pageRef,
+    `.${s.heroFloat}, .${s.playMain}, .${s.subRow} > *, .${s.lockBox}, .${s.sat}, .${s.roadRow}`,
+    !ranked.isPending && !deck.isPending,
   );
 
   if (!user)
@@ -169,7 +178,7 @@ export default function Combat() {
   };
 
   return (
-    <section className={`${s.page} ${s['t_' + ptab]}`}>
+    <section ref={pageRef} className={`${s.page} ${s['t_' + ptab]}`}>
       <h1 className="visually-hidden">{t('arena.title')}</h1>
       {/* téléphone / tablette : 2 onglets au lieu d'une longue page */}
       <div className={s.mtabs}>

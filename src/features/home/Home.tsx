@@ -12,7 +12,8 @@ import { FallCoin, FallRain } from './FallStage';
 import { Quests } from '../quests/Quests';
 import { Starter } from '../starter/Starter';
 import { useAuth } from '@/lib/auth';
-import { useMe } from '@/api/queries';
+import { useMe, useQuests } from '@/api/queries';
+import { useStaggerIn } from '@/ui/useStaggerIn';
 import { Landing } from '../landing/Landing';
 import s from './Home.module.css';
 
@@ -23,7 +24,12 @@ export default function Home() {
   const pull: { name: string; img: string; soon?: boolean } = PULLS[pi] ??
     PULLS[0] ?? { name: 'Takoras', img: '/img/jetons/takoras.png' };
   const user = useAuth((x) => x.user);
-  const admin = !!useMe().data?.admin; // Bodako : ouvrable par les admins seulement pour l'instant
+  const me = useMe();
+  const admin = !!me.data?.admin; // Bodako : ouvrable par les admins seulement pour l'instant
+  // les blocs attendent le compte et les quêtes, puis apparaissent l'un après l'autre (plus de saut au chargement)
+  const quests = useQuests();
+  const stageRef = useRef<HTMLDivElement>(null);
+  useStaggerIn(stageRef, `.${s.center} > *, .${s.sat}`, !!user && !me.isPending && !quests.isPending);
   const ready = useAuth((x) => x.ready);
   useEffect(installOpeningHost, []);
   // la souris donne de la profondeur : les satellites glissent un peu à l'opposé (variables CSS, pas de rendu React)
@@ -43,7 +49,7 @@ export default function Home() {
   return (
     <>
       <FallRain serie={pull.name} />
-      <div className={s.stage} onPointerMove={parallax} onPointerLeave={unParallax}>
+      <div ref={stageRef} className={s.stage} onPointerMove={parallax} onPointerLeave={unParallax}>
         <div className={s.center} data-tour="pull">
           <FallCoin img={pull.img} label={pull.name} serie={pull.name} disabled={!!pull.soon && !admin} />
           <h1 className={s.title}>
