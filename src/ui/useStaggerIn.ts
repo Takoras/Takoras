@@ -1,8 +1,8 @@
 import { useLayoutEffect, type RefObject } from 'react';
 import { reducedFx } from '@/lib/settings';
 
-// Apparition d'une page, la même partout (accueil, inventaire, combat) : exactement le mouvement des jetons de
-// l'inventaire (ils montent un peu, penchent, se redressent), bloc après bloc.
+// Apparition d'une page, la même partout (accueil, inventaire, combat) : un fondu, bloc après bloc,
+// comme les jetons de l'inventaire.
 // La page reste invisible (et ses animations en pause) tant que :
 //  - ses données ne sont pas là (`ready`),
 //  - ses images et ses polices ne sont pas chargées (sinon elles arrivent après et décalent tout d'un coup).
@@ -11,15 +11,9 @@ export function useStaggerIn(root: RefObject<HTMLElement | null>, selector: stri
   useLayoutEffect(() => stagger(root.current, selector, ready), [root, selector, ready]);
 }
 
-// même mouvement que @keyframes cardIn (Inventory.module.css), en « transform » pour ne pas gêner
-// les propriétés translate / rotate que les blocs utilisent déjà (souris, balancement)
-export const SPAWN: Keyframe[] = [
-  { opacity: 0, transform: 'translateY(14px) rotate(-7deg)' },
-  { opacity: 1, transform: 'translateY(0) rotate(4deg)', offset: 0.4 },
-  { transform: 'rotate(-1.5deg)', offset: 0.7 },
-  { transform: 'none' },
-];
-export const SPAWN_MS = 750;
+// un simple fondu (même apparition que les jetons de l'inventaire, @keyframes cardIn) : rien ne bouge ni ne penche
+export const SPAWN: Keyframe[] = [{ opacity: 0 }, { opacity: 1 }];
+export const SPAWN_MS = 450;
 export const SPAWN_STEP = 35;
 
 const played = new WeakSet<HTMLElement>();

@@ -496,7 +496,7 @@
   text-align: center;
   rotate: var(--swing, 0deg);
   transform-origin: 50% 0;
-  animation: cardIn 0.75s ease-out calc(var(--i, 0) * 35ms) both;
+  animation: cardIn 0.45s ease-out calc(var(--i, 0) * 35ms) both;
   transition: border-color var(--t-fast);
 }
 .item:hover {
@@ -935,7 +935,7 @@
   /* au survol, le jeton se balance (accroché par le haut, --swing via useSwingAll) au lieu de grossir */
   rotate: var(--swing, 0deg);
   transform-origin: 50% 0;
-  animation: cardIn 0.75s ease-out calc(var(--i, 0) * 35ms) both;
+  animation: cardIn 0.45s ease-out calc(var(--i, 0) * 35ms) both;
   transition: border-color var(--t-fast);
 }
 .card:hover .cardBtn {
@@ -950,21 +950,8 @@
 }
 /* à l'arrivée, comme accrochées à un étendoir : elles apparaissent et se balancent un peu avant de se poser */
 @keyframes cardIn {
-  0% {
+  from {
     opacity: 0;
-    translate: 0 14px;
-    transform: rotate(-7deg);
-  }
-  40% {
-    opacity: 1;
-    translate: 0 0;
-    transform: rotate(4deg);
-  }
-  70% {
-    transform: rotate(-1.5deg);
-  }
-  100% {
-    transform: none;
   }
 }
 
