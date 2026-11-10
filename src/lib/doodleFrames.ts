@@ -109,7 +109,9 @@ const eligible = (img: HTMLImageElement) =>
   img.classList.contains('px') &&
   !img.classList.contains('still') &&
   !img.matches('.v-gold, .v-celeste, .v-ombre') &&
-  !img.src.startsWith('blob:');
+  !img.src.startsWith('blob:') &&
+  // GIF animé : une copie fixe le figerait sur sa 1re image ; il garde le doodle CSS (et son animation)
+  !/\.gif(\?|$)/i.test(img.src);
 
 const queue = new Set<HTMLImageElement>();
 let working = false;
