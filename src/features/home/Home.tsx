@@ -29,7 +29,12 @@ export default function Home() {
   // les blocs attendent le compte et les quêtes, puis apparaissent l'un après l'autre (plus de saut au chargement)
   const quests = useQuests();
   const stageRef = useRef<HTMLDivElement>(null);
-  useStaggerIn(stageRef, `.${s.center} > *, .${s.sat}`, !!user && !me.isPending && !quests.isPending);
+  useStaggerIn(
+    stageRef,
+    // comme les jetons de l'inventaire : chaque petite case arrive à son tour (quêtes, améliorations, séries…)
+    `.${s.center} > *, .${s.sat}, .${s.sat} li, .${s.sat} button, .${s.up}`,
+    !!user && !me.isPending && !quests.isPending,
+  );
   const ready = useAuth((x) => x.ready);
   useEffect(installOpeningHost, []);
   // la souris donne de la profondeur : les satellites glissent un peu à l'opposé (variables CSS, pas de rendu React)

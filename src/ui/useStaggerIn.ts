@@ -41,6 +41,6 @@ function stagger(el: HTMLElement | null, selector: string, ready: boolean) {
     if (reducedFx() || matchMedia('(prefers-reduced-motion: reduce)').matches) return;
     [...el.querySelectorAll<HTMLElement>(selector)]
       .filter((b) => b.offsetParent !== null)
-      .forEach((b, i) => b.animate(SPAWN, { duration: SPAWN_MS, delay: i * SPAWN_STEP * 2, easing: 'ease-out', fill: 'backwards' }));
+      .forEach((b, i) => b.animate(SPAWN, { duration: SPAWN_MS, delay: i * SPAWN_STEP, easing: 'ease-out', fill: 'backwards' }));
   });
 }

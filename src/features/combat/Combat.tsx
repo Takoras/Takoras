@@ -74,7 +74,7 @@ export default function Combat() {
   const pageRef = useRef<HTMLElement>(null);
   useStaggerIn(
     pageRef,
-    `.${s.heroFloat}, .${s.playMain}, .${s.subRow} > *, .${s.lockBox}, .${s.sat}, .${s.roadRow}`,
+    `.${s.heroFloat}, .${s.playMain}, .${s.subRow} > *, .${s.lockBox}, .${s.sat}, .${s.sat} li, .${s.roadRow}`,
     !ranked.isPending && !deck.isPending,
   );
 
