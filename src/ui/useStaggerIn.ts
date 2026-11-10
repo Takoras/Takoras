@@ -41,6 +41,10 @@ function stagger(el: HTMLElement | null, selector: string, ready: boolean) {
     if (reducedFx() || matchMedia('(prefers-reduced-motion: reduce)').matches) return;
     [...el.querySelectorAll<HTMLElement>(selector)]
       .filter((b) => b.offsetParent !== null)
-      .forEach((b, i) => b.animate(SPAWN, { duration: SPAWN_MS, delay: i * SPAWN_STEP, easing: 'ease-out', fill: 'backwards' }));
+      .forEach((b, i) => {
+        // le fondu s'arrête à l'opacité normale du bloc (une case grisée reste grisée, sans flash)
+        const to = getComputedStyle(b).opacity;
+        b.animate([{ opacity: 0 }, { opacity: to }], { duration: SPAWN_MS, delay: i * SPAWN_STEP, easing: 'ease-out', fill: 'backwards' });
+      });
   });
 }
