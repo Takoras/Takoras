@@ -214,11 +214,19 @@ export default function Shop() {
       await new Promise((ok) => requestAnimationFrame(() => requestAnimationFrame(ok)));
       const it = r.shop.items.find((x) => slotOf(x, 0) === slot);
       sfx.reveal(it && !isHidden(it) ? oddsOf(it) : 1);
-      if (!fast)
+      if (!fast) {
         // l'objet arrive à la taille où la case s'est arrêtée, puis redescend doucement à sa taille (sans rebond)
         el.animate([{ scale: '1.06' }, { scale: '1' }], { duration: 650, easing: 'cubic-bezier(.2,.7,.3,1)' });
+        // sous le choc, la case se balance ~1 s (comme quand la souris la pousse), accrochée par le haut
+        const sw = el.querySelector<HTMLElement>(`.${s.box}`) ?? el;
+        const a = sw === el ? 2.5 : 5;
+        sw.animate(
+          [0, a, -a * 0.75, a * 0.5, -a * 0.3, a * 0.15, 0].map((d) => ({ rotate: `${d}deg` })),
+          { duration: 1000, easing: 'ease-out' },
+        );
+      }
       flash
-        .animate([{ opacity: 1 }, { opacity: 0 }], { duration: fast ? 120 : 420, easing: 'ease-out', fill: 'forwards' })
+        .animate([{ opacity: 1 }, { opacity: 0 }], { duration: fast ? 120 : 500, easing: 'ease-out', fill: 'forwards' })
         .finished.then(
           () => flash.remove(),
           () => flash.remove(),
@@ -277,7 +285,7 @@ export default function Shop() {
                     <img className="px" src={c.icon} alt="" />
                     <span>
                       <b>{t(c.label)}</b>
-                      <small>{inCat.length}</small>
+                      <small>{t('ui.shop_n', { n: inCat.length })}</small>
                     </span>
                   </button>
                 );

@@ -1,6 +1,7 @@
 // Généré par scripts/port/i18n.mjs depuis l'ancien site, puis maintenu à la main.
 export const fr = {
   ui: {
+    shop_n: '{n} en stock',
     shop_rev: '{n}/{m} révélés',
     shop_myst: 'Mystère',
     shop_reveal: 'Touche pour révéler',

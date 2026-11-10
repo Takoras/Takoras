@@ -3,6 +3,7 @@ import type { Dict } from './types';
 
 export const en: Dict = {
   ui: {
+    shop_n: '{n} in stock',
     shop_rev: '{n}/{m} revealed',
     shop_myst: 'Mystery',
     shop_reveal: 'Tap to reveal',
