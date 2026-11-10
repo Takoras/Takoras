@@ -313,7 +313,7 @@ function Face({ cls, src, alt }: { cls: string; src: string; alt: string }) {
 export const STAT_COL = { mass: '96, 165, 250', power: '251, 113, 133', size: '74, 222, 128' } as const;
 
 // Couleur du fond selon la mutation montrée
-const VHEX: Record<Variant, string> = { gold: '#facc15', celeste: '#bac8ff', ombre: '#4f7bff' };
+const VHEX: Record<Variant, string> = { gold: '#facc15', celeste: '#bac8ff', ombre: '#8b5cf6' };
 
 // Couleur de l'aura selon la mutation montrée
-const VCOL: Record<Variant, string> = { gold: '250, 204, 21', celeste: '186, 200, 255', ombre: '61, 107, 255' };
+const VCOL: Record<Variant, string> = { gold: '250, 204, 21', celeste: '186, 200, 255', ombre: '139, 92, 246' };

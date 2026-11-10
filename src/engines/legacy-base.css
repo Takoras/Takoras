@@ -29,7 +29,7 @@ img.v-ombre, .opening.v-ombre .op-coin .spin img.face, .opening.v-ombre .op-coin
   66% { filter: url(#dd2) url(#vceleste) drop-shadow(0 0 7px #fff) drop-shadow(0 0 18px rgba(199, 210, 254, .85)); }
 }
 @keyframes vOmbre {
-  0% { filter: url(#dd0) url(#vombre) drop-shadow(0 0 2px #c084fc) drop-shadow(0 0 11px rgba(61, 107, 255, .9)); }
-  33% { filter: url(#dd1) url(#vombre) drop-shadow(0 0 2px #c084fc) drop-shadow(0 0 11px rgba(61, 107, 255, .9)); }
-  66% { filter: url(#dd2) url(#vombre) drop-shadow(0 0 2px #c084fc) drop-shadow(0 0 11px rgba(61, 107, 255, .9)); }
+  0% { filter: url(#dd0) url(#vombre) drop-shadow(0 0 2px #c084fc) drop-shadow(0 0 11px rgba(124, 58, 237, .9)); }
+  33% { filter: url(#dd1) url(#vombre) drop-shadow(0 0 2px #c084fc) drop-shadow(0 0 11px rgba(124, 58, 237, .9)); }
+  66% { filter: url(#dd2) url(#vombre) drop-shadow(0 0 2px #c084fc) drop-shadow(0 0 11px rgba(124, 58, 237, .9)); }
 }
