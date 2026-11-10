@@ -10,7 +10,9 @@ const STEP = 300; // ms entre deux images (comme l'ancienne animation : 0,9 s po
 const NOISE = [3, 17, 41]; // mêmes graines que les filtres #dd0..#dd2
 const ns = 'http://www.w3.org/2000/svg';
 
-type Frames = string[]; // 3 valeurs CSS « content »
+// une seule planche (les 3 dessins l'un sous l'autre) : on la fait glisser, l'image n'est jamais remplacée
+// (changer d'image forçait parfois le navigateur à la redécoder : le sprite disparaissait une image, d'où des flashs)
+type Frames = { content: string; h: number };
 const cache = new Map<string, Promise<Frames | null>>();
 const live = new Map<HTMLImageElement, { key: string; frames: Frames }>();
 let svgHost: SVGSVGElement | null = null;
@@ -38,37 +40,56 @@ function filterId(seed: number, small: boolean, dpr: number) {
   return id;
 }
 
-async function render(img: HTMLImageElement, w: number, small: boolean, dpr: number): Promise<Frames | null> {
+async function render(
+  img: HTMLImageElement,
+  bw: number,
+  bh: number,
+  fit: string,
+  small: boolean,
+  dpr: number,
+): Promise<Frames | null> {
   if (!img.complete) await img.decode().catch(() => undefined);
   const nw = img.naturalWidth,
     nh = img.naturalHeight;
   if (!nw || !nh) return null;
-  const cw = Math.max(8, Math.round(w * dpr));
-  const ch = Math.max(8, Math.round((cw * nh) / nw));
+  // chaque dessin a exactement la taille de la case à l'écran (en pixels réels), l'image y est placée
+  // comme le ferait le CSS (contain, cover ou fill)
+  const cw = Math.max(8, Math.round(bw * dpr)),
+    ch = Math.max(8, Math.round(bh * dpr));
+  let dw = cw,
+    dh = ch;
+  if (fit === 'contain' || fit === 'cover' || fit === 'scale-down') {
+    const k = (fit === 'cover' ? Math.max : Math.min)(cw / nw, ch / nh);
+    dw = nw * k;
+    dh = nh * k;
+  }
   const src = document.createElement('canvas');
   src.width = cw;
   src.height = ch;
   const sx = src.getContext('2d');
   if (!sx) return null;
   sx.imageSmoothingEnabled = false; // pixel art : agrandi sans flou, comme à l'écran
-  sx.drawImage(img, 0, 0, cw, ch);
-  // taille « naturelle » gardée : l'image affichée garde exactement la même place qu'avant
-  const res = cw / nw;
-  const out: Frames = [];
-  for (const seed of NOISE) {
-    const cv = document.createElement('canvas');
-    cv.width = cw;
-    cv.height = ch;
-    const x = cv.getContext('2d');
-    if (!x) return null;
+  sx.drawImage(img, (cw - dw) / 2, (ch - dh) / 2, dw, dh);
+  const sheet = document.createElement('canvas');
+  sheet.width = cw;
+  sheet.height = ch * NOISE.length;
+  const x = sheet.getContext('2d');
+  if (!x) return null;
+  NOISE.forEach((seed, i) => {
     x.filter = `url(#${filterId(seed, small, dpr)})`;
-    x.drawImage(src, 0, 0);
-    const blob = await new Promise<Blob | null>((ok) => cv.toBlob(ok));
-    if (!blob) return null;
-    out.push(`image-set(url("${URL.createObjectURL(blob)}") ${res}x)`);
-  }
-  return out;
+    x.drawImage(src, 0, i * ch);
+  });
+  const blob = await new Promise<Blob | null>((ok) => sheet.toBlob(ok));
+  if (!blob) return null;
+  const url = URL.createObjectURL(blob);
+  // décodée à l'avance et gardée en mémoire : jamais d'image vide à l'affichage
+  const keep = new Image();
+  keep.src = url;
+  await keep.decode().catch(() => undefined);
+  kept.push(keep);
+  return { content: `image-set(url("${url}") ${cw / bw}x)`, h: bh };
 }
+const kept: HTMLImageElement[] = [];
 
 // le filtre de canvas avec url(#…) ne marche pas partout : on vérifie une fois qu'il déforme vraiment
 let support: boolean | null = null;
@@ -100,22 +121,24 @@ async function pump() {
       const img = queue.values().next().value as HTMLImageElement;
       queue.delete(img);
       if (!img.isConnected || !eligible(img) || img.classList.contains('dd-off')) continue;
-      const r = img.getBoundingClientRect();
-      if (r.width < 4) continue;
-      const small = r.width <= 52 || !!img.closest('.mini, .small');
-      const dpr = Math.min(2, Math.round((devicePixelRatio || 1) * 2) / 2);
-      // une taille par palier de 8 px : les jetons de même taille partagent leurs images
-      const w = Math.ceil(r.width / 8) * 8;
-      const key = `${img.currentSrc || img.src}|${w}|${small ? 1 : 0}|${dpr}`;
+      // taille de la case dans la page (sans les agrandissements CSS), et zoom de la page
+      const bw = img.clientWidth,
+        bh = img.clientHeight;
+      if (bw < 4 || bh < 4) continue;
+      const zoom = (img as HTMLImageElement & { currentCSSZoom?: number }).currentCSSZoom ?? 1;
+      const small = bw * zoom <= 52 || !!img.closest('.mini, .small');
+      const dpr = Math.min(3, (devicePixelRatio || 1) * zoom);
+      const fit = getComputedStyle(img).objectFit;
+      const key = `${img.currentSrc || img.src}|${bw}x${bh}|${fit}|${small ? 1 : 0}|${dpr.toFixed(2)}`;
       let p = cache.get(key);
       if (!p) {
-        p = render(img, w, small, dpr).catch(() => null);
+        p = render(img, bw, bh, fit, small, dpr).catch(() => null);
         cache.set(key, p);
       }
       const frames = await p;
-      if (!frames || !img.isConnected) continue;
+      if (!frames || !img.isConnected || img.clientWidth !== bw || img.clientHeight !== bh) continue;
       live.set(img, { key, frames });
-      img.style.setProperty('content', frames[tick % 3] ?? null);
+      show(img, frames);
       img.classList.add('dd-on');
       // laisse respirer la page entre deux jetons
       await new Promise((ok) => setTimeout(ok, 0));
@@ -126,7 +149,22 @@ async function pump() {
 }
 
 let tick = 0;
+const show = (img: HTMLImageElement, f: Frames) => {
+  img.style.setProperty('content', f.content);
+  img.style.setProperty('object-fit', 'none');
+  img.style.setProperty('object-position', `0 ${-tick * f.h}px`);
+};
+const clear = (img: HTMLImageElement) => {
+  ['content', 'object-fit', 'object-position'].forEach((k) => img.style.removeProperty(k));
+  img.classList.remove('dd-on');
+};
 function step() {
+  // effets allégés ou patate : on rend les images normales
+  if (reducedFx()) {
+    for (const img of live.keys()) clear(img);
+    live.clear();
+    return;
+  }
   tick = (tick + 1) % 3;
   for (const [img, st] of live) {
     if (!img.isConnected) {
@@ -135,15 +173,15 @@ function step() {
     }
     // l'image a changé (autre jeton, autre taille, variante…) : on la recalcule
     const src = img.currentSrc || img.src;
-    if (!st.key.startsWith(src + '|') || !eligible(img)) {
+    const size = `|${img.clientWidth}x${img.clientHeight}|`;
+    if (!st.key.startsWith(src + '|') || !st.key.includes(size) || !eligible(img)) {
       live.delete(img);
-      img.style.removeProperty('content');
-      img.classList.remove('dd-on');
+      clear(img);
       if (eligible(img)) queue.add(img);
       continue;
     }
     if (img.classList.contains('dd-off')) continue; // hors de l'écran : rien à faire
-    img.style.setProperty('content', st.frames[tick] ?? null);
+    img.style.setProperty('object-position', `0 ${-tick * st.frames.h}px`);
   }
   if (queue.size) void pump();
 }
@@ -179,7 +217,7 @@ export function installDoodleFrames() {
   });
   mo.observe(document.body, { childList: true, subtree: true });
   const id = setInterval(() => {
-    if (document.visibilityState === 'visible' && !reducedFx()) step();
+    if (document.visibilityState === 'visible') step();
   }, STEP);
   void pump();
   return () => {
