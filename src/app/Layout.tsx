@@ -41,6 +41,7 @@ const PAGE_ZOOM: [string, number][] = [
   ['/combat', 0.9],
   ['/shop', 0.85],
 ];
+// la boutique est plus large que les autres pages (la vitrine respire sur PC)
 function pageZoom(path: string) {
   if (path === '/') return 0.9;
   return PAGE_ZOOM.find(([p]) => path.startsWith(p))?.[1] ?? 1;
@@ -190,7 +191,7 @@ export function Layout() {
       <Announcements />
       <main id="main" className={s.main} key={pathname}>
         {/* zoom propre à chaque page (choisi à l'œil) : le contenu de la page seulement, pas la barre ni le haut */}
-        <div className={s.pz} style={{ '--pz': pageZoom(pathname) } as CSSProperties}>
+        <div className={s.pz} style={{ '--pz': pageZoom(pathname), ...(pathname.startsWith('/shop') ? { '--page-max': '1600px' } : {}) } as CSSProperties}>
           <Outlet />
         </div>
         {/* pied de page discret, en bas de chaque page (la page de présentation des visiteurs a déjà le sien) */}

@@ -6,10 +6,12 @@ test('boutique : catégories, stock, achat, prix modifié, code promo', async ({
   await page.goto('/shop');
   await expect(page.getByRole('heading', { level: 1 })).toBeVisible();
   await expect(page.getByText('+20%').first()).toBeVisible(); // potion ×10 plus chère que d'habitude
-  await expect(page.getByText('Épuisé').first()).toBeVisible(); // sablier : 2/2 achetés
-  // achat d'une potion ×1,3
-  await page.getByRole('button', { name: /Acheter · .* · 300$/ }).click();
+  // achat d'une potion ×1,3 (rayon Potions, ouvert par défaut)
+  await page.getByRole('button', { name: /Acheter · .* · 300$/ }).first().click();
   await expect(page.getByLabel('Solde')).toContainText('4 700');
+  // rayon « Tirages » : le sablier est épuisé (2/2 achetés)
+  await page.getByRole('button', { name: /Tirages/ }).click();
+  await expect(page.getByText('Épuisé').first()).toBeVisible();
   // filtre « Cosmétiques »
   await page.getByRole('button', { name: 'Cosmétiques' }).click();
   await expect(page.locator('li h3')).toHaveCount(1);

@@ -1,4 +1,4 @@
-import { useRef, useState, type CSSProperties, type FormEvent } from 'react';
+import { useLayoutEffect, useRef, useState, type CSSProperties, type FormEvent } from 'react';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { errorText, publicApi, shopApi } from '@/api';
 import { useMe } from '@/api/queries';
@@ -8,11 +8,11 @@ import { locale, reducedFx, useSettings } from '@/lib/settings';
 import { useT } from '@/i18n/useT';
 import type { Key } from '@/i18n';
 import { sfx } from '@/engines/sound.js';
-import { moDissolve } from '@/engines/motion.js';
+import { moDissolve, moPlay, moSnap } from '@/engines/motion.js';
 import { Button } from '@/ui/Button';
 import { PixelBg } from '@/ui/PixelBg';
 import { toast } from '@/ui/toast';
-import { useSwingAll } from '@/ui/useSwing';
+import { useSwing, useSwingAll } from '@/ui/useSwing';
 import { useStaggerIn } from '@/ui/useStaggerIn';
 import { useNow } from '../eco/eco';
 import { Effects } from '../home/Effects';
@@ -20,10 +20,9 @@ import { openInfo } from '../info/store';
 import s from './Shop.module.css';
 
 type Item = ShopItem & { price: number; base_price: number | null; stock: number; bought: number; owned: boolean };
-type ShopData = { items: Item[]; reset_in: number };
+type ShopData = { items: Item[]; reset_in: number; featured?: string | null; off?: number | null };
 // rayons de la boutique (l'icône est un objet du rayon)
 const CATS: { k: string; label: Key; icon: string }[] = [
-  { k: 'all', label: 'ui.all', icon: '/img/piece.png' },
   { k: 'potion', label: 'ui.cat_potions', icon: '/img/potions/chance-10.png' },
   { k: 'util', label: 'ui.cat_pulls', icon: '/img/objets/sablier.png' },
   { k: 'banner', label: 'ui.cat_cosm', icon: '/img/pp/bleu.png' },
@@ -48,8 +47,6 @@ const glowOf = (it: Item) =>
       : '142, 170, 255';
 const hexOf = (rgb: string) => '#' + rgb.split(',').map((n) => (+n).toString(16).padStart(2, '0')).join('');
 const avail = (it: Item) => !it.owned && it.stock - it.bought > 0;
-// penchés comme des étiquettes accrochées, chacun un peu différemment (même DA que l'inventaire et l'accueil)
-const TILT = [-2.2, 1.6, -1, 2.4, -1.8, 0.9, -2.6, 1.3];
 const Coin = ({ size = 14 }: { size?: number }) => (
   <img className="px" src="/img/piece.png" alt="" width={size} height={size} />
 );
@@ -64,7 +61,7 @@ export default function Shop() {
   const me = useMe();
   const qc = useQueryClient();
   const now = useNow();
-  const [cat, setCat] = useState('all');
+  const [cat, setCat] = useState('potion');
   const shop = useQuery({
     queryKey: ['shop'],
     queryFn: async () => ({ ...((await publicApi.shopToday()) as unknown as ShopData), at: Date.now() }),
@@ -73,7 +70,19 @@ export default function Shop() {
   const gridRef = useRef<HTMLUListElement>(null);
   const shelvesRef = useRef<HTMLDivElement>(null);
   useStaggerIn(pageRef, `.${s.head}, .${s.hero}, .${s.shelf}, .${s.card}, .${s.ticket}`, !!shop.data);
-  useSwingAll(gridRef, `.${s.box}`, 0.4, cat + (shop.data?.items.length ?? 0));
+  useSwingAll(gridRef, `.${s.box}`, 0.35, cat + (shop.data?.items.length ?? 0));
+  // changer de rayon : les cases glissent à leur nouvelle place, les nouvelles arrivent (comme les séries de l'inventaire)
+  const snap = useRef<Map<string, DOMRect> | null>(null);
+  useLayoutEffect(() => {
+    if (snap.current && gridRef.current) moPlay(snap.current, gridRef.current, '[data-key]', { dissolve: true });
+    snap.current = null;
+  }, [cat]);
+  const pick = (k: string) => {
+    if (k === cat) return;
+    if (gridRef.current) snap.current = moSnap(gridRef.current, '[data-key]');
+    sfx.click();
+    setCat(k);
+  };
   useSwingAll(shelvesRef, `.${s.shelf}`, 0.5);
   const coins = me.data?.coins ?? 0;
   if (shop.isError) return <p className="muted">{t('ui.err_generic')}</p>;
@@ -130,9 +139,11 @@ export default function Shop() {
   };
 
   const items = data?.items ?? [];
-  const list = items.filter((it) => cat === 'all' || catOf(it) === cat);
-  // vedette : l'objet le plus précieux encore en stock (sinon le plus précieux tout court)
-  const featured = [...items].sort((a, b) => Number(avail(b)) - Number(avail(a)) || b.price - a.price)[0];
+  const list = items.filter((it) => catOf(it) === cat);
+  // vedette : tirée par le serveur à chaque stock, avec sa réduction (sinon l'objet le plus précieux en stock)
+  const featured =
+    items.find((it) => it.id === data?.featured) ??
+    [...items].sort((a, b) => Number(avail(b)) - Number(avail(a)) || b.price - a.price)[0];
   return (
     <section ref={pageRef} className={s.page} aria-busy={!data}>
       <header className={s.head}>
@@ -149,22 +160,19 @@ export default function Shop() {
         <>
           <div className={s.top}>
             {featured ? (
-              <Hero it={featured} coins={coins} logged={!!user} left={left} onBuy={buy} />
+              <Hero it={featured} off={featured.id === data.featured ? (data.off ?? 0) : 0} coins={coins} logged={!!user} left={left} onBuy={buy} />
             ) : null}
             <div ref={shelvesRef} className={s.shelves} role="group" aria-label={t('ui.shop_title')}>
               {CATS.map((c) => {
-                const inCat = items.filter((it) => c.k === 'all' || catOf(it) === c.k);
-                if (c.k !== 'all' && !inCat.length) return null;
+                const inCat = items.filter((it) => catOf(it) === c.k);
+                if (!inCat.length) return null;
                 return (
                   <button
                     key={c.k}
                     type="button"
                     className={s.shelf}
                     aria-pressed={cat === c.k}
-                    onClick={() => {
-                      sfx.click();
-                      setCat(c.k);
-                    }}
+                    onClick={() => pick(c.k)}
                   >
                     <img className="px" src={c.icon} alt="" />
                     <span>
@@ -177,8 +185,8 @@ export default function Shop() {
             </div>
           </div>
           <ul ref={gridRef} className={s.grid}>
-            {list.map((it, i) => (
-              <Card key={it.id} it={it} i={i} coins={coins} logged={!!user} left={left} onBuy={buy} />
+            {list.map((it) => (
+              <Card key={it.id} it={it} coins={coins} logged={!!user} left={left} onBuy={buy} />
             ))}
           </ul>
           {user ? <Redeem items={items} /> : <p className="muted">{t('ui.acc_need')}</p>}
@@ -239,11 +247,12 @@ function Buy({ it, coins, logged, left, onBuy, card, big }: CardProps & { card: 
 }
 
 // L'objet vedette : grand, il flotte sur le fond pixel animé de la fiche d'un jeton
-function Hero(p: CardProps) {
+function Hero(p: CardProps & { off: number }) {
   const t = useT();
   const lang = useSettings((x) => x.lang);
-  const { it, left } = p;
+  const { it, left, off } = p;
   const ref = useRef<HTMLDivElement>(null);
+  useSwing(ref, 0.12); // il se balance un peu quand la souris passe dessus
   const art = useRef<HTMLDivElement>(null);
   const [name, desc] = itemText(it, lang),
     img = itemImg(it);
@@ -261,7 +270,10 @@ function Hero(p: CardProps) {
         />
       </div>
       <div className={s.heroInfo}>
-        <span className={s.feat}>{t('ui.shop_feat')}</span>
+        <span className={s.featRow}>
+          <span className={s.feat}>{t('ui.shop_feat')}</span>
+          {off > 0 ? <b className={s.off}>−{off}%</b> : null}
+        </span>
         <h2>{name}</h2>
         {it.kind === 'potion' ? <p>{desc}</p> : null}
         <span className={s.stock}>
@@ -273,11 +285,11 @@ function Hero(p: CardProps) {
   );
 }
 
-// Une case de la vitrine : penchée, elle flotte, se balance au survol et l'objet saute quand on passe dessus
-function Card(p: CardProps & { i: number }) {
+// Une case de la vitrine : droite et posée comme les jetons de l'inventaire ; elle se balance au survol
+function Card(p: CardProps) {
   const t = useT();
   const lang = useSettings((x) => x.lang);
-  const { it, i } = p;
+  const { it } = p;
   const ref = useRef<HTMLLIElement>(null);
   const [name, desc] = itemText(it, lang),
     img = itemImg(it);
@@ -287,7 +299,8 @@ function Card(p: CardProps & { i: number }) {
     <li
       ref={ref}
       className={`${s.card} ${out ? s.out : ''}`}
-      style={{ '--g': glowOf(it), '--tilt': `${TILT[i % TILT.length]}deg`, '--fl': `${6 + (i % 4) * 0.6}s`, '--dl': `${-i * 0.9}s` } as CSSProperties}
+      data-key={it.id}
+      style={{ '--g': glowOf(it) } as CSSProperties}
     >
       <div className={s.box}>
         <span className={`${s.badge} ${it.owned ? s.ok : stockLeft ? '' : s.none}`}>
@@ -302,7 +315,8 @@ function Card(p: CardProps & { i: number }) {
           />
         </div>
         <h3>{name}</h3>
-        {it.kind === 'potion' ? <p className="muted">{desc}</p> : null}
+        {/* ligne réservée même sans description : toutes les cases gardent la même taille */}
+        <p className="muted">{it.kind === 'potion' ? desc : '\u00a0'}</p>
         <Buy {...p} card={() => ref.current} />
       </div>
     </li>

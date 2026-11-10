@@ -6,7 +6,8 @@
 .page {
   display: grid;
   gap: var(--s-8);
-  max-width: 1180px;
+  width: 100%;
+  max-width: 1560px; /* large sur PC : la vitrine respire */
   margin-inline: auto;
 }
 
@@ -68,9 +69,8 @@
   padding: var(--s-6) var(--s-8);
   border-radius: 16px;
   background: rgb(255 255 255 / 3%);
-  rotate: calc(-0.8deg + var(--swing, 0deg));
+  rotate: var(--swing, 0deg);
   transform-origin: 50% 0;
-  animation: float 7s ease-in-out infinite;
 }
 .heroBg {
   position: absolute;
@@ -88,9 +88,17 @@
   animation: bob 3.6s ease-in-out infinite;
 }
 .heroArt img {
-  width: clamp(150px, 15vw, 210px);
-  height: clamp(150px, 15vw, 210px);
+  width: clamp(150px, 15vw, 220px);
+  height: clamp(150px, 15vw, 220px);
   object-fit: contain;
+  transition:
+    scale 0.4s var(--ease-out),
+    translate 0.4s var(--ease-out);
+}
+/* survol de la vedette : l'objet se soulève doucement */
+.hero:hover .heroArt img {
+  scale: 1.07;
+  translate: 0 -6px;
 }
 .heroArt img.wide {
   width: 100%;
@@ -110,6 +118,19 @@
 .heroInfo p {
   margin: 0;
   color: var(--text-2);
+}
+.featRow {
+  display: flex;
+  align-items: center;
+  gap: var(--s-2);
+}
+.off {
+  padding: 2px 10px;
+  border-radius: var(--r-pill);
+  background: rgb(74 222 128 / 18%);
+  color: #bbf7d0;
+  font-family: var(--font-display);
+  font-size: var(--fs-md);
 }
 .feat {
   padding: 3px 10px;
@@ -195,13 +216,11 @@
   --dp: 1.6;
   list-style: none;
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(210px, 1fr));
+  grid-template-columns: repeat(auto-fill, minmax(230px, 1fr));
+  grid-auto-rows: 1fr; /* toutes les cases de la même taille, quel que soit l'objet */
   gap: var(--s-6) var(--s-5);
   margin: 0;
   padding: 0;
-}
-.card {
-  animation: float var(--fl, 6s) ease-in-out var(--dl, 0s) infinite;
 }
 .box {
   position: relative;
@@ -212,14 +231,15 @@
   height: 100%;
   padding: var(--s-6) var(--s-4) var(--s-4);
   border-radius: 14px;
-  background: linear-gradient(165deg, rgba(var(--g), 0.12), transparent 60%), rgb(255 255 255 / 3.5%);
+  background: rgb(255 255 255 / 3.5%);
   text-align: center;
-  rotate: calc(var(--tilt, 0deg) + var(--swing, 0deg));
+  /* droite et posée comme les jetons de l'inventaire ; au survol elle se balance (accrochée par le haut) */
+  rotate: var(--swing, 0deg);
   transform-origin: 50% 0;
   transition: background-color var(--t-fast);
 }
 .card:hover .box {
-  background-color: rgb(255 255 255 / 3%);
+  background: rgb(255 255 255 / 6%);
 }
 .art {
   display: grid;
@@ -236,16 +256,18 @@
   max-width: 180px;
   height: auto;
 }
-/* au survol, l'objet fait un petit saut */
-.card:hover .art {
-  animation: hop 0.55s cubic-bezier(0.3, 0.7, 0.4, 1);
-}
 .box h3 {
+  display: -webkit-box;
+  min-height: 2.4em;
   margin: 0;
+  overflow: hidden;
   font-size: var(--fs-md);
   line-height: 1.2;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 2;
 }
 .box p {
+  min-height: 1.4em;
   margin: 0;
   font-size: var(--fs-xs);
 }
@@ -361,24 +383,8 @@
     transform: translateY(-12px) rotate(2deg);
   }
 }
-@keyframes hop {
-  0% {
-    transform: none;
-  }
-  40% {
-    transform: translateY(-14px) scale(1.06, 0.96);
-  }
-  70% {
-    transform: translateY(0) scale(0.96, 1.04);
-  }
-  100% {
-    transform: none;
-  }
-}
 
-:global(html.reduce-fx) .hero,
 :global(html.reduce-fx) .shelf,
-:global(html.reduce-fx) .card,
 :global(html.reduce-fx) .heroArt {
   animation: none;
 }
@@ -407,11 +413,8 @@
   }
 }
 @media (prefers-reduced-motion: reduce) {
-  .hero,
   .shelf,
-  .card,
-  .heroArt,
-  .card:hover .art {
+  .heroArt {
     animation: none;
   }
 }

@@ -13,7 +13,9 @@ export function Effects() {
   const now = useNow();
   if (!me.data) return null;
   const pots = (me.data.potions as { m: number; n: number }[] | undefined) ?? [];
-  const fast = Math.max(0, Math.round(Number(me.data.fast_left ?? 0) - (now - me.dataUpdatedAt) / 1000));
+  // temps écoulé jamais négatif : juste après un achat, l'horloge de la page est un peu en retard sur la mise à jour du
+  // compte, et un sablier fini s'affichait « actif 00:00:01 » une fraction de seconde (toute la page bougeait)
+  const fast = Math.max(0, Math.floor(Number(me.data.fast_left ?? 0) - Math.max(0, now - me.dataUpdatedAt) / 1000));
   if (!pots.length && !fast) return null;
   return (
     <ul className={s.fx} aria-label={t('ui.fx_total', { m: dec(Number(me.data.luck ?? 1), lang) })}>
