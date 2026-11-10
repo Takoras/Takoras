@@ -1,183 +1,302 @@
+/* ======================================================================
+   Boutique : une vitrine vivante, même DA que l'inventaire et l'accueil.
+   Tout ce qui est une case penche (--tilt), flotte doucement (animation en « transform »), se balance au survol
+   (--swing, useSwingAll) et glisse un tout petit peu avec la souris (--mpx / --mpy, posé sur les conteneurs).
+   ====================================================================== */
 .page {
   display: grid;
   gap: var(--s-8);
-  align-content: start;
-}
-.head {
-  display: flex;
-  align-items: flex-end;
-  justify-content: space-between;
-  gap: var(--s-4);
-  flex-wrap: wrap;
-}
-.head h1 {
-  font-size: var(--fs-2xl);
-}
-.timer {
-  font-variant-numeric: tabular-nums;
-  color: var(--text);
-}
-.cats {
-  display: flex;
-  flex-wrap: wrap;
-  gap: var(--s-2);
-}
-.cats button {
-  border: 1px solid rgb(255 255 255 / 9%);
-  border-radius: 8px;
-  background: var(--surface);
-  min-height: 36px;
-  padding: 0 var(--s-4);
-  color: var(--text-2);
-  font-weight: 600;
-  font-size: var(--fs-sm);
-}
-.cats button[aria-pressed='true'] {
-  color: var(--text);
-  border-color: #8eaaff;
-}
-.h2 {
-  font-size: var(--fs-lg);
-  margin-bottom: var(--s-3);
-}
-.h2 small {
-  font-size: var(--fs-xs);
-  font-weight: 500;
-}
-.grid {
-  list-style: none;
-  display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(min(100%, 320px), 1fr));
-  gap: var(--s-3);
-}
-@media (min-width: 1000px) {
-  .grid {
-    grid-template-columns: repeat(3, minmax(0, 1fr));
-    gap: 24px;
-  }
+  max-width: 1180px;
+  margin-inline: auto;
 }
 
-/* Carte large (~2,2 : 1) : visuel à gauche, nom en haut à droite, stock + prix + Acheter en bas */
-.card {
-  position: relative;
-  display: grid;
-  grid-template-columns: 140px minmax(0, 1fr);
+/* profondeur à la souris : chaque bloc à sa profondeur (les cases flottent à l'intérieur) */
+.head,
+.top,
+.grid,
+.ticket {
+  translate: calc(var(--mpx, 0) * -8px * var(--dp, 1)) calc(var(--mpy, 0) * -6px * var(--dp, 1));
+}
+
+/* ---------- en-tête ---------- */
+.head {
+  --dp: 0.5;
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
   gap: var(--s-4);
-  aspect-ratio: 2 / 1;
-  min-height: 190px;
-  padding: var(--s-4);
-  transition:
-    transform var(--t-fast),
-    filter var(--t-fast);
-  border: 1px solid rgb(255 255 255 / 12%);
-  border-radius: 8px;
-  background: var(--surface-2);
 }
-.card.epic {
-  border-color: rgba(var(--g), 0.55);
+.head h1 {
+  margin: 0;
+  font-family: var(--font-display);
+  font-size: clamp(32px, 3.4vw, 46px);
+  line-height: 1;
 }
-.card.out {
-  border-style: dashed;
-}
-.card.out .icon {
-  opacity: 0.45;
-  filter: grayscale(0.7);
-}
-.card:hover {
-  transform: translateY(-3px);
-  filter: brightness(1.08);
-}
-.card h3 {
-  font-size: var(--fs-lg);
-}
-.card p {
+.restock {
+  padding: 6px 12px;
+  border-radius: var(--r-pill);
+  background: rgb(255 255 255 / 5%);
+  color: var(--muted);
   font-size: var(--fs-sm);
 }
-.icon {
-  display: grid;
-  place-items: center;
-  border-radius: var(--r-md);
-  background: rgba(var(--g), 0.08);
+.restock b {
+  color: var(--gold);
+  font-variant-numeric: tabular-nums;
 }
-.icon img {
-  width: 96px;
-  height: 96px;
-  object-fit: contain;
-  --df: drop-shadow(0 0 12px rgba(var(--g), calc(0.45 * var(--ga, 0))));
-}
-.icon img.banner {
-  width: 100%;
-  height: 72px;
-  object-fit: cover;
-  border-radius: var(--r-sm);
-}
-.body {
-  display: flex;
-  flex-direction: column;
-  justify-content: space-between;
-  gap: var(--s-2);
-  min-width: 0;
-}
-.foot {
-  display: flex;
-  flex-wrap: wrap; /* prix long : le bouton passe dessous au lieu de déborder de la carte */
-  align-items: center;
-  justify-content: space-between;
-  gap: var(--s-2);
-}
-.foot > :last-child {
+.head > :last-child {
   margin-left: auto;
 }
-.meta {
+
+/* ---------- vedette + rayons ---------- */
+.top {
+  --dp: 1;
   display: grid;
-  gap: 2px;
+  grid-template-columns: minmax(0, 1.7fr) minmax(0, 1fr);
+  gap: var(--s-6);
+  align-items: stretch;
+}
+
+.hero {
+  position: relative;
+  isolation: isolate;
+  overflow: hidden;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1.1fr);
+  align-items: center;
+  gap: var(--s-4);
+  min-height: 300px;
+  padding: var(--s-6) var(--s-8);
+  border-radius: 16px;
+  background: rgb(255 255 255 / 3%);
+  rotate: calc(-0.8deg + var(--swing, 0deg));
+  transform-origin: 50% 0;
+  animation: float 7s ease-in-out infinite;
+}
+.heroBg {
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  width: 100%;
+  height: 100%;
+  opacity: 0.7;
+  pointer-events: none;
+}
+.heroArt {
+  display: grid;
+  place-items: center;
+  /* l'objet flotte (sur son cadre : l'image garde son effet doodle) */
+  animation: bob 3.6s ease-in-out infinite;
+}
+.heroArt img {
+  width: clamp(150px, 15vw, 210px);
+  height: clamp(150px, 15vw, 210px);
+  object-fit: contain;
+}
+.heroArt img.wide {
+  width: 100%;
+  height: auto;
+}
+.heroInfo {
+  display: grid;
+  justify-items: start;
+  gap: var(--s-2);
+}
+.heroInfo h2 {
+  margin: 0;
+  font-family: var(--font-display);
+  font-size: clamp(28px, 2.8vw, 40px);
+  line-height: 1.05;
+}
+.heroInfo p {
+  margin: 0;
+  color: var(--text-2);
+}
+.feat {
+  padding: 3px 10px;
+  border-radius: var(--r-pill);
+  background: rgb(242 194 48 / 16%);
+  color: var(--gold-hi);
+  font-size: var(--fs-xs);
+  font-weight: 800;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+.stock {
+  color: var(--muted);
+  font-size: var(--fs-sm);
+}
+.hero .buy {
+  margin-top: var(--s-3);
+  gap: var(--s-4);
+  justify-content: flex-start;
+}
+/* dans une case : le prix, puis le bouton sur toute la largeur */
+.box .buy {
+  flex-direction: column;
+  align-items: stretch;
+}
+.box .buy .price {
+  justify-content: center;
+}
+.hero .price {
+  font-size: var(--fs-xl);
+}
+
+/* rayons : comme les séries de l'inventaire, des étiquettes penchées qui flottent */
+.shelves {
+  display: grid;
+  align-content: center;
+  gap: var(--s-3);
+}
+.shelf {
+  --tilt: -1.6deg;
+  display: flex;
+  align-items: center;
+  gap: var(--s-3);
+  padding: var(--s-3) var(--s-4);
+  border-radius: 10px;
+  background: var(--surface);
+  color: var(--text);
+  text-align: left;
+  rotate: calc(var(--tilt) + var(--swing, 0deg));
+  transform-origin: 50% 0;
+  animation: float 6s ease-in-out infinite;
+  transition: background-color var(--t-fast);
+}
+.shelf:nth-child(2n) {
+  --tilt: 1.3deg;
+  animation-duration: 7s;
+  animation-delay: -2.5s;
+}
+.shelf:nth-child(3n) {
+  --tilt: -0.7deg;
+  animation-delay: -4s;
+}
+.shelf img {
+  width: 40px;
+  height: 40px;
+  object-fit: contain;
+}
+.shelf span {
+  display: grid;
+}
+.shelf small {
+  color: var(--muted);
+}
+.shelf:hover {
+  background: var(--surface-2);
+}
+.shelf[aria-pressed='true'] {
+  background: rgb(61 107 255 / 22%);
+}
+
+/* ---------- vitrine ---------- */
+.grid {
+  --dp: 1.6;
+  list-style: none;
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(210px, 1fr));
+  gap: var(--s-6) var(--s-5);
+  margin: 0;
+  padding: 0;
+}
+.card {
+  animation: float var(--fl, 6s) ease-in-out var(--dl, 0s) infinite;
+}
+.box {
+  position: relative;
+  display: grid;
+  justify-items: center;
+  align-content: start;
+  gap: 6px;
+  height: 100%;
+  padding: var(--s-6) var(--s-4) var(--s-4);
+  border-radius: 14px;
+  background: linear-gradient(165deg, rgba(var(--g), 0.12), transparent 60%), rgb(255 255 255 / 3.5%);
+  text-align: center;
+  rotate: calc(var(--tilt, 0deg) + var(--swing, 0deg));
+  transform-origin: 50% 0;
+  transition: background-color var(--t-fast);
+}
+.card:hover .box {
+  background-color: rgb(255 255 255 / 3%);
+}
+.art {
+  display: grid;
+  place-items: center;
+  height: 104px;
+}
+.art img {
+  width: 92px;
+  height: 92px;
+  object-fit: contain;
+}
+.art img.wide {
+  width: 100%;
+  max-width: 180px;
+  height: auto;
+}
+/* au survol, l'objet fait un petit saut */
+.card:hover .art {
+  animation: hop 0.55s cubic-bezier(0.3, 0.7, 0.4, 1);
+}
+.box h3 {
+  margin: 0;
+  font-size: var(--fs-md);
+  line-height: 1.2;
+}
+.box p {
+  margin: 0;
+  font-size: var(--fs-xs);
+}
+.badge {
+  position: absolute;
+  top: 10px;
+  right: 10px;
+  padding: 1px 8px;
+  border-radius: var(--r-pill);
+  background: rgb(255 255 255 / 8%);
+  font-size: var(--fs-xs);
+  font-weight: 700;
+}
+.badge.ok {
+  background: rgb(74 222 128 / 16%);
+  color: #bbf7d0;
+}
+.badge.none {
+  background: rgb(244 63 94 / 16%);
+  color: #fecdd3;
+}
+.out .art img {
+  --df: grayscale(1) brightness(0.6);
+}
+.out h3,
+.out p {
+  opacity: 0.55;
+}
+
+.buy {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: var(--s-2);
+  width: 100%;
+  margin-top: auto;
+  padding-top: var(--s-3);
 }
 .price {
   display: inline-flex;
   align-items: center;
   gap: 4px;
-  font-variant-numeric: tabular-nums;
+  font-family: var(--font-display);
+  font-size: var(--fs-md);
 }
 .price s {
-  color: var(--text-2);
-  font-weight: 400;
-}
-/* Packs en euros (achats intégrés) : ta boîte pêche à rayures, texte foncé */
-.card.pack {
-  /* 10 % plus sombre : les objets ressortent mieux */
-  border-color: #ffe07a;
-  border-image-slice: 12 fill;
-  border-image-width: 24px;
-  background-color: #e6caa2;
-  color: #4a2306;
-}
-.pack h3,
-.pack .price {
-  color: #4a2306;
-}
-.pack :global(.muted) {
-  color: #8a4b16;
-}
-.pack .icon {
-  background: rgb(255 255 255 / 45%);
-}
-
-/* micro-achats : petite rangée sous la catégorie, même fond que les packs en euros */
-.microGrid {
-  margin-top: 10px;
-}
-
-/* stock (petit texte) et variation de prix (pastille) : dans le bas de la carte */
-.stock {
-  font-size: var(--fs-xs);
-  font-weight: 600;
-  color: var(--text-2);
-}
-.stock.ok {
-  color: var(--ok);
+  color: var(--muted);
+  font-size: 0.8em;
 }
 .deal {
-  margin-left: 4px;
   padding: 0 6px;
   border-radius: var(--r-pill);
   font-size: var(--fs-xs);
@@ -189,73 +308,110 @@
   color: #fecdd3;
 }
 
-.redeem {
+/* ---------- code promo : un ticket penché ---------- */
+.ticket {
+  --dp: 0.8;
   display: grid;
-  gap: var(--s-3);
-  padding: var(--s-5);
-  border: 1px solid rgb(255 255 255 / 12%);
-  border-radius: 8px;
-  background: var(--surface-2);
+  grid-template-columns: auto minmax(0, 1fr);
+  align-items: center;
+  gap: var(--s-6);
+  max-width: 720px;
+  padding: var(--s-5) var(--s-6);
+  border-radius: 14px;
+  background: rgb(242 194 48 / 8%);
+  rotate: -1deg;
+}
+.h2 {
+  margin: 0;
+  font-size: var(--fs-lg);
 }
 .form {
   display: flex;
   gap: var(--s-2);
   flex-wrap: wrap;
 }
-
 .form input {
-  border: 1px solid rgb(255 255 255 / 7%);
-  border-radius: 8px;
-  background: var(--surface);
   flex: 1;
   min-width: 180px;
   min-height: 44px;
   padding: 0 var(--s-3);
+  border: 0;
+  border-radius: 8px;
+  background: var(--surface);
   font-family: var(--font-display);
   letter-spacing: 0.08em;
   text-transform: uppercase;
 }
 
-/* Téléphone : une carte par ligne, compacte (le format large tient sur 375 px) */
-@media (max-width: 559px) {
-  .grid {
-    grid-template-columns: 1fr;
-    gap: var(--s-2);
+@keyframes float {
+  0%,
+  100% {
+    transform: translateY(0);
   }
-  .card {
-    grid-template-columns: 92px minmax(0, 1fr);
-    aspect-ratio: auto;
-    min-height: 0;
-    padding: var(--s-3);
+  50% {
+    transform: translateY(-6px);
   }
-  .card p {
-    font-size: var(--fs-xs);
+}
+@keyframes bob {
+  0%,
+  100% {
+    transform: translateY(0) rotate(-2deg);
   }
-  .icon img {
-    width: 68px;
-    height: 68px;
+  50% {
+    transform: translateY(-12px) rotate(2deg);
   }
-  /* prix au-dessus, bouton en dessous sur toute la largeur : plus rien ne se chevauche */
-  .foot {
-    flex-wrap: wrap;
+}
+@keyframes hop {
+  0% {
+    transform: none;
   }
-  .foot > :last-child {
-    flex: 1 1 100%;
+  40% {
+    transform: translateY(-14px) scale(1.06, 0.96);
+  }
+  70% {
+    transform: translateY(0) scale(0.96, 1.04);
+  }
+  100% {
+    transform: none;
   }
 }
 
-.headBtns {
-  display: flex;
-  gap: var(--s-2);
-  align-items: center;
-  flex-wrap: wrap;
+:global(html.reduce-fx) .hero,
+:global(html.reduce-fx) .shelf,
+:global(html.reduce-fx) .card,
+:global(html.reduce-fx) .heroArt {
+  animation: none;
 }
-.passBtn {
-  padding: 6px var(--s-3);
-  border-radius: var(--r-pill);
-  border: 1px solid rgb(251 191 36 / 45%);
-  color: inherit;
-  text-decoration: none;
-  font-size: var(--fs-sm);
-  font-weight: 600;
+
+@media (max-width: 760px) {
+  .top {
+    grid-template-columns: 1fr;
+  }
+  .hero {
+    grid-template-columns: 1fr;
+    justify-items: center;
+    text-align: center;
+    padding: var(--s-6) var(--s-4);
+  }
+  .heroInfo {
+    justify-items: center;
+  }
+  .shelves {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+  .grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+  .ticket {
+    grid-template-columns: 1fr;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .hero,
+  .shelf,
+  .card,
+  .heroArt,
+  .card:hover .art {
+    animation: none;
+  }
 }

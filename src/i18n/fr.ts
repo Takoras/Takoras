@@ -1,6 +1,7 @@
 // Généré par scripts/port/i18n.mjs depuis l'ancien site, puis maintenu à la main.
 export const fr = {
   ui: {
+    shop_feat: 'À la une',
     nav_home: 'Accueil',
     nav_board: 'Classement',
     pulls: 'Tirages',

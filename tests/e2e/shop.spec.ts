@@ -5,7 +5,7 @@ test('boutique : catégories, stock, achat, prix modifié, code promo', async ({
   await fakeSupabase(page, { coins: 5000 });
   await page.goto('/shop');
   await expect(page.getByRole('heading', { level: 1 })).toBeVisible();
-  await expect(page.getByText('+20%')).toBeVisible(); // potion ×10 plus chère que d'habitude
+  await expect(page.getByText('+20%').first()).toBeVisible(); // potion ×10 plus chère que d'habitude
   await expect(page.getByText('Épuisé').first()).toBeVisible(); // sablier : 2/2 achetés
   // achat d'une potion ×1,3
   await page.getByRole('button', { name: /Acheter · .* · 300$/ }).click();
