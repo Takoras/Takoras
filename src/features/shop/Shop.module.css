@@ -442,18 +442,13 @@
   color: var(--text);
   font: inherit;
   cursor: pointer;
-  /* damier de pixels bleu Takoras (de loin : une surface mate un peu vivante) */
-  background:
-    repeating-conic-gradient(rgb(61 107 255 / 26%) 0 25%, rgb(61 107 255 / 17%) 0 50%) 0 0 / 12px 12px,
-    var(--surface);
+  background: var(--surface); /* sombre et uni, comme les cases */
   rotate: var(--swing, 0deg);
   transform-origin: 50% 0;
   transition: background-color var(--t-fast);
 }
 .cover:hover:not(:disabled) {
-  background:
-    repeating-conic-gradient(rgb(61 107 255 / 34%) 0 25%, rgb(61 107 255 / 24%) 0 50%) 0 0 / 12px 12px,
-    var(--surface-2);
+  background: var(--surface-2);
 }
 .cover:disabled {
   cursor: default;
@@ -487,6 +482,8 @@
   border-radius: 18px;
   background: #fff;
   pointer-events: none;
+  /* une petite lueur blanche au moment où ça « explose » (filtre : les ombres sont coupées sur le site) */
+  filter: drop-shadow(0 0 14px rgb(255 255 255 / 70%));
 }
 .gainTag {
   display: inline-flex;

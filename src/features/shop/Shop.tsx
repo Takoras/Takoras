@@ -195,15 +195,15 @@ export default function Shop() {
           ? Promise.resolve()
           : cover.animate(
               [
-                { transform: 'scale(1)', filter: 'brightness(1)' },
+                { transform: 'scale(1)', filter: 'brightness(1) saturate(1) drop-shadow(0 0 0 rgb(255 255 255 / 0%))' },
                 { transform: 'scale(1.03)', filter: 'brightness(1.3)', offset: 0.2 },
                 { transform: 'scale(0.99)', offset: 0.32 },
                 { transform: 'scale(1.05)', filter: 'brightness(1.9)', offset: 0.5 },
                 { transform: 'scale(0.98)', offset: 0.6 },
                 { transform: 'scale(1.07)', filter: 'brightness(2.8)', offset: 0.74 },
                 { transform: 'scale(1.01)', offset: 0.82 },
-                { transform: 'scale(1.1)', filter: 'brightness(4) saturate(0)', offset: 0.92 },
-                { transform: 'scale(1.13)', filter: 'brightness(6) saturate(0)' },
+                { transform: 'scale(1.1)', filter: 'brightness(4) saturate(0) drop-shadow(0 0 6px rgb(255 255 255 / 40%))', offset: 0.92 },
+                { transform: 'scale(1.13)', filter: 'brightness(6) saturate(0) drop-shadow(0 0 16px rgb(255 255 255 / 75%))' },
               ],
               { duration: 1200, easing: 'cubic-bezier(.45,0,.55,1)', fill: 'forwards' },
             ).finished;
