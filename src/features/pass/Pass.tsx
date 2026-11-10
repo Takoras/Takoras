@@ -299,9 +299,13 @@ export default function Pass() {
         cam.to = Math.min(max, Math.max(0, col.offsetLeft - box.clientWidth / 2 + col.offsetWidth / 2));
       };
       aim(todo[0] ? tileOf(todo[0][0], todo[0][1]) : null);
-      await wait(450);
-      let gap = 320;
+      await wait(400);
+      // de plus lent à plus vite, et tout le passe tient en ~10 s maximum (attentes du début et de la fin comprises)
+      const w = todo.map((_, i) => Math.max(0.25, 0.88 ** i));
+      const k = Math.min(320, 8500 / Math.max(1, w.reduce((a, b) => a + b, 0)));
+      let i = 0;
       for (const [tr, p, rw] of todo) {
+        const gap = (w[i++] ?? 0.25) * k;
         aim(tileOf(tr, p));
         qc.setQueryData(['pass', user.id], (o: PassState | undefined) =>
           o ? (p ? { ...o, pclaimed: [...o.pclaimed, tr] } : { ...o, claimed: [...o.claimed, tr] }) : o,
@@ -310,7 +314,6 @@ export default function Pass() {
         burst(tileOf(tr, p), rw, p, true);
         sfx.click();
         await wait(gap);
-        gap = Math.max(110, gap * 0.88);
       }
       await wait(300);
       cam.on = false;
