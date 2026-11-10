@@ -215,6 +215,7 @@ export type Database = {
       delete_my_account: { Args: never; Returns: undefined };
       export_my_data: { Args: never; Returns: Json };
       buy_item: { Args: { p_item: string }; Returns: Json };
+      reveal_slot: { Args: { p_slot: number }; Returns: Json };
       change_pseudo: { Args: { p: string }; Returns: undefined };
       claim_daily: { Args: never; Returns: Json };
       claim_quest: { Args: { p_id: string }; Returns: Json };

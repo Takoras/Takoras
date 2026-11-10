@@ -3,6 +3,10 @@ import type { Dict } from './types';
 
 export const en: Dict = {
   ui: {
+    shop_rev: '{n}/{m} revealed',
+    shop_myst: 'Mystery',
+    shop_reveal: 'Tap to reveal',
+    shop_reveal_a: 'Reveal this slot (+{n} coins)',
     shop_feat: 'Featured',
     nav_home: 'Home',
     nav_board: 'Leaderboard',

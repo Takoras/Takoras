@@ -1,0 +1,6 @@
+-- Boutique mystère, renouvelée chaque jour à minuit (heure de Paris). Appliquée en prod le 10 nov. 2026,
+-- puis corrigée par 20261110171000_boutique_mystere_gain.sql (la révélation rapporte 100 pièces, la vedette est aussi cachée).
+-- Le SQL exact appliqué est dans l'historique des migrations Supabase (boutique_mystere_quotidienne).
+-- Résumé : _period() = jour de Paris ; _shop_reset_in() ; stocks plus gros sur les potions courantes ;
+-- table shop_reveals (RLS, accès par fonctions) ; _shop_slots(uid, per) ; _revealed ; shop_today() avec cases cachées ;
+-- reveal_slot(p_slot) ; buy_item exige un objet révélé ; admin_shop_reroll efface aussi les révélations du jour.

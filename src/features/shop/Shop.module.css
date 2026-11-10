@@ -170,7 +170,7 @@
   gap: var(--s-3);
 }
 .shelf {
-  --tilt: -1.6deg;
+  --tilt: -0.4deg;
   display: flex;
   align-items: center;
   gap: var(--s-3);
@@ -185,12 +185,12 @@
   transition: background-color var(--t-fast);
 }
 .shelf:nth-child(2n) {
-  --tilt: 1.3deg;
+  --tilt: 0.35deg;
   animation-duration: 7s;
   animation-delay: -2.5s;
 }
 .shelf:nth-child(3n) {
-  --tilt: -0.7deg;
+  --tilt: -0.2deg;
   animation-delay: -4s;
 }
 .shelf img {
@@ -415,6 +415,86 @@
 @media (prefers-reduced-motion: reduce) {
   .shelf,
   .heroArt {
+    animation: none;
+  }
+}
+
+/* ---------- cases mystère ---------- */
+.myst .box {
+  width: 100%;
+  border: 0;
+  color: var(--text);
+  font: inherit;
+  cursor: pointer;
+  background: rgb(142 170 255 / 6%);
+}
+.myst .box:hover:not(:disabled) {
+  background: rgb(142 170 255 / 12%);
+}
+.myst .box:disabled {
+  cursor: default;
+}
+/* le « ? » respire doucement : il y a quelque chose dedans */
+.myst .art {
+  animation: breathe 2.4s ease-in-out infinite;
+}
+.myst:hover .art {
+  animation-duration: 0.9s;
+}
+.gainTag {
+  display: inline-flex;
+  align-items: center;
+  gap: 3px;
+  background: rgb(242 194 48 / 18%);
+  color: var(--gold-hi);
+}
+.gainBig {
+  position: static;
+  margin-top: var(--s-2);
+  padding: 4px 12px;
+  font-size: var(--fs-md);
+}
+.heroMyst {
+  width: 100%;
+  border: 0;
+  color: var(--text);
+  font: inherit;
+  text-align: left;
+  cursor: pointer;
+}
+.heroMyst:disabled {
+  cursor: default;
+}
+.heroMyst .heroArt img {
+  animation: breathe 2.4s ease-in-out infinite;
+}
+/* « +100 » qui s'envole au-dessus d'une case révélée */
+.gain {
+  position: fixed;
+  z-index: 200;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 6px 14px;
+  border-radius: var(--r-pill);
+  background: rgb(20 20 26 / 85%);
+  color: var(--gold-hi);
+  font-family: var(--font-display);
+  font-size: var(--fs-lg);
+  pointer-events: none;
+}
+@keyframes breathe {
+  0%,
+  100% {
+    scale: 1;
+  }
+  50% {
+    scale: 1.06;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .myst .art,
+  .heroMyst .heroArt img {
     animation: none;
   }
 }

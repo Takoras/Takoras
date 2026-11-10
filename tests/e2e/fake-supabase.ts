@@ -46,6 +46,7 @@ export async function fakeSupabase(
     pick?: () => string;
   } = {},
 ) {
+  let revealed = false; // boutique mystère : la case de la vedette
   const st: FakeState = {
     coins: 5000,
     stock: 12,
@@ -301,9 +302,13 @@ export async function fakeSupabase(
           { id: 'q3', stat: 'rares', target: 1, value: 1, claimed: true, coins: 500, item: null, qty: 0 },
         ],
       });
-    if (rpc === 'shop_today')
-      return json({
+    // boutique mystère : 4 objets déjà révélés + une case mystère (la vedette, -40 %) qui cache une potion ×2
+    const shopNow = () => ({
         reset_in: 7200,
+        reveal_gain: 100,
+        featured_slot: 5,
+        featured: revealed ? 'potion2' : null,
+        off: 40,
         items: [
           {
             id: 'potion1',
@@ -336,8 +341,18 @@ export async function fakeSupabase(
             owned: false,
           },
           { id: 'b_plaine', kind: 'banner', data: {}, price: 5000, base_price: 5000, stock: 1, bought: 0, owned: true },
+          revealed
+            ? { slot: 5, id: 'potion2', kind: 'potion', data: { mult: 2, rolls: 6 }, price: 180, base_price: 300, stock: 9, bought: 0, owned: false }
+            : { slot: 5, hidden: true, group: 'potion' },
         ],
       });
+    if (rpc === 'shop_today') return json(shopNow());
+    if (rpc === 'reveal_slot') {
+      const gain = revealed ? 0 : 100;
+      revealed = true;
+      st.coins += gain;
+      return json({ gain, item: 'potion2', state: { ...st }, shop: shopNow() });
+    }
     if (rpc === 'buy_item') {
       st.coins -= 300;
       return json({ ...st });

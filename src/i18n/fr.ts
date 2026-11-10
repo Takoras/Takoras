@@ -1,6 +1,10 @@
 // Généré par scripts/port/i18n.mjs depuis l'ancien site, puis maintenu à la main.
 export const fr = {
   ui: {
+    shop_rev: '{n}/{m} révélés',
+    shop_myst: 'Mystère',
+    shop_reveal: 'Touche pour révéler',
+    shop_reveal_a: 'Révéler la case (+{n} pièces)',
     shop_feat: 'À la une',
     nav_home: 'Accueil',
     nav_board: 'Classement',

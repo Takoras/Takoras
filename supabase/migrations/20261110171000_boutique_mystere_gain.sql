@@ -1,0 +1,4 @@
+-- Correction (appliquée en prod le 10 nov. 2026) : révéler une case DONNE 100 pièces (une fois par jour et par objet)
+-- et tout est mystère, y compris l'objet à la une (sa réduction se voit, pas ce que c'est).
+-- Fonctions remplacées : _revealed, shop_today (featured_slot, featured seulement si révélée, reveal_gain), reveal_slot.
+-- Le SQL exact est dans l'historique des migrations Supabase (boutique_mystere_gain).

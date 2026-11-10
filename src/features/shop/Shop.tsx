@@ -20,15 +20,37 @@ import { openInfo } from '../info/store';
 import s from './Shop.module.css';
 
 type Item = ShopItem & { price: number; base_price: number | null; stock: number; bought: number; owned: boolean };
-type ShopData = { items: Item[]; reset_in: number; featured?: string | null; off?: number | null };
+// une case mystère (pas encore révélée) : le serveur ne dit que son rayon
+type Hidden = { slot: number; hidden: true; group: string };
+type Slot = (Item & { slot?: number; hidden?: false }) | Hidden;
+type ShopData = {
+  items: Slot[];
+  reset_in: number;
+  featured?: string | null;
+  featured_slot?: number | null;
+  off?: number | null;
+  reveal_gain?: number;
+};
+const isHidden = (x: Slot): x is Hidden => !!(x as Hidden).hidden;
+const slotOf = (x: Slot, i: number) => x.slot ?? i + 1;
 // rayons de la boutique (l'icône est un objet du rayon)
 const CATS: { k: string; label: Key; icon: string }[] = [
   { k: 'potion', label: 'ui.cat_potions', icon: '/img/potions/chance-10.png' },
   { k: 'util', label: 'ui.cat_pulls', icon: '/img/objets/sablier.png' },
   { k: 'banner', label: 'ui.cat_cosm', icon: '/img/pp/bleu.png' },
 ];
-const catOf = (it: Item) =>
-  it.kind === 'potion' ? 'potion' : it.kind === 'banner' || it.kind === 'avatar' ? 'banner' : 'util';
+const catOf = (it: Slot) =>
+  isHidden(it)
+    ? it.group
+    : it.kind === 'potion'
+      ? 'potion'
+      : it.kind === 'banner' || it.kind === 'avatar'
+        ? 'banner'
+        : 'util';
+// rareté d'un objet (en « 1 sur X », comme les jetons) : le fond de la vedette et le son de la révélation en dépendent
+const POTION_ODDS: Record<number, number> = { 1.3: 1, 2: 100, 5: 1000, 10: 10_000, 25: 50_000, 50: 100_000, 100: 500_000 };
+const oddsOf = (it: Item) =>
+  it.kind === 'potion' ? (POTION_ODDS[it.data.mult ?? 0] ?? ((it.data.mult ?? 0) >= 250 ? 1_000_000 : 1)) : 100;
 // Couleur de chaque objet (celle de la potion), pour son fond et sa lumière
 const POTION_GLOW: Record<number, string> = {
   1.3: '134, 239, 172',
@@ -46,14 +68,13 @@ const glowOf = (it: Item) =>
       ? '242, 194, 48'
       : '142, 170, 255';
 const hexOf = (rgb: string) => '#' + rgb.split(',').map((n) => (+n).toString(16).padStart(2, '0')).join('');
-const avail = (it: Item) => !it.owned && it.stock - it.bought > 0;
 const Coin = ({ size = 14 }: { size?: number }) => (
   <img className="px" src="/img/piece.png" alt="" width={size} height={size} />
 );
 
-// Boutique : une vitrine vivante. En haut, l'objet vedette (le plus précieux en stock) sur le fond pixel de la fiche
-// d'un jeton ; à côté, les rayons ; puis les objets dans des cases qui flottent, se balancent au survol et suivent la
-// souris. Stock commun renouvelé toutes les 5 h. Pas d'achat en argent réel pour l'instant.
+// Boutique mystère, renouvelée chaque jour à minuit : chaque objet en stock est caché dans une case. La révéler est
+// gratuit et rapporte 100 pièces (une fois par objet et par jour) ; ensuite on peut l'acheter. En haut, l'objet à la
+// une (sa réduction se voit, pas ce que c'est), sur le fond pixel des fiches de jetons. Pas d'argent réel.
 export default function Shop() {
   const t = useT();
   const lang = useSettings((x) => x.lang);
@@ -67,10 +88,16 @@ export default function Shop() {
     queryFn: async () => ({ ...((await publicApi.shopToday()) as unknown as ShopData), at: Date.now() }),
   });
   const pageRef = useRef<HTMLElement>(null);
+  const revealing = useRef(new Set<number>());
   const gridRef = useRef<HTMLUListElement>(null);
   const shelvesRef = useRef<HTMLDivElement>(null);
   useStaggerIn(pageRef, `.${s.head}, .${s.hero}, .${s.shelf}, .${s.card}, .${s.ticket}`, !!shop.data);
-  useSwingAll(gridRef, `.${s.box}`, 0.35, cat + (shop.data?.items.length ?? 0));
+  useSwingAll(
+    gridRef,
+    `.${s.box}`,
+    0.35,
+    cat + (shop.data?.items.map((x) => (isHidden(x) ? 'h' : 'r')).join('') ?? ''),
+  );
   // changer de rayon : les cases glissent à leur nouvelle place, les nouvelles arrivent (comme les séries de l'inventaire)
   const snap = useRef<Map<string, DOMRect> | null>(null);
   useLayoutEffect(() => {
@@ -114,18 +141,26 @@ export default function Shop() {
         t('ui.bought', { n: name }) +
           (it.kind === 'banner' ? '' : it.kind === 'avatar' ? ` → ${t('ui.edit_profile')}` : ` → ${t('ui.nav_inv')}`),
       );
-      // la case rebondit, l'objet part en pixels vers l'inventaire
-      if (!reducedFx())
-        card.animate([{ scale: '1' }, { scale: '1.06', offset: 0.35 }, { scale: '0.98', offset: 0.7 }, { scale: '1' }], {
-          duration: 420,
-          easing: 'cubic-bezier(.2,.8,.3,1)',
+      // achat : la case se tasse doucement, l'objet s'élève et s'efface, puis revient (posé, sans à-coup)
+      if (!reducedFx()) {
+        card.animate([{ scale: '1' }, { scale: '0.97', offset: 0.4 }, { scale: '1' }], {
+          duration: 700,
+          easing: 'cubic-bezier(.4,0,.2,1)',
         });
-      const ic = card.querySelector<HTMLImageElement>(`.${s.art} img`);
-      if (ic) moDissolve(ic, ic.getBoundingClientRect(), 0.4);
+        card.querySelector(`.${s.art} img, .${s.heroArt} img`)?.animate(
+          [
+            { opacity: 1, transform: 'none' },
+            { opacity: 0, transform: 'translateY(-26px) scale(.9)', offset: 0.5 },
+            { opacity: 0, transform: 'translateY(10px)', offset: 0.6 },
+            { opacity: 1, transform: 'none' },
+          ],
+          { duration: 1100, easing: 'cubic-bezier(.4,0,.2,1)' },
+        );
+      }
       qc.setQueryData(['shop'], {
         ...data,
         items: data.items.map((x) =>
-          x.id === it.id
+          !isHidden(x) && x.id === it.id
             ? { ...x, bought: x.bought + 1, owned: x.owned || x.kind === 'banner' || x.kind === 'avatar' }
             : x,
         ),
@@ -138,12 +173,39 @@ export default function Shop() {
     }
   };
 
+  // révéler une case mystère : elle se retourne, l'objet apparaît, +100 pièces
+  const reveal = async (slot: number, el: HTMLElement) => {
+    if (!data || !user) return;
+    if (revealing.current.has(slot)) return;
+    revealing.current.add(slot);
+    const flip = (a: string, b: string, ms: number, ease: string) =>
+      reducedFx() ? Promise.resolve() : el.animate([{ transform: a }, { transform: b }], { duration: ms, easing: ease }).finished;
+    try {
+      const out = flip('perspective(700px) rotateY(0)', 'perspective(700px) rotateY(90deg)', 220, 'cubic-bezier(.5,0,.9,.4)');
+      const r = (await shopApi.reveal(slot)) as { gain: number; state: object; shop: ShopData };
+      await out;
+      qc.setQueryData(['me', user.id], (old: object | undefined) => ({ ...old, ...r.state }));
+      qc.setQueryData(['shop'], { ...r.shop, at: Date.now() });
+      await new Promise((ok) => requestAnimationFrame(() => requestAnimationFrame(ok)));
+      const it = r.shop.items.find((x) => slotOf(x, 0) === slot);
+      sfx.reveal(it && !isHidden(it) ? oddsOf(it) : 1);
+      void flip('perspective(700px) rotateY(-90deg)', 'perspective(700px) rotateY(0)', 520, 'cubic-bezier(.2,.9,.3,1.15)');
+      if (r.gain) gainPop(el, r.gain);
+    } catch (e) {
+      sfx.deny();
+      el.getAnimations().forEach((a) => a.cancel());
+      toast(errorText(e, lang), true);
+    } finally {
+      revealing.current.delete(slot);
+    }
+  };
+
   const items = data?.items ?? [];
   const list = items.filter((it) => catOf(it) === cat);
-  // vedette : tirée par le serveur à chaque stock, avec sa réduction (sinon l'objet le plus précieux en stock)
-  const featured =
-    items.find((it) => it.id === data?.featured) ??
-    [...items].sort((a, b) => Number(avail(b)) - Number(avail(a)) || b.price - a.price)[0];
+  // la vedette : sa case (révélée ou non) et sa réduction, tirées par le serveur
+  const fSlot = data?.featured_slot ?? null;
+  const fIdx = fSlot == null ? -1 : items.findIndex((x, i) => slotOf(x, i) === fSlot);
+  const featured = fIdx >= 0 ? items[fIdx] : undefined;
   return (
     <section ref={pageRef} className={s.page} aria-busy={!data}>
       <header className={s.head}>
@@ -159,8 +221,12 @@ export default function Shop() {
       {data ? (
         <>
           <div className={s.top}>
-            {featured ? (
-              <Hero it={featured} off={featured.id === data.featured ? (data.off ?? 0) : 0} coins={coins} logged={!!user} left={left} onBuy={buy} />
+            {featured && fSlot != null ? (
+              isHidden(featured) ? (
+                <MysteryHero off={data.off ?? 0} gain={data.reveal_gain ?? 100} logged={!!user} onReveal={(el) => void reveal(fSlot, el)} />
+              ) : (
+                <Hero it={featured} off={data.off ?? 0} coins={coins} logged={!!user} left={left} onBuy={buy} />
+              )
             ) : null}
             <div ref={shelvesRef} className={s.shelves} role="group" aria-label={t('ui.shop_title')}>
               {CATS.map((c) => {
@@ -177,7 +243,9 @@ export default function Shop() {
                     <img className="px" src={c.icon} alt="" />
                     <span>
                       <b>{t(c.label)}</b>
-                      <small>{t('ui.in_stock', { n: inCat.filter(avail).length, m: inCat.length })}</small>
+                      <small>
+                        {t('ui.shop_rev', { n: inCat.filter((x) => !isHidden(x)).length, m: inCat.length })}
+                      </small>
                     </span>
                   </button>
                 );
@@ -185,11 +253,16 @@ export default function Shop() {
             </div>
           </div>
           <ul ref={gridRef} className={s.grid}>
-            {list.map((it) => (
-              <Card key={it.id} it={it} coins={coins} logged={!!user} left={left} onBuy={buy} />
-            ))}
+            {list.map((it) => {
+              const slot = slotOf(it, items.indexOf(it));
+              return isHidden(it) ? (
+                <Mystery key={slot} slot={slot} gain={data.reveal_gain ?? 100} logged={!!user} onReveal={(el) => void reveal(slot, el)} />
+              ) : (
+                <Card key={slot} slot={slot} it={it} coins={coins} logged={!!user} left={left} onBuy={buy} />
+              );
+            })}
           </ul>
-          {user ? <Redeem items={items} /> : <p className="muted">{t('ui.acc_need')}</p>}
+          {user ? <Redeem items={items.filter((x): x is Item => !isHidden(x))} /> : <p className="muted">{t('ui.acc_need')}</p>}
         </>
       ) : null}
     </section>
@@ -260,7 +333,8 @@ function Hero(p: CardProps & { off: number }) {
   const glow = glowOf(it);
   return (
     <div ref={ref} className={s.hero} style={{ '--g': glow } as CSSProperties}>
-      <PixelBg className={s.heroBg} odds={it.kind === 'potion' ? 2500 * Math.max(1, it.data.mult ?? 1) : 2500} glow={hexOf(glow)} center={art} still={reducedFx()} />
+      {/* fond selon la rareté de l'objet (comme les jetons), à sa couleur */}
+      <PixelBg className={s.heroBg} odds={oddsOf(it)} glow={hexOf(glow)} center={art} still={reducedFx()} />
       <div ref={art} className={s.heroArt}>
         <img
           className={`px ${img.wide ? s.wide : ''}`}
@@ -286,10 +360,10 @@ function Hero(p: CardProps & { off: number }) {
 }
 
 // Une case de la vitrine : droite et posée comme les jetons de l'inventaire ; elle se balance au survol
-function Card(p: CardProps) {
+function Card(p: CardProps & { slot: number }) {
   const t = useT();
   const lang = useSettings((x) => x.lang);
-  const { it } = p;
+  const { it, slot } = p;
   const ref = useRef<HTMLLIElement>(null);
   const [name, desc] = itemText(it, lang),
     img = itemImg(it);
@@ -299,7 +373,7 @@ function Card(p: CardProps) {
     <li
       ref={ref}
       className={`${s.card} ${out ? s.out : ''}`}
-      data-key={it.id}
+      data-key={slot}
       style={{ '--g': glowOf(it) } as CSSProperties}
     >
       <div className={s.box}>
@@ -320,6 +394,87 @@ function Card(p: CardProps) {
         <Buy {...p} card={() => ref.current} />
       </div>
     </li>
+  );
+}
+
+// « +100 » qui monte au-dessus de la case révélée, puis s'efface
+function gainPop(el: HTMLElement, n: number) {
+  const r = el.getBoundingClientRect();
+  const d = document.createElement('div');
+  d.className = s.gain ?? '';
+  d.innerHTML = `+${n} <img class="px" src="/img/piece.png" alt="" width="18" height="18">`;
+  d.style.left = `${r.left + r.width / 2}px`;
+  d.style.top = `${r.top + r.height * 0.3}px`;
+  document.body.appendChild(d);
+  d.animate(
+    [
+      { opacity: 0, transform: 'translate(-50%, 10px) scale(.9)' },
+      { opacity: 1, transform: 'translate(-50%, -14px) scale(1)', offset: 0.25 },
+      { opacity: 1, transform: 'translate(-50%, -34px)', offset: 0.7 },
+      { opacity: 0, transform: 'translate(-50%, -50px)' },
+    ],
+    { duration: 1400, easing: 'cubic-bezier(.2,.8,.3,1)' },
+  ).finished.then(() => d.remove(), () => d.remove());
+}
+
+// Case mystère : on ne sait pas ce qu'il y a dedans ; la toucher la révèle (+100 pièces)
+function Mystery({ slot, gain, logged, onReveal }: { slot: number; gain: number; logged: boolean; onReveal: (el: HTMLElement) => void }) {
+  const t = useT();
+  const ref = useRef<HTMLLIElement>(null);
+  return (
+    <li ref={ref} className={`${s.card} ${s.myst}`} data-key={slot}>
+      <button
+        type="button"
+        className={s.box}
+        disabled={!logged}
+        aria-label={t('ui.shop_reveal_a', { n: gain })}
+        onClick={() => ref.current && onReveal(ref.current)}
+      >
+        <span className={`${s.badge} ${s.gainTag}`}>
+          +{gain} <Coin size={12} />
+        </span>
+        <div className={s.art}>
+          <img className="px" src="/img/jetons/mystere.png" alt="" />
+        </div>
+        <h3>{t('ui.shop_myst')}</h3>
+        <p className="muted">{t('ui.shop_reveal')}</p>
+      </button>
+    </li>
+  );
+}
+
+// La vedette tant qu'elle n'est pas révélée : on voit sa réduction, pas ce que c'est
+function MysteryHero({ off, gain, logged, onReveal }: { off: number; gain: number; logged: boolean; onReveal: (el: HTMLElement) => void }) {
+  const t = useT();
+  const ref = useRef<HTMLButtonElement>(null);
+  const art = useRef<HTMLDivElement>(null);
+  useSwing(ref, 0.12);
+  return (
+    <button
+      ref={ref}
+      type="button"
+      className={`${s.hero} ${s.heroMyst}`}
+      disabled={!logged}
+      aria-label={t('ui.shop_reveal_a', { n: gain })}
+      onClick={() => ref.current && onReveal(ref.current)}
+      style={{ '--g': '142, 170, 255' } as CSSProperties}
+    >
+      <PixelBg className={s.heroBg} odds={1000} glow="#8eaaff" center={art} still={reducedFx()} />
+      <div ref={art} className={s.heroArt}>
+        <img className="px" src="/img/jetons/mystere.png" alt="" />
+      </div>
+      <div className={s.heroInfo}>
+        <span className={s.featRow}>
+          <span className={s.feat}>{t('ui.shop_feat')}</span>
+          {off > 0 ? <b className={s.off}>−{off}%</b> : null}
+        </span>
+        <h2>{t('ui.shop_myst')}</h2>
+        <p>{t('ui.shop_reveal')}</p>
+        <span className={`${s.badge} ${s.gainTag} ${s.gainBig}`}>
+          +{gain} <Coin size={16} />
+        </span>
+      </div>
+    </button>
   );
 }
 

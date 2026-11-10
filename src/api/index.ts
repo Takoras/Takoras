@@ -80,6 +80,8 @@ export const passApi = {
 
 export const shopApi = {
   buy: (p_item: string) => rpc('buy_item', { p_item }),
+  // boutique mystère : révéler une case (+100 pièces, une fois par objet et par jour)
+  reveal: (p_slot: number) => rpc('reveal_slot', { p_slot }),
   redeem: (p_code: string) => rpc('redeem_code', { p_code }),
 };
 
