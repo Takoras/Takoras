@@ -205,13 +205,19 @@ export default function Shop() {
         { gain: number; state: object; shop: ShopData },
         unknown,
       ];
-      // éclair blanc par-dessus la case, puis l'objet est là
-      const flash = document.createElement('div');
-      flash.className = s.flash ?? '';
-      el.appendChild(flash);
+      const isHero = el.classList.contains(s.hero ?? '');
       qc.setQueryData(['me', user.id], (old: object | undefined) => ({ ...old, ...r.state }));
       qc.setQueryData(['shop'], { ...r.shop, at: Date.now() });
       await new Promise((ok) => requestAnimationFrame(() => requestAnimationFrame(ok)));
+      // la case cachée a été remplacée par la vraie case : les effets se jouent sur la nouvelle
+      el =
+        (isHero
+          ? pageRef.current?.querySelector<HTMLElement>(`.${s.top} .${s.hero}`)
+          : gridRef.current?.querySelector<HTMLElement>(`[data-key="${slot}"]`)) ?? el;
+      // éclair blanc par-dessus la case (il s'efface en 0,5 s), puis l'objet est là
+      const flash = document.createElement('div');
+      flash.className = s.flash ?? '';
+      el.appendChild(flash);
       const it = r.shop.items.find((x) => slotOf(x, 0) === slot);
       sfx.reveal(it && !isHidden(it) ? oddsOf(it) : 1);
       if (!fast) {
