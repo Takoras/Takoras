@@ -18,8 +18,10 @@ import { NeedLogin } from '@/app/NeedLogin';
 import { useFriends, type Friend } from './social';
 import s from './Friends.module.css';
 
-// Page Amis, même DA que la boutique et le passe : en haut ta carte (pseudo à partager) et l'ajout ;
-// les demandes reçues passent devant ; puis tes amis en cases (en ligne d'abord), qui se balancent au survol.
+type Tab = 'ok' | 'inc' | 'out';
+
+// Page Amis : la disposition de l'ancienne page (ta carte et l'ajout à gauche, onglets à droite)
+// avec la DA de la boutique et du passe (cases sombres, en ligne d'abord, balancement au survol).
 // Pas de notification : chaque action se voit sur place (case qui part, bouton « Copié », message sous le champ).
 export default function Friends() {
   const t = useT();
@@ -29,7 +31,6 @@ export default function Friends() {
   const qc = useQueryClient();
   const fr = useFriends();
   const pageRef = useRef<HTMLElement>(null);
-  const gridRef = useRef<HTMLUListElement>(null);
   const pseudo0 = me.data?.pseudo ?? '';
   const prof = useQuery({
     queryKey: ['profile', pseudo0],
@@ -40,8 +41,13 @@ export default function Friends() {
   const [busy, setBusy] = useState(false);
   const [said, setSaid] = useState<{ txt: string; ok: boolean } | null>(null);
   const [copied, setCopied] = useState(false);
-  useStaggerIn(pageRef, `.${s.head}, .${s.me}, .${s.addBox}, .${s.reqs} > li, .${s.grid} > li, .${s.sent}`, !!fr.data);
-  useSwingAll(pageRef, `.${s.card}, .${s.me}`, 0.45, fr.data);
+  const [tab, setTab] = useState<Tab | null>(null);
+  useStaggerIn(
+    pageRef,
+    `.${s.head}, .${s.me}, .${s.addBox}, .${s.tabs}, .${s.reqs} > li, .${s.grid} > li, .${s.empty}`,
+    !!fr.data,
+  );
+  useSwingAll(pageRef, `.${s.card}, .${s.me}`, 0.45, `${String(fr.dataUpdatedAt)}|${tab ?? ''}`);
   if (!user) return <NeedLogin title={t('ui.nav_friends')} />;
 
   const list = fr.data ?? [];
@@ -52,6 +58,13 @@ export default function Friends() {
       .filter((f) => f.status === 'accepted')
       .sort((a, b) => Number(!!b.online) - Number(!!a.online) || a.pseudo.localeCompare(b.pseudo));
   const online = ok.filter((f) => f.online).length;
+  // onglet par défaut : les demandes reçues s'il y en a
+  const cur: Tab = tab ?? (inc.length ? 'inc' : 'ok');
+  const TABS: [Tab, string, number][] = [
+    ['ok', t('ui.fr_list'), ok.length],
+    ['inc', t('ui.fr_requests'), inc.length],
+    ['out', t('ui.fr_pending'), out.length],
+  ];
   const reload = () => qc.invalidateQueries({ queryKey: ['friends'] });
 
   // une case qui part (acceptée, refusée, retirée) : elle s'efface doucement avant la mise à jour
@@ -59,11 +72,17 @@ export default function Friends() {
     const el = pageRef.current?.querySelector<HTMLElement>(`[data-fid="${id}"]`);
     if (el)
       await el
-        .animate([{ opacity: 1, scale: '1' }, { opacity: 0, scale: '.94' }], {
-          duration: 240,
-          easing: 'ease-in',
-          fill: 'forwards',
-        })
+        .animate(
+          [
+            { opacity: 1, scale: '1' },
+            { opacity: 0, scale: '.94' },
+          ],
+          {
+            duration: 240,
+            easing: 'ease-in',
+            fill: 'forwards',
+          },
+        )
         .finished.catch(() => undefined);
   };
 
@@ -131,8 +150,8 @@ export default function Friends() {
         </span>
       </header>
 
-      <div className={s.top}>
-        {/* ta carte : ce qu'un ami doit taper pour t'ajouter */}
+      {/* à gauche : ta carte et l'ajout (comme l'ancienne page) */}
+      <aside className={s.side}>
         <div className={s.me}>
           <Avatar pseudo={pseudo0 || '?'} avatar={prof.data?.avatar} size={84} />
           <div className={s.meTxt}>
@@ -165,75 +184,82 @@ export default function Friends() {
             {said?.txt ?? ''}
           </p>
         </form>
-      </div>
+      </aside>
 
-      {inc.length ? (
-        <section className={s.block} aria-labelledby="fr-inc">
-          <h2 id="fr-inc">
-            {t('ui.fr_requests')} <i className={s.count}>{inc.length}</i>
-          </h2>
-          <ul className={s.reqs}>
-            {inc.map((f) => (
-              <li key={f.id} data-fid={f.id} className={s.req}>
+      {/* à droite : les onglets (amis, demandes reçues, envoyées) */}
+      <div className={s.main}>
+        <div className={s.tabs} role="tablist" aria-label={t('ui.fr_title')}>
+          {TABS.map(([k, l, n]) => (
+            <button key={k} type="button" role="tab" aria-selected={cur === k} onClick={() => setTab(k)}>
+              {l}
+              {n ? <i className={k === 'inc' ? s.count : s.cnt}>{n}</i> : null}
+            </button>
+          ))}
+        </div>
+        {!fr.data ? (
+          <p className="muted" aria-busy>
+            …
+          </p>
+        ) : cur === 'ok' ? (
+          ok.length ? (
+            <ul key="ok" className={s.grid}>
+              {ok.map((f) => (
+                <li key={f.id} data-fid={f.id} className={`${s.card} ${f.online ? s.on : ''}`}>
+                  <Link to={href(f.pseudo)} className={s.cardLink}>
+                    <span className={s.ava}>
+                      <Avatar pseudo={f.pseudo} avatar={f.avatar} size={76} />
+                      <i className={s.dot} aria-hidden />
+                    </span>
+                    <b className={s.name}>{f.pseudo}</b>
+                    <small className={s.st}>{status(f)}</small>
+                    <span className={s.stats}>
+                      {f.elo != null ? (
+                        <span>
+                          <b>{f.elo}</b> Elo
+                        </span>
+                      ) : null}
+                      {f.collection != null ? (
+                        <span>
+                          <b>{f.collection}</b> jetons
+                        </span>
+                      ) : null}
+                    </span>
+                  </Link>
+                  <button
+                    type="button"
+                    className={`${s.x} ${s.rm}`}
+                    onClick={() => void remove(f)}
+                    aria-label={`${t('ui.fr_remove')} ${f.pseudo}`}
+                  >
+                    ✕
+                  </button>
+                </li>
+              ))}
+            </ul>
+          ) : (
+            <p className={s.empty}>{t('ui.fr_empty')}</p>
+          )
+        ) : (cur === 'inc' ? inc : out).length ? (
+          <ul key={cur} className={s.reqs}>
+            {(cur === 'inc' ? inc : out).map((f) => (
+              <li key={f.id} data-fid={f.id} className={`${s.req} ${cur === 'out' ? s.reqOut : ''}`}>
                 <Link to={href(f.pseudo)} className={s.reqWho}>
                   <Avatar pseudo={f.pseudo} avatar={f.avatar} size={48} />
                   <span>
                     <b>{f.pseudo}</b>
-                    <small>{t('ui.fr_wants')}</small>
+                    <small>{cur === 'inc' ? t('ui.fr_wants') : t('ui.fr_sent')}</small>
                   </span>
                 </Link>
-                <Button size="sm" variant="primary" onClick={() => void respond(f, true)}>
-                  {t('ui.fr_accept')}
-                </Button>
+                {cur === 'inc' ? (
+                  <Button size="sm" variant="primary" onClick={() => void respond(f, true)}>
+                    {t('ui.fr_accept')}
+                  </Button>
+                ) : null}
                 <button
                   type="button"
                   className={s.x}
                   onClick={() => void respond(f, false)}
                   aria-label={`${t('ui.cancel')} · ${f.pseudo}`}
-                >
-                  ✕
-                </button>
-              </li>
-            ))}
-          </ul>
-        </section>
-      ) : null}
-
-      <section className={s.block} aria-labelledby="fr-list">
-        <h2 id="fr-list">{t('ui.fr_list')}</h2>
-        {!fr.data ? (
-          <p className="muted" aria-busy>
-            …
-          </p>
-        ) : ok.length ? (
-          <ul ref={gridRef} className={s.grid}>
-            {ok.map((f) => (
-              <li key={f.id} data-fid={f.id} className={`${s.card} ${f.online ? s.on : ''}`}>
-                <Link to={href(f.pseudo)} className={s.cardLink}>
-                  <span className={s.ava}>
-                    <Avatar pseudo={f.pseudo} avatar={f.avatar} size={76} />
-                    <i className={s.dot} aria-hidden />
-                  </span>
-                  <b className={s.name}>{f.pseudo}</b>
-                  <small className={s.st}>{status(f)}</small>
-                  <span className={s.stats}>
-                    {f.elo != null ? (
-                      <span>
-                        <b>{f.elo}</b> Elo
-                      </span>
-                    ) : null}
-                    {f.collection != null ? (
-                      <span>
-                        <b>{f.collection}</b> jetons
-                      </span>
-                    ) : null}
-                  </span>
-                </Link>
-                <button
-                  type="button"
-                  className={`${s.x} ${s.rm}`}
-                  onClick={() => void remove(f)}
-                  aria-label={`${t('ui.fr_remove')} ${f.pseudo}`}
                 >
                   ✕
                 </button>
@@ -241,31 +267,9 @@ export default function Friends() {
             ))}
           </ul>
         ) : (
-          <p className={s.empty}>{t('ui.fr_empty')}</p>
+          <p className={s.empty}>{cur === 'inc' ? 'Aucune demande pour l’instant.' : 'Aucune demande envoyée.'}</p>
         )}
-      </section>
-
-      {out.length ? (
-        <section className={`${s.block} ${s.sent}`} aria-labelledby="fr-out">
-          <h2 id="fr-out">{t('ui.fr_pending')}</h2>
-          <ul className={s.sentList}>
-            {out.map((f) => (
-              <li key={f.id} data-fid={f.id}>
-                <Avatar pseudo={f.pseudo} avatar={f.avatar} size={28} />
-                <span>{f.pseudo}</span>
-                <button
-                  type="button"
-                  className={s.x}
-                  onClick={() => void respond(f, false)}
-                  aria-label={`${t('ui.cancel')} · ${f.pseudo}`}
-                >
-                  ✕
-                </button>
-              </li>
-            ))}
-          </ul>
-        </section>
-      ) : null}
+      </div>
     </section>
   );
 }

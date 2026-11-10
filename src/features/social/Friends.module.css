@@ -4,21 +4,23 @@
    ====================================================================== */
 .page {
   display: grid;
-  gap: var(--s-7, 28px);
+  grid-template-columns: minmax(260px, 340px) minmax(0, 1fr);
+  grid-template-areas:
+    'head head'
+    'side main';
+  align-items: start;
+  gap: var(--s-7, 28px) var(--s-6);
   width: 100%;
   max-width: 1400px;
   margin-inline: auto;
 }
 
-/* profondeur à la souris : chaque bloc à sa profondeur */
-.head,
-.top,
-.block {
-  will-change: translate; /* calque à part : bouger avec la souris ne redessine rien */
-  translate: calc(var(--mpx, 0) * -8px * var(--dp, 1)) calc(var(--mpy, 0) * -6px * var(--dp, 1));
-}
+/* profondeur à la souris : chaque bloc à sa profondeur (calque à part : bouger ne redessine rien) */
 .head {
   --dp: 0.5;
+  grid-area: head;
+  will-change: translate;
+  translate: calc(var(--mpx, 0) * -8px * var(--dp, 1)) calc(var(--mpy, 0) * -6px * var(--dp, 1));
   display: flex;
   align-items: center;
   flex-wrap: wrap;
@@ -45,18 +47,65 @@
   background: #4ade80;
 }
 
-/* ---------- ta carte + ajout ---------- */
-.top {
+/* ---------- à gauche ta carte et l'ajout, à droite les onglets ---------- */
+.side {
   --dp: 1;
+  grid-area: side;
   display: grid;
-  grid-template-columns: minmax(0, 1fr) minmax(0, 1.4fr);
-  gap: var(--s-5);
+  gap: var(--s-4);
+  will-change: translate;
+  translate: calc(var(--mpx, 0) * -8px * var(--dp, 1)) calc(var(--mpy, 0) * -6px * var(--dp, 1));
 }
-.me {
+.main {
+  --dp: 1.4;
+  grid-area: main;
+  display: grid;
+  gap: var(--s-4);
+  min-width: 0;
+  will-change: translate;
+  translate: calc(var(--mpx, 0) * -8px * var(--dp, 1)) calc(var(--mpy, 0) * -6px * var(--dp, 1));
+}
+.tabs {
   display: flex;
+  flex-wrap: wrap;
+  gap: var(--s-2);
+}
+.tabs button {
+  display: inline-flex;
   align-items: center;
-  gap: var(--s-5);
-  padding: var(--s-5) var(--s-6);
+  gap: 8px;
+  padding: 9px 16px;
+  border: 0;
+  border-radius: var(--r-pill);
+  background: rgb(255 255 255 / 5%);
+  color: var(--muted);
+  font: inherit;
+  font-weight: 700;
+  cursor: pointer;
+  transition:
+    background-color var(--t-fast),
+    color var(--t-fast);
+}
+.tabs button:hover {
+  background: rgb(255 255 255 / 9%);
+  color: var(--text);
+}
+.tabs button[aria-selected='true'] {
+  background: #3d6bff;
+  color: #fff;
+}
+.cnt {
+  font-size: var(--fs-xs);
+  font-style: normal;
+  opacity: 0.75;
+}
+
+.me {
+  display: grid;
+  justify-items: center;
+  gap: var(--s-3);
+  padding: var(--s-6) var(--s-5) var(--s-5);
+  text-align: center;
   border-radius: 16px;
   background: rgb(61 107 255 / 10%);
   rotate: var(--swing, 0deg);
@@ -64,7 +113,7 @@
 }
 .meTxt {
   display: grid;
-  flex: 1;
+  max-width: 100%;
   min-width: 0;
   line-height: 1.15;
 }
@@ -85,7 +134,7 @@
   display: grid;
   align-content: center;
   gap: var(--s-2);
-  padding: var(--s-5) var(--s-6);
+  padding: var(--s-5);
   border-radius: 16px;
   background: rgb(255 255 255 / 3.5%);
 }
@@ -95,10 +144,11 @@
 }
 .add {
   display: flex;
+  flex-wrap: wrap;
   gap: var(--s-2);
 }
 .add input {
-  flex: 1;
+  flex: 1 1 140px;
   min-width: 0;
   height: 52px;
   padding: 0 var(--s-4);
@@ -130,21 +180,8 @@
 }
 
 /* ---------- blocs ---------- */
-.block {
-  --dp: 1.4;
-  display: grid;
-  gap: var(--s-3);
-}
-.block h2 {
-  display: flex;
-  align-items: center;
-  gap: var(--s-2);
-  margin: 0;
-  color: var(--muted);
-  font-size: var(--fs-sm);
-  font-weight: 700;
-  letter-spacing: var(--tracking-caps);
-  text-transform: uppercase;
+.reqOut {
+  background: rgb(255 255 255 / 3.5%);
 }
 .count {
   min-width: 22px;
@@ -337,39 +374,24 @@
   text-align: center;
 }
 
-/* demandes envoyées : discrètes, en bas */
-.sentList {
-  display: flex;
-  flex-wrap: wrap;
-  gap: var(--s-2);
-  margin: 0;
-  padding: 0;
-  list-style: none;
-}
-.sentList li {
-  display: flex;
-  align-items: center;
-  gap: var(--s-2);
-  padding: 4px 4px 4px 6px;
-  border-radius: var(--r-pill);
-  background: rgb(255 255 255 / 4%);
-  color: var(--muted);
-  font-size: var(--fs-sm);
-}
-.sentList .x {
-  width: 26px;
-  height: 26px;
-  font-size: 11px;
-}
 
 @media (max-width: 900px) {
-  .top {
+  .page {
     grid-template-columns: 1fr;
+    grid-template-areas:
+      'head'
+      'side'
+      'main';
+  }
+  .me {
+    grid-template-columns: auto 1fr auto;
+    place-items: center start;
+    text-align: left;
   }
 }
 @media (max-width: 640px) {
   .me {
-    flex-wrap: wrap;
+    grid-template-columns: auto 1fr;
     padding: var(--s-4);
   }
   .addBox {
