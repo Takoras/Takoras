@@ -180,8 +180,8 @@ export default function Shop() {
     }
   };
 
-  // révéler une case : le cache gonfle et rebondit de plus en plus fort en blanchissant (≈ 1,2 s), comme s'il allait
-  // exploser, puis éclair blanc et l'objet apparaît (+100 pièces)
+  // révéler une case : le cache grossit très légèrement et blanchit (≈ 1,2 s), puis éclair blanc et l'objet apparaît,
+  // de cette taille vers sa taille normale (+100 pièces). Que des transformations : rien ne bouge autour.
   const reveal = async (slot: number, el: HTMLElement) => {
     if (!data || !user) return;
     if (revealing.current.has(slot)) return;
@@ -196,16 +196,9 @@ export default function Shop() {
           : cover.animate(
               [
                 { transform: 'scale(1)', filter: 'brightness(1) saturate(1) drop-shadow(0 0 0 rgb(255 255 255 / 0%))' },
-                { transform: 'scale(1.03)', filter: 'brightness(1.3)', offset: 0.2 },
-                { transform: 'scale(0.99)', offset: 0.32 },
-                { transform: 'scale(1.05)', filter: 'brightness(1.9)', offset: 0.5 },
-                { transform: 'scale(0.98)', offset: 0.6 },
-                { transform: 'scale(1.07)', filter: 'brightness(2.8)', offset: 0.74 },
-                { transform: 'scale(1.01)', offset: 0.82 },
-                { transform: 'scale(1.1)', filter: 'brightness(4) saturate(0) drop-shadow(0 0 6px rgb(255 255 255 / 40%))', offset: 0.92 },
-                { transform: 'scale(1.13)', filter: 'brightness(6) saturate(0) drop-shadow(0 0 16px rgb(255 255 255 / 75%))' },
+                { transform: 'scale(1.06)', filter: 'brightness(6) saturate(0) drop-shadow(0 0 16px rgb(255 255 255 / 75%))' },
               ],
-              { duration: 1200, easing: 'cubic-bezier(.45,0,.55,1)', fill: 'forwards' },
+              { duration: 1200, easing: 'cubic-bezier(.45,0,.75,.6)', fill: 'forwards' },
             ).finished;
       cover?.classList.add(s.whiten ?? '');
       const [r] = (await Promise.all([shopApi.reveal(slot), swell])) as [
@@ -222,10 +215,8 @@ export default function Shop() {
       const it = r.shop.items.find((x) => slotOf(x, 0) === slot);
       sfx.reveal(it && !isHidden(it) ? oddsOf(it) : 1);
       if (!fast)
-        el.animate([{ scale: '1.08' }, { scale: '0.98', offset: 0.55 }, { scale: '1' }], {
-          duration: 480,
-          easing: 'cubic-bezier(.2,.8,.3,1)',
-        });
+        // l'objet arrive à la taille où la case s'est arrêtée, puis redescend doucement à sa taille (sans rebond)
+        el.animate([{ scale: '1.06' }, { scale: '1' }], { duration: 650, easing: 'cubic-bezier(.2,.7,.3,1)' });
       flash
         .animate([{ opacity: 1 }, { opacity: 0 }], { duration: fast ? 120 : 420, easing: 'ease-out', fill: 'forwards' })
         .finished.then(
