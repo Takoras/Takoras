@@ -1,5 +1,6 @@
 import { useLayoutEffect, type RefObject } from 'react';
 import { reducedFx } from '@/lib/settings';
+import { snapMouseDepth } from '@/lib/mouseDepth';
 
 // Apparition d'une page, la même partout (accueil, inventaire, combat) : un fondu, bloc après bloc,
 // comme les jetons de l'inventaire.
@@ -35,6 +36,7 @@ function stagger(el: HTMLElement | null, selector: string, ready: boolean) {
   const fonts = (document as Document & { fonts?: { ready: Promise<unknown> } }).fonts?.ready ?? Promise.resolve();
   void Promise.race([Promise.all([...imgs.map(loaded), fonts]), new Promise((r) => setTimeout(r, 900))]).then(() => {
     played.add(el);
+    snapMouseDepth(); // les blocs sont tout de suite à leur place (pas de glissade après le fondu)
     el.classList.remove('stg-wait');
     if (reducedFx() || matchMedia('(prefers-reduced-motion: reduce)').matches) return;
     [...el.querySelectorAll<HTMLElement>(selector)]
