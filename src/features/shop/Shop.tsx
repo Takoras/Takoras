@@ -14,6 +14,7 @@ import { PixelBg } from '@/ui/PixelBg';
 import { toast } from '@/ui/toast';
 import { useSwing, useSwingAll } from '@/ui/useSwing';
 import { useStaggerIn } from '@/ui/useStaggerIn';
+import { flyCoins, shockwave } from '@/ui/fx';
 import { useNow } from '../eco/eco';
 import { Effects } from '../home/Effects';
 import { openInfo } from '../info/store';
@@ -186,23 +187,32 @@ export default function Shop() {
     const fast = reducedFx();
     try {
       sfx.riser(fast ? 0.2 : 1.2);
+      // 1) la charge : le cache gonfle à peine, vire au blanc et frémit de plus en plus (lui seul, rien autour)
       const swell =
         fast || !cover
           ? Promise.resolve()
           : cover.animate(
               [
                 { transform: 'scale(1)', filter: 'brightness(1) saturate(1) drop-shadow(0 0 0 rgb(255 255 255 / 0%))' },
-                { transform: 'scale(1.06)', filter: 'brightness(6) saturate(0) drop-shadow(0 0 16px rgb(255 255 255 / 75%))' },
+                { transform: 'scale(1.05)', filter: 'brightness(6) saturate(0) drop-shadow(0 0 18px rgb(255 255 255 / 80%))' },
               ],
-              { duration: 1200, easing: 'cubic-bezier(.45,0,.75,.6)', fill: 'forwards' },
+              { duration: 1200, easing: 'cubic-bezier(.5,0,.75,.4)', fill: 'forwards' },
             ).finished;
+      if (!fast && cover) {
+        const fr: Keyframe[] = [];
+        for (let k = 0; k <= 24; k++) {
+          const a = 1.6 * (k / 24) ** 2.2;
+          fr.push({ translate: `${(Math.random() * 2 - 1) * a}px ${(Math.random() * 2 - 1) * a}px` });
+        }
+        cover.animate(fr, { duration: 1200, easing: 'linear', fill: 'forwards' });
+      }
       cover?.classList.add(s.whiten ?? '');
       const [r] = (await Promise.all([shopApi.reveal(slot), swell])) as [
         { gain: number; state: object; shop: ShopData },
         unknown,
       ];
       const isHero = el.classList.contains(s.hero ?? '');
-      qc.setQueryData(['me', user.id], (old: object | undefined) => ({ ...old, ...r.state }));
+      const applyCoins = () => qc.setQueryData(['me', user.id], (old: object | undefined) => ({ ...old, ...r.state }));
       qc.setQueryData(['shop'], { ...r.shop, at: Date.now() });
       await new Promise((ok) => requestAnimationFrame(() => requestAnimationFrame(ok)));
       // la case cachée a été remplacée par la vraie case : les effets se jouent sur la nouvelle
@@ -210,29 +220,57 @@ export default function Shop() {
         (isHero
           ? pageRef.current?.querySelector<HTMLElement>(`.${s.top} .${s.hero}`)
           : gridRef.current?.querySelector<HTMLElement>(`[data-key="${slot}"]`)) ?? el;
-      // éclair blanc par-dessus la case (il s'efface en 0,5 s), puis l'objet est là
+      const it = r.shop.items.find((x) => slotOf(x, 0) === slot);
+      const col = it && !isHidden(it) ? `rgb(${glowOf(it)})` : 'rgb(142 170 255)';
+      sfx.reveal(it && !isHidden(it) ? oddsOf(it) : 1);
+      // 2) l'éclat : flash blanc qui s'efface, deux ondes de choc (blanche puis couleur de la rareté)
       const flash = document.createElement('div');
       flash.className = s.flash ?? '';
       el.appendChild(flash);
-      const it = r.shop.items.find((x) => slotOf(x, 0) === slot);
-      sfx.reveal(it && !isHidden(it) ? oddsOf(it) : 1);
-      if (!fast) {
-        // l'objet arrive à la taille où la case s'est arrêtée, puis redescend doucement à sa taille (sans rebond)
-        el.animate([{ scale: '1.06' }, { scale: '1' }], { duration: 650, easing: 'cubic-bezier(.2,.7,.3,1)' });
-        // sous le choc, la case se balance ~1 s (comme quand la souris la pousse), accrochée par le haut
-        const sw = el.querySelector<HTMLElement>(`.${s.box}`) ?? el;
-        const a = sw === el ? 2.5 : 5;
-        sw.animate(
-          [0, a, -a * 0.75, a * 0.5, -a * 0.3, a * 0.15, 0].map((d) => ({ rotate: `${d}deg` })),
-          { duration: 1000, easing: 'ease-out' },
-        );
-      }
       flash
-        .animate([{ opacity: 1 }, { opacity: 0 }], { duration: fast ? 120 : 500, easing: 'ease-out', fill: 'forwards' })
+        .animate([{ opacity: 1 }, { opacity: 0 }], { duration: fast ? 120 : 550, easing: 'cubic-bezier(.3,0,.2,1)', fill: 'forwards' })
         .finished.then(
           () => flash.remove(),
           () => flash.remove(),
         );
+      const box = el.querySelector<HTMLElement>(`.${s.box}`) ?? el;
+      const rect = box.getBoundingClientRect();
+      if (!fast) {
+        const rad = isHero ? 16 : 14;
+        shockwave(rect, 'rgb(255 255 255)', rad, 0, isHero ? 34 : 26);
+        shockwave(rect, col, rad, 110, isHero ? 60 : 44);
+        // 3) l'objet sort de la lumière : flou et surexposé, il devient net en se posant (sans rebond)
+        el.animate(
+          [
+            { scale: '1.05', filter: 'blur(8px) brightness(2.6) saturate(.4)' },
+            { scale: '1', filter: 'blur(0) brightness(1) saturate(1)' },
+          ],
+          { duration: 700, easing: 'cubic-bezier(.16,1,.3,1)' },
+        );
+        // sous le choc, la case se balance ~1 s (comme quand la souris la pousse), accrochée par le haut
+        const a = box === el ? 2.5 : 5;
+        box.animate(
+          [0, a, -a * 0.75, a * 0.5, -a * 0.3, a * 0.15, 0].map((d) => ({ rotate: `${d}deg` })),
+          { duration: 1000, easing: 'ease-out' },
+        );
+        // 4) les pièces gagnées jaillissent et filent vers le solde ; le compteur monte quand la 1re arrive
+        let landed = false;
+        const safety = setTimeout(() => {
+          if (!landed) applyCoins();
+          landed = true;
+        }, 2500);
+        setTimeout(
+          () =>
+            flyCoins(rect, 3, () => {
+              sfx.pop();
+              if (landed) return;
+              landed = true;
+              clearTimeout(safety);
+              applyCoins();
+            }),
+          140,
+        );
+      } else applyCoins();
     } catch (e) {
       sfx.deny();
       cover?.getAnimations().forEach((a) => a.cancel());

@@ -22,7 +22,20 @@ const P: Record<string, string> = {
 };
 // Icônes pixel art dessinées à la main (grille 32×32, blanc sur transparent) : utilisées en masque pour prendre la couleur du texte.
 // Affichées à 16 px (petits boutons) ou 26 px (barre).
-const PIX = new Set(['home', 'users', 'swords', 'bag', 'help', 'bulb', 'bell', 'gear', 'star', 'scroll', 'user', 'shop']);
+const PIX = new Set([
+  'home',
+  'users',
+  'swords',
+  'bag',
+  'help',
+  'bulb',
+  'bell',
+  'gear',
+  'star',
+  'scroll',
+  'user',
+  'shop',
+]);
 export function Icon({ name, size = 20 }: { name: keyof typeof P | string; size?: number }) {
   if (PIX.has(name)) {
     const px = size >= 22 ? 26 : 16; // un peu plus petit que la boîte, pour ne pas déborder

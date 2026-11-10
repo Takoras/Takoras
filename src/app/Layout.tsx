@@ -169,7 +169,7 @@ export function Layout() {
         ) : null}
         {user ? (
           <>
-            <span className={s.bal} aria-label={t('app.balance')}>
+            <span className={s.bal} aria-label={t('app.balance')} data-coin-target>
               <img className="px" src="/img/piece.png" alt="" width={20} height={20} />
               {/* le solde défile vers sa nouvelle valeur (dépense ou gain), au lieu de changer d'un coup */}
               {me.data ? (
