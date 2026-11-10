@@ -396,19 +396,20 @@ export default function Pass() {
     );
   };
 
-  // petite vignette de la prochaine récompense (dans la carte du haut)
+  // la prochaine récompense en grand, dans la carte du haut (gratuite, et premium en doré)
   const peek = (r: Reward, prem: boolean) =>
     r ? (
-      <span className={`${s.peek} ${prem ? s.peekGold : ''}`}>
-        <img
-          className={`px ${r.item?.startsWith('b_') ? s.wide : r.item?.startsWith('a_') ? s.round : ''}`}
-          src={icon(r)}
-          alt=""
-        />
-        <span>
-          <b>{amount(r) || name(r)}</b>
-          <small>{amount(r) ? name(r) : prem ? t('ui.bp_prem_short') : t('ui.bp_free')}</small>
+      <span className={`${s.nx} ${prem ? s.nxGold : ''}`}>
+        <span className={s.nxArt}>
+          <img
+            className={`px ${r.item?.startsWith('b_') ? s.wide : r.item?.startsWith('a_') ? s.round : ''}`}
+            src={icon(r)}
+            alt=""
+          />
         </span>
+        <b>{amount(r) || '\u00a0'}</b>
+        <small>{name(r)}</small>
+        {prem && !d.premium ? <i className={s.lock} aria-hidden /> : null}
       </span>
     ) : null;
 
@@ -464,12 +465,6 @@ export default function Pass() {
                   / {n(XP_TIER)} XP
                   <span>{tier >= 50 ? t('ui.bp_done') : t('ui.bp_next', { n: n(XP_TIER - into), t: tier + 1 })}</span>
                 </p>
-                {nextT && tier < 50 ? (
-                  <div className={s.peeks}>
-                    {peek(nextT.free, false)}
-                    {peek(nextT.prem, true)}
-                  </div>
-                ) : null}
                 <div className={s.actions}>
                   {nReady > 0 ? (
                     <Button variant="primary" onClick={() => void claimAll()} disabled={busy}>
@@ -478,6 +473,12 @@ export default function Pass() {
                   ) : null}
                 </div>
               </div>
+              {nextT && tier < 50 ? (
+                <div className={s.nexts} aria-label={t('ui.bp_next', { n: n(XP_TIER - into), t: tier + 1 })}>
+                  {peek(nextT.free, false)}
+                  {peek(nextT.prem, true)}
+                </div>
+              ) : null}
             </div>
             {/* le premium de la saison : la photo exclusive flotte, la valeur des deux pistes comparée */}
             <button type="button" className={s.prem} onClick={() => setPremOpen(true)}>

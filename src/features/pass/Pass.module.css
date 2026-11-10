@@ -68,9 +68,9 @@
   isolation: isolate;
   overflow: hidden;
   display: grid;
-  grid-template-columns: auto minmax(0, 1fr);
+  grid-template-columns: auto minmax(0, 1fr) auto;
   align-items: center;
-  gap: var(--s-8);
+  gap: var(--s-6);
   min-height: 190px;
   padding: var(--s-5) var(--s-6);
   border-radius: 16px;
@@ -159,49 +159,70 @@
   color: var(--muted);
   font-size: var(--fs-sm);
 }
-.peeks {
+/* la prochaine récompense, en grandes cases à droite de la carte */
+.nexts {
   display: flex;
-  flex-wrap: wrap;
   gap: var(--s-3);
 }
-.peek {
-  display: flex;
-  align-items: center;
-  gap: var(--s-3);
-  padding: var(--s-2) var(--s-4) var(--s-2) var(--s-2);
-  border-radius: 12px;
-  background: rgb(255 255 255 / 5%);
+.nx {
+  position: relative;
+  display: grid;
+  grid-template-rows: 1fr auto auto;
+  place-items: center center;
+  width: 136px;
+  height: 160px;
+  padding: var(--s-3) var(--s-2);
+  border-radius: 14px;
+  background: rgb(255 255 255 / 6%);
+  text-align: center;
 }
-.peek img {
-  width: 44px;
-  height: 44px;
+.nxGold {
+  background: rgb(242 194 48 / 12%);
+}
+.nxArt {
+  display: grid;
+  place-items: center;
+  animation: nxBob 3.4s ease-in-out infinite;
+}
+.nxGold .nxArt {
+  animation-delay: -1.7s;
+}
+@keyframes nxBob {
+  50% {
+    translate: 0 -5px;
+  }
+}
+.nxArt img {
+  width: 76px;
+  height: 76px;
   object-fit: contain;
 }
-.peek img.wide {
-  width: 88px;
-  height: 22px;
+.nxArt img.wide {
+  width: 116px;
+  height: auto;
+  aspect-ratio: 4;
   object-fit: cover;
+  border-radius: 4px;
 }
-.peek img.round {
+.nxArt img.round {
   border-radius: 50%;
   object-fit: cover;
 }
-.peek span {
-  display: grid;
-  line-height: 1.15;
-}
-.peek b {
+.nx b {
   font-family: var(--font-display);
+  font-size: var(--fs-lg);
+  line-height: 1.1;
 }
-.peek small {
+.nxGold b {
+  color: var(--gold-hi);
+}
+.nx small {
+  max-width: 100%;
+  overflow: hidden;
   color: var(--muted);
   font-size: var(--fs-xs);
-}
-.peekGold {
-  background: rgb(242 194 48 / 10%);
-}
-.peekGold b {
-  color: var(--gold-hi);
+  white-space: nowrap;
+  text-overflow: ellipsis;
 }
 .actions {
   display: flex;
@@ -589,6 +610,7 @@ button.tile:focus-visible {
   .tile.ready::after,
   .track li[aria-current]::after,
   .ppWrap,
+  .nxArt,
   .bar i::after {
     animation: none;
   }
@@ -755,6 +777,16 @@ button.tile:focus-visible {
 }
 .ok {
   color: var(--ok);
+}
+
+/* écran moyen : les grandes cases passent sous la barre d'XP */
+@media (max-width: 1200px) {
+  .hero {
+    grid-template-columns: auto minmax(0, 1fr);
+  }
+  .nexts {
+    grid-column: 2;
+  }
 }
 
 @media (max-width: 900px) {
