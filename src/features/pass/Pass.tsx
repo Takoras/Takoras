@@ -286,8 +286,17 @@ export default function Pass() {
         requestAnimationFrame(follow);
       };
       requestAnimationFrame(follow);
+      // position du palier dans la route (la case est placée dans sa colonne : on prend la colonne)
       const aim = (tile: HTMLElement | null | undefined) => {
-        if (box && tile) cam.to = Math.max(0, tile.offsetLeft - box.clientWidth / 2 + tile.offsetWidth / 2);
+        const col = tile?.closest('li');
+        if (!box || !col) return;
+        if (box.scrollWidth <= box.clientWidth + 1) {
+          // téléphone : la route est verticale, c'est la page qui suit
+          col.scrollIntoView({ block: 'center', behavior: 'smooth' });
+          return;
+        }
+        const max = box.scrollWidth - box.clientWidth;
+        cam.to = Math.min(max, Math.max(0, col.offsetLeft - box.clientWidth / 2 + col.offsetWidth / 2));
       };
       aim(todo[0] ? tileOf(todo[0][0], todo[0][1]) : null);
       await wait(450);
