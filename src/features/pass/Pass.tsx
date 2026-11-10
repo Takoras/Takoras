@@ -276,11 +276,24 @@ export default function Pass() {
     try {
       const r = (await passApi.claimAll()) as { claimed: number; state: object };
       const box = list.current;
-      let gap = 300;
+      // la caméra suit : la route est d'abord ramenée à l'écran, puis elle glisse en douceur vers chaque case
+      box?.scrollIntoView({ block: 'nearest', behavior: 'smooth' });
+      const cam = { x: box?.scrollLeft ?? 0, to: box?.scrollLeft ?? 0, on: true };
+      const follow = () => {
+        if (!box || !cam.on) return;
+        cam.x += (cam.to - cam.x) * 0.16;
+        box.scrollLeft = cam.x;
+        requestAnimationFrame(follow);
+      };
+      requestAnimationFrame(follow);
+      const aim = (tile: HTMLElement | null | undefined) => {
+        if (box && tile) cam.to = Math.max(0, tile.offsetLeft - box.clientWidth / 2 + tile.offsetWidth / 2);
+      };
+      aim(todo[0] ? tileOf(todo[0][0], todo[0][1]) : null);
+      await wait(450);
+      let gap = 320;
       for (const [tr, p, rw] of todo) {
-        const tile = tileOf(tr, p);
-        if (box && tile)
-          box.scrollTo({ left: tile.offsetLeft - box.clientWidth / 2 + tile.offsetWidth / 2, behavior: 'smooth' });
+        aim(tileOf(tr, p));
         qc.setQueryData(['pass', user.id], (o: PassState | undefined) =>
           o ? (p ? { ...o, pclaimed: [...o.pclaimed, tr] } : { ...o, claimed: [...o.claimed, tr] }) : o,
         );
@@ -288,8 +301,10 @@ export default function Pass() {
         burst(tileOf(tr, p), rw, p, true);
         sfx.click();
         await wait(gap);
-        gap = Math.max(70, gap * 0.85);
+        gap = Math.max(110, gap * 0.88);
       }
+      await wait(300);
+      cam.on = false;
       sfx.upgrade();
       await wait(700);
       qc.setQueryData(['me', user.id], (old: object | undefined) => ({ ...old, ...r.state }));

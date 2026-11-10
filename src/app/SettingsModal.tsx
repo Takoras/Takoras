@@ -72,8 +72,10 @@ export function SettingsModal() {
             onChange={(fx) => st.set({ fx })}
             options={[
               ['auto', t('ui.fx_auto')],
-              ['full', t('ui.fx_full')],
-              ['reduced', t('ui.fx_reduced')],
+              ['high', t('ui.fx_high')],
+              ['medium', t('ui.fx_med')],
+              ['low', t('ui.fx_low')],
+              ['potato', t('ui.fx_potato')],
             ]}
           />
           <small className="muted">{t('ui.fx_hint')}</small>

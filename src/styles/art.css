@@ -179,3 +179,8 @@ img.px.still {
 html.dd-kick img.px {
   animation: none !important;
 }
+
+/* image hors de l'écran : son doodle est en pause (voir installDoodleVisibility dans lib/doodle.ts) */
+img.px.dd-off {
+  animation-play-state: paused !important;
+}

@@ -1,4 +1,4 @@
-import { reducedFx } from '@/lib/settings';
+import { calmFx } from '@/lib/settings';
 
 // Profondeur à la souris (comme l'accueil) pour tout le site : la position du pointeur, de -0,5 à 0,5 par rapport au
 // centre de l'écran, lissée, écrite dans --mpx / --mpy sur <html>. Les pages s'en servent en CSS (translate) pour faire
@@ -25,7 +25,7 @@ export function installMouseDepth() {
     raf = Math.abs(st.tx - st.x) + Math.abs(st.ty - st.y) > 0.0005 ? requestAnimationFrame(step) : 0;
   };
   const move = (e: PointerEvent) => {
-    if (reducedFx() || matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+    if (calmFx() || matchMedia('(prefers-reduced-motion: reduce)').matches) return;
     st.tx = e.clientX / innerWidth - 0.5;
     st.ty = e.clientY / innerHeight - 0.5;
     if (!raf) raf = requestAnimationFrame(step);

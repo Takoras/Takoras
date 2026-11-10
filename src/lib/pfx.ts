@@ -1,9 +1,10 @@
-import { reducedFx } from '@/lib/settings';
+import { calmFx, reducedFx } from '@/lib/settings';
 
 // Petit éclat de carrés pixel (dessinés par le code) autour d'un élément : récompense, révélation…
 // (les particules en images ont été retirées : pas assez propres)
 export function burstAt(el: Element | null, color = '#ffffff', power = 1) {
   if (!el || reducedFx() || typeof document === 'undefined') return;
+  if (calmFx()) power *= 0.5; // qualité moyenne : moitié moins de particules
   const r = el.getBoundingClientRect(),
     x = r.left + r.width / 2,
     y = r.top + r.height / 2,

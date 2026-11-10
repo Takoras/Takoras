@@ -1,5 +1,6 @@
 import { useEffect, useRef, type RefObject } from 'react';
 import { hexRGB } from '@/data/jetons';
+import { calmFx } from '@/lib/settings';
 
 // Le fond pixel art de l'ouverture (opening.js, drawBg), pour n'importe quel cadre : un petit canvas agrandi
 // sans lissage. Plus le jeton est rare, plus il est chargé : bande → bandes + rayons + poussière →
@@ -232,7 +233,7 @@ export function PixelBg({
       last = now;
       // effets réduits : on ne redessine que pendant une transition de couleur ou de niveau
       const settled = lvPrev === lvNow && target.current.rgb.every((v, i) => Math.abs(v - (cur[i] ?? v)) < 0.5);
-      raf = still && settled ? 0 : requestAnimationFrame(loop);
+      raf = (still || calmFx()) && settled ? 0 : requestAnimationFrame(loop);
     };
     raf = requestAnimationFrame(loop);
     // en mode figé, un changement de cible relance juste la transition

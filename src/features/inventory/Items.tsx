@@ -39,7 +39,7 @@ export default function Items() {
   useSwingAll(box, `.${s.item}`, 0.35, items.data);
   const snap = useRef<Map<string, DOMRect> | null>(null);
   useLayoutEffect(() => {
-    if (snap.current && box.current) moPlay(snap.current, box.current, '[data-key]', { dissolve: true });
+    if (snap.current && box.current) moPlay(snap.current, box.current, '[data-key]');
     snap.current = null;
   }, [items.data]);
   if (!user) return <NeedLogin title={t('ui.nav_inv')} />;

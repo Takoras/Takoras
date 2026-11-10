@@ -112,10 +112,14 @@ function moPlay(old, root, sel, { dissolve = false, appear = true } = {}) {
   for (const [k, o] of old) {
     if (seen.has(k) || !fx) continue;
     const ghost = o.el.cloneNode(true);
-    Object.assign(ghost.style, { position: 'fixed', left: o.r.left + 'px', top: o.r.top + 'px', width: o.r.width + 'px', height: o.r.height + 'px', margin: 0, zIndex: 299, pointerEvents: 'none' });
+    // le fantôme est posé dans le même conteneur que la carte (il garde exactement son style), à sa place d'avant
+    const host = (o.el.isConnected ? null : root.querySelector(sel)?.parentElement) || root;
+    if (getComputedStyle(host).position === 'static') host.style.position = 'relative';
+    const z = parseFloat(getComputedStyle(host).getPropertyValue('--z')) || 1, hr = host.getBoundingClientRect();
+    Object.assign(ghost.style, { position: 'absolute', left: (o.r.left - hr.left) / z + 'px', top: (o.r.top - hr.top) / z + 'px', width: o.r.width / z + 'px', height: o.r.height / z + 'px', margin: 0, zIndex: 5, pointerEvents: 'none', animation: 'none' });
     ghost.classList.add('mo-ghost');
     if (dissolve) ghost.querySelectorAll('img').forEach(i => { i.style.visibility = 'hidden'; });
-    document.body.appendChild(ghost);
+    host.appendChild(ghost);
     ghost.animate([{ opacity: 1, transform: 'none' }, { opacity: 0, transform: dissolve ? 'scale(.92)' : 'scale(.85)' }], { duration: dissolve ? 520 : 260, easing: 'ease-out', fill: 'forwards' }).finished.then(() => ghost.remove(), () => ghost.remove());
     if (dissolve) moDissolve(o.img, o.ir, 1, o.g);
   }

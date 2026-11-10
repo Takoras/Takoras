@@ -26,7 +26,7 @@ export function Button({
       {...rest}
       disabled={disabled || loading}
       aria-busy={loading || undefined}
-      className={[s.btn, s[variant], s[size], block && s.block, className].filter(Boolean).join(' ')}
+      className={[s.btn, s[variant], s[size], block && s.block, loading && s.busy, className].filter(Boolean).join(' ')}
       data-variant={variant}
     >
       {loading ? <span className={s.spin} aria-hidden /> : null}

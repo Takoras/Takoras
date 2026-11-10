@@ -334,3 +334,22 @@ html.lock body {
 .stg-wait * {
   animation-play-state: paused !important;
 }
+
+/* ---------- Qualité graphique (Réglages) ----------
+   moyen (q-calm) : le décor qui bouge en boucle (flottements, reflets, pulsations) joue une fois puis s'arrête ;
+   l'ouverture des jetons, le dessin des images et les roues de chargement continuent. */
+html.q-calm :is(*, *::before, *::after):not(img, #opening, #opening *, [aria-busy], [aria-busy] *) {
+  animation-iteration-count: 1 !important;
+}
+/* patate : plus aucune animation ni transition, ni flou, ni lueur (tout s'affiche directement à sa place) */
+html.q-potato *,
+html.q-potato *::before,
+html.q-potato *::after {
+  animation: none !important;
+  transition: none !important;
+  backdrop-filter: none !important;
+  scroll-behavior: auto !important;
+}
+html.q-potato :not(img, canvas, svg, svg *) {
+  filter: none !important;
+}

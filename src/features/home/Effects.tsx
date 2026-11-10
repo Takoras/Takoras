@@ -22,8 +22,8 @@ export function Effects({ reserve = false }: { reserve?: boolean }) {
   if (!pots.length && !fast) return space;
   return (
     <ul className={`${s.fx} ${reserve ? s.fxSpace : ''}`} aria-label={t('ui.fx_total', { m: dec(Number(me.data.luck ?? 1), lang) })}>
-      {/* le total seulement quand plusieurs potions se cumulent (sinon il redit la même chose) */}
-      {pots.length > 1 ? (
+      {/* la chance totale, en premier, dès qu'une potion est active */}
+      {pots.length ? (
         <li className={s.fxTotal}>{t('ui.fx_total', { m: dec(Number(me.data.luck ?? 1), lang) })}</li>
       ) : null}
       {pots.map((p, i) => (

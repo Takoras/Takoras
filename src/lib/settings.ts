@@ -4,7 +4,8 @@ import type { Lang } from '@/i18n';
 // Réglages du joueur, sauvegardés dans le navigateur sous la même clé que l'ancien site (takoras-settings) :
 // passer de l'ancien au nouveau site garde la langue, la vitesse, le volume, les effets et l'ouverture auto.
 export type Speed = 'normal' | 'rapide' | 'instant';
-export type Fx = 'auto' | 'full' | 'reduced';
+// qualité graphique : haut = tout, moyen = sans le décor inutile, bas = effets allégés, patate = plus aucune animation
+export type Fx = 'auto' | 'high' | 'medium' | 'low' | 'potato';
 export type Variant = 'gold' | 'celeste' | 'ombre';
 export type Settings = { speed: Speed; lang: Lang; volume: number; fx: Fx; autoMin: number; autoVars: Variant[] };
 
@@ -25,7 +26,11 @@ function load(): Settings {
     // valeurs inattendues (ancien format, modification à la main) → valeur par défaut
     if (!['normal', 'rapide', 'instant'].includes(s.speed)) s.speed = DEFAULTS.speed;
     if (s.lang !== 'fr' && s.lang !== 'en') s.lang = DEFAULTS.lang;
-    if (!['auto', 'full', 'reduced'].includes(s.fx)) s.fx = DEFAULTS.fx;
+    // anciens réglages : « Complets » = haut, « Allégés » = bas
+    const old = s.fx as string;
+    if (old === 'full') s.fx = 'high';
+    if (old === 'reduced') s.fx = 'low';
+    if (!['auto', 'high', 'medium', 'low', 'potato'].includes(s.fx)) s.fx = DEFAULTS.fx;
     s.volume = Math.max(0, Math.min(100, Number(s.volume) || 0));
     return s;
   } catch {
@@ -53,7 +58,13 @@ export const useSettings = create<Store>((set, get) => ({
 // parfois à 2, ce qui coupait toutes les animations et le doodle sur des PC normaux.
 const nav = typeof navigator === 'undefined' ? undefined : (navigator as Navigator & { deviceMemory?: number });
 export const LOWFX = (nav?.hardwareConcurrency ?? 8) <= 2 && (nav?.deviceMemory ?? 8) <= 2;
-export const reducedFx = (fx: Fx = useSettings.getState().fx) => fx === 'reduced' || (fx === 'auto' && LOWFX);
+export const quality = (fx: Fx = useSettings.getState().fx): Exclude<Fx, 'auto'> =>
+  fx === 'auto' ? (LOWFX ? 'low' : 'high') : fx;
+// bas ou patate : animations courtes ou coupées, pas de particules
+export const reducedFx = (fx?: Fx) => ['low', 'potato'].includes(quality(fx));
+// moyen et moins : plus de décor qui tourne en continu (fonds animés, profondeur à la souris…)
+export const calmFx = (fx?: Fx) => quality(fx) !== 'high';
+export const potatoFx = (fx?: Fx) => quality(fx) === 'potato';
 export const speedFactor = () => ({ normal: 1, rapide: 0.5, instant: 0 })[useSettings.getState().speed];
 export const locale = (lang: Lang = useSettings.getState().lang) => (lang === 'en' ? 'en-US' : 'fr-FR');
 

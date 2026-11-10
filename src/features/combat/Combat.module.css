@@ -1011,6 +1011,7 @@
 .playCol,
 .team,
 .dex {
+  will-change: translate; /* calque à part : bouger avec la souris ne redessine rien */
   translate: calc(var(--mpx, 0) * -8px * var(--dp, 1)) calc(var(--mpy, 0) * -6px * var(--dp, 1));
 }
 .page .eloTop {

@@ -114,7 +114,14 @@
   gap: var(--s-2);
 }
 
+/* chargement : la roue se pose PAR-DESSUS le texte (caché), le bouton garde sa taille et ne bouge pas */
+.busy .label {
+  visibility: hidden;
+}
 .spin {
+  position: absolute;
+  inset: 0;
+  margin: auto;
   width: 14px;
   height: 14px;
   border: 2px solid currentcolor;

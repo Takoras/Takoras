@@ -23,6 +23,7 @@
 .top,
 .board,
 .missions {
+  will-change: translate; /* calque à part : bouger avec la souris ne redessine rien */
   translate: calc(var(--mpx, 0) * -8px * var(--dp, 1)) calc(var(--mpy, 0) * -6px * var(--dp, 1));
 }
 
@@ -102,7 +103,7 @@
   font-size: clamp(60px, 5.6vw, 92px);
   color: var(--gold-hi);
   font-variant-numeric: tabular-nums;
-  filter: drop-shadow(0 0 22px rgb(242 194 48 / 35%));
+  text-shadow: 0 0 24px rgb(242 194 48 / 35%);
 }
 .heroInfo {
   display: grid;
@@ -246,10 +247,12 @@
   height: 80px;
   object-fit: cover;
   border-radius: 50%;
-  --df: drop-shadow(0 0 18px rgb(242 194 48 / 55%));
 }
 .ppWrap {
   display: grid;
+  border-radius: 50%;
+  background: radial-gradient(closest-side, rgb(242 194 48 / 45%), transparent);
+  padding: 10px;
   animation: premFloat 3.2s ease-in-out infinite;
 }
 @keyframes premFloat {
@@ -277,7 +280,6 @@
 /* ---------- la route ---------- */
 .board {
   --dp: 1.4;
-  will-change: translate;
   display: grid;
   grid-template-columns: auto minmax(0, 1fr);
   gap: var(--s-2);
@@ -359,12 +361,12 @@
   position: absolute;
   top: 50%;
   left: calc(-50% - var(--gap) + (100% + var(--gap)) * var(--f));
-  width: 14px;
-  height: 14px;
   translate: -50% -50%;
   border-radius: 50%;
-  background: #fff;
-  filter: drop-shadow(0 0 6px var(--gold-hi)) drop-shadow(0 0 14px rgb(242 194 48 / 70%));
+  background: radial-gradient(closest-side, #fff 0 45%, rgb(255 224 122 / 70%) 60%, transparent);
+  width: 26px;
+  height: 26px;
+  will-change: scale;
   animation: headPulse 1.8s ease-in-out infinite;
 }
 .track li:first-child[aria-current]::after {
@@ -558,6 +560,7 @@ button.tile:focus-visible {
   background: rgb(242 194 48 / 14%);
 }
 .tile.ready::after {
+  will-change: opacity;
   content: '';
   position: absolute;
   inset: -10px;
