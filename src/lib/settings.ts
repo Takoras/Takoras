@@ -65,7 +65,8 @@ export const reducedFx = (fx?: Fx) => ['low', 'potato'].includes(quality(fx));
 // moyen et moins : plus de décor qui tourne en continu (fonds animés, profondeur à la souris…)
 export const calmFx = (fx?: Fx) => quality(fx) !== 'high';
 export const potatoFx = (fx?: Fx) => quality(fx) === 'potato';
-export const speedFactor = () => ({ normal: 1, rapide: 0.5, instant: 0 })[useSettings.getState().speed];
+export const speedFactor = () =>
+  potatoFx() ? 0 : { normal: 1, rapide: 0.5, instant: 0 }[useSettings.getState().speed];
 export const locale = (lang: Lang = useSettings.getState().lang) => (lang === 'en' ? 'en-US' : 'fr-FR');
 
 // Safari et iPhone/iPad (WebKit) n'appliquent pas le filtre SVG « dessin » des jetons : effet coupé chez eux

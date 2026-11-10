@@ -4,6 +4,7 @@ import { NavLink, Outlet, useLocation, useNavigate } from 'react-router';
 import { useMe } from '@/api/queries';
 import { useResetWatch } from '@/lib/resetWatch';
 import { installDoodleVisibility, kickDoodle } from '@/lib/doodle';
+import { installDoodleFrames } from '@/lib/doodleFrames';
 import { installMouseDepth } from '@/lib/mouseDepth';
 import { qc } from '@/lib/queryClient';
 import { sfx } from '@/engines/sound.js';
@@ -68,7 +69,8 @@ export function Layout() {
     }, 1500);
     return () => clearTimeout(id);
   }, [uid]);
-  useEffect(installDoodleVisibility, []); // le doodle ne tourne que sur les images à l'écran
+  useEffect(installDoodleVisibility, []);
+  useEffect(installDoodleFrames, []); // doodle précalculé : plus de filtre en direct (fini le lag avec beaucoup de jetons) // le doodle ne tourne que sur les images à l'écran
   useEffect(installMouseDepth, []); // les blocs glissent un tout petit peu avec la souris (inventaire, combat…)
   useEffect(() => {
     // nouvelle page : toujours en haut (avant, on gardait parfois la position de la page d'avant)

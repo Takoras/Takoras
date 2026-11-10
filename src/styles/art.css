@@ -184,3 +184,11 @@ html.dd-kick img.px {
 img.px.dd-off {
   animation-play-state: paused !important;
 }
+
+/* doodle précalculé (lib/doodleFrames.ts) : l'image affiche ses 3 dessins déjà déformés, plus aucun filtre en direct */
+html.dd-js:not(.reduce-fx) img.px.dd-on {
+  animation: none !important;
+}
+html.reduce-fx img.px.dd-on {
+  content: normal !important;
+}

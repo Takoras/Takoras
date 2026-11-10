@@ -341,11 +341,14 @@ html.lock body {
 html.q-calm :is(*, *::before, *::after):not(img, #opening, #opening *, [aria-busy], [aria-busy] *) {
   animation-iteration-count: 1 !important;
 }
-/* patate : plus aucune animation ni transition, ni flou, ni lueur (tout s'affiche directement à sa place) */
+/* patate : plus aucune animation ni transition, ni flou, ni lueur. Les animations sautent directement à leur fin
+   (au lieu d'être supprimées) : ce qui apparaît en fondu (fiche d'un jeton…) s'affiche donc tout de suite. */
 html.q-potato *,
 html.q-potato *::before,
 html.q-potato *::after {
-  animation: none !important;
+  animation-duration: 0s !important;
+  animation-delay: 0s !important;
+  animation-iteration-count: 1 !important;
   transition: none !important;
   backdrop-filter: none !important;
   scroll-behavior: auto !important;

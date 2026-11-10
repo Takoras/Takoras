@@ -1,6 +1,6 @@
 // Environnement des moteurs portés de l'ancien site (ring, cinéma, motion) : les mêmes petits outils que les globales
 // d'autrefois (SETTINGS, t, esc, jetonOf…), mais branchés sur les réglages, les traductions et le catalogue React.
-import { locale, reducedFx as rfx, speedFactor, useSettings } from '@/lib/settings';
+import { locale, potatoFx, reducedFx as rfx, speedFactor, useSettings } from '@/lib/settings';
 import { dictOf, translate, type Key } from '@/i18n';
 import { hexRGB, jetonOf, SERIES, texOf, VARIANTS } from '@/data/jetons';
 import { sfx } from './sound.js';
@@ -10,7 +10,8 @@ export { hexRGB, jetonOf, SERIES, texOf, sfx };
 // Les moteurs lisent SETTINGS.lang, SETTINGS.speed… et l'ouverture auto écrit SETTINGS.autoMin / autoVars
 type St = ReturnType<typeof useSettings.getState>;
 export const SETTINGS = new Proxy({} as St, {
-  get: (_o, k) => useSettings.getState()[k as keyof St],
+  // qualité « patate » : l'ouverture est toujours instantanée (pas de transition, pas de fissures, pas de mouvement)
+  get: (_o, k) => (k === 'speed' && potatoFx() ? 'instant' : useSettings.getState()[k as keyof St]),
   set: (_o, k, v) => (useSettings.getState().set({ [k]: v } as Partial<St>), true),
 });
 export const reducedFx = () => rfx();
