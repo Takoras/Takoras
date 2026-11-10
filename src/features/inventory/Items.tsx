@@ -52,7 +52,7 @@ export default function Items() {
         </div>
       </header>
       <InvTabs />
-      <Effects />
+      <Effects reserve />
       {items.isError ? (
         <p className="muted">{t('ui.err_generic')}</p>
       ) : !items.data ? (

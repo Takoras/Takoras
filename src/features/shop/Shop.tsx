@@ -299,7 +299,7 @@ export default function Shop() {
           {t('ui.odds_info')}
         </Button>
       </header>
-      {user ? <Effects /> : null}
+      {user ? <Effects reserve /> : null}
       {data ? (
         <>
           <div className={s.top}>
