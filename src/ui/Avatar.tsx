@@ -52,7 +52,18 @@ export function Avatar({ pseudo, avatar, size = 40 }: { pseudo: string; avatar?:
   }
   const src = AVATARS[key];
   return (
-    <span className={s.av} style={{ width: size, height: size, fontSize: size / 2.4 }} aria-hidden>
+    // la photo sert aussi de fond à la pastille : si le doodle décale un peu l'image, on voit la photo dessous,
+    // jamais le fond sombre
+    <span
+      className={s.av}
+      style={{
+        width: size,
+        height: size,
+        fontSize: size / 2.4,
+        ...(src ? { backgroundImage: `url(${src})`, backgroundSize: 'cover', backgroundPosition: 'center' } : {}),
+      }}
+      aria-hidden
+    >
       {src ? <img className="px" src={src} alt="" /> : (pseudo[0] ?? '?').toUpperCase()}
     </span>
   );
