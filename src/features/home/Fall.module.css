@@ -106,11 +106,11 @@
 }
 
 .coin:hover .tumble img {
-  scale: 1.06;
+  scale: calc(1.06 * var(--ts, 1));
 }
 
 .coin:active .tumble img {
-  scale: 0.94;
+  scale: calc(0.94 * var(--ts, 1));
 }
 
 @keyframes dropIn {

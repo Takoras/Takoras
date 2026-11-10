@@ -217,7 +217,8 @@ export function JetonModal({
               <span className={s.pin}>
                 <div
                   ref={coin}
-                  className={s.coin}
+                  // « jm-coin » : la pièce entière (dessin + reflet) est agrandie ici, pas l'image seule (lib/gridCss.ts)
+                  className={`${s.coin} jm-coin`}
                   onPointerMove={tilt}
                   onPointerLeave={untilt}
                   style={texScale(j) !== 1 ? { scale: String(texScale(j)) } : undefined}

@@ -4,103 +4,103 @@
       "name": "Mobu",
       "odds": 2,
       "glow": "#8fb3c4",
-      "img": "/img/jetons/serie-takoras/mobu.png"
+      "img": "/img/jetons/serie-takoras/mobu.png?g=80"
     },
     {
       "name": "Pikko",
       "odds": 4,
       "glow": "#f0a3b0",
-      "img": "/img/jetons/serie-takoras/pikko.png"
+      "img": "/img/jetons/serie-takoras/pikko.png?g=80"
     },
     {
       "name": "Rouillé",
       "odds": 10,
       "glow": "#d2603a",
-      "img": "/img/jetons/serie-takoras/rouille.png"
+      "img": "/img/jetons/serie-takoras/rouille.png?g=80"
     },
     {
       "name": "Givre",
       "odds": 25,
       "glow": "#a5b4fc",
-      "img": "/img/jetons/serie-takoras/givre.png"
+      "img": "/img/jetons/serie-takoras/givre.png?g=80"
     },
     {
       "name": "Soléo",
       "odds": 60,
       "glow": "#f0805c",
-      "img": "/img/jetons/serie-takoras/soleo.png"
+      "img": "/img/jetons/serie-takoras/soleo.png?g=80"
     },
     {
       "name": "Azura",
       "odds": 150,
       "glow": "#7c7cc4",
-      "img": "/img/jetons/serie-takoras/azura.png"
+      "img": "/img/jetons/serie-takoras/azura.png?g=80"
     },
     {
       "name": "Carmin",
       "odds": 400,
       "glow": "#d0408f",
-      "img": "/img/jetons/serie-takoras/carmin.png"
+      "img": "/img/jetons/serie-takoras/carmin.png?g=80"
     },
     {
       "name": "Vyolis",
       "odds": 1000,
       "glow": "#c9a6f2",
-      "img": "/img/jetons/serie-takoras/vyolis.png"
+      "img": "/img/jetons/serie-takoras/vyolis.png?g=80"
     },
     {
       "name": "Lumis",
       "odds": 2500,
       "glow": "#f7a8d8",
-      "img": "/img/jetons/serie-takoras/lumis.png"
+      "img": "/img/jetons/serie-takoras/lumis.png?g=80"
     },
     {
       "name": "Nyx",
       "odds": 5000,
       "glow": "#7c8cf8",
-      "img": "/img/jetons/serie-takoras/nyx.png"
+      "img": "/img/jetons/serie-takoras/nyx.png?g=80"
     },
     {
       "name": "Astra",
       "odds": 10000,
       "glow": "#f6d39a",
-      "img": "/img/jetons/serie-takoras/astra.png"
+      "img": "/img/jetons/serie-takoras/astra.png?g=80"
     },
     {
       "name": "Kraïos",
       "odds": 25000,
       "glow": "#3d3fa8",
-      "img": "/img/jetons/serie-takoras/kraios.gif"
+      "img": "/img/jetons/serie-takoras/kraios.gif?g=80"
     },
     {
       "name": "Koi",
       "odds": 50000,
       "glow": "#f0453a",
-      "img": "/img/jetons/serie-takoras/koi.png"
+      "img": "/img/jetons/serie-takoras/koi.png?g=80"
     },
     {
       "name": "Néphéris",
       "odds": 100000,
       "glow": "#f08a3c",
-      "img": "/img/jetons/serie-takoras/nepheris.gif?v=2"
+      "img": "/img/jetons/serie-takoras/nepheris.gif?g=80"
     },
     {
       "name": "Zénith",
       "odds": 250000,
       "glow": "#d9364f",
-      "img": "/img/jetons/serie-takoras/zenith.gif"
+      "img": "/img/jetons/serie-takoras/zenith.gif?g=80"
     },
     {
       "name": "Oblivion",
       "odds": 500000,
       "glow": "#3fc7b6",
-      "img": "/img/jetons/serie-takoras/oblivion.gif"
+      "img": "/img/jetons/serie-takoras/oblivion.gif?g=80"
     },
     {
       "name": "Takoras",
       "odds": 1000000,
       "glow": "#3cc8ea",
-      "img": "/img/jetons/serie-takoras/takoras.gif"
+      "img": "/img/jetons/serie-takoras/takoras.gif?g=80"
     }
   ],
   "Bodako": [
@@ -108,13 +108,13 @@
       "name": "Mousse",
       "odds": 2,
       "glow": "#b8e08a",
-      "img": "/img/jetons/serie-bodako/mousse.png"
+      "img": "/img/jetons/serie-bodako/mousse.png?g=80"
     },
     {
       "name": "Ronce",
       "odds": 5000,
       "glow": "#5fae7e",
-      "img": "/img/jetons/serie-bodako/ronce.png"
+      "img": "/img/jetons/serie-bodako/ronce.png?g=80"
     }
   ]
 }

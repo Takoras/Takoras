@@ -127,7 +127,9 @@ async function pump() {
       if (bw < 4 || bh < 4) continue;
       const zoom = (img as HTMLImageElement & { currentCSSZoom?: number }).currentCSSZoom ?? 1;
       const small = bw * zoom <= 52 || !!img.closest('.mini, .small');
-      const dpr = Math.min(3, (devicePixelRatio || 1) * zoom);
+      // l'image peut être agrandie en CSS (dessins 80×80) : on dessine à la taille vraiment affichée
+      const sc = parseFloat(getComputedStyle(img).scale) || 1;
+      const dpr = Math.min(4, (devicePixelRatio || 1) * zoom * sc);
       const fit = getComputedStyle(img).objectFit;
       const key = `${img.currentSrc || img.src}|${bw}x${bh}|${fit}|${small ? 1 : 0}|${dpr.toFixed(2)}`;
       let p = cache.get(key);

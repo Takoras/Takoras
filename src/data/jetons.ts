@@ -7,8 +7,14 @@ export const TEMPLATE = '/img/jetons/template.png';
 export const MYSTERE = '/img/jetons/mystere.png';
 
 export const texOf = (j: Pick<Jeton, 'img'>) => j.img ?? TEMPLATE;
-// Néphéris est dessiné sur une grille de 74 au lieu de 64 : on agrandit l'image d'autant
-export const texScale = (j?: Pick<Jeton, 'grid'>) => (j?.grid ?? 64) / 64;
+// Les dessins de jetons sont sur une grille de 80×80 (le jeton au centre, de la place autour pour ses effets).
+// Le corps d'un jeton fait toujours la taille d'un ancien dessin 64×64 : on affiche donc l'image 80/64 fois plus grande
+// que sa case. (Le modèle et le mystère restent en 64.) Un dessin sur une autre grille peut le préciser avec « grid ».
+export const GRID = 80;
+export const texScale = (j?: Pick<Jeton, 'grid' | 'img'>) => (j?.grid ?? (j?.img ? GRID : 64)) / 64;
+// même chose à partir d'une adresse d'image (canvas, moteurs)
+export const isGridImg = (src?: string) => !!src && src.includes('/img/jetons/serie-');
+export const srcScale = (src?: string) => (isGridImg(src) ? GRID / 64 : 1);
 export const hexRGB = (h: string) => [1, 3, 5].map((i) => parseInt(h.slice(i, i + 2), 16)).join(', ');
 
 // Un jeton par son nom (et sa collection si on la connaît)

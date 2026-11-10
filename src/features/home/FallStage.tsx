@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState } from 'react';
 import { createPortal } from 'react-dom';
-import { SERIES, texOf } from '@/data/jetons';
+import { SERIES, texOf, texScale } from '@/data/jetons';
 import { reducedFx } from '@/lib/settings';
 import { serieTheme } from '@/engines/env';
 import { openPulls } from '../eco/openPulls';
@@ -32,9 +32,10 @@ export function FallRain({ serie }: { serie: string }) {
     type Sprite = { cv: HTMLCanvasElement; ox: number; oy: number };
     const sprites: (Sprite[] | null)[] = list.map(() => null);
     const hasFilter = 'filter' in (document.createElement('canvas').getContext('2d') ?? {});
-    const bake = (im: HTMLImageElement): Sprite[] =>
+    const bake = (im: HTMLImageElement, ts: number): Sprite[] =>
       LEVELS.map((b) => {
-        const pad = Math.ceil(b * 2.5);
+        // dessin 80×80 : l'image est plus grande que le jeton (le vide autour), le corps garde sa taille
+        const pad = Math.ceil(b * 2.5) + Math.ceil((S * (ts - 1)) / 2);
         const c = document.createElement('canvas');
         c.width = S + pad * 2;
         c.height = Math.round(S * 1.9) + pad * 2;
@@ -45,14 +46,15 @@ export function FallRain({ serie }: { serie: string }) {
           // traînée sous le jeton (le monde monte, donc ce qu'il laisse derrière est en bas)
           for (let k = 5; k >= 0; k--) {
             g.globalAlpha = k ? 0.32 / k : 1;
-            g.drawImage(im, pad, pad + k * S * 0.15, S, S);
+            const e = (S * (ts - 1)) / 2;
+            g.drawImage(im, pad - e, pad - e + k * S * 0.15, S * ts, S * ts);
           }
         }
         return { cv: c, ox: pad + S / 2, oy: pad + S / 2 };
       });
     list.forEach((j, i) => {
       const im = new Image();
-      im.onload = () => (sprites[i] = bake(im));
+      im.onload = () => (sprites[i] = bake(im, texScale(j)));
       im.src = texOf(j);
     });
     // trait de vitesse pré-dessiné (un dégradé), juste étiré à chaque image

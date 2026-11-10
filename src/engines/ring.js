@@ -1147,14 +1147,14 @@ function rgToken(c, b, t, fall) {
   const spin = RNG.spin[b.id] || 0, im = rgImg(b.name);
   c.translate(x, y); c.rotate(spin * .5); c.imageSmoothingEnabled = false;
   if (b.variant && VFILTER[b.variant]) c.filter = VFILTER[b.variant];
-  if (im.complete && im.naturalWidth) { const sz = rr * 2.08 * ((jetonOf(b.name).grid || 64) / 64), d = rgDoodle(im, b.name), k = d ? sz * d.k : sz; c.drawImage(d || im, -k / 2, -k / 2, k, k); }
+  if (im.complete && im.naturalWidth) { const jb = jetonOf(b.name), sz = rr * 2.08 * ((jb.grid || (jb.img ? 80 : 64)) / 64), d = rgDoodle(im, b.name), k = d ? sz * d.k : sz; c.drawImage(d || im, -k / 2, -k / 2, k, k); }
   else { c.fillStyle = sideCol(b).md; c.beginPath(); c.arc(0, 0, rr, 0, 7); c.fill(); }
   c.filter = 'none';
   c.restore();
   // Takoras a un ennemi dans le ventre : petite bulle avec son portrait (son prochain tir le recrache)
   if (fall === false && !b.tmp && RNG.phase === 'aim') {
     const live = RNG.st?.bodies.find(z => z.id === b.id), held = live?.full != null ? RNG.st.bodies.find(z => z.id === live.full) : null;
-    if (held) { const hi = rgImg(held.name), br = Math.max(9, rr * .42), bx = x - rr * .7, by = y - rr * .9; c.save(); c.fillStyle = 'rgba(11,9,20,.85)'; c.strokeStyle = '#9fb6ff'; c.lineWidth = 2; c.beginPath(); c.arc(bx, by, br, 0, 7); c.fill(); c.stroke(); if (hi.complete && hi.naturalWidth) { c.imageSmoothingEnabled = false; c.drawImage(hi, bx - br * .8, by - br * .8, br * 1.6, br * 1.6); } c.restore(); }
+    if (held) { const hi = rgImg(held.name), br = Math.max(9, rr * .42), bx = x - rr * .7, by = y - rr * .9; c.save(); c.fillStyle = 'rgba(11,9,20,.85)'; c.strokeStyle = '#9fb6ff'; c.lineWidth = 2; c.beginPath(); c.arc(bx, by, br, 0, 7); c.fill(); c.stroke(); if (hi.complete && hi.naturalWidth) { c.imageSmoothingEnabled = false; const hs = br * 1.6 * (hi.src.includes('/img/jetons/serie-') ? 1.25 : 1); c.drawImage(hi, bx - hs / 2, by - hs / 2, hs, hs); } c.restore(); }
   }
 }
 
@@ -1335,7 +1335,7 @@ const RFX = (() => {
     // bandeau d'ult : bande en biais à la couleur du pouvoir, portrait du jeton, reflet qui balaie (même durée qu'avant)
     rgBanner(`<img class="px${vCls(b.variant)}" src="${texOf(jetonOf(b.name))}" alt=""><span><small>${b.side !== ME() ? '' : ''}${jnH(b.name)}</small>${rtL().pw[e.pw][0]}</span>`, col, false, 950, 'ult');
     burst(x, y, 30, col, 3.5); burst(x, y, 14, pc, 2.5);
-    if (!reducedFx()) { const im = rgImg(b.name), sz = b.r * RNG.view.s * 2.1; RNG.parts.push({ echo: true, im, x, y, size: sz, life: 1 }); setTimeout(() => RNG.parts.push({ echo: true, im, x, y, size: sz, life: .8 }), 140); }
+    if (!reducedFx()) { const im = rgImg(b.name), sz = b.r * RNG.view.s * 2.1 * (im.src.includes('/img/jetons/serie-') ? 1.25 : 1); RNG.parts.push({ echo: true, im, x, y, size: sz, life: 1 }); setTimeout(() => RNG.parts.push({ echo: true, im, x, y, size: sz, life: .8 }), 140); }
     if (e.pw === 'roots') vines = { side: b.side, t: 0, flash: [] };
     if (e.pw === 'anchor') { RNG.shake = 12; for (let k = 0; k < 24; k++) { const a = k / 24 * 6.283; part({ x, y, vx: Math.cos(a) * 3.2, vy: Math.sin(a) * 3.2, col: '#93c5fd', size: 4 }); } }
     if (e.pw === 'rescue') { const r = P.r.ev.find(z => z.t === 'rescue'); if (r) intro.rescue = P.bodies.find(z => z.id === r.id); }

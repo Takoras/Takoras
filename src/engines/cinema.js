@@ -49,6 +49,7 @@ const CINE = (() => {
   const tc = tintCv.getContext('2d'); tc.imageSmoothingEnabled = false;
   function coin(x, im, cx, cy, size, o = {}) {
     if (!im || !im.complete || !im.naturalWidth || size < 1) return;
+    if (im.src && im.src.includes('/img/jetons/serie-')) size *= 1.25; // dessin 80×80 : le corps garde sa taille
     const { ang = 0, alpha = 1, tint, tintA = 0, rot = 0 } = o;
     const c = Math.max(.05, Math.abs(Math.cos(ang)));
     let src = im;
@@ -905,7 +906,6 @@ const CINE = (() => {
       const x = cv.getContext('2d'); x.imageSmoothingEnabled = false;
       const img = new Image(); img.src = texOf(j);
       const mys = new Image(); mys.src = MYSTERE;
-      const TS = (j.grid || 64) / 64;
       // effets communs : flash coloré, écran blanc, tremblement, carton de texte
       let flashA = 0, flashC = '#ffffff', whiteA = 0, shakeA = 0;
       const fx = {
@@ -968,7 +968,7 @@ const CINE = (() => {
         rev.streaks.forEach(sk => { sk.r += sk.v; sk.v *= .97; sk.life -= .018; if (sk.life <= 0) return; x.strokeStyle = rgba(th.c[3], sk.life * .8); x.lineWidth = 1; x.beginPath(); x.moveTo(cx + Math.cos(sk.a) * sk.r, ry + Math.sin(sk.a) * sk.r); x.lineTo(cx + Math.cos(sk.a) * (sk.r + sk.L * sk.life), ry + Math.sin(sk.a) * (sk.r + sk.L * sk.life)); x.stroke(); });
         const spinT = clamp(ms / 1500), ang = F.noSpin ? 0 : (1 - (1 - spinT) ** 4) * Math.PI * 12, bob = Math.sin(ms / 1000 * 2.4) * 2 * spinT;
         // le vrai sprite (animé si c'est un GIF, avec le doodle) posé par-dessus le canvas, à la même place
-        const k = cv.getBoundingClientRect().width / w, sz = size * TS * k;
+        const k = cv.getBoundingClientRect().width / w, sz = size * k; // (dessin 80×80 : l'image est agrandie par le CSS, lib/gridCss.ts)
         live.style.width = live.style.height = `${sz}px`;
         live.style.left = `${cv.offsetLeft + cx * k - sz / 2}px`;
         live.style.top = `${cv.offsetTop + (ry + bob) * k - sz / 2}px`;

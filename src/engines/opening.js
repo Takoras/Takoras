@@ -232,7 +232,7 @@ addEventListener('keydown', e => {
 // Jetons de la série Takoras — PROVISOIRES : même texture (template), seule la couleur du glow change.
 // Taille de la grille du dessin (64×64 pour la plupart). Un dessin plus grand (Néphéris : 74×74) est affiché un peu plus grand
 // pour que ses pixels fassent la même taille que ceux des autres jetons.
-const texScale = j => (j?.grid || 64) / 64;
+const texScale = j => (j?.grid || (j?.img ? 80 : 64)) / 64; // dessins sur la grille 80 (voir data/jetons.ts)
 // la liste des jetons vient de src/data/series.json (une seule source : avant, une vieille copie ici n'avait pas l'image de Takoras)
 const SKIP = 1 / 5; // environ 1 clic sur 5 saute discrètement une étape
 
@@ -1152,11 +1152,6 @@ $('auto-cfg')?.addEventListener('click', e => {
 });
 addEventListener('DOMContentLoaded', renderAutoCfg);
 
-// Jetons dessinés sur une grille plus grande : on les agrandit partout (sauf dans le jeton 3D et la fiche, déjà agrandis en entier)
-(function gridCSS() {
-  const css = Object.values(SERIES).flat().filter(j => j.img && texScale(j) !== 1)
-    .map(j => `img[src$="${j.img.split('/').pop()}"]:not(.spin img):not(.jm-coin img){scale:${texScale(j)}}`).join('');
-  if (css) document.head.appendChild(Object.assign(document.createElement('style'), { textContent: css }));
-})();
+// (l'agrandissement des dessins 80×80 dans les pages est fait par lib/gridCss.ts)
 
 export { buy, leave, canClose, startOpening, closeOpening, renderAutoCfg, renderDebug, debug, sess };
