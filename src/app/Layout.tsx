@@ -173,7 +173,7 @@ export function Layout() {
               <img className="px" src="/img/piece.png" alt="" width={20} height={20} />
               {/* le solde défile vers sa nouvelle valeur (dépense ou gain), au lieu de changer d'un coup */}
               {me.data ? (
-                <Tween value={me.data.coins} ms={900} format={(n) => Math.round(n).toLocaleString(locale())} />
+                <Tween value={me.data.coins} ms={1600} pow={5} format={(n) => Math.round(n).toLocaleString(locale())} />
               ) : me.isError ? (
                 '—'
               ) : (
