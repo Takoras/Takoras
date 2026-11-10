@@ -16,6 +16,7 @@ import { Modal } from '@/ui/Modal';
 import { Tween } from '@/ui/Tween';
 import { Announcements, openAnnHistory, unreadAnn, useAnn } from '@/features/social/Announcements';
 import { SocialLayer } from '@/features/social/SocialLayer';
+import { DebugPanel } from '@/features/admin/DebugPanel';
 import { BetaChip, BetaLayer, openPatchnotes } from '@/features/beta/Beta';
 import { openFeedback, openTester } from '@/features/beta/store';
 import { badgeOf, useFriends } from '@/features/social/social';
@@ -223,6 +224,8 @@ export function Layout() {
 
       <SocialLayer />
       <BetaLayer />
+      {/* admins : Ctrl+Q ouvre le menu debug de la page */}
+      <DebugPanel />
 
       <Modal open={more} onClose={() => openUI('more', false)} title={t('ui.more')}>
         <div className={s.sheet}>

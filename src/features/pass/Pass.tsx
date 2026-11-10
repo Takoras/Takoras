@@ -7,7 +7,6 @@ import { useAuth } from '@/lib/auth';
 import { locale, reducedFx, useSettings } from '@/lib/settings';
 import { useT } from '@/i18n/useT';
 import { NeedLogin } from '@/app/NeedLogin';
-import { useMe } from '@/api/queries';
 import { Button } from '@/ui/Button';
 import { Modal } from '@/ui/Modal';
 import { PixelBg } from '@/ui/PixelBg';
@@ -68,7 +67,6 @@ export default function Pass() {
   const [tab, setTab] = useState<'rewards' | 'missions'>('rewards');
   const [premOpen, setPremOpen] = useState(false);
   const [busy, setBusy] = useState(false);
-  const me = useMe();
   const q = useQuery({
     queryKey: ['pass', user?.id],
     enabled: !!user,
@@ -413,7 +411,7 @@ export default function Pass() {
           <div className={s.top}>
             {/* ta progression : grand palier, barre d'XP qui glisse, et ce que tu gagnes au prochain */}
             <div className={s.hero}>
-              <PixelBg className={s.heroBg} odds={1000 + tier * 2000} glow="#f2c230" still={reducedFx()} />
+              <PixelBg className={s.heroBg} odds={1000 + tier * 2000} glow="#f2c230" still />
               <div className={s.lvl}>
                 <small>Palier</small>
                 <b>
@@ -449,21 +447,6 @@ export default function Pass() {
                   {nReady > 0 ? (
                     <Button variant="primary" onClick={() => void claimAll()} disabled={busy}>
                       Tout récupérer · {nReady}
-                    </Button>
-                  ) : null}
-                  {me.data?.admin ? (
-                    <Button
-                      size="sm"
-                      onClick={async () => {
-                        try {
-                          await passApi.adminMax();
-                          void q.refetch();
-                        } catch (err) {
-                          toast(errorText(err, lang), true);
-                        }
-                      }}
-                    >
-                      Admin · passe complet
                     </Button>
                   ) : null}
                 </div>

@@ -274,6 +274,7 @@ export type Database = {
       bp_claim: { Args: { p_tier: number; p_prem?: boolean }; Returns: Json };
       bp_claim_all: { Args: never; Returns: Json };
       admin_bp_max: { Args: never; Returns: Json };
+      admin_debug: { Args: { p_action: string; p_n?: number; p_item?: string }; Returns: Json };
       starter_choices: { Args: never; Returns: Json };
       starter_pick: { Args: { p_jeton: string }; Returns: Json };
       starter_quest_claim: { Args: never; Returns: Json };

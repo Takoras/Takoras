@@ -1,0 +1,74 @@
+/* Menu debug des admins (Ctrl+Q) : petit panneau flottant en bas à gauche, au-dessus de tout */
+.panel {
+  position: fixed;
+  left: calc(var(--rail-w, 104px) + 16px);
+  bottom: 16px;
+  z-index: 200;
+  display: grid;
+  gap: var(--s-3);
+  width: min(320px, calc(100vw - 32px));
+  max-height: calc(100dvh - 32px);
+  overflow-y: auto;
+  padding: var(--s-4);
+  border-radius: 14px;
+  background: #15151f;
+  color: var(--text);
+  font-size: var(--fs-sm);
+  animation: dbgIn 0.2s ease-out;
+}
+@keyframes dbgIn {
+  from {
+    opacity: 0;
+    translate: 0 8px;
+  }
+}
+.panel header {
+  display: flex;
+  align-items: center;
+  gap: var(--s-2);
+}
+.panel header small {
+  padding: 1px 6px;
+  border-radius: 6px;
+  background: rgb(255 255 255 / 7%);
+  color: var(--muted);
+  font-size: var(--fs-xs);
+}
+.x {
+  margin-left: auto;
+  border: 0;
+  background: none;
+  color: var(--muted);
+  font-size: 20px;
+  line-height: 1;
+  cursor: pointer;
+}
+.panel h3 {
+  margin: 0 0 6px;
+  color: var(--gold);
+  font-size: var(--fs-xs);
+  text-transform: uppercase;
+  letter-spacing: var(--tracking-caps);
+}
+.btns {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+.btns button {
+  padding: 6px 10px;
+  border: 0;
+  border-radius: 8px;
+  background: rgb(255 255 255 / 6%);
+  color: var(--text);
+  font: inherit;
+  font-size: var(--fs-xs);
+  cursor: pointer;
+}
+.btns button:hover:not(:disabled) {
+  background: rgb(61 107 255 / 30%);
+}
+.btns button:disabled {
+  opacity: 0.5;
+  cursor: progress;
+}
