@@ -48,6 +48,8 @@ const ERR: Record<string, Key> = {
   self: 'ui.err_self',
   pseudo_taken: 'ui.err_pseudo_taken',
   bad_pseudo: 'ui.err_pseudo',
+  offensive: 'ui.err_offensive',
+  self_report: 'ui.err_self',
   pseudo_cooldown: 'ui.err_pseudo_cd',
   deck_incomplete: 'ui.err_deck',
   quest_not_done: 'ui.err_quest',

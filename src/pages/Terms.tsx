@@ -4,7 +4,7 @@ import { LegalDoc, type Doc } from './LegalDoc';
 // propres conditions générales de vente (CGV), avec le droit de rétractation et la médiation de la consommation.
 const FR: Doc = {
   title: 'Conditions générales d’utilisation',
-  updated: 'Dernière mise à jour : 4 novembre 2026',
+  updated: 'Dernière mise à jour : 10 novembre 2026',
   intro:
     'Les présentes conditions générales d’utilisation (ci-après les « CGU ») encadrent l’accès et l’utilisation du site et du jeu Takoras (ci-après le « Service »), édité par l’éditeur désigné dans les mentions légales (ci-après « l’Éditeur »). Créer un compte ou utiliser le Service implique l’acceptation pleine et entière des présentes CGU et de la politique de confidentialité.',
   blocks: [
@@ -48,8 +48,12 @@ const FR: Doc = {
       ],
     ],
     [
-      '7. Sanctions',
+      '7. Modération et sanctions',
       [
+        '7.1. Contenus interdits : le pseudo, la bio et tout texte visible par les autres joueurs ne doivent contenir ni insulte, ni contenu sexuel, violent, haineux ou discriminatoire, ni données personnelles, ni usurpation d’identité. Un filtre automatique refuse à l’enregistrement les textes contenant des mots interdits.',
+        '7.2. Signalement : tout joueur peut signaler un autre joueur (pseudo, bio, profil, triche) avec le bouton « Signaler » de son profil. Chaque signalement est examiné par l’Éditeur, qui peut demander des précisions.',
+        '7.3. Mesures : selon la gravité, l’Éditeur peut modifier ou supprimer le texte en cause (par exemple renommer le compte ou vider la bio), retirer les contenus virtuels obtenus de manière irrégulière, annuler une progression ou un classement, suspendre temporairement ou bannir définitivement le compte.',
+        '7.4. Contestation : l’utilisateur concerné peut contester une mesure en contactant l’Éditeur (bouton « Donner un avis » ou coordonnées des mentions légales). L’Éditeur réexamine la décision et y répond.',
         'En cas de manquement aux présentes CGU, l’Éditeur peut, selon la gravité et après avoir, lorsque c’est possible, permis à l’utilisateur de s’expliquer : retirer les contenus virtuels obtenus de manière irrégulière, annuler une progression ou un classement, suspendre temporairement ou bannir définitivement le compte.',
       ],
     ],
@@ -94,7 +98,7 @@ const FR: Doc = {
 
 const EN: Doc = {
   title: 'Terms of use',
-  updated: 'Last updated: 4 November 2026',
+  updated: 'Last updated: 10 November 2026',
   intro:
     'These terms of use (the “Terms”) govern access to and use of the Takoras website and game (the “Service”), published by the publisher named in the legal notice (the “Publisher”). Creating an account or using the Service means fully accepting these Terms and the privacy policy.',
   blocks: [
@@ -138,8 +142,12 @@ const EN: Doc = {
       ],
     ],
     [
-      '7. Sanctions',
+      '7. Moderation and sanctions',
       [
+        '7.1. Forbidden content: usernames, bios and any text visible to other players must not contain insults, sexual, violent, hateful or discriminatory content, personal data or impersonation. An automatic filter rejects texts containing forbidden words when they are saved.',
+        '7.2. Reporting: any player can report another player (username, bio, profile, cheating) using the “Report” button on their profile. Each report is reviewed by the Publisher, who may ask for details.',
+        '7.3. Measures: depending on severity, the Publisher may edit or remove the text in question (for example rename the account or clear the bio), remove improperly obtained virtual content, cancel progress or a ranking, temporarily suspend or permanently ban the account.',
+        '7.4. Appeals: the user concerned can contest a measure by contacting the Publisher (“Feedback” button or the details in the legal notice). The Publisher reviews the decision and replies.',
         'If these Terms are breached, the Publisher may, depending on severity and, where possible, after letting the user explain: remove improperly obtained virtual content, cancel progress or a ranking, temporarily suspend or permanently ban the account.',
       ],
     ],

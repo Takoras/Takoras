@@ -151,7 +151,11 @@ export type Database = {
       admin_codes: { Args: never; Returns: Json };
       admin_delete_announcement: { Args: { p_id: number }; Returns: undefined };
       admin_delete_message: { Args: { p_id: number }; Returns: undefined };
+      admin_clear_bio: { Args: { target: string }; Returns: undefined };
       admin_feedback: { Args: never; Returns: Json };
+      admin_report_set: { Args: { p_id: number; p_status: string }; Returns: undefined };
+      admin_reports: { Args: never; Returns: Json };
+      report_player: { Args: { p_pseudo: string; p_reason: string; p_detail: string }; Returns: undefined };
       admin_feedback_set: { Args: { p_id: number; p_status: string }; Returns: undefined };
       admin_give: { Args: { p_coins?: number; p_pulls?: number; target: string | null }; Returns: number };
       admin_give_item: { Args: { p_item: string; target: string }; Returns: undefined };

@@ -93,6 +93,8 @@ export const questApi = {
 export const socialApi = {
   friends: () => rpc('my_friends'),
   request: (p_pseudo: string) => rpc('friend_request', { p_pseudo }),
+  report: (p_pseudo: string, p_reason: string, p_detail: string) =>
+    rpc('report_player', { p_pseudo, p_reason, p_detail }),
   respond: (p_other: string, p_accept: boolean) => rpc('friend_respond', { p_other, p_accept }),
   remove: (p_other: string) => rpc('friend_remove', { p_other }),
   status: (p_pseudo: string) => rpc('friend_status', { p_pseudo }),
@@ -154,6 +156,9 @@ export const adminApi = {
   codeToggle: (p_code: string, p_active: boolean) => rpc('admin_code_toggle', { p_code, p_active }),
   feedback: () => rpc('admin_feedback'),
   feedbackSet: (p_id: number, p_status: string) => rpc('admin_feedback_set', { p_id, p_status }),
+  reports: () => rpc('admin_reports'),
+  reportSet: (p_id: number, p_status: string) => rpc('admin_report_set', { p_id, p_status }),
+  clearBio: (target: string) => rpc('admin_clear_bio', { target }),
   setBeta: (p_on: boolean) => rpc('admin_set_beta', { p_on }),
   patchnoteSave: (a: { p_id: number | null; p_title: string; p_lines: Json; p_title_en?: string; p_lines_en?: Json }) =>
     rpc('admin_patchnote_save', a),

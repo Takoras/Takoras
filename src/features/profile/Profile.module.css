@@ -704,3 +704,41 @@ ul.collGrid {
   max-height: none;
   overflow: visible;
 }
+
+/* Signaler un joueur : la raison (une seule), un détail facultatif */
+.report {
+  display: grid;
+  gap: var(--s-4);
+}
+.report fieldset {
+  display: grid;
+  gap: var(--s-2);
+  border: 0;
+  padding: 0;
+  margin: 0;
+}
+.reportOpt {
+  display: flex;
+  align-items: center;
+  gap: var(--s-3);
+  padding: var(--s-2) var(--s-3);
+  border: 1px solid rgb(255 255 255 / 10%);
+  border-radius: 8px;
+  cursor: pointer;
+}
+.reportOpt:has(input:checked) {
+  border-color: var(--accent-hi);
+  background: color-mix(in srgb, var(--accent) 14%, transparent);
+}
+.reportOpt input {
+  accent-color: var(--accent);
+}
+.reportDetail {
+  display: grid;
+  gap: var(--s-1);
+  font-size: var(--fs-sm);
+  color: var(--text-2);
+}
+.reportDetail textarea {
+  resize: vertical;
+}

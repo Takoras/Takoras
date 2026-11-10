@@ -5,13 +5,14 @@ import { ShopAdmin } from './ShopAdmin';
 import { Announce } from './Announce';
 import { Codes } from './Codes';
 import { FeedbackAdmin } from './FeedbackAdmin';
+import { ReportsAdmin } from './ReportsAdmin';
 import { PatchnotesAdmin } from './PatchnotesAdmin';
 import { Tests } from './Tests';
 import { Button } from '@/ui/Button';
 import { setPreview } from '@/lib/preview';
 import s from './Admin.module.css';
 
-// Panel admin : 8 onglets (comme l'ancien site). Réservé aux admins, en français (outil interne).
+// Panel admin : 9 onglets (comme l'ancien site). Réservé aux admins, en français (outil interne).
 const TABS = [
   ['players', '👥 Joueurs'],
   ['global', '🌍 Global'],
@@ -19,6 +20,7 @@ const TABS = [
   ['ann', '📢 Annonces'],
   ['codes', '🎟️ Codes promo'],
   ['fb', '💡 Retours'],
+  ['rep', '🚩 Signalements'],
   ['pn', '📜 Patch notes'],
   ['tests', '🧪 Tests'],
 ] as const;
@@ -49,6 +51,7 @@ export default function Admin() {
         {tab === 'ann' ? <Announce /> : null}
         {tab === 'codes' ? <Codes /> : null}
         {tab === 'fb' ? <FeedbackAdmin /> : null}
+        {tab === 'rep' ? <ReportsAdmin /> : null}
         {tab === 'pn' ? <PatchnotesAdmin /> : null}
         {tab === 'tests' ? <Tests /> : null}
       </div>

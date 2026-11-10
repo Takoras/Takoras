@@ -24,6 +24,7 @@ import { JetonModal } from '../inventory/JetonModal';
 import { useInventory } from '../inventory/inv';
 import { NeedLogin } from '@/app/NeedLogin';
 import { FriendButton } from '../social/FriendButton';
+import { ReportButton } from './ReportButton';
 import { RankBadge, useRankName } from '../combat/Ranked';
 import { rankOf } from '../combat/rankedApi';
 import iv from '../inventory/Inventory.module.css';
@@ -119,7 +120,10 @@ export default function Profile() {
                 {t('ui.edit_profile')}
               </Button>
             ) : user ? (
-              <FriendButton pseudo={p.pseudo} />
+              <>
+                <FriendButton pseudo={p.pseudo} />
+                <ReportButton pseudo={p.pseudo} />
+              </>
             ) : null}
           </div>
         </div>
