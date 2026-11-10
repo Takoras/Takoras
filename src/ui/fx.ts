@@ -45,16 +45,20 @@ export function shockwave(r: DOMRect, color: string, radius = 16, delay = 0, gro
 
 // Pièces qui jaillissent de la case et s'envolent vers le solde (en haut à droite), en ralentissant à l'arrivée.
 export function flyCoins(from: DOMRect, n: number, onLand: (i: number) => void) {
-  const target = document.querySelector<HTMLElement>('[data-coin-target]');
+  flyIcons(from, '/img/piece.png', n, '[data-coin-target]', onLand);
+}
+
+// Même vol pour n'importe quelle image (ex. un objet gagné qui file vers l'inventaire)
+export function flyIcons(from: DOMRect, src: string, n: number, sel: string, onLand: (i: number) => void, size = 30) {
+  const target = [...document.querySelectorAll<HTMLElement>(sel)].find((x) => x.getClientRects().length);
   const t = target?.getBoundingClientRect();
-  const ex = t ? t.left + 22 : innerWidth - 120;
+  const ex = t ? t.left + Math.min(22, t.width / 2) : innerWidth - 120;
   const ey = t ? t.top + t.height / 2 : 28;
   const sx = from.left + from.width / 2;
   const sy = from.top + from.height / 2;
-  const size = 30;
   for (let i = 0; i < n; i++) {
     const img = document.createElement('img');
-    img.src = '/img/piece.png';
+    img.src = src;
     img.alt = '';
     img.width = size;
     img.height = size;
@@ -66,6 +70,7 @@ export function flyCoins(from: DOMRect, n: number, onLand: (i: number) => void) 
       width: `${size}px`,
       height: `${size}px`,
       imageRendering: 'pixelated',
+      objectFit: 'contain',
       pointerEvents: 'none',
       zIndex: '61',
       opacity: '0',
@@ -111,7 +116,8 @@ export function flyCoins(from: DOMRect, n: number, onLand: (i: number) => void) 
       )
       .then(() => {
         onLand(i);
-        if (target) target.animate([{ scale: '1' }, { scale: '1.14' }, { scale: '1' }], { duration: 280, easing: 'ease-out' });
+        if (target)
+          target.animate([{ scale: '1' }, { scale: '1.14' }, { scale: '1' }], { duration: 280, easing: 'ease-out' });
         return img.animate([{ opacity: 1 }, { opacity: 0 }], { duration: 120, fill: 'forwards' }).finished;
       })
       .catch(() => onLand(i))

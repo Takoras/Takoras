@@ -123,6 +123,7 @@ export function Layout() {
             <NavLink
               key={n.to}
               to={n.to}
+              data-inv-target={n.to === '/inventory' ? '' : undefined}
               end={n.to === '/'}
               className={({ isActive }) => `${s.railItem} ${isActive ? s.on : ''}`}
             >
