@@ -235,7 +235,8 @@ export default function Shop() {
   };
 
   const items = data?.items ?? [];
-  const list = items.filter((it) => catOf(it) === cat);
+  // la grille du bas : le rayon choisi, sans l'objet à la une (il est déjà en grand en haut)
+  const list = items.filter((it, i) => catOf(it) === cat && slotOf(it, i) !== data?.featured_slot);
   // la vedette : sa case (révélée ou non) et sa réduction, tirées par le serveur
   const fSlot = data?.featured_slot ?? null;
   const fIdx = fSlot == null ? -1 : items.findIndex((x, i) => slotOf(x, i) === fSlot);
@@ -277,9 +278,7 @@ export default function Shop() {
                     <img className="px" src={c.icon} alt="" />
                     <span>
                       <b>{t(c.label)}</b>
-                      <small>
-                        {t('ui.shop_rev', { n: inCat.filter((x) => !isHidden(x)).length, m: inCat.length })}
-                      </small>
+                      <small>{inCat.length}</small>
                     </span>
                   </button>
                 );
