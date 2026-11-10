@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- Pages publiques de Takoras (les autres demandent un compte) -->
+<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
+  <url><loc>https://takoras.com/</loc><changefreq>weekly</changefreq><priority>1.0</priority></url>
+  <url><loc>https://takoras.com/shop</loc><changefreq>daily</changefreq><priority>0.6</priority></url>
+  <url><loc>https://takoras.com/legal</loc><changefreq>yearly</changefreq><priority>0.2</priority></url>
+  <url><loc>https://takoras.com/terms</loc><changefreq>yearly</changefreq><priority>0.2</priority></url>
+  <url><loc>https://takoras.com/privacy</loc><changefreq>yearly</changefreq><priority>0.2</priority></url>
+</urlset>

@@ -143,11 +143,7 @@ export default function Shop() {
       const st = await shopApi.buy(it.id);
       qc.setQueryData(['me', user?.id], (old: object | undefined) => ({ ...old, ...(st as object) }));
       sfx.upgrade();
-      const name = itemText(it, lang)[0];
-      toast(
-        t('ui.bought', { n: name }) +
-          (it.kind === 'banner' ? '' : it.kind === 'avatar' ? ` → ${t('ui.edit_profile')}` : ` → ${t('ui.nav_inv')}`),
-      );
+      // pas de notification : l'animation de la case et le solde qui baisse suffisent
       // achat : la case se tasse doucement, l'objet s'élève et s'efface, puis revient (posé, sans à-coup)
       if (!reducedFx()) {
         card.animate([{ scale: '1' }, { scale: '0.97', offset: 0.4 }, { scale: '1' }], {

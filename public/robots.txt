@@ -1,0 +1,6 @@
+# Takoras : tout le site peut être visité par les moteurs de recherche, sauf le panel admin
+User-agent: *
+Allow: /
+Disallow: /admin
+
+Sitemap: https://takoras.com/sitemap.xml
