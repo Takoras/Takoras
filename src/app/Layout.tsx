@@ -8,7 +8,7 @@ import { installMouseDepth } from '@/lib/mouseDepth';
 import { qc } from '@/lib/queryClient';
 import { sfx } from '@/engines/sound.js';
 import { useAuth, signOut } from '@/lib/auth';
-import { locale, reducedFx } from '@/lib/settings';
+import { locale } from '@/lib/settings';
 import { useT } from '@/i18n/useT';
 import { Avatar } from '@/ui/Avatar';
 import { Button } from '@/ui/Button';
@@ -72,26 +72,6 @@ export function Layout() {
     // le doodle ne prenait parfois pas sur les images : on le relance une fois la page affichée
     [120, 1000, 3000].forEach((ms) => setTimeout(kickDoodle, ms)); // aussi quand les images arrivent plus tard
     sfx.page(); // petit souffle en changeant de page
-    if (reducedFx()) return;
-    const main = document.getElementById('main')?.firstElementChild;
-    if (!main) return;
-    const blocks = [...main.children].flatMap((c) =>
-      c.children.length > 1 && c.children.length < 14 ? [...c.children] : [c],
-    );
-    blocks.slice(0, 14).forEach((el, i) =>
-      el.animate(
-        [
-          { opacity: 0, translate: '0 18px' },
-          { opacity: 1, translate: '0 0' },
-        ],
-        {
-          duration: 520,
-          delay: 40 + i * 55,
-          easing: 'cubic-bezier(.2, .9, .3, 1)',
-          fill: 'backwards',
-        },
-      ),
-    );
   }, [pathname]);
   useEffect(() => openUI('more', false), [pathname]);
   const navigate = useNavigate();
