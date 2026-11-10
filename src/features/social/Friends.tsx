@@ -1,4 +1,4 @@
-import { useState, type FormEvent, type ReactNode } from 'react';
+import { useRef, useState, type FormEvent } from 'react';
 import { Link } from 'react-router';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { errorText, publicApi, socialApi } from '@/api';
@@ -7,19 +7,20 @@ import { sfx } from '@/engines/sound.js';
 import { useAuth } from '@/lib/auth';
 import { useSettings } from '@/lib/settings';
 import { useT } from '@/i18n/useT';
+import type { Key } from '@/i18n';
 import { Avatar } from '@/ui/Avatar';
 import { Button } from '@/ui/Button';
 import { confirm } from '@/ui/confirm';
 import { toast } from '@/ui/toast';
+import { useSwingAll } from '@/ui/useSwing';
+import { useStaggerIn } from '@/ui/useStaggerIn';
 import { NeedLogin } from '@/app/NeedLogin';
-import { friendRequest } from './FriendButton';
-import { dateOf, useFriends, type Friend } from './social';
-import s from './Social.module.css';
+import { useFriends, type Friend } from './social';
+import s from './Friends.module.css';
 
-type Tab = 'ok' | 'inc' | 'out';
-
-// Page Amis : à gauche ta carte (pseudo, ID à partager) et l'ajout par pseudo ;
-// à droite tes amis en cartes (en ligne, Elo, collection), les demandes reçues et envoyées.
+// Page Amis, même DA que la boutique et le passe : en haut ta carte (pseudo à partager) et l'ajout ;
+// les demandes reçues passent devant ; puis tes amis en cases (en ligne d'abord), qui se balancent au survol.
+// Pas de notification : chaque action se voit sur place (case qui part, bouton « Copié », message sous le champ).
 export default function Friends() {
   const t = useT();
   const lang = useSettings((x) => x.lang);
@@ -27,6 +28,8 @@ export default function Friends() {
   const me = useMe();
   const qc = useQueryClient();
   const fr = useFriends();
+  const pageRef = useRef<HTMLElement>(null);
+  const gridRef = useRef<HTMLUListElement>(null);
   const pseudo0 = me.data?.pseudo ?? '';
   const prof = useQuery({
     queryKey: ['profile', pseudo0],
@@ -35,32 +38,58 @@ export default function Friends() {
   });
   const [pseudo, setPseudo] = useState('');
   const [busy, setBusy] = useState(false);
-  const [tab, setTab] = useState<Tab | null>(null);
+  const [said, setSaid] = useState<{ txt: string; ok: boolean } | null>(null);
+  const [copied, setCopied] = useState(false);
+  useStaggerIn(pageRef, `.${s.head}, .${s.me}, .${s.addBox}, .${s.reqs} > li, .${s.grid} > li, .${s.sent}`, !!fr.data);
+  useSwingAll(pageRef, `.${s.card}, .${s.me}`, 0.45, fr.data);
   if (!user) return <NeedLogin title={t('ui.nav_friends')} />;
+
   const list = fr.data ?? [];
   const inc = list.filter((f) => f.incoming),
     out = list.filter((f) => f.status === 'pending' && !f.incoming),
-    ok = list.filter((f) => f.status === 'accepted');
+    // en ligne d'abord, puis par pseudo
+    ok = list
+      .filter((f) => f.status === 'accepted')
+      .sort((a, b) => Number(!!b.online) - Number(!!a.online) || a.pseudo.localeCompare(b.pseudo));
   const online = ok.filter((f) => f.online).length;
-  // onglet par défaut : les demandes reçues s'il y en a
-  const cur: Tab = tab ?? (inc.length ? 'inc' : 'ok');
   const reload = () => qc.invalidateQueries({ queryKey: ['friends'] });
+
+  // une case qui part (acceptée, refusée, retirée) : elle s'efface doucement avant la mise à jour
+  const leave = async (id: string) => {
+    const el = pageRef.current?.querySelector<HTMLElement>(`[data-fid="${id}"]`);
+    if (el)
+      await el
+        .animate([{ opacity: 1, scale: '1' }, { opacity: 0, scale: '.94' }], {
+          duration: 240,
+          easing: 'ease-in',
+          fill: 'forwards',
+        })
+        .finished.catch(() => undefined);
+  };
+
   const add = async (e: FormEvent) => {
     e.preventDefault();
     const v = pseudo.trim();
-    if (!v) return;
+    if (!v || busy) return;
     setBusy(true);
-    if (await friendRequest(v, lang, t)) setPseudo('');
+    try {
+      const r = await socialApi.request(v);
+      sfx.upgrade();
+      setSaid({ txt: t(`ui.fr_res_${r}` as Key, { n: v }), ok: true });
+      setPseudo('');
+    } catch (err) {
+      sfx.deny();
+      setSaid({ txt: errorText(err, lang), ok: false });
+    }
     setBusy(false);
     void reload();
   };
   const respond = async (f: Friend, yes: boolean) => {
     try {
       await socialApi.respond(f.id, yes);
-      if (yes) {
-        sfx.upgrade();
-        toast(t('ui.fr_now', { n: f.pseudo }));
-      } else sfx.click();
+      if (yes) sfx.upgrade();
+      else sfx.click();
+      await leave(f.id);
     } catch (err) {
       toast(errorText(err, lang), true);
     }
@@ -70,6 +99,7 @@ export default function Friends() {
     if (!(await confirm(t('ui.fr_remove_q', { n: f.pseudo }), { danger: true }))) return;
     try {
       await socialApi.remove(f.id);
+      await leave(f.id);
     } catch (err) {
       toast(errorText(err, lang), true);
     }
@@ -79,154 +109,163 @@ export default function Friends() {
     try {
       await navigator.clipboard.writeText(pseudo0);
       sfx.click();
-      toast('Pseudo copié : envoie-le à tes amis !');
+      setCopied(true);
+      setTimeout(() => setCopied(false), 1600);
     } catch {
-      toast(pseudo0);
+      /* presse-papier bloqué : le pseudo reste affiché, on peut le sélectionner */
     }
   };
-  const card = (f: Friend, actions: ReactNode) => (
-    <li key={f.id} className={`${s.frCard} ${f.online ? s.isOn : ''}`}>
-      <Link className={s.frAva} to={`/profile/${encodeURIComponent(f.pseudo)}`} tabIndex={-1} aria-hidden>
-        <Avatar pseudo={f.pseudo} avatar={f.avatar} size={56} />
-        {f.status === 'accepted' ? <i className={s.dotOn} /> : null}
-      </Link>
-      <div className={s.who}>
-        <Link to={`/profile/${encodeURIComponent(f.pseudo)}`}>{f.pseudo}</Link>
-        <small className="muted">
-          {f.status === 'accepted'
-            ? f.online
-              ? 'En ligne'
-              : f.last_at
-                ? t('ui.fr_last', { d: dateOf(f.last_at) })
-                : 'Hors ligne'
-            : f.incoming
-              ? t('ui.fr_wants')
-              : t('ui.fr_sent')}
-        </small>
-        {f.status === 'accepted' ? (
-          <span className={s.chips}>
-            {f.elo != null ? <b title="Elo">⚔ {f.elo}</b> : null}
-            {f.collection != null ? <b title="Jetons trouvés">◆ {f.collection}</b> : null}
-          </span>
-        ) : null}
-      </div>
-      {Number(f.unread) ? (
-        <i className={s.badge} aria-label={`${f.unread}`}>
-          {f.unread}
-        </i>
-      ) : null}
-      <div className={s.act}>{actions}</div>
-    </li>
-  );
-  const TABS: [Tab, string, number][] = [
-    ['ok', t('ui.fr_list'), ok.length],
-    ['inc', t('ui.fr_requests'), inc.length],
-    ['out', t('ui.fr_pending'), out.length],
-  ];
+  const status = (f: Friend) => (f.online ? 'En ligne' : 'Hors ligne');
+  const href = (p: string) => `/profile/${encodeURIComponent(p)}`;
+
   return (
-    <section className={s.frPage}>
-      <header className={s.frHead}>
+    <section ref={pageRef} className={s.page}>
+      <header className={s.head}>
         <h1>{t('ui.fr_title')}</h1>
-        <p className="muted">
-          {ok.length} ami{ok.length > 1 ? 's' : ''} · <span className={s.onTxt}>{online} en ligne</span>
-        </p>
+        <span className={s.chip}>
+          <i className={s.dot} aria-hidden />
+          {online} en ligne
+        </span>
+        <span className={s.chip}>
+          {ok.length} ami{ok.length > 1 ? 's' : ''}
+        </span>
       </header>
 
-      <aside className={s.frSide}>
-        {/* ta carte : ce qu'il faut donner à un ami pour qu'il t'ajoute */}
-        <div className={s.meCard}>
-          <Avatar pseudo={pseudo0 || '?'} avatar={prof.data?.avatar} size={72} />
-          <div>
-            <small className="muted">Ton pseudo</small>
+      <div className={s.top}>
+        {/* ta carte : ce qu'un ami doit taper pour t'ajouter */}
+        <div className={s.me}>
+          <Avatar pseudo={pseudo0 || '?'} avatar={prof.data?.avatar} size={84} />
+          <div className={s.meTxt}>
             <b>{pseudo0 || '…'}</b>
-            {prof.data?.num ? <small className={s.meId}>ID #{prof.data.num}</small> : null}
+            {prof.data?.num ? <small>#{String(prof.data.num).padStart(6, '0')}</small> : null}
           </div>
           <Button size="sm" onClick={() => void copy()} disabled={!pseudo0}>
-            Copier
+            {copied ? 'Copié ✓' : 'Copier mon pseudo'}
           </Button>
         </div>
         <form className={s.addBox} onSubmit={(e) => void add(e)}>
-          <h2 className={s.h2}>Ajouter un ami</h2>
-          <p className="muted">Entre son pseudo exact : il recevra ta demande.</p>
+          <label htmlFor="fr-add">Ajouter un ami</label>
           <div className={s.add}>
             <input
+              id="fr-add"
               value={pseudo}
-              onChange={(e) => setPseudo(e.target.value)}
+              onChange={(e) => {
+                setPseudo(e.target.value);
+                setSaid(null);
+              }}
               placeholder={t('ui.fr_add_ph')}
               maxLength={16}
               autoComplete="off"
-              aria-label={t('ui.fr_add_ph')}
             />
-            <Button type="submit" variant="primary" loading={busy}>
-              {t('ui.fr_add')}
+            <Button type="submit" variant="primary" loading={busy} disabled={!pseudo.trim()}>
+              Ajouter
             </Button>
           </div>
+          <p className={`${s.said} ${said ? (said.ok ? s.saidOk : s.saidKo) : ''}`} role="status">
+            {said?.txt ?? ''}
+          </p>
         </form>
-      </aside>
+      </div>
 
-      <div className={s.frMain}>
-        <div className={s.frTabs} role="tablist" aria-label={t('ui.fr_title')}>
-          {TABS.map(([k, l, n]) => (
-            <button key={k} type="button" role="tab" aria-selected={cur === k} onClick={() => setTab(k)}>
-              {l}
-              {n ? <i className={k === 'inc' ? s.badge : s.cnt}>{n}</i> : null}
-            </button>
-          ))}
-        </div>
+      {inc.length ? (
+        <section className={s.block} aria-labelledby="fr-inc">
+          <h2 id="fr-inc">
+            {t('ui.fr_requests')} <i className={s.count}>{inc.length}</i>
+          </h2>
+          <ul className={s.reqs}>
+            {inc.map((f) => (
+              <li key={f.id} data-fid={f.id} className={s.req}>
+                <Link to={href(f.pseudo)} className={s.reqWho}>
+                  <Avatar pseudo={f.pseudo} avatar={f.avatar} size={48} />
+                  <span>
+                    <b>{f.pseudo}</b>
+                    <small>{t('ui.fr_wants')}</small>
+                  </span>
+                </Link>
+                <Button size="sm" variant="primary" onClick={() => void respond(f, true)}>
+                  {t('ui.fr_accept')}
+                </Button>
+                <button
+                  type="button"
+                  className={s.x}
+                  onClick={() => void respond(f, false)}
+                  aria-label={`${t('ui.cancel')} · ${f.pseudo}`}
+                >
+                  ✕
+                </button>
+              </li>
+            ))}
+          </ul>
+        </section>
+      ) : null}
+
+      <section className={s.block} aria-labelledby="fr-list">
+        <h2 id="fr-list">{t('ui.fr_list')}</h2>
         {!fr.data ? (
           <p className="muted" aria-busy>
             …
           </p>
-        ) : cur === 'inc' ? (
-          inc.length ? (
-            <ul className={s.frGrid}>
-              {inc.map((f) =>
-                card(
-                  f,
-                  <>
-                    <Button size="sm" variant="primary" onClick={() => void respond(f, true)}>
-                      ✓ {t('ui.fr_accept')}
-                    </Button>
-                    <Button size="sm" onClick={() => void respond(f, false)} aria-label={t('ui.cancel')}>
-                      ✕
-                    </Button>
-                  </>,
-                ),
-              )}
-            </ul>
-          ) : (
-            <p className="muted">Aucune demande pour l’instant.</p>
-          )
-        ) : cur === 'out' ? (
-          out.length ? (
-            <ul className={s.frGrid}>
-              {out.map((f) =>
-                card(
-                  f,
-                  <Button size="sm" onClick={() => void respond(f, false)}>
-                    {t('ui.cancel')}
-                  </Button>,
-                ),
-              )}
-            </ul>
-          ) : (
-            <p className="muted">Aucune demande envoyée.</p>
-          )
         ) : ok.length ? (
-          <ul className={s.frGrid}>
-            {ok.map((f) =>
-              card(
-                f,
-                <Button size="sm" onClick={() => void remove(f)} aria-label={`${t('ui.fr_remove')} ${f.pseudo}`}>
+          <ul ref={gridRef} className={s.grid}>
+            {ok.map((f) => (
+              <li key={f.id} data-fid={f.id} className={`${s.card} ${f.online ? s.on : ''}`}>
+                <Link to={href(f.pseudo)} className={s.cardLink}>
+                  <span className={s.ava}>
+                    <Avatar pseudo={f.pseudo} avatar={f.avatar} size={76} />
+                    <i className={s.dot} aria-hidden />
+                  </span>
+                  <b className={s.name}>{f.pseudo}</b>
+                  <small className={s.st}>{status(f)}</small>
+                  <span className={s.stats}>
+                    {f.elo != null ? (
+                      <span>
+                        <b>{f.elo}</b> Elo
+                      </span>
+                    ) : null}
+                    {f.collection != null ? (
+                      <span>
+                        <b>{f.collection}</b> jetons
+                      </span>
+                    ) : null}
+                  </span>
+                </Link>
+                <button
+                  type="button"
+                  className={`${s.x} ${s.rm}`}
+                  onClick={() => void remove(f)}
+                  aria-label={`${t('ui.fr_remove')} ${f.pseudo}`}
+                >
                   ✕
-                </Button>,
-              ),
-            )}
+                </button>
+              </li>
+            ))}
           </ul>
         ) : (
-          <p className="muted">{t('ui.fr_empty')}</p>
+          <p className={s.empty}>{t('ui.fr_empty')}</p>
         )}
-      </div>
+      </section>
+
+      {out.length ? (
+        <section className={`${s.block} ${s.sent}`} aria-labelledby="fr-out">
+          <h2 id="fr-out">{t('ui.fr_pending')}</h2>
+          <ul className={s.sentList}>
+            {out.map((f) => (
+              <li key={f.id} data-fid={f.id}>
+                <Avatar pseudo={f.pseudo} avatar={f.avatar} size={28} />
+                <span>{f.pseudo}</span>
+                <button
+                  type="button"
+                  className={s.x}
+                  onClick={() => void respond(f, false)}
+                  aria-label={`${t('ui.cancel')} · ${f.pseudo}`}
+                >
+                  ✕
+                </button>
+              </li>
+            ))}
+          </ul>
+        </section>
+      ) : null}
     </section>
   );
 }

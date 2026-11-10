@@ -10,7 +10,8 @@ test('amis : pastille, accepter une demande, plus de chat', async ({ page, isMob
   void isMobile;
   await expect(page.getByRole('link', { name: /Amis/ }).first()).toContainText('1');
   await page.getByRole('button', { name: /Accepter/ }).click();
-  await expect(page.getByRole('status').getByText(/Nouveau/)).toBeVisible();
+  // plus de notification : la demande part de la liste
+  await expect(page.getByRole('heading', { name: /Demandes reçues/ })).toHaveCount(0);
   await expect(page.getByRole('button', { name: /Discuter|Chat/ })).toHaveCount(0);
 });
 
