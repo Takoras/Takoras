@@ -20,7 +20,7 @@ test('mon profil : stats, vitrine, modifier la bio et la photo', async ({ page }
   await page.getByLabel(/Bio/).fill('Coucou');
   await page.getByRole('button', { name: 'bleu', exact: true }).click();
   await page.getByRole('button', { name: 'Enregistrer' }).click();
-  await expect(page.getByText('Coucou')).toBeVisible();
+  await expect(page.getByRole('heading', { level: 1 }).locator('..').getByText('Coucou')).toBeVisible();
   expect(calls.filter((c) => c === 'update_profile')).toHaveLength(2);
 });
 

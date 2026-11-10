@@ -6,18 +6,20 @@ import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { accountApi, errorText, publicApi } from '@/api';
 import { useMe } from '@/api/queries';
 import { BANNER_IMG, bannerName } from '@/data/items';
-import { jetonOf, MYSTERE, SERIES, TEMPLATE, texOf, vImg, vOdds, glowVars, type Variant } from '@/data/jetons';
+import { hexRGB, jetonOf, MYSTERE, SERIES, TEMPLATE, texOf, vImg, vOdds, glowVars, type Variant } from '@/data/jetons';
 import { sfx } from '@/engines/sound.js';
 import { openUI } from '@/app/ui-store';
 import { AVATARS, FREE_PP } from '@/lib/avatars';
 import { signOut, useAuth } from '@/lib/auth';
 import { useJn } from '@/lib/names';
-import { locale, useSettings } from '@/lib/settings';
+import { locale, reducedFx, useSettings } from '@/lib/settings';
 import { useT } from '@/i18n/useT';
 import { Avatar, setAvatar } from '@/ui/Avatar';
 import { Button } from '@/ui/Button';
 import { confirm } from '@/ui/confirm';
 import { Modal } from '@/ui/Modal';
+import { PixelBg } from '@/ui/PixelBg';
+import { useStaggerIn } from '@/ui/useStaggerIn';
 import { toast } from '@/ui/toast';
 import { VTag } from '@/ui/VTag';
 import { JetonModal } from '../inventory/JetonModal';
@@ -55,8 +57,9 @@ export type Prof = {
   owned: number;
 };
 
-// Profil d'un joueur : bannière, photo, bio, stats, vitrine de 5 jetons et collection.
-// Sur son propre profil : modifier, choisir la vitrine, et la zone privée (compte, déconnexion).
+// Profil d'un joueur, même DA que la boutique et le passe : bannière (ou fond pixel à la couleur de son meilleur
+// jeton), carte du joueur avec son rang, chiffres en pastilles, meilleur tirage en trophée, vitrine de 5 cases
+// et bestiaires. Sur son propre profil : modifier (aperçu en direct), choisir la vitrine, et la zone privée.
 export default function Profile() {
   const t = useT();
   const jn = useJn();
@@ -76,6 +79,13 @@ export default function Profile() {
   const [slot, setSlot] = useState<number | null>(null);
   const [edit, setEdit] = useState(false);
   const [serie, setSerie] = useState<string | null>('Takoras'); // bestiaire montré en dessous (pas de fenêtre)
+  const pageRef = useRef<HTMLElement>(null);
+  useStaggerIn(
+    pageRef,
+    `.${s.banner}, .${s.head}, .${s.strip} > li, .${s.best}, .${s.showcase} > li, .${s.series} > *, .${s.private}`,
+    !!prof.data,
+  );
+  useSwingAll(pageRef, `.${s.sc}, .${s.scEmpty}, .${s.best}, .${s.series} > button`, 0.4, prof.data);
 
   if (!params.pseudo && !user) return <NeedLogin title={t('app.account')} />;
   if (prof.isError) return <p className="muted">{t('ui.err_generic')}</p>;
@@ -95,28 +105,34 @@ export default function Profile() {
   const mine = !!me.data?.pseudo && p.pseudo === me.data.pseudo;
   const bp = p.best_pull;
   const show = p.showcase ?? [];
+  const total = Object.values(SERIES).reduce((n, l) => n + l.length, 0);
+  const bannerSrc = p.banner ? BANNER_IMG[p.banner] : undefined;
+  // couleur du profil : celle de son meilleur jeton (fond de la bannière quand il n'en a pas)
+  const tone = bp ? jetonOf(bp.jeton).glow : '#3d6bff';
   return (
-    <section className={s.page}>
-      <div className={`${s.banner} ${p.banner && BANNER_IMG[p.banner] ? '' : s.noBanner}`}>
-        {p.banner && BANNER_IMG[p.banner] ? (
-          <img className="px" src={BANNER_IMG[p.banner]} alt="" />
-        ) : mine ? (
-          <span className="muted">{t('ui.no_banner')}</span>
-        ) : null}
+    <section ref={pageRef} className={s.page} style={{ '--tone': hexRGB(tone) } as CSSProperties}>
+      {/* bannière : l'image achetée, sinon un fond pixel à la couleur de son meilleur jeton */}
+      <div className={s.banner}>
+        {bannerSrc ? (
+          <img className="px" src={bannerSrc} alt="" />
+        ) : (
+          <PixelBg className={s.bannerBg} odds={bp?.eff ?? 1} glow={tone} still={reducedFx()} />
+        )}
       </div>
-      {/* la photo chevauche la bannière ; à droite, le rang classé en grand (c'est ce qu'on montre) */}
+
+      {/* la carte du joueur chevauche la bannière : photo, pseudo, bio, actions ; à droite son rang */}
       <header className={s.head}>
         <div className={s.pp}>
-          <Avatar pseudo={p.pseudo} avatar={p.avatar} size={112} />
+          <Avatar pseudo={p.pseudo} avatar={p.avatar} size={128} />
         </div>
         <div className={s.id}>
           <h1>
             {p.pseudo} <small className={s.num}>#{String(p.num).padStart(6, '0')}</small>
           </h1>
-          {p.bio || mine ? <p className="muted">{p.bio || t('ui.bio_empty_me')}</p> : null}
+          {p.bio ? <p className={s.bio}>{p.bio}</p> : null}
           <div className={s.headActions}>
             {mine ? (
-              <Button size="sm" onClick={() => setEdit(true)}>
+              <Button size="sm" variant="primary" onClick={() => setEdit(true)}>
                 {t('ui.edit_profile')}
               </Button>
             ) : user ? (
@@ -129,7 +145,8 @@ export default function Profile() {
         </div>
         <EloHero pseudo={p.pseudo} wins={p.wins || 0} losses={p.losses || 0} />
       </header>
-      {/* chiffres posés en ligne, sans boîtes */}
+
+      {/* chiffres en pastilles */}
       <ul className={s.strip}>
         <li>
           <b>{fmt(p.pulls)}</b> {t('ui.st_pulls')}
@@ -137,64 +154,86 @@ export default function Profile() {
         <li>
           <b>{fmt(p.owned)}</b> {t('ui.st_owned')}
         </li>
+        <li>
+          <b>
+            {p.collection}/{total}
+          </b>{' '}
+          {t('ui.bestiaries').toLowerCase()}
+        </li>
         {p.streak > 0 ? (
-          <li>
-            <b className="streak" title={t('ui.st_streak')}>
-              <img className="px" src="/img/ui/flame.png" alt="" width={22} height={22} /> {p.streak}
-            </b>
+          <li title={t('ui.st_streak')}>
+            <img className="px" src="/img/ui/flame.png" alt="" width={20} height={20} /> <b>{p.streak}</b>
           </li>
         ) : null}
+        <li className={s.since}>{t('ui.joined', { d: new Date(p.joined).toLocaleDateString(locale(lang)) })}</li>
       </ul>
-      {/* meilleur tirage : en grand, c'est un trophée */}
-      {bp ? (
-        <div className={s.best} style={glowVars(jetonOf(bp.jeton), bp.variant) as CSSProperties}>
-          <span className={s.bestImg}>
-            <img className={vImg(bp.variant)} src={texOf(jetonOf(bp.jeton))} alt="" width={120} height={120} />
-          </span>
-          <div>
-            <small>{t('ui.st_best')}</small>
-            <b>
-              {jn(bp.jeton)} <VTag v={bp.variant} />
-            </b>
-            <span className={s.bestOdds}>1/{fmt(bp.eff)}</span>
-          </div>
-        </div>
-      ) : null}
-      <h2 className={s.h2}>{t('ui.showcase')}</h2>
-      {/* vitrine : les jetons posés librement (pas de boîte), le nom, la mutation et la vraie chance dessous */}
-      <ul className={s.showcase}>
-        {Array.from({ length: 5 }, (_, i) => {
-          const x = show[i];
-          if (!x)
-            return (
-              <li key={`e${i}`} className={s.scEmpty}>
-                {mine ? (
-                  <button type="button" onClick={() => setSlot(i)} aria-label={t('ui.pick_title', { n: i + 1 })}>
-                    +
+
+      <div className={s.duo}>
+        {/* meilleur tirage : le trophée, en grand, sur le fond de sa rareté */}
+        {bp ? (
+          <button
+            type="button"
+            className={s.best}
+            style={glowVars(jetonOf(bp.jeton), bp.variant) as CSSProperties}
+            onClick={() => setJeton({ name: bp.jeton, variant: bp.variant ?? '', locked: false })}
+          >
+            <PixelBg className={s.bestBg} odds={bp.eff} glow={jetonOf(bp.jeton).glow} still={reducedFx()} />
+            <span className={s.bestImg}>
+              <img className={vImg(bp.variant)} src={texOf(jetonOf(bp.jeton))} alt="" />
+            </span>
+            <span className={s.bestTxt}>
+              <small>{t('ui.st_best')}</small>
+              <b>
+                {jn(bp.jeton)} <VTag v={bp.variant} />
+              </b>
+              <span className={s.bestOdds}>1/{fmt(bp.eff)}</span>
+            </span>
+          </button>
+        ) : null}
+
+        {/* vitrine : 5 cases, comme la boutique ; sur son profil, une case vide se remplit d'un clic */}
+        <section className={s.showBox} aria-labelledby="sc-t">
+          <h2 id="sc-t" className={s.h2}>
+            {t('ui.showcase')}
+          </h2>
+          <ul className={s.showcase}>
+            {Array.from({ length: 5 }, (_, i) => {
+              const x = show[i];
+              if (!x)
+                return (
+                  <li key={`e${i}`} className={s.scEmpty}>
+                    {mine ? (
+                      <button type="button" onClick={() => setSlot(i)} aria-label={t('ui.pick_title', { n: i + 1 })}>
+                        +
+                      </button>
+                    ) : null}
+                  </li>
+                );
+              const j = jetonOf(x.jeton);
+              return (
+                <li key={`${i}:${x.id}`} className={s.sc} style={glowVars(j, x.variant) as CSSProperties}>
+                  <button
+                    type="button"
+                    onClick={() =>
+                      mine ? setSlot(i) : setJeton({ name: x.jeton, variant: x.variant ?? '', locked: false })
+                    }
+                  >
+                    <span className={s.scArt}>
+                      <img className={vImg(x.variant)} src={texOf(j)} alt="" />
+                    </span>
+                    <b>{jn(x.jeton)}</b>
+                    <small>
+                      {x.variant ? `${t(`ui.v_${x.variant}` as 'ui.v_gold')} · ` : ''}1/
+                      {fmt(vOdds(x.odds, (x.variant ?? '') as Variant))}
+                    </small>
                   </button>
-                ) : null}
-              </li>
-            );
-          const j = jetonOf(x.jeton);
-          return (
-            <li key={`${i}:${x.id}`} className={s.sc} style={glowVars(j, x.variant) as CSSProperties}>
-              <button
-                type="button"
-                onClick={() =>
-                  mine ? setSlot(i) : setJeton({ name: x.jeton, variant: x.variant ?? '', locked: false })
-                }
-              >
-                <img className={vImg(x.variant)} src={texOf(j)} alt="" />
-                <b>{jn(x.jeton)}</b>
-                <small>
-                  {x.variant ? `${t(`ui.v_${x.variant}` as 'ui.v_gold')} · ` : ''}1/
-                  {fmt(vOdds(x.odds, (x.variant ?? '') as Variant))}
-                </small>
-              </button>
-            </li>
-          );
-        })}
-      </ul>
+                </li>
+              );
+            })}
+          </ul>
+        </section>
+      </div>
+
       <Bestiaries pseudo={p.pseudo} open={serie} onOpen={(x) => setSerie(serie === x ? null : x)} />
       {/* le bestiaire de la série choisie, directement dans la page, comme dans l'inventaire */}
       {serie ? (
@@ -204,34 +243,36 @@ export default function Profile() {
           onOpen={(name, locked) => setJeton({ name, variant: '', locked })}
         />
       ) : null}
-      <p className="muted">{t('ui.joined', { d: new Date(p.joined).toLocaleDateString(locale(lang)) })}</p>
+
       {mine ? (
         <section className={s.private} aria-labelledby="pv-t">
           <h2 id="pv-t" className={s.h2}>
-            {t('ui.private_zone')} <small className="muted">{t('ui.private_hint')}</small>
+            {t('ui.private_zone')} <small>{t('ui.private_hint')}</small>
           </h2>
-          <div className={s.row}>
-            <span>{t('ui.pv_login')}</span>
-            <b>{p.provider === 'discord' ? 'Discord' : (p.provider ?? '—')}</b>
+          <div className={s.pvGrid}>
+            <div className={s.row}>
+              <span>{t('ui.pv_login')}</span>
+              <b>{p.provider === 'discord' ? 'Discord' : (p.provider ?? '—')}</b>
+            </div>
+            <div className={s.row}>
+              <span>{t('ui.pv_email')}</span>
+              <b>{p.email ?? '—'}</b>
+            </div>
+            <div className={s.pvActions}>
+              <Button size="sm" onClick={() => openUI('settings')}>
+                {t('ui.settings')}
+              </Button>
+              <Button
+                size="sm"
+                onClick={async () => {
+                  await signOut();
+                  void nav('/');
+                }}
+              >
+                {t('ui.logout')}
+              </Button>
+            </div>
           </div>
-          <div className={s.row}>
-            <span>{t('ui.pv_email')}</span>
-            <b>{p.email ?? '—'}</b>
-          </div>
-          <div className={s.row}>
-            <span>{t('ui.settings')}</span>
-            <Button size="sm" onClick={() => openUI('settings')}>
-              {t('ui.open')}
-            </Button>
-          </div>
-          <Button
-            onClick={async () => {
-              await signOut();
-              void nav('/');
-            }}
-          >
-            {t('ui.logout')}
-          </Button>
         </section>
       ) : null}
       <TheirJeton pseudo={p.pseudo} jeton={jeton} onClose={() => setJeton(null)} />
@@ -501,7 +542,8 @@ function ShowcasePicker({ p, slot, onClose }: { p: Prof; slot: number; onClose: 
   );
 }
 
-// Modifier le profil : pseudo (1 fois / 30 jours), bio, bannière achetée, photo
+// Modifier le profil : en haut l'aperçu en direct (bannière, photo, pseudo, bio, comme sur le profil),
+// puis le pseudo (1 fois / 30 jours) et la bio, les photos (celles à débloquer mènent à la boutique) et les bannières.
 function EditProfile({ p, onClose }: { p: Prof; onClose: () => void }) {
   const t = useT();
   const lang = useSettings((x) => x.lang);
@@ -515,6 +557,7 @@ function EditProfile({ p, onClose }: { p: Prof; onClose: () => void }) {
   const [busy, setBusy] = useState(false);
   const canRename = !!p.pseudo_free || !p.pseudo_next;
   const pps = ['default', ...FREE_PP, ...Object.keys(AVATARS).filter((a) => !FREE_PP.includes(a))];
+  const tone = p.best_pull ? jetonOf(p.best_pull.jeton).glow : '#3d6bff';
   const save = async () => {
     setBusy(true);
     try {
@@ -527,7 +570,6 @@ function EditProfile({ p, onClose }: { p: Prof; onClose: () => void }) {
       await saveProfile(p, { p_banner: banner || null, p_bio: bio.trim(), p_avatar: avatar });
       setAvatar(name, avatar);
       sfx.upgrade();
-      toast(t('ui.profile_saved'));
       onClose();
       void qc.invalidateQueries({ queryKey: ['me', user?.id] });
       await qc.invalidateQueries({ queryKey: ['profile'] });
@@ -548,29 +590,87 @@ function EditProfile({ p, onClose }: { p: Prof; onClose: () => void }) {
           void save();
         }}
       >
-        <label htmlFor="pe-pseudo">
-          {t('ui.acc_pseudo')}{' '}
-          <small className="muted">
-            {p.pseudo_free
-              ? t('ui.pseudo_free')
-              : canRename
-                ? t('ui.pseudo_month')
-                : t('ui.pseudo_next', { d: new Date(p.pseudo_next ?? '').toLocaleDateString(locale(lang)) })}
-          </small>
-        </label>
-        <input
-          id="pe-pseudo"
-          value={pseudo}
-          maxLength={16}
-          disabled={!canRename}
-          autoComplete="off"
-          onChange={(e) => setPseudo(e.target.value.trim())}
-        />
-        <label htmlFor="pe-bio">
-          {t('ui.pe_bio')} <small className="muted">{bio.length}/120</small>
-        </label>
-        <textarea id="pe-bio" value={bio} maxLength={120} rows={2} onChange={(e) => setBio(e.target.value)} />
-        <fieldset>
+        {/* aperçu : ce que les autres verront */}
+        <div className={s.prev} style={{ '--tone': hexRGB(tone) } as CSSProperties} aria-hidden>
+          <div className={s.prevBanner}>
+            {banner && BANNER_IMG[banner] ? <img className="px" src={BANNER_IMG[banner]} alt="" /> : null}
+          </div>
+          <div className={s.prevId}>
+            <span className={s.prevPp}>
+              {avatar === 'default' ? (
+                <span>{(pseudo[0] ?? '?').toUpperCase()}</span>
+              ) : (
+                <img className="px" src={AVATARS[avatar]} alt="" />
+              )}
+            </span>
+            <span className={s.prevTxt}>
+              <b>{pseudo || p.pseudo}</b>
+              <small>{bio.trim() || '…'}</small>
+            </span>
+          </div>
+        </div>
+
+        <div className={s.peCols}>
+          <div className={s.peField}>
+            <label htmlFor="pe-pseudo">{t('ui.acc_pseudo')}</label>
+            <input
+              id="pe-pseudo"
+              value={pseudo}
+              maxLength={16}
+              disabled={!canRename}
+              autoComplete="off"
+              onChange={(e) => setPseudo(e.target.value.trim())}
+            />
+            <small>
+              {p.pseudo_free
+                ? t('ui.pseudo_free')
+                : canRename
+                  ? t('ui.pseudo_month')
+                  : t('ui.pseudo_next', { d: new Date(p.pseudo_next ?? '').toLocaleDateString(locale(lang)) })}
+            </small>
+          </div>
+          <div className={s.peField}>
+            <label htmlFor="pe-bio">{t('ui.pe_bio')}</label>
+            <textarea id="pe-bio" value={bio} maxLength={120} rows={2} onChange={(e) => setBio(e.target.value)} />
+            <small className={s.peCount}>{bio.length}/120</small>
+          </div>
+        </div>
+
+        <fieldset className={s.peSet}>
+          <legend>{t('ui.pe_pp')}</legend>
+          <div className={s.pps}>
+            {pps.map((a) => {
+              const owned = a === 'default' || FREE_PP.includes(a) || (p.avatars ?? []).includes(a);
+              return (
+                <button
+                  key={a}
+                  type="button"
+                  aria-pressed={avatar === a}
+                  className={owned ? undefined : s.lockedPp}
+                  aria-label={owned ? a : `${a} · ${t('ui.pp_shop')}`}
+                  title={owned ? undefined : t('ui.pp_shop')}
+                  onClick={() => {
+                    if (!owned) {
+                      onClose();
+                      return void nav('/shop');
+                    }
+                    sfx.click();
+                    setAv(a);
+                  }}
+                >
+                  {a === 'default' ? (
+                    <span>{(p.pseudo[0] ?? '?').toUpperCase()}</span>
+                  ) : (
+                    <img className="px" src={AVATARS[a]} alt="" />
+                  )}
+                  {owned ? null : <i aria-hidden></i>}
+                </button>
+              );
+            })}
+          </div>
+        </fieldset>
+
+        <fieldset className={s.peSet}>
           <legend>{t('ui.pe_banner')}</legend>
           {(p.banners ?? []).length ? (
             <div className={s.banners}>
@@ -590,47 +690,15 @@ function EditProfile({ p, onClose }: { p: Prof; onClose: () => void }) {
               ))}
             </div>
           ) : (
-            <p className="muted">{t('ui.no_banner_owned')}</p>
+            <p className={s.peNone}>{t('ui.no_banner_owned')}</p>
           )}
         </fieldset>
-        <fieldset>
-          <legend>{t('ui.pe_pp')}</legend>
-          <div className={s.pps}>
-            {pps.map((a) => {
-              const owned = a === 'default' || FREE_PP.includes(a) || (p.avatars ?? []).includes(a);
-              return (
-                <button
-                  key={a}
-                  type="button"
-                  aria-pressed={avatar === a}
-                  className={owned ? undefined : s.lockedPp}
-                  aria-label={owned ? a : `${a} · ${t('ui.pp_shop')}`}
-                  onClick={() => {
-                    if (!owned) {
-                      onClose();
-                      toast(t('ui.pp_shop'));
-                      return void nav('/shop');
-                    }
-                    sfx.click();
-                    setAv(a);
-                  }}
-                >
-                  {a === 'default' ? (
-                    <span>{(p.pseudo[0] ?? '?').toUpperCase()}</span>
-                  ) : (
-                    <img className="px" src={AVATARS[a]} alt="" />
-                  )}
-                  {owned ? null : <i aria-hidden></i>}
-                </button>
-              );
-            })}
-          </div>
-        </fieldset>
+
         <div className={s.peActions}>
+          <Button onClick={onClose}>{t('ui.cancel')}</Button>
           <Button type="submit" variant="primary" loading={busy}>
             {t('ui.save')}
           </Button>
-          <Button onClick={onClose}>{t('ui.cancel')}</Button>
         </div>
       </form>
     </Modal>
