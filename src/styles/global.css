@@ -325,3 +325,12 @@ html.lock body {
     font-size: clamp(64px, 17vw, 96px);
   }
 }
+
+/* page en attente (useStaggerIn) : invisible et figée tant que ses données, images et polices n'ont pas fini d'arriver */
+.stg-wait {
+  visibility: hidden;
+}
+.stg-wait,
+.stg-wait * {
+  animation-play-state: paused !important;
+}

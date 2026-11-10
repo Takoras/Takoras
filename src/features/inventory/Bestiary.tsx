@@ -18,6 +18,7 @@ import { confirm } from '@/ui/confirm';
 import { toast } from '@/ui/toast';
 import { JetonModal } from './JetonModal';
 import { useSwingAll } from '@/ui/useSwing';
+import { useStaggerIn } from '@/ui/useStaggerIn';
 import { Tween } from '@/ui/Tween';
 
 const rnd = (n: number) => String(Math.round(n));
@@ -89,6 +90,9 @@ export default function Bestiary() {
   const snap = useRef<{ m: Map<string, DOMRect>; dissolve: boolean } | null>(null);
 
   const d = inv.data;
+  // comme l'accueil et le combat : la page attend sa collection, ses images et ses polices, puis apparaît bloc par bloc
+  const pageRef = useRef<HTMLElement>(null);
+  useStaggerIn(pageRef, `.${s.head}, .${s.tabs}, .${s.shelves}, .${s.progress}, .${s.tools}`, !!d);
   const cards = useMemo(() => (d ? visibleCards(d, view, jn) : []), [d, view, jn]);
   // les jetons se balancent au survol, accrochés par le haut (rattaché quand la liste change)
   useSwingAll(grid, `.${s.cardBtn}`, 0.35, cards);
@@ -109,7 +113,7 @@ export default function Bestiary() {
   if (!user) return <NeedLogin title={t('ui.bst_title')} />;
   if (inv.isError) return <p className="muted">{t('ui.err_generic')}</p>;
   // tant que la collection n'est pas arrivée : rien (sinon la page s'affichait vide puis tout sautait en place)
-  if (!d) return <section className={s.page} aria-busy />;
+  if (!d) return <section ref={pageRef} className={s.page} aria-busy />;
 
   const groups = d?.groups.filter((g) => g.serie === view.serie) ?? [];
   const all = SERIES[view.serie] ?? [];
@@ -185,7 +189,7 @@ export default function Bestiary() {
   const og = open && d ? d.groups.find((g) => g.key === gKey(view.serie, open.name, open.v)) : undefined;
   const oc = open && d ? d.coll.get(cKey(view.serie, open.name)) : undefined;
   return (
-    <section className={`${s.page} ${selecting ? s.withBar : ''}`}>
+    <section ref={pageRef} className={`${s.page} ${selecting ? s.withBar : ''}`}>
       <header className={s.head} data-tour="inv">
         <div>
           <h1>{t('ui.bst_title')}</h1>
