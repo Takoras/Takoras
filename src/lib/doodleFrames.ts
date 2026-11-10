@@ -56,28 +56,40 @@ async function render(
   // comme le ferait le CSS (contain, cover ou fill)
   const cw = Math.max(8, Math.round(bw * dpr)),
     ch = Math.max(8, Math.round(bh * dpr));
-  let dw = cw,
-    dh = ch;
+  // image qui remplit toute la case (photo de profil…) : on la dessine un peu plus grande que la case, sinon la
+  // déformation va chercher des pixels hors de l'image et le fond noir apparaît sur les bords
+  const full = fit === 'cover' || fit === 'fill';
+  const m = full ? Math.ceil((small ? 1.4 : 3) * dpr) : 0;
+  const ow = cw + m * 2,
+    oh = ch + m * 2;
+  let dw = ow,
+    dh = oh;
   if (fit === 'contain' || fit === 'cover' || fit === 'scale-down') {
-    const k = (fit === 'cover' ? Math.max : Math.min)(cw / nw, ch / nh);
+    const k = (fit === 'cover' ? Math.max : Math.min)(ow / nw, oh / nh);
     dw = nw * k;
     dh = nh * k;
   }
   const src = document.createElement('canvas');
-  src.width = cw;
-  src.height = ch;
+  src.width = ow;
+  src.height = oh;
   const sx = src.getContext('2d');
   if (!sx) return null;
   sx.imageSmoothingEnabled = false; // pixel art : agrandi sans flou, comme à l'écran
-  sx.drawImage(img, (cw - dw) / 2, (ch - dh) / 2, dw, dh);
+  sx.drawImage(img, (ow - dw) / 2, (oh - dh) / 2, dw, dh);
   const sheet = document.createElement('canvas');
   sheet.width = cw;
   sheet.height = ch * NOISE.length;
   const x = sheet.getContext('2d');
   if (!x) return null;
   NOISE.forEach((seed, i) => {
+    // chaque dessin reste dans sa propre bande de la planche
+    x.save();
+    x.beginPath();
+    x.rect(0, i * ch, cw, ch);
+    x.clip();
     x.filter = `url(#${filterId(seed, small, dpr)})`;
-    x.drawImage(src, 0, i * ch);
+    x.drawImage(src, -m, i * ch - m);
+    x.restore();
   });
   const blob = await new Promise<Blob | null>((ok) => sheet.toBlob(ok));
   if (!blob) return null;
