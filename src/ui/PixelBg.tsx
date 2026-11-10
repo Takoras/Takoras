@@ -236,9 +236,13 @@ export function PixelBg({
       raf = (still || calmFx()) && settled ? 0 : requestAnimationFrame(loop);
     };
     raf = requestAnimationFrame(loop);
-    // en mode figé, un changement de cible relance juste la transition
+    // en mode figé, seul un changement de cible (couleur, niveau) relance le dessin, le temps d'une transition
+    // (avant, il était relancé 4 fois par seconde : le fond bougeait par à-coups)
     const wake = setInterval(() => {
-      if (!raf) {
+      const moved =
+        target.current.lv !== lvNow || target.current.rgb.some((v, i) => Math.abs(v - (cur[i] ?? v)) >= 0.5);
+      const live = !still && !calmFx(); // qualité changée en Haut : la boucle repart
+      if (!raf && (moved || live)) {
         last = 0;
         raf = requestAnimationFrame(loop);
       }
