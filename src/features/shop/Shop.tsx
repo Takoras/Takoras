@@ -223,7 +223,6 @@ export default function Shop() {
           () => flash.remove(),
           () => flash.remove(),
         );
-      if (r.gain) gainPop(el, r.gain);
     } catch (e) {
       sfx.deny();
       cover?.getAnimations().forEach((a) => a.cancel());
@@ -428,26 +427,6 @@ function Card(p: CardProps & { slot: number }) {
       </div>
     </li>
   );
-}
-
-// « +100 » qui monte au-dessus de la case révélée, puis s'efface
-function gainPop(el: HTMLElement, n: number) {
-  const r = el.getBoundingClientRect();
-  const d = document.createElement('div');
-  d.className = s.gain ?? '';
-  d.innerHTML = `+${n} <img class="px" src="/img/piece.png" alt="" width="18" height="18">`;
-  d.style.left = `${r.left + r.width / 2}px`;
-  d.style.top = `${r.top + r.height * 0.3}px`;
-  document.body.appendChild(d);
-  d.animate(
-    [
-      { opacity: 0, transform: 'translate(-50%, 10px) scale(.9)' },
-      { opacity: 1, transform: 'translate(-50%, -14px) scale(1)', offset: 0.25 },
-      { opacity: 1, transform: 'translate(-50%, -34px)', offset: 0.7 },
-      { opacity: 0, transform: 'translate(-50%, -50px)' },
-    ],
-    { duration: 1400, easing: 'cubic-bezier(.2,.8,.3,1)' },
-  ).finished.then(() => d.remove(), () => d.remove());
 }
 
 // Case pas encore révélée : la même case qu'un objet (même taille), entièrement recouverte d'un cache ; la toucher la

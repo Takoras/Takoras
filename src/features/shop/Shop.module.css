@@ -499,18 +499,3 @@
 .gainBig {
   font-size: var(--fs-lg);
 }
-/* « +100 » qui s'envole au-dessus d'une case révélée */
-.gain {
-  position: fixed;
-  z-index: 200;
-  display: inline-flex;
-  align-items: center;
-  gap: 6px;
-  padding: 6px 14px;
-  border-radius: var(--r-pill);
-  background: rgb(20 20 26 / 85%);
-  color: var(--gold-hi);
-  font-family: var(--font-display);
-  font-size: var(--fs-lg);
-  pointer-events: none;
-}
