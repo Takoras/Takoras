@@ -186,7 +186,7 @@
 }
 .list li:hover .rank {
   scale: 1.35;
-  color: #c4b5fd;
+  color: #8eaaff;
 }
 .list li:hover > span:nth-child(2) {
   scale: 1.12;

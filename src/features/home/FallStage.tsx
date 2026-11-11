@@ -161,7 +161,7 @@ export function FallRain({ serie }: { serie: string }) {
         ctx.drawImage(b.img, bx - r, by - r, r * 2, r * 2);
       }
       ctx.globalCompositeOperation = 'source-over';
-      ctx.fillStyle = '#c4b5fd';
+      ctx.fillStyle = '#8eaaff';
       for (const p of dust) {
         p.y -= dt * (0.5 + p.z * 1.6);
         if (p.y < -0.02) {

@@ -86,7 +86,6 @@ export function ExpandCard({
       className={`${s.wrap} ${hover ? s.hover : ''} ${open ? s.open : ''}`}
       style={{ '--c': color } as CSSProperties}
       aria-expanded={open}
-      aria-label={label}
       onPointerMove={move}
       onPointerEnter={() => setHover(true)}
       onPointerLeave={leave}
@@ -95,6 +94,8 @@ export function ExpandCard({
         setOpen(!open);
       }}
     >
+      {/* nom lu par les lecteurs d'écran, suivi de ce qui est écrit sur la carte */}
+      <span className="visually-hidden">{label} </span>
       <div ref={tilt} className={s.card}>
         <div className={s.wash} />
 
