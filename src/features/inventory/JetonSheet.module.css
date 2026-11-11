@@ -157,8 +157,7 @@
   height: 44px;
   border: 1px solid rgb(255 255 255 / 14%);
   border-radius: 999px;
-  background: rgb(0 0 0 / 45%);
-  backdrop-filter: blur(6px);
+  background: rgb(0 0 0 / 70%);
   color: var(--text);
   transition:
     scale var(--t-fast),

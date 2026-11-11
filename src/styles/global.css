@@ -356,3 +356,14 @@ html.q-potato *::after {
 html.q-potato :not(img, canvas, svg, svg *) {
   filter: none !important;
 }
+
+/* « … » de chargement : affichés seulement si l'attente dure (au-delà de 0,7 s). Sur un chargement normal on ne voit
+   rien, au lieu d'un texte qui apparaît puis saute quand la page arrive. */
+p[aria-busy] {
+  animation: lateShow 0.3s 0.7s both;
+}
+@keyframes lateShow {
+  from {
+    opacity: 0;
+  }
+}

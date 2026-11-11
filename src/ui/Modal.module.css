@@ -18,8 +18,7 @@
 }
 
 .dialog::backdrop {
-  background: rgb(5 5 10 / 72%);
-  backdrop-filter: blur(4px);
+  background: rgb(5 5 10 / 84%);
   transition: opacity 0.26s ease-in;
 }
 

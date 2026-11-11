@@ -11,6 +11,7 @@ import { useT } from '@/i18n/useT';
 import { Button } from '@/ui/Button';
 import { toast } from '@/ui/toast';
 import { Effects } from '../home/Effects';
+import { useStaggerIn } from '@/ui/useStaggerIn';
 import { NeedLogin } from '@/app/NeedLogin';
 import { InvTabs } from './Bestiary';
 import { useSwingAll } from '@/ui/useSwing';
@@ -35,6 +36,8 @@ export default function Items() {
     queryFn: async () => (await invApi.items()) as unknown as Row[],
   });
   const box = useRef<HTMLDivElement>(null);
+  const pageRef = useRef<HTMLElement>(null);
+  useStaggerIn(pageRef, `.${s.head}`, !!items.data); // les cases ont déjà leur fondu en cascade (cardIn)
   // les objets se balancent au survol, accrochés par le haut (comme les jetons du bestiaire)
   useSwingAll(box, `.${s.item}`, 0.35, items.data);
   const snap = useRef<Map<string, DOMRect> | null>(null);
@@ -45,7 +48,7 @@ export default function Items() {
   if (!user) return <NeedLogin title={t('ui.nav_inv')} />;
   const list = items.data ?? [];
   return (
-    <section className={s.page}>
+    <section ref={pageRef} className={s.page}>
       <header className={s.head}>
         <div>
           <h1>{t('ui.inv_items_title')}</h1>

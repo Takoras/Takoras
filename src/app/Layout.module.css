@@ -23,8 +23,7 @@
   height: 60px;
   padding: 0 var(--gutter);
   padding-top: env(safe-area-inset-top);
-  background: rgb(13 13 18 / 88%);
-  backdrop-filter: blur(10px);
+  background: rgb(13 13 18 / 97%);
   border-bottom: 1px solid var(--line);
 }
 
@@ -270,8 +269,7 @@
     grid-template-columns: repeat(5, 1fr);
     height: calc(var(--tabh) + env(safe-area-inset-bottom));
     padding-bottom: env(safe-area-inset-bottom);
-    background: rgb(13 13 18 / 94%);
-    backdrop-filter: blur(10px);
+    background: rgb(13 13 18 / 98%);
     border-top: 1px solid var(--line);
   }
 

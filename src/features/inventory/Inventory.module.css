@@ -356,10 +356,9 @@
   flex-wrap: wrap;
   padding: var(--s-3) var(--s-4);
   border-radius: var(--r-lg);
-  background: rgb(22 21 31 / 94%);
+  background: rgb(22 21 31 / 98%);
   border: 1px solid var(--line-strong);
   box-shadow: var(--shadow-pop);
-  backdrop-filter: blur(8px);
   animation: barIn var(--t-med) var(--ease-out);
 }
 .sellBar > div {

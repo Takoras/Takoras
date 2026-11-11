@@ -4,7 +4,7 @@ export const fr = {
     shop_n: '{n} en stock',
     shop_rev: '{n}/{m} révélés',
     shop_myst: 'Mystère',
-    shop_reveal: 'Touche pour révéler',
+    shop_reveal: 'Révéler la case',
     shop_reveal_a: 'Révéler la case (+{n} pièces)',
     shop_feat: 'À la une',
     nav_home: 'Accueil',

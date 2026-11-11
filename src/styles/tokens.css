@@ -16,7 +16,7 @@
   --al-ink: #f2f2f5;
   --al-ink-2: #b8b8c6;
   --al-num: #8eaaff; /* numéros des cases : bleu clair lisible sur le sombre */
-  --al-red: #3d6bff; /* action principale : bleu Takoras */
+  --al-red: #3966f7; /* action principale : bleu Takoras */
   --al-red-deep: #2443b3;
   --al-shadow: 0 2px 3px rgb(0 0 0 / 35%), 0 10px 22px rgb(0 0 0 / 40%);
   --al-shadow-lift: 0 6px 8px rgb(0 0 0 / 35%), 0 22px 40px rgb(0 0 0 / 50%);
@@ -39,7 +39,7 @@
   --faint: #5c5c6e; /* décoratif seulement (pas pour du texte) */
 
   /* Accent (action principale) et secondaire (monnaie, urgence) */
-  --accent: #3d6bff; /* fond des boutons principaux : le bleu du logo Takoras (blanc dessus lisible) */
+  --accent: #3966f7; /* fond des boutons principaux : le bleu du logo Takoras (blanc dessus lisible) */
   --accent-hover: #2f58e0;
   --accent-hi: #8eaaff; /* bleu clair pour du texte sur fond sombre */
   --accent-lo: #2443b3;

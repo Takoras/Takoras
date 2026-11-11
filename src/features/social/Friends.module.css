@@ -91,7 +91,7 @@
   color: var(--text);
 }
 .tabs button[aria-selected='true'] {
-  background: #3d6bff;
+  background: #3966f7;
   color: #fff;
 }
 .cnt {
@@ -160,7 +160,7 @@
   font-size: var(--fs-md);
 }
 .add input:focus-visible {
-  outline: 2px solid var(--accent, #3d6bff);
+  outline: 2px solid var(--accent, #3966f7);
   outline-offset: 2px;
 }
 .said {

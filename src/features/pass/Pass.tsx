@@ -385,8 +385,9 @@ export default function Pass() {
         data-k={`${tr}-${prem ? 1 : 0}`}
         disabled={busy}
         onClick={() => void claim(tr, prem, r)}
-        aria-label={`${t('ui.bp_claim')} · ${label(r)}`}
       >
+        {/* nom lu par les lecteurs d'écran : « Récupérer · » puis ce qui est écrit dans la case */}
+        <span className="visually-hidden">{t('ui.bp_claim')} · </span>
         {body}
       </button>
     ) : (

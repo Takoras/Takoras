@@ -51,7 +51,7 @@
   width: 20px;
   height: 20px;
   margin-top: 1px;
-  accent-color: var(--accent, #3d6bff);
+  accent-color: var(--accent, #3966f7);
 }
 .check a {
   text-decoration: underline;

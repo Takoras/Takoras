@@ -461,7 +461,7 @@
   font-weight: 700;
 }
 .frTabs button[aria-selected='true'] {
-  background: #3d6bff;
+  background: #3966f7;
   box-shadow: 0 3px 0 #2443b3;
   color: #fff;
 }

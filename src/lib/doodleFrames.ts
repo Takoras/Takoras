@@ -188,27 +188,32 @@ function step() {
     return;
   }
   tick = (tick + 1) % 3;
+  // 1) on LIT tout (taille, visibilité), 2) on ÉCRIT tout : lire après une écriture force le navigateur à recalculer
+  // la page, et le faire pour chaque image coûtait une centaine de recalculs à chaque pas
+  const todo: [HTMLImageElement, Frames][] = [];
+  const stale: HTMLImageElement[] = [];
   for (const [img, st] of live) {
     if (!img.isConnected) {
       live.delete(img);
       continue;
     }
+    if (img.classList.contains('dd-off')) continue; // hors de l'écran : rien à faire
     // l'image a changé (autre jeton, autre taille, variante…) : on la recalcule
     const src = img.currentSrc || img.src;
     const size = `|${img.clientWidth}x${img.clientHeight}|`;
-    if (!st.key.startsWith(src + '|') || !st.key.includes(size) || !eligible(img)) {
-      live.delete(img);
-      clear(img);
-      // garde-fou : une image recalculée trop souvent (sa taille bouge sans arrêt) garde le doodle simple
-      const n = (redo.get(img) ?? 0) + 1;
-      redo.set(img, n);
-      if (n > 3) banned.add(img);
-      if (eligible(img)) queue.add(img);
-      continue;
-    }
-    if (img.classList.contains('dd-off')) continue; // hors de l'écran : rien à faire
-    img.style.setProperty('object-position', `0 ${-tick * st.frames.h}px`);
+    if (!st.key.startsWith(src + '|') || !st.key.includes(size) || !eligible(img)) stale.push(img);
+    else todo.push([img, st.frames]);
   }
+  for (const img of stale) {
+    live.delete(img);
+    clear(img);
+    // garde-fou : une image recalculée trop souvent (sa taille bouge sans arrêt) garde le doodle simple
+    const n = (redo.get(img) ?? 0) + 1;
+    redo.set(img, n);
+    if (n > 3) banned.add(img);
+    if (eligible(img)) queue.add(img);
+  }
+  for (const [img, f] of todo) img.style.setProperty('object-position', `0 ${-tick * f.h}px`);
   if (queue.size) void pump();
 }
 

@@ -60,7 +60,7 @@ test('CSP : aucune violation sur tout le site', async ({ page, isMobile }) => {
   }
   // fiche jeton
   await page.goto('/inventory');
-  await page.getByRole('button', { name: /×4 Mobu/ }).click();
+  await page.getByRole('button', { name: /Mobu/ }).first().click();
   await page.waitForTimeout(400);
   await check('fiche jeton');
   // Ring + IA (fil séparé)

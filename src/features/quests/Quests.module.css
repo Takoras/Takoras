@@ -87,6 +87,10 @@
 .ok .bar i {
   background: var(--ok);
 }
+/* barre pleine (verte) : chiffres foncés, lisibles dessus */
+.ok .bar b {
+  color: #06260f;
+}
 .bar b {
   position: relative;
   display: block;

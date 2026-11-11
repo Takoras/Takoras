@@ -499,7 +499,7 @@ ul.collGrid {
   height: 32px;
 }
 .pkSeries button[aria-selected='true'] {
-  background: #3d6bff;
+  background: #3966f7;
   color: #fff;
 }
 .pkSoon {
@@ -641,7 +641,7 @@ ul.collGrid {
 }
 .peField input:focus-visible,
 .peField textarea:focus-visible {
-  outline: 2px solid #3d6bff;
+  outline: 2px solid #3966f7;
   outline-offset: 2px;
 }
 .peField input:disabled {
@@ -694,7 +694,7 @@ ul.collGrid {
   scale: 1.05;
 }
 .pps button[aria-pressed='true'] {
-  outline-color: #3d6bff;
+  outline-color: #3966f7;
 }
 .pps img {
   width: 100%;
@@ -737,7 +737,7 @@ ul.collGrid {
   transition: outline-color var(--t-fast);
 }
 .banners button[aria-pressed='true'] {
-  outline-color: #3d6bff;
+  outline-color: #3966f7;
 }
 .banners img {
   width: 100%;

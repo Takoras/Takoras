@@ -499,9 +499,9 @@ function Mystery({ slot, gain, logged, onReveal }: { slot: number; gain: number;
         type="button"
         className={s.cover}
         disabled={!logged}
-        aria-label={t('ui.shop_reveal_a', { n: gain })}
         onClick={() => ref.current && onReveal(ref.current)}
       >
+        <span className="visually-hidden">{t('ui.shop_reveal')}</span>
         <span className={s.gainTag}>
           +{gain} <Coin size={16} />
         </span>
@@ -521,9 +521,9 @@ function MysteryHero({ off, gain, logged, onReveal }: { off: number; gain: numbe
         type="button"
         className={s.cover}
         disabled={!logged}
-        aria-label={t('ui.shop_reveal_a', { n: gain })}
         onClick={() => ref.current && onReveal(ref.current)}
       >
+        <span className="visually-hidden">{t('ui.shop_reveal')}</span>
         <span className={s.featRow}>
           <span className={s.feat}>{t('ui.shop_feat')}</span>
           {off > 0 ? <b className={s.off}>−{off}%</b> : null}

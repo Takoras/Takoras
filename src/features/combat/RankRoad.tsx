@@ -142,7 +142,7 @@ function Slide({
           </span>
         </div>
         {/* à partir d'Émeraude, un reflet de lumière balaie le nom */}
-        <b className={`${s.name} ${i >= SWEEP_FROM ? s.sweep : ''}`} aria-label={title}>
+        <b className={`${s.name} ${i >= SWEEP_FROM ? s.sweep : ''}`} role="img" aria-label={title}>
           {[...title].map((c, k) => (
             <span key={k} data-c={c === ' ' ? '\u00a0' : c} style={{ '--l': k } as CSSProperties} aria-hidden>
               {c === ' ' ? ' ' : c}

@@ -108,7 +108,7 @@ export default function Profile() {
   const total = Object.values(SERIES).reduce((n, l) => n + l.length, 0);
   const bannerSrc = p.banner ? BANNER_IMG[p.banner] : undefined;
   // couleur du profil : celle de son meilleur jeton (fond de la bannière quand il n'en a pas)
-  const tone = bp ? jetonOf(bp.jeton).glow : '#3d6bff';
+  const tone = bp ? jetonOf(bp.jeton).glow : '#3966f7';
   return (
     <section ref={pageRef} className={s.page} style={{ '--tone': hexRGB(tone) } as CSSProperties}>
       {/* bannière : l'image achetée, sinon un fond pixel à la couleur de son meilleur jeton */}
@@ -557,7 +557,7 @@ function EditProfile({ p, onClose }: { p: Prof; onClose: () => void }) {
   const [busy, setBusy] = useState(false);
   const canRename = !!p.pseudo_free || !p.pseudo_next;
   const pps = ['default', ...FREE_PP, ...Object.keys(AVATARS).filter((a) => !FREE_PP.includes(a))];
-  const tone = p.best_pull ? jetonOf(p.best_pull.jeton).glow : '#3d6bff';
+  const tone = p.best_pull ? jetonOf(p.best_pull.jeton).glow : '#3966f7';
   const save = async () => {
     setBusy(true);
     try {
