@@ -1,5 +1,6 @@
 /* eslint-disable react-refresh/only-export-components -- les fonctions d'ouverture vivent à côté de leurs fenêtres */
 import { lazy, Suspense, useEffect, useRef } from 'react';
+import { useAuth } from '@/lib/auth';
 import { sfx } from '@/engines/sound.js';
 import { useT } from '@/i18n/useT';
 import { lsGet, lsSet } from '../social/social';
@@ -30,7 +31,8 @@ export function BetaLayer() {
     const t = setTimeout(() => {
       if (useBeta.getState().win || document.querySelector('dialog[open]')) return;
       if (String(done) !== '1') return useBeta.setState({ win: 'tuto' });
-      if (last && last.id > Number(lsGet(PN_KEY, 0))) {
+      // la patch note ne s'ouvre que pour un joueur connecté : un visiteur doit d'abord voir la page de présentation
+      if (last && useAuth.getState().user && last.id > Number(lsGet(PN_KEY, 0))) {
         sfx.announce();
         useBeta.setState({ win: 'pop' });
       }

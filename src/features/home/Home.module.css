@@ -1,4 +1,8 @@
 /* Accueil : une colonne sur téléphone (pull, historique, réglages), trois sur grand écran */
+/* enveloppe de la page (pour l'apparition) : elle ne change rien à la mise en page */
+.homeRoot {
+  display: contents;
+}
 .stage {
   display: grid;
   gap: var(--s-6);

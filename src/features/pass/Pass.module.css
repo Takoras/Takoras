@@ -708,26 +708,38 @@ button.tile:focus-visible {
   width: 100%;
   margin-inline: auto;
 }
+/* d'où vient l'XP : une seule bande, les 4 sources côte à côte séparées par un filet */
 .how {
-  list-style: none;
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
-  gap: var(--s-3);
-}
-.how li {
+  display: flex;
+  flex-wrap: wrap;
+  margin: 0;
+  padding: var(--s-2) 0;
   border-radius: 14px;
   background: rgb(255 255 255 / 3.5%);
-  display: grid;
-  gap: 2px;
-  padding: var(--s-4);
+  list-style: none;
+}
+.how li {
+  display: flex;
+  flex: 1 1 160px;
+  align-items: baseline;
+  gap: var(--s-2);
+  padding: var(--s-3) var(--s-5);
   color: var(--text-2);
+  font-size: var(--fs-sm);
+}
+.how li + li {
+  background: linear-gradient(rgb(255 255 255 / 8%), rgb(255 255 255 / 8%)) left center / 1px 60% no-repeat;
 }
 .how b {
-  font-size: var(--fs-xl);
   color: var(--gold-hi);
+  font-family: var(--font-display);
+  font-size: var(--fs-lg);
+  font-variant-numeric: tabular-nums;
 }
 .how small {
+  margin-left: auto;
   color: var(--muted);
+  font-variant-numeric: tabular-nums;
 }
 .weekly {
   display: grid;

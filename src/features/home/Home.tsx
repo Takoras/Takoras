@@ -29,10 +29,12 @@ export default function Home() {
   // les blocs attendent le compte et les quêtes, puis apparaissent l'un après l'autre (plus de saut au chargement)
   const quests = useQuests();
   const stageRef = useRef<HTMLDivElement>(null);
+  // toute la page attend ensemble (« En direct » et le classement compris : ils sautaient quand le haut arrivait)
+  const homeRef = useRef<HTMLDivElement>(null);
   useStaggerIn(
-    stageRef,
+    homeRef,
     // comme les jetons de l'inventaire : chaque petite case arrive à son tour (quêtes, améliorations, séries…)
-    `.${s.center} > *, .${s.sat}, .${s.sat} li, .${s.sat} button, .${s.up}`,
+    `.${s.center} > *, .${s.sat}, .${s.sat} li, .${s.sat} button, .${s.up}, .${s.liveDiag}, .${s.boardBottom}`,
     !!user && !me.isPending && !quests.isPending,
   );
   const ready = useAuth((x) => x.ready);
@@ -52,7 +54,7 @@ export default function Home() {
   if ((ready && !user) || (import.meta.env.DEV && new URLSearchParams(location.search).has('landing')))
     return <Landing />;
   return (
-    <>
+    <div ref={homeRef} className={s.homeRoot}>
       <FallRain serie={pull.name} />
       <div ref={stageRef} className={s.stage} onPointerMove={parallax} onPointerLeave={unParallax}>
         <div className={s.center} data-tour="pull">
@@ -82,7 +84,7 @@ export default function Home() {
       <div className={s.boardBottom}>
         <BoardSection kind="pulls" title={t('ui.k_pulls')} />
       </div>
-    </>
+    </div>
   );
 }
 

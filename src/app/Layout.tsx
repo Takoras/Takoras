@@ -57,6 +57,10 @@ export function Layout() {
   const me = useMe();
   const preview = usePreview();
   const more = useUI((x) => x.more);
+  // le coin en haut à droite apparaît d'un bloc quand on sait qui est connecté (sinon ses boutons arrivaient un par un
+  // et se poussaient les uns les autres)
+  const authReady = useAuth((x) => x.ready);
+  const hudReady = authReady && (!user || !!me.data || me.isError);
   useResetWatch();
   // Chaque page arrive en douceur : ses blocs montent et apparaissent l'un après l'autre
   // l'inventaire est préparé en avance (code + collection) : la page s'ouvre déjà remplie, sans saut
@@ -159,7 +163,7 @@ export function Layout() {
       </nav>
 
       {/* en haut à droite : bêta, pièces, profil (pas de grande barre) */}
-      <div className={s.hud}>
+      <div className={`${s.hud} ${hudReady ? '' : s.hudWait}`}>
         {preview ? (
           <button type="button" className={s.previewChip} onClick={() => setPreview(false)}>
             Aperçu joueur · revenir admin
@@ -204,7 +208,15 @@ export function Layout() {
       <Announcements />
       <main id="main" className={s.main} key={pathname}>
         {/* zoom propre à chaque page (choisi à l'œil) : le contenu de la page seulement, pas la barre ni le haut */}
-        <div className={s.pz} style={{ '--pz': pageZoom(pathname), ...(pathname.startsWith('/shop') ? { '--page-max': '1600px' } : {}) } as CSSProperties}>
+        <div
+          className={s.pz}
+          style={
+            {
+              '--pz': pageZoom(pathname),
+              ...(pathname.startsWith('/shop') ? { '--page-max': '1600px' } : {}),
+            } as CSSProperties
+          }
+        >
           <Outlet />
         </div>
         {/* pied de page discret, en bas de chaque page (la page de présentation des visiteurs a déjà le sien) */}

@@ -467,6 +467,11 @@
   display: flex;
   align-items: center;
   gap: var(--s-3);
+  transition: opacity 0.3s ease-out;
+}
+.hudWait {
+  opacity: 0;
+  pointer-events: none;
 }
 .hud .bal {
   display: flex;
@@ -760,7 +765,9 @@
 }
 
 /* pied de page des pages connectées : petit, discret, poussé tout en bas */
+/* le pied de page arrive après le contenu : il ne se voit plus sauter vers le bas pendant que la page se remplit */
 .siteFoot {
+  animation: footIn 0.4s 1.1s both;
   display: flex;
   flex-wrap: wrap;
   justify-content: center;
@@ -779,4 +786,10 @@
 }
 .siteFoot a:hover {
   color: var(--text);
+}
+
+@keyframes footIn {
+  from {
+    opacity: 0;
+  }
 }
