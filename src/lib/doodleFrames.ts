@@ -12,7 +12,7 @@ const ns = 'http://www.w3.org/2000/svg';
 
 // une seule planche (les 3 dessins l'un sous l'autre) : on la fait glisser, l'image n'est jamais remplacée
 // (changer d'image forçait parfois le navigateur à la redécoder : le sprite disparaissait une image, d'où des flashs)
-type Frames = { content: string; h: number };
+type Frames = { content: string; h: number; w: number };
 const cache = new Map<string, Promise<Frames | null>>();
 const live = new Map<HTMLImageElement, { key: string; frames: Frames }>();
 let svgHost: SVGSVGElement | null = null;
@@ -99,7 +99,7 @@ async function render(
   keep.src = url;
   await keep.decode().catch(() => undefined);
   kept.push(keep);
-  return { content: `image-set(url("${url}") ${cw / bw}x)`, h: bh };
+  return { content: `image-set(url("${url}") ${cw / bw}x)`, h: bh, w: bw };
 }
 const kept: HTMLImageElement[] = [];
 
@@ -117,7 +117,10 @@ function supported() {
   return support;
 }
 
+const redo = new WeakMap<HTMLImageElement, number>();
+const banned = new WeakSet<HTMLImageElement>();
 const eligible = (img: HTMLImageElement) =>
+  !banned.has(img) &&
   img.classList.contains('px') &&
   !img.classList.contains('still') &&
   !img.matches('.v-gold, .v-celeste, .v-ombre') &&
@@ -169,9 +172,12 @@ const show = (img: HTMLImageElement, f: Frames) => {
   img.style.setProperty('content', f.content);
   img.style.setProperty('object-fit', 'none');
   img.style.setProperty('object-position', `0 ${-tick * f.h}px`);
+  // la planche est 3 fois plus haute que l'image : on impose les proportions d'UN dessin, sinon une image dont la
+  // hauteur s'adapte toute seule triplait de hauteur (puis était recalculée, en boucle : zoom / dézoom et flashs)
+  img.style.setProperty('aspect-ratio', `${f.w} / ${f.h}`);
 };
 const clear = (img: HTMLImageElement) => {
-  ['content', 'object-fit', 'object-position'].forEach((k) => img.style.removeProperty(k));
+  ['content', 'object-fit', 'object-position', 'aspect-ratio'].forEach((k) => img.style.removeProperty(k));
   img.classList.remove('dd-on');
 };
 function step() {
@@ -193,6 +199,10 @@ function step() {
     if (!st.key.startsWith(src + '|') || !st.key.includes(size) || !eligible(img)) {
       live.delete(img);
       clear(img);
+      // garde-fou : une image recalculée trop souvent (sa taille bouge sans arrêt) garde le doodle simple
+      const n = (redo.get(img) ?? 0) + 1;
+      redo.set(img, n);
+      if (n > 3) banned.add(img);
       if (eligible(img)) queue.add(img);
       continue;
     }
