@@ -30,7 +30,7 @@ export function BetaLayer() {
     }
     const t = setTimeout(() => {
       if (useBeta.getState().win || document.querySelector('dialog[open]')) return;
-      if (String(done) !== '1') return useBeta.setState({ win: 'tuto' });
+      void done; // tuto de première visite retiré pour l'instant
       // la patch note ne s'ouvre que pour un joueur connecté : un visiteur doit d'abord voir la page de présentation
       if (last && useAuth.getState().user && last.id > Number(lsGet(PN_KEY, 0))) {
         sfx.announce();

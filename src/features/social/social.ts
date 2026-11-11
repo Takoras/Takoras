@@ -50,6 +50,8 @@ export type Notif = {
 export const useNotifs = create<{ list: Notif[] }>(() => ({ list: [] }));
 let nid = 0;
 export function notify(n: Omit<Notif, 'id'>, ms = 5600) {
+  // notifications en bas à droite désactivées (demande du 11 nov. 2026) : retirer cette ligne pour les remettre
+  if (ms) return;
   const id = ++nid;
   useNotifs.setState((s) => ({ list: [...s.list, { ...n, id }].slice(-4) }));
   setTimeout(() => dismiss(id), ms);

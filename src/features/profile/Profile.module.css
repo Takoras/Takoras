@@ -44,6 +44,65 @@
 }
 
 /* ---------- bannière ---------- */
+/* elle flotte doucement et penche vers la souris ; le cadre garde la perspective, la bannière tourne dedans */
+.bannerTilt {
+  --rx: 0deg;
+  --ry: 0deg;
+  --gx: 50%;
+  --gy: 50%;
+  perspective: 1400px;
+  animation: pfFloat 7s ease-in-out infinite;
+}
+.bannerTilt .banner {
+  transform: rotateX(var(--rx)) rotateY(var(--ry));
+  transition: transform 0.35s cubic-bezier(0.2, 0.7, 0.3, 1);
+  will-change: transform;
+}
+.bannerTilt:hover .banner {
+  transition-duration: 0.12s;
+}
+/* reflet qui suit le pointeur */
+.glare {
+  position: absolute;
+  inset: 0;
+  background: radial-gradient(420px circle at var(--gx) var(--gy), rgb(255 255 255 / 16%), transparent 60%);
+  opacity: 0;
+  transition: opacity 0.3s;
+  pointer-events: none;
+}
+.bannerTilt:hover .glare {
+  opacity: 1;
+}
+/* tout le profil flotte un peu, chaque bloc à son rythme */
+@keyframes pfFloat {
+  50% {
+    translate: 0 -6px;
+  }
+}
+.page .pp {
+  animation: pfFloat 5.5s ease-in-out -1.5s infinite;
+}
+.page .elo {
+  animation: pfFloat 6.5s ease-in-out -3s infinite;
+}
+.showcase > li {
+  animation: pfFloat 6s ease-in-out infinite;
+}
+.showcase > li:nth-child(2) {
+  animation-delay: -1.2s;
+}
+.showcase > li:nth-child(3) {
+  animation-delay: -2.4s;
+}
+.showcase > li:nth-child(4) {
+  animation-delay: -3.6s;
+}
+.showcase > li:nth-child(5) {
+  animation-delay: -4.8s;
+}
+.page .best {
+  animation: pfFloat 7.5s ease-in-out -2s infinite;
+}
 .banner {
   position: relative;
   isolation: isolate;
@@ -766,7 +825,12 @@ ul.collGrid {
 
 @media (prefers-reduced-motion: reduce) {
   .eloBadge > *,
-  .bestImg {
+  .bestImg,
+  .bannerTilt,
+  .pp,
+  .elo,
+  .best,
+  .showcase > li {
     animation: none;
   }
 }

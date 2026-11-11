@@ -16,7 +16,6 @@ import { useSwing, useSwingAll } from '@/ui/useSwing';
 import { useStaggerIn } from '@/ui/useStaggerIn';
 import { flyCoins, shockwave } from '@/ui/fx';
 import { useNow } from '../eco/eco';
-import { Effects } from '../home/Effects';
 import { openInfo } from '../info/store';
 import s from './Shop.module.css';
 
@@ -299,7 +298,6 @@ export default function Shop() {
           {t('ui.odds_info')}
         </Button>
       </header>
-      {user ? <Effects reserve /> : null}
       {data ? (
         <>
           <div className={s.top}>

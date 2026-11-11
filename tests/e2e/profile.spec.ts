@@ -25,7 +25,7 @@ test('mon profil : stats, vitrine, modifier la bio et la photo', async ({ page }
 });
 
 test('profil d’un autre joueur : vitrine, collection, demande d’ami', async ({ page }) => {
-  await fakeSupabase(page);
+  const { calls } = await fakeSupabase(page);
   await page.goto('/profile/Ami');
   await expect(page.getByRole('heading', { level: 1, name: /Ami/ })).toBeVisible();
   await expect(page.getByText('test@example.com')).toHaveCount(0);
@@ -33,7 +33,8 @@ test('profil d’un autre joueur : vitrine, collection, demande d’ami', async 
   await expect(page.getByRole('dialog').getByRole('heading', { name: /Mobu/ })).toBeVisible();
   await page.keyboard.press('Escape');
   await page.getByRole('button', { name: /Ajouter en ami/ }).click();
-  await expect(page.getByRole('status').getByText('Demande envoyée à Ami')).toBeVisible();
+  // plus de notification en bas : la demande part bien au serveur
+  await expect.poll(() => calls.some((c) => /friend/.test(c))).toBe(true);
 });
 
 test('profil introuvable', async ({ page }) => {

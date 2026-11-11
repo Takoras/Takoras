@@ -66,6 +66,7 @@ export default function Pass() {
   const list = useRef<HTMLOListElement>(null);
   const [tab, setTab] = useState<'rewards' | 'missions'>('rewards');
   const [premOpen, setPremOpen] = useState(false);
+  const [info, setInfo] = useState<{ t: number; prem: boolean } | null>(null);
   const [busy, setBusy] = useState(false);
   const q = useQuery({
     queryKey: ['pass', user?.id],
@@ -302,7 +303,14 @@ export default function Pass() {
       await wait(400);
       // de plus lent à plus vite, et tout le passe tient en ~10 s maximum (attentes du début et de la fin comprises)
       const w = todo.map((_, i) => Math.max(0.25, 0.88 ** i));
-      const k = Math.min(320, 8500 / Math.max(1, w.reduce((a, b) => a + b, 0)));
+      const k = Math.min(
+        320,
+        8500 /
+          Math.max(
+            1,
+            w.reduce((a, b) => a + b, 0),
+          ),
+      );
       let i = 0;
       for (const [tr, p, rw] of todo) {
         const gap = (w[i++] ?? 0.25) * k;
@@ -378,24 +386,47 @@ export default function Pass() {
         ) : null}
       </>
     );
-    return can ? (
+    // à récupérer : un clic la prend ; sinon un clic ouvre la fenêtre qui explique la récompense
+    return (
       <button
         type="button"
         className={cls}
         data-k={`${tr}-${prem ? 1 : 0}`}
-        disabled={busy}
-        onClick={() => void claim(tr, prem, r)}
+        disabled={can && busy}
+        onClick={() => (can ? void claim(tr, prem, r) : (sfx.click(), setInfo({ t: tr, prem })))}
       >
-        {/* nom lu par les lecteurs d'écran : « Récupérer · » puis ce qui est écrit dans la case */}
-        <span className="visually-hidden">{t('ui.bp_claim')} · </span>
+        {/* nom lu par les lecteurs d'écran, puis ce qui est écrit dans la case */}
+        {can ? <span className="visually-hidden">{t('ui.bp_claim')} · </span> : null}
         {body}
       </button>
-    ) : (
-      <span className={cls} data-k={`${tr}-${prem ? 1 : 0}`} role="img" aria-label={label(r)}>
-        {body}
-      </span>
     );
   };
+
+  // fenêtre d'un palier
+  const infoTier = info ? d.tiers.find((x) => x.t === info.t) : undefined;
+  const infoR: Reward = info && infoTier ? (info.prem ? infoTier.prem : infoTier.free) : null;
+  const infoGot = !!info && (info.prem ? d.pclaimed : d.claimed).includes(info.t);
+  const infoItem = ITEMS[infoR?.item ?? ''];
+  const infoDesc = !infoR
+    ? ''
+    : infoR.coins
+      ? 'Des pièces ajoutées à ton solde : pour la boutique et les améliorations.'
+      : infoItem?.kind === 'avatar'
+        ? 'Une photo de profil exclusive de cette saison. Elle ne sera jamais vendue en boutique.'
+        : infoItem?.kind === 'banner'
+          ? 'Une bannière de profil exclusive de cette saison. Elle ne sera jamais vendue en boutique.'
+          : infoItem
+            ? (itemText(infoItem, lang)[1] ?? '')
+            : '';
+  const infoState = !info
+    ? ''
+    : infoGot
+      ? '✓ Déjà récupéré'
+      : info.prem && !d.premium
+        ? 'Réservé au passe premium'
+        : info.t <= tier
+          ? 'Prêt à récupérer'
+          : `Encore ${n((info.t - 1) * XP_TIER + XP_TIER - d.xp)} XP pour l’atteindre`;
 
   // la prochaine récompense en grand, dans la carte du haut (gratuite, et premium en doré)
   const peek = (r: Reward, prem: boolean) =>
@@ -440,7 +471,7 @@ export default function Pass() {
           <div className={s.top}>
             {/* ta progression : grand palier, barre d'XP qui glisse, et ce que tu gagnes au prochain */}
             <div className={s.hero}>
-              <PixelBg className={s.heroBg} odds={1000 + tier * 2000} glow="#f2c230" still={reducedFx()} />
+              <PixelBg className={s.heroBg} odds={1000 + tier * 2000} glow="#3966f7" still={reducedFx()} />
               <div className={s.lvl}>
                 <small>Palier</small>
                 <b>
@@ -522,6 +553,29 @@ export default function Pass() {
               })}
             </ol>
           </div>
+
+          {/* fenêtre d'un palier : ce que c'est, combien, et où on en est */}
+          <Modal open={!!infoR} onClose={() => setInfo(null)} title={info ? `Palier ${info.t}` : ''}>
+            {info && infoR ? (
+              <div className={`${s.info} ${info.prem ? s.infoGold : ''}`}>
+                <div className={s.infoArt}>
+                  <span>
+                    <img
+                      className={`px ${infoR.item?.startsWith('b_') ? s.wide : infoR.item?.startsWith('a_') ? s.round : ''}`}
+                      src={icon(infoR)}
+                      alt=""
+                    />
+                  </span>
+                </div>
+                <div className={s.infoTxt}>
+                  <span className={s.infoTag}>{info.prem ? t('ui.bp_prem_short') : t('ui.bp_free')}</span>
+                  <h3>{label(infoR)}</h3>
+                  <p>{infoDesc}</p>
+                  <p className={`${s.infoState} ${infoGot ? s.ok : ''}`}>{infoState}</p>
+                </div>
+              </div>
+            ) : null}
+          </Modal>
 
           <Modal open={premOpen} onClose={() => setPremOpen(false)} title={t('ui.bp_prem')}>
             <div className={s.premium}>

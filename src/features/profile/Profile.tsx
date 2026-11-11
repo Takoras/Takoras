@@ -82,7 +82,7 @@ export default function Profile() {
   const pageRef = useRef<HTMLElement>(null);
   useStaggerIn(
     pageRef,
-    `.${s.banner}, .${s.head}, .${s.strip} > li, .${s.best}, .${s.showcase} > li, .${s.series} > *, .${s.private}`,
+    `.${s.bannerTilt}, .${s.head}, .${s.strip} > li, .${s.best}, .${s.showcase} > li, .${s.series} > *, .${s.private}`,
     !!prof.data,
   );
   useSwingAll(pageRef, `.${s.sc}, .${s.scEmpty}, .${s.best}, .${s.series} > button`, 0.4, prof.data);
@@ -112,12 +112,33 @@ export default function Profile() {
   return (
     <section ref={pageRef} className={s.page} style={{ '--tone': hexRGB(tone) } as CSSProperties}>
       {/* bannière : l'image achetée, sinon un fond pixel à la couleur de son meilleur jeton */}
-      <div className={s.banner}>
-        {bannerSrc ? (
-          <img className="px" src={bannerSrc} alt="" />
-        ) : (
-          <PixelBg className={s.bannerBg} odds={bp?.eff ?? 1} glow={tone} still={reducedFx()} />
-        )}
+      {/* la bannière flotte et penche vers la souris, avec un reflet qui suit le pointeur (comme une carte tenue en main) */}
+      <div
+        className={s.bannerTilt}
+        onPointerMove={(e) => {
+          if (e.pointerType !== 'mouse' || reducedFx()) return;
+          const el = e.currentTarget,
+            r = el.getBoundingClientRect();
+          const x = (e.clientX - r.left) / r.width,
+            y = (e.clientY - r.top) / r.height;
+          el.style.setProperty('--ry', `${((x - 0.5) * 9).toFixed(2)}deg`);
+          el.style.setProperty('--rx', `${((0.5 - y) * 7).toFixed(2)}deg`);
+          el.style.setProperty('--gx', `${(x * 100).toFixed(1)}%`);
+          el.style.setProperty('--gy', `${(y * 100).toFixed(1)}%`);
+        }}
+        onPointerLeave={(e) => {
+          e.currentTarget.style.setProperty('--ry', '0deg');
+          e.currentTarget.style.setProperty('--rx', '0deg');
+        }}
+      >
+        <div className={s.banner}>
+          {bannerSrc ? (
+            <img className="px" src={bannerSrc} alt="" />
+          ) : (
+            <PixelBg className={s.bannerBg} odds={bp?.eff ?? 1} glow={tone} still={reducedFx()} />
+          )}
+          <i className={s.glare} aria-hidden />
+        </div>
       </div>
 
       {/* la carte du joueur chevauche la bannière : photo, pseudo, bio, actions ; à droite son rang */}
@@ -160,11 +181,6 @@ export default function Profile() {
           </b>{' '}
           {t('ui.bestiaries').toLowerCase()}
         </li>
-        {p.streak > 0 ? (
-          <li title={t('ui.st_streak')}>
-            <img className="px" src="/img/ui/flame.png" alt="" width={20} height={20} /> <b>{p.streak}</b>
-          </li>
-        ) : null}
         <li className={s.since}>{t('ui.joined', { d: new Date(p.joined).toLocaleDateString(locale(lang)) })}</li>
       </ul>
 

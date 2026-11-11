@@ -1,101 +1,300 @@
-import { type CSSProperties } from 'react';
+import { useRef, type CSSProperties, type ReactNode } from 'react';
 import { Link } from 'react-router';
 import { useQuery } from '@tanstack/react-query';
-import { MYSTERE, SERIES, texOf, glowVars, tierKey, type Jeton } from '@/data/jetons';
+import { hexRGB, jetonOf, MYSTERE, SERIES, texOf, type Jeton } from '@/data/jetons';
 import { useJn } from '@/lib/names';
-import { locale, useSettings } from '@/lib/settings';
+import { locale, reducedFx, useSettings } from '@/lib/settings';
 import { useT } from '@/i18n/useT';
 import { openUI } from '@/app/ui-store';
 import { openPatchnotes } from '@/features/beta/store';
 import { tables } from '@/api';
+import { Button } from '@/ui/Button';
+import { PixelBg } from '@/ui/PixelBg';
+import { useSwingAll } from '@/ui/useSwing';
+import { useStaggerIn } from '@/ui/useStaggerIn';
 import { Live } from '../home/Feeds';
 import { openInfo } from '../info/store';
-import { Sticker } from './Sticker';
-import { CardStack } from '@/ui/CardStack';
-import { ExpandCard } from '@/ui/ExpandCard';
-import { GlassIconReveal } from '@/ui/GlassReveal';
-import { SerieName } from '@/ui/SerieName';
-import '@fontsource/archivo-black';
-import '@fontsource-variable/archivo';
 import s from './Landing.module.css';
 
-const SERIE = 'Takoras';
-const STAR = 'Néphéris'; // la vignette mise en avant (grande, brillante)
-// Cases déjà « collées » sur la double page d'accueil (exemple d'un album en cours, pas de faux chiffres)
-const FILLED = new Set(['Mobu', 'Pikko', 'Givre', 'Carmin', 'Nyx', STAR]);
-// Petite inclinaison fixe par case : l'album a l'air rempli à la main, sans hasard au rendu
-const TILT = [-2.5, 1.5, -1, 2, -1.5, 1, 2.5, -2, 1.5, -1, 2, -2.5, 1, -1.5, 2, -1, 1.5];
+// Textes de la page (courts : une phrase par page du jeu)
+const TXT = {
+  fr: {
+    login: 'Se connecter',
+    pull: [
+      'Tirages',
+      'Ouvre des jetons',
+      'Tes tirages se rechargent tout seuls. Tape sur le jeton mystère : il se fissure, la chance grimpe, puis il révèle ce que tu as eu.',
+    ],
+    inv: [
+      'Inventaire',
+      'Remplis ton bestiaire',
+      'Chaque série a ses jetons, du plus commun au 1 sur 1 000 000. Et chacun peut sortir en Doré, Céleste ou Ombre.',
+    ],
+    fight: [
+      'Combat',
+      'Monte au classement',
+      'Choisis 3 jetons, chacun avec son pouvoir, et grimpe de Bois jusqu’au rang Takoras.',
+    ],
+    shop: [
+      'Boutique',
+      'Une boutique mystère chaque jour',
+      'Les cases sont cachées. Révèle-les pour gagner des pièces, et tombe sur l’objet à la une en réduction.',
+    ],
+    pass: [
+      'Passe de combat',
+      '50 paliers de récompenses',
+      'Joue, gagne de l’XP et récupère des pièces, des potions et des exclusivités de saison.',
+    ],
+    prof: [
+      'Profil et amis',
+      'Montre ta collection',
+      'Ta vitrine, ton meilleur jeton, ton rang. Ajoute tes amis et compare vos bestiaires.',
+    ],
+    free: 'Gratuit · dans le navigateur',
+  },
+  en: {
+    login: 'Log in',
+    pull: [
+      'Pulls',
+      'Open tokens',
+      'Your pulls refill on their own. Tap the mystery token: it cracks, the odds climb, then it reveals what you got.',
+    ],
+    inv: [
+      'Inventory',
+      'Fill your bestiary',
+      'Each series has its tokens, from the most common to 1 in 1,000,000. And each one can come out Gold, Celestial or Shadow.',
+    ],
+    fight: [
+      'Battle',
+      'Climb the ladder',
+      'Pick 3 tokens, each with its own power, and climb from Wood up to the Takoras rank.',
+    ],
+    shop: [
+      'Shop',
+      'A mystery shop every day',
+      'The slots are hidden. Reveal them to earn coins, and find the featured item on sale.',
+    ],
+    pass: ['Battle pass', '50 reward tiers', 'Play, earn XP and collect coins, potions and season exclusives.'],
+    prof: [
+      'Profile and friends',
+      'Show your collection',
+      'Your showcase, your best token, your rank. Add friends and compare bestiaries.',
+    ],
+    free: 'Free · in your browser',
+  },
+} as const;
 
 const fmt = (n: number, lang: Parameters<typeof locale>[0]) => n.toLocaleString(locale(lang));
+const J = (name: string) => jetonOf(name);
+const tok = (j: Jeton) => <img className="px" src={texOf(j)} alt="" draggable={false} />;
 
-// Accueil des visiteurs : un album à vignettes ouvert. Page gauche = le jeu en une phrase et Jouer,
-// page droite = les vignettes de la série. Puis une double page « comment ça marche », puis la quatrième de couverture.
+// Une section : à gauche (ou à droite) le texte et le bouton de connexion, de l'autre côté l'aperçu
+type SecKey = 'pull' | 'inv' | 'fight' | 'shop' | 'pass' | 'prof';
+function Sec({ k, flip, children }: { k: SecKey; flip?: boolean; children: ReactNode }) {
+  const lang = useSettings((x) => x.lang);
+  const L = TXT[lang === 'en' ? 'en' : 'fr'];
+  return (
+    <section className={`${s.sec} ${flip ? s.flip : ''}`} aria-labelledby={`land-${k}`}>
+      <div className={s.secTxt}>
+        <span className={s.tag}>{L[k][0]}</span>
+        <h2 id={`land-${k}`}>{L[k][1]}</h2>
+        <p>{L[k][2]}</p>
+        <Button size="sm" onClick={() => openUI('account')}>
+          {L.login}
+        </Button>
+      </div>
+      <div className={s.secArt}>{children}</div>
+    </section>
+  );
+}
+
+// Accueil des visiteurs, même DA que le reste du site : le jeu en une phrase et « Jouer », puis une section par page
+// du jeu (tirages, inventaire, combat, boutique, passe, profil), chacune avec un aperçu fait des vrais éléments du
+// site et un bouton pour se connecter.
 export function Landing() {
   const t = useT();
+  const jn = useJn();
+  const lang = useSettings((x) => x.lang);
+  const L = TXT[lang === 'en' ? 'en' : 'fr'];
   const play = () => openUI('account');
-  const list = SERIES[SERIE] ?? [];
+  const root = useRef<HTMLDivElement>(null);
+  useStaggerIn(root, `.${s.heroTxt} > *, .${s.heroArt}, .${s.live}, .${s.sec}`, true);
+  useSwingAll(root, `.${s.card}, .${s.mini}, .${s.tile}`, 0.4);
+  const takoras = SERIES.Takoras ?? [];
+  const star = J('Néphéris');
+  const sorted = [...takoras].sort((a, b) => a.odds - b.odds);
+  const still = reducedFx();
 
   return (
-    <div className={s.page}>
-      <section className={s.spread} aria-labelledby="land-title">
-        <div className={`${s.leaf} ${s.left}`}>
-          <p className={s.running}>{t('ui.land_album', { s: SERIE })}</p>
-          <div className={s.pitch}>
-            <h1 id="land-title">{t('ui.land_title')}</h1>
-            <p className={s.lead}>{t('ui.land_lead')}</p>
-            <div className={s.ctas}>
-              <button type="button" className={s.play} onClick={play}>
-                {t('ui.land_play')}
-              </button>
-              <button type="button" className={s.link} onClick={openInfo}>
-                {t('ui.odds_info')}
-              </button>
-            </div>
+    <div ref={root} className={s.page}>
+      {/* ---------- le jeu en une phrase ---------- */}
+      <section className={s.hero} aria-labelledby="land-title">
+        <PixelBg className={s.heroBg} odds={100000} glow={star.glow} still={still} />
+        <div className={s.heroTxt}>
+          <span className={s.tag}>{L.free}</span>
+          <h1 id="land-title">{t('ui.land_title')}</h1>
+          <p>{t('ui.land_lead')}</p>
+          <div className={s.ctas}>
+            <Button variant="primary" size="lg" onClick={play}>
+              {t('ui.land_play')}
+            </Button>
+            <button type="button" className={s.link} onClick={openInfo}>
+              {t('ui.odds_info')}
+            </button>
           </div>
         </div>
-        <div className={`${s.leaf} ${s.right}`}>
-          <Slots list={list} />
+        {/* un gros jeton qui flotte, entouré de quelques autres */}
+        <div className={s.heroArt} aria-hidden>
+          <span className={s.big}>{tok(star)}</span>
+          {['Mobu', 'Pikko', 'Vyolis', 'Nyx', 'Carmin'].map((n, i) => (
+            <span key={n} className={s.orb} style={{ '--i': i } as CSSProperties}>
+              {tok(J(n))}
+            </span>
+          ))}
         </div>
       </section>
 
-      <div className={s.liveBand}>
+      <div className={s.live}>
         <Live />
       </div>
 
-      <section className={s.spread} aria-labelledby="land-how">
-        <div className={`${s.leaf} ${s.left}`}>
-          <h2 id="land-how" className={s.h2}>
-            {t('ui.land_how')}
-          </h2>
-          <Steps />
+      {/* ---------- tirages ---------- */}
+      <Sec k="pull">
+        <div className={s.pull}>
+          <span className={s.mys}>
+            <img className="px" src={MYSTERE} alt="" />
+          </span>
+          <ul className={s.odds}>
+            {[sorted[0], sorted[4], sorted[7], sorted[11], sorted[sorted.length - 1]]
+              .filter((j): j is Jeton => !!j)
+              .map((j) => (
+                <li key={j.name} className={s.mini} style={{ '--g': hexRGB(j.glow) } as CSSProperties}>
+                  {tok(j)}
+                  <b>{jn(j.name)}</b>
+                  <small>1/{fmt(j.odds, lang)}</small>
+                </li>
+              ))}
+          </ul>
         </div>
-        <div className={`${s.leaf} ${s.right}`}>
-          <Blueprint />
-        </div>
-      </section>
+      </Sec>
 
-      <section className={s.spread} aria-labelledby="land-rares">
-        <div className={`${s.leaf} ${s.left}`}>
-          <h2 id="land-rares" className={s.h2}>
-            {t('ui.land_rares')}
-          </h2>
-          <Rares />
-        </div>
-        <div className={`${s.leaf} ${s.right}`}>
-          <h2 className={s.h2}>{t('ui.land_series')}</h2>
-          <SeriesCards />
-        </div>
-      </section>
+      {/* ---------- inventaire ---------- */}
+      <Sec k="inv" flip>
+        <ul className={s.grid}>
+          {sorted.slice(0, 8).map((j, i) => {
+            const have = ![2, 5, 7].includes(i);
+            return (
+              <li key={j.name} className={`${s.card} ${have ? '' : s.unk}`}>
+                <small>#{have ? String(i + 1).padStart(2, '0') : '?'}</small>
+                <img className="px" src={have ? texOf(j) : MYSTERE} alt="" />
+                <b>{have ? jn(j.name) : '???'}</b>
+                <span className={s.stamps}>
+                  {(['gold', 'celeste', 'ombre'] as const).map((v, k) => (
+                    <i
+                      key={v}
+                      className={have && (i + k) % 3 === 0 ? undefined : s.off}
+                      style={{ backgroundImage: `url(/img/stamps/${v}.png)` }}
+                    />
+                  ))}
+                </span>
+              </li>
+            );
+          })}
+        </ul>
+      </Sec>
 
-      <section className={s.back} aria-labelledby="land-final">
-        <div className={s.backText}>
-          <h2 id="land-final" className={s.h2}>
-            {t('ui.land_final')}
-          </h2>
-          <button type="button" className={s.play} onClick={play}>
-            {t('ui.land_play')}
-          </button>
+      {/* ---------- combat ---------- */}
+      <Sec k="fight">
+        <div className={s.fight}>
+          <div className={s.team}>
+            {['Rouillé', 'Givre', 'Azura'].map((n) => (
+              <span key={n} className={s.mini}>
+                {tok(J(n))}
+              </span>
+            ))}
+          </div>
+          <ul className={s.ranks}>
+            {[1, 4, 7, 10, 13, 16].map((r) => (
+              <li key={r}>
+                <img className="px" src={`/img/ranks/rank${r}.png`} alt="" />
+              </li>
+            ))}
+          </ul>
         </div>
+      </Sec>
+
+      {/* ---------- boutique ---------- */}
+      <Sec k="shop" flip>
+        <ul className={s.shop}>
+          <li className={`${s.card} ${s.item}`}>
+            <span className={s.sale}>−40%</span>
+            <img className="px" src="/img/potions/chance-10.png" alt="" />
+            <b>Chance ×10</b>
+            <small>
+              <img className="px" src="/img/piece.png" alt="" width={14} height={14} /> 900
+            </small>
+          </li>
+          {[0, 1, 2].map((i) => (
+            <li key={i} className={`${s.card} ${s.cover}`}>
+              <span>
+                +100 <img className="px" src="/img/piece.png" alt="" width={16} height={16} />
+              </span>
+            </li>
+          ))}
+        </ul>
+      </Sec>
+
+      {/* ---------- passe ---------- */}
+      <Sec k="pass">
+        <ol className={s.track}>
+          {[
+            ['/img/piece.png', '100', true],
+            ['/img/potions/chance-2.png', '×2', true],
+            ['/img/piece.png', '300', false],
+            ['/img/objets/sablier.png', '', false],
+            ['/img/pp/oeil.png', '', false],
+          ].map(([src, n, done], i) => (
+            <li key={i} className={done ? s.done : undefined}>
+              <span className={`${s.tile} ${i === 4 ? s.excl : ''}`}>
+                <img className={`px ${i === 4 ? s.round : ''}`} src={src as string} alt="" />
+                {n ? <b>{n}</b> : null}
+              </span>
+              <i>{i + 1}</i>
+            </li>
+          ))}
+        </ol>
+      </Sec>
+
+      {/* ---------- profil ---------- */}
+      <Sec k="prof" flip>
+        <div className={s.prof}>
+          <div className={s.pfBanner}>
+            <PixelBg className={s.pfBg} odds={5000} glow={J('Vyolis').glow} still />
+          </div>
+          <div className={s.pfId}>
+            <span className={s.pfPp}>
+              <img className="px" src="/img/pp/bleu.png" alt="" />
+            </span>
+            <b>Takoras</b>
+            <img className={`px ${s.pfRank}`} src="/img/ranks/rank10.png" alt="" />
+          </div>
+          <ul className={s.pfShow}>
+            {['Vyolis', 'Nyx', 'Lumis'].map((n) => (
+              <li key={n} className={s.mini}>
+                {tok(J(n))}
+                <b>{jn(n)}</b>
+              </li>
+            ))}
+          </ul>
+        </div>
+      </Sec>
+
+      {/* ---------- dernier appel ---------- */}
+      <section className={s.final} aria-labelledby="land-final">
+        <h2 id="land-final">{t('ui.land_final')}</h2>
+        <Button variant="primary" size="lg" onClick={play}>
+          {t('ui.land_play')}
+        </Button>
       </section>
 
       <footer className={s.foot}>
@@ -113,193 +312,6 @@ export function Landing() {
   );
 }
 
-// Les 12 premières cases de la série, numérotées comme dans un vrai album
-function Slots({ list }: { list: Jeton[] }) {
-  const t = useT();
-  const jn = useJn();
-  const lang = useSettings((x) => x.lang);
-  const star = list.findIndex((j) => j.name === STAR);
-  // grille de 4 × 3 : 8 cases + la vignette vedette en 2 × 2
-  const shown = list.slice(0, 8);
-  return (
-    <ol className={s.slots}>
-      {shown.map((j, i) => (
-        <Slot key={j.name} j={j} n={i + 1} tilt={TILT[i] ?? 0} />
-      ))}
-      {star >= 0 && list[star] ? (
-        <li className={s.starSlot}>
-          <Sticker tilt={-3} big label={t('ui.land_slot', { n: star + 1, name: jn(STAR) })}>
-            <span className={s.gloss} style={glowVars(list[star]) as CSSProperties}>
-              <img className="px" src={texOf(list[star])} alt="" draggable={false} />
-            </span>
-            <span className={s.cap}>
-              <b>{jn(STAR)}</b>
-              <small>1/{fmt(list[star].odds, lang)}</small>
-            </span>
-          </Sticker>
-          <span className={s.num}>{String(star + 1).padStart(3, '0')}</span>
-        </li>
-      ) : null}
-    </ol>
-  );
-}
-
-function Slot({ j, n, tilt }: { j: Jeton; n: number; tilt: number }) {
-  const t = useT();
-  const jn = useJn();
-  const filled = FILLED.has(j.name);
-  return (
-    <li className={`${s.slot} ${s[tierKey(j.odds)] ?? ''}`}>
-      {filled ? (
-        <Sticker tilt={tilt} label={t('ui.land_slot', { n, name: jn(j.name) })}>
-          <img className="px" src={texOf(j)} alt="" draggable={false} />
-        </Sticker>
-      ) : (
-        <span className={s.empty} role="img" aria-label={t('ui.land_empty', { n })} />
-      )}
-      <span className={s.num}>{String(n).padStart(3, '0')}</span>
-    </li>
-  );
-}
-
-// Tirages → Collection → Ring → Classement, en une colonne qu'on lit d'un coup
-function Steps() {
-  const t = useT();
-  const list = SERIES[SERIE] ?? [];
-  const steps = [
-    { k: 'pull', img: [MYSTERE] },
-    { k: 'collec', img: list.slice(0, 3).map((j) => texOf(j)) },
-    { k: 'combat', img: list.filter((j) => ['Mobu', 'Carmin', 'Vyolis'].includes(j.name)).map((j) => texOf(j)) },
-    { k: 'board', img: [1, 7, 13].map((n) => `/img/ranks/rank${n}.png`) },
-  ] as const;
-  return (
-    <ul className={s.steps}>
-      {steps.map((st) => (
-        <li key={st.k}>
-          <span className={s.stepImgs}>
-            {st.img.map((src) => (
-              <img key={src} className="px" src={src} alt="" draggable={false} />
-            ))}
-          </span>
-          <span>
-            <b>{t(`ui.land_s_${st.k}` as 'ui.land_s_pull')}</b>
-            <span className={s.stepTxt}>{t(`ui.land_s_${st.k}_txt` as 'ui.land_s_pull_txt')}</span>
-          </span>
-        </li>
-      ))}
-    </ul>
-  );
-}
-
-// La fiche d'une vignette, comme au dos d'une carte : rareté, mutations, stats, pouvoir
-function Blueprint() {
-  const t = useT();
-  const jn = useJn();
-  const lang = useSettings((x) => x.lang);
-  const list = SERIES[SERIE] ?? [];
-  const idx = Math.max(
-    0,
-    list.findIndex((x) => x.name === STAR),
-  );
-  const j = list[idx];
-  if (!j) return null;
-  const rows: [string, string][] = [
-    [t('ui.land_bp_rarity'), `1/${fmt(j.odds, lang)}`],
-    [t('ui.land_bp_mut'), t('ui.land_bp_mut_v')],
-    [t('ui.land_bp_stats'), t('ui.land_bp_stats_v')],
-    [t('ui.land_bp_power'), t('ui.land_bp_power_v')],
-  ];
-  return (
-    <div className={s.card}>
-      {/* le jeton se révèle dans du verre liquide (clic = rejouer) ; sans WebGL, le sprite seul */}
-      <div className={s.cardArt} style={glowVars(j) as CSSProperties}>
-        <GlassIconReveal
-          className={s.glass}
-          logo={texOf(j)}
-          label={jn(j.name)}
-          look="dark"
-          pixel
-          originalColors
-          keepPlate
-          loop={false}
-          background="#1e1e28"
-          plateColor="#17171f"
-          logoScale={0.8}
-          tuning={{ present: 2.2 }}
-        />
-      </div>
-      <div className={s.cardBody}>
-        <h3>
-          {jn(j.name)} <span className={s.cardNum}>{String(idx + 1).padStart(3, '0')}</span>
-        </h3>
-        <dl>
-          {rows.map(([k, v]) => (
-            <div key={k}>
-              <dt>{k}</dt>
-              <dd>{v}</dd>
-            </div>
-          ))}
-        </dl>
-        <p className={s.stepTxt}>{t('ui.land_bp_txt')}</p>
-      </div>
-    </div>
-  );
-}
-
-// Les 3 jetons les plus rares de la série, en pile : le plus rare devant
-function Rares() {
-  const t = useT();
-  const jn = useJn();
-  const lang = useSettings((x) => x.lang);
-  const list = SERIES[SERIE] ?? [];
-  const top = [...list].sort((a, b) => a.odds - b.odds).slice(-3);
-  return (
-    <CardStack
-      className={s.rares}
-      cards={top.map((j) => ({
-        icon: <img className="px" src={texOf(j)} alt="" draggable={false} />,
-        title: jn(j.name),
-        description: t('ui.land_rares_odds', { n: fmt(j.odds, lang) }),
-        date: `N° ${String(list.indexOf(j) + 1).padStart(3, '0')}`,
-        color: j.glow,
-      }))}
-    />
-  );
-}
-
-// Une carte par série : elle penche vers la souris et se déplie sur sa page (vignettes + la plus rare au centre)
-function SeriesCards() {
-  const t = useT();
-  const jn = useJn();
-  const lang = useSettings((x) => x.lang);
-  return (
-    <div className={s.seriesCards}>
-      {Object.entries(SERIES).map(([name, list]) => {
-        const sorted = [...list].sort((a, b) => a.odds - b.odds);
-        const star = sorted[sorted.length - 1];
-        if (!star) return null;
-        return (
-          <ExpandCard
-            key={name}
-            label={name}
-            icon={<img className="px" src={texOf(star)} alt="" draggable={false} />}
-            badge={t('ui.land_series_count', { n: list.length })}
-            title={<SerieName name={name} h="1.6em" />}
-            detail={t('ui.land_series_star', { name: jn(star.name), n: fmt(star.odds, lang) })}
-            sprites={sorted
-              .slice(0, -1)
-              .slice(0, 6)
-              .map((j) => texOf(j))}
-            star={texOf(star)}
-            color={star.glow}
-          />
-        );
-      })}
-    </div>
-  );
-}
-
-// Crédits : chaque musique, son, police avec sa licence (table « credits »)
 function Credits() {
   const t = useT();
   const q = useQuery({

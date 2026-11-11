@@ -3,7 +3,7 @@ import { useT } from '@/i18n/useT';
 import type { Lang } from '@/i18n';
 import { Modal } from '@/ui/Modal';
 import { Button } from '@/ui/Button';
-import { openTuto } from '@/features/beta/Beta';
+
 import { Segmented } from '@/ui/Segmented';
 import { openUI, useUI } from './ui-store';
 import { useState } from 'react';
@@ -80,17 +80,6 @@ export function SettingsModal() {
           />
           <small className="muted">{t('ui.fx_hint')}</small>
         </div>
-        <div className={s.row}>
-          <Button
-            size="sm"
-            onClick={() => {
-              openUI('settings', false);
-              openTuto();
-            }}
-          >
-            {t('ui.tuto_again')}
-          </Button>
-        </div>
         <AccountZone />
       </div>
     </Modal>
@@ -141,6 +130,16 @@ function AccountZone() {
   return (
     <div className={`${s.row} ${s.account}`}>
       <b>{t('ui.acc_section')}</b>
+      <Button
+        size="sm"
+        onClick={async () => {
+          openUI('settings', false);
+          await signOut();
+          location.assign('/');
+        }}
+      >
+        {t('ui.logout')}
+      </Button>
       <Button size="sm" loading={busy === 'export'} onClick={() => void download()}>
         {t('ui.acc_export')}
       </Button>

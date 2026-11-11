@@ -238,7 +238,14 @@ export function installDoodleFrames() {
     });
   scan();
   let pending = 0;
-  const mo = new MutationObserver(() => {
+  const mo = new MutationObserver((muts) => {
+    for (const m of muts) {
+      const img = m.target as HTMLImageElement;
+      if (m.type !== 'attributes' || !live.has(img)) continue;
+      live.delete(img);
+      clear(img);
+      if (eligible(img)) queue.add(img);
+    }
     if (pending) return;
     pending = requestAnimationFrame(() => {
       pending = 0;
@@ -246,7 +253,7 @@ export function installDoodleFrames() {
       void pump();
     });
   });
-  mo.observe(document.body, { childList: true, subtree: true });
+  mo.observe(document.body, { childList: true, subtree: true, attributes: true, attributeFilter: ['src'] });
   const id = setInterval(() => {
     if (document.visibilityState === 'visible') step();
   }, STEP);
