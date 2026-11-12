@@ -8,7 +8,8 @@ import s from './Modal.module.css';
 // Fenêtre modale sur <dialog> natif : le focus reste dedans, Échap ferme, le fond est inerte.
 // `locked` : impossible de fermer (ex. choix du pseudo obligatoire).
 // Toutes les fenêtres s'ouvrent comme la fiche d'un jeton : la carte se déplie depuis son centre avec un petit
-// rebond (ressort 520 / 24), le contenu arrive juste après ; en la fermant (croix, à côté, Échap) elle se replie.
+// rebond (ressort 520 / 24), le contenu arrive juste après ; en la fermant (croix, à côté, Échap) elle rétrécit un
+// peu en s'effaçant complètement, puis se ferme.
 export function Modal({
   open,
   onClose,
@@ -61,6 +62,7 @@ export function Modal({
       const k = Math.max(0, v);
       el.style.clipPath = `inset(${((1 - k) * 42).toFixed(2)}% ${((1 - k) * 38).toFixed(2)}% round 12px)`;
       el.style.transform = `scale(${(0.9 + 0.1 * v).toFixed(4)})`;
+      el.style.opacity = String(Math.min(1, k * 1.8));
     };
     if (reducedFx()) return;
     paint(0);
@@ -71,30 +73,29 @@ export function Modal({
       sp.stop();
       el.style.clipPath = '';
       el.style.transform = '';
+      el.style.opacity = '';
     };
   }, [open, bare]);
-  // repli (la même chose à l'envers, sans rebond), puis fermeture pour de vrai
+  // fermeture : la carte rétrécit un peu en s'effaçant jusqu'au bout, PUIS la fenêtre se ferme (avant, un ressort
+  // coupé en route la faisait disparaître alors qu'on la voyait encore)
   const shut = () => {
     if (locked || folding) return;
     const el = card.current;
     if (bare || !el || reducedFx()) return onClose();
     setFolding(true);
     u.current?.stop();
-    const from = 1;
-    const sp = spring(
-      (v) => {
-        const k = Math.max(0, v);
-        el.style.clipPath = `inset(${((1 - k) * 42).toFixed(2)}% ${((1 - k) * 38).toFixed(2)}% round 12px)`;
-        el.style.transform = `scale(${(0.9 + 0.1 * v).toFixed(4)})`;
-      },
-      { stiffness: 420, damping: 40, from },
-    );
-    sp.set(0);
-    window.setTimeout(() => {
-      sp.stop();
+    const done = () => {
       setFolding(false);
       onClose();
-    }, 260);
+    };
+    const a = el.animate(
+      [
+        { opacity: 1, transform: 'scale(1)', clipPath: 'inset(0% 0% round 12px)' },
+        { opacity: 0, transform: 'scale(.94) translateY(8px)', clipPath: 'inset(4% 3% round 12px)' },
+      ],
+      { duration: 230, easing: 'cubic-bezier(.45,0,.75,.35)', fill: 'forwards' },
+    );
+    a.finished.then(done, done);
   };
   return (
     // Clic sur le fond = fermer ; au clavier, Échap fait la même chose (onCancel natif du <dialog>).

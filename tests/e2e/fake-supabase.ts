@@ -444,7 +444,7 @@ export async function fakeSupabase(
           banner: prof.banner,
           banners: ['plaine'],
           avatars: [],
-          cosmetics: ['n_or', 'n_arc', 'au_bleue', 'au_ombre', 'fx_neige', 'fx_braises'],
+          cosmetics: ['n_or', 'n_celeste', 'n_ombre', 'n_rose', 'n_glace', 'n_braise', 'n_arc', 'au_bleue', 'au_or', 'au_etoile', 'au_flamme', 'au_ombre', 'fx_neige', 'fx_braises'],
           email: 'test@example.com',
           provider: 'discord',
           pseudo_free: false,

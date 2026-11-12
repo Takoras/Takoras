@@ -166,7 +166,7 @@ export function Layout() {
       <div className={`${s.hud} ${hudReady ? '' : s.hudWait}`}>
         {preview ? (
           <button type="button" className={s.previewChip} onClick={() => setPreview(false)}>
-            Aperçu joueur · revenir admin
+            {t('ui.admin_back')}
           </button>
         ) : null}
         <BetaChip />

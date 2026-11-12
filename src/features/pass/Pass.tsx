@@ -184,11 +184,11 @@ export default function Pass() {
     if (r.coins) return t('ui.bp_coins', { n: '' }).trim();
     const it = ITEMS[r.item ?? ''];
     return it?.kind === 'potion'
-      ? `Chance ×${it.data.mult}`
+      ? t('ui.luck_x', { n: it.data.mult ?? 1 })
       : it?.kind === 'banner'
-        ? 'Bannière'
+        ? t('ui.banner_s')
         : it?.kind === 'avatar'
-          ? 'Photo de profil'
+          ? t('ui.pp_photo')
           : it
             ? itemText(it, lang)[0]
             : (r.item ?? '');
@@ -410,23 +410,23 @@ export default function Pass() {
   const infoDesc = !infoR
     ? ''
     : infoR.coins
-      ? 'Des pièces ajoutées à ton solde : pour la boutique et les améliorations.'
+      ? t('ui.bp_d_coins')
       : infoItem?.kind === 'avatar'
-        ? 'Une photo de profil exclusive de cette saison. Elle ne sera jamais vendue en boutique.'
+        ? t('ui.bp_d_avatar')
         : infoItem?.kind === 'banner'
-          ? 'Une bannière de profil exclusive de cette saison. Elle ne sera jamais vendue en boutique.'
+          ? t('ui.bp_d_banner')
           : infoItem
             ? (itemText(infoItem, lang)[1] ?? '')
             : '';
   const infoState = !info
     ? ''
     : infoGot
-      ? '✓ Déjà récupéré'
+      ? t('ui.bp_claimed')
       : info.prem && !d.premium
-        ? 'Réservé au passe premium'
+        ? t('ui.bp_prem_only')
         : info.t <= tier
-          ? 'Prêt à récupérer'
-          : `Encore ${n((info.t - 1) * XP_TIER + XP_TIER - d.xp)} XP pour l’atteindre`;
+          ? t('ui.bp_ready')
+          : t('ui.bp_left', { n: n((info.t - 1) * XP_TIER + XP_TIER - d.xp) });
 
   // la prochaine récompense en grand, dans la carte du haut (gratuite, et premium en doré)
   const peek = (r: Reward, prem: boolean) =>
@@ -473,7 +473,7 @@ export default function Pass() {
             <div className={s.hero}>
               <PixelBg className={s.heroBg} odds={1000 + tier * 2000} glow="#3966f7" still={reducedFx()} />
               <div className={s.lvl}>
-                <small>Palier</small>
+                <small>{t('ui.bp_tier')}</small>
                 <b>
                   <Tween value={tier} ms={900} format={(v) => String(Math.round(v))} />
                 </b>
@@ -500,7 +500,7 @@ export default function Pass() {
                 <div className={s.actions}>
                   {nReady > 0 ? (
                     <Button variant="primary" onClick={() => void claimAll()} disabled={busy}>
-                      Tout récupérer · {nReady}
+                      {t('ui.bp_claim_all', { n: nReady })}
                     </Button>
                   ) : null}
                 </div>
@@ -555,7 +555,7 @@ export default function Pass() {
           </div>
 
           {/* fenêtre d'un palier : ce que c'est, combien, et où on en est */}
-          <Modal open={!!infoR} onClose={() => setInfo(null)} title={info ? `Palier ${info.t}` : ''}>
+          <Modal open={!!infoR} onClose={() => setInfo(null)} title={info ? t('ui.bp_tier_n', { n: info.t }) : ''}>
             {info && infoR ? (
               <div className={`${s.info} ${info.prem ? s.infoGold : ''}`}>
                 <div className={s.infoArt}>
@@ -583,13 +583,13 @@ export default function Pass() {
                 <figure>
                   <img className="px" src="/img/pp/oeil.png" alt="" />
                   <figcaption>
-                    Photo « Œil » <small>palier 50 · exclusive</small>
+                    {t('ui.bp_ex_photo')} <small>{t('ui.bp_ex_tier', { n: 50 })}</small>
                   </figcaption>
                 </figure>
                 <figure>
                   <img className={`px ${s.premBan}`} src="/img/bannieres/yeux.png" alt="" />
                   <figcaption>
-                    Bannière « Yeux » <small>palier 30 · exclusive</small>
+                    {t('ui.bp_ex_banner')} <small>{t('ui.bp_ex_tier', { n: 30 })}</small>
                   </figcaption>
                 </figure>
               </div>

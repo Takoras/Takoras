@@ -49,7 +49,7 @@ export function FriendButton({ pseudo }: { pseudo: string }) {
   if (st === 'chat')
     return (
       // le chat est retiré : on montre juste que vous êtes amis
-      <Button disabled>✓ Ami</Button>
+      <Button disabled>{t('ui.fr_is')}</Button>
     );
   if (st === 'accept')
     return (

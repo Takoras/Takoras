@@ -32,7 +32,7 @@ import { confirm } from '@/ui/confirm';
 import { Modal } from '@/ui/Modal';
 import { PixelBg } from '@/ui/PixelBg';
 import { useStaggerIn } from '@/ui/useStaggerIn';
-import { Aura, BannerFx, COSM_NAMES, COSMETICS, CosmeticPreview, nameCls } from '@/ui/Cosmetics';
+import { Aura, BannerFx, cosmName, COSMETICS, CosmeticPreview, nameCls } from '@/ui/Cosmetics';
 import { toast } from '@/ui/toast';
 import { VTag } from '@/ui/VTag';
 import { JetonModal } from '../inventory/JetonModal';
@@ -491,9 +491,9 @@ const saveProfile = (
     ...part,
   });
 
-// Choisir le jeton d'une case de la vitrine : les séries en onglets, puis TOUS tes jetons possédés en cases (chaque
-// mutation est sa propre case : Mobu, Mobu Doré…), du plus rare au plus commun. Un clic le pose dans la case.
-// En haut : ce qu'il y a dans la case, pour la vider.
+// Choisir le jeton d'une case de la vitrine, en deux temps : les séries en onglets et une case par jeton possédé
+// (pastilles pour ses mutations), du plus rare au plus commun ; puis, s'il en a plusieurs, la mutation à montrer.
+// Avec une seule version, un clic la pose directement. En haut : ce qu'il y a dans la case, pour la vider.
 function ShowcasePicker({ p, slot, onClose }: { p: Prof; slot: number; onClose: () => void }) {
   const t = useT();
   const jn = useJn();
@@ -502,17 +502,29 @@ function ShowcasePicker({ p, slot, onClose }: { p: Prof; slot: number; onClose: 
   const inv = useInventory();
   const series = Object.keys(SERIES);
   const [serie, setSerie] = useState(series[0] ?? 'Takoras');
-  const [onlyMut, setOnlyMut] = useState(false);
+  const [pick, setPick] = useState<string | null>(null); // jeton choisi, dont on choisit la mutation
   const [busy, setBusy] = useState<number | null>(null);
   const show = p.showcase ?? [];
   const cur = show[slot] ?? null;
   const used = new Set(show.filter(Boolean).map((x) => x?.id));
   const fmt = (n: number) => n.toLocaleString(locale(lang));
-  // une case par jeton et par mutation possédés, la plus rare d'abord
-  const cards = (inv.data?.groups ?? [])
-    .filter((g) => (g.serie || 'Takoras') === serie && (!onlyMut || g.variant))
-    .map((g) => ({ g, eff: vOdds(g.odds, (g.variant || '') as Variant), free: g.ids.find((i) => !used.has(i)) }))
-    .sort((a, b) => b.eff - a.eff);
+  // une case par jeton possédé (toutes ses mutations dedans), le plus rare d'abord
+  const VORD = ['', 'gold', 'celeste', 'ombre'];
+  const byTok = new Map<
+    string,
+    { name: string; serie?: string; vs: { g: (typeof groups)[number]; eff: number; free?: number }[] }
+  >();
+  const groups = (inv.data?.groups ?? []).filter((g) => (g.serie || 'Takoras') === serie);
+  for (const g of groups) {
+    const e = byTok.get(g.name) ?? { name: g.name, serie: g.serie, vs: [] };
+    e.vs.push({ g, eff: vOdds(g.odds, (g.variant || '') as Variant), free: g.ids.find((i) => !used.has(i)) });
+    byTok.set(g.name, e);
+  }
+  const toks = [...byTok.values()]
+    .map((e) => ({ ...e, vs: e.vs.sort((a, b) => VORD.indexOf(a.g.variant || '') - VORD.indexOf(b.g.variant || '')) }))
+    .sort((a, b) => (b.vs[0]?.g.odds ?? 0) - (a.vs[0]?.g.odds ?? 0));
+  const picked = pick ? byTok.get(pick) : undefined;
+  const vName = (v?: string | null) => (v ? t(`ui.v_${v}` as 'ui.v_gold') : t('ui.pk_normal'));
   const save = async (id: number | null) => {
     // 5 cases fixes : le jeton va exactement dans la case choisie
     const ids = Array.from({ length: 5 }, (_, i) => show[i]?.id ?? null);
@@ -549,51 +561,95 @@ function ShowcasePicker({ p, slot, onClose }: { p: Prof; slot: number; onClose: 
           </div>
         ) : null}
 
-        <div className={s.pkBar}>
-          <div className={s.pkSeries} role="tablist">
-            {series.map((x) => (
-              <button key={x} type="button" role="tab" aria-selected={x === serie} onClick={() => setSerie(x)}>
-                <SerieName name={x} h="1.2em" />
+        {picked ? (
+          // 2e temps : la mutation de ce jeton
+          <div key="mut" className={s.pkStep}>
+            <div className={s.pkBar}>
+              <button type="button" className={s.pkBack} onClick={() => setPick(null)}>
+                ← {t('ui.back')}
               </button>
-            ))}
+              <b className={s.pkName}>{jn(picked.name)}</b>
+            </div>
+            <ul className={`${s.pkGrid} ${s.pkMuts}`}>
+              {picked.vs.map(({ g, eff, free }) => {
+                const j = jetonOf(g.name, g.serie);
+                return (
+                  <li key={g.key} style={glowVars(j, g.variant || null) as CSSProperties}>
+                    <button
+                      type="button"
+                      disabled={!free || busy !== null}
+                      onClick={() => free && void save(free)}
+                      aria-label={`${jn(g.name)} ${vName(g.variant)}`}
+                    >
+                      <span className={s.pkArt}>
+                        <img className={vImg(g.variant || null)} src={texOf(j)} alt="" />
+                      </span>
+                      <b>{g.variant ? <VTag v={g.variant} /> : vName(null)}</b>
+                      <small>1/{fmt(eff)}</small>
+                      {g.ids.length > 1 ? <i className={s.pkQty}>×{g.ids.length}</i> : null}
+                      {!free ? <em className={s.pkIn}>{t('ui.showcase')}</em> : null}
+                    </button>
+                  </li>
+                );
+              })}
+            </ul>
           </div>
-          <button type="button" className={s.pkMut} aria-pressed={onlyMut} onClick={() => setOnlyMut(!onlyMut)}>
-            {t('ui.v_gold')} · {t('ui.v_celeste')} · {t('ui.v_ombre')}
-          </button>
-        </div>
-
-        {!inv.data ? (
-          <p className="muted" aria-busy>
-            …
-          </p>
-        ) : cards.length ? (
-          <ul className={s.pkGrid}>
-            {cards.map(({ g, eff, free }) => {
-              const j = jetonOf(g.name, g.serie);
-              return (
-                <li key={g.key} style={glowVars(j, g.variant || null) as CSSProperties}>
-                  <button
-                    type="button"
-                    disabled={!free || busy !== null}
-                    onClick={() => free && void save(free)}
-                    aria-label={`${jn(g.name)}${g.variant ? ` ${t(`ui.v_${g.variant}` as 'ui.v_gold')}` : ''}`}
-                  >
-                    <span className={s.pkArt}>
-                      <img className={vImg(g.variant || null)} src={texOf(j)} alt="" />
-                    </span>
-                    <b>{jn(g.name)}</b>
-                    <small>
-                      {g.variant ? `${t(`ui.v_${g.variant}` as 'ui.v_gold')} · ` : ''}1/{fmt(eff)}
-                    </small>
-                    {g.ids.length > 1 ? <i className={s.pkQty}>×{g.ids.length}</i> : null}
-                    {!free ? <em className={s.pkIn}>{t('ui.showcase')}</em> : null}
-                  </button>
-                </li>
-              );
-            })}
-          </ul>
         ) : (
-          <p className={s.pkEmpty}>{t('ui.none')}</p>
+          <div key="tok" className={s.pkStep}>
+            <div className={s.pkBar}>
+              <div className={s.pkSeries} role="tablist">
+                {series.map((x) => (
+                  <button key={x} type="button" role="tab" aria-selected={x === serie} onClick={() => setSerie(x)}>
+                    <SerieName name={x} h="1.2em" />
+                  </button>
+                ))}
+              </div>
+            </div>
+            {!inv.data ? (
+              <p className="muted" aria-busy>
+                …
+              </p>
+            ) : toks.length ? (
+              <ul className={s.pkGrid}>
+                {toks.map((e) => {
+                  const top = e.vs[0];
+                  if (!top) return null;
+                  const j = jetonOf(e.name, e.serie);
+                  const free = e.vs.some((v) => v.free);
+                  const one = e.vs.length === 1 ? top.free : undefined;
+                  return (
+                    <li key={e.name} style={glowVars(j, top.g.variant || null) as CSSProperties}>
+                      <button
+                        type="button"
+                        disabled={!free || busy !== null}
+                        onClick={() => (sfx.click(), one ? void save(one) : setPick(e.name))}
+                        aria-label={jn(e.name)}
+                      >
+                        <span className={s.pkArt}>
+                          <img className={vImg(top.g.variant || null)} src={texOf(j)} alt="" />
+                        </span>
+                        <b>{jn(e.name)}</b>
+                        <small>1/{fmt(top.g.odds)}</small>
+                        {/* les mutations possédées, en pastilles */}
+                        <span className={s.pkDots}>
+                          {e.vs.map((v) => (
+                            <i
+                              key={v.g.key}
+                              className={s.pkDot}
+                              data-v={v.g.variant || 'n'}
+                              title={vName(v.g.variant)}
+                            />
+                          ))}
+                        </span>
+                      </button>
+                    </li>
+                  );
+                })}
+              </ul>
+            ) : (
+              <p className={s.pkEmpty}>{t('ui.none')}</p>
+            )}
+          </div>
         )}
       </div>
     </Modal>
@@ -741,14 +797,14 @@ function EditProfile({ p, onClose }: { p: Prof; onClose: () => void }) {
 
         {/* effets achetés en boutique : couleur du pseudo, aura de la photo, effet de bannière */}
         <fieldset className={s.peSet}>
-          <legend>Effets</legend>
+          <legend>{t('ui.fx_title')}</legend>
           {owned.length ? (
             <div className={s.fxRows}>
               {(
                 [
-                  ['Pseudo', COSMETICS.name, nameFx, setNameFx],
-                  ['Aura', COSMETICS.aura, auraFx, setAuraFx],
-                  ['Bannière', COSMETICS.bfx, bannerFx, setBannerFx],
+                  [t('ui.fx_name'), COSMETICS.name, nameFx, setNameFx],
+                  [t('ui.fx_aura'), COSMETICS.aura, auraFx, setAuraFx],
+                  [t('ui.fx_banner'), COSMETICS.bfx, bannerFx, setBannerFx],
                 ] as const
               ).map(([lbl, ids, cur, set]) => {
                 const mine = ids.filter((x) => owned.includes(x));
@@ -765,7 +821,7 @@ function EditProfile({ p, onClose }: { p: Prof; onClose: () => void }) {
                           <span className={s.fxPv}>
                             <CosmeticPreview id={x} label={pseudo || p.pseudo} />
                           </span>
-                          <small>{COSM_NAMES[x]}</small>
+                          <small>{cosmName(x, lang)}</small>
                         </button>
                       ))}
                     </div>
@@ -774,9 +830,7 @@ function EditProfile({ p, onClose }: { p: Prof; onClose: () => void }) {
               })}
             </div>
           ) : (
-            <p className={s.peNone}>
-              Couleur de pseudo, aura, effet de bannière : ils arrivent dans la boutique mystère.
-            </p>
+            <p className={s.peNone}>{t('ui.cs_hint')}</p>
           )}
         </fieldset>
 
@@ -794,7 +848,7 @@ function EditProfile({ p, onClose }: { p: Prof; onClose: () => void }) {
               onClick={() => setBanner('best')}
               style={{ '--tone': hexRGB(tone) } as CSSProperties}
             >
-              Meilleur jeton
+              {t('ui.pe_best')}
             </button>
             {(p.banners ?? []).map((b) => (
               <button

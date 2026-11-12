@@ -19,7 +19,7 @@
 
 .dialog::backdrop {
   background: rgb(5 5 10 / 84%);
-  transition: opacity 0.26s ease-in;
+  transition: opacity 0.23s ease-in;
 }
 
 /* le fond arrive et repart en fondu (pas de coupure) */
@@ -46,7 +46,7 @@
 }
 .card.out > * {
   opacity: 0;
-  transition: opacity 0.12s;
+  transition: opacity 0.1s;
 }
 @keyframes inside {
   from {

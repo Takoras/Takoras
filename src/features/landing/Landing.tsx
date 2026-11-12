@@ -229,7 +229,7 @@ export function Landing() {
           <li className={`${s.card} ${s.item}`}>
             <span className={s.sale}>−40%</span>
             <img className="px" src="/img/potions/chance-10.png" alt="" />
-            <b>Chance ×10</b>
+            <b>{lang === 'en' ? 'Luck ×10' : 'Chance ×10'}</b>
             <small>
               <img className="px" src="/img/piece.png" alt="" width={14} height={14} /> 900
             </small>

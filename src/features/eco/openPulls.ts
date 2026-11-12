@@ -50,7 +50,7 @@ export async function openPulls(n: number | 'all', serie = 'Takoras') {
     buy(data.results.length, data.results, data.variants ?? null, data.lucks ?? null, data.ids ?? null);
     // limite de 500 exemplaires par jeton : le surplus est vendu tout de suite
     if (data.capped)
-      toast(`${data.capped} doublon${data.capped > 1 ? 's' : ''} au-delà de 500 vendu${data.capped > 1 ? 's' : ''} : +${data.capped_coins ?? 0} pièces`);
+      toast(translate(useSettings.getState().lang, 'ui.dup_sold', { n: data.capped, c: data.capped_coins ?? 0 }));
   } catch (err) {
     sfx.deny();
     toast(errorText(err, useSettings.getState().lang), true);
@@ -118,10 +118,22 @@ async function openCoinPulls(n: number, serie: string) {
     const data = (await ecoApi.takePullsSerie(
       serie,
       n,
-      me.admin || me.tester ? { force: debug.force || undefined, luck: debug.luck, p_variant: debug.variant || undefined } : {},
+      me.admin || me.tester
+        ? { force: debug.force || undefined, luck: debug.luck, p_variant: debug.variant || undefined }
+        : {},
     )) as { state: Me; results: string[]; variants?: (string | null)[]; lucks?: number[]; ids?: (number | null)[] };
     qc.setQueryData(meKey(), (old: object | undefined) => ({ ...old, ...(data.state as object) })); // garde admin, testeur… (absents de la réponse)
-    buy(data.results.length, data.results, data.variants ?? null, data.lucks ?? null, data.ids ?? null, Math.max(0, PULLS.findIndex((p) => p.name === serie)));
+    buy(
+      data.results.length,
+      data.results,
+      data.variants ?? null,
+      data.lucks ?? null,
+      data.ids ?? null,
+      Math.max(
+        0,
+        PULLS.findIndex((p) => p.name === serie),
+      ),
+    );
   } catch (err) {
     sfx.deny();
     toast(errorText(err, useSettings.getState().lang), true);

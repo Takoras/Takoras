@@ -684,6 +684,67 @@ ul.collGrid {
   letter-spacing: 0.06em;
   text-transform: uppercase;
 }
+.pkStep {
+  display: grid;
+  gap: var(--s-4);
+  animation: pkIn 0.32s var(--ease-out) both;
+}
+@keyframes pkIn {
+  from {
+    opacity: 0;
+    translate: 0 8px;
+  }
+}
+.pkBack {
+  min-height: 44px;
+  padding: 0 var(--s-4);
+  border: 0;
+  border-radius: var(--r-pill);
+  background: rgb(255 255 255 / 5%);
+  color: var(--text);
+  font: inherit;
+  font-size: var(--fs-sm);
+  font-weight: 700;
+  cursor: pointer;
+}
+.pkBack:hover {
+  background: rgb(255 255 255 / 9%);
+}
+.pkName {
+  font-family: var(--font-display);
+  font-size: var(--fs-lg);
+}
+/* la mutation : des cases plus grandes */
+.pkMuts {
+  grid-template-columns: repeat(auto-fill, minmax(170px, 1fr));
+}
+.pkMuts .pkArt {
+  height: 120px;
+}
+.pkMuts .pkArt img {
+  width: 104px;
+  height: 104px;
+}
+.pkDots {
+  display: flex;
+  gap: 4px;
+  min-height: 8px;
+  margin-top: 4px;
+}
+.pkDot {
+  width: 8px;
+  height: 8px;
+  background: #9aa0ad;
+}
+.pkDot[data-v='gold'] {
+  background: #f2c230;
+}
+.pkDot[data-v='celeste'] {
+  background: #e6f1ff;
+}
+.pkDot[data-v='ombre'] {
+  background: #8b5cf6;
+}
 .pkEmpty {
   margin: 0;
   padding: var(--s-6);

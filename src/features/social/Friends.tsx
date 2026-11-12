@@ -134,7 +134,7 @@ export default function Friends() {
       /* presse-papier bloqué : le pseudo reste affiché, on peut le sélectionner */
     }
   };
-  const status = (f: Friend) => (f.online ? 'En ligne' : 'Hors ligne');
+  const status = (f: Friend) => (f.online ? t('ui.fr_on') : t('ui.fr_off'));
   const href = (p: string) => `/profile/${encodeURIComponent(p)}`;
 
   return (
@@ -143,11 +143,9 @@ export default function Friends() {
         <h1>{t('ui.fr_title')}</h1>
         <span className={s.chip}>
           <i className={s.dot} aria-hidden />
-          {online} en ligne
+          {t('ui.online', { n: online })}
         </span>
-        <span className={s.chip}>
-          {ok.length} ami{ok.length > 1 ? 's' : ''}
-        </span>
+        <span className={s.chip}>{t(ok.length > 1 ? 'ui.fr_nn' : 'ui.fr_n1', { n: ok.length })}</span>
       </header>
 
       {/* à gauche : ta carte et l'ajout (comme l'ancienne page) */}
@@ -159,11 +157,11 @@ export default function Friends() {
             {prof.data?.num ? <small>#{String(prof.data.num).padStart(6, '0')}</small> : null}
           </div>
           <Button size="sm" onClick={() => void copy()} disabled={!pseudo0}>
-            {copied ? 'Copié ✓' : 'Copier mon pseudo'}
+            {copied ? t('ui.fr_copied') : t('ui.fr_copy')}
           </Button>
         </div>
         <form className={s.addBox} onSubmit={(e) => void add(e)}>
-          <label htmlFor="fr-add">Ajouter un ami</label>
+          <label htmlFor="fr-add">{t('ui.fr_add_lbl')}</label>
           <div className={s.add}>
             <input
               id="fr-add"
@@ -177,7 +175,7 @@ export default function Friends() {
               autoComplete="off"
             />
             <Button type="submit" variant="primary" loading={busy} disabled={!pseudo.trim()}>
-              Ajouter
+              {t('ui.fr_add_btn')}
             </Button>
           </div>
           <p className={`${s.said} ${said ? (said.ok ? s.saidOk : s.saidKo) : ''}`} role="status">
@@ -220,7 +218,7 @@ export default function Friends() {
                       ) : null}
                       {f.collection != null ? (
                         <span>
-                          <b>{f.collection}</b> jetons
+                          <b>{f.collection}</b> {t('ui.fr_tokens')}
                         </span>
                       ) : null}
                     </span>
@@ -267,7 +265,7 @@ export default function Friends() {
             ))}
           </ul>
         ) : (
-          <p className={s.empty}>{cur === 'inc' ? 'Aucune demande pour l’instant.' : 'Aucune demande envoyée.'}</p>
+          <p className={s.empty}>{cur === 'inc' ? t('ui.fr_none_in') : t('ui.fr_none_out')}</p>
         )}
       </div>
     </section>
