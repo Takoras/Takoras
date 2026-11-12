@@ -128,7 +128,9 @@ const banned = new WeakSet<HTMLImageElement>();
 const eligible = (img: HTMLImageElement) =>
   !banned.has(img) &&
   !img.closest('[data-still]') && // zones qui défilent (bande « En direct ») : images fixes
-  !img.closest('#opening, #fx') && // écran d'ouverture : son jeton garde le doodle simple (rien à calculer pendant l'animation)
+  !img.closest('#opening, #fx') &&
+  // logos de série : le dessin déborde un peu avec la déformation ; découpé au bord de l'image, il était rogné
+  !img.classList.contains('serie-logo') && // écran d'ouverture : son jeton garde le doodle simple (rien à calculer pendant l'animation)
   img.classList.contains('px') &&
   !img.classList.contains('still') &&
   !img.matches('.v-gold, .v-celeste, .v-ombre') &&
@@ -182,7 +184,12 @@ async function pump() {
 }
 
 let tick = 0;
+// réglages d'origine de l'image (posés par la page) : remis tels quels quand le doodle se retire
+// (avant, on les effaçait : un logo perdait ses proportions et grandissait puis rapetissait en changeant de série)
+const KEYS = ['content', 'object-fit', 'object-position', 'aspect-ratio'] as const;
+const orig = new WeakMap<HTMLImageElement, Record<string, string>>();
 const show = (img: HTMLImageElement, f: Frames) => {
+  if (!orig.has(img)) orig.set(img, Object.fromEntries(KEYS.map((k) => [k, img.style.getPropertyValue(k)])));
   img.style.setProperty('content', f.content);
   img.style.setProperty('object-fit', 'none');
   img.style.setProperty('object-position', `0 ${-tick * f.step}px`);
@@ -191,7 +198,9 @@ const show = (img: HTMLImageElement, f: Frames) => {
   img.style.setProperty('aspect-ratio', `${f.w} / ${f.bh}`); // la taille de la case ne change jamais
 };
 const clear = (img: HTMLImageElement) => {
-  ['content', 'object-fit', 'object-position', 'aspect-ratio'].forEach((k) => img.style.removeProperty(k));
+  const o = orig.get(img);
+  KEYS.forEach((k) => (o?.[k] ? img.style.setProperty(k, o[k]) : img.style.removeProperty(k)));
+  orig.delete(img);
   img.classList.remove('dd-on');
 };
 function step() {
