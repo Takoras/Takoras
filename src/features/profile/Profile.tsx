@@ -75,7 +75,7 @@ export default function Profile() {
     enabled: !!pseudo,
     queryFn: async () => (await publicApi.profile(pseudo)) as unknown as Prof | null,
   });
-  const [jeton, setJeton] = useState<{ name: string; variant: string; locked: boolean } | null>(null);
+  const [jeton, setJeton] = useState<{ name: string; variant: string; locked: boolean; single?: boolean } | null>(null);
   const [slot, setSlot] = useState<number | null>(null);
   const [edit, setEdit] = useState(false);
   const [serie, setSerie] = useState<string | null>('Takoras'); // bestiaire montré en dessous (pas de fenêtre)
@@ -191,7 +191,7 @@ export default function Profile() {
             type="button"
             className={s.best}
             style={glowVars(jetonOf(bp.jeton), bp.variant) as CSSProperties}
-            onClick={() => setJeton({ name: bp.jeton, variant: bp.variant ?? '', locked: false })}
+            onClick={() => setJeton({ name: bp.jeton, variant: bp.variant ?? '', locked: false, single: true })}
           >
             <PixelBg className={s.bestBg} odds={bp.eff} glow={jetonOf(bp.jeton).glow} still={reducedFx()} />
             <span className={s.bestImg}>
@@ -422,7 +422,7 @@ function TheirJeton({
   onClose,
 }: {
   pseudo: string;
-  jeton: { name: string; variant: string; locked: boolean } | null;
+  jeton: { name: string; variant: string; locked: boolean; single?: boolean } | null;
   onClose: () => void;
 }) {
   const t = useT();
@@ -437,6 +437,7 @@ function TheirJeton({
       name={jeton?.name ?? null}
       variant={jeton?.variant}
       locked={jeton?.locked}
+      single={jeton?.single}
       found={Object.fromEntries(rows.map((r) => [r.variant ?? '', true]))}
       facts={
         <>
@@ -461,28 +462,33 @@ const saveProfile = (
     ...part,
   });
 
-// Choisir le jeton d'une case de la vitrine : la série en haut (comme le bestiaire), toute la collection
-// (ceux pas encore eus en silhouette) ; toucher un jeton ouvre sa fiche, où l'on choisit la mutation à montrer.
+// Choisir le jeton d'une case de la vitrine : les séries en onglets, puis TOUS tes jetons possédés en cases (chaque
+// mutation est sa propre case : Mobu, Mobu Doré…), du plus rare au plus commun. Un clic le pose dans la case.
+// En haut : ce qu'il y a dans la case, pour la vider.
 function ShowcasePicker({ p, slot, onClose }: { p: Prof; slot: number; onClose: () => void }) {
   const t = useT();
   const jn = useJn();
   const lang = useSettings((x) => x.lang);
   const qc = useQueryClient();
   const inv = useInventory();
-  const [serie, setSerie] = useState(Object.keys(SERIES)[0] ?? 'Takoras');
-  const [open, setOpen] = useState<string | null>(null);
-  const [pv, setPv] = useState('');
+  const series = Object.keys(SERIES);
+  const [serie, setSerie] = useState(series[0] ?? 'Takoras');
+  const [onlyMut, setOnlyMut] = useState(false);
+  const [busy, setBusy] = useState<number | null>(null);
   const show = p.showcase ?? [];
+  const cur = show[slot] ?? null;
   const used = new Set(show.filter(Boolean).map((x) => x?.id));
-  const groups = (inv.data?.groups ?? []).filter((g) => (g.serie || 'Takoras') === serie);
-  // une case libre pour ce jeton dans cette mutation (pas déjà dans une autre case de la vitrine)
-  const freeId = (name: string, v: string) =>
-    groups.find((g) => g.name === name && (g.variant || '') === v)?.ids.find((i) => !used.has(i));
-  const all = [...(SERIES[serie] ?? [])].sort((a, b) => a.odds - b.odds);
+  const fmt = (n: number) => n.toLocaleString(locale(lang));
+  // une case par jeton et par mutation possédés, la plus rare d'abord
+  const cards = (inv.data?.groups ?? [])
+    .filter((g) => (g.serie || 'Takoras') === serie && (!onlyMut || g.variant))
+    .map((g) => ({ g, eff: vOdds(g.odds, (g.variant || '') as Variant), free: g.ids.find((i) => !used.has(i)) }))
+    .sort((a, b) => b.eff - a.eff);
   const save = async (id: number | null) => {
     // 5 cases fixes : le jeton va exactement dans la case choisie
     const ids = Array.from({ length: 5 }, (_, i) => show[i]?.id ?? null);
     ids[slot] = id;
+    setBusy(id ?? -1);
     try {
       await saveProfile(p, { p_showcase: ids });
       sfx.click();
@@ -491,70 +497,77 @@ function ShowcasePicker({ p, slot, onClose }: { p: Prof; slot: number; onClose: 
       void qc.invalidateQueries({ queryKey: ['inv'] });
     } catch (e) {
       toast(errorText(e, lang), true);
+    } finally {
+      setBusy(null);
     }
   };
-  const owns = (name: string) => groups.some((g) => g.name === name);
-  const found = open
-    ? Object.fromEntries((['', 'gold', 'celeste', 'ombre'] as const).map((v) => [v, !!freeId(open, v)]))
-    : {};
-  const pick = open ? freeId(open, pv) : undefined;
   return (
-    <>
-      <Modal open={!open} onClose={onClose} title={t('ui.pick_title', { n: slot + 1 })} wide>
-        <div className={s.pkSeries} role="tablist">
-          {Object.keys(SERIES).map((x) => (
-            <button key={x} type="button" role="tab" aria-selected={x === serie} onClick={() => setSerie(x)}>
-              <img className="px" src={x === 'Takoras' ? '/img/jetons/takoras.png' : texOf(jetonOf('Mobu'))} alt="" />
-              {x}
-            </button>
-          ))}
-          <span className={s.pkSoon} aria-disabled="true">
-            <img className="px" src={TEMPLATE} alt="" />
-            {t('ui.pk_soon')}
-          </span>
+    <Modal open onClose={onClose} title={t('ui.pick_title', { n: slot + 1 })} wide>
+      <div className={s.pk}>
+        {/* ce qu'il y a dans la case maintenant */}
+        {cur ? (
+          <div className={s.pkCur} style={glowVars(jetonOf(cur.jeton), cur.variant) as CSSProperties}>
+            <img className={vImg(cur.variant)} src={texOf(jetonOf(cur.jeton))} alt="" />
+            <span>
+              <b>
+                {jn(cur.jeton)} <VTag v={cur.variant} />
+              </b>
+              <small>1/{fmt(vOdds(cur.odds, (cur.variant ?? '') as Variant))}</small>
+            </span>
+            <Button size="sm" onClick={() => void save(null)} loading={busy === -1}>
+              {t('ui.pick_remove')}
+            </Button>
+          </div>
+        ) : null}
+
+        <div className={s.pkBar}>
+          <div className={s.pkSeries} role="tablist">
+            {series.map((x) => (
+              <button key={x} type="button" role="tab" aria-selected={x === serie} onClick={() => setSerie(x)}>
+                <SerieName name={x} h="1.2em" />
+              </button>
+            ))}
+          </div>
+          <button type="button" className={s.pkMut} aria-pressed={onlyMut} onClick={() => setOnlyMut(!onlyMut)}>
+            {t('ui.v_gold')} · {t('ui.v_celeste')} · {t('ui.v_ombre')}
+          </button>
         </div>
+
         {!inv.data ? (
           <p className="muted" aria-busy>
             …
           </p>
-        ) : (
-          <ul className={s.coll}>
-            {all.map((j) => {
-              const have = owns(j.name);
+        ) : cards.length ? (
+          <ul className={s.pkGrid}>
+            {cards.map(({ g, eff, free }) => {
+              const j = jetonOf(g.name, g.serie);
               return (
-                <li
-                  key={j.name}
-                  style={(have ? glowVars(j) : { '--g': '113, 113, 122' }) as CSSProperties}
-                  className={have ? undefined : s.unk}
-                >
+                <li key={g.key} style={glowVars(j, g.variant || null) as CSSProperties}>
                   <button
                     type="button"
-                    disabled={!have}
-                    onClick={() => {
-                      sfx.click();
-                      const g = groups.find((x) => x.name === j.name && x.ids.some((i) => !used.has(i)));
-                      setPv(g?.variant || '');
-                      setOpen(j.name);
-                    }}
-                    aria-label={have ? jn(j.name) : '?'}
+                    disabled={!free || busy !== null}
+                    onClick={() => free && void save(free)}
+                    aria-label={`${jn(g.name)}${g.variant ? ` ${t(`ui.v_${g.variant}` as 'ui.v_gold')}` : ''}`}
                   >
-                    <img className="px" src={have ? texOf(j) : MYSTERE} alt="" />
-                    <small>{have ? jn(j.name) : '?'}</small>
+                    <span className={s.pkArt}>
+                      <img className={vImg(g.variant || null)} src={texOf(j)} alt="" />
+                    </span>
+                    <b>{jn(g.name)}</b>
+                    <small>
+                      {g.variant ? `${t(`ui.v_${g.variant}` as 'ui.v_gold')} · ` : ''}1/{fmt(eff)}
+                    </small>
+                    {g.ids.length > 1 ? <i className={s.pkQty}>×{g.ids.length}</i> : null}
+                    {!free ? <em className={s.pkIn}>{t('ui.showcase')}</em> : null}
                   </button>
                 </li>
               );
             })}
           </ul>
+        ) : (
+          <p className={s.pkEmpty}>{t('ui.none')}</p>
         )}
-        {show[slot] ? <Button onClick={() => void save(null)}>{t('ui.pick_remove')}</Button> : null}
-      </Modal>
-      <JetonModal name={open} serie={serie} variant={pv} found={found} pick={setPv} onClose={() => setOpen(null)}>
-        <Button variant="primary" disabled={!pick} onClick={() => pick && void save(pick)}>
-          {pick ? t('ui.pick_put') : t('ui.already_showcase')}
-        </Button>
-        <Button onClick={() => setOpen(null)}>{t('ui.back')}</Button>
-      </JetonModal>
-    </>
+      </div>
+    </Modal>
   );
 }
 

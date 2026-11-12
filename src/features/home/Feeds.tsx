@@ -1,10 +1,11 @@
+import { useEffect, useRef } from 'react';
 import { Link } from 'react-router';
 import { useHistory, useLive, useMe } from '@/api/queries';
 import { useOnline } from '@/lib/online';
 import { jetonOf, texOf, vOdds, VARIANTS } from '@/data/jetons';
 import { useAuth } from '@/lib/auth';
 import { useJn } from '@/lib/names';
-import { locale, useSettings } from '@/lib/settings';
+import { locale, reducedFx, useSettings } from '@/lib/settings';
 import { useT } from '@/i18n/useT';
 import { Avatar } from '@/ui/Avatar';
 import { VTag } from '@/ui/VTag';
@@ -80,6 +81,39 @@ export function Live() {
   const me = useMe();
   const live = useLive();
   const online = useOnline((x) => x.n);
+  // défilement de la bande : au survol, elle ralentit en douceur jusqu'à s'arrêter, et repart en douceur
+  const trackRef = useRef<HTMLUListElement>(null);
+  const anim = useRef<Animation | null>(null);
+  const ramp = useRef(0);
+  const scrolling = (live.data?.length ?? 0) > 0;
+  useEffect(() => {
+    const el = trackRef.current;
+    if (!el || el.children.length < 12) return; // moins de 6 tirages : pas de défilement
+    const a = el.animate([{ transform: 'translateX(0)' }, { transform: 'translateX(-50%)' }], {
+      duration: reducedFx() ? 120_000 : 50_000,
+      iterations: Infinity,
+    });
+    anim.current = a;
+    return () => {
+      cancelAnimationFrame(ramp.current);
+      a.cancel();
+      anim.current = null;
+    };
+  }, [scrolling, live.data?.length]);
+  const ease = (to: number) => {
+    const a = anim.current;
+    if (!a) return;
+    cancelAnimationFrame(ramp.current);
+    const from = a.playbackRate,
+      t0 = performance.now(),
+      ms = 380;
+    const step = (now: number) => {
+      const k = Math.min(1, (now - t0) / ms);
+      a.playbackRate = from + (to - from) * (1 - (1 - k) ** 3);
+      if (k < 1) ramp.current = requestAnimationFrame(step);
+    };
+    ramp.current = requestAnimationFrame(step);
+  };
   // Seulement les vrais beaux tirages : plus rare que 1/5 000, ou une mutation (Doré et plus) qui vaut plus de 1/1 000
   const all = live.data ?? [];
   const good = all.filter((r) => r.odds > 5000 || (!!r.variant && vOdds(r.odds, r.variant) > 1000));
@@ -96,8 +130,8 @@ export function Live() {
         {t('ui.live')}
         {online ? <span className={s.online}>· {t('ui.online', { n: online })}</span> : null}
       </div>
-      <div className={s.ticker} data-still>
-        <ul className={`${s.track} ${rows.length >= 6 ? s.scroll : ''}`}>
+      <div className={s.ticker} data-still onPointerEnter={() => ease(0)} onPointerLeave={() => ease(1)}>
+        <ul ref={trackRef} className={s.track}>
           {loop.map((r, i) => {
             const j = jetonOf(r.jeton, r.serie),
               mine = r.pseudo === me.data?.pseudo;

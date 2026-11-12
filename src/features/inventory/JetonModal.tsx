@@ -33,6 +33,7 @@ export function JetonModal({
   pick,
   onShow,
   demo,
+  single,
   onClose,
   children,
 }: {
@@ -47,6 +48,8 @@ export function JetonModal({
   onShow?: (v: string) => void;
   /** montre la vidéo d'exemple du pouvoir (éditeur d'équipe) */
   demo?: boolean;
+  /** une seule version du jeton (meilleur tirage du profil) : pas de tampons pour changer de mutation */
+  single?: boolean;
   onClose: () => void;
   children?: ReactNode;
 }) {
@@ -237,7 +240,7 @@ export function JetonModal({
                 </div>
               </span>
               <i className={s.floor} aria-hidden />
-              {locked ? null : (
+              {locked || single ? null : (
                 <div className={s.stamps} role="group" aria-label={t('ui.bst_variants')}>
                   {VS.map((v) => {
                     const has = pick ? found?.[v] !== false && found?.[v] !== 0 : !!found?.[v];

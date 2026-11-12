@@ -529,75 +529,168 @@ ul.collGrid {
 }
 
 /* ---------- choix de la vitrine (fenêtre) ---------- */
+.pk {
+  display: grid;
+  gap: var(--s-4);
+}
+/* ce qu'il y a dans la case */
+.pkCur {
+  display: flex;
+  align-items: center;
+  gap: var(--s-4);
+  padding: var(--s-3) var(--s-4);
+  border-radius: 14px;
+  background: rgba(var(--g, 255, 255, 255), 0.08);
+}
+.pkCur img {
+  width: 64px;
+  height: 64px;
+  object-fit: contain;
+}
+.pkCur span {
+  display: grid;
+  flex: 1;
+  min-width: 0;
+}
+.pkCur b {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-family: var(--font-display);
+  font-size: var(--fs-lg);
+}
+.pkCur small {
+  color: var(--muted);
+}
+.pkBar {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--s-2);
+}
 .pkSeries {
   display: flex;
   flex-wrap: wrap;
   gap: var(--s-2);
-  margin-bottom: var(--s-4);
 }
-.pkSeries > * {
-  display: flex;
+.pkSeries button,
+.pkMut {
+  display: inline-flex;
   align-items: center;
-  gap: var(--s-2);
-  min-height: 48px;
-  padding: 0 var(--s-4) 0 var(--s-2);
+  min-height: 44px;
+  padding: 0 var(--s-4);
   border: 0;
   border-radius: var(--r-pill);
   background: rgb(255 255 255 / 5%);
-  color: var(--text);
+  color: var(--muted);
   font: inherit;
+  font-size: var(--fs-sm);
   font-weight: 700;
+  cursor: pointer;
+  transition:
+    background-color var(--t-fast),
+    color var(--t-fast);
 }
-.pkSeries img {
-  width: 32px;
-  height: 32px;
+.pkSeries button:hover,
+.pkMut:hover {
+  background: rgb(255 255 255 / 9%);
+  color: var(--text);
 }
-.pkSeries button[aria-selected='true'] {
+.pkSeries button[aria-selected='true'],
+.pkMut[aria-pressed='true'] {
   background: #3966f7;
   color: #fff;
 }
-.pkSoon {
-  opacity: 0.45;
-  font-weight: 500 !important;
-}
-.coll {
+/* tes jetons, en cases comme la boutique */
+.pkGrid {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(84px, 1fr));
-  gap: var(--s-2);
-  margin: 0 0 var(--s-4);
-  padding: 0;
+  grid-template-columns: repeat(auto-fill, minmax(130px, 1fr));
+  gap: var(--s-3);
+  max-height: min(60vh, 560px);
+  margin: 0;
+  padding: 4px;
+  overflow-y: auto;
   list-style: none;
 }
-.coll button {
+.pkGrid button {
+  position: relative;
   display: grid;
   justify-items: center;
   gap: 2px;
   width: 100%;
-  padding: var(--s-3) var(--s-2);
+  padding: var(--s-4) var(--s-2) var(--s-3);
   border: 0;
-  border-radius: 12px;
+  border-radius: 14px;
   background: rgb(255 255 255 / 4%);
   color: var(--text);
   font: inherit;
+  text-align: center;
   cursor: pointer;
+  transition:
+    background-color var(--t-fast),
+    translate 0.25s var(--ease-out);
 }
-.coll button:hover:not(:disabled) {
-  background: rgb(255 255 255 / 8%);
+.pkGrid button:hover:not(:disabled) {
+  background: rgba(var(--g, 255, 255, 255), 0.12);
+  translate: 0 -3px;
 }
-.coll button:disabled {
+.pkGrid button:disabled {
   cursor: default;
+  opacity: 0.45;
 }
-.coll img {
-  width: 52px;
-  height: 52px;
+.pkArt {
+  display: grid;
+  place-items: center;
+  height: 84px;
+}
+.pkArt img {
+  width: 72px;
+  height: 72px;
   object-fit: contain;
 }
-.coll small {
+.pkGrid b {
+  max-width: 100%;
+  overflow: hidden;
+  font-family: var(--font-display);
+  font-size: var(--fs-sm);
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.pkGrid small {
   color: var(--muted);
   font-size: var(--fs-xs);
+  font-variant-numeric: tabular-nums;
 }
-.unk {
-  opacity: 0.55;
+.pkQty {
+  position: absolute;
+  top: 6px;
+  right: 8px;
+  padding: 0 6px;
+  border-radius: var(--r-pill);
+  background: rgb(255 255 255 / 8%);
+  color: var(--text-2);
+  font-size: var(--fs-xs);
+  font-style: normal;
+}
+.pkIn {
+  position: absolute;
+  top: 6px;
+  left: 8px;
+  color: var(--muted);
+  font-size: 10px;
+  font-style: normal;
+  font-weight: 800;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+}
+.pkEmpty {
+  margin: 0;
+  padding: var(--s-6);
+  border-radius: 14px;
+  background: rgb(255 255 255 / 3%);
+  color: var(--muted);
+  text-align: center;
 }
 
 /* ---------- éditeur ---------- */

@@ -446,12 +446,6 @@
 .track img:global(.v-ombre) {
   filter: url('#vombre') !important;
 }
-.scroll {
-  animation: scroll 50s linear infinite;
-}
-.ticker:hover .scroll {
-  animation-play-state: paused;
-}
 
 .track li {
   border: 1px solid rgb(255 255 255 / 9%);
@@ -474,14 +468,6 @@
   50% {
     opacity: 0.35;
   }
-}
-@keyframes scroll {
-  to {
-    transform: translateX(-50%);
-  }
-}
-:global(html.reduce-fx) .scroll {
-  animation-duration: 120s;
 }
 
 @media (max-width: 759px) {
