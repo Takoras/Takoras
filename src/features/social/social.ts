@@ -32,7 +32,6 @@ export const badgeOf = (l: Friend[] = []) => ({
   unread: 0, // plus de chat : seules les demandes d'ami comptent
 });
 
-export type Msg = { id: number; mine: boolean; body: string; created_at: string };
 export const timeOf = (d: string) => new Date(d).toLocaleTimeString(locale(), { hour: '2-digit', minute: '2-digit' });
 export const dateOf = (d: string) =>
   new Date(d).toLocaleString(locale(), { day: '2-digit', month: '2-digit', hour: '2-digit', minute: '2-digit' });

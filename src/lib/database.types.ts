@@ -150,7 +150,6 @@ export type Database = {
       admin_code_toggle: { Args: { p_active: boolean; p_code: string }; Returns: undefined };
       admin_codes: { Args: never; Returns: Json };
       admin_delete_announcement: { Args: { p_id: number }; Returns: undefined };
-      admin_delete_message: { Args: { p_id: number }; Returns: undefined };
       admin_clear_bio: { Args: { target: string }; Returns: undefined };
       admin_feedback: { Args: never; Returns: Json };
       admin_report_set: { Args: { p_id: number; p_status: string }; Returns: undefined };
@@ -165,10 +164,6 @@ export type Database = {
         Returns: { created_at: string; id: number; jeton: string; locked: boolean; odds: number; showcased: boolean }[];
       };
       admin_lock_pulls: { Args: { ids: number[]; p_locked: boolean; target: string }; Returns: undefined };
-      admin_messages: {
-        Args: { target: string };
-        Returns: { body: string; created_at: string; from_pseudo: string; id: number; to_pseudo: string }[];
-      };
       admin_patchnote_delete: { Args: { p_id: number }; Returns: undefined };
       admin_patchnote_save: {
         Args: { p_id: number | null; p_lines: Json; p_lines_en?: Json; p_title: string; p_title_en?: string };
@@ -192,7 +187,6 @@ export type Database = {
       admin_remove_pulls: { Args: { ids: number[]; target: string }; Returns: number };
       admin_reset: { Args: { target: string | null }; Returns: number };
       admin_give_all: { Args: { target: string }; Returns: undefined };
-      admin_clear_messages: { Args: never; Returns: number };
       admin_set_beta: { Args: { p_on: boolean }; Returns: undefined };
       admin_set_items: { Args: { p_item: string; p_qty: number; target: string }; Returns: undefined };
       admin_set_tester: { Args: { p_on: boolean; target: string }; Returns: undefined };
@@ -242,14 +236,9 @@ export type Database = {
         Returns: { created_at: string; jeton: string; odds: number; pseudo: string; serie: string; variant: string }[];
       };
       lock_pulls: { Args: { ids: number[]; p_locked: boolean }; Returns: number };
-      mark_read: { Args: { p_other: string }; Returns: undefined };
       my_collection: {
         Args: never;
         Returns: { jeton: string; owned: number; serie: string; total: number; variant: string }[];
-      };
-      my_conversation: {
-        Args: { p_before?: number; p_other: string };
-        Returns: { body: string; created_at: string; id: number; mine: boolean }[];
       };
       my_daily: { Args: never; Returns: Json };
       my_deck: {
@@ -289,7 +278,6 @@ export type Database = {
       refund_pulls: { Args: { ids: number[] }; Returns: Json };
       sell_pulls: { Args: { ids: number[] }; Returns: Json };
       send_feedback: { Args: { p_body: string; p_device: string; p_kind: string; p_page: string }; Returns: undefined };
-      send_message: { Args: { p_body: string; p_to: string }; Returns: number };
       set_deck: { Args: { ids: number[] }; Returns: undefined };
       set_pseudo: { Args: { p: string }; Returns: undefined };
       shop_today: { Args: never; Returns: Json };

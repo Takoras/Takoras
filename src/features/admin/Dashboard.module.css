@@ -170,6 +170,8 @@
   position: relative;
 }
 .chart svg {
+  touch-action: none;
+  user-select: none;
   display: block;
   width: 100%;
   height: auto;
@@ -860,4 +862,15 @@
 }
 .dash .cats button {
   padding: 0 11px;
+}
+
+/* zoom de la courbe */
+.selBox {
+  fill: rgb(57 102 247 / 18%);
+  stroke: rgb(91 140 255 / 70%);
+  stroke-width: 1;
+}
+.metrics .unzoom {
+  background: rgb(242 194 48 / 14%);
+  color: #fde68a;
 }

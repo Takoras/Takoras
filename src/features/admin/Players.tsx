@@ -151,9 +151,6 @@ function PlayerBody({ id, P }: { id: string; P: Player }) {
   const [pulls, setPulls] = useState('');
   const [pseudo, setPseudo] = useState(P.pseudo ?? '');
   const [qty, setQty] = useState<Record<string, number>>(() => Object.fromEntries(P.items.map((x) => [x.item, x.qty])));
-  const [msgs, setMsgs] = useState<
-    { id: number; created_at: string; from_pseudo: string; to_pseudo: string; body: string }[] | null
-  >(null);
   const name = P.pseudo || 'ce joueur';
   const [pt, setPt] = useState<'give' | 'coll' | 'items' | 'mod'>('give');
   const myId = useAuth((x) => x.user?.id);
@@ -561,36 +558,7 @@ function PlayerBody({ id, P }: { id: string; P: Player }) {
                 >
                   Vider vitrine + bio
                 </Button>
-                <Button size="sm" onClick={async () => setMsgs((await adminApi.messages(id)) as typeof msgs)}>
-                  Voir ses messages
-                </Button>
               </div>
-              {msgs ? (
-                <ul className={s.msgs}>
-                  {msgs.map((m) => (
-                    <li key={m.id}>
-                      <small className="muted">{dt(m.created_at)}</small>
-                      <b>
-                        {m.from_pseudo || '?'} → {m.to_pseudo || '?'}
-                      </b>
-                      <p>{m.body}</p>
-                      <Button
-                        size="sm"
-                        variant="danger"
-                        aria-label="Supprimer le message"
-                        onClick={async () => {
-                          if (!(await confirm('Supprimer ce message ?', { danger: true }))) return;
-                          if (await act(() => adminApi.deleteMessage(m.id), 'Message supprimé'))
-                            setMsgs(msgs.filter((x) => x.id !== m.id));
-                        }}
-                      >
-                        Supprimer
-                      </Button>
-                    </li>
-                  ))}
-                  {msgs.length ? null : <li className="muted">Aucun message</li>}
-                </ul>
-              ) : null}
             </section>
             <Button
               variant="danger"

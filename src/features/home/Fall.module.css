@@ -15,13 +15,23 @@
   height: 100vh;
   pointer-events: none;
   /* le haut s'efface ; le bas s'arrête en fondu au niveau de « En direct » (--cut, posé par le script) */
-  mask-image: linear-gradient(
-    to bottom,
-    transparent,
-    #000 10%,
-    #000 calc(var(--cut, 100vh) - 140px),
-    transparent var(--cut, 100vh)
-  );
+  /* + le voile du milieu (le jeton, les boutons et les textes ressortent) : un masque fixe, plus repeint à
+     chaque image dans le canvas */
+  mask-image:
+    linear-gradient(
+      to bottom,
+      transparent,
+      #000 10%,
+      #000 calc(var(--cut, 100vh) - 140px),
+      transparent var(--cut, 100vh)
+    ),
+    radial-gradient(
+      circle at 50% 48%,
+      rgb(0 0 0 / 22%) 0,
+      rgb(0 0 0 / 38%) 34vmax,
+      rgb(0 0 0 / 62%) 62vmax
+    );
+  mask-composite: intersect;
 }
 
 .fall {

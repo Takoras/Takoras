@@ -103,10 +103,6 @@ export const socialApi = {
   respond: (p_other: string, p_accept: boolean) => rpc('friend_respond', { p_other, p_accept }),
   remove: (p_other: string) => rpc('friend_remove', { p_other }),
   status: (p_pseudo: string) => rpc('friend_status', { p_pseudo }),
-  conversation: (p_other: string, p_before?: number) =>
-    rpc('my_conversation', p_before ? { p_other, p_before } : { p_other }),
-  markRead: (p_other: string) => rpc('mark_read', { p_other }),
-  send: (p_to: string, p_body: string) => rpc('send_message', { p_to, p_body }),
   feedback: (a: { p_kind: string; p_body: string; p_page: string; p_device: string }) => rpc('send_feedback', a),
 };
 
@@ -129,7 +125,6 @@ export const adminApi = {
   inventory: (target: string) => rpc('admin_inventory', { target }),
   removePulls: (target: string, ids: number[]) => rpc('admin_remove_pulls', { target, ids }),
   lockPulls: (target: string, ids: number[], p_locked: boolean) => rpc('admin_lock_pulls', { target, ids, p_locked }),
-  messages: (target: string) => rpc('admin_messages', { target }),
   give: (target: string | null, p_coins = 0, p_pulls = 0) => rpc('admin_give', { target, p_coins, p_pulls }),
   giveJeton: (target: string, p_jeton: string) => rpc('admin_give_jeton', { target, p_jeton }),
   giveItem: (target: string, p_item: string) => rpc('admin_give_item', { target, p_item }),
@@ -137,7 +132,6 @@ export const adminApi = {
   ban: (target: string, p_ban: boolean) => rpc('admin_ban', { target, p_ban }),
   setTester: (target: string, p_on: boolean) => rpc('admin_set_tester', { target, p_on }),
   clearShowcase: (target: string) => rpc('admin_clear_showcase', { target }),
-  deleteMessage: (p_id: number) => rpc('admin_delete_message', { p_id }),
   setItems: (target: string, p_item: string, p_qty: number) => rpc('admin_set_items', { target, p_item, p_qty }),
   reset: (target: string | null) => rpc('admin_reset', { target }),
   giveAll: (target: string) => rpc('admin_give_all', { target }),

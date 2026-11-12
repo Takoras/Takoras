@@ -121,6 +121,7 @@ function RainLayer({ serie, out }: { serie: string; out: boolean }) {
     let W = 0,
       H = 0;
     // demi-résolution : le fond est flou, ça ne se voit pas et ça fait 4 fois moins de pixels à dessiner
+    let buildAmbient = () => {};
     const resize = () => {
       W = window.innerWidth;
       H = window.innerHeight;
@@ -128,6 +129,7 @@ function RainLayer({ serie, out }: { serie: string; out: boolean }) {
       cv.height = Math.ceil(H / 2);
       ctx.setTransform(0.5, 0, 0, 0.5, 0, 0);
       ctx.imageSmoothingEnabled = true;
+      buildAmbient();
     };
     resize();
     const N = W < 700 ? 14 : 24;
@@ -140,7 +142,7 @@ function RainLayer({ serie, out }: { serie: string; out: boolean }) {
       spin: Math.random() * 6.28,
       rot: 0,
     }));
-    const streaks: Streak[] = Array.from({ length: W < 700 ? 12 : 22 }, () => ({
+    const streaks: Streak[] = Array.from({ length: W < 700 ? 8 : 14 }, () => ({
       x: Math.random(),
       y: Math.random(),
       z: Math.random(),
@@ -178,8 +180,25 @@ function RainLayer({ serie, out }: { serie: string; out: boolean }) {
       { img: tint(rgb(th.main)), x: 0.8, y: 0.5, r: 0.6, sp: 0.05, ph: 2 },
       { img: tint(rgb(th.hi)), x: 0.5, y: 0.8, r: 0.4, sp: 0.09, ph: 4 },
     ];
+    // les nappes sont dessinées UNE fois (à la taille de l'écran, un peu plus grand pour dériver sans bord) ;
+    // à chaque image, on ne fait plus qu'une copie de cette image (avant : 3 grands dessins additifs par image)
+    const ambient = document.createElement('canvas');
+    buildAmbient = () => {
+      ambient.width = Math.ceil((W * 1.1) / 2);
+      ambient.height = Math.ceil((H * 1.1) / 2);
+      const a = ambient.getContext('2d');
+      if (!a) return;
+      a.setTransform(0.5, 0, 0, 0.5, 0, 0);
+      a.globalCompositeOperation = 'lighter';
+      a.globalAlpha = 0.16;
+      for (const b of blobs) {
+        const r = Math.max(W, H) * b.r;
+        a.drawImage(b.img, b.x * W * 1.1 - r, b.y * H * 1.1 - r, r * 2, r * 2);
+      }
+    };
+    buildAmbient();
     // poussière : de tout petits points qui montent vite (ça donne la vitesse de chute)
-    const dust = Array.from({ length: W < 700 ? 30 : 60 }, () => ({
+    const dust = Array.from({ length: W < 700 ? 22 : 40 }, () => ({
       x: Math.random(),
       y: Math.random(),
       z: Math.random(),
@@ -198,15 +217,15 @@ function RainLayer({ serie, out }: { serie: string; out: boolean }) {
       time += dt;
       px += (tx - px) * Math.min(1, dt * 3);
       ctx.clearRect(0, 0, W, H);
-      ctx.globalCompositeOperation = 'lighter';
-      for (const b of blobs) {
-        const r = Math.max(W, H) * b.r,
-          bx = (b.x + Math.sin(time * b.sp + b.ph) * 0.08) * W - px * 20,
-          by = (b.y + Math.cos(time * b.sp * 0.8 + b.ph) * 0.06) * H;
-        ctx.globalAlpha = 0.16;
-        ctx.drawImage(b.img, bx - r, by - r, r * 2, r * 2);
-      }
-      ctx.globalCompositeOperation = 'source-over';
+      // nappes de couleur : une seule copie, qui dérive doucement
+      ctx.globalAlpha = 1;
+      ctx.drawImage(
+        ambient,
+        -W * 0.05 + Math.sin(time * 0.06) * W * 0.04 - px * 20,
+        -H * 0.05 + Math.cos(time * 0.05) * H * 0.03,
+        W * 1.1,
+        H * 1.1,
+      );
       ctx.fillStyle = '#8eaaff';
       for (const p of dust) {
         p.y -= dt * (0.5 + p.z * 1.6);
@@ -248,14 +267,7 @@ function RainLayer({ serie, out }: { serie: string; out: boolean }) {
         ctx.globalAlpha = 0.16 + d.z * 0.5;
         ctx.drawImage(spr.cv, x - spr.ox * k, y - spr.oy * k, spr.cv.width * k, spr.cv.height * k);
       }
-      // voile sombre au milieu de l'écran : le jeton, les boutons et les textes ressortent bien sur la pluie
-      ctx.globalAlpha = 1;
-      const veil = ctx.createRadialGradient(W / 2, H * 0.48, 0, W / 2, H * 0.48, Math.max(W, H) * 0.62);
-      veil.addColorStop(0, 'rgba(10,10,14,0.78)');
-      veil.addColorStop(0.55, 'rgba(10,10,14,0.62)');
-      veil.addColorStop(1, 'rgba(10,10,14,0.38)');
-      ctx.fillStyle = veil;
-      ctx.fillRect(0, 0, W, H);
+      // (le voile sombre du milieu est un masque CSS fixe sur le canvas : plus rien à peindre ici)
     };
 
     // le fond s'arrête à la bande « En direct » ([data-rain-end]) : en dessous, fond uni.

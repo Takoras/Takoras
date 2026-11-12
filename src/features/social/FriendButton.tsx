@@ -40,13 +40,13 @@ export function FriendButton({ pseudo }: { pseudo: string }) {
   });
   const s = q.data;
   if (!s) return null;
-  const st = s.status === 'accepted' ? 'chat' : s.incoming ? 'accept' : s.status === 'pending' ? 'sent' : 'add';
+  const st = s.status === 'accepted' ? 'friend' : s.incoming ? 'accept' : s.status === 'pending' ? 'sent' : 'add';
   const done = () => {
     void qc.invalidateQueries({ queryKey: ['friend', pseudo] });
     void qc.invalidateQueries({ queryKey: ['friends'] });
   };
   if (st === 'sent') return <Button disabled>{t('ui.fr_sent')}</Button>;
-  if (st === 'chat')
+  if (st === 'friend')
     return (
       // le chat est retiré : on montre juste que vous êtes amis
       <Button disabled>{t('ui.fr_is')}</Button>

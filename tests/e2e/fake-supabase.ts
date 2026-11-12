@@ -999,7 +999,6 @@ export async function fakeSupabase(
           created_at: '2026-10-20T10:00:00Z',
         },
       ]);
-    if (rpc === 'admin_messages') return json([]);
     if (rpc?.startsWith('admin_')) return json(rpc === 'admin_give' || rpc === 'admin_reset' ? 2 : null);
     if (rpc === 'live_feed' || rpc === 'avatars_of') return json([]);
     if (url.includes('/rest/v1/pulls')) return json([]);

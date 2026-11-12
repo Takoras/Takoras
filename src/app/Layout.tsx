@@ -1,5 +1,6 @@
 import type { CSSProperties } from 'react';
-import { useEffect } from 'react';
+import { useEffect, useRef } from 'react';
+import { useSwingAll } from '@/ui/useSwing';
 import { NavLink, Outlet, useLocation, useNavigate } from 'react-router';
 import { useMe } from '@/api/queries';
 import { useResetWatch } from '@/lib/resetWatch';
@@ -52,6 +53,9 @@ function pageZoom(path: string) {
 
 export function Layout() {
   const t = useT();
+  // les cases du menu se balancent au survol, accrochées par le haut (comme les rayons du site)
+  const railRef = useRef<HTMLDivElement>(null);
+  useSwingAll(railRef, `.${s.railIco}`, 0.5);
   const { pathname } = useLocation();
   const user = useAuth((x) => x.user);
   const me = useMe();
@@ -126,7 +130,7 @@ export function Layout() {
         <NavLink to="/" className={s.railBrand} aria-label="Takoras">
           <img className="px still" src="/img/logo.png" alt="" width={44} height={44} />
         </NavLink>
-        <div className={s.railNav}>
+        <div ref={railRef} className={s.railNav}>
           {NAV.map((n) => (
             <NavLink
               key={n.to}

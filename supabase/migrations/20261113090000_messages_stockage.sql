@@ -1,0 +1,6 @@
+-- 13 nov. 2026 (appliqué via MCP) :
+-- * messages entre joueurs retirés : admin_stats_cat, export_my_data et my_friends ne lisent plus public.messages ;
+--   send_message, mark_read, my_conversation, admin_messages, admin_delete_message, admin_clear_messages fermées
+--   (revoke). La table public.messages reste en attente d'accord pour la supprimer.
+-- * stockage : _eco_log n'écrit plus que les mouvements de pièces ; fillfactor 70 sur profiles (80 sur daily_stats,
+--   battle_pass) ; vacuum full profiles ; reindex pulls, pending_pulls, rate_hits, eco_log.

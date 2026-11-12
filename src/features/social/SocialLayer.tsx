@@ -1,8 +1,8 @@
-import { useEffect, useRef, useState, type FormEvent } from 'react';
+import { useRef } from 'react';
 import { usePoll } from '@/lib/poll';
-import { Link, useNavigate } from 'react-router';
-import { useQuery, useQueryClient } from '@tanstack/react-query';
-import { errorText, publicApi, socialApi } from '@/api';
+import { useNavigate } from 'react-router';
+import { useQueryClient } from '@tanstack/react-query';
+import { publicApi, socialApi } from '@/api';
 import { itemImg, itemText, type ShopItem } from '@/data/items';
 import { sfx } from '@/engines/sound.js';
 import { useAuth } from '@/lib/auth';
@@ -11,12 +11,11 @@ import { sb } from '@/lib/supabase';
 import { useT } from '@/i18n/useT';
 import { Avatar } from '@/ui/Avatar';
 import { toast } from '@/ui/toast';
-import { closeChat, openChat, useChat } from './chatStore';
-import { dismiss, notify, timeOf, useFriends, useNotifs, type Friend, type Msg } from './social';
+import { dismiss, notify, useNotifs, type Friend } from './social';
 import s from './Social.module.css';
 
-// Tout ce qui est social et en direct, présent sur toutes les pages : fenêtre de chat (ouverte depuis Amis), notifications,
-// et les abonnements temps réel (messages, demandes d'ami, prix de la boutique).
+// Tout ce qui est social et en direct, présent sur toutes les pages : notifications, et les abonnements
+// temps réel (demandes d'ami, prix de la boutique). Plus de messages entre joueurs.
 export function SocialLayer() {
   useSocialRealtime();
   usePriceRealtime();
@@ -55,9 +54,6 @@ function useSocialRealtime() {
     90_000,
     !!uid,
   );
-  useEffect(() => {
-    if (!uid) closeChat();
-  }, [uid]);
 }
 
 // Prix changé par l'admin (seulement pour la boutique actuelle) : notif chez tout le monde, clic = boutique.
@@ -103,168 +99,6 @@ function usePriceRealtime() {
       );
     }
   }, 120_000);
-}
-
-// (chat retiré du site : gardé ici au cas où on le remettrait)
-export function ChatDock() {
-  const t = useT();
-  const { dock, open, min } = useChat();
-  const fr = useFriends();
-  const list = fr.data ?? [];
-  if (!dock) return null;
-  const f = open ? list.find((x) => x.id === open) : undefined;
-  return (
-    <section className={`${s.dock} ${min ? s.min : ''}`} aria-label={t('ui.fr_chats')}>
-      {f ? (
-        <Conversation f={f} min={min} />
-      ) : (
-        <>
-          <header className={s.dockHead}>
-            <b>{t('ui.fr_chats')}</b>
-            <button type="button" className={s.x} onClick={closeChat} aria-label={t('ui.close')}>
-              ✕
-            </button>
-          </header>
-          <div className={s.pick}>
-            {list
-              .filter((x) => x.status === 'accepted')
-              .map((x) => (
-                <button key={x.id} type="button" onClick={() => openChat(x.id)}>
-                  <Avatar pseudo={x.pseudo} size={34} />
-                  <span>{x.pseudo}</span>
-                  {Number(x.unread) ? <i className={s.badge}>{x.unread}</i> : null}
-                </button>
-              ))}
-            {list.some((x) => x.status === 'accepted') ? null : <p className="muted">{t('ui.fr_empty')}</p>}
-          </div>
-        </>
-      )}
-    </section>
-  );
-}
-
-export function Conversation({ f, min, inline = false }: { f: Friend; min: boolean; inline?: boolean }) {
-  const t = useT();
-  const lang = useSettings((x) => x.lang);
-  const uid = useAuth((x) => x.user?.id);
-  const qc = useQueryClient();
-  const [text, setText] = useState('');
-  const box = useRef<HTMLDivElement>(null);
-  const input = useRef<HTMLInputElement>(null);
-  const conv = useQuery({
-    queryKey: ['conv', f.id],
-    queryFn: async () => ((await socialApi.conversation(f.id)) as unknown as Msg[]) ?? [],
-    staleTime: Infinity,
-  });
-  const msgs = conv.data ?? [];
-  // Messages lus dès qu'on ouvre la conversation
-  useEffect(() => {
-    if (Number(f.unread) > 0)
-      void socialApi.markRead(f.id).then(
-        () => qc.invalidateQueries({ queryKey: ['friends', uid] }),
-        () => undefined,
-      );
-  }, [f.id, f.unread, qc, uid]);
-  useEffect(() => {
-    if (box.current) box.current.scrollTop = box.current.scrollHeight;
-  }, [msgs.length, min]);
-  // Sur téléphone, pas de clavier qui saute tout seul
-  useEffect(() => {
-    if (!min && !matchMedia('(pointer: coarse)').matches) input.current?.focus({ preventScroll: true });
-  }, [f.id, min]);
-  const send = async (e: FormEvent) => {
-    e.preventDefault();
-    const body = text.trim();
-    if (!body) return;
-    setText('');
-    try {
-      const id = (await socialApi.send(f.id, body)) as number;
-      qc.setQueryData<Msg[]>(['conv', f.id], (l = []) =>
-        l.some((m) => m.id === id) ? l : [...l, { id, mine: true, body, created_at: new Date().toISOString() }],
-      );
-    } catch (err) {
-      setText(body);
-      sfx.deny();
-      toast(errorText(err, lang), true);
-    }
-  };
-  let last = '';
-  return (
-    <>
-      {inline ? (
-        <header className={s.dockHead}>
-          <Avatar pseudo={f.pseudo} size={28} />
-          <Link to={`/profile/${encodeURIComponent(f.pseudo)}`} className={s.dockName}>
-            {f.pseudo}
-          </Link>
-        </header>
-      ) : (
-        <header className={s.dockHead}>
-          <button type="button" className={s.x} onClick={() => openChat(null)} aria-label={t('ui.back')}>
-            ‹
-          </button>
-          <Avatar pseudo={f.pseudo} size={28} />
-          <Link to={`/profile/${encodeURIComponent(f.pseudo)}`} className={s.dockName}>
-            {f.pseudo}
-          </Link>
-          <button
-            type="button"
-            className={s.x}
-            onClick={() => useChat.setState({ min: !min })}
-            aria-label={min ? '▢' : '–'}
-            aria-expanded={!min}
-          >
-            {min ? '▢' : '–'}
-          </button>
-          <button type="button" className={s.x} onClick={closeChat} aria-label={t('ui.close')}>
-            ✕
-          </button>
-        </header>
-      )}
-      {min ? null : (
-        <>
-          <div ref={box} className={s.msgs} role="log" aria-live="polite">
-            {msgs.length ? (
-              msgs.map((m) => {
-                const day = new Date(m.created_at).toLocaleDateString(locale(lang));
-                const sep = day !== last;
-                last = day;
-                return (
-                  <div key={m.id}>
-                    {sep ? <p className={s.day}>{day}</p> : null}
-                    <div className={`${s.m} ${m.mine ? s.me : ''}`}>
-                      <p>{m.body}</p>
-                      <small>{timeOf(m.created_at)}</small>
-                    </div>
-                  </div>
-                );
-              })
-            ) : conv.isPending ? (
-              <p className="muted" aria-busy>
-                …
-              </p>
-            ) : (
-              <p className="muted">{t('ui.fr_first')}</p>
-            )}
-          </div>
-          <form className={s.form} onSubmit={(e) => void send(e)}>
-            <input
-              ref={input}
-              value={text}
-              onChange={(e) => setText(e.target.value)}
-              maxLength={500}
-              placeholder={t('ui.fr_write', { n: f.pseudo })}
-              aria-label={t('ui.fr_write', { n: f.pseudo })}
-              autoComplete="off"
-            />
-            <button type="submit" aria-label={t('ui.send')}>
-              ➤
-            </button>
-          </form>
-        </>
-      )}
-    </>
-  );
 }
 
 function Notifs() {

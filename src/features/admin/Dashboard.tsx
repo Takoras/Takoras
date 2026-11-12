@@ -501,7 +501,6 @@ function SocialCat({ d }: { d: J }) {
           metrics={[
             ['matchs', 'Matchs classés'],
             ['amities', 'Nouvelles amitiés'],
-            ['messages', 'Messages'],
           ]}
         />
         <Panel title="Fin des matchs" sub="pourquoi ils s’arrêtent">
@@ -650,9 +649,32 @@ function niceMax(v: number) {
   const m = [1, 2, 2.5, 5, 10].find((x) => x * p >= v) ?? 10;
   return m * p;
 }
-function Trend({ days, metrics }: { days: Day[]; metrics: [string, string][] }) {
+// Zoom : glisser sur la courbe pour garder une période ; molette pour zoomer autour du jour survolé ; « Tout voir ».
+function Trend({ days: all, metrics }: { days: Day[]; metrics: [string, string][] }) {
   const [m, setM] = useState(metrics[0]?.[0] ?? '');
   const [hov, setHov] = useState<number | null>(null);
+  const [zoom, setZoom] = useState<[number, number] | null>(null); // indices dans `all`
+  const [sel, setSel] = useState<[number, number] | null>(null); // sélection en cours (indices visibles)
+  const z0 = zoom?.[0] ?? 0;
+  const days = zoom ? all.slice(zoom[0], zoom[1] + 1) : all;
+  const zoomTo = (a: number, b: number) => {
+    const lo = Math.max(0, Math.min(a, b)),
+      hi = Math.min(all.length - 1, Math.max(a, b));
+    if (hi - lo < 2 || (lo === 0 && hi === all.length - 1))
+      return setZoom(lo === 0 && hi === all.length - 1 ? null : zoom);
+    setHov(null);
+    setZoom([lo, hi]);
+  };
+  const wheel = (e: React.WheelEvent) => {
+    if (hov === null) return;
+    e.preventDefault();
+    const n = days.length,
+      c = z0 + hov;
+    const nn = Math.max(3, Math.min(all.length, Math.round(n * (e.deltaY > 0 ? 1.35 : 0.7))));
+    const lo = Math.max(0, Math.min(all.length - nn, c - Math.round((hov / Math.max(1, n - 1)) * (nn - 1))));
+    if (nn >= all.length) return setZoom(null);
+    zoomTo(lo, lo + nn - 1);
+  };
   const vals = days.map((x) => num(x[m]));
   const max = niceMax(Math.max(...vals, 0));
   const iw = W - PAD.l - PAD.r,
@@ -674,9 +696,15 @@ function Trend({ days, metrics }: { days: Day[]; metrics: [string, string][] }) 
           <h3>{label}</h3>
           <small>
             {short(total)} sur {days.length} jours · {short(total / Math.max(1, days.length))} / jour
+            {zoom ? ` · du ${dShort(days[0]?.d ?? '')} au ${dShort(days.at(-1)?.d ?? '')}` : ''}
           </small>
         </div>
         <div className={s.metrics} role="tablist">
+          {zoom ? (
+            <button type="button" className={s.unzoom} onClick={() => setZoom(null)}>
+              Tout voir
+            </button>
+          ) : null}
           {metrics.map(([k, l]) => (
             <button key={k} type="button" role="tab" aria-selected={m === k} onClick={() => setM(k)}>
               {l}
@@ -684,8 +712,17 @@ function Trend({ days, metrics }: { days: Day[]; metrics: [string, string][] }) 
           ))}
         </div>
       </header>
-      <div className={s.chart}>
-        <svg viewBox={`0 0 ${W} ${H}`} role="img" aria-label={`${label} par jour`}>
+      <div className={s.chart} onWheel={wheel}>
+        <svg
+          viewBox={`0 0 ${W} ${H}`}
+          role="img"
+          aria-label={`${label} par jour`}
+          onPointerUp={() => {
+            if (sel && Math.abs(sel[1] - sel[0]) >= 2) zoomTo(z0 + sel[0], z0 + sel[1]);
+            setSel(null);
+          }}
+          onPointerLeave={() => setSel(null)}
+        >
           {[0, 0.5, 1].map((f) => (
             <g key={f}>
               <line x1={PAD.l} x2={W - PAD.r} y1={Y(max * f)} y2={Y(max * f)} className={s.gridLine} />
@@ -701,7 +738,16 @@ function Trend({ days, metrics }: { days: Day[]; metrics: [string, string][] }) 
               </text>
             ) : null,
           )}
-          <g key={m + days.length}>
+          {sel && sel[0] !== sel[1] ? (
+            <rect
+              x={X(Math.min(...sel))}
+              y={PAD.t}
+              width={Math.abs(X(sel[1]) - X(sel[0]))}
+              height={ih}
+              className={s.selBox}
+            />
+          ) : null}
+          <g key={m + z0 + days.length}>
             <path d={area} className={s.area} />
             <path d={line} className={s.line} pathLength={1} />
           </g>
@@ -719,7 +765,15 @@ function Trend({ days, metrics }: { days: Day[]; metrics: [string, string][] }) 
               width={slot}
               height={ih}
               fill="transparent"
-              onPointerEnter={() => setHov(i)}
+              style={{ cursor: 'crosshair' }}
+              onPointerDown={(e) => {
+                e.currentTarget.ownerSVGElement?.releasePointerCapture?.(e.pointerId);
+                setSel([i, i]);
+              }}
+              onPointerEnter={() => {
+                setHov(i);
+                setSel((x) => (x ? [x[0], i] : x));
+              }}
               onPointerLeave={() => setHov((c) => (c === i ? null : c))}
             />
           ))}

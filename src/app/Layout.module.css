@@ -340,10 +340,7 @@
   overflow: hidden; /* la barre ne défile pas et ne se pousse pas */
   overscroll-behavior: none;
   touch-action: manipulation;
-  background: linear-gradient(180deg, #17171b, #0e0e11);
-  box-shadow:
-    inset -2px 0 0 #262036,
-    6px 0 24px rgb(0 0 0 / 35%);
+  background: #121217;
 }
 .railBrand {
   display: grid;
@@ -363,66 +360,65 @@
 .railItem {
   position: relative;
   display: grid;
+  grid-template-rows: auto 0fr; /* le nom est replié… */
   justify-items: center;
-  gap: 4px;
   width: 84px;
-  padding: 6px 0;
+  padding: 4px 0;
   color: var(--muted);
   text-decoration: none;
   transition:
-    transform var(--t-fast),
+    grid-template-rows 0.35s var(--ease-out),
     color var(--t-fast);
 }
-.railItem:hover {
-  color: var(--text);
-  transform: translateY(-2px);
-}
+/* les cases sont accrochées par le haut : elles se balancent au survol (--swing), comme les rayons du site */
 .railIco {
   display: grid;
   place-items: center;
   width: 52px;
   height: 52px;
-  border: 1px solid rgb(255 255 255 / 9%);
-  border-radius: 8px;
-  background: var(--surface);
+  border-radius: 10px;
+  background: rgb(255 255 255 / 4%);
+  rotate: var(--swing, 0deg);
+  transform-origin: 50% 0;
   transition:
-    filter var(--t-fast),
-    transform var(--t-fast);
+    background-color 0.25s,
+    color 0.25s,
+    translate 0.25s var(--ease-out);
+}
+.railItem:hover {
+  color: var(--text);
 }
 .railItem:hover .railIco {
-  filter: brightness(1.3);
+  background: rgb(255 255 255 / 8%);
+  translate: 0 -2px;
 }
 .railTxt {
+  min-height: 0;
+  overflow: hidden;
+  padding-top: 4px;
   font-size: var(--fs-xs);
   font-weight: 700;
   letter-spacing: 0.02em;
   text-align: center;
   line-height: 1.1;
+  opacity: 0;
+  translate: 0 -4px;
+  transition:
+    opacity 0.25s,
+    translate 0.35s var(--ease-out);
 }
-/* page ouverte : boîte violette qui brille + trait lumineux à gauche */
+/* page ouverte : case bleue unie, et son nom se déplie dessous */
 .railItem.on {
+  grid-template-rows: auto 1fr;
   color: #fff;
 }
 .railItem.on .railIco {
-  border-color: #4f7bff;
-  background-color: var(--accent);
-  filter: drop-shadow(0 0 10px rgb(61 107 255 / 60%));
-  animation: railPulse 2.4s ease-in-out infinite;
+  background: #3966f7;
+  color: #fff;
 }
-.railItem.on::before {
-  content: '';
-  position: absolute;
-  left: -10px;
-  top: 14px;
-  width: 4px;
-  height: 36px;
-  background: #8eaaff;
-  box-shadow: 0 0 10px #4f7bff;
-}
-@keyframes railPulse {
-  50% {
-    transform: translateY(-2px);
-  }
+.railItem.on .railTxt {
+  opacity: 1;
+  translate: 0 0;
 }
 .railItem .nbadge {
   position: absolute;
@@ -522,10 +518,6 @@
   .railTxt {
     font-size: var(--fs-xs);
   }
-  .railItem.on::before {
-    top: 8px;
-    height: 28px;
-  }
   .railMini {
     width: 32px;
     height: 32px;
@@ -612,10 +604,6 @@
     clip-path: inset(50%);
     white-space: nowrap;
   }
-  .railItem.on::before {
-    top: 6px;
-    height: 28px;
-  }
 }
 
 /* écran pas très haut (portable, téléphone réduit) : la barre se resserre pour que tout tienne */
@@ -633,10 +621,6 @@
   .railIco {
     width: 44px;
     height: 44px;
-  }
-  .railItem.on::before {
-    top: 10px;
-    height: 30px;
   }
   .railBottom {
     display: grid;
