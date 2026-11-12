@@ -56,32 +56,55 @@ async function render(
   // comme le ferait le CSS (contain, cover ou fill)
   const cw = Math.max(8, Math.round(bw * dpr)),
     ch = Math.max(8, Math.round(bh * dpr));
-  // image qui remplit toute la case (photo de profil…) : on la dessine un peu plus grande que la case, sinon la
-  // déformation va chercher des pixels hors de l'image et le fond noir apparaît sur les bords
-  const full = fit === 'cover' || fit === 'fill';
+  // place de l'image dans la case, comme le ferait le CSS (contain, cover ou fill)
+  const place = (W: number, H: number) => {
+    if (fit === 'contain' || fit === 'cover' || fit === 'scale-down') {
+      const k = (fit === 'cover' ? Math.max : Math.min)(W / nw, H / nh);
+      return [nw * k, nh * k] as const;
+    }
+    return [W, H] as const;
+  };
+  // on regarde d'abord les bords du dessin, à la taille de la case :
+  //  - bords tous pleins (photo de profil) : on la dessine un peu plus grande, sinon la déformation fait apparaître
+  //    le fond sur les bords ;
+  //  - bords en bonne partie pleins (dessin collé au cadre) : un dessin précalculé serait coupé → doodle simple ;
+  //    (avant, un jeton rond comme Bodako était pris pour une photo, agrandi et rogné sur les côtés)
+  //  - bords vides (la plupart des jetons) : dessin normal.
+  const probe = document.createElement('canvas');
+  probe.width = cw;
+  probe.height = ch;
+  const px = probe.getContext('2d');
+  if (!px) return null;
+  px.imageSmoothingEnabled = false;
+  {
+    const [dw, dh] = place(cw, ch);
+    px.drawImage(img, (cw - dw) / 2, (ch - dh) / 2, dw, dh);
+  }
+  const e = Math.max(2, Math.ceil(2 * dpr));
+  const strips = [px.getImageData(0, 0, cw, e), px.getImageData(0, ch - e, cw, e), px.getImageData(0, 0, e, ch), px.getImageData(cw - e, 0, e, ch)];
+  let opaque = 0,
+    total = 0;
+  strips.forEach((d) => {
+    for (let i = 3; i < d.data.length; i += 4) {
+      total++;
+      if ((d.data[i] ?? 0) > 24) opaque++;
+    }
+  });
+  const full = total > 0 && opaque / total > 0.9;
+  // (un rond qui frôle le bord en 4 points, comme les jetons, reste en dessin précalculé : la coupe ne se voit pas)
+  if (!full && opaque / Math.max(1, total) > 0.3) return null;
   const m = full ? Math.ceil((small ? 1.4 : 3) * dpr) : 0;
   const ow = cw + m * 2,
     oh = ch + m * 2;
-  let dw = ow,
-    dh = oh;
-  if (fit === 'contain' || fit === 'cover' || fit === 'scale-down') {
-    const k = (fit === 'cover' ? Math.max : Math.min)(ow / nw, oh / nh);
-    dw = nw * k;
-    dh = nh * k;
-  }
   const src = document.createElement('canvas');
   src.width = ow;
   src.height = oh;
   const sx = src.getContext('2d');
   if (!sx) return null;
   sx.imageSmoothingEnabled = false; // pixel art : agrandi sans flou, comme à l'écran
-  sx.drawImage(img, (ow - dw) / 2, (oh - dh) / 2, dw, dh);
-  // dessin qui touche le bord de sa case (ex. le jeton Bodako) : la déformation le ferait déborder, et un dessin
-  // précalculé est forcément coupé au bord → on laisse cette image au doodle simple (qui peut déborder)
-  if (!full) {
-    const e = Math.max(2, Math.ceil(2 * dpr));
-    const strips = [sx.getImageData(0, 0, ow, e), sx.getImageData(0, oh - e, ow, e), sx.getImageData(0, 0, e, oh), sx.getImageData(ow - e, 0, e, oh)];
-    if (strips.some((d) => d.data.some((v, i) => i % 4 === 3 && v > 24))) return null;
+  {
+    const [dw, dh] = place(ow, oh);
+    sx.drawImage(img, (ow - dw) / 2, (oh - dh) / 2, dw, dh);
   }
   // les 3 dessins l'un sous l'autre, séparés par une petite bande vide : si l'affichage tombe sur une fraction de
   // pixel, on voit du vide (rien) au lieu d'un bout du dessin d'à côté (avant : traits parasites, ex. le podium)
