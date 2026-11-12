@@ -1,0 +1,2 @@
+-- Tableau de bord admin : admin_dashboard(p_days) renvoie toutes les stats d'un coup (appliqué via MCP le 12 nov. 2026).
+-- Voir la définition complète dans la base (pg_get_functiondef('public.admin_dashboard'::regproc)).

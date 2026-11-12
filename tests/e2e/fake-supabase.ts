@@ -304,48 +304,58 @@ export async function fakeSupabase(
       });
     // boutique mystère : 4 objets déjà révélés + une case mystère (la vedette, -40 %) qui cache une potion ×2
     const shopNow = () => ({
-        reset_in: 7200,
-        reveal_gain: 100,
-        featured_slot: 5,
-        featured: revealed ? 'potion2' : null,
-        off: 40,
-        items: [
-          {
-            id: 'potion1',
-            kind: 'potion',
-            data: { mult: 1.3, rolls: 5 },
-            price: 300,
-            base_price: 300,
-            stock: 7,
-            bought: 0,
-            owned: false,
-          },
-          {
-            id: 'potion10',
-            kind: 'potion',
-            data: { mult: 10, rolls: 1 },
-            price: 60000,
-            base_price: 50000,
-            stock: 1,
-            bought: 0,
-            owned: false,
-          },
-          {
-            id: 'hourglass',
-            kind: 'hourglass',
-            data: { minutes: 60 },
-            price: 2000,
-            base_price: 2000,
-            stock: 2,
-            bought: 2,
-            owned: false,
-          },
-          { id: 'b_plaine', kind: 'banner', data: {}, price: 5000, base_price: 5000, stock: 1, bought: 0, owned: true },
-          revealed
-            ? { slot: 5, id: 'potion2', kind: 'potion', data: { mult: 2, rolls: 6 }, price: 180, base_price: 300, stock: 9, bought: 0, owned: false }
-            : { slot: 5, hidden: true, group: 'potion' },
-        ],
-      });
+      reset_in: 7200,
+      reveal_gain: 100,
+      featured_slot: 5,
+      featured: revealed ? 'potion2' : null,
+      off: 40,
+      items: [
+        {
+          id: 'potion1',
+          kind: 'potion',
+          data: { mult: 1.3, rolls: 5 },
+          price: 300,
+          base_price: 300,
+          stock: 7,
+          bought: 0,
+          owned: false,
+        },
+        {
+          id: 'potion10',
+          kind: 'potion',
+          data: { mult: 10, rolls: 1 },
+          price: 60000,
+          base_price: 50000,
+          stock: 1,
+          bought: 0,
+          owned: false,
+        },
+        {
+          id: 'hourglass',
+          kind: 'hourglass',
+          data: { minutes: 60 },
+          price: 2000,
+          base_price: 2000,
+          stock: 2,
+          bought: 2,
+          owned: false,
+        },
+        { id: 'b_plaine', kind: 'banner', data: {}, price: 5000, base_price: 5000, stock: 1, bought: 0, owned: true },
+        revealed
+          ? {
+              slot: 5,
+              id: 'potion2',
+              kind: 'potion',
+              data: { mult: 2, rolls: 6 },
+              price: 180,
+              base_price: 300,
+              stock: 9,
+              bought: 0,
+              owned: false,
+            }
+          : { slot: 5, hidden: true, group: 'potion' },
+      ],
+    });
     if (rpc === 'shop_today') return json(shopNow());
     if (rpc === 'reveal_slot') {
       const gain = revealed ? 0 : 100;
@@ -444,7 +454,22 @@ export async function fakeSupabase(
           banner: prof.banner,
           banners: ['plaine'],
           avatars: [],
-          cosmetics: ['n_or', 'n_celeste', 'n_ombre', 'n_rose', 'n_glace', 'n_braise', 'n_arc', 'au_bleue', 'au_or', 'au_etoile', 'au_flamme', 'au_ombre', 'fx_neige', 'fx_braises'],
+          cosmetics: [
+            'n_or',
+            'n_celeste',
+            'n_ombre',
+            'n_rose',
+            'n_glace',
+            'n_braise',
+            'n_arc',
+            'au_bleue',
+            'au_or',
+            'au_etoile',
+            'au_flamme',
+            'au_ombre',
+            'fx_neige',
+            'fx_braises',
+          ],
           email: 'test@example.com',
           provider: 'discord',
           pseudo_free: false,
@@ -677,6 +702,100 @@ export async function fakeSupabase(
     if (rpc === 'admin_ban') {
       admBanned = (JSON.parse(route.request().postData() ?? '{}') as { p_ban: boolean }).p_ban;
       return json(null);
+    }
+    if (rpc === 'admin_dashboard') {
+      const days_n = Number((JSON.parse(route.request().postData() ?? '{}') as { p_days?: number }).p_days ?? 30);
+      const days = Array.from({ length: days_n }, (_, i) => ({
+        d: new Date(Date.now() - (days_n - 1 - i) * 864e5).toISOString().slice(0, 10),
+        signups: (i * 7) % 5,
+        pulls: 200 + Math.round(Math.sin(i / 3) * 120 + i * 12),
+        active: 3 + (i % 6),
+        rares: 10 + (i % 9) * 3,
+        variants: 4 + (i % 5),
+        battles: i % 4,
+        hours: 1 + (i % 7) / 2,
+        earned: 40000 + i * 900,
+        spent: 30000 + i * 700,
+      }));
+      const pull = (pseudo: string, jeton: string, odds: number, variant: string | null, eff: number) => ({
+        pseudo,
+        jeton,
+        serie: 'Takoras',
+        odds,
+        variant,
+        eff,
+        at: new Date(Date.now() - 3600e3).toISOString(),
+      });
+      return json({
+        kpi: {
+          players: 152,
+          banned: 2,
+          new_today: 4,
+          new_7d: 31,
+          new_prev7d: 24,
+          online: 7,
+          online_15: 12,
+          active_today: 48,
+          active_7d: 96,
+          pulls_today: 1316,
+          pulls_yesterday: 1102,
+          pulls_total: 48210,
+          variants_today: 71,
+          rares_today: 61,
+          coins_total: 10226653,
+          coins_avg: 67280,
+          matches_today: 9,
+          matches_total: 412,
+          hours_today: 18.5,
+          hours_total: 935.8,
+          friendships: 211,
+          fb_open: 1,
+          reports_open: 2,
+          items_owned: 2760,
+          cosmetics_owned: 14,
+          owned_tokens: 25970,
+        },
+        days,
+        hours: [0, 0, 0, 0, 0, 0, 2, 165, 410, 74, 48, 20, 30, 60, 80, 90, 105, 204, 334, 442, 380, 210, 91, 24],
+        best_today: [
+          pull('Kreuy', 'Astra', 10000, 'celeste', 2000000),
+          pull('DGT', 'Carmin', 400, 'ombre', 200000),
+          pull('Ami', 'Vyolis', 5000, null, 5000),
+        ],
+        best_ever: [pull('Kreuy', 'Astra', 10000, 'celeste', 2000000), pull('Ami', 'Vyolis', 500000, null, 500000)],
+        top_pullers: [
+          { pseudo: 'Kreuy', n: 540 },
+          { pseudo: 'DGT', n: 310 },
+          { pseudo: 'Ami', n: 92 },
+        ],
+        top_rich: [
+          { pseudo: 'Kreuy', coins: 70000000 },
+          { pseudo: 'Ami', coins: 120000 },
+        ],
+        top_time: [
+          { pseudo: 'DGT', h: 12.4 },
+          { pseudo: 'Ami', h: 6.1 },
+        ],
+        rarity_7d: [
+          { k: 0, n: 3200 },
+          { k: 1, n: 1700 },
+          { k: 2, n: 420 },
+          { k: 3, n: 61 },
+          { k: 4, n: 6 },
+          { k: 5, n: 1 },
+        ],
+        variants_7d: { gold: 210, celeste: 22, ombre: 7, none: 5100 },
+        series_7d: [
+          { serie: 'Takoras', n: 4200 },
+          { serie: 'Bodako', n: 1150 },
+        ],
+        top_jetons_7d: [
+          { jeton: 'Mobu', serie: 'Takoras', odds: 2, n: 1800 },
+          { jeton: 'Pikko', serie: 'Takoras', odds: 8, n: 900 },
+        ],
+        recent: [{ pseudo: 'Nouveau', created_at: new Date(Date.now() - 600e3).toISOString() }],
+        online_list: [{ pseudo: 'Kreuy' }, { pseudo: 'Ami' }, { pseudo: 'DGT' }],
+      });
     }
     if (rpc === 'admin_stats')
       return json({ players: 2, pulls_today: 40, pulls_total: 312, coins_total: 1250, best_today: 5000 });

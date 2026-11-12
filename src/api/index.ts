@@ -142,6 +142,7 @@ export const adminApi = {
   reset: (target: string | null) => rpc('admin_reset', { target }),
   giveAll: (target: string) => rpc('admin_give_all', { target }),
   stats: () => rpc('admin_stats'),
+  dashboard: (p_days = 30) => rpc('admin_dashboard', { p_days }),
   shop: () => rpc('admin_shop'),
   shopSet: (a: { p_item: string; p_price: number; p_active: boolean; p_stock: number }) => rpc('admin_shop_set', a),
   shopReroll: () => rpc('admin_shop_reroll'),

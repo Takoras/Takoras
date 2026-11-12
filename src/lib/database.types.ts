@@ -201,6 +201,7 @@ export type Database = {
       admin_shop_reroll: { Args: never; Returns: undefined };
       admin_shop_set: { Args: { p_active: boolean; p_item: string; p_price: number; p_stock: number }; Returns: undefined };
       admin_stats: { Args: never; Returns: Json };
+      admin_dashboard: { Args: { p_days?: number }; Returns: Json };
       avatars_of: { Args: { p: string[] }; Returns: { avatar: string; pseudo: string }[] };
       beta_give: {
         Args: { p_coins?: number; p_item?: string; p_jeton?: string; p_pulls?: number; p_qty?: number; p_variant?: string };
