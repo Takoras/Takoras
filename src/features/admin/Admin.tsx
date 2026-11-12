@@ -13,39 +13,40 @@ import { PatchnotesAdmin } from './PatchnotesAdmin';
 import { Tests } from './Tests';
 import { setPreview } from '@/lib/preview';
 import { useMe } from '@/api/queries';
+import { Icon } from '@/app/Icon';
 import s from './Admin.module.css';
 
 // Panel admin : une colonne de rubriques rangées par thème (tableau de bord d'abord), le contenu à droite.
 // Réservé aux admins, en français (outil interne). L'onglet ouvert est retenu d'une visite à l'autre.
 const GROUPS = [
-  ['Vue d’ensemble', [['dash', '📊', 'Tableau de bord']]],
+  ['Vue d’ensemble', [['dash', 'trophy', 'Tableau de bord']]],
   [
     'Joueurs',
     [
-      ['players', '👥', 'Joueurs'],
-      ['rep', '🚩', 'Signalements'],
-      ['fb', '💡', 'Retours'],
+      ['players', 'users', 'Joueurs'],
+      ['rep', 'shield', 'Signalements'],
+      ['fb', 'bulb', 'Retours'],
     ],
   ],
   [
     'Économie',
     [
-      ['shop', '🛒', 'Boutique'],
-      ['codes', '🎟️', 'Codes promo'],
+      ['shop', 'shop', 'Boutique'],
+      ['codes', 'star', 'Codes promo'],
     ],
   ],
   [
     'Communication',
     [
-      ['ann', '📢', 'Annonces'],
-      ['pn', '📜', 'Patch notes'],
+      ['ann', 'bell', 'Annonces'],
+      ['pn', 'scroll', 'Patch notes'],
     ],
   ],
   [
     'Outils',
     [
-      ['global', '🌍', 'Global'],
-      ['tests', '🧪', 'Tests'],
+      ['global', 'gear', 'Global'],
+      ['tests', 'flask', 'Tests'],
     ],
   ],
 ] as const;
@@ -100,7 +101,7 @@ export default function Admin() {
               <small>{g}</small>
               {mine.map(([k, ic, l]) => (
                 <button key={k} type="button" aria-current={tab === k ? 'page' : undefined} onClick={() => setTab(k)}>
-                  <span aria-hidden>{ic}</span>
+                  <Icon name={ic} size={20} />
                   {l}
                   {badge[k] ? <i className={s.badge}>{badge[k]}</i> : null}
                 </button>
@@ -110,15 +111,13 @@ export default function Admin() {
         })}
         {isAdmin ? (
           <button type="button" className={s.asPlayer} onClick={() => setPreview(true)}>
-            👁 Voir comme un joueur
+            Voir comme un joueur
           </button>
         ) : null}
       </nav>
       <div className={s.main}>
         <header className={s.head}>
-          <h1>
-            <span aria-hidden>{title?.[1]}</span> {title?.[2]}
-          </h1>
+          <h1>{title?.[2]}</h1>
         </header>
         <div key={tab} className={s.panel}>
           {tab === 'dash' ? <Dashboard /> : null}

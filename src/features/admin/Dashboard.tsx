@@ -25,12 +25,12 @@ type Pull = {
 type J = Record<string, any>; // eslint-disable-line @typescript-eslint/no-explicit-any -- JSON du serveur, lu champ par champ
 
 const CATS = [
-  ['over', '📊 Aperçu'],
-  ['players', '👥 Joueurs'],
-  ['luck', '🎲 Chance'],
-  ['eco', '🪙 Économie'],
-  ['social', '⚔️ Combat & social'],
-  ['alerts', '🚨 Alertes'],
+  ['over', 'Aperçu'],
+  ['players', 'Joueurs'],
+  ['luck', 'Chance'],
+  ['eco', 'Économie'],
+  ['social', 'Combat & social'],
+  ['alerts', 'Alertes'],
 ] as const;
 type Cat = (typeof CATS)[number][0];
 const RANGES = [7, 14, 30, 90];
@@ -108,9 +108,9 @@ function Overview({ range }: { range: number }) {
     <>
       {(k.fb_open ?? 0) + (k.reports_open ?? 0) > 0 ? (
         <p className={s.alert}>
-          {k.fb_open ? `💡 ${k.fb_open} retour(s) à lire` : ''}
+          {k.fb_open ? `${k.fb_open} retour(s) à lire` : ''}
           {k.fb_open && k.reports_open ? ' · ' : ''}
-          {k.reports_open ? `🚩 ${k.reports_open} signalement(s) à traiter` : ''}
+          {k.reports_open ? `${k.reports_open} signalement(s) à traiter` : ''}
         </p>
       ) : null}
       <Kpis
@@ -456,14 +456,14 @@ function EcoCat({ d }: { d: J }) {
         <Panel title="Lecture rapide">
           <ul className={s.read}>
             <li>
-              {gain >= dep ? '📈' : '📉'} Sur la période, il s’est créé <b>{short(gain)}</b> pièces et détruit{' '}
-              <b>{short(dep)}</b> : la masse {gain >= dep ? 'gonfle' : 'baisse'}.
+              Sur la période, il s’est créé <b>{short(gain)}</b> pièces et détruit <b>{short(dep)}</b> : la masse{' '}
+              {gain >= dep ? 'gonfle' : 'baisse'}.
             </li>
             <li>
-              {num(d.top10) > 70 ? '⚠️' : '✅'} Les 10 % les plus riches ont <b>{d.top10} %</b> des pièces.
+              Les 10 % les plus riches ont <b>{d.top10} %</b> des pièces.
             </li>
             <li>
-              {num(sp.gini) > 0.8 ? '⚠️' : '✅'} Gini à <b>{sp.gini}</b>
+              Gini à <b>{sp.gini}</b>
               {num(sp.gini) > 0.8 ? ' : richesse très concentrée (souvent des comptes de test).' : '.'}
             </li>
           </ul>

@@ -35,12 +35,12 @@ test('admin : joueurs, don, ban avec confirmation, remise à zéro générale pr
     .getByRole('tablist', { name: 'Fiche du joueur' })
     .getByRole('tab', { name: /Modération/ })
     .click();
-  await page.getByRole('button', { name: '⛔ Bannir' }).click();
+  await page.getByRole('button', { name: 'Bannir' }).click();
   await page.getByRole('dialog').getByRole('button', { name: 'Annuler' }).click();
   expect(calls).not.toContain('admin_ban');
-  await page.getByRole('button', { name: '⛔ Bannir' }).click();
+  await page.getByRole('button', { name: 'Bannir' }).click();
   await page.getByRole('dialog').getByRole('button', { name: 'Confirmer' }).click();
-  await expect(page.getByRole('button', { name: '✅ Débannir' })).toBeVisible();
+  await expect(page.getByRole('button', { name: 'Débannir' })).toBeVisible();
   // global : remise à zéro générale = taper RESET
   await page
     .getByRole('navigation', { name: 'Rubriques admin' })
@@ -83,7 +83,7 @@ test('admin : boutique, annonce, code promo, retours, patch notes FR+EN', async 
     .getByRole('button', { name: /Retours/ })
     .click();
   await expect(page.getByText('Le bouton vendre bug')).toBeVisible();
-  await page.getByRole('button', { name: '✅ Fait', exact: true }).click();
+  await page.getByRole('button', { name: 'Fait', exact: true }).click();
   await expect.poll(() => calls).toContain('admin_feedback_set');
   await page
     .getByRole('navigation', { name: 'Rubriques admin' })
@@ -96,7 +96,7 @@ test('admin : boutique, annonce, code promo, retours, patch notes FR+EN', async 
   await page.getByRole('textbox', { name: 'Titre EN' }).fill('Version 0.14');
   await page.getByRole('textbox', { name: 'Lignes EN' }).fill('+ Admin panel in React');
   await page.getByRole('button', { name: 'Publier' }).click();
-  expect(calls).toContain('admin_patchnote_save');
+  await expect.poll(() => calls).toContain('admin_patchnote_save');
 });
 
 test('admin : pas de problème d’accessibilité grave', async ({ page }) => {

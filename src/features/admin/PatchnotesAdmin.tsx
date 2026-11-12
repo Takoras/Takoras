@@ -52,7 +52,7 @@ export function PatchnotesAdmin() {
           p_title_en: f.title_en.trim(),
           p_lines_en: linesEn,
         }),
-      edit ? 'Patch note modifiée' : 'Patch note publiée 📢 (popup chez les joueurs à leur prochaine visite)',
+      edit ? 'Patch note modifiée' : 'Patch note publiée (popup chez les joueurs à leur prochaine visite)',
     );
     if (ok) {
       setEdit(null);
@@ -140,7 +140,7 @@ export function PatchnotesAdmin() {
                   });
                 }}
               >
-                ✏️ Modifier
+                Modifier
               </Button>
               <Button
                 size="sm"
@@ -151,7 +151,7 @@ export function PatchnotesAdmin() {
                   if (await act(() => adminApi.patchnoteDelete(n.id), 'Patch note supprimée')) await refresh();
                 }}
               >
-                🗑
+                Supprimer
               </Button>
             </div>
           </li>

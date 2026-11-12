@@ -16,15 +16,15 @@ type Fb = {
   status: 'new' | 'seen' | 'done';
   created_at: string;
 };
-const KIND = { bug: '🐞 Bug', idea: '💡 Idée', add: '✨ Ajout', other: '💬 Autre' } as const;
+const KIND = { bug: 'Bug', idea: 'Idée', add: 'Ajout', other: 'Autre' } as const;
 const FILTERS = [
   ['new', '🆕 Nouveaux'],
   ['all', 'Tous'],
-  ['bug', '🐞 Bugs'],
-  ['idea', '💡 Idées'],
-  ['add', '✨ Ajouts'],
-  ['other', '💬 Autres'],
-  ['done', '✅ Faits'],
+  ['bug', 'Bugs'],
+  ['idea', 'Idées'],
+  ['add', 'Ajouts'],
+  ['other', 'Autres'],
+  ['done', 'Faits'],
 ] as const;
 type F = (typeof FILTERS)[number][0];
 const match = (f: Fb, k: F) =>
@@ -70,19 +70,19 @@ export function FeedbackAdmin() {
                 <small className="muted">
                   {dt(f.created_at)} · {f.page ?? ''}
                 </small>
-                <span>{f.status === 'new' ? '🆕' : f.status === 'seen' ? '👀 vu' : '✅ fait'}</span>
+                <span>{f.status === 'new' ? 'nouveau' : f.status === 'seen' ? 'vu' : 'fait'}</span>
               </div>
               <p>{f.body}</p>
               {f.device ? <small className="muted">{f.device}</small> : null}
               <div className={s.quick}>
                 {f.status !== 'seen' ? (
                   <Button size="sm" onClick={() => void set(f, 'seen')}>
-                    👀 Vu
+                    Vu
                   </Button>
                 ) : null}
                 {f.status !== 'done' ? (
                   <Button size="sm" onClick={() => void set(f, 'done')}>
-                    ✅ Fait
+                    Fait
                   </Button>
                 ) : (
                   <Button size="sm" onClick={() => void set(f, 'new')}>
@@ -90,7 +90,7 @@ export function FeedbackAdmin() {
                   </Button>
                 )}
                 <Button size="sm" variant="danger" onClick={() => void set(f, 'delete')}>
-                  🗑 Supprimer
+                  Supprimer
                 </Button>
               </div>
             </li>

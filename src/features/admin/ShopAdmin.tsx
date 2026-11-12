@@ -22,16 +22,16 @@ type Row = ShopItem & {
   pass_only?: boolean;
   group?: string;
 };
-const GROUP: Record<string, string> = { potion: '🧪 Potions', util: '⏳ Pulls', banner: '✨ Cosmétiques' };
+const GROUP: Record<string, string> = { potion: 'Potions', util: 'Pulls', banner: 'Cosmétiques' };
 
 // Boutique (admin) : une carte par objet, tout s'enregistre tout seul.
 // En vente (interrupteur), stock de la période (− / +), prix avec réductions rapides, objet à la une.
 const CATS: [string, string, (r: Row) => boolean][] = [
   ['all', 'Tout', () => true],
-  ['potion', '🧪 Potions', (r) => r.kind === 'potion'],
-  ['bonus', '⏳ Bonus', (r) => r.kind === 'instant' || r.kind === 'hourglass'],
-  ['cosm', '✨ Cosmétiques', (r) => isCosmetic(r.kind)],
-  ['look', '🖼️ Photos & bannières', (r) => r.kind === 'avatar' || r.kind === 'banner'],
+  ['potion', 'Potions', (r) => r.kind === 'potion'],
+  ['bonus', 'Bonus', (r) => r.kind === 'instant' || r.kind === 'hourglass'],
+  ['cosm', 'Cosmétiques', (r) => isCosmetic(r.kind)],
+  ['look', 'Photos & bannières', (r) => r.kind === 'avatar' || r.kind === 'banner'],
 ];
 const OFFS = [10, 25, 50, 75];
 
@@ -79,7 +79,7 @@ export function ShopAdmin() {
               if (await act(() => adminApi.shopReroll(), '')) await refresh();
             }}
           >
-            🎲 Nouveau stock
+            Nouveau stock
           </Button>
         </div>
         <div className={`${s.box} ${s.featBox}`}>
@@ -116,7 +116,7 @@ export function ShopAdmin() {
           )}
           {feats.some((f) => f.forced) ? (
             <Button size="sm" onClick={() => void feature(null)}>
-              🎲 Remettre tout au hasard
+              Remettre tout au hasard
             </Button>
           ) : null}
         </div>
@@ -210,7 +210,7 @@ function Card({
       <li className={`${s.card} ${s.locked}`} style={{ '--i': i } as CSSProperties}>
         <Art it={it} />
         <b>{name}</b>
-        <span className={s.tag}>🔒 Exclusif du passe : jamais en boutique</span>
+        <span className={s.tag}>Exclusif du passe : jamais en boutique</span>
       </li>
     );
   const pct = it.base_price ? Math.round((1 - price / it.base_price) * 100) : 0;
@@ -296,7 +296,7 @@ function Card({
       </small>
       {!it.featured && it.active && stock > 0 ? (
         <button type="button" className={s.feature} onClick={() => onFeature(30)}>
-          ⭐ Mettre à la une
+          Mettre à la une
         </button>
       ) : null}
     </li>

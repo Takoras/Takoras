@@ -17,7 +17,7 @@
   gap: var(--s-3);
   padding: var(--s-5);
   border-radius: 18px;
-  background: radial-gradient(120% 90% at 50% 0%, rgba(var(--tone), 0.16), transparent 70%), rgb(255 255 255 / 2.5%);
+  background: rgb(255 255 255 / 2.5%);
 }
 .card {
   overflow: hidden;
@@ -116,46 +116,120 @@
   animation: fadeIn 0.2s ease-out;
 }
 
-/* ---------- rayons ---------- */
+/* ---------- rayons : comme les rayons de la boutique (penchés, ils flottent et se balancent au survol) ---------- */
 .side {
   display: grid;
   gap: var(--s-4);
   min-width: 0;
 }
 .tabs {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: var(--s-2);
+}
+.tabs > button {
+  --tilt: -0.4deg;
   display: flex;
-  flex-wrap: wrap;
-  gap: 4px;
-  padding: 4px;
-  border-radius: 14px;
-  background: rgb(255 255 255 / 3.5%);
-}
-.tabs button {
-  display: inline-flex;
   align-items: center;
-  gap: 6px;
-  min-height: 38px;
-  padding: 0 12px;
+  gap: var(--s-3);
+  min-width: 0;
+  padding: var(--s-2) var(--s-3);
   border-radius: 10px;
-  color: var(--text-2);
-  font-size: var(--fs-sm);
-  font-weight: 700;
-  transition:
-    background-color var(--t-fast),
-    color var(--t-fast);
-}
-.tabs button:hover {
-  background: rgb(255 255 255 / 6%);
+  background: var(--surface);
   color: var(--text);
+  text-align: left;
+  rotate: calc(var(--tilt) + var(--swing, 0deg));
+  transform-origin: 50% 0;
+  animation: shFloat 6s ease-in-out infinite;
+  transition: background-color var(--t-fast);
 }
-.tabs button[aria-selected='true'] {
-  background: #3966f7;
-  color: #fff;
+.tabs > button:nth-child(2n) {
+  --tilt: 0.35deg;
+  animation-duration: 7s;
+  animation-delay: -2.5s;
 }
-.tabs i {
-  font-size: 11px;
-  font-style: normal;
-  opacity: 0.65;
+.tabs > button:nth-child(3n) {
+  --tilt: -0.2deg;
+  animation-delay: -4s;
+}
+.tabs > button:hover {
+  background: var(--surface-2);
+}
+.tabs > button[aria-selected='true'] {
+  background: rgb(61 107 255 / 22%);
+}
+@keyframes shFloat {
+  0%,
+  100% {
+    translate: 0 0;
+  }
+  50% {
+    translate: 0 -3px;
+  }
+}
+.shIc {
+  display: grid;
+  flex: none;
+  place-items: center;
+  width: 40px;
+  height: 40px;
+}
+.shIc img {
+  width: 40px;
+  height: 40px;
+  object-fit: contain;
+  image-rendering: pixelated;
+}
+.shIc .shWide {
+  width: 40px;
+  height: 26px;
+  border-radius: 4px;
+  object-fit: cover;
+}
+.shIc .shRound {
+  border-radius: 50%;
+  object-fit: cover;
+}
+.shLetter {
+  display: grid;
+  place-items: center;
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  background: #2a2c38;
+  font-family: var(--font-display);
+}
+.shAa {
+  font-family: var(--font-display);
+  font-size: 22px;
+}
+.shAura {
+  display: grid;
+  place-items: center;
+  width: 40px;
+  height: 40px;
+}
+.shDot {
+  display: block;
+  width: 26px;
+  height: 26px;
+  border-radius: 50%;
+  background: #2a2c38;
+}
+.shTxt {
+  display: grid;
+  min-width: 0;
+  line-height: 1.2;
+}
+.shTxt b {
+  overflow: hidden;
+  font-size: var(--fs-sm);
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.shTxt small {
+  color: var(--muted);
+  font-size: var(--fs-xs);
 }
 .panel {
   min-height: 300px;
@@ -278,26 +352,25 @@
 }
 .check {
   position: absolute;
-  top: 6px;
-  right: 6px;
-  display: grid;
-  place-items: center;
+  top: 5px;
+  right: 5px;
   width: 20px;
   height: 20px;
-  border-radius: 50%;
-  background: #3966f7;
-  color: #fff;
-  font-size: 11px;
-  font-style: normal;
-  font-weight: 800;
+  image-rendering: pixelated;
   animation: pop 0.25s var(--ease-out);
 }
+/* pas encore à toi : une étiquette discrète qui dit où l'avoir */
 .lock {
   position: absolute;
   top: 6px;
   right: 6px;
-  font-size: 12px;
+  padding: 1px 7px;
+  border-radius: var(--r-pill);
+  background: rgb(0 0 0 / 45%);
+  color: var(--muted);
+  font-size: 10px;
   font-style: normal;
+  font-weight: 800;
 }
 .lockedT .tileArt {
   filter: grayscale(0.85) brightness(0.55);
@@ -327,11 +400,15 @@
   .panel {
     max-height: none;
   }
+  .tabs {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
 }
 @media (prefers-reduced-motion: reduce) {
   .card,
   .tile,
-  .panel {
+  .panel,
+  .tabs > button {
     animation: none;
   }
 }

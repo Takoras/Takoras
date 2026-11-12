@@ -38,6 +38,7 @@ import { VTag } from '@/ui/VTag';
 import { JetonModal } from '../inventory/JetonModal';
 import { useInventory } from '../inventory/inv';
 import { NeedLogin } from '@/app/NeedLogin';
+import { Icon } from '@/app/Icon';
 import { FriendButton } from '../social/FriendButton';
 import { ReportButton } from './ReportButton';
 import { RankBadge, useRankName } from '../combat/Ranked';
@@ -713,6 +714,10 @@ function EditProfile({ p, onClose }: { p: Prof; onClose: () => void }) {
   // ---------- le vestiaire : aperçu en direct à gauche, rayons de cases à droite ----------
   type Tab = 'id' | 'pp' | 'banner' | 'name' | 'aura' | 'bfx';
   const [tab, setTab] = useState<Tab>('pp');
+  const shelvesRef = useRef<HTMLDivElement>(null);
+  const panelRef = useRef<HTMLDivElement>(null);
+  useSwingAll(shelvesRef, `.${lk.tabs} > button`, 0.5);
+  useSwingAll(panelRef, `.${lk.tile}`, 0.35, tab);
   // survoler une case l'essaie sur l'aperçu (même verrouillée), sans rien changer
   const [hov, setHov] = useState<{ k: Tab; v: string } | null>(null);
   const show = (k: Tab, v: string) => (hov?.k === k ? hov.v : v);
@@ -728,13 +733,57 @@ function EditProfile({ p, onClose }: { p: Prof; onClose: () => void }) {
   };
   const ppOwned = (a: string) => a === 'default' || FREE_PP.includes(a) || (p.avatars ?? []).includes(a);
   const allBanners = Object.keys(BANNER_IMG);
-  const TABS: [Tab, string, string, number, number][] = [
-    ['id', '✏️', t('ui.lk_id'), 0, 0],
-    ['pp', '🙂', t('ui.pe_pp'), pps.filter(ppOwned).length, pps.length],
-    ['banner', '🖼️', t('ui.pe_banner'), (p.banners ?? []).length + 1, allBanners.length + 1],
-    ['name', '✨', t('ui.fx_name'), COSMETICS.name.filter((x) => owned.includes(x)).length, COSMETICS.name.length],
-    ['aura', '⭕', t('ui.fx_aura'), COSMETICS.aura.filter((x) => owned.includes(x)).length, COSMETICS.aura.length],
-    ['bfx', '🌌', t('ui.lk_bfx'), COSMETICS.bfx.filter((x) => owned.includes(x)).length, COSMETICS.bfx.length],
+  // les rayons du vestiaire, chacun avec son image pixel (comme les rayons de la boutique)
+  const firstBanner = (p.banners ?? [])[0] ?? allBanners[0] ?? '';
+  const TABS: [Tab, React.ReactNode, string, number, number][] = [
+    ['id', <Icon key="i" name="user" size={26} />, t('ui.lk_id'), 0, 0],
+    [
+      'pp',
+      avatar === 'default' ? (
+        <span key="i" className={lk.shLetter}>
+          {(p.pseudo[0] ?? '?').toUpperCase()}
+        </span>
+      ) : (
+        <img key="i" className={`px ${lk.shRound}`} src={AVATARS[avatar]} alt="" />
+      ),
+      t('ui.pe_pp'),
+      pps.filter(ppOwned).length,
+      pps.length,
+    ],
+    [
+      'banner',
+      <img key="i" className={`px ${lk.shWide}`} src={BANNER_IMG[firstBanner]} alt="" />,
+      t('ui.pe_banner'),
+      (p.banners ?? []).length + 1,
+      allBanners.length + 1,
+    ],
+    [
+      'name',
+      <b key="i" className={`${lk.shAa} ${nameCls(nameFx || 'n_or')}`}>
+        Aa
+      </b>,
+      t('ui.fx_name'),
+      COSMETICS.name.filter((x) => owned.includes(x)).length,
+      COSMETICS.name.length,
+    ],
+    [
+      'aura',
+      <span key="i" className={lk.shAura}>
+        <Aura id={auraFx || 'au_or'}>
+          <span className={lk.shDot} />
+        </Aura>
+      </span>,
+      t('ui.fx_aura'),
+      COSMETICS.aura.filter((x) => owned.includes(x)).length,
+      COSMETICS.aura.length,
+    ],
+    [
+      'bfx',
+      <img key="i" className="px" src="/img/fx/particle-2.gif" alt="" />,
+      t('ui.lk_bfx'),
+      COSMETICS.bfx.filter((x) => owned.includes(x)).length,
+      COSMETICS.bfx.length,
+    ],
   ];
   // ce que fait une case : équiper, essayer au survol, ou (verrouillée) mener à la boutique
   const setter: Record<Tab, (x: string) => void> = {
@@ -746,6 +795,7 @@ function EditProfile({ p, onClose }: { p: Prof; onClose: () => void }) {
     bfx: setBannerFx,
   };
   const tp = (k: Tab, v: string, to = '/shop') => ({
+    lockTag: to === '/pass' ? t('ui.lk_pass') : t('ui.nav_shop'),
     onPick: () => (sfx.click(), setter[k](v)),
     onLocked: () => goShop(to),
     onTry: () => setHov({ k, v }),
@@ -795,11 +845,10 @@ function EditProfile({ p, onClose }: { p: Prof; onClose: () => void }) {
               <small className={lk.bio}>{bio.trim() || '…'}</small>
             </div>
           </div>
-          {hov ? <p className={lk.trying}>{t('ui.lk_try')}</p> : null}
         </div>
 
         <div className={lk.side}>
-          <div className={lk.tabs} role="tablist" aria-label={t('ui.edit_profile')}>
+          <div ref={shelvesRef} className={lk.tabs} role="tablist" aria-label={t('ui.edit_profile')}>
             {TABS.map(([k, ic, l, n, tot]) => (
               <button
                 key={k}
@@ -808,18 +857,18 @@ function EditProfile({ p, onClose }: { p: Prof; onClose: () => void }) {
                 aria-selected={tab === k}
                 onClick={() => (sfx.click(), setTab(k))}
               >
-                <span aria-hidden>{ic}</span>
-                {l}
-                {tot ? (
-                  <i>
-                    {n}/{tot}
-                  </i>
-                ) : null}
+                <span className={lk.shIc} aria-hidden>
+                  {ic}
+                </span>
+                <span className={lk.shTxt}>
+                  <b>{l}</b>
+                  {tot ? <small>{t('ui.lk_owned', { n, m: tot })}</small> : null}
+                </span>
               </button>
             ))}
           </div>
 
-          <div key={tab} className={lk.panel}>
+          <div key={tab} ref={panelRef} className={lk.panel}>
             {tab === 'id' ? (
               <div className={lk.fields}>
                 <div className={s.peField}>
@@ -871,7 +920,7 @@ function EditProfile({ p, onClose }: { p: Prof; onClose: () => void }) {
                       <span className={lk.empty} />
                     </LockerTile>
                     <LockerTile {...tp('banner', 'best')} on={banner === 'best'} have label={t('ui.pe_best')} wide>
-                      <PixelBg className={lk.bannerBg} odds={bestOdds} glow={tone} still />
+                      <PixelBg className={lk.bannerBg} odds={bestOdds} glow={tone} still={reducedFx()} />
                     </LockerTile>
                     {allBanners.map((b) => (
                       <LockerTile
@@ -936,6 +985,7 @@ function LockerTile({
   label,
   wide,
   lockLabel,
+  lockTag,
   onPick,
   onLocked,
   onTry,
@@ -947,6 +997,7 @@ function LockerTile({
   label: string;
   wide?: boolean;
   lockLabel: string;
+  lockTag: string;
   onPick: () => void;
   onLocked: () => void;
   onTry: () => void;
@@ -967,14 +1018,10 @@ function LockerTile({
     >
       <span className={lk.tileArt}>{children}</span>
       <small>{label}</small>
-      {on ? (
-        <i className={lk.check} aria-hidden>
-          ✓
-        </i>
-      ) : null}
+      {on ? <img className={`px ${lk.check}`} src="/img/ui/ok.png" alt="" /> : null}
       {have ? null : (
         <i className={lk.lock} aria-hidden>
-          🔒
+          {lockTag}
         </i>
       )}
     </button>

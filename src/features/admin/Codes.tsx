@@ -87,7 +87,7 @@ export function Codes() {
           />
           {editing ? null : (
             <Button size="sm" onClick={() => setF({ ...f, code: rand() })}>
-              🎲 Au hasard
+              Au hasard
             </Button>
           )}
         </div>
@@ -318,10 +318,10 @@ export function Codes() {
                         }
                       }}
                     >
-                      📋
+                      Copier
                     </Button>
                     <Button size="sm" aria-label={`Modifier ${c.code}`} onClick={() => edit(c)}>
-                      ✏️
+                      Modifier
                     </Button>
                     <Button
                       size="sm"
@@ -332,7 +332,7 @@ export function Codes() {
                         if (await act(() => adminApi.codeDelete(c.code), 'Code supprimé')) await refresh();
                       }}
                     >
-                      🗑
+                      Supprimer
                     </Button>
                   </td>
                 </tr>

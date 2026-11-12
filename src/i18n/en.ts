@@ -3,6 +3,8 @@ import type { Dict } from './types';
 
 export const en: Dict = {
   ui: {
+    lk_owned: '{n} of {m}',
+    lk_pass: 'Pass',
     lk_id: 'Identity',
     lk_bfx: 'Banner effect',
     lk_try: 'Trying on: not equipped yet',

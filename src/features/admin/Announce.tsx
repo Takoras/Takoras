@@ -46,7 +46,7 @@ export function Announce() {
             disabled={!body.trim() || (!full && !banner)}
             onClick={async () => {
               if (!(await confirm('Envoyer cette annonce à tous les joueurs ?'))) return;
-              if (await act(() => adminApi.announce(body.trim(), full, banner), 'Annonce envoyée à tout le monde 📢')) {
+              if (await act(() => adminApi.announce(body.trim(), full, banner), 'Annonce envoyée à tout le monde')) {
                 setBody('');
                 await refresh();
               }
@@ -72,7 +72,7 @@ export function Announce() {
                 if (await act(() => adminApi.deleteAnnouncement(a.id), 'Annonce supprimée')) await refresh();
               }}
             >
-              🗑
+              Supprimer
             </Button>
           </li>
         ))}

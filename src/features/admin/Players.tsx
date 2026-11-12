@@ -103,7 +103,7 @@ export function Players() {
                     <button type="button" className={s.rowBtn} onClick={() => setSel(p.id)}>
                       {p.pseudo || '(sans pseudo)'}
                     </button>
-                    {p.banned ? ' ⛔' : ''}
+                    {p.banned ? ' (banni)' : ''}
                   </td>
                   <td>{fmt(p.coins)}</td>
                   <td>
@@ -217,7 +217,7 @@ function PlayerBody({ id, P }: { id: string; P: Player }) {
             {P.pseudo || '(sans pseudo)'} {P.is_admin ? <span className={s.tag}>admin</span> : null}
             {P.tester ? <span className={s.tag}>testeur</span> : null}
             {P.is_mod ? <span className={s.tag}>modo</span> : null}
-            {P.banned ? <span className={`${s.tag} ${s.red}`}>⛔ banni</span> : null}
+            {P.banned ? <span className={`${s.tag} ${s.red}`}>banni</span> : null}
           </h2>
           <small className="muted">
             {P.email ?? ''} · inscrit le {day(P.created_at)}
@@ -262,10 +262,10 @@ function PlayerBody({ id, P }: { id: string; P: Player }) {
       <div className={s.ptabs} role="tablist" aria-label="Fiche du joueur">
         {(
           [
-            ['give', '🎁 Donner'],
-            ['coll', `🪙 Collection (${groups.length})`],
-            ['items', '🧪 Objets'],
-            ['mod', '🛡️ Modération'],
+            ['give', 'Donner'],
+            ['coll', `Collection (${groups.length})`],
+            ['items', 'Objets'],
+            ['mod', 'Modération'],
           ] as const
         ).map(([k, l]) => (
           <button key={k} type="button" role="tab" aria-selected={pt === k} onClick={() => setPt(k)}>
@@ -380,9 +380,7 @@ function PlayerBody({ id, P }: { id: string; P: Player }) {
         {pt === 'coll' ? (
           <>
             <section className={s.box}>
-              <h3>
-                Collection <small className="muted">(🔒 verrouillés · 📌 en vitrine)</small>
-              </h3>
+              <h3>Collection</h3>
               <ul className={s.coll}>
                 {groups.map((g) => (
                   <li key={g.jeton}>
@@ -392,8 +390,8 @@ function PlayerBody({ id, P }: { id: string; P: Player }) {
                     </span>
                     <span className={s.cn}>
                       ×{g.all.length}
-                      {g.locked ? ` · 🔒${g.locked}` : ''}
-                      {g.sc ? ` · 📌${g.sc}` : ''}
+                      {g.locked ? ` · ${g.locked} verrouillé(s)` : ''}
+                      {g.sc ? ` · ${g.sc} en vitrine` : ''}
                     </span>
                     <Button size="sm" onClick={() => void collOp(g, 'rm1')} aria-label={`Retirer 1 ${jn(g.jeton)}`}>
                       −1
@@ -406,7 +404,7 @@ function PlayerBody({ id, P }: { id: string; P: Player }) {
                       onClick={() => void collOp(g, g.locked === g.all.length ? 'unlock' : 'lock')}
                       aria-label={g.locked === g.all.length ? 'Déverrouiller' : 'Verrouiller'}
                     >
-                      {g.locked === g.all.length ? '🔓' : '🔒'}
+                      {g.locked === g.all.length ? 'Déverrouiller' : 'Verrouiller'}
                     </Button>
                   </li>
                 ))}
@@ -518,7 +516,7 @@ function PlayerBody({ id, P }: { id: string; P: Player }) {
                       if (await act(() => adminApi.ban(id, ban), `${name} ${ban ? 'banni' : 'débanni'}`)) await after();
                     }}
                   >
-                    {P.banned ? '✅ Débannir' : '⛔ Bannir'}
+                    {P.banned ? 'Débannir' : 'Bannir'}
                   </Button>
                 )}
                 <Button
@@ -533,7 +531,7 @@ function PlayerBody({ id, P }: { id: string; P: Player }) {
                       await after();
                   }}
                 >
-                  {P.tester ? '🧪 Retirer testeur' : '🧪 Rendre testeur'}
+                  {P.tester ? 'Retirer testeur' : 'Rendre testeur'}
                 </Button>
                 <Button
                   size="sm"
@@ -552,7 +550,7 @@ function PlayerBody({ id, P }: { id: string; P: Player }) {
                       await after();
                   }}
                 >
-                  {P.is_mod ? '🛡️ Retirer modo' : '🛡️ Rendre modo'}
+                  {P.is_mod ? 'Retirer modo' : 'Rendre modo'}
                 </Button>
                 <Button
                   size="sm"
@@ -561,10 +559,10 @@ function PlayerBody({ id, P }: { id: string; P: Player }) {
                     if (await act(() => adminApi.clearShowcase(id), 'Vitrine et bio vidées')) await after();
                   }}
                 >
-                  🧹 Vider vitrine + bio
+                  Vider vitrine + bio
                 </Button>
                 <Button size="sm" onClick={async () => setMsgs((await adminApi.messages(id)) as typeof msgs)}>
-                  💬 Voir ses messages
+                  Voir ses messages
                 </Button>
               </div>
               {msgs ? (
@@ -586,7 +584,7 @@ function PlayerBody({ id, P }: { id: string; P: Player }) {
                             setMsgs(msgs.filter((x) => x.id !== m.id));
                         }}
                       >
-                        🗑
+                        Supprimer
                       </Button>
                     </li>
                   ))}

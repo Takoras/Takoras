@@ -113,7 +113,7 @@ export function Global() {
               await qc.invalidateQueries({ queryKey: ['beta-open'] });
           }}
         >
-          {beta.data ? '✅ Bêta ouverte — la fermer' : '⛔ Bêta fermée — la rouvrir'}
+          {beta.data ? 'Bêta ouverte — la fermer' : 'Bêta fermée — la rouvrir'}
         </Button>
       </section>
       <section className={`${s.box} ${s.mod}`}>

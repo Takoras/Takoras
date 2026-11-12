@@ -11,18 +11,18 @@ export const dt = (d: string) =>
 // Objets qu'on peut donner (mêmes libellés que l'ancien panel)
 export const ITEMS: [string, string][] = [
   // (même liste que la boutique : chance × pour N tirages)
-  ['potion1', '🧪 Potion ×1,3 (10 tirages)'],
-  ['potion2', '🧪 Potion ×2 (6 tirages)'],
-  ['potion3', '🧪 Potion ×5 (3 tirages)'],
-  ['potion10', '🧪 Potion ×10 (4 tirages)'],
-  ['potion25', '🧪 Potion ×25 (5 tirages)'],
-  ['potion50', '🧪 Potion ×50 (6 tirages)'],
-  ['potion100', '🧪 Potion ×100 (10 tirages)'],
-  ['potion250', '🧪 Potion ×250 (10 tirages)'],
-  ['potion500', '🧪 Potion ×500 (5 tirages)'],
-  ['hourglass', '⏳ Sablier 1 h'],
-  ['a_etoile', '✨ Photo animée Étoile'],
-  ...Object.keys(BANNER_IMG).map((b): [string, string] => [`b_${b}`, `🎨 Bannière ${bannerName(b, 'fr')}`]),
+  ['potion1', 'Potion ×1,3 (10 tirages)'],
+  ['potion2', 'Potion ×2 (6 tirages)'],
+  ['potion3', 'Potion ×5 (3 tirages)'],
+  ['potion10', 'Potion ×10 (4 tirages)'],
+  ['potion25', 'Potion ×25 (5 tirages)'],
+  ['potion50', 'Potion ×50 (6 tirages)'],
+  ['potion100', 'Potion ×100 (10 tirages)'],
+  ['potion250', 'Potion ×250 (10 tirages)'],
+  ['potion500', 'Potion ×500 (5 tirages)'],
+  ['hourglass', 'Sablier 1 h'],
+  ['a_etoile', 'Photo animée Étoile'],
+  ...Object.keys(BANNER_IMG).map((b): [string, string] => [`b_${b}`, `Bannière ${bannerName(b, 'fr')}`]),
 ];
 export const itemLabel = (id: string) => ITEMS.find(([k]) => k === id)?.[1] ?? id;
 // Exécute une action admin : message de réussite, ou l'erreur du serveur

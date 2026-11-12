@@ -26,17 +26,17 @@ type Rep = {
   total: number;
 };
 const REASON = {
-  pseudo: '🏷️ Pseudo',
-  bio: '📝 Bio',
-  profile: '🖼️ Profil',
-  cheat: '🎯 Triche',
-  other: '💬 Autre',
+  pseudo: 'Pseudo',
+  bio: 'Bio',
+  profile: 'Profil',
+  cheat: 'Triche',
+  other: 'Autre',
 } as const;
 const FILTERS = [
   ['new', '🆕 À traiter'],
   ['all', 'Tous'],
-  ['done', '✅ Traités'],
-  ['dismissed', '🙅 Rejetés'],
+  ['done', 'Traités'],
+  ['dismissed', 'Rejetés'],
 ] as const;
 type F = (typeof FILTERS)[number][0];
 
@@ -95,19 +95,19 @@ export function ReportsAdmin() {
             <div className={s.quick}>
               {r.bio_now ? (
                 <Button size="sm" variant="danger" onClick={() => void clearBio(r)}>
-                  🧽 Vider la bio
+                  Vider la bio
                 </Button>
               ) : null}
               <Button size="sm" variant="danger" onClick={() => void rename(r)}>
-                ✏️ Renommer
+                Renommer
               </Button>
               {r.status === 'new' ? (
                 <>
                   <Button size="sm" onClick={() => void set(r, 'done')}>
-                    ✅ Traité
+                    Traité
                   </Button>
                   <Button size="sm" onClick={() => void set(r, 'dismissed')}>
-                    🙅 Rejeter
+                    Rejeter
                   </Button>
                 </>
               ) : (
@@ -117,7 +117,7 @@ export function ReportsAdmin() {
               )}
               {isAdmin ? (
                 <Button size="sm" variant="danger" onClick={() => void set(r, 'delete')}>
-                  🗑 Supprimer
+                  Supprimer
                 </Button>
               ) : null}
             </div>
