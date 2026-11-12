@@ -52,6 +52,8 @@
   opacity: 0.6;
 }
 .who {
+  position: relative;
+  z-index: 1; /* la photo passe toujours devant la bannière */
   display: grid;
   justify-items: center;
   gap: 6px;

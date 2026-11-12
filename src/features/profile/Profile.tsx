@@ -156,7 +156,7 @@ export default function Profile() {
         <div className={s.banner}>
           {bannerSrc ? (
             <img className="px" src={bannerSrc} alt="" />
-          ) : bestBanner && !p.banner_fx ? (
+          ) : bestBanner ? (
             <PixelBg className={s.bannerBg} odds={bp?.eff ?? 1} glow={tone} still={reducedFx()} />
           ) : null}
           <BannerFx id={p.banner_fx} />

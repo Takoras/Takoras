@@ -126,6 +126,8 @@
 }
 /* seule la photo chevauche la bannière : le pseudo et le rang restent dessous */
 .pp {
+  position: relative;
+  z-index: 2; /* la photo passe toujours devant la bannière (même quand elle penche) */
   margin-top: calc(-1 * clamp(64px, 6vw, 84px));
   padding: 6px;
   border-radius: 50%;

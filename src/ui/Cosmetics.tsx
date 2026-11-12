@@ -1,7 +1,6 @@
 import { useEffect, useRef, type ReactNode } from 'react';
 import type { Lang } from '@/i18n';
 import { reducedFx } from '@/lib/settings';
-import { PixelBg } from './PixelBg';
 import s from './Cosmetics.module.css';
 
 // Cosmétiques de profil (boutique) : effet de pseudo (n_…), contour de la photo (au_…), effet de bannière (fx_…).
@@ -174,16 +173,120 @@ export function Aura({ id, children }: { id?: string | null; children: ReactNode
   );
 }
 
-// ---------- effet de bannière : le fond pixel du jeu (bandes, rayons, poussière, étoiles) dans une teinte ----------
-const BFX: Record<string, { glow: string; odds: number }> = {
-  fx_etoiles: { glow: '#6f8dff', odds: 20_000 }, // nuit bleue : bandes, rayons, poussière et étoiles
-  fx_neige: { glow: '#cfe8ff', odds: 2000 }, // givre : bandes claires et poussière
-  fx_braises: { glow: '#ff7a1a', odds: 2000 }, // braises : bandes orange et poussière qui monte
+// ---------- effet de bannière : quelques sprites pixel PAR-DESSUS la bannière (elle reste visible) ----------
+// Dessinés à la main comme des sprites (grille de pixels agrandie sans lissage), peu nombreux, animés image par
+// image à 10 i/s : étoiles en croix qui scintillent, flocons qui tombent en ondulant, braises qui montent.
+const PXS = 3; // taille d'un pixel de sprite à l'écran
+type Spr = string[]; // '#' = couleur principale, 'o' = couleur claire
+const STAR: Spr[] = [
+  ['o'],
+  ['.#.', '#o#', '.#.'],
+  ['..#..', '..#..', '##o##', '..#..', '..#..'],
+];
+const FLAKE: Spr[] = [
+  ['#.#.#', '.#o#.', '#ooo#', '.#o#.', '#.#.#'],
+  ['.o.', 'o#o', '.o.'],
+  ['o'],
+];
+const EMBER: Spr[] = [['o#', '##'], ['#o', '#'], ['o']];
+const BFX_PAL: Record<string, [string, string]> = {
+  fx_etoiles: ['#a9c2ff', '#ffffff'],
+  fx_neige: ['#cfe8ff', '#ffffff'],
+  fx_braises: ['#ff7a1a', '#ffd166'],
 };
+type P = { x: number; y: number; v: number; p: number; k: number };
 export function BannerFx({ id }: { id?: string | null }) {
-  const fx = id ? BFX[id] : undefined;
-  if (!fx) return null;
-  return <PixelBg className={s.bfx} odds={fx.odds} glow={fx.glow} still={reducedFx()} />;
+  const pal = id ? BFX_PAL[id] : undefined;
+  const ref = useRef<HTMLCanvasElement>(null);
+  useEffect(() => {
+    const cv = ref.current,
+      x = cv?.getContext('2d');
+    if (!cv || !x || !pal || !id) return;
+    let W = 0,
+      H = 0,
+      parts: P[] = [];
+    const size = () => {
+      W = cv.width = Math.max(1, Math.ceil(cv.clientWidth / PXS));
+      H = cv.height = Math.max(1, Math.ceil(cv.clientHeight / PXS));
+      const n = Math.max(8, Math.round((W * PXS) / 32)); // environ un sprite pour 32 px de large
+      parts = Array.from({ length: n }, () => ({
+        x: Math.random() * W,
+        y: Math.random() * H,
+        v: 0.25 + Math.random() * 0.45,
+        p: Math.random() * 10,
+        k: Math.floor(Math.random() * 3),
+      }));
+    };
+    size();
+    const ro = new ResizeObserver(size);
+    ro.observe(cv);
+    const blit = (spr: Spr, cx: number, cy: number) => {
+      const h = spr.length,
+        w = spr[0]?.length ?? 0;
+      spr.forEach((row, j) =>
+        [...row].forEach((c, i) => {
+          if (c === '.') return;
+          x.fillStyle = c === 'o' ? pal[1] : pal[0];
+          x.fillRect(Math.round(cx - w / 2 + i), Math.round(cy - h / 2 + j), 1, 1);
+        }),
+      );
+    };
+    const frame = (f: number) => {
+      x.clearRect(0, 0, W, H);
+      for (const o of parts) {
+        if (id === 'fx_etoiles') {
+          // scintille : point → petite croix → grande croix → petite croix → point → éteinte
+          const ph = Math.floor((f / 3 + o.p) % 10);
+          const st = [0, 1, 2, 1, 0, -1, -1, -1, -1, -1][ph] ?? -1;
+          const spr = st >= 0 ? STAR[st] : undefined;
+          if (spr) blit(spr, o.x, o.y);
+          if (ph === 9) {
+            o.x = Math.random() * W;
+            o.y = Math.random() * H;
+          }
+        } else if (id === 'fx_neige') {
+          o.y += o.v * 0.5;
+          if (o.y > H + 4) {
+            o.y = -4;
+            o.x = Math.random() * W;
+          }
+          const spr = FLAKE[o.k];
+          if (spr) blit(spr, o.x + Math.round(Math.sin(f * 0.12 + o.p) * 2), o.y);
+        } else {
+          // braise : monte en vacillant, rétrécit puis s'éteint
+          o.y -= o.v * 0.7;
+          if (o.y < -3) {
+            o.y = H + 3;
+            o.x = Math.random() * W;
+          }
+          const life = o.y / H;
+          const spr = EMBER[life > 0.6 ? 0 : life > 0.25 ? 1 : 2];
+          if (spr && (life > 0.1 || f % 2)) blit(spr, o.x + (Math.sin(f * 0.3 + o.p) > 0.6 ? 1 : 0), o.y);
+        }
+      }
+    };
+    if (reducedFx()) {
+      frame(6);
+      return () => ro.disconnect();
+    }
+    let raf = 0,
+      last = -1;
+    const t0 = performance.now();
+    const loop = (now: number) => {
+      raf = requestAnimationFrame(loop);
+      const step = Math.floor((now - t0) / 100); // 10 images par seconde, comme un sprite
+      if (step === last) return;
+      last = step;
+      frame(step);
+    };
+    raf = requestAnimationFrame(loop);
+    return () => {
+      cancelAnimationFrame(raf);
+      ro.disconnect();
+    };
+  }, [id, pal]);
+  if (!pal) return null;
+  return <canvas ref={ref} className={s.bfx} aria-hidden />;
 }
 
 // aperçu d'un cosmétique (case de la boutique, choix dans l'éditeur)
