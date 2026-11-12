@@ -52,7 +52,15 @@ const catOf = (it: Slot) =>
         ? 'banner'
         : 'util';
 // rareté d'un objet (en « 1 sur X », comme les jetons) : le fond de la vedette et le son de la révélation en dépendent
-const POTION_ODDS: Record<number, number> = { 1.3: 1, 2: 100, 5: 1000, 10: 10_000, 25: 50_000, 50: 100_000, 100: 500_000 };
+const POTION_ODDS: Record<number, number> = {
+  1.3: 1,
+  2: 100,
+  5: 1000,
+  10: 10_000,
+  25: 50_000,
+  50: 100_000,
+  100: 500_000,
+};
 const oddsOf = (it: Item) =>
   it.kind === 'potion' ? (POTION_ODDS[it.data.mult ?? 0] ?? ((it.data.mult ?? 0) >= 250 ? 1_000_000 : 1)) : 100;
 // Couleur de chaque objet (celle de la potion), pour son fond et sa lumière
@@ -71,7 +79,12 @@ const glowOf = (it: Item) =>
     : it.kind === 'banner'
       ? '242, 194, 48'
       : '142, 170, 255';
-const hexOf = (rgb: string) => '#' + rgb.split(',').map((n) => (+n).toString(16).padStart(2, '0')).join('');
+const hexOf = (rgb: string) =>
+  '#' +
+  rgb
+    .split(',')
+    .map((n) => (+n).toString(16).padStart(2, '0'))
+    .join('');
 const Coin = ({ size = 14 }: { size?: number }) => (
   <img className="px" src="/img/piece.png" alt="" width={size} height={size} />
 );
@@ -104,8 +117,20 @@ export default function Shop() {
   );
   // changer de rayon : les cases du nouveau rayon apparaissent en fondu, l'une après l'autre (comme à l'arrivée)
   const switched = useRef(false);
+  const heroRef = useRef<HTMLDivElement>(null);
+  const ghostRef = useRef<HTMLDivElement>(null);
+  const dirRef = useRef(1);
   useLayoutEffect(() => {
-    if (!switched.current || !gridRef.current || reducedFx()) return;
+    if (!switched.current || reducedFx()) return;
+    // le nouvel objet à la une arrive du côté du rayon choisi
+    heroRef.current?.querySelector<HTMLElement>(`.${s.hero}`)?.animate(
+      [
+        { opacity: 0, transform: `translateX(${dirRef.current * 48}px) scale(.96)` },
+        { opacity: 1, transform: 'translateX(0) scale(1)' },
+      ],
+      { duration: 460, delay: 70, easing: 'cubic-bezier(.2,.8,.2,1)', fill: 'backwards' },
+    );
+    if (!gridRef.current) return;
     [...gridRef.current.children].forEach((c, i) =>
       (c as HTMLElement).animate([{ opacity: 0 }, { opacity: 1 }], {
         duration: 380,
@@ -115,10 +140,42 @@ export default function Shop() {
       }),
     );
   }, [cat]);
+  // changer de rayon : l'objet à la une ne saute pas, il glisse. Une copie de l'ancien (fond pixel compris)
+  // part du côté opposé en s'effaçant pendant que le nouveau arrive du côté du rayon choisi.
   const pick = (k: string) => {
     if (k === cat) return;
     switched.current = true;
     sfx.click();
+    const ix = (x: string) => CATS.findIndex((c) => c.k === x);
+    dirRef.current = ix(k) > ix(cat) ? 1 : -1;
+    const cur = heroRef.current?.querySelector<HTMLElement>(`.${s.hero}`);
+    const layer = ghostRef.current;
+    if (cur && layer && !reducedFx()) {
+      const g = cur.cloneNode(true) as HTMLElement;
+      // les canvas copiés sont vides : on y recopie l'image actuelle
+      const src = cur.querySelectorAll('canvas'),
+        dst = g.querySelectorAll('canvas');
+      dst.forEach((c, i) => {
+        const o = src[i];
+        if (!o) return;
+        c.width = o.width;
+        c.height = o.height;
+        c.getContext('2d')?.drawImage(o, 0, 0);
+      });
+      g.style.cssText += ';position:absolute;inset:0;margin:0;pointer-events:none;animation:none';
+      layer.replaceChildren(g);
+      const d = dirRef.current;
+      g.animate(
+        [
+          { opacity: 1, transform: 'translateX(0) scale(1)' },
+          { opacity: 0, transform: `translateX(${-d * 40}px) scale(.96)` },
+        ],
+        { duration: 300, easing: 'cubic-bezier(.4,0,.8,.4)', fill: 'forwards' },
+      ).finished.then(
+        () => g.remove(),
+        () => g.remove(),
+      );
+    }
     setCat(k);
   };
   useSwingAll(shelvesRef, `.${s.shelf}`, 0.5);
@@ -197,7 +254,10 @@ export default function Shop() {
           : cover.animate(
               [
                 { transform: 'scale(1)', filter: 'brightness(1) saturate(1) drop-shadow(0 0 0 rgb(255 255 255 / 0%))' },
-                { transform: 'scale(1.05)', filter: 'brightness(6) saturate(0) drop-shadow(0 0 18px rgb(255 255 255 / 80%))' },
+                {
+                  transform: 'scale(1.05)',
+                  filter: 'brightness(6) saturate(0) drop-shadow(0 0 18px rgb(255 255 255 / 80%))',
+                },
               ],
               { duration: 1200, easing: 'cubic-bezier(.5,0,.75,.4)', fill: 'forwards' },
             ).finished;
@@ -231,7 +291,11 @@ export default function Shop() {
       flash.className = s.flash ?? '';
       el.appendChild(flash);
       flash
-        .animate([{ opacity: 1 }, { opacity: 0 }], { duration: fast ? 120 : 550, easing: 'cubic-bezier(.3,0,.2,1)', fill: 'forwards' })
+        .animate([{ opacity: 1 }, { opacity: 0 }], {
+          duration: fast ? 120 : 550,
+          easing: 'cubic-bezier(.3,0,.2,1)',
+          fill: 'forwards',
+        })
         .finished.then(
           () => flash.remove(),
           () => flash.remove(),
@@ -308,13 +372,21 @@ export default function Shop() {
       {data ? (
         <>
           <div className={s.top}>
-            {featured && fSlot != null ? (
-              isHidden(featured) ? (
-                <MysteryHero off={fOff} gain={data.reveal_gain ?? 100} logged={!!user} onReveal={(el) => void reveal(fSlot, el)} />
-              ) : (
-                <Hero key={fSlot} it={featured} off={fOff} coins={coins} logged={!!user} left={left} onBuy={buy} />
-              )
-            ) : null}
+            <div ref={heroRef} className={s.heroSlot}>
+              {featured && fSlot != null ? (
+                isHidden(featured) ? (
+                  <MysteryHero
+                    off={fOff}
+                    gain={data.reveal_gain ?? 100}
+                    logged={!!user}
+                    onReveal={(el) => void reveal(fSlot, el)}
+                  />
+                ) : (
+                  <Hero key={fSlot} it={featured} off={fOff} coins={coins} logged={!!user} left={left} onBuy={buy} />
+                )
+              ) : null}
+              <div ref={ghostRef} className={s.heroGhost} aria-hidden />
+            </div>
             <div ref={shelvesRef} className={s.shelves} role="group" aria-label={t('ui.shop_title')}>
               {CATS.map((c) => {
                 // les rayons restent toujours accessibles, même vides aujourd'hui
@@ -341,13 +413,23 @@ export default function Shop() {
             {list.map((it) => {
               const slot = slotOf(it, items.indexOf(it));
               return isHidden(it) ? (
-                <Mystery key={slot} slot={slot} gain={data.reveal_gain ?? 100} logged={!!user} onReveal={(el) => void reveal(slot, el)} />
+                <Mystery
+                  key={slot}
+                  slot={slot}
+                  gain={data.reveal_gain ?? 100}
+                  logged={!!user}
+                  onReveal={(el) => void reveal(slot, el)}
+                />
               ) : (
                 <Card key={slot} slot={slot} it={it} coins={coins} logged={!!user} left={left} onBuy={buy} />
               );
             })}
           </ul>
-          {user ? <Redeem items={items.filter((x): x is Item => !isHidden(x))} /> : <p className="muted">{t('ui.acc_need')}</p>}
+          {user ? (
+            <Redeem items={items.filter((x): x is Item => !isHidden(x))} />
+          ) : (
+            <p className="muted">{t('ui.acc_need')}</p>
+          )}
         </>
       ) : null}
     </section>
@@ -363,7 +445,15 @@ type CardProps = {
 };
 
 // Prix (avec l'ancien prix barré et la variation quand il a bougé) et bouton d'achat
-function Buy({ it, coins, logged, left, onBuy, card, big }: CardProps & { card: () => HTMLElement | null; big?: boolean }) {
+function Buy({
+  it,
+  coins,
+  logged,
+  left,
+  onBuy,
+  card,
+  big,
+}: CardProps & { card: () => HTMLElement | null; big?: boolean }) {
   const t = useT();
   const lang = useSettings((x) => x.lang);
   const n = (v: number) => v.toLocaleString(locale(lang));
@@ -423,7 +513,7 @@ function Hero(p: CardProps & { off: number }) {
       <div ref={art} className={s.heroArt}>
         {isCosmetic(it.kind) ? (
           <span className={s.heroCosm}>
-            <CosmeticPreview id={it.id} />
+            <CosmeticPreview id={it.id} big />
           </span>
         ) : (
           <img
@@ -442,7 +532,11 @@ function Hero(p: CardProps & { off: number }) {
         <h2>{name}</h2>
         {it.kind === 'potion' ? <p>{desc}</p> : null}
         <span className={s.stock}>
-          {it.owned ? t('ui.unlocked_b') : stockLeft ? t('ui.stock_n', { n: stockLeft }) : `${t('ui.sold_out')} · ${hms(left)}`}
+          {it.owned
+            ? t('ui.unlocked_b')
+            : stockLeft
+              ? t('ui.stock_n', { n: stockLeft })
+              : `${t('ui.sold_out')} · ${hms(left)}`}
         </span>
         <Buy {...p} card={() => ref.current} big />
       </div>
@@ -494,7 +588,17 @@ function Card(p: CardProps & { slot: number }) {
 
 // Case pas encore révélée : la même case qu'un objet (même taille), entièrement recouverte d'un cache ; la toucher la
 // révèle (+100 pièces)
-function Mystery({ slot, gain, logged, onReveal }: { slot: number; gain: number; logged: boolean; onReveal: (el: HTMLElement) => void }) {
+function Mystery({
+  slot,
+  gain,
+  logged,
+  onReveal,
+}: {
+  slot: number;
+  gain: number;
+  logged: boolean;
+  onReveal: (el: HTMLElement) => void;
+}) {
   const t = useT();
   const ref = useRef<HTMLLIElement>(null);
   return (
@@ -510,12 +614,7 @@ function Mystery({ slot, gain, logged, onReveal }: { slot: number; gain: number;
           </Button>
         </div>
       </div>
-      <button
-        type="button"
-        className={s.cover}
-        disabled={!logged}
-        onClick={() => ref.current && onReveal(ref.current)}
-      >
+      <button type="button" className={s.cover} disabled={!logged} onClick={() => ref.current && onReveal(ref.current)}>
         <span className="visually-hidden">{t('ui.shop_reveal')}</span>
         <span className={s.gainTag}>
           +{gain} <Coin size={16} />
@@ -526,18 +625,23 @@ function Mystery({ slot, gain, logged, onReveal }: { slot: number; gain: number;
 }
 
 // La vedette tant qu'elle n'est pas révélée : toute la case est cachée, on ne voit que « À la une » et sa réduction
-function MysteryHero({ off, gain, logged, onReveal }: { off: number; gain: number; logged: boolean; onReveal: (el: HTMLElement) => void }) {
+function MysteryHero({
+  off,
+  gain,
+  logged,
+  onReveal,
+}: {
+  off: number;
+  gain: number;
+  logged: boolean;
+  onReveal: (el: HTMLElement) => void;
+}) {
   const t = useT();
   const ref = useRef<HTMLDivElement>(null);
   useSwing(ref, 0.12);
   return (
     <div ref={ref} className={`${s.hero} ${s.myst}`}>
-      <button
-        type="button"
-        className={s.cover}
-        disabled={!logged}
-        onClick={() => ref.current && onReveal(ref.current)}
-      >
+      <button type="button" className={s.cover} disabled={!logged} onClick={() => ref.current && onReveal(ref.current)}>
         <span className="visually-hidden">{t('ui.shop_reveal')}</span>
         <span className={s.featRow}>
           <span className={s.feat}>{t('ui.shop_feat')}</span>

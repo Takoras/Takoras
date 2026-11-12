@@ -187,23 +187,25 @@ export function BannerFx({ id }: { id?: string | null }) {
 }
 
 // aperçu d'un cosmétique (case de la boutique, choix dans l'éditeur)
-export function CosmeticPreview({ id, label = 'Pseudo' }: { id: string; label?: string }) {
+// `big` : en grand (objet à la une de la boutique)
+export function CosmeticPreview({ id, label = 'Pseudo', big }: { id: string; label?: string; big?: boolean }) {
+  const lg = big ? ` ${s.pvBig}` : '';
   if (id.startsWith('n_'))
     return (
-      <span className={s.pvName}>
+      <span className={s.pvName + lg}>
         <b className={nameCls(id)}>{label}</b>
       </span>
     );
   if (id.startsWith('au_'))
     return (
-      <span className={s.pvAura}>
+      <span className={s.pvAura + lg}>
         <Aura id={id}>
           <span className={s.pvQ}>?</span>
         </Aura>
       </span>
     );
   return (
-    <span className={s.pvBanner}>
+    <span className={s.pvBanner + lg}>
       <BannerFx id={id} />
     </span>
   );

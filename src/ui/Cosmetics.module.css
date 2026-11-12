@@ -148,6 +148,19 @@
   background: #1a1d2e;
 }
 
+.pvName.pvBig {
+  font-size: clamp(40px, 4.5vw, 64px);
+}
+.pvAura.pvBig .pvQ {
+  width: clamp(130px, 13vw, 180px);
+  height: clamp(130px, 13vw, 180px);
+  font-size: 64px;
+}
+.pvBanner.pvBig {
+  max-width: none;
+  width: clamp(240px, 26vw, 380px);
+  border-radius: 14px;
+}
 @media (prefers-reduced-motion: reduce) {
   .name {
     animation: none;

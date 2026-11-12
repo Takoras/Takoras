@@ -58,6 +58,18 @@
   align-items: stretch;
 }
 
+/* la place de l'objet à la une : l'ancien s'y efface par-dessus le nouveau au changement de rayon */
+.heroSlot {
+  position: relative;
+  display: grid;
+  min-width: 0;
+}
+.heroGhost {
+  position: absolute;
+  inset: 0;
+  z-index: 2;
+  pointer-events: none;
+}
 .hero {
   position: relative;
   isolation: isolate;
@@ -505,7 +517,6 @@
 .heroCosm {
   display: grid;
   place-items: center;
-  width: clamp(160px, 16vw, 240px);
-  aspect-ratio: 1;
-  scale: 1.1;
+  min-width: clamp(160px, 16vw, 240px);
+  min-height: clamp(160px, 16vw, 240px);
 }
