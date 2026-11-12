@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState, type CSSProperties } from 'react';
 import { createPortal } from 'react-dom';
-import { SERIES, texOf, texScale } from '@/data/jetons';
+import { MYSTERE, SERIES, texOf, texScale } from '@/data/jetons';
+import { cKey, useInventory } from '../inventory/inv';
 import { reducedFx } from '@/lib/settings';
 import { serieTheme } from '@/engines/env';
 import { openPulls } from '../eco/openPulls';
@@ -10,7 +11,7 @@ import s from './Fall.module.css';
 // c'est le monde qui défile vers le haut), avec une traînée floue. Autour, une pluie de jetons de la série
 // à différentes profondeurs (les lointains petits et flous, les proches grands et flous, le milieu net).
 
-type Drop = { t: number; x: number; y: number; z: number; spin: number; rot: number };
+type Drop = { t: number; x: number; y: number; z: number; spin: number; rot: number; known: boolean };
 type Streak = { x: number; y: number; z: number; len: number };
 
 // Pluie de fond (canvas plein écran derrière l'accueil). Changer de série : le nouveau fond (ses jetons, ses
@@ -38,6 +39,15 @@ export function FallRain({ serie }: { serie: string }) {
 
 function RainLayer({ serie, out }: { serie: string; out: boolean }) {
   const ref = useRef<HTMLCanvasElement>(null);
+  // pas de spoil : seuls les jetons que le joueur a déjà eus tombent tels quels, les autres tombent en « ? »
+  const inv = useInventory();
+  const known = useRef<Set<string>>(new Set());
+  useEffect(() => {
+    const coll = inv.data?.coll;
+    known.current = new Set(
+      (SERIES[serie] ?? []).filter((j) => (coll?.get(cKey(serie, j.name))?.total ?? 0) > 0).map((j) => j.name),
+    );
+  }, [inv.data, serie]);
   // couche déjà effacée (changement de série) : pas de copie qui s'efface à son retrait
   const gone = useRef(out);
   useEffect(() => {
@@ -84,6 +94,12 @@ function RainLayer({ serie, out }: { serie: string; out: boolean }) {
       im.onload = () => (sprites[i] = bake(im, texScale(j)));
       im.src = texOf(j);
     });
+    // le jeton mystère (pour ceux pas encore découverts)
+    let mystery: Sprite[] | null = null;
+    const mim = new Image();
+    mim.onload = () => (mystery = bake(mim, 1));
+    mim.src = MYSTERE;
+    const isKnown = (t: number) => known.current.has(list[t]?.name ?? '');
     // trait de vitesse pré-dessiné (un dégradé), juste étiré à chaque image
     const streakImg = document.createElement('canvas');
     streakImg.width = 2;
@@ -116,6 +132,7 @@ function RainLayer({ serie, out }: { serie: string; out: boolean }) {
     const N = W < 700 ? 14 : 24;
     const drops: Drop[] = Array.from({ length: N }, () => ({
       t: pick(),
+      known: false,
       x: Math.random(),
       y: Math.random(),
       z: Math.random(),
@@ -128,7 +145,8 @@ function RainLayer({ serie, out }: { serie: string; out: boolean }) {
       z: Math.random(),
       len: 40 + Math.random() * 160,
     }));
-    drops.sort((a, b) => a.z - b.z); // du plus loin au plus proche (l'ordre ne change jamais)
+    drops.sort((a, b) => a.z - b.z);
+    drops.forEach((d) => (d.known = isKnown(d.t))); // inventaire déjà chargé : les jetons connus tombent tout de suite // du plus loin au plus proche (l'ordre ne change jamais)
     // nappes de couleur qui dérivent (lumière d'ambiance) : un dégradé pré-dessiné, juste déplacé
     const blobImg = document.createElement('canvas');
     blobImg.width = blobImg.height = 256;
@@ -209,12 +227,13 @@ function RainLayer({ serie, out }: { serie: string; out: boolean }) {
         ctx.drawImage(streakImg, st.x * W - px * 40 * st.z, st.y * H, 1 + st.z, st.len);
       }
       for (const d of drops) {
-        const sp = sprites[d.t];
+        const sp = d.known ? sprites[d.t] : mystery;
         d.y -= dt * (0.1 + d.z * 0.6);
         if (d.y < -0.3) {
           d.y = 1.2;
           d.x = Math.random();
           d.t = pick();
+          d.known = isKnown(d.t); // décidé à l'apparition : un jeton ne change jamais d'image en tombant
         }
         if (!sp) continue;
         // profondeur de champ : très flou loin et tout près, un peu flou au milieu
