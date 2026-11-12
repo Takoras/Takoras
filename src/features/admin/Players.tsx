@@ -38,6 +38,7 @@ type Player = {
   banner: string | null;
   banned: boolean;
   tester: boolean;
+  is_mod?: boolean;
   items: { item: string; qty: number }[];
   recent: { jeton: string; odds: number; at: string; sold: boolean }[];
 };
@@ -214,6 +215,7 @@ function PlayerBody({ id, P }: { id: string; P: Player }) {
           <h2>
             {P.pseudo || '(sans pseudo)'} {P.is_admin ? <span className={s.tag}>admin</span> : null}
             {P.tester ? <span className={s.tag}>testeur</span> : null}
+            {P.is_mod ? <span className={s.tag}>modo</span> : null}
             {P.banned ? <span className={`${s.tag} ${s.red}`}>⛔ banni</span> : null}
           </h2>
           <small className="muted">
@@ -392,6 +394,25 @@ function PlayerBody({ id, P }: { id: string; P: Player }) {
             }}
           >
             {P.tester ? '🧪 Retirer testeur' : '🧪 Rendre testeur'}
+          </Button>
+          <Button
+            size="sm"
+            onClick={async () => {
+              if (
+                !P.is_mod &&
+                !(await confirm(`${name} pourra voir les stats et traiter les signalements. Continuer ?`))
+              )
+                return;
+              if (
+                await act(
+                  () => adminApi.setMod(id, !P.is_mod),
+                  `${name} ${P.is_mod ? 'n’est plus modérateur' : 'est maintenant modérateur'}`,
+                )
+              )
+                await after();
+            }}
+          >
+            {P.is_mod ? '🛡️ Retirer modo' : '🛡️ Rendre modo'}
           </Button>
           <Button
             size="sm"

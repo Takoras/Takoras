@@ -797,6 +797,104 @@ export async function fakeSupabase(
         online_list: [{ pseudo: 'Kreuy' }, { pseudo: 'Ami' }, { pseudo: 'DGT' }],
       });
     }
+    if (rpc === 'admin_stats_cat') {
+      const a = JSON.parse(route.request().postData() ?? '{}') as { p_cat: string; p_days?: number };
+      const nd = Number(a.p_days ?? 30);
+      const days = (f: (i: number) => Record<string, number>) =>
+        Array.from({ length: nd }, (_, i) => ({
+          d: new Date(Date.now() - (nd - 1 - i) * 864e5).toISOString().slice(0, 10),
+          ...f(i),
+        }));
+      const who = (pseudo: string, extra: object = {}) => ({
+        pseudo,
+        avatar: 'default',
+        is_admin: false,
+        tester: false,
+        ...extra,
+      });
+      const cats: Record<string, unknown> = {
+        players: {
+          dau: 12,
+          wau: 41,
+          mau: 96,
+          days: days((i) => ({ nouveaux: (i * 3) % 7, revenus: 8 + (i % 9), minutes: 20 + (i % 5) * 4 })),
+          cohorts: [0, 1, 2, 3, 4, 5].map((w) => ({
+            w: new Date(Date.now() - w * 7 * 864e5).toISOString().slice(0, 10),
+            taille: 20 - w,
+            r1: 60 - w * 3,
+            r7: w ? 35 - w * 2 : null,
+            r30: w > 4 ? 12 : null,
+          })),
+          churn: { actifs: 30, risque: 12, decroches: 25, partis: 40, jamais: 45 },
+          buckets: { b0: 45, b1: 30, b2: 50, b3: 22, b4: 5 },
+          funnel: [
+            ['Inscrits', 152],
+            ['1er tirage', 107],
+            ['10 tirages', 90],
+            ['Revenu un autre jour', 70],
+            ['100 tirages', 41],
+            ['A un ami', 33],
+            ['A joué en classé', 20],
+            ['Actif 7 jours différents', 14],
+          ].map(([k, n]) => ({ k, n })),
+          playtime: { avg_h: 3.4, median_h: 0.8 },
+        },
+        luck: {
+          base: 1914,
+          tiers: [
+            [0, 1496, 1657.5],
+            [1, 234, 238.9],
+            [2, 41, 14.7],
+            [3, 52, 2.6],
+            [4, 2, 0.3],
+            [5, 0, 0.02],
+          ].map(([k, obs, exp]) => ({ k, obs, exp })),
+          variants: { n: 1914, gold: 96, celeste: 10, ombre: 4 },
+          luck: { total: 2602, boosted: 688, avg: 12.4, l1: 1914, l2: 60, l3: 21, l4: 0, l5: 607 },
+          discover: days((i) => ({ n: (i * 5) % 11 })),
+          never: [{ serie: 'Takoras', name: 'Vyolis', odds: 500000 }],
+          lucky: [{ ...who('Kreuy'), n: 900, rares: 40, ratio: 44.4 }],
+          expected_rare: 2.9,
+        },
+        eco: {
+          days: days((i) => ({ gagne: 40000 + i * 900, depense: 30000 + i * 1200, vendus: i % 6 })),
+          supply: { total: 10226653, median: 4200, p90: 120000, gini: 0.86 },
+          top10: 91,
+          shop: [{ item: 'potion10', kind: 'potion', qty: 40, buyers: 12, coins: 360000 }],
+          items: [
+            { item: 'potion1', qty: 120, owners: 30 },
+            { item: 'hourglass', qty: 40, owners: 12 },
+          ],
+          promo: [{ code: 'BETA', uses: 52, max_uses: 100, active: true }],
+        },
+        social: {
+          days: days((i) => ({ matchs: i % 5, amities: i % 3, messages: (i * 7) % 13 })),
+          ranked: { total: 120, finished: 104, avg_turns: 9.2, avg_min: 6.4 },
+          why: [
+            { k: 'ko', n: 80 },
+            { k: 'forfait', n: 12 },
+          ],
+          friends: { with_friend: 33, players: 152, avg: 1.4, pending: 3 },
+          pass: { players: 60, premium: 4, avg_xp: 5400, claims: 410 },
+          feedback: [
+            { k: 'bug', n: 10, open: 1 },
+            { k: 'idee', n: 7, open: 0 },
+          ],
+          reports: [{ k: 'pseudo', n: 3, open: 2 }],
+          cosmetics: { owners: 6, name: 4, aura: 3, bfx: 2 },
+        },
+        alerts: {
+          gains: [who('Kreuy', { is_admin: true, gain: 51502900 }), who('DGT', { gain: 10003190 })],
+          bursts: [who('DGT', { h: new Date().toISOString(), n: 540 })],
+          rate: [{ k: 'open_pulls', n: 30, users: 3 }],
+          pending: 0,
+          banned: [],
+          staff: [{ pseudo: 'Kreuy', admin: true, mod: false, tester: true }],
+          lucky_odd: [who('DGT', { n: 600, best: 200000, big: 3 })],
+        },
+      };
+      return json(cats[a.p_cat] ?? null);
+    }
     if (rpc === 'admin_stats')
       return json({ players: 2, pulls_today: 40, pulls_total: 312, coins_total: 1250, best_today: 5000 });
     if (rpc === 'admin_shop')

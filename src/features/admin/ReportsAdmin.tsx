@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { Link } from 'react-router';
 import { adminApi } from '@/api';
+import { useMe } from '@/api/queries';
 import { Button } from '@/ui/Button';
 import { confirm } from '@/ui/confirm';
 import { act, dt } from './shared';
@@ -40,6 +41,7 @@ const FILTERS = [
 type F = (typeof FILTERS)[number][0];
 
 export function ReportsAdmin() {
+  const isAdmin = !!useMe().data?.admin; // supprimer : admin seulement (le modo traite)
   const qc = useQueryClient();
   const list = useQuery({
     queryKey: ['adm-rep'],
@@ -113,9 +115,11 @@ export function ReportsAdmin() {
                   ↩︎ Rouvrir
                 </Button>
               )}
-              <Button size="sm" variant="danger" onClick={() => void set(r, 'delete')}>
-                🗑 Supprimer
-              </Button>
+              {isAdmin ? (
+                <Button size="sm" variant="danger" onClick={() => void set(r, 'delete')}>
+                  🗑 Supprimer
+                </Button>
+              ) : null}
             </div>
           </li>
         ))}

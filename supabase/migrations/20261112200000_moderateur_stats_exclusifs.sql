@@ -1,0 +1,6 @@
+-- 12 nov. 2026 (appliqué via MCP) :
+-- * rôle modérateur : profiles.is_mod, _is_mod(), admin_set_mod ; stats et signalements ouverts aux modos
+--   (admin_dashboard, admin_stats_cat, admin_reports, admin_report_set sans suppression, admin_clear_bio et
+--   admin_set_pseudo sauf sur l'équipe) ; eco_state renvoie 'mod'.
+-- * admin_stats_cat(p_cat, p_days) : players, luck, eco, social, alerts.
+-- * exclusifs du passe (a_oeil, b_yeux) : data.pass_only, contrainte shop_items_pass_only_check, _stock = 0.

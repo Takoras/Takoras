@@ -93,7 +93,7 @@
 .head h1 {
   margin: 0;
   font-family: var(--font-display);
-  font-size: var(--fs-2xl);
+  font-size: var(--fs-xl);
 }
 .panel {
   min-width: 0;

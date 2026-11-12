@@ -12,6 +12,7 @@ import { ReportsAdmin } from './ReportsAdmin';
 import { PatchnotesAdmin } from './PatchnotesAdmin';
 import { Tests } from './Tests';
 import { setPreview } from '@/lib/preview';
+import { useMe } from '@/api/queries';
 import s from './Admin.module.css';
 
 // Panel admin : une colonne de rubriques rangées par thème (tableau de bord d'abord), le contenu à droite.
@@ -63,7 +64,12 @@ const saved = (): Tab => {
 };
 
 export default function Admin() {
-  const [tab, setTabState] = useState<Tab>(saved);
+  // le modo ne voit que le tableau de bord et les signalements (le serveur refuse le reste de toute façon)
+  const me = useMe();
+  const isAdmin = !!me.data?.admin;
+  const allowed = (k: Tab) => isAdmin || k === 'dash' || k === 'rep';
+  const [tab0, setTabState] = useState<Tab>(saved);
+  const tab: Tab = allowed(tab0) ? tab0 : 'dash';
   const setTab = (t: Tab) => {
     setTabState(t);
     try {
@@ -84,24 +90,29 @@ export default function Admin() {
     <section className={s.page}>
       <nav className={s.side} aria-label="Rubriques admin">
         <div className={s.brand}>
-          <b>Admin</b>
+          <b>{isAdmin ? 'Admin' : 'Modération'}</b>
           <small>Takoras</small>
         </div>
-        {GROUPS.map(([g, list]) => (
-          <div key={g} className={s.group}>
-            <small>{g}</small>
-            {(list as readonly Item[]).map(([k, ic, l]) => (
-              <button key={k} type="button" aria-current={tab === k ? 'page' : undefined} onClick={() => setTab(k)}>
-                <span aria-hidden>{ic}</span>
-                {l}
-                {badge[k] ? <i className={s.badge}>{badge[k]}</i> : null}
-              </button>
-            ))}
-          </div>
-        ))}
-        <button type="button" className={s.asPlayer} onClick={() => setPreview(true)}>
-          👁 Voir comme un joueur
-        </button>
+        {GROUPS.map(([g, list]) => {
+          const mine = (list as readonly Item[]).filter(([k]) => allowed(k));
+          return mine.length ? (
+            <div key={g} className={s.group}>
+              <small>{g}</small>
+              {mine.map(([k, ic, l]) => (
+                <button key={k} type="button" aria-current={tab === k ? 'page' : undefined} onClick={() => setTab(k)}>
+                  <span aria-hidden>{ic}</span>
+                  {l}
+                  {badge[k] ? <i className={s.badge}>{badge[k]}</i> : null}
+                </button>
+              ))}
+            </div>
+          ) : null;
+        })}
+        {isAdmin ? (
+          <button type="button" className={s.asPlayer} onClick={() => setPreview(true)}>
+            👁 Voir comme un joueur
+          </button>
+        ) : null}
       </nav>
       <div className={s.main}>
         <header className={s.head}>

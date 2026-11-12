@@ -144,7 +144,7 @@ export function Layout() {
           ))}
         </div>
         <div className={s.railBottom}>
-          {me.data?.admin ? (
+          {me.data?.admin || me.data?.mod ? (
             <NavLink to="/admin" className={s.railMini} aria-label="Admin">
               <Icon name="shield" />
             </NavLink>
