@@ -76,6 +76,13 @@ async function render(
   if (!sx) return null;
   sx.imageSmoothingEnabled = false; // pixel art : agrandi sans flou, comme à l'écran
   sx.drawImage(img, (ow - dw) / 2, (oh - dh) / 2, dw, dh);
+  // dessin qui touche le bord de sa case (ex. le jeton Bodako) : la déformation le ferait déborder, et un dessin
+  // précalculé est forcément coupé au bord → on laisse cette image au doodle simple (qui peut déborder)
+  if (!full) {
+    const e = Math.max(2, Math.ceil(2 * dpr));
+    const strips = [sx.getImageData(0, 0, ow, e), sx.getImageData(0, oh - e, ow, e), sx.getImageData(0, 0, e, oh), sx.getImageData(ow - e, 0, e, oh)];
+    if (strips.some((d) => d.data.some((v, i) => i % 4 === 3 && v > 24))) return null;
+  }
   // les 3 dessins l'un sous l'autre, séparés par une petite bande vide : si l'affichage tombe sur une fraction de
   // pixel, on voit du vide (rien) au lieu d'un bout du dessin d'à côté (avant : traits parasites, ex. le podium)
   const GAP = 4;
@@ -173,6 +180,7 @@ async function pump() {
         cache.set(key, p);
       }
       const frames = await p;
+      if (!frames) banned.add(img);
       if (!frames || !img.isConnected || img.clientWidth !== bw || img.clientHeight !== bh) continue;
       live.set(img, { key, frames });
       show(img, frames);

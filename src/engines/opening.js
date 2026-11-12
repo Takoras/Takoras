@@ -50,7 +50,7 @@ const far = o => Math.hypot(Math.max(o.x, innerWidth - o.x), Math.max(o.y, inner
 const css = v => getComputedStyle(document.documentElement).getPropertyValue(v).trim();
 
 // couleur des cubes = couleur de la série (Takoras : le bleu du logo)
-const SERIE_LOGO = { Takoras: '/img/logo-takoras.png?v=2', Bodako: '/img/logo-bodako.png?v=1' };
+const SERIE_LOGO = { Takoras: '/img/logo-takoras.png?v=2', Bodako: '/img/logo-bodako.png?v=2' };
 const SERIE_COL = { Takoras: ['#2747b5', '#47c2ea'], Bodako: ['#1f7a3d', '#8bd36a'] };
 const serieCol = () => SERIE_COL[(sess && PULLS[sess.pull]?.name) || 'Takoras'] || [css('--mid'), css('--hi')];
 function grid(cols) {
