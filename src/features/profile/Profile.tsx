@@ -44,6 +44,7 @@ import { RankBadge, useRankName } from '../combat/Ranked';
 import { rankOf } from '../combat/rankedApi';
 import iv from '../inventory/Inventory.module.css';
 import s from './Profile.module.css';
+import lk from './Locker.module.css';
 import { MutationStamp } from '@/ui/MutationStamp';
 
 type Shown = { id: number; jeton: string; odds: number; variant: string | null } | null;
@@ -709,177 +710,274 @@ function EditProfile({ p, onClose }: { p: Prof; onClose: () => void }) {
       setBusy(false);
     }
   };
+  // ---------- le vestiaire : aperçu en direct à gauche, rayons de cases à droite ----------
+  type Tab = 'id' | 'pp' | 'banner' | 'name' | 'aura' | 'bfx';
+  const [tab, setTab] = useState<Tab>('pp');
+  // survoler une case l'essaie sur l'aperçu (même verrouillée), sans rien changer
+  const [hov, setHov] = useState<{ k: Tab; v: string } | null>(null);
+  const show = (k: Tab, v: string) => (hov?.k === k ? hov.v : v);
+  const vAv = show('pp', avatar),
+    vBanner = show('banner', banner),
+    vName = show('name', nameFx),
+    vAura = show('aura', auraFx),
+    vBfx = show('bfx', bannerFx);
+  const bestOdds = p.best_pull?.eff ?? 1;
+  const goShop = (to = '/shop') => {
+    onClose();
+    void nav(to);
+  };
+  const ppOwned = (a: string) => a === 'default' || FREE_PP.includes(a) || (p.avatars ?? []).includes(a);
+  const allBanners = Object.keys(BANNER_IMG);
+  const TABS: [Tab, string, string, number, number][] = [
+    ['id', '✏️', t('ui.lk_id'), 0, 0],
+    ['pp', '🙂', t('ui.pe_pp'), pps.filter(ppOwned).length, pps.length],
+    ['banner', '🖼️', t('ui.pe_banner'), (p.banners ?? []).length + 1, allBanners.length + 1],
+    ['name', '✨', t('ui.fx_name'), COSMETICS.name.filter((x) => owned.includes(x)).length, COSMETICS.name.length],
+    ['aura', '⭕', t('ui.fx_aura'), COSMETICS.aura.filter((x) => owned.includes(x)).length, COSMETICS.aura.length],
+    ['bfx', '🌌', t('ui.lk_bfx'), COSMETICS.bfx.filter((x) => owned.includes(x)).length, COSMETICS.bfx.length],
+  ];
+  // ce que fait une case : équiper, essayer au survol, ou (verrouillée) mener à la boutique
+  const setter: Record<Tab, (x: string) => void> = {
+    id: () => undefined,
+    pp: setAv,
+    banner: setBanner,
+    name: setNameFx,
+    aura: setAuraFx,
+    bfx: setBannerFx,
+  };
+  const tp = (k: Tab, v: string, to = '/shop') => ({
+    onPick: () => (sfx.click(), setter[k](v)),
+    onLocked: () => goShop(to),
+    onTry: () => setHov({ k, v }),
+    onUntry: () => setHov((h) => (h?.k === k && h.v === v ? null : h)),
+    lockLabel: t('ui.pp_shop'),
+  });
+  const ppName = (a: string) => {
+    const k = `ui.pp_${a}` as 'ui.pp_etoile',
+      n = t(k);
+    return n === k ? a.charAt(0).toUpperCase() + a.slice(1) : n;
+  };
   return (
-    <Modal open onClose={onClose} title={t('ui.edit_profile')} wide>
+    <Modal open onClose={onClose} title={t('ui.edit_profile')} xl>
       <form
-        className={s.pe}
+        className={lk.locker}
         onSubmit={(e) => {
           e.preventDefault();
           void save();
         }}
       >
-        {/* aperçu : ce que les autres verront */}
-        <div className={s.prev} style={{ '--tone': hexRGB(tone) } as CSSProperties} aria-hidden>
-          <div className={`${s.prevBanner} ${banner === 'best' ? s.prevBest : ''}`}>
-            {banner && BANNER_IMG[banner] ? <img className="px" src={BANNER_IMG[banner]} alt="" /> : null}
-            <BannerFx id={bannerFx} />
-          </div>
-          <div className={s.prevId}>
-            <Aura id={auraFx}>
-              <span className={s.prevPp}>
-                {avatar === 'default' ? (
-                  <span>{(pseudo[0] ?? '?').toUpperCase()}</span>
-                ) : (
-                  <img className="px" src={AVATARS[avatar]} alt="" />
-                )}
-              </span>
-            </Aura>
-            <span className={s.prevTxt}>
-              <b>
-                <span className={nameCls(nameFx)}>{pseudo || p.pseudo}</span>
-              </b>
-              <small>{bio.trim() || '…'}</small>
-            </span>
-          </div>
-        </div>
-
-        <div className={s.peCols}>
-          <div className={s.peField}>
-            <label htmlFor="pe-pseudo">{t('ui.acc_pseudo')}</label>
-            <input
-              id="pe-pseudo"
-              value={pseudo}
-              maxLength={16}
-              disabled={!canRename}
-              autoComplete="off"
-              onChange={(e) => setPseudo(e.target.value.trim())}
-            />
-            <small>
-              {p.pseudo_free
-                ? t('ui.pseudo_free')
-                : canRename
-                  ? t('ui.pseudo_month')
-                  : t('ui.pseudo_next', { d: new Date(p.pseudo_next ?? '').toLocaleDateString(locale(lang)) })}
-            </small>
-          </div>
-          <div className={s.peField}>
-            <label htmlFor="pe-bio">{t('ui.pe_bio')}</label>
-            <textarea id="pe-bio" value={bio} maxLength={120} rows={2} onChange={(e) => setBio(e.target.value)} />
-            <small className={s.peCount}>{bio.length}/120</small>
-          </div>
-        </div>
-
-        <fieldset className={s.peSet}>
-          <legend>{t('ui.pe_pp')}</legend>
-          <div className={s.pps}>
-            {pps.map((a) => {
-              const owned = a === 'default' || FREE_PP.includes(a) || (p.avatars ?? []).includes(a);
-              return (
-                <button
-                  key={a}
-                  type="button"
-                  aria-pressed={avatar === a}
-                  className={owned ? undefined : s.lockedPp}
-                  aria-label={owned ? a : `${a} · ${t('ui.pp_shop')}`}
-                  title={owned ? undefined : t('ui.pp_shop')}
-                  onClick={() => {
-                    if (!owned) {
-                      onClose();
-                      return void nav('/shop');
-                    }
-                    sfx.click();
-                    setAv(a);
-                  }}
-                >
-                  {a === 'default' ? (
-                    <span>{(p.pseudo[0] ?? '?').toUpperCase()}</span>
-                  ) : (
-                    <img className="px" src={AVATARS[a]} alt="" />
-                  )}
-                  {owned ? null : <i aria-hidden></i>}
-                </button>
-              );
-            })}
-          </div>
-        </fieldset>
-
-        {/* effets achetés en boutique : couleur du pseudo, aura de la photo, effet de bannière */}
-        <fieldset className={s.peSet}>
-          <legend>{t('ui.fx_title')}</legend>
-          {owned.length ? (
-            <div className={s.fxRows}>
-              {(
-                [
-                  [t('ui.fx_name'), COSMETICS.name, nameFx, setNameFx],
-                  [t('ui.fx_aura'), COSMETICS.aura, auraFx, setAuraFx],
-                  [t('ui.fx_banner'), COSMETICS.bfx, bannerFx, setBannerFx],
-                ] as const
-              ).map(([lbl, ids, cur, set]) => {
-                const mine = ids.filter((x) => owned.includes(x));
-                if (!mine.length) return null;
-                return (
-                  <div key={lbl} className={s.fxRow}>
-                    <span className={s.fxLbl}>{lbl}</span>
-                    <div className={s.fxOpts}>
-                      <button type="button" aria-pressed={!cur} onClick={() => set('')}>
-                        {t('ui.none')}
-                      </button>
-                      {mine.map((x) => (
-                        <button key={x} type="button" aria-pressed={cur === x} onClick={() => (sfx.click(), set(x))}>
-                          <span className={s.fxPv}>
-                            <CosmeticPreview id={x} label={pseudo || p.pseudo} />
-                          </span>
-                          <small>{cosmName(x, lang)}</small>
-                        </button>
-                      ))}
-                    </div>
-                  </div>
-                );
-              })}
+        {/* aperçu en direct : ce que les autres verront */}
+        <div className={lk.stage} style={{ '--tone': hexRGB(tone) } as CSSProperties} aria-hidden>
+          <div className={lk.card}>
+            <div className={lk.banner}>
+              {vBanner === 'best' ? (
+                <PixelBg className={lk.bannerBg} odds={bestOdds} glow={tone} still={reducedFx()} />
+              ) : vBanner && BANNER_IMG[vBanner] ? (
+                <img className="px" src={BANNER_IMG[vBanner]} alt="" />
+              ) : null}
+              <BannerFx key={vBfx} id={vBfx} />
             </div>
-          ) : (
-            <p className={s.peNone}>{t('ui.cs_hint')}</p>
-          )}
-        </fieldset>
+            <div className={lk.who}>
+              <Aura key={vAura} id={vAura}>
+                <span className={lk.pp}>
+                  {vAv === 'default' ? (
+                    <span>{(pseudo[0] ?? '?').toUpperCase()}</span>
+                  ) : (
+                    <img className="px" src={AVATARS[vAv]} alt="" />
+                  )}
+                </span>
+              </Aura>
+              <b className={lk.name}>
+                <span key={vName} className={nameCls(vName)}>
+                  {pseudo || p.pseudo}
+                </span>
+              </b>
+              <small className={lk.bio}>{bio.trim() || '…'}</small>
+            </div>
+          </div>
+          {hov ? <p className={lk.trying}>{t('ui.lk_try')}</p> : null}
+        </div>
 
-        <fieldset className={s.peSet}>
-          <legend>{t('ui.pe_banner')}</legend>
-          <div className={s.banners}>
-            <button type="button" aria-pressed={!banner} onClick={() => setBanner('')}>
-              {t('ui.none')}
-            </button>
-            {/* gratuite : le fond pixel à la couleur de ton meilleur jeton */}
-            <button
-              type="button"
-              className={s.bestOpt}
-              aria-pressed={banner === 'best'}
-              onClick={() => setBanner('best')}
-              style={{ '--tone': hexRGB(tone) } as CSSProperties}
-            >
-              {t('ui.pe_best')}
-            </button>
-            {(p.banners ?? []).map((b) => (
+        <div className={lk.side}>
+          <div className={lk.tabs} role="tablist" aria-label={t('ui.edit_profile')}>
+            {TABS.map(([k, ic, l, n, tot]) => (
               <button
-                key={b}
+                key={k}
                 type="button"
-                aria-pressed={banner === b}
-                onClick={() => setBanner(b)}
-                aria-label={bannerName(b, lang)}
+                role="tab"
+                aria-selected={tab === k}
+                onClick={() => (sfx.click(), setTab(k))}
               >
-                {BANNER_IMG[b] ? <img className="px" src={BANNER_IMG[b]} alt="" /> : bannerName(b, lang)}
+                <span aria-hidden>{ic}</span>
+                {l}
+                {tot ? (
+                  <i>
+                    {n}/{tot}
+                  </i>
+                ) : null}
               </button>
             ))}
           </div>
-        </fieldset>
 
-        <div className={s.peActions}>
-          <Button onClick={onClose}>{t('ui.cancel')}</Button>
-          <Button type="submit" variant="primary" loading={busy}>
-            {t('ui.save')}
-          </Button>
+          <div key={tab} className={lk.panel}>
+            {tab === 'id' ? (
+              <div className={lk.fields}>
+                <div className={s.peField}>
+                  <label htmlFor="pe-pseudo">{t('ui.acc_pseudo')}</label>
+                  <input
+                    id="pe-pseudo"
+                    value={pseudo}
+                    maxLength={16}
+                    disabled={!canRename}
+                    autoComplete="off"
+                    onChange={(e) => setPseudo(e.target.value.trim())}
+                  />
+                  <small>
+                    {p.pseudo_free
+                      ? t('ui.pseudo_free')
+                      : canRename
+                        ? t('ui.pseudo_month')
+                        : t('ui.pseudo_next', { d: new Date(p.pseudo_next ?? '').toLocaleDateString(locale(lang)) })}
+                  </small>
+                </div>
+                <div className={s.peField}>
+                  <label htmlFor="pe-bio">{t('ui.pe_bio')}</label>
+                  <textarea id="pe-bio" value={bio} maxLength={120} rows={3} onChange={(e) => setBio(e.target.value)} />
+                  <small className={s.peCount}>{bio.length}/120</small>
+                </div>
+              </div>
+            ) : (
+              <div className={`${lk.grid} ${tab === 'banner' || tab === 'bfx' ? lk.gridWide : ''}`}>
+                {tab === 'pp'
+                  ? pps.map((a) => (
+                      <LockerTile
+                        key={a}
+                        {...tp('pp', a)}
+                        on={avatar === a}
+                        have={ppOwned(a)}
+                        label={a === 'default' ? t('ui.none') : ppName(a)}
+                      >
+                        {a === 'default' ? (
+                          <span className={lk.letter}>{(p.pseudo[0] ?? '?').toUpperCase()}</span>
+                        ) : (
+                          <img className={`px ${lk.round}`} src={AVATARS[a]} alt="" />
+                        )}
+                      </LockerTile>
+                    ))
+                  : null}
+                {tab === 'banner' ? (
+                  <>
+                    <LockerTile {...tp('banner', '')} on={!banner} have label={t('ui.none')} wide>
+                      <span className={lk.empty} />
+                    </LockerTile>
+                    <LockerTile {...tp('banner', 'best')} on={banner === 'best'} have label={t('ui.pe_best')} wide>
+                      <PixelBg className={lk.bannerBg} odds={bestOdds} glow={tone} still />
+                    </LockerTile>
+                    {allBanners.map((b) => (
+                      <LockerTile
+                        key={b}
+                        {...tp('banner', b, b === 'yeux' ? '/pass' : '/shop')}
+                        on={banner === b}
+                        have={(p.banners ?? []).includes(b)}
+                        label={bannerName(b, lang)}
+                        wide
+                      >
+                        <img className="px" src={BANNER_IMG[b]} alt="" />
+                      </LockerTile>
+                    ))}
+                  </>
+                ) : null}
+                {tab === 'name' || tab === 'aura' || tab === 'bfx' ? (
+                  <>
+                    <LockerTile
+                      {...tp(tab, '')}
+                      on={!{ name: nameFx, aura: auraFx, bfx: bannerFx }[tab]}
+                      have
+                      label={t('ui.none')}
+                      wide={tab === 'bfx'}
+                    >
+                      <span className={lk.empty} />
+                    </LockerTile>
+                    {COSMETICS[tab].map((x) => (
+                      <LockerTile
+                        key={x}
+                        {...tp(tab, x)}
+                        on={{ name: nameFx, aura: auraFx, bfx: bannerFx }[tab] === x}
+                        have={owned.includes(x)}
+                        label={cosmName(x, lang)}
+                        wide={tab === 'bfx'}
+                      >
+                        <CosmeticPreview id={x} label={(pseudo || p.pseudo).slice(0, 8)} />
+                      </LockerTile>
+                    ))}
+                  </>
+                ) : null}
+              </div>
+            )}
+          </div>
+
+          <div className={lk.actions}>
+            <Button onClick={onClose}>{t('ui.cancel')}</Button>
+            <Button type="submit" variant="primary" loading={busy}>
+              {t('ui.save')}
+            </Button>
+          </div>
         </div>
       </form>
     </Modal>
+  );
+}
+
+// une case du vestiaire : sélectionnée (✓), possédée, ou verrouillée (🔒, mène à la boutique) ;
+// la survoler l'essaie sur l'aperçu
+function LockerTile({
+  on,
+  have,
+  label,
+  wide,
+  lockLabel,
+  onPick,
+  onLocked,
+  onTry,
+  onUntry,
+  children,
+}: {
+  on: boolean;
+  have: boolean;
+  label: string;
+  wide?: boolean;
+  lockLabel: string;
+  onPick: () => void;
+  onLocked: () => void;
+  onTry: () => void;
+  onUntry: () => void;
+  children: React.ReactNode;
+}) {
+  return (
+    <button
+      type="button"
+      className={`${lk.tile} ${wide ? lk.wide : ''} ${have ? '' : lk.lockedT}`}
+      aria-pressed={on}
+      aria-label={have ? label : `${label} · ${lockLabel}`}
+      onClick={have ? onPick : onLocked}
+      onPointerEnter={onTry}
+      onPointerLeave={onUntry}
+      onFocus={onTry}
+      onBlur={onUntry}
+    >
+      <span className={lk.tileArt}>{children}</span>
+      <small>{label}</small>
+      {on ? (
+        <i className={lk.check} aria-hidden>
+          ✓
+        </i>
+      ) : null}
+      {have ? null : (
+        <i className={lk.lock} aria-hidden>
+          🔒
+        </i>
+      )}
+    </button>
   );
 }
 

@@ -1,6 +1,7 @@
 import { useLayoutEffect, useRef, useState, type CSSProperties } from 'react';
 import { Link } from 'react-router';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
+import { isCosmetic } from '@/ui/Cosmetics';
 import { errorText, invApi } from '@/api';
 import { itemImg, itemText, type ShopItem } from '@/data/items';
 import { moPlay, moSnap } from '@/engines/motion.js';
@@ -46,7 +47,8 @@ export default function Items() {
     snap.current = null;
   }, [items.data]);
   if (!user) return <NeedLogin title={t('ui.nav_inv')} />;
-  const list = items.data ?? [];
+  // les effets de profil (pseudo, contour, bannière) se portent dans « Modifier le profil » : jamais des objets à utiliser
+  const list = (items.data ?? []).filter((x) => !isCosmetic(x.kind));
   return (
     <section ref={pageRef} className={s.page}>
       <header className={s.head}>

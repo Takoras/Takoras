@@ -8,3 +8,4 @@
 --   admin_shop_feature(p_item, p_pct), admin_shop renvoie period_price, featured, off, forced, pass_only.
 -- * un objet à la une par rayon : _shop_group(kind), _featured(per) renvoie une ligne par rayon,
 --   admin_shop_feature range le choix par rayon (feat_item:<période>:<rayon>), shop_today renvoie 'feats'.
+-- * admin_give_all : les cosmétiques sont débloqués sur le profil (profiles.cosmetics), plus mis en user_items.

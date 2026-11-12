@@ -1,6 +1,9 @@
 // Généré par scripts/port/i18n.mjs depuis l'ancien site, puis maintenu à la main.
 export const fr = {
   ui: {
+    lk_id: 'Identité',
+    lk_bfx: 'Effet de bannière',
+    lk_try: 'Essayage : pas encore équipé',
     pk_normal: 'Normal',
     pp_photo: 'Photo de profil',
     banner_s: 'Bannière',

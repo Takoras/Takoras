@@ -17,8 +17,9 @@ test('mon profil : stats, vitrine, modifier la bio et la photo', async ({ page }
   await expect(page.getByRole('button', { name: /Vyolis/ }).first()).toBeVisible();
   // modifier : bio + photo, sans bannière (envoyée comme null, pas '')
   await page.getByRole('button', { name: /Modifier le profil/ }).click();
+  await page.getByRole('button', { name: 'Bleu', exact: true }).click();
+  await page.getByRole('tab', { name: /Identité/ }).click();
   await page.getByLabel(/Bio/).fill('Coucou');
-  await page.getByRole('button', { name: 'bleu', exact: true }).click();
   await page.getByRole('button', { name: 'Enregistrer' }).click();
   await expect(page.getByRole('heading', { level: 1 }).locator('..').getByText('Coucou')).toBeVisible();
   expect(calls.filter((c) => c === 'update_profile')).toHaveLength(2);
