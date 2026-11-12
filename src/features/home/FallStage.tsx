@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from 'react';
+import { useEffect, useRef, useState, type CSSProperties } from 'react';
 import { createPortal } from 'react-dom';
 import { SERIES, texOf, texScale } from '@/data/jetons';
 import { reducedFx } from '@/lib/settings';
@@ -13,8 +13,30 @@ import s from './Fall.module.css';
 type Drop = { t: number; x: number; y: number; z: number; spin: number; rot: number };
 type Streak = { x: number; y: number; z: number; len: number };
 
-// Pluie de fond (canvas plein écran derrière l'accueil)
+// Pluie de fond (canvas plein écran derrière l'accueil). Changer de série : le nouveau fond (ses jetons, ses
+// couleurs) apparaît en fondu par-dessus l'ancien, qui s'efface en même temps (pas de coupure).
 export function FallRain({ serie }: { serie: string }) {
+  const [layers, setLayers] = useState([{ serie, k: 0, out: false }]);
+  const [cur, setCur] = useState(serie);
+  if (cur !== serie) {
+    setCur(serie);
+    setLayers((l) => [...l.map((x) => ({ ...x, out: true })), { serie, k: (l[l.length - 1]?.k ?? 0) + 1, out: false }]);
+  }
+  useEffect(() => {
+    if (!layers.some((x) => x.out)) return;
+    const id = setTimeout(() => setLayers((l) => l.filter((x) => !x.out)), 950);
+    return () => clearTimeout(id);
+  }, [layers]);
+  return (
+    <>
+      {layers.map((x) => (
+        <RainLayer key={x.k} serie={x.serie} out={x.out} first={x.k === 0} />
+      ))}
+    </>
+  );
+}
+
+function RainLayer({ serie, out, first }: { serie: string; out: boolean; first: boolean }) {
   const ref = useRef<HTMLCanvasElement>(null);
 
   useEffect(() => {
@@ -258,7 +280,10 @@ export function FallRain({ serie }: { serie: string }) {
   }, [serie]);
 
   // hors du zoom du site (#root) : le canvas couvre vraiment toute la largeur de la fenêtre
-  return createPortal(<canvas ref={ref} className={s.rain} aria-hidden />, document.body);
+  return createPortal(
+    <canvas ref={ref} className={`${s.rain} ${out ? s.rainOut : first ? '' : s.rainIn}`} aria-hidden />,
+    document.body,
+  );
 }
 
 // Le jeton du centre, en chute libre. Changer de série : l'ancien file vers le bas, le nouveau tombe à sa place.
@@ -305,8 +330,9 @@ export function FallCoin({
     if (!disabled) void openPulls(1, serie); // série pas ouvrable pour ce joueur : le jeton ne lance rien
   };
 
+  const th = serieTheme(serie);
   return (
-    <div className={s.fall}>
+    <div className={s.fall} style={{ '--beam': `rgb(${th.hi})` } as CSSProperties}>
       <div className={s.beam} aria-hidden />
       {items.map((it) => (
         <div key={it.k} className={`${s.body} ${it.out ? s.out : s.in}`} aria-hidden={it.out || undefined}>

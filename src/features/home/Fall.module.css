@@ -1,3 +1,8 @@
+@property --beam {
+  syntax: '<color>';
+  inherits: true;
+  initial-value: rgb(71 194 234);
+}
 /* Chute libre de l'accueil : pluie de jetons en fond + jeton central qui tombe sans fin */
 
 .rain {
@@ -19,6 +24,7 @@
 }
 
 .fall {
+  transition: --beam 0.9s ease; /* changement de série : la traînée change de couleur en douceur */
   position: relative;
   display: grid;
   place-items: center;
@@ -35,11 +41,12 @@
   width: 70%;
   height: 260%;
   translate: -50% 0;
+  /* couleur de la série choisie (--beam), qui glisse en douceur quand on change de série */
   background: linear-gradient(
     to bottom,
     transparent,
-    rgba(var(--g, 61, 107, 255), 0.22) 70%,
-    rgba(var(--g, 61, 107, 255), 0.05)
+    color-mix(in srgb, var(--beam) 22%, transparent) 70%,
+    color-mix(in srgb, var(--beam) 5%, transparent)
   );
   mask-image: radial-gradient(50% 100% at 50% 100%, #000 30%, transparent 100%);
   filter: blur(18px);
@@ -210,4 +217,22 @@
 :global(html.reduce-fx) .beam,
 :global(html.reduce-fx) .tumble {
   animation: none;
+}
+
+/* changement de série : le nouveau fond arrive en fondu, l'ancien s'efface */
+.rainIn {
+  animation: rainIn 0.9s ease both;
+}
+.rainOut {
+  animation: rainOut 0.9s ease both;
+}
+@keyframes rainIn {
+  from {
+    opacity: 0;
+  }
+}
+@keyframes rainOut {
+  to {
+    opacity: 0;
+  }
 }
