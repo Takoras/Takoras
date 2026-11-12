@@ -436,3 +436,12 @@ html.lock #root {
 }
 .op-stats { --dp: 1.4; }
 .op-coin-col { translate: calc(var(--mpx, 0) * 8px) calc(var(--mpy, 0) * 6px); }
+
+/* Téléphone / petit appareil : l'ouverture sans ce qui coûte cher à redessiner (même rendu à l'œil) */
+@media (pointer: coarse) {
+  .op-odds { text-shadow: none; }            /* le chiffre change à chaque clic : une grosse lueur floue à redessiner à chaque fois */
+  .op-bg { animation: none; }                /* le fond plein écran ne glisse plus (il est déjà animé dedans) */
+  .op-main { animation: none; }              /* tout l'écran ne se balance plus */
+}
+html.q-calm .op-odds { text-shadow: none; }
+html.q-calm .op-bg, html.q-calm .op-main { animation: none; }

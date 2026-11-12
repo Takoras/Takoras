@@ -257,10 +257,12 @@ function draw(list) {
   return byRarity.find(j => Math.random() < debug.luck / j.odds) || byRarity[byRarity.length - 1];
 }
 
-// Valeurs affichées à chaque clic : monte doucement puis accélère (8 à 15 clics pour les jetons rares).
+// Valeurs affichées à chaque clic : monte doucement puis accélère. Plus le jeton est rare, plus il faut de clics :
+// ~15 jusqu'à 1/5 000, ~28 vers 1/50 000, ~38 pour 1/1 000 000 (on ne voit jamais « 1 million » arriver en 5 clics).
 function steps(X) {
   if (X <= 1) return [];
-  const n = Math.min(X - 1, Math.min(15, Math.round(4 + Math.log2(X) * .9)));
+  const rare = X >= 10000, cap = X >= 100000 ? 40 : rare ? 28 : 15;
+  const n = Math.min(X - 1, Math.min(cap, Math.round(4 + Math.log2(X) * (rare ? 1.7 : .9))));
   const out = [];
   for (let i = 1; i <= n; i++) {
     const v = i === n ? X : Math.round(1 + (X - 1) * (i / n) ** 2.2 * (.9 + Math.random() * .2));
@@ -516,7 +518,13 @@ function startBg(j, mode = 'reveal') {
   bg.stars = Array.from({ length: [0, 0, 0, 40, 55, 75][bg.level] }, () => ({ x: Math.random() * W | 0, y: Math.random() * H | 0, p: Math.random() * 6 }));
   cancelAnimationFrame(bg.raf);
   const t0 = performance.now();
-  const loop = t => { try { drawBg(Math.max(0, (t - t0) / 1000)); } catch { /* image ratée : on continue */ } bg.raf = requestAnimationFrame(loop); };
+  // téléphone / petit appareil : 30 images par seconde (le fond bouge lentement : même rendu, deux fois moins de calcul)
+  const slow = matchMedia('(pointer: coarse)').matches || reducedFx();
+  let lastDraw = 0;
+  const loop = t => {
+    if (!slow || t - lastDraw > 30) { lastDraw = t; try { drawBg(Math.max(0, (t - t0) / 1000)); } catch { /* image ratée : on continue */ } }
+    bg.raf = requestAnimationFrame(loop);
+  };
   bg.raf = requestAnimationFrame(loop);
 }
 function stopBg() { cancelAnimationFrame(bg.raf); bg.mode = ''; }
@@ -947,7 +955,8 @@ function tap() {
   if (!run || run.done) return;
   if (run.holding) { if (run.canReveal) (run.result.odds >= RARE && SETTINGS.speed !== 'instant' ? cine() : reveal()); return; }
   if (!run.queue.length) return; // entre le dernier palier et la pause
-  if (rhythm().fast && run.queue.length > 2) run.queue.shift(); // spam : on saute un palier (ça monte deux fois plus vite)
+  // spam : on saute un palier (ça monte deux fois plus vite) — sauf pour les très rares, qui se méritent
+  if (rhythm().fast && run.queue.length > 2 && (run.queue[run.queue.length - 1] ?? 0) < 10000) run.queue.shift();
   const next = run.queue.shift();
   countTo(run.shown, next);
   run.shown = next;

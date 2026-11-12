@@ -507,6 +507,7 @@ export const fr = {
     my_tokens: 'Mes jetons',
     bst_found: 'jetons',
     bst_variants: 'variantes',
+    bst_unknown_tag: 'Pas encore découvert',
     bst_unknown: 'Pas encore découvert. Continue d’ouvrir des tirages !',
     bst_got: 'Obtenu {n} fois',
     v_gold: 'Doré',

@@ -6,7 +6,19 @@ import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { accountApi, errorText, publicApi } from '@/api';
 import { useMe } from '@/api/queries';
 import { BANNER_IMG, bannerName } from '@/data/items';
-import { hexRGB, jetonOf, MYSTERE, SERIES, TEMPLATE, texOf, vImg, vOdds, glowVars, type Variant } from '@/data/jetons';
+import {
+  colorOf,
+  hexRGB,
+  jetonOf,
+  MYSTERE,
+  SERIES,
+  TEMPLATE,
+  texOf,
+  vImg,
+  vOdds,
+  glowVars,
+  type Variant,
+} from '@/data/jetons';
 import { sfx } from '@/engines/sound.js';
 import { openUI } from '@/app/ui-store';
 import { AVATARS, FREE_PP } from '@/lib/avatars';
@@ -107,8 +119,11 @@ export default function Profile() {
   const show = p.showcase ?? [];
   const total = Object.values(SERIES).reduce((n, l) => n + l.length, 0);
   const bannerSrc = p.banner ? BANNER_IMG[p.banner] : undefined;
+  // bannière « meilleur jeton » (option des cosmétiques) : le fond pixel à la couleur de ton meilleur tirage
+  const bestBanner = p.banner === 'best';
   // couleur du profil : celle de son meilleur jeton (fond de la bannière quand il n'en a pas)
-  const tone = bp ? jetonOf(bp.jeton).glow : '#3966f7';
+  // couleur du profil : celle de son meilleur jeton, mutation comprise (Ombre = violet, Doré = or…)
+  const tone = bp ? colorOf(jetonOf(bp.jeton), bp.variant) : '#3966f7';
   return (
     <section ref={pageRef} className={s.page} style={{ '--tone': hexRGB(tone) } as CSSProperties}>
       {/* bannière : l'image achetée, sinon un fond pixel à la couleur de son meilleur jeton */}
@@ -134,9 +149,9 @@ export default function Profile() {
         <div className={s.banner}>
           {bannerSrc ? (
             <img className="px" src={bannerSrc} alt="" />
-          ) : (
+          ) : bestBanner ? (
             <PixelBg className={s.bannerBg} odds={bp?.eff ?? 1} glow={tone} still={reducedFx()} />
-          )}
+          ) : null}
         </div>
       </div>
 
@@ -193,7 +208,12 @@ export default function Profile() {
             style={glowVars(jetonOf(bp.jeton), bp.variant) as CSSProperties}
             onClick={() => setJeton({ name: bp.jeton, variant: bp.variant ?? '', locked: false, single: true })}
           >
-            <PixelBg className={s.bestBg} odds={bp.eff} glow={jetonOf(bp.jeton).glow} still={reducedFx()} />
+            <PixelBg
+              className={s.bestBg}
+              odds={bp.eff}
+              glow={colorOf(jetonOf(bp.jeton), bp.variant)}
+              still={reducedFx()}
+            />
             <span className={s.bestImg}>
               <img className={vImg(bp.variant)} src={texOf(jetonOf(bp.jeton))} alt="" />
             </span>
@@ -586,7 +606,7 @@ function EditProfile({ p, onClose }: { p: Prof; onClose: () => void }) {
   const [busy, setBusy] = useState(false);
   const canRename = !!p.pseudo_free || !p.pseudo_next;
   const pps = ['default', ...FREE_PP, ...Object.keys(AVATARS).filter((a) => !FREE_PP.includes(a))];
-  const tone = p.best_pull ? jetonOf(p.best_pull.jeton).glow : '#3966f7';
+  const tone = p.best_pull ? colorOf(jetonOf(p.best_pull.jeton), p.best_pull.variant) : '#3966f7';
   const save = async () => {
     setBusy(true);
     try {
@@ -621,7 +641,7 @@ function EditProfile({ p, onClose }: { p: Prof; onClose: () => void }) {
       >
         {/* aperçu : ce que les autres verront */}
         <div className={s.prev} style={{ '--tone': hexRGB(tone) } as CSSProperties} aria-hidden>
-          <div className={s.prevBanner}>
+          <div className={`${s.prevBanner} ${banner === 'best' ? s.prevBest : ''}`}>
             {banner && BANNER_IMG[banner] ? <img className="px" src={BANNER_IMG[banner]} alt="" /> : null}
           </div>
           <div className={s.prevId}>
@@ -701,26 +721,32 @@ function EditProfile({ p, onClose }: { p: Prof; onClose: () => void }) {
 
         <fieldset className={s.peSet}>
           <legend>{t('ui.pe_banner')}</legend>
-          {(p.banners ?? []).length ? (
-            <div className={s.banners}>
-              <button type="button" aria-pressed={!banner} onClick={() => setBanner('')}>
-                {t('ui.none')}
+          <div className={s.banners}>
+            <button type="button" aria-pressed={!banner} onClick={() => setBanner('')}>
+              {t('ui.none')}
+            </button>
+            {/* gratuite : le fond pixel à la couleur de ton meilleur jeton */}
+            <button
+              type="button"
+              className={s.bestOpt}
+              aria-pressed={banner === 'best'}
+              onClick={() => setBanner('best')}
+              style={{ '--tone': hexRGB(tone) } as CSSProperties}
+            >
+              Meilleur jeton
+            </button>
+            {(p.banners ?? []).map((b) => (
+              <button
+                key={b}
+                type="button"
+                aria-pressed={banner === b}
+                onClick={() => setBanner(b)}
+                aria-label={bannerName(b, lang)}
+              >
+                {BANNER_IMG[b] ? <img className="px" src={BANNER_IMG[b]} alt="" /> : bannerName(b, lang)}
               </button>
-              {(p.banners ?? []).map((b) => (
-                <button
-                  key={b}
-                  type="button"
-                  aria-pressed={banner === b}
-                  onClick={() => setBanner(b)}
-                  aria-label={bannerName(b, lang)}
-                >
-                  {BANNER_IMG[b] ? <img className="px" src={BANNER_IMG[b]} alt="" /> : bannerName(b, lang)}
-                </button>
-              ))}
-            </div>
-          ) : (
-            <p className={s.peNone}>{t('ui.no_banner_owned')}</p>
-          )}
+            ))}
+          </div>
         </fieldset>
 
         <div className={s.peActions}>

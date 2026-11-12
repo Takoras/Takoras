@@ -505,6 +505,7 @@ export const en: Dict = {
     my_tokens: 'My tokens',
     bst_found: 'tokens',
     bst_variants: 'variants',
+    bst_unknown_tag: 'Not found yet',
     bst_unknown: 'Not discovered yet. Keep opening pulls!',
     bst_got: 'Obtained {n} times',
     v_gold: 'Golden',

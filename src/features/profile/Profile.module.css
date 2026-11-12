@@ -892,6 +892,17 @@ ul.collGrid {
   object-fit: cover;
   image-rendering: pixelated;
 }
+.bestOpt {
+  background:
+    repeating-linear-gradient(-8deg, rgba(var(--tone), 0.35) 0 10px, transparent 10px 34px),
+    rgba(var(--tone), 0.14) !important;
+  color: var(--text) !important;
+  font-weight: 700;
+}
+.prevBest {
+  background: repeating-linear-gradient(-8deg, rgba(var(--tone), 0.35) 0 14px, transparent 14px 48px),
+    rgba(var(--tone), 0.16);
+}
 .peNone {
   margin: 0;
   padding: var(--s-4);

@@ -122,6 +122,7 @@ const banned = new WeakSet<HTMLImageElement>();
 const eligible = (img: HTMLImageElement) =>
   !banned.has(img) &&
   !img.closest('[data-still]') && // zones qui défilent (bande « En direct ») : images fixes
+  !img.closest('#opening, #fx') && // écran d'ouverture : son jeton garde le doodle simple (rien à calculer pendant l'animation)
   img.classList.contains('px') &&
   !img.classList.contains('still') &&
   !img.matches('.v-gold, .v-celeste, .v-ombre') &&
@@ -129,6 +130,10 @@ const eligible = (img: HTMLImageElement) =>
   // GIF animé : une copie fixe le figerait sur sa 1re image ; il garde le doodle CSS (et son animation)
   !/\.gif(\?|$)/i.test(img.src);
 
+const idle = () =>
+  new Promise<void>((ok) =>
+    'requestIdleCallback' in window ? requestIdleCallback(() => ok(), { timeout: 1500 }) : setTimeout(ok, 50),
+  );
 const queue = new Set<HTMLImageElement>();
 let working = false;
 async function pump() {
@@ -136,7 +141,11 @@ async function pump() {
   working = true;
   try {
     while (queue.size) {
-      const img = queue.values().next().value as HTMLImageElement;
+      // chaque image est traitée quand le navigateur est libre (lire sa taille force un recalcul de la page :
+      // le faire pour toutes d'un coup bloquait l'animation en cours, ex. le départ de l'ouverture)
+      await idle();
+      const img = queue.values().next().value as HTMLImageElement | undefined;
+      if (!img) break;
       queue.delete(img);
       if (!img.isConnected || !eligible(img) || img.classList.contains('dd-off')) continue;
       // taille de la case dans la page (sans les agrandissements CSS), et zoom de la page
@@ -160,8 +169,6 @@ async function pump() {
       live.set(img, { key, frames });
       show(img, frames);
       img.classList.add('dd-on');
-      // laisse respirer la page entre deux jetons
-      await new Promise((ok) => setTimeout(ok, 0));
     }
   } finally {
     working = false;

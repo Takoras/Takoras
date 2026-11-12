@@ -1,0 +1,3 @@
+-- Bannière « meilleur jeton » : valeur spéciale 'best' acceptée par update_profile (gratuite pour tout le monde).
+-- (même fonction qu'avant, seule la ligne de la bannière change)
+-- if p_banner is not null and p_banner <> 'best' and not p_banner = any(r.banners) then raise exception 'bad_banner'; end if;

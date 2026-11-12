@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState, type CSSProperties, type PointerEvent, type ReactNode } from 'react';
-import { hexRGB, jetonOf, MYSTERE, texOf, texScale, vImg, vOdds, glowVars, type Variant } from '@/data/jetons';
+import { hexRGB, jetonOf, texOf, texScale, vImg, vOdds, glowVars, type Variant } from '@/data/jetons';
 import { powerInfo } from '@/data/kit';
 import { useJn } from '@/lib/names';
 import { reducedFx, useSettings } from '@/lib/settings';
@@ -165,14 +165,14 @@ export function JetonModal({
     coin.current?.style.removeProperty('transform');
     coin.current?.style.setProperty('--gl', '0');
   };
-  const vars = (locked
-    ? { '--g': '113, 113, 122', '--ga': 0 }
-    : {
-        ...glowVars(j, pv),
-        '--ga': 1,
-        '--pw': hexRGB(k.col),
-        ...(pv ? { '--g': VCOL[pv as Variant] } : {}),
-      }) as unknown as CSSProperties;
+  // jeton pas encore découvert : on le montre quand même en aperçu (son dessin, ses stats, son pouvoir),
+  // avec une étiquette « pas encore découvert » ; seules les mutations trouvées et les infos du joueur sont cachées
+  const vars = {
+    ...glowVars(j, pv),
+    '--ga': 1,
+    '--pw': hexRGB(k.col),
+    ...(pv ? { '--g': VCOL[pv as Variant] } : {}),
+  } as unknown as CSSProperties;
   return (
     <Modal open={!!name} onClose={close} wide noX bare fading={closing}>
       {name ? (
@@ -180,8 +180,8 @@ export function JetonModal({
           {/* le fond pixel art de l'ouverture : plus le jeton est rare, plus il est chargé */}
           <PixelBg
             className={s.pxbg}
-            odds={locked ? 1 : vOdds(j.odds, pv)}
-            glow={locked ? '#71717a' : pv && pv in VHEX ? VHEX[pv as Variant] : j.glow}
+            odds={vOdds(j.odds, pv)}
+            glow={pv && pv in VHEX ? VHEX[pv as Variant] : j.glow}
             center={coin}
             still={reducedFx()}
           />
@@ -196,9 +196,10 @@ export function JetonModal({
               ref={idBox}
               className={`${s.id} ${s.box}`}
               serie={serie ?? 'Takoras'}
-              name={locked ? '???' : jn(j.name)}
-              odds={locked ? null : vOdds(j.odds, pv)}
+              name={jn(j.name)}
+              odds={vOdds(j.odds, pv)}
             >
+              {locked ? <p className={s.unknownTag}>{t('ui.bst_unknown_tag')}</p> : null}
               {facts && !locked ? <ul className={s.facts}>{facts}</ul> : null}
               {/* vidéo d'exemple du pouvoir (éditeur d'équipe) */}
               {demo && !locked ? (
@@ -210,13 +211,13 @@ export function JetonModal({
             <div className={s.center}>
               <i className={s.rays} aria-hidden />
               <i className={s.aura} aria-hidden />
-              {locked ? null : (
+              {
                 <span className={s.sparks} aria-hidden>
                   {[0, 1, 2, 3, 4, 5].map((i) => (
                     <i key={i} />
                   ))}
                 </span>
-              )}
+              }
               <span className={s.pin}>
                 <div
                   ref={coin}
@@ -226,11 +227,7 @@ export function JetonModal({
                   onPointerLeave={untilt}
                   style={texScale(j) !== 1 ? { scale: String(texScale(j)) } : undefined}
                 >
-                  <Face
-                    cls={locked ? 'px' : vImg(pv)}
-                    src={locked ? MYSTERE : texOf(j)}
-                    alt={locked ? '' : jn(j.name)}
-                  />
+                  <Face cls={locked ? 'px' : vImg(pv)} src={texOf(j)} alt={jn(j.name)} />
                   {locked ? null : (
                     <i
                       className={s.glare}
@@ -267,14 +264,12 @@ export function JetonModal({
                 </div>
               )}
             </div>
-            {locked ? (
-              <p className={`muted ${s.unknown}`}>{t('ui.bst_unknown')}</p>
-            ) : (
+            {
               <div className={s.power}>
                 {/* même fiche que la révélation du tirage : stats en barres puis la capacité */}
                 <TokenStats ref={rsBox} className={`${s.rs} ${s.box}`} name={j.name} odds={j.odds} variant={pv} />
               </div>
-            )}
+            }
           </div>
           {children ? <div className={s.actions}>{children}</div> : null}
         </div>

@@ -43,6 +43,9 @@ export const VARIANTS: Record<Variant, { odds: number; mult: number; col: string
   ombre: { odds: 500, mult: 25, col: '168, 85, 247' },
 };
 const isVariant = (v: string | null | undefined): v is Variant => !!v && v in VARIANTS;
+// Couleur d'un jeton tel qu'il est (hexa) : celle de sa mutation s'il en a une (Ombre = violet…), sinon la sienne
+export const colorOf = (j: Pick<Jeton, 'glow'>, v?: string | null) =>
+  isVariant(v) ? '#' + VARIANTS[v].col.split(', ').map((n) => (+n).toString(16).padStart(2, '0')).join('') : j.glow;
 // Variables CSS d'un jeton : sa couleur (--g) et si son halo s'allume (--ga). Le halo est une récompense :
 // seulement pour les jetons très rares (1/100 000 et plus) et les mutations (cahier de refonte § 3.3).
 export const glowVars = (j: { glow: string; odds: number }, v?: string | null) =>

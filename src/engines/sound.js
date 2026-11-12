@@ -15,9 +15,10 @@ const sfx = (() => {
   const vol = () => (muted ? 0 : .8 * (env_.volume() / 100));
 
   // Réverbération : une « salle » fabriquée avec du bruit qui s'éteint doucement
-  function room(sec = 2.2) {
+  // (calcul allégé : un cube au lieu de Math.pow, et fait quand le navigateur est libre — voir init)
+  function room(sec = 1.8) {
     const len = Math.ceil(ctx.sampleRate * sec), ir = ctx.createBuffer(2, len, ctx.sampleRate);
-    for (let ch = 0; ch < 2; ch++) { const d = ir.getChannelData(ch); for (let i = 0; i < len; i++) d[i] = (Math.random() * 2 - 1) * Math.pow(1 - i / len, 3); }
+    for (let ch = 0; ch < 2; ch++) { const d = ir.getChannelData(ch); for (let i = 0; i < len; i++) { const k = 1 - i / len; d[i] = (Math.random() * 2 - 1) * k * k * k; } }
     const c = ctx.createConvolver(); c.buffer = ir; return c;
   }
   // Téléphone / appareil lent : la réverbération « convolution » demande trop de calcul et faisait grésiller le son.
@@ -45,11 +46,22 @@ const sfx = (() => {
     bus.connect(warm);
     warm.connect(comp);
     if (LITE) { const e = echo(); warm.connect(e.input); e.output.connect(wet).connect(comp); }
-    else warm.connect(room()).connect(wet).connect(comp);
+    else {
+      // la réverbération se fabrique quand le navigateur n'a rien d'autre à faire : avant, elle bloquait ~150 ms
+      // au premier son (souvent le départ de l'ouverture, qui saccadait)
+      const later = window.requestIdleCallback || ((f) => setTimeout(f, 200));
+      later(() => { try { warm.connect(room()).connect(wet).connect(comp); } catch { /* pas de réverbération */ } });
+    }
     comp.connect(master).connect(ctx.destination);
   }
   addEventListener('pointerdown', init, { capture: true });
   addEventListener('keydown', init, { capture: true });
+  // le moteur audio est créé à l'avance, au calme après le chargement (il reste en pause jusqu'au premier clic, qui
+  // ne fait plus que l'allumer) : le créer pendant le clic bloquait ~100 ms, souvent au départ de l'ouverture
+  if (typeof window !== 'undefined') {
+    const early = window.requestIdleCallback || ((f) => setTimeout(f, 1500));
+    early(() => { try { init(); } catch { /* il sera créé au premier clic */ } }, { timeout: 4000 });
+  }
 
   const ok = () => ctx && !muted;
   // Fichiers audio : chargés à la première utilisation ; tant qu'ils ne sont pas prêts (ou absents), son synthétisé
