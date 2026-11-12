@@ -709,7 +709,7 @@
   border: 0;
   border-radius: 8px;
   padding: 0 var(--s-4) 0 var(--s-1);
-  background: rgb(23 23 31 / 70%);
+  background: rgb(20 20 27 / 95%);
   box-shadow: inset 0 0 0 1px rgb(255 255 255 / 8%);
   transition:
     transform var(--t-med) var(--ease-out),
@@ -735,7 +735,7 @@
 .satUps .up {
   border: 0;
   border-radius: 8px;
-  background: rgb(23 23 31 / 72%);
+  background: rgb(20 20 27 / 95%);
   box-shadow:
     inset 0 0 0 1px rgb(255 255 255 / 8%),
     0 10px 24px rgb(0 0 0 / 35%);
@@ -844,7 +844,7 @@
 }
 .openAll {
   border: 1px solid rgb(255 255 255 / 14%);
-  background: rgb(23 23 31 / 80%);
+  background: rgb(20 20 27 / 95%);
   color: var(--text);
 }
 .openOne:not(:disabled):hover,

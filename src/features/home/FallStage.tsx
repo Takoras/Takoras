@@ -223,7 +223,14 @@ function RainLayer({ serie, out, first }: { serie: string; out: boolean; first: 
         ctx.globalAlpha = 0.16 + d.z * 0.5;
         ctx.drawImage(spr.cv, x - spr.ox * k, y - spr.oy * k, spr.cv.width * k, spr.cv.height * k);
       }
+      // voile sombre au milieu de l'écran : le jeton, les boutons et les textes ressortent bien sur la pluie
       ctx.globalAlpha = 1;
+      const veil = ctx.createRadialGradient(W / 2, H * 0.48, 0, W / 2, H * 0.48, Math.max(W, H) * 0.62);
+      veil.addColorStop(0, 'rgba(10,10,14,0.62)');
+      veil.addColorStop(0.55, 'rgba(10,10,14,0.42)');
+      veil.addColorStop(1, 'rgba(10,10,14,0.12)');
+      ctx.fillStyle = veil;
+      ctx.fillRect(0, 0, W, H);
     };
 
     // le fond s'arrête à la bande « En direct » ([data-rain-end]) : en dessous, fond uni.
