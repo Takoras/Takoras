@@ -137,7 +137,6 @@ export default function Profile() {
           ) : (
             <PixelBg className={s.bannerBg} odds={bp?.eff ?? 1} glow={tone} still={reducedFx()} />
           )}
-          <i className={s.glare} aria-hidden />
         </div>
       </div>
 
@@ -164,25 +163,26 @@ export default function Profile() {
             ) : null}
           </div>
         </div>
-        <EloHero pseudo={p.pseudo} wins={p.wins || 0} losses={p.losses || 0} />
+        {/* à droite : le rang classé, et ses chiffres juste en dessous */}
+        <div className={s.rankCol}>
+          <EloHero pseudo={p.pseudo} wins={p.wins || 0} losses={p.losses || 0} />
+          <ul className={s.strip}>
+            <li>
+              <b>{fmt(p.pulls)}</b> {t('ui.st_pulls')}
+            </li>
+            <li>
+              <b>{fmt(p.owned)}</b> {t('ui.st_owned')}
+            </li>
+            <li>
+              <b>
+                {p.collection}/{total}
+              </b>{' '}
+              {t('ui.bestiaries').toLowerCase()}
+            </li>
+            <li className={s.since}>{t('ui.joined', { d: new Date(p.joined).toLocaleDateString(locale(lang)) })}</li>
+          </ul>
+        </div>
       </header>
-
-      {/* chiffres en pastilles */}
-      <ul className={s.strip}>
-        <li>
-          <b>{fmt(p.pulls)}</b> {t('ui.st_pulls')}
-        </li>
-        <li>
-          <b>{fmt(p.owned)}</b> {t('ui.st_owned')}
-        </li>
-        <li>
-          <b>
-            {p.collection}/{total}
-          </b>{' '}
-          {t('ui.bestiaries').toLowerCase()}
-        </li>
-        <li className={s.since}>{t('ui.joined', { d: new Date(p.joined).toLocaleDateString(locale(lang)) })}</li>
-      </ul>
 
       <div className={s.duo}>
         {/* meilleur tirage : le trophée, en grand, sur le fond de sa rareté */}

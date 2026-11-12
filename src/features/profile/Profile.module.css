@@ -37,7 +37,6 @@
 /* profondeur à la souris (calques à part : bouger ne redessine rien) */
 .head,
 .duo,
-.strip,
 .series {
   will-change: translate;
   translate: calc(var(--mpx, 0) * -8px * var(--dp, 1)) calc(var(--mpy, 0) * -6px * var(--dp, 1));
@@ -61,18 +60,6 @@
 .bannerTilt:hover .banner {
   transition-duration: 0.12s;
 }
-/* reflet qui suit le pointeur */
-.glare {
-  position: absolute;
-  inset: 0;
-  background: radial-gradient(420px circle at var(--gx) var(--gy), rgb(255 255 255 / 16%), transparent 60%);
-  opacity: 0;
-  transition: opacity 0.3s;
-  pointer-events: none;
-}
-.bannerTilt:hover .glare {
-  opacity: 1;
-}
 /* tout le profil flotte un peu, chaque bloc à son rythme */
 @keyframes pfFloat {
   50% {
@@ -82,7 +69,7 @@
 .page .pp {
   animation: pfFloat 5.5s ease-in-out -1.5s infinite;
 }
-.page .elo {
+.page .rankCol {
   animation: pfFloat 6.5s ease-in-out -3s infinite;
 }
 .showcase > li {
@@ -248,13 +235,21 @@
 }
 
 /* ---------- chiffres ---------- */
+/* colonne de droite de la carte : le rang, puis ses chiffres */
+.rankCol {
+  display: grid;
+  gap: var(--s-3);
+  justify-items: end;
+  min-width: 0;
+  max-width: 460px;
+}
 .strip {
-  --dp: 0.8;
   display: flex;
   flex-wrap: wrap;
+  justify-content: flex-end;
   gap: var(--s-2);
   margin: 0;
-  padding: 0 var(--s-6);
+  padding: 0;
   list-style: none;
 }
 .strip li {
@@ -274,8 +269,8 @@
   font-variant-numeric: tabular-nums;
 }
 .strip .since {
-  margin-left: auto;
   background: none;
+  padding-inline: 4px;
 }
 
 /* ---------- trophée + vitrine ---------- */
@@ -828,7 +823,7 @@ ul.collGrid {
   .bestImg,
   .bannerTilt,
   .pp,
-  .elo,
+  .rankCol,
   .best,
   .showcase > li {
     animation: none;
@@ -840,9 +835,9 @@ ul.collGrid {
   .head {
     grid-template-columns: auto minmax(0, 1fr);
   }
-  .elo {
+  .rankCol {
     grid-column: 1 / -1;
-    justify-self: start;
+    justify-items: start;
   }
   .duo {
     grid-template-columns: 1fr;
@@ -856,12 +851,6 @@ ul.collGrid {
   }
   .showcase {
     grid-template-columns: repeat(3, minmax(0, 1fr));
-  }
-  .strip {
-    padding: 0 var(--s-3);
-  }
-  .strip .since {
-    margin-left: 0;
   }
   .peCols {
     grid-template-columns: 1fr;
