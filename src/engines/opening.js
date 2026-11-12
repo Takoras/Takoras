@@ -216,6 +216,19 @@ async function runTransition() {
 
 ['wheel', 'touchmove'].forEach(t => opening.addEventListener(t, e => { if (!opening.classList.contains('recap')) e.preventDefault(); }, { passive: false })); // pas de défilement derrière
 addEventListener('keydown', e => { if (e.key === 'Escape') leave(); });
+// PC : la barre Espace fait comme un clic sur l'écran d'ouverture (monter le compteur, révéler, tirage suivant).
+// La garder enfoncée fait monter le compteur, mais ne relance jamais de nouveaux tirages toute seule.
+addEventListener('keydown', e => {
+  if (e.code !== 'Space' || !opening.classList.contains('on') || opening.classList.contains('recap')) return;
+  if (e.target.closest?.('input, textarea, select, [contenteditable]')) return;
+  e.preventDefault();
+  if (sess?.auto) return;
+  if (run && !run.done) return tap();
+  if (e.repeat) return;
+  if (run?.done && opening.classList.contains('revealed') && spinning()) { noteTap(); return stopSpin(); }
+  if (run?.done && sess && sess.total === 1 && opening.classList.contains('revealed') && !spinning()) { noteTap(); return tryReopen(); }
+  if (!$('op-next').hidden && opening.classList.contains('revealed')) next();
+});
 
 // Menu debug : taper « debug » n'importe où sur la page (le contenu est géré dans opening.js)
 $('debug-close')?.addEventListener('click', () => { $('debug').hidden = true; });
@@ -258,11 +271,11 @@ function draw(list) {
 }
 
 // Valeurs affichées à chaque clic : monte doucement puis accélère. Plus le jeton est rare, plus il faut de clics :
-// ~15 jusqu'à 1/5 000, ~28 vers 1/50 000, ~38 pour 1/1 000 000 (on ne voit jamais « 1 million » arriver en 5 clics).
+// ~15 jusqu'à 1/10 000, ~33 vers 1/50 000, ~50 pour 1/200 000, ~65 pour 1/1 000 000 : un très rare se mérite.
 function steps(X) {
   if (X <= 1) return [];
-  const rare = X >= 10000, cap = X >= 100000 ? 40 : rare ? 28 : 15;
-  const n = Math.min(X - 1, Math.min(cap, Math.round(4 + Math.log2(X) * (rare ? 1.7 : .9))));
+  const lg = Math.log2(X);
+  const n = Math.min(X - 1, X >= 10000 ? Math.min(70, Math.round(15 + (lg - 13.3) * 8)) : Math.min(15, Math.round(4 + lg * .9)));
   const out = [];
   for (let i = 1; i <= n; i++) {
     const v = i === n ? X : Math.round(1 + (X - 1) * (i / n) ** 2.2 * (.9 + Math.random() * .2));
@@ -361,6 +374,7 @@ function startOpening() {
   tag.querySelector('.op-tag-n').textContent = sess.total > 1 ? `${sess.idx + 1}/${sess.total}` : '';
   $('op-odds').classList.remove('bump');
   if ($('op-price')) $('op-price').textContent = (p.price * sess.total).toLocaleString(LOCALE()); // ce bouton peut être réécrit par l'économie
+  countAnim++; // coupe le compteur du tirage d'avant s'il défilait encore
   $('op-odds').textContent = '1/' + c.shown.toLocaleString(LOCALE());
   stopBg();
   opening.classList.remove('hold', 'rare', 'revealed', 'recap', 'spinning', 'mythic', 'god', 'cinema', 'v-gold', 'v-celeste', 'v-ombre');
@@ -938,7 +952,9 @@ function rhythm() {
   return { fast: avg < 260 && last < 330, slowing: last > Math.max(280, avg * 1.6) };
 }
 const LET_GO = 650; // après la révélation, un clic « lent » attend ce délai avant de rouvrir
+let swapping = false;
 function tryReopen() {
+  if (swapping) return;
   tapsAfter++;
   const { fast, slowing } = rhythm();
   if (fast && !slowing) return openPulls(1); // spam : on enchaîne
@@ -947,6 +963,7 @@ function tryReopen() {
 }
 
 function tap() {
+  if (swapping) return; // le tirage suivant arrive : ce clic ne compte pas
   if (sess?.auto) return; // ouverture auto en cours : les clics ne doivent pas s'en mêler (ça la faisait dérailler)
   noteTap();
   if (run?.done && opening.classList.contains('revealed') && spinning()) return stopSpin();
@@ -999,7 +1016,15 @@ function buy(n, plan = null, vars = null, lucks = null, ids = null, pull = 0) {
   // Le jeton qu'on vient d'avoir se retourne sur place, le « ? » revient, le compteur repart à 1/1 — sans coupure.
   const reopen = n === 1 && opening.classList.contains('on') && !opening.classList.contains('recap') && SETTINGS.speed !== 'instant';
   if (reopen) {
+    // pendant le retournement (140 ms), plus aucun clic ne compte : avant, un clic très rapide relançait un 2e tirage
+    // qui remplaçait celui-ci (le compteur montait puis repartait à zéro, et ce tirage n'était jamais montré)
+    swapping = true;
+    const leaving = [...opening.querySelectorAll('.op-id, .op-stats, .op-actions, .op-note, .op-burst, .v-pop')];
+    const fades = leaving.map(x => x.animate([{ opacity: getComputedStyle(x).opacity }, { opacity: 0 }], { duration: 130, easing: 'ease-out', fill: 'forwards' }));
     opCoin.animate([{ transform: 'rotateY(0deg)' }, { transform: 'rotateY(90deg)' }], { duration: 140, easing: 'ease-in', fill: 'forwards' }).finished.then(() => {
+      swapping = false;
+      // le nouveau tirage repart propre (les infos réapparaîtront normalement à sa révélation)
+      requestAnimationFrame(() => fades.forEach(a => a.cancel()));
       endSession(); startSession(n, plan, vars, lucks, ids);
       skipSpawn = true;
       startOpening();
