@@ -1,0 +1,3 @@
+-- 12 nov. 2026 (appliqué via MCP) : retrait complet de la « recharge éclair » (objet instant).
+-- Quête buy1 : récompense → sablier. Exemplaires possédés remboursés 500 pièces chacun puis retirés.
+-- shop_items 'instant' supprimé (avec ses réglages de période) ; _shop_ids, _stock, admin_shop nettoyés.

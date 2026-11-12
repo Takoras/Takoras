@@ -3,6 +3,8 @@ import type { Dict } from './types';
 
 export const en: Dict = {
   ui: {
+    tap_coin_a: 'Tap the token',
+    open_pull_a: 'open a pull',
     lk_owned: '{n} of {m}',
     lk_pass: 'Pass',
     lk_id: 'Identity',
@@ -147,7 +149,7 @@ export const en: Dict = {
     nav_shop: 'Shop',
     inv_title: 'Your tokens',
     inv_items_title: 'Your items',
-    inv_items_sub: 'Potions, hourglasses, recharges… use them whenever you want. Your tokens are in the Bestiary tab.',
+    inv_items_sub: 'Potions, hourglasses… use them whenever you want. Your tokens are in the Bestiary tab.',
     inv_items_empty: 'No items yet. Potions and hourglasses are sold in the shop.',
     bst_title: 'Your collection',
     bst_mut_only: 'With mutation',
@@ -199,8 +201,6 @@ export const en: Dict = {
     bought: '{n} bought!',
     it_potion: 'Luck potion ×{m}',
     it_potion_d: 'Active {n} pulls',
-    it_instant: 'Instant refill',
-    it_instant_d: '+{n} pulls',
     it_hourglass: 'Hourglass',
     it_hourglass_d: 'Recharge ×2 · {n} min',
     it_banner: '“{n}” banner',
@@ -932,7 +932,7 @@ export const en: Dict = {
     vtitle: 'Variants',
     vintro:
       'On top of the token, every pull has its own chance to come out in a special version. It works for every token (even Mobu) and isn’t changed by potions.',
-    vth: ['Variant', 'Chance', 'Sell', 'Preview'],
+    vth: ['Variant', 'Odds', 'Sell', 'Preview'],
     vdesc: {
       gold: 'All-gold shining token',
       celeste: 'Pearly white, glowing halo',
@@ -958,10 +958,9 @@ export const en: Dict = {
         'Recharge',
         'You get 1 pull every 3 min (upgradable on the home page: −10 s each time, down to 1 min, from 300 to 26,300 coins) up to your max stock (5 at first). The hourglass doubles the speed (1 pull every 1 min 30); several hourglasses extend the duration.',
       ],
-      ['Instant refill', 'Gives +1 pull right away, if your stock isn’t full.'],
       [
         'Max stock',
-        'Upgradable from 5 to 50, +1 each time: 100 coins to reach 6, 950 for 10, 4,450 for 20, 9,050 for 30, 14,500 for 40 and 20,650 for 50. Refilling over time stops at your max stock, but promo codes, refunds and the instant refill can take you above 50 pulls.',
+        'Upgradable from 5 to 50, +1 each time: 100 coins to reach 6, 950 for 10, 4,450 for 20, 9,050 for 30, 14,500 for 40 and 20,650 for 50. Refilling over time stops at your max stock, but promo codes and refunds can take you above 50 pulls.',
       ],
       [
         'Selling',

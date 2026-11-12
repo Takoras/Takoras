@@ -129,7 +129,7 @@ export async function fakeSupabase(
   };
   const items = [
     { item: 'potion1', kind: 'potion', data: { mult: 1.3, rolls: 5 }, qty: 3 },
-    { item: 'instant', kind: 'instant', data: {}, qty: 1 },
+    { item: 'hourglass', kind: 'hourglass', data: { minutes: 60 }, qty: 1 },
   ];
   // Classé simulé : moi = le camp 1 (« p2 », pour vérifier l'écran tourné), « Rival » passe toujours son tour.
   // 1er et 2e « join » : en file ; 3e : match trouvé. 2e tir : le serveur déclare la victoire (+20 Elo).
@@ -609,7 +609,7 @@ export async function fakeSupabase(
         ends_in: 40 * 86400,
         tiers: Array.from({ length: 50 }, (_, i) => ({
           t: i + 1,
-          free: (i + 1) % 5 ? { coins: 100 } : { item: 'instant', qty: 1 },
+          free: (i + 1) % 5 ? { coins: 100 } : { item: 'hourglass', qty: 1 },
           prem:
             i + 1 === 30
               ? { item: 'b_yeux', qty: 1 }

@@ -1,4 +1,6 @@
 import { useRef } from 'react';
+import { translate } from '@/i18n';
+import { useSettings } from '@/lib/settings';
 import { openPulls } from '../eco/openPulls';
 import s from './Home.module.css';
 
@@ -41,7 +43,7 @@ export function HeroCoin({ img, label }: { img: string; label: string }) {
         onPointerLeave={leave}
         role="button"
         tabIndex={0}
-        aria-label={`${label} · ouvrir un tirage`}
+        aria-label={`${label} · ${translate(useSettings.getState().lang, 'ui.open_pull_a')}`}
         onClick={() => void openPulls(1)}
         onKeyDown={(e) => {
           if (e.key === 'Enter' || e.key === ' ') {

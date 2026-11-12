@@ -1,6 +1,8 @@
 // Généré par scripts/port/i18n.mjs depuis l'ancien site, puis maintenu à la main.
 export const fr = {
   ui: {
+    tap_coin_a: 'Toucher le jeton',
+    open_pull_a: 'ouvrir un tirage',
     lk_owned: '{n} sur {m}',
     lk_pass: 'Passe',
     lk_id: 'Identité',
@@ -146,7 +148,7 @@ export const fr = {
     nav_shop: 'Boutique',
     inv_title: 'Tes jetons',
     inv_items_title: 'Tes objets',
-    inv_items_sub: 'Potions, sabliers, recharges… utilise-les quand tu veux. Tes jetons sont dans l’onglet Bestiaire.',
+    inv_items_sub: 'Potions, sabliers… utilise-les quand tu veux. Tes jetons sont dans l’onglet Bestiaire.',
     inv_items_empty: 'Pas encore d’objet. Les potions et sabliers s’achètent en boutique.',
     bst_title: 'Ta collection',
     bst_mut_only: 'Avec mutation',
@@ -198,8 +200,6 @@ export const fr = {
     bought: '{n} acheté !',
     it_potion: 'Potion de chance ×{m}',
     it_potion_d: 'Actif {n} tirages',
-    it_instant: 'Recharge éclair',
-    it_instant_d: '+{n} tirages',
     it_hourglass: 'Sablier',
     it_hourglass_d: 'Recharge ×2 · {n} min',
     it_banner: 'Bannière « {n} »',
@@ -974,10 +974,9 @@ export const fr = {
         'Recharge',
         'Tu gagnes 1 tirage toutes les 3 min (améliorable sur l’accueil : −10 s à chaque fois, jusqu’à 1 min, de 300 à 26 300 pièces) jusqu’à ton stock max (5 au départ). Le sablier double la vitesse (1 tirage toutes les 1 min 30) ; plusieurs sabliers rallongent la durée.',
       ],
-      ['Recharge éclair', 'Donne +1 pull tout de suite, si ton stock n’est pas plein.'],
       [
         'Stock max',
-        'Améliorable de 5 à 50, +1 à chaque fois : 100 pièces pour passer à 6, 950 pour 10, 4 450 pour 20, 9 050 pour 30, 14 500 pour 40 et 20 650 pour 50. La recharge avec le temps s’arrête à ton stock max, mais les codes promo, les remboursements et la recharge éclair peuvent te faire dépasser 50 tirages.',
+        'Améliorable de 5 à 50, +1 à chaque fois : 100 pièces pour passer à 6, 950 pour 10, 4 450 pour 20, 9 050 pour 30, 14 500 pour 40 et 20 650 pour 50. La recharge avec le temps s’arrête à ton stock max, mais les codes promo et les remboursements peuvent te faire dépasser 50 tirages.',
       ],
       [
         'Revente',

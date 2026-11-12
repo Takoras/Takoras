@@ -725,6 +725,11 @@ ul.collGrid {
   width: 104px;
   height: 104px;
 }
+.pkTok img {
+  width: 72px;
+  height: 72px;
+  object-fit: contain;
+}
 .pkMutGrid {
   grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
 }

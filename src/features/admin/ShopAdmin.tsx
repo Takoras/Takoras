@@ -29,7 +29,7 @@ const GROUP: Record<string, string> = { potion: 'Potions', util: 'Pulls', banner
 const CATS: [string, string, (r: Row) => boolean][] = [
   ['all', 'Tout', () => true],
   ['potion', 'Potions', (r) => r.kind === 'potion'],
-  ['bonus', 'Bonus', (r) => r.kind === 'instant' || r.kind === 'hourglass'],
+  ['bonus', 'Bonus', (r) => r.kind === 'hourglass'],
   ['cosm', 'Cosmétiques', (r) => isCosmetic(r.kind)],
   ['look', 'Photos & bannières', (r) => r.kind === 'avatar' || r.kind === 'banner'],
 ];

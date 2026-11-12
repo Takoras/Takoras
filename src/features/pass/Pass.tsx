@@ -39,7 +39,6 @@ const ITEMS: Record<string, ShopItem & { price: number }> = {
   potion25: { id: 'potion25', kind: 'potion', data: { mult: 25, rolls: 5 }, price: 4000 },
   potion50: { id: 'potion50', kind: 'potion', data: { mult: 50, rolls: 6 }, price: 9500 },
   potion100: { id: 'potion100', kind: 'potion', data: { mult: 100, rolls: 10 }, price: 31000 },
-  instant: { id: 'instant', kind: 'instant', data: { pulls: 15 }, price: 500 },
   hourglass: { id: 'hourglass', kind: 'hourglass', data: { minutes: 60 }, price: 700 },
   // exclusifs du passe premium (saison 1) : jamais vendus en boutique
   a_oeil: { id: 'a_oeil', kind: 'avatar', data: {}, price: 20000 },
@@ -48,7 +47,7 @@ const ITEMS: Record<string, ShopItem & { price: number }> = {
 const worth = (r: Reward) => (!r ? 0 : r.coins ? r.coins : (ITEMS[r.item ?? '']?.price ?? 0) * (r.qty ?? 1));
 const isCosmetic = (r: Reward) => !!r?.item && (r.item.startsWith('b_') || r.item.startsWith('a_'));
 const icon = (r: Reward) =>
-  r?.coins ? '/img/piece.png' : itemImg(ITEMS[r?.item ?? ''] ?? { id: 'instant', kind: 'instant' }).src;
+  r?.coins ? '/img/piece.png' : itemImg(ITEMS[r?.item ?? ''] ?? { id: 'hourglass', kind: 'hourglass' }).src;
 const GOLD = 'rgb(242 194 48)';
 const BLUE = 'rgb(142 170 255)';
 const wait = (ms: number) => new Promise((ok) => setTimeout(ok, ms));

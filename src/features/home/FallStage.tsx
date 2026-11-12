@@ -2,7 +2,8 @@ import { useEffect, useRef, useState, type CSSProperties } from 'react';
 import { createPortal } from 'react-dom';
 import { MYSTERE, SERIES, texOf, texScale } from '@/data/jetons';
 import { cKey, useInventory } from '../inventory/inv';
-import { reducedFx } from '@/lib/settings';
+import { reducedFx, useSettings } from '@/lib/settings';
+import { translate } from '@/i18n';
 import { serieTheme } from '@/engines/env';
 import { openPulls } from '../eco/openPulls';
 import s from './Fall.module.css';
@@ -381,7 +382,7 @@ export function FallCoin({
             className={s.coin}
             role={it.out ? undefined : 'button'}
             tabIndex={it.out ? -1 : 0}
-            aria-label={it.out ? undefined : `${label} · ouvrir un tirage`}
+            aria-label={it.out ? undefined : `${label} · ${translate(useSettings.getState().lang, 'ui.open_pull_a')}`}
             onClick={it.out ? undefined : open}
             onPointerMove={it.out ? undefined : move}
             onPointerLeave={it.out ? undefined : leave}

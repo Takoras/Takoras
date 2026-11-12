@@ -46,7 +46,6 @@ import { rankOf } from '../combat/rankedApi';
 import iv from '../inventory/Inventory.module.css';
 import s from './Profile.module.css';
 import lk from './Locker.module.css';
-import { MutationStamp } from '@/ui/MutationStamp';
 
 type Shown = { id: number; jeton: string; odds: number; variant: string | null } | null;
 export type Prof = {
@@ -505,7 +504,9 @@ function ShowcasePicker({ p, slot, onClose }: { p: Prof; slot: number; onClose: 
   const inv = useInventory();
   const series = Object.keys(SERIES);
   const [serie, setSerie] = useState(series[0] ?? 'Takoras');
-  const [pick, setPick] = useState<string | null>(null); // jeton choisi, dont on choisit la mutation
+  // jeton ouvert dans sa fiche, et la mutation choisie en bas de la fiche
+  const [open, setOpen] = useState<string | null>(null);
+  const [pv, setPv] = useState('');
   const [busy, setBusy] = useState<number | null>(null);
   const show = p.showcase ?? [];
   const cur = show[slot] ?? null;
@@ -526,7 +527,8 @@ function ShowcasePicker({ p, slot, onClose }: { p: Prof; slot: number; onClose: 
   const toks = [...byTok.values()]
     .map((e) => ({ ...e, vs: e.vs.sort((a, b) => VORD.indexOf(a.g.variant || '') - VORD.indexOf(b.g.variant || '')) }))
     .sort((a, b) => (b.vs[0]?.g.odds ?? 0) - (a.vs[0]?.g.odds ?? 0));
-  const picked = pick ? byTok.get(pick) : undefined;
+  const opened = open ? byTok.get(open) : undefined;
+  const openedFree = opened?.vs.find((v) => (v.g.variant || '') === pv)?.free;
   const vName = (v?: string | null) => (v ? t(`ui.v_${v}` as 'ui.v_gold') : t('ui.pk_normal'));
   const save = async (id: number | null) => {
     // 5 cases fixes : le jeton va exactement dans la case choisie
@@ -564,42 +566,7 @@ function ShowcasePicker({ p, slot, onClose }: { p: Prof; slot: number; onClose: 
           </div>
         ) : null}
 
-        {picked ? (
-          // 2e temps : la mutation de ce jeton
-          <div key="mut" className={s.pkStep}>
-            <div className={s.pkBar}>
-              <button type="button" className={s.pkBack} onClick={() => setPick(null)}>
-                ← {t('ui.back')}
-              </button>
-              <b className={s.pkName}>{jn(picked.name)}</b>
-            </div>
-            {/* même case que l'inventaire, une par version possédée, avec son tampon de mutation */}
-            <ul className={`${iv.grid} ${s.pkMutGrid}`}>
-              {picked.vs.map(({ g, eff, free }, i) => {
-                const j = jetonOf(g.name, g.serie);
-                return (
-                  <li key={g.key} className={iv.card} style={glowVars(j, g.variant || null) as CSSProperties}>
-                    <button
-                      type="button"
-                      className={iv.cardBtn}
-                      style={{ '--i': i } as CSSProperties}
-                      disabled={!free || busy !== null}
-                      onClick={() => free && void save(free)}
-                      aria-label={`${jn(g.name)} ${vName(g.variant)}`}
-                    >
-                      {g.ids.length > 1 ? <span className={iv.count}>×{g.ids.length}</span> : null}
-                      {!free ? <span className={iv.num}>{t('ui.showcase')}</span> : null}
-                      <img className={vImg(g.variant || null)} src={texOf(j)} alt="" />
-                      <b>{vName(g.variant)}</b>
-                      <small>1/{fmt(eff)}</small>
-                      <span className={s.pkStamp}>{g.variant ? <MutationStamp v={g.variant} size="md" /> : null}</span>
-                    </button>
-                  </li>
-                );
-              })}
-            </ul>
-          </div>
-        ) : (
+        {
           <div key="tok" className={s.pkStep}>
             <div className={s.pkBar}>
               <div className={s.pkSeries} role="tablist">
@@ -616,13 +583,11 @@ function ShowcasePicker({ p, slot, onClose }: { p: Prof; slot: number; onClose: 
               </p>
             ) : toks.length ? (
               // les mêmes cases que le bestiaire de l'inventaire : numéro, nombre, jeton, nom, rareté, 3 tampons
-              <ul className={iv.grid}>
+              <ul className={`${iv.grid} ${s.pkTok}`}>
                 {toks.map((e, i) => {
                   const top = e.vs[0];
                   if (!top) return null;
                   const j = jetonOf(e.name, e.serie);
-                  const free = e.vs.some((v) => v.free);
-                  const one = e.vs.length === 1 ? top.free : undefined;
                   const has = new Set(e.vs.map((v) => v.g.variant || ''));
                   const n = e.vs.reduce((a, v) => a + v.g.ids.length, 0);
                   const no = (SERIES[serie] ?? []).findIndex((x) => x.name === e.name) + 1;
@@ -632,8 +597,13 @@ function ShowcasePicker({ p, slot, onClose }: { p: Prof; slot: number; onClose: 
                         type="button"
                         className={iv.cardBtn}
                         style={{ '--i': Math.min(i, 24) } as CSSProperties}
-                        disabled={!free || busy !== null}
-                        onClick={() => (sfx.click(), one ? void save(one) : setPick(e.name))}
+                        disabled={busy !== null}
+                        onClick={() => {
+                          sfx.click();
+                          // s'ouvre sur la première version encore libre (sinon la première)
+                          setPv((e.vs.find((v) => v.free) ?? top).g.variant || '');
+                          setOpen(e.name);
+                        }}
                         aria-label={jn(e.name)}
                       >
                         <span className={iv.num}>#{String(no).padStart(2, '0')}</span>
@@ -660,8 +630,28 @@ function ShowcasePicker({ p, slot, onClose }: { p: Prof; slot: number; onClose: 
               <p className={s.pkEmpty}>{t('ui.none')}</p>
             )}
           </div>
-        )}
+        }
       </div>
+      {/* la fiche du jeton : on touche le tampon de la mutation voulue, puis « Mettre en vitrine » */}
+      <JetonModal
+        name={open}
+        serie={serie}
+        variant={pv}
+        found={Object.fromEntries(
+          ['', 'gold', 'celeste', 'ombre'].map((k) => [k, !!opened?.vs.some((v) => (v.g.variant || '') === k)]),
+        )}
+        pick={setPv}
+        onClose={() => setOpen(null)}
+      >
+        <Button
+          variant="primary"
+          disabled={!openedFree || busy !== null}
+          onClick={() => openedFree && void save(openedFree)}
+        >
+          {openedFree ? t('ui.pick_put') : t('ui.already_showcase')}
+        </Button>
+        <Button onClick={() => setOpen(null)}>{t('ui.back')}</Button>
+      </JetonModal>
     </Modal>
   );
 }
