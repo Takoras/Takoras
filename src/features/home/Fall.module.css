@@ -9,7 +9,8 @@
   /* posé dans <body>, hors du zoom du site : il couvre toute la fenêtre */
   position: fixed;
   inset: 0;
-  z-index: -1;
+  /* 0 et pas -1 : à -1, le fond de la page était peint par-dessus et cachait toute la pluie */
+  z-index: 0;
   width: 100vw;
   height: 100vh;
   pointer-events: none;
