@@ -242,6 +242,66 @@ const CINE = (() => {
         vignette(x, w, h, bg, .78);
       },
     },
+    // ---------------------------------------------------------------- Coton (Bodako, 1/10 000) : un jardin de coton la nuit.
+    // Des feuilles poussent du bas, des boules de coton roses tourbillonnent doucement et se resserrent autour du jeton,
+    // une petite boîte à musique ; à la fin, un éclat rose tout doux (pas d'écran blanc).
+    Coton: {
+      R: 6, c: ['#0b120f', '#2f5d43', '#f2c4b6', '#fff4ee'],
+      init(c) {
+        c.st.puffs = Array.from({ length: 26 }, (_, i) => ({ a: i / 26 * TAU + rnd(-.15, .15), r: rnd(.42, 1.15), v: rnd(.6, 1.1), sz: Math.round(rnd(3, 6)), p: rnd(0, 9) }));
+        c.st.fronds = Array.from({ length: 18 }, (_, i) => ({ x: (i + rnd(-.3, .3)) / 17 * c.w, h: rnd(.18, .38) * c.h, wob: rnd(0, 9), d: rnd(0, .5), dark: i % 2 }));
+        c.st.motes = Array.from({ length: 46 }, () => ({ x: rnd(0, c.w), y: rnd(0, c.h), v: rnd(2, 6), p: rnd(0, 9) }));
+      },
+      music(m, R) {
+        const r = 261.6, bpm = 72;
+        // berceuse : une boîte à musique sur des accords doux, la nappe s'épaissit, puis la révélation
+        bars(m, .3, R - .3, bpm, [[0, 4, 7], [-3, 0, 4], [-7, -3, 0], [-5, -1, 2]], (t, c, i, b, len) => {
+          m.I.pad(chordHz(m, r, c, -1), t, len + .1, .026, 900);
+          [0, 2, 1, 2, 0, 2, 1, 2].forEach((n, k) => { if (t + k * b / 2 < m.T(R - .35)) m.I.bell(m.hz(r, c[n] + 12 + (k === 4 ? 12 : 0)), t + k * b / 2, i >= 2 ? .045 : .035, 1.6); });
+        });
+        m.I.warm(chordHz(m, r, [0, 7, 12]), m.T(.2), 3.4, .025);
+        m.I.strings(chordHz(m, r, [0, 4, 7, 12]), m.T(R - 2.4), 2.2, .028);
+        m.I.swell(m.T(R - 1.2), 1, .09);
+        revealHit(m, R, r, [0, 4, 7, 12, 16], 'bell');
+      },
+      scene(c) {
+        const { x, w, h, cx, cy, M, t, st, dt } = c, [bg, dk, ac, li] = this.c, R = this.R;
+        const k = seg(t, 0, R), grow = E.io(seg(t, .3, 3.2));
+        x.fillStyle = bg; x.fillRect(0, 0, w, h);
+        glow(x, cx, cy, M * (.55 + .3 * k), dk, .45 + .25 * k);
+        // poussière de coton qui monte lentement
+        st.motes.forEach(p => { p.y -= p.v * dt * (1 + k); p.x += Math.sin(t * .8 + p.p) * dt * 4; if (p.y < 0) { p.y = h; p.x = rnd(0, w); } P(x, p.x, p.y, 1, rgba(li, .15 + .25 * (.5 + .5 * Math.sin(t * 1.6 + p.p)))); });
+        // feuilles qui poussent du bas et se balancent (comme le pied du jeton)
+        st.fronds.forEach(f => {
+          const g = clamp(grow * 1.2 - f.d * .4), H = f.h * g;
+          for (let y = 0; y < H; y += 1) {
+            const u = y / Math.max(1, f.h), sway = Math.sin(t * 1.3 + f.wob + u * 2) * u * 6;
+            const X = f.x + sway, Y = h - y;
+            P(x, X, Y, 2, f.dark ? dk : '#4f9a63');
+            if (y % 5 === 0 && y > 4) { P(x, X - 2, Y + 1, 1, '#6fbf7a'); P(x, X + 2, Y + 1, 1, '#6fbf7a'); }
+          }
+        });
+        // les boules de coton : elles tournent doucement et se resserrent autour du jeton
+        st.spin = (st.spin || 0) + dt * lerp(.25, 1.8, E.in(k, 2));
+        st.puffs.forEach((q, i) => {
+          const a = q.a + st.spin * q.v, rr = M * q.r * lerp(1, .42, E.in(k, 1.5));
+          const X = cx + Math.cos(a) * rr, Y = cy + Math.sin(a) * rr * .82 + Math.sin(t * 1.4 + q.p) * 2;
+          const sz = q.sz * (.85 + .15 * Math.sin(t * 2 + q.p));
+          for (let dy = -sz; dy <= sz; dy++) for (let dx = -sz; dx <= sz; dx++) {
+            const d2 = dx * dx + dy * dy;
+            if (d2 > sz * sz) continue;
+            P(x, X + dx, Y + dy, 1, d2 < sz * sz * .3 && dx < 0 && dy < 0 ? li : i % 3 ? ac : '#f7d9cf');
+          }
+        });
+        // le jeton mystère au milieu, qui se teinte de rose et frémit à la fin
+        const quake = E.in(seg(t, 4.2, R), 2);
+        coin(x, c.mys, cx + Math.sin(t * 36) * quake * 1.5, cy + Math.sin(t * 1.3) * 2, M * .27, { tint: ac, tintA: grow * .4, ang: Math.sin(t * .7) * .35 });
+        glow(x, cx, cy, M * (.18 + k * .25), ac, .25 + k * .4);
+        c.fx.shake(quake * 2);
+        if (t > R - .18) c.fx.flash(ac, .75);
+        vignette(x, w, h, bg, .75);
+      },
+    },
     // ---------------------------------------------------------------- Vyolis : une salle de verre, des reflets partout
     Vyolis: {
       R: 6.2, c: ['#0b0614', '#5b3a8c', '#c9a6f2', '#ffffff'],
@@ -899,6 +959,14 @@ const CINE = (() => {
       root.style.setProperty('--cc', th.c[2]);
       root.querySelector('.cine-title b').textContent = jn(j.name);
       root.querySelector('.cine-title small').textContent = '1/' + (v ? vOdds(j.odds, v) : j.odds).toLocaleString(LOCALE());
+      // jeton muté : à côté du nom, son tampon et le nom de la mutation (comme sur la fiche du jeton)
+      if (v) {
+        const mut = document.createElement('span');
+        mut.className = 'cine-mut cine-mut-' + v;
+        mut.innerHTML = `<i style="background-image:url(/img/stamps/${v}.png)"></i>`;
+        mut.append(t('v_' + v));
+        root.querySelector('.cine-title').insertBefore(mut, root.querySelector('.cine-title small'));
+      }
       document.body.appendChild(root);
       const cv = root.querySelector('canvas'), fl = root.querySelector('.cine-flash'), skip = root.querySelector('.cine-skip'), card = root.querySelector('.cine-card');
       const live = document.createElement('img'); live.className = 'px cine-live' + vCls(v); live.alt = ''; live.hidden = true; live.src = texOf(j); cv.after(live);

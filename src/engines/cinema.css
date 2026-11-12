@@ -32,3 +32,11 @@
 @keyframes cardLetter { to { opacity: 1; transform: none; filter: blur(0); } }
 /* le jeton révélé : la vraie image (GIF animé, doodle) au-dessus du canvas */
 .cine-live { position: absolute; image-rendering: pixelated; pointer-events: none; will-change: transform; }
+
+/* jeton muté : tampon + nom de la mutation sous le nom du jeton */
+.cine-mut { display: inline-flex; align-items: center; gap: 8px; padding: 4px 14px 4px 6px; border-radius: 999px; background: rgba(255, 255, 255, .08);
+  font: 800 clamp(13px, 2vw, 16px) / 1 var(--font-display); letter-spacing: .08em; text-transform: uppercase; color: #fff; }
+.cine-mut i { width: 26px; height: 26px; background: center / contain no-repeat; image-rendering: pixelated; }
+.cine-mut-gold { color: #fde68a; background: rgba(250, 204, 21, .16); }
+.cine-mut-celeste { color: #e0e7ff; background: rgba(224, 231, 255, .14); }
+.cine-mut-ombre { color: #e9d5ff; background: rgba(168, 85, 247, .2); }
