@@ -30,14 +30,19 @@ export function FallRain({ serie }: { serie: string }) {
   return (
     <>
       {layers.map((x) => (
-        <RainLayer key={x.k} serie={x.serie} out={x.out} first={x.k === 0} />
+        <RainLayer key={x.k} serie={x.serie} out={x.out} />
       ))}
     </>
   );
 }
 
-function RainLayer({ serie, out, first }: { serie: string; out: boolean; first: boolean }) {
+function RainLayer({ serie, out }: { serie: string; out: boolean }) {
   const ref = useRef<HTMLCanvasElement>(null);
+  // couche déjà effacée (changement de série) : pas de copie qui s'efface à son retrait
+  const gone = useRef(out);
+  useEffect(() => {
+    gone.current = out;
+  }, [out]);
 
   useEffect(() => {
     const cv = ref.current;
@@ -226,9 +231,9 @@ function RainLayer({ serie, out, first }: { serie: string; out: boolean; first: 
       // voile sombre au milieu de l'écran : le jeton, les boutons et les textes ressortent bien sur la pluie
       ctx.globalAlpha = 1;
       const veil = ctx.createRadialGradient(W / 2, H * 0.48, 0, W / 2, H * 0.48, Math.max(W, H) * 0.62);
-      veil.addColorStop(0, 'rgba(10,10,14,0.62)');
-      veil.addColorStop(0.55, 'rgba(10,10,14,0.42)');
-      veil.addColorStop(1, 'rgba(10,10,14,0.12)');
+      veil.addColorStop(0, 'rgba(10,10,14,0.78)');
+      veil.addColorStop(0.55, 'rgba(10,10,14,0.62)');
+      veil.addColorStop(1, 'rgba(10,10,14,0.38)');
       ctx.fillStyle = veil;
       ctx.fillRect(0, 0, W, H);
     };
@@ -279,6 +284,15 @@ function RainLayer({ serie, out, first }: { serie: string; out: boolean; first: 
     start();
     return () => {
       stop();
+      // on quitte l'accueil : une copie du dernier dessin s'efface en douceur (le fond ne disparaît pas d'un coup)
+      if (!gone.current && !reducedFx() && cv.width) {
+        const ghost = cv.cloneNode() as HTMLCanvasElement;
+        ghost.getContext('2d')?.drawImage(cv, 0, 0);
+        ghost.className = `${s.rain} ${s.rainOut}`;
+        ghost.style.setProperty('--cut', cv.style.getPropertyValue('--cut'));
+        document.body.appendChild(ghost);
+        setTimeout(() => ghost.remove(), 950);
+      }
       document.removeEventListener('visibilitychange', onVis);
       window.removeEventListener('pointermove', onMove);
       window.removeEventListener('resize', resize);
@@ -288,7 +302,7 @@ function RainLayer({ serie, out, first }: { serie: string; out: boolean; first: 
 
   // hors du zoom du site (#root) : le canvas couvre vraiment toute la largeur de la fenêtre
   return createPortal(
-    <canvas ref={ref} className={`${s.rain} ${out ? s.rainOut : first ? '' : s.rainIn}`} aria-hidden />,
+    <canvas ref={ref} className={`${s.rain} ${out ? s.rainOut : s.rainIn}`} aria-hidden />,
     document.body,
   );
 }

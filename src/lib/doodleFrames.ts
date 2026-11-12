@@ -12,7 +12,7 @@ const ns = 'http://www.w3.org/2000/svg';
 
 // une seule planche (les 3 dessins l'un sous l'autre) : on la fait glisser, l'image n'est jamais remplacée
 // (changer d'image forçait parfois le navigateur à la redécoder : le sprite disparaissait une image, d'où des flashs)
-type Frames = { content: string; h: number; w: number };
+type Frames = { content: string; h: number; w: number; bh: number; step: number };
 const cache = new Map<string, Promise<Frames | null>>();
 const live = new Map<HTMLImageElement, { key: string; frames: Frames }>();
 let svgHost: SVGSVGElement | null = null;
@@ -76,19 +76,23 @@ async function render(
   if (!sx) return null;
   sx.imageSmoothingEnabled = false; // pixel art : agrandi sans flou, comme à l'écran
   sx.drawImage(img, (ow - dw) / 2, (oh - dh) / 2, dw, dh);
+  // les 3 dessins l'un sous l'autre, séparés par une petite bande vide : si l'affichage tombe sur une fraction de
+  // pixel, on voit du vide (rien) au lieu d'un bout du dessin d'à côté (avant : traits parasites, ex. le podium)
+  const GAP = 4;
+  const step = ch + GAP;
   const sheet = document.createElement('canvas');
   sheet.width = cw;
-  sheet.height = ch * NOISE.length;
+  sheet.height = step * NOISE.length;
   const x = sheet.getContext('2d');
   if (!x) return null;
   NOISE.forEach((seed, i) => {
     // chaque dessin reste dans sa propre bande de la planche
     x.save();
     x.beginPath();
-    x.rect(0, i * ch, cw, ch);
+    x.rect(0, i * step, cw, ch);
     x.clip();
     x.filter = `url(#${filterId(seed, small, dpr)})`;
-    x.drawImage(src, -m, i * ch - m);
+    x.drawImage(src, -m, i * step - m);
     x.restore();
   });
   const blob = await new Promise<Blob | null>((ok) => sheet.toBlob(ok));
@@ -99,7 +103,9 @@ async function render(
   keep.src = url;
   await keep.decode().catch(() => undefined);
   kept.push(keep);
-  return { content: `image-set(url("${url}") ${cw / bw}x)`, h: bh, w: bw };
+  // tailles exactes en pixels de la page (pas arrondies) : hauteur d'un dessin et décalage d'un dessin au suivant
+  const res = cw / bw;
+  return { content: `image-set(url("${url}") ${res}x)`, h: ch / res, w: bw, bh, step: step / res };
 }
 const kept: HTMLImageElement[] = [];
 
@@ -179,10 +185,10 @@ let tick = 0;
 const show = (img: HTMLImageElement, f: Frames) => {
   img.style.setProperty('content', f.content);
   img.style.setProperty('object-fit', 'none');
-  img.style.setProperty('object-position', `0 ${-tick * f.h}px`);
+  img.style.setProperty('object-position', `0 ${-tick * f.step}px`);
   // la planche est 3 fois plus haute que l'image : on impose les proportions d'UN dessin, sinon une image dont la
   // hauteur s'adapte toute seule triplait de hauteur (puis était recalculée, en boucle : zoom / dézoom et flashs)
-  img.style.setProperty('aspect-ratio', `${f.w} / ${f.h}`);
+  img.style.setProperty('aspect-ratio', `${f.w} / ${f.bh}`); // la taille de la case ne change jamais
 };
 const clear = (img: HTMLImageElement) => {
   ['content', 'object-fit', 'object-position', 'aspect-ratio'].forEach((k) => img.style.removeProperty(k));
@@ -221,7 +227,7 @@ function step() {
     if (n > 3) banned.add(img);
     if (eligible(img)) queue.add(img);
   }
-  for (const [img, f] of todo) img.style.setProperty('object-position', `0 ${-tick * f.h}px`);
+  for (const [img, f] of todo) img.style.setProperty('object-position', `0 ${-tick * f.step}px`);
   if (queue.size) void pump();
 }
 
