@@ -4,7 +4,7 @@
 // Tout est dessiné en direct dans un petit canvas agrandi sans lissage (pixel art). Pas de dessins détaillés :
 // des formes simples (verre, flèches, plumes, ombre…) qui bougent bien.
 // Les mouvements utilisent des courbes « humaines » : anticipation, petits dépassements, ressorts amortis, pauses.
-import { LOCALE, SERIES, jn, sfx, texOf, t } from './env';
+import { LOCALE, SERIES, jn, sfx, texOf, t, vCls, vOdds } from './env';
 import FILES from '../data/sounds.json';
 import './cinema.css';
 
@@ -888,7 +888,8 @@ const CINE = (() => {
   // =====================================================================
   // Lecture
   // =====================================================================
-  function play(j) {
+  // v : mutation tirée (gold, celeste, ombre) : le jeton du film est déjà de sa couleur, du début à la fin
+  function play(j, v = '') {
     return new Promise(resolve => {
       const F = FILMS[j.name] || GENERIC(j), R = F.R, HOLD = 2.6, D = R + HOLD;
       const th = { c: F.c };
@@ -897,14 +898,29 @@ const CINE = (() => {
       root.innerHTML = `<canvas class="cine-cv"></canvas><div class="cine-flash"></div><div class="cine-card"></div><div class="cine-title"><b></b><small></small></div><div class="cine-skip">${t('cine_skip')}</div>`;
       root.style.setProperty('--cc', th.c[2]);
       root.querySelector('.cine-title b').textContent = jn(j.name);
-      root.querySelector('.cine-title small').textContent = '1/' + j.odds.toLocaleString(LOCALE());
+      root.querySelector('.cine-title small').textContent = '1/' + (v ? vOdds(j.odds, v) : j.odds).toLocaleString(LOCALE());
       document.body.appendChild(root);
       const cv = root.querySelector('canvas'), fl = root.querySelector('.cine-flash'), skip = root.querySelector('.cine-skip'), card = root.querySelector('.cine-card');
-      const live = document.createElement('img'); live.className = 'px cine-live'; live.alt = ''; live.hidden = true; live.src = texOf(j); cv.after(live);
+      const live = document.createElement('img'); live.className = 'px cine-live' + vCls(v); live.alt = ''; live.hidden = true; live.src = texOf(j); cv.after(live);
       const w = Math.ceil(innerWidth / S), h = Math.ceil(innerHeight / S);
       cv.width = w; cv.height = h;
       const x = cv.getContext('2d'); x.imageSmoothingEnabled = false;
-      const img = new Image(); img.src = texOf(j);
+      // le dessin du jeton pour le canvas : passé une fois dans la palette de sa mutation (même filtre que le site)
+      const img = new Image();
+      if (!v) img.src = texOf(j);
+      else {
+        const raw = new Image();
+        raw.onload = () => {
+          try {
+            const cvv = document.createElement('canvas'); cvv.width = raw.naturalWidth; cvv.height = raw.naturalHeight;
+            const g = cvv.getContext('2d'); g.imageSmoothingEnabled = false;
+            g.filter = `url(#v${v === 'gold' ? 'gold' : v === 'celeste' ? 'celeste' : 'ombre'})`;
+            g.drawImage(raw, 0, 0);
+            img.src = cvv.toDataURL();
+          } catch { img.src = raw.src; }
+        };
+        raw.src = texOf(j);
+      }
       const mys = new Image(); mys.src = MYSTERE;
       // effets communs : flash coloré, écran blanc, tremblement, carton de texte
       let flashA = 0, flashC = '#ffffff', whiteA = 0, shakeA = 0;

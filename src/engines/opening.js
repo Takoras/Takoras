@@ -697,12 +697,8 @@ function reveal(restored, quiet = false) {
 
 // Variante (Doré, Glitch, Prisme) : bandeau qui claque, flash et étincelles à sa couleur, petit jingle
 function variantFx(v, odds = 1) {
-  const d = document.createElement('div');
-  d.className = 'v-pop v-' + v;
-  d.innerHTML = `<i></i><b>${t('v_' + v)}</b><small>1/${fmt(vOdds(odds, v))}</small>`;
+  void odds; // (plus de bandeau « Doré » qui saute en haut : la couleur du jeton et la fiche suffisent)
   opening.querySelectorAll('.v-pop').forEach(x => x.remove());
-  opening.appendChild(d);
-  setTimeout(() => d.remove(), 1800);
   flash(.35, 500); burst(v === 'gold' ? 24 : 36); shake(v === 'gold' ? .5 : 1);
   sfx.upgrade(); if (v !== 'gold') setTimeout(() => sfx.reveal(20000), 120);
 }
@@ -713,7 +709,7 @@ async function cine() {
   r.done = true;
   clearInterval(r.hb);
   styleClean(); // le film prend le relais : le décor du style d'ouverture (et ses sons) s'arrête
-  try { await CINE.play(r.result); } catch (e) { console.error('[cinématique]', e); document.querySelectorAll('.cine').forEach(n => n.remove()); }
+  try { await CINE.play(r.result, r.variant); } catch (e) { console.error('[cinématique]', e); document.querySelectorAll('.cine').forEach(n => n.remove()); }
   if (run !== r) return;
   // fin de cinématique sans coupure : le jeton du film glisse jusqu'à sa place dans la fiche pendant que le film s'efface
   const live = document.querySelector('.cine.out .cine-live');
@@ -728,7 +724,9 @@ async function cine() {
   col.style.transition = zoom.style.transition = '';
   const ghost = document.createElement('div'); // au-dessus du film qui s'efface
   ghost.style.cssText = `position:fixed;left:${a.left}px;top:${a.top}px;width:${a.width}px;height:${a.height}px;z-index:96;pointer-events:none`;
-  ghost.innerHTML = `<img src="${live.src}" alt="" style="width:100%;height:100%;image-rendering:pixelated;display:block">`;
+  // scale:none : la boîte du fantôme a déjà la taille VISIBLE du jeton du film (agrandissement des dessins 80×80 compris) ;
+  // sans ça il était agrandi une 2e fois, arrivait trop gros puis rapetissait d'un coup en laissant place au vrai jeton
+  ghost.innerHTML = `<img class="px${vCls(r.variant)}" src="${live.src}" alt="" style="width:100%;height:100%;image-rendering:pixelated;display:block;scale:none">`;
   document.body.appendChild(ghost);
   opCoin.style.opacity = '0';
   const dx = b.left + b.width / 2 - (a.left + a.width / 2), dy = b.top + b.height / 2 - (a.top + a.height / 2), k = b.width / a.width;
@@ -736,7 +734,10 @@ async function cine() {
     { transform: 'none' },
     { transform: `translate(${dx}px,${dy}px) scale(${k})` },
   ], { duration: 620, easing: 'cubic-bezier(.3,.8,.25,1)', fill: 'forwards' }).finished;
+  // le vrai jeton apparaît pendant que le fantôme s'efface (fondu croisé, pas de coupure)
   opCoin.style.opacity = '';
+  opCoin.animate([{ opacity: 0 }, { opacity: 1 }], { duration: 160, easing: 'ease-out' });
+  await ghost.animate([{ opacity: 1 }, { opacity: 0 }], { duration: 160, easing: 'ease-in', fill: 'forwards' }).finished.catch(() => {});
   ghost.remove();
 }
 
