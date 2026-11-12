@@ -20,7 +20,9 @@ type Row = ShopItem & {
   off?: number | null;
   forced?: boolean;
   pass_only?: boolean;
+  group?: string;
 };
+const GROUP: Record<string, string> = { potion: '🧪 Potions', util: '⏳ Pulls', banner: '✨ Cosmétiques' };
 
 // Boutique (admin) : une carte par objet, tout s'enregistre tout seul.
 // En vente (interrupteur), stock de la période (− / +), prix avec réductions rapides, objet à la une.
@@ -49,7 +51,7 @@ export function ShopAdmin() {
   const rows = list.data ?? [];
   const f = CATS.find(([k]) => k === cat)?.[2] ?? (() => true);
   const shown = rows.filter((r) => f(r) && (!onlyOn || (r.active && r.stock > 0)));
-  const feat = rows.find((r) => r.featured);
+  const feats = rows.filter((r) => r.featured);
   const onSale = rows.filter((r) => r.active && r.stock > 0).length;
 
   const feature = async (id: string | null, pct?: number) => {
@@ -81,37 +83,42 @@ export function ShopAdmin() {
           </Button>
         </div>
         <div className={`${s.box} ${s.featBox}`}>
-          <small>À la une {feat?.forced ? '· choisi par toi' : '· tiré au hasard'}</small>
-          {feat ? (
-            <div className={s.feat}>
-              <Art it={feat} />
-              <div>
-                <b>{itemText(feat, 'fr')[0]}</b>
-                <span>
-                  <s>{fmt(feat.period_price ?? feat.base_price)}</s> → <b>{fmt(feat.price)}</b> · −{feat.off} %
-                </span>
-                <div className={s.chips}>
-                  {OFFS.map((p) => (
-                    <button
-                      key={p}
-                      type="button"
-                      aria-pressed={feat.off === p}
-                      onClick={() => void feature(feat.id, p)}
-                    >
-                      −{p} %
-                    </button>
-                  ))}
-                  {feat.forced ? (
-                    <button type="button" onClick={() => void feature(null)}>
-                      🎲 Au hasard
-                    </button>
-                  ) : null}
+          <small>À la une · un par rayon</small>
+          {feats.length ? (
+            feats.map((feat) => (
+              <div key={feat.id} className={s.feat}>
+                <Art it={feat} />
+                <div>
+                  <b>
+                    {GROUP[feat.group ?? ''] ?? ''} · {itemText(feat, 'fr')[0]}{' '}
+                    <small className="muted">{feat.forced ? '(choisi par toi)' : '(au hasard)'}</small>
+                  </b>
+                  <span>
+                    <s>{fmt(feat.period_price ?? feat.base_price)}</s> → <b>{fmt(feat.price)}</b> · −{feat.off} %
+                  </span>
+                  <div className={s.chips}>
+                    {OFFS.map((p) => (
+                      <button
+                        key={p}
+                        type="button"
+                        aria-pressed={feat.off === p}
+                        onClick={() => void feature(feat.id, p)}
+                      >
+                        −{p} %
+                      </button>
+                    ))}
+                  </div>
                 </div>
               </div>
-            </div>
+            ))
           ) : (
             <p className="muted">Aucun objet à la une (rien en stock).</p>
           )}
+          {feats.some((f) => f.forced) ? (
+            <Button size="sm" onClick={() => void feature(null)}>
+              🎲 Remettre tout au hasard
+            </Button>
+          ) : null}
         </div>
       </div>
 

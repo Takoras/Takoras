@@ -507,5 +507,5 @@
   place-items: center;
   width: clamp(160px, 16vw, 240px);
   aspect-ratio: 1;
-  scale: 1.6;
+  scale: 1.1;
 }

@@ -155,6 +155,7 @@ function PlayerBody({ id, P }: { id: string; P: Player }) {
     { id: number; created_at: string; from_pseudo: string; to_pseudo: string; body: string }[] | null
   >(null);
   const name = P.pseudo || 'ce joueur';
+  const [pt, setPt] = useState<'give' | 'coll' | 'items' | 'mod'>('give');
   const myId = useAuth((x) => x.user?.id);
   const after = async () => {
     await Promise.all([
@@ -257,342 +258,370 @@ function PlayerBody({ id, P }: { id: string; P: Player }) {
         </div>
       </dl>
 
-      <section className={s.box}>
-        <h3>
-          Pièces et pulls <small className="muted">(nombre négatif pour retirer)</small>
-        </h3>
-        <form
-          className={s.row}
-          onSubmit={(e) => {
-            e.preventDefault();
-            const c = Math.trunc(+coins || 0),
-              pl = Math.trunc(+pulls || 0);
-            if (c || pl) void give(c, pl);
-          }}
-        >
-          <input
-            className={s.input}
-            type="number"
-            value={coins}
-            onChange={(e) => setCoins(e.target.value)}
-            placeholder="Pièces"
-            aria-label="Pièces"
-          />
-          <input
-            className={s.input}
-            type="number"
-            value={pulls}
-            onChange={(e) => setPulls(e.target.value)}
-            placeholder="Pulls"
-            aria-label="Pulls"
-          />
-          <Button type="submit" variant="primary" size="sm">
-            Donner
-          </Button>
-        </form>
-        <div className={s.quick}>
-          {[1000, 10000, 100000].map((c) => (
-            <Button key={c} size="sm" onClick={() => void give(c, 0)}>
-              +{fmt(c)}
-            </Button>
-          ))}
-          {[5, 10].map((n) => (
-            <Button key={n} size="sm" onClick={() => void give(0, n)}>
-              +{n} pulls
-            </Button>
-          ))}
-        </div>
-      </section>
+      {/* la fiche en onglets : plus de longue page à faire défiler */}
+      <div className={s.ptabs} role="tablist" aria-label="Fiche du joueur">
+        {(
+          [
+            ['give', '🎁 Donner'],
+            ['coll', `🪙 Collection (${groups.length})`],
+            ['items', '🧪 Objets'],
+            ['mod', '🛡️ Modération'],
+          ] as const
+        ).map(([k, l]) => (
+          <button key={k} type="button" role="tab" aria-selected={pt === k} onClick={() => setPt(k)}>
+            {l}
+          </button>
+        ))}
+      </div>
+      <div key={pt} className={s.ptab}>
+        {pt === 'give' ? (
+          <>
+            <section className={s.box}>
+              <h3>
+                Pièces et pulls <small className="muted">(nombre négatif pour retirer)</small>
+              </h3>
+              <form
+                className={s.row}
+                onSubmit={(e) => {
+                  e.preventDefault();
+                  const c = Math.trunc(+coins || 0),
+                    pl = Math.trunc(+pulls || 0);
+                  if (c || pl) void give(c, pl);
+                }}
+              >
+                <input
+                  className={s.input}
+                  type="number"
+                  value={coins}
+                  onChange={(e) => setCoins(e.target.value)}
+                  placeholder="Pièces"
+                  aria-label="Pièces"
+                />
+                <input
+                  className={s.input}
+                  type="number"
+                  value={pulls}
+                  onChange={(e) => setPulls(e.target.value)}
+                  placeholder="Pulls"
+                  aria-label="Pulls"
+                />
+                <Button type="submit" variant="primary" size="sm">
+                  Donner
+                </Button>
+              </form>
+              <div className={s.quick}>
+                {[1000, 10000, 100000].map((c) => (
+                  <Button key={c} size="sm" onClick={() => void give(c, 0)}>
+                    +{fmt(c)}
+                  </Button>
+                ))}
+                {[5, 10].map((n) => (
+                  <Button key={n} size="sm" onClick={() => void give(0, n)}>
+                    +{n} pulls
+                  </Button>
+                ))}
+              </div>
+            </section>
 
-      <section className={s.box}>
-        <h3>Donner un jeton</h3>
-        <div className={s.jetons}>
-          {(SERIES.Takoras ?? []).map((j) => (
-            <button
-              key={j.name}
-              type="button"
-              style={{ '--g': hexRGB(j.glow) } as CSSProperties}
-              title={`${jn(j.name)} · 1/${fmt(j.odds)}`}
-              onClick={async () => {
-                if (await act(() => adminApi.giveJeton(id, j.name), `${jn(j.name)} donné à ${name}`)) await after();
-              }}
-            >
-              <img className="px" src={texOf(j)} alt="" />
-              <small>{jn(j.name)}</small>
-            </button>
-          ))}
-        </div>
-      </section>
+            <section className={s.box}>
+              <h3>Donner un jeton</h3>
+              <div className={s.jetons}>
+                {(SERIES.Takoras ?? []).map((j) => (
+                  <button
+                    key={j.name}
+                    type="button"
+                    style={{ '--g': hexRGB(j.glow) } as CSSProperties}
+                    title={`${jn(j.name)} · 1/${fmt(j.odds)}`}
+                    onClick={async () => {
+                      if (await act(() => adminApi.giveJeton(id, j.name), `${jn(j.name)} donné à ${name}`))
+                        await after();
+                    }}
+                  >
+                    <img className="px" src={texOf(j)} alt="" />
+                    <small>{jn(j.name)}</small>
+                  </button>
+                ))}
+              </div>
+            </section>
 
-      <section className={s.box}>
-        <h3>Donner un objet</h3>
-        <div className={s.quick}>
-          {ITEMS.map(([it, l]) => (
+            <section className={s.box}>
+              <h3>Donner un objet</h3>
+              <div className={s.quick}>
+                {ITEMS.map(([it, l]) => (
+                  <Button
+                    key={it}
+                    size="sm"
+                    onClick={async () => {
+                      if (await act(() => adminApi.giveItem(id, it), `${l} donné à ${name}`)) await after();
+                    }}
+                  >
+                    {l}
+                  </Button>
+                ))}
+              </div>
+            </section>
             <Button
-              key={it}
-              size="sm"
+              variant="primary"
+              block
               onClick={async () => {
-                if (await act(() => adminApi.giveItem(id, it), `${l} donné à ${name}`)) await after();
-              }}
-            >
-              {l}
-            </Button>
-          ))}
-        </div>
-      </section>
-
-      <section className={`${s.box} ${s.mod}`}>
-        <h3>Modération</h3>
-        <form
-          className={s.row}
-          onSubmit={async (e) => {
-            e.preventDefault();
-            if (await act(() => adminApi.setPseudo(id, pseudo.trim()), `Renommé en ${pseudo.trim()}`)) await after();
-          }}
-        >
-          <input
-            className={s.input}
-            value={pseudo}
-            onChange={(e) => setPseudo(e.target.value)}
-            maxLength={16}
-            aria-label="Nouveau pseudo"
-          />
-          <Button type="submit" size="sm">
-            Renommer
-          </Button>
-        </form>
-        <div className={s.quick}>
-          {P.is_admin ? null : (
-            <Button
-              size="sm"
-              variant={P.banned ? 'ghost' : 'danger'}
-              onClick={async () => {
-                const ban = !P.banned;
                 if (
-                  ban &&
-                  !(await confirm(`Bannir ${name} ? Il ne pourra plus ouvrir, acheter, vendre ni écrire.`, {
-                    danger: true,
-                  }))
+                  !(await confirm(
+                    `Tout donner à ${name} ? (chaque jeton en normal, Doré, Céleste, Ombre ; 10 de chaque objet ; 1 000 000 de pièces ; bannières et photos)`,
+                  ))
                 )
                   return;
-                if (await act(() => adminApi.ban(id, ban), `${name} ${ban ? 'banni' : 'débanni'}`)) await after();
+                if (await act(() => adminApi.giveAll(id), `Tout donné à ${name}`)) await after();
               }}
             >
-              {P.banned ? '✅ Débannir' : '⛔ Bannir'}
+              Tout donner à {name}
             </Button>
-          )}
-          <Button
-            size="sm"
-            onClick={async () => {
-              if (
-                await act(
-                  () => adminApi.setTester(id, !P.tester),
-                  `${name} ${P.tester ? 'n’est plus testeur' : 'est maintenant testeur'}`,
-                )
-              )
-                await after();
-            }}
-          >
-            {P.tester ? '🧪 Retirer testeur' : '🧪 Rendre testeur'}
-          </Button>
-          <Button
-            size="sm"
-            onClick={async () => {
-              if (
-                !P.is_mod &&
-                !(await confirm(`${name} pourra voir les stats et traiter les signalements. Continuer ?`))
-              )
-                return;
-              if (
-                await act(
-                  () => adminApi.setMod(id, !P.is_mod),
-                  `${name} ${P.is_mod ? 'n’est plus modérateur' : 'est maintenant modérateur'}`,
-                )
-              )
-                await after();
-            }}
-          >
-            {P.is_mod ? '🛡️ Retirer modo' : '🛡️ Rendre modo'}
-          </Button>
-          <Button
-            size="sm"
-            onClick={async () => {
-              if (!(await confirm(`Vider la vitrine et la bio de ${name} ?`, { danger: true }))) return;
-              if (await act(() => adminApi.clearShowcase(id), 'Vitrine et bio vidées')) await after();
-            }}
-          >
-            🧹 Vider vitrine + bio
-          </Button>
-          <Button size="sm" onClick={async () => setMsgs((await adminApi.messages(id)) as typeof msgs)}>
-            💬 Voir ses messages
-          </Button>
-        </div>
-        {msgs ? (
-          <ul className={s.msgs}>
-            {msgs.map((m) => (
-              <li key={m.id}>
-                <small className="muted">{dt(m.created_at)}</small>
-                <b>
-                  {m.from_pseudo || '?'} → {m.to_pseudo || '?'}
-                </b>
-                <p>{m.body}</p>
-                <Button
-                  size="sm"
-                  variant="danger"
-                  aria-label="Supprimer le message"
-                  onClick={async () => {
-                    if (!(await confirm('Supprimer ce message ?', { danger: true }))) return;
-                    if (await act(() => adminApi.deleteMessage(m.id), 'Message supprimé'))
-                      setMsgs(msgs.filter((x) => x.id !== m.id));
-                  }}
-                >
-                  🗑
-                </Button>
-              </li>
-            ))}
-            {msgs.length ? null : <li className="muted">Aucun message</li>}
-          </ul>
+          </>
         ) : null}
-      </section>
-
-      <section className={s.box}>
-        <h3>
-          Collection <small className="muted">(🔒 verrouillés · 📌 en vitrine)</small>
-        </h3>
-        <ul className={s.coll}>
-          {groups.map((g) => (
-            <li key={g.jeton}>
-              <img className="px" src={texOf(jetonOf(g.jeton))} alt="" />
-              <span>
-                <b>{jn(g.jeton)}</b> <small className="muted">1/{fmt(g.odds)}</small>
-              </span>
-              <span className={s.cn}>
-                ×{g.all.length}
-                {g.locked ? ` · 🔒${g.locked}` : ''}
-                {g.sc ? ` · 📌${g.sc}` : ''}
-              </span>
-              <Button size="sm" onClick={() => void collOp(g, 'rm1')} aria-label={`Retirer 1 ${jn(g.jeton)}`}>
-                −1
-              </Button>
-              <Button size="sm" variant="danger" onClick={() => void collOp(g, 'rmall')}>
-                Tout retirer
+        {pt === 'coll' ? (
+          <>
+            <section className={s.box}>
+              <h3>
+                Collection <small className="muted">(🔒 verrouillés · 📌 en vitrine)</small>
+              </h3>
+              <ul className={s.coll}>
+                {groups.map((g) => (
+                  <li key={g.jeton}>
+                    <img className="px" src={texOf(jetonOf(g.jeton))} alt="" />
+                    <span>
+                      <b>{jn(g.jeton)}</b> <small className="muted">1/{fmt(g.odds)}</small>
+                    </span>
+                    <span className={s.cn}>
+                      ×{g.all.length}
+                      {g.locked ? ` · 🔒${g.locked}` : ''}
+                      {g.sc ? ` · 📌${g.sc}` : ''}
+                    </span>
+                    <Button size="sm" onClick={() => void collOp(g, 'rm1')} aria-label={`Retirer 1 ${jn(g.jeton)}`}>
+                      −1
+                    </Button>
+                    <Button size="sm" variant="danger" onClick={() => void collOp(g, 'rmall')}>
+                      Tout retirer
+                    </Button>
+                    <Button
+                      size="sm"
+                      onClick={() => void collOp(g, g.locked === g.all.length ? 'unlock' : 'lock')}
+                      aria-label={g.locked === g.all.length ? 'Déverrouiller' : 'Verrouiller'}
+                    >
+                      {g.locked === g.all.length ? '🔓' : '🔒'}
+                    </Button>
+                  </li>
+                ))}
+                {inv.data && !groups.length ? <li className="muted">Aucun jeton</li> : null}
+              </ul>
+            </section>
+            <section className={s.box}>
+              <h3>Derniers tirages</h3>
+              <ul className={s.recent}>
+                {P.recent.map((r, i) => (
+                  <li key={i}>
+                    <span>
+                      {jn(r.jeton)} <small className="muted">1/{fmt(r.odds)}</small>
+                    </span>
+                    <small className="muted">
+                      {dt(r.at)}
+                      {r.sold ? ' · vendu' : ''}
+                    </small>
+                  </li>
+                ))}
+                {P.recent.length ? null : <li className="muted">Aucun</li>}
+              </ul>
+            </section>
+          </>
+        ) : null}
+        {pt === 'items' ? (
+          <section className={s.box}>
+            <h3>Objets</h3>
+            <div className={s.items}>
+              {ITEMS.filter(([it]) => !it.startsWith('b_')).map(([it, l]) => (
+                <label key={it}>
+                  {l}
+                  <input
+                    className={s.input}
+                    type="number"
+                    min={0}
+                    value={qty[it] ?? 0}
+                    onChange={(e) => setQty({ ...qty, [it]: Math.max(0, Math.trunc(+e.target.value || 0)) })}
+                  />
+                </label>
+              ))}
+            </div>
+            <div className={s.quick}>
+              <Button
+                size="sm"
+                variant="primary"
+                onClick={async () => {
+                  for (const [it] of ITEMS.filter(([x]) => !x.startsWith('b_')))
+                    if (!(await act(() => adminApi.setItems(id, it, qty[it] ?? 0), ''))) return;
+                  await act(async () => undefined, 'Objets enregistrés');
+                  await after();
+                }}
+              >
+                Enregistrer les quantités
               </Button>
               <Button
                 size="sm"
-                onClick={() => void collOp(g, g.locked === g.all.length ? 'unlock' : 'lock')}
-                aria-label={g.locked === g.all.length ? 'Déverrouiller' : 'Verrouiller'}
+                variant="danger"
+                onClick={async () => {
+                  if (!(await confirm(`Vider tous les objets de ${name} ?`, { danger: true }))) return;
+                  for (const [it] of ITEMS.filter(([x]) => !x.startsWith('b_')))
+                    if (!(await act(() => adminApi.setItems(id, it, 0), ''))) return;
+                  await act(async () => undefined, 'Objets vidés');
+                  await after();
+                }}
               >
-                {g.locked === g.all.length ? '🔓' : '🔒'}
+                Vider tous ses objets
               </Button>
-            </li>
-          ))}
-          {inv.data && !groups.length ? <li className="muted">Aucun jeton</li> : null}
-        </ul>
-      </section>
-
-      <section className={s.box}>
-        <h3>Objets</h3>
-        <div className={s.items}>
-          {ITEMS.filter(([it]) => !it.startsWith('b_')).map(([it, l]) => (
-            <label key={it}>
-              {l}
-              <input
-                className={s.input}
-                type="number"
-                min={0}
-                value={qty[it] ?? 0}
-                onChange={(e) => setQty({ ...qty, [it]: Math.max(0, Math.trunc(+e.target.value || 0)) })}
-              />
-            </label>
-          ))}
-        </div>
-        <div className={s.quick}>
-          <Button
-            size="sm"
-            variant="primary"
-            onClick={async () => {
-              for (const [it] of ITEMS.filter(([x]) => !x.startsWith('b_')))
-                if (!(await act(() => adminApi.setItems(id, it, qty[it] ?? 0), ''))) return;
-              await act(async () => undefined, 'Objets enregistrés');
-              await after();
-            }}
-          >
-            Enregistrer les quantités
-          </Button>
-          <Button
-            size="sm"
-            variant="danger"
-            onClick={async () => {
-              if (!(await confirm(`Vider tous les objets de ${name} ?`, { danger: true }))) return;
-              for (const [it] of ITEMS.filter(([x]) => !x.startsWith('b_')))
-                if (!(await act(() => adminApi.setItems(id, it, 0), ''))) return;
-              await act(async () => undefined, 'Objets vidés');
-              await after();
-            }}
-          >
-            Vider tous ses objets
-          </Button>
-        </div>
-      </section>
-
-      <section className={s.box}>
-        <h3>Derniers tirages</h3>
-        <ul className={s.recent}>
-          {P.recent.map((r, i) => (
-            <li key={i}>
-              <span>
-                {jn(r.jeton)} <small className="muted">1/{fmt(r.odds)}</small>
-              </span>
-              <small className="muted">
-                {dt(r.at)}
-                {r.sold ? ' · vendu' : ''}
-              </small>
-            </li>
-          ))}
-          {P.recent.length ? null : <li className="muted">Aucun</li>}
-        </ul>
-      </section>
-
-      <Button
-        variant="primary"
-        block
-        onClick={async () => {
-          if (
-            !(await confirm(
-              `Tout donner à ${name} ? (chaque jeton en normal, Doré, Céleste, Ombre ; 10 de chaque objet ; 1 000 000 de pièces ; bannières et photos)`,
-            ))
-          )
-            return;
-          if (await act(() => adminApi.giveAll(id), `Tout donné à ${name}`)) await after();
-        }}
-      >
-        Tout donner à {name}
-      </Button>
-      <Button
-        variant="danger"
-        block
-        onClick={async () => {
-          if (
-            !(await confirm(
-              `Remettre ${name} à zéro ? (tirages, pièces, objets, classé, passe, tuto : tout est effacé)`,
-              {
-                danger: true,
-              },
-            ))
-          )
-            return;
-          if (await act(() => adminApi.reset(id), `${name} remis à zéro`)) {
-            if (id === myId) {
-              forgetLocalProgress(); // c'est moi : je revois le tuto et tout comme un nouveau joueur
-              location.assign('/');
-              return;
-            }
-            await after();
-          }
-        }}
-      >
-        Remettre {name} à zéro
-      </Button>
+            </div>
+          </section>
+        ) : null}
+        {pt === 'mod' ? (
+          <>
+            <section className={`${s.box} ${s.mod}`}>
+              <h3>Modération</h3>
+              <form
+                className={s.row}
+                onSubmit={async (e) => {
+                  e.preventDefault();
+                  if (await act(() => adminApi.setPseudo(id, pseudo.trim()), `Renommé en ${pseudo.trim()}`))
+                    await after();
+                }}
+              >
+                <input
+                  className={s.input}
+                  value={pseudo}
+                  onChange={(e) => setPseudo(e.target.value)}
+                  maxLength={16}
+                  aria-label="Nouveau pseudo"
+                />
+                <Button type="submit" size="sm">
+                  Renommer
+                </Button>
+              </form>
+              <div className={s.quick}>
+                {P.is_admin ? null : (
+                  <Button
+                    size="sm"
+                    variant={P.banned ? 'ghost' : 'danger'}
+                    onClick={async () => {
+                      const ban = !P.banned;
+                      if (
+                        ban &&
+                        !(await confirm(`Bannir ${name} ? Il ne pourra plus ouvrir, acheter, vendre ni écrire.`, {
+                          danger: true,
+                        }))
+                      )
+                        return;
+                      if (await act(() => adminApi.ban(id, ban), `${name} ${ban ? 'banni' : 'débanni'}`)) await after();
+                    }}
+                  >
+                    {P.banned ? '✅ Débannir' : '⛔ Bannir'}
+                  </Button>
+                )}
+                <Button
+                  size="sm"
+                  onClick={async () => {
+                    if (
+                      await act(
+                        () => adminApi.setTester(id, !P.tester),
+                        `${name} ${P.tester ? 'n’est plus testeur' : 'est maintenant testeur'}`,
+                      )
+                    )
+                      await after();
+                  }}
+                >
+                  {P.tester ? '🧪 Retirer testeur' : '🧪 Rendre testeur'}
+                </Button>
+                <Button
+                  size="sm"
+                  onClick={async () => {
+                    if (
+                      !P.is_mod &&
+                      !(await confirm(`${name} pourra voir les stats et traiter les signalements. Continuer ?`))
+                    )
+                      return;
+                    if (
+                      await act(
+                        () => adminApi.setMod(id, !P.is_mod),
+                        `${name} ${P.is_mod ? 'n’est plus modérateur' : 'est maintenant modérateur'}`,
+                      )
+                    )
+                      await after();
+                  }}
+                >
+                  {P.is_mod ? '🛡️ Retirer modo' : '🛡️ Rendre modo'}
+                </Button>
+                <Button
+                  size="sm"
+                  onClick={async () => {
+                    if (!(await confirm(`Vider la vitrine et la bio de ${name} ?`, { danger: true }))) return;
+                    if (await act(() => adminApi.clearShowcase(id), 'Vitrine et bio vidées')) await after();
+                  }}
+                >
+                  🧹 Vider vitrine + bio
+                </Button>
+                <Button size="sm" onClick={async () => setMsgs((await adminApi.messages(id)) as typeof msgs)}>
+                  💬 Voir ses messages
+                </Button>
+              </div>
+              {msgs ? (
+                <ul className={s.msgs}>
+                  {msgs.map((m) => (
+                    <li key={m.id}>
+                      <small className="muted">{dt(m.created_at)}</small>
+                      <b>
+                        {m.from_pseudo || '?'} → {m.to_pseudo || '?'}
+                      </b>
+                      <p>{m.body}</p>
+                      <Button
+                        size="sm"
+                        variant="danger"
+                        aria-label="Supprimer le message"
+                        onClick={async () => {
+                          if (!(await confirm('Supprimer ce message ?', { danger: true }))) return;
+                          if (await act(() => adminApi.deleteMessage(m.id), 'Message supprimé'))
+                            setMsgs(msgs.filter((x) => x.id !== m.id));
+                        }}
+                      >
+                        🗑
+                      </Button>
+                    </li>
+                  ))}
+                  {msgs.length ? null : <li className="muted">Aucun message</li>}
+                </ul>
+              ) : null}
+            </section>
+            <Button
+              variant="danger"
+              block
+              onClick={async () => {
+                if (
+                  !(await confirm(
+                    `Remettre ${name} à zéro ? (tirages, pièces, objets, classé, passe, tuto : tout est effacé)`,
+                    {
+                      danger: true,
+                    },
+                  ))
+                )
+                  return;
+                if (await act(() => adminApi.reset(id), `${name} remis à zéro`)) {
+                  if (id === myId) {
+                    forgetLocalProgress(); // c'est moi : je revois le tuto et tout comme un nouveau joueur
+                    location.assign('/');
+                    return;
+                  }
+                  await after();
+                }
+              }}
+            >
+              Remettre {name} à zéro
+            </Button>
+          </>
+        ) : null}
+      </div>
     </div>
   );
 }

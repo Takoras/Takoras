@@ -153,13 +153,23 @@
   min-width: 0;
 }
 .input {
-  min-height: 38px;
-  padding: var(--s-2) var(--s-3);
-  border-radius: var(--r-sm);
-  border: 1px solid var(--line-strong);
-  background: var(--bg-raised);
-  font-size: var(--fs-sm);
+  min-height: 40px;
   min-width: 0;
+  padding: var(--s-2) var(--s-3);
+  border: 0;
+  border-radius: 10px;
+  background: rgb(0 0 0 / 28%);
+  color: var(--text);
+  font: inherit;
+  font-size: var(--fs-sm);
+  transition: background-color var(--t-fast);
+}
+.input:hover {
+  background: rgb(0 0 0 / 38%);
+}
+.input:focus-visible {
+  outline: 2px solid #3966f7;
+  outline-offset: 1px;
 }
 textarea.input {
   resize: vertical;
@@ -188,8 +198,8 @@ textarea.input {
 .tableWrap {
   overflow: auto;
   max-height: calc(70dvh / var(--z, 1));
-  border-radius: var(--r-md);
-  border: 1px solid var(--line);
+  border-radius: 14px;
+  background: rgb(255 255 255 / 3%);
 }
 .table {
   width: 100%;
@@ -198,15 +208,16 @@ textarea.input {
 }
 .table th,
 .table td {
-  padding: var(--s-2);
-  border-bottom: 1px solid var(--line);
+  padding: var(--s-2) var(--s-3);
+  border-bottom: 1px solid rgb(255 255 255 / 5%);
   text-align: left;
   vertical-align: middle;
 }
 .table th {
   position: sticky;
   top: 0;
-  background: var(--surface-2);
+  z-index: 1;
+  background: #17181f;
   font-size: var(--fs-xs);
   color: var(--muted);
 }
@@ -216,12 +227,13 @@ textarea.input {
 }
 .table tbody tr {
   cursor: pointer;
+  transition: background-color var(--t-fast);
 }
 .table tbody tr:hover {
-  background: var(--surface);
+  background: rgb(255 255 255 / 4%);
 }
 .table tr.on {
-  background: rgb(61 107 255 / 16%);
+  background: rgb(57 102 247 / 18%);
 }
 .table .input {
   width: 100px;
@@ -250,9 +262,9 @@ textarea.input {
 }
 .banner {
   height: 90px;
-  border-radius: var(--r-md);
+  border-radius: 16px;
   overflow: hidden;
-  background: var(--surface);
+  background: rgb(57 102 247 / 12%);
 }
 .banner img {
   width: 100%;
@@ -281,7 +293,7 @@ textarea.input {
   margin-left: var(--s-1);
   padding: 2px var(--s-2);
   border-radius: var(--r-pill);
-  background: var(--surface-3);
+  background: rgb(255 255 255 / 8%);
   font-size: var(--fs-xs);
   font-weight: 700;
   vertical-align: middle;
@@ -301,9 +313,8 @@ textarea.input {
   display: flex;
   flex-direction: column-reverse;
   padding: var(--s-3);
-  border-radius: var(--r-md);
-  background: var(--surface);
-  border: 1px solid var(--line);
+  border-radius: 12px;
+  background: rgb(255 255 255 / 3.5%);
 }
 .mini dt,
 .stats dt {
@@ -318,17 +329,51 @@ textarea.input {
 }
 .box {
   display: grid;
-  gap: var(--s-2);
-  padding: var(--s-4);
-  border-radius: var(--r-md);
-  background: var(--surface);
-  border: 1px solid var(--line);
+  gap: var(--s-3);
+  padding: var(--s-4) var(--s-5);
+  border-radius: 16px;
+  background: rgb(255 255 255 / 3.5%);
 }
 .box h3 {
-  font-size: var(--fs-md);
+  margin: 0;
+  font-family: var(--font-display);
+  font-size: var(--fs-lg);
 }
 .mod {
-  border-color: rgb(244 63 94 / 30%);
+  background: rgb(244 63 94 / 6%);
+}
+/* fiche joueur en onglets */
+.ptabs {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px;
+  padding: 4px;
+  border-radius: 14px;
+  background: rgb(255 255 255 / 3.5%);
+}
+.ptabs button {
+  min-height: 36px;
+  padding: 0 14px;
+  border-radius: 10px;
+  color: var(--text-2);
+  font-size: var(--fs-sm);
+  font-weight: 700;
+  transition:
+    background-color var(--t-fast),
+    color var(--t-fast);
+}
+.ptabs button:hover {
+  background: rgb(255 255 255 / 6%);
+  color: var(--text);
+}
+.ptabs button[aria-selected='true'] {
+  background: #3966f7;
+  color: #fff;
+}
+.ptab {
+  display: grid;
+  gap: var(--s-3);
+  animation: tabIn 0.3s var(--ease-out) both;
 }
 .jetons {
   display: grid;
@@ -340,12 +385,15 @@ textarea.input {
   justify-items: center;
   gap: 2px;
   padding: var(--s-2) var(--s-1);
-  border-radius: var(--r-sm);
-  background: var(--bg-raised);
-  border: 1px solid var(--line);
+  border-radius: 12px;
+  background: rgb(255 255 255 / 3.5%);
+  transition:
+    background-color var(--t-fast),
+    translate 0.2s var(--ease-out);
 }
 .jetons button:hover {
-  border-color: rgba(var(--g), 0.7);
+  background: rgba(var(--g), 0.16);
+  translate: 0 -2px;
 }
 .jetons img {
   width: 36px;
@@ -363,9 +411,8 @@ textarea.input {
   display: grid;
   gap: 2px;
   padding: var(--s-2) var(--s-3);
-  border-radius: var(--r-sm);
-  background: var(--bg-raised);
-  border: 1px solid var(--line);
+  border-radius: 12px;
+  background: rgb(0 0 0 / 22%);
 }
 .msgs li p {
   white-space: pre-wrap;
@@ -388,8 +435,8 @@ textarea.input {
   align-items: center;
   gap: var(--s-2);
   padding: var(--s-1) var(--s-2);
-  border-radius: var(--r-sm);
-  background: var(--bg-raised);
+  border-radius: 10px;
+  background: rgb(255 255 255 / 3.5%);
   font-size: var(--fs-sm);
 }
 .coll img {
@@ -434,16 +481,39 @@ textarea.input {
   min-height: 32px;
   padding: 0 var(--s-3);
   border-radius: var(--r-pill);
-  background: var(--surface);
-  border: 1px solid var(--line);
+  background: rgb(255 255 255 / 5%);
   font-size: var(--fs-xs);
-  font-weight: 600;
+  font-weight: 700;
   color: var(--text-2);
+  transition:
+    background-color var(--t-fast),
+    color var(--t-fast);
+}
+.chip:hover {
+  background: rgb(255 255 255 / 9%);
+  color: var(--text);
 }
 .chip[aria-pressed='true'] {
-  border-color: var(--accent-hi);
-  color: var(--text);
-  background: rgb(61 107 255 / 18%);
+  color: #fff;
+  background: #3966f7;
+}
+.presets {
+  display: grid;
+  grid-template-columns: auto repeat(5, max-content);
+  align-items: center;
+  gap: 6px;
+}
+.presets > span {
+  color: var(--muted);
+  font-size: var(--fs-xs);
+  font-weight: 800;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+}
+@media (max-width: 700px) {
+  .presets {
+    grid-template-columns: repeat(3, max-content);
+  }
 }
 .fb {
   list-style: none;
@@ -453,13 +523,13 @@ textarea.input {
 .fb li {
   display: grid;
   gap: var(--s-2);
-  padding: var(--s-3);
-  border-radius: var(--r-md);
-  background: var(--surface);
-  border: 1px solid var(--line);
+  padding: var(--s-4);
+  border-radius: 14px;
+  background: rgb(255 255 255 / 3.5%);
+  animation: tabIn 0.35s var(--ease-out) backwards;
 }
 .fb li.new {
-  border-color: var(--accent-hi);
+  background: linear-gradient(90deg, #3966f7 0 3px, rgb(57 102 247 / 10%) 3px);
 }
 .fb li.done {
   opacity: 0.6;

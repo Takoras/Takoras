@@ -6,3 +6,5 @@
 -- * exclusifs du passe (a_oeil, b_yeux) : data.pass_only, contrainte shop_items_pass_only_check, _stock = 0.
 -- * boutique : _featured accepte un objet à la une forcé (shop_settings feat_item:<période> / feat_pct:<période>),
 --   admin_shop_feature(p_item, p_pct), admin_shop renvoie period_price, featured, off, forced, pass_only.
+-- * un objet à la une par rayon : _shop_group(kind), _featured(per) renvoie une ligne par rayon,
+--   admin_shop_feature range le choix par rayon (feat_item:<période>:<rayon>), shop_today renvoie 'feats'.

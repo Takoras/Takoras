@@ -31,6 +31,8 @@ type ShopData = {
   featured?: string | null;
   featured_slot?: number | null;
   off?: number | null;
+  /** un objet à la une par rayon : sa case, sa réduction, l'objet s'il est déjà révélé */
+  feats?: { group: string; slot: number; off: number; item: string | null }[];
   reveal_gain?: number;
 };
 const isHidden = (x: Slot): x is Hidden => !!(x as Hidden).hidden;
@@ -285,10 +287,11 @@ export default function Shop() {
   // pas connecté : la boutique demande de se connecter (comme l'inventaire, le passe…)
   if (!user) return <NeedLogin title={t('ui.nav_shop')} />;
   const items = data?.items ?? [];
-  // la grille du bas : le rayon choisi, sans l'objet à la une (il est déjà en grand en haut)
-  const list = items.filter((it, i) => catOf(it) === cat && slotOf(it, i) !== data?.featured_slot);
-  // la vedette : sa case (révélée ou non) et sa réduction, tirées par le serveur
-  const fSlot = data?.featured_slot ?? null;
+  // un objet à la une par rayon : celui du rayon choisi est en grand en haut (et retiré de la grille du bas)
+  const feat = data?.feats ? data.feats.find((f) => f.group === cat) : undefined;
+  const fSlot = data?.feats ? (feat?.slot ?? null) : (data?.featured_slot ?? null);
+  const fOff = data?.feats ? (feat?.off ?? 0) : (data?.off ?? 0);
+  const list = items.filter((it, i) => catOf(it) === cat && slotOf(it, i) !== fSlot);
   const fIdx = fSlot == null ? -1 : items.findIndex((x, i) => slotOf(x, i) === fSlot);
   const featured = fIdx >= 0 ? items[fIdx] : undefined;
   return (
@@ -307,9 +310,9 @@ export default function Shop() {
           <div className={s.top}>
             {featured && fSlot != null ? (
               isHidden(featured) ? (
-                <MysteryHero off={data.off ?? 0} gain={data.reveal_gain ?? 100} logged={!!user} onReveal={(el) => void reveal(fSlot, el)} />
+                <MysteryHero off={fOff} gain={data.reveal_gain ?? 100} logged={!!user} onReveal={(el) => void reveal(fSlot, el)} />
               ) : (
-                <Hero it={featured} off={data.off ?? 0} coins={coins} logged={!!user} left={left} onBuy={buy} />
+                <Hero key={fSlot} it={featured} off={fOff} coins={coins} logged={!!user} left={left} onBuy={buy} />
               )
             ) : null}
             <div ref={shelvesRef} className={s.shelves} role="group" aria-label={t('ui.shop_title')}>

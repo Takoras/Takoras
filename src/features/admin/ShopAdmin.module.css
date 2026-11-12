@@ -35,11 +35,20 @@
 .feat {
   display: flex;
   align-items: center;
-  gap: var(--s-4);
+  gap: var(--s-3);
+  width: 100%;
+}
+.feat .art {
+  width: 52px;
+  height: 52px;
 }
 .feat > div {
   display: grid;
-  gap: 6px;
+  gap: 4px;
+}
+.feat + .feat {
+  padding-top: var(--s-2);
+  border-top: 1px solid rgb(255 255 255 / 6%);
 }
 .feat s {
   color: var(--muted);

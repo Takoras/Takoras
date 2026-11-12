@@ -31,6 +31,10 @@ test('admin : joueurs, don, ban avec confirmation, remise à zéro générale pr
   await page.getByRole('button', { name: '+1 000', exact: true }).click();
   await expect.poll(() => calls).toContain('admin_give');
   // bannir : la confirmation du site d'abord ; annuler = rien envoyé
+  await page
+    .getByRole('tablist', { name: 'Fiche du joueur' })
+    .getByRole('tab', { name: /Modération/ })
+    .click();
   await page.getByRole('button', { name: '⛔ Bannir' }).click();
   await page.getByRole('dialog').getByRole('button', { name: 'Annuler' }).click();
   expect(calls).not.toContain('admin_ban');

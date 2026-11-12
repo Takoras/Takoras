@@ -198,7 +198,7 @@ export function CosmeticPreview({ id, label = 'Pseudo' }: { id: string; label?: 
     return (
       <span className={s.pvAura}>
         <Aura id={id}>
-          <img className="px" src="/img/pp/bleu.png" alt="" />
+          <span className={s.pvQ}>?</span>
         </Aura>
       </span>
     );

@@ -124,6 +124,71 @@ export function Codes() {
             aria-label="Expiration"
           />
         </div>
+        {/* préréglages en un clic */}
+        <div className={s.presets}>
+          <span>Pièces</span>
+          {[500, 1000, 5000, 10000, 50000].map((v) => (
+            <button
+              key={v}
+              type="button"
+              className={s.chip}
+              aria-pressed={+f.coins === v}
+              onClick={() => setF({ ...f, coins: String(v) })}
+            >
+              {fmt(v)}
+            </button>
+          ))}
+          <span>Pulls</span>
+          {[5, 10, 25, 50].map((v) => (
+            <button
+              key={v}
+              type="button"
+              className={s.chip}
+              aria-pressed={+f.pulls === v}
+              onClick={() => setF({ ...f, pulls: String(v) })}
+            >
+              {v}
+            </button>
+          ))}
+          <span>Utilisations</span>
+          {[1, 10, 50, 100, 0].map((v) => (
+            <button
+              key={v}
+              type="button"
+              className={s.chip}
+              aria-pressed={(+f.max || 0) === v}
+              onClick={() => setF({ ...f, max: v ? String(v) : '' })}
+            >
+              {v || '∞'}
+            </button>
+          ))}
+          <span>Expire dans</span>
+          {[
+            ['1 jour', 1],
+            ['3 jours', 3],
+            ['7 jours', 7],
+            ['30 jours', 30],
+            ['Jamais', 0],
+          ].map(([l, d]) => (
+            <button
+              key={String(l)}
+              type="button"
+              className={s.chip}
+              onClick={() =>
+                setF({
+                  ...f,
+                  exp: d
+                    ? new Date(Date.now() + Number(d) * 864e5 - new Date().getTimezoneOffset() * 60000)
+                        .toISOString()
+                        .slice(0, 16)
+                    : '',
+                })
+              }
+            >
+              {l}
+            </button>
+          ))}
+        </div>
         <div className={s.row}>
           <select
             className={s.input}

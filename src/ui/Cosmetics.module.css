@@ -125,6 +125,17 @@
   border-radius: 50%;
   object-fit: cover;
 }
+.pvQ {
+  display: grid;
+  place-items: center;
+  width: 52px;
+  height: 52px;
+  border-radius: 50%;
+  background: rgb(255 255 255 / 8%);
+  color: var(--muted);
+  font-family: var(--font-display);
+  font-size: 24px;
+}
 .pvBanner {
   position: relative;
   display: block;
