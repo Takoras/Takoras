@@ -192,3 +192,10 @@ html.dd-js:not(.reduce-fx) img.px.dd-on {
 html.reduce-fx img.px.dd-on {
   content: normal !important;
 }
+
+/* GIF animés (Néphéris, Takoras, Coton…) : pas de doodle. Ils bougent déjà, et le filtre devait être recalculé à
+   chaque image du GIF (très lourd en grand, ex. le jeton du haut de la page des visiteurs). Les mutations gardent
+   leur palette. */
+html img.px[src*='.gif']:not(.v-gold, .v-celeste, .v-ombre) {
+  animation: none !important;
+}

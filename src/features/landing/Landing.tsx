@@ -129,7 +129,7 @@ export function Landing() {
     <div ref={root} className={s.page}>
       {/* ---------- le jeu en une phrase ---------- */}
       <section className={s.hero} aria-labelledby="land-title">
-        <PixelBg className={s.heroBg} odds={100000} glow={star.glow} still={still} />
+        <PixelBg className={s.heroBg} odds={5000} glow={star.glow} still={still} />
         <div className={s.heroTxt}>
           <span className={s.tag}>{L.free}</span>
           <h1 id="land-title">{t('ui.land_title')}</h1>
