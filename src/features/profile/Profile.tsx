@@ -44,6 +44,7 @@ import { RankBadge, useRankName } from '../combat/Ranked';
 import { rankOf } from '../combat/rankedApi';
 import iv from '../inventory/Inventory.module.css';
 import s from './Profile.module.css';
+import { MutationStamp } from '@/ui/MutationStamp';
 
 type Shown = { id: number; jeton: string; odds: number; variant: string | null } | null;
 export type Prof = {
@@ -570,24 +571,26 @@ function ShowcasePicker({ p, slot, onClose }: { p: Prof; slot: number; onClose: 
               </button>
               <b className={s.pkName}>{jn(picked.name)}</b>
             </div>
-            <ul className={`${s.pkGrid} ${s.pkMuts}`}>
-              {picked.vs.map(({ g, eff, free }) => {
+            {/* même case que l'inventaire, une par version possédée, avec son tampon de mutation */}
+            <ul className={`${iv.grid} ${s.pkMutGrid}`}>
+              {picked.vs.map(({ g, eff, free }, i) => {
                 const j = jetonOf(g.name, g.serie);
                 return (
-                  <li key={g.key} style={glowVars(j, g.variant || null) as CSSProperties}>
+                  <li key={g.key} className={iv.card} style={glowVars(j, g.variant || null) as CSSProperties}>
                     <button
                       type="button"
+                      className={iv.cardBtn}
+                      style={{ '--i': i } as CSSProperties}
                       disabled={!free || busy !== null}
                       onClick={() => free && void save(free)}
                       aria-label={`${jn(g.name)} ${vName(g.variant)}`}
                     >
-                      <span className={s.pkArt}>
-                        <img className={vImg(g.variant || null)} src={texOf(j)} alt="" />
-                      </span>
-                      <b>{g.variant ? <VTag v={g.variant} /> : vName(null)}</b>
+                      {g.ids.length > 1 ? <span className={iv.count}>×{g.ids.length}</span> : null}
+                      {!free ? <span className={iv.num}>{t('ui.showcase')}</span> : null}
+                      <img className={vImg(g.variant || null)} src={texOf(j)} alt="" />
+                      <b>{vName(g.variant)}</b>
                       <small>1/{fmt(eff)}</small>
-                      {g.ids.length > 1 ? <i className={s.pkQty}>×{g.ids.length}</i> : null}
-                      {!free ? <em className={s.pkIn}>{t('ui.showcase')}</em> : null}
+                      <span className={s.pkStamp}>{g.variant ? <MutationStamp v={g.variant} size="md" /> : null}</span>
                     </button>
                   </li>
                 );
@@ -610,34 +613,39 @@ function ShowcasePicker({ p, slot, onClose }: { p: Prof; slot: number; onClose: 
                 …
               </p>
             ) : toks.length ? (
-              <ul className={s.pkGrid}>
-                {toks.map((e) => {
+              // les mêmes cases que le bestiaire de l'inventaire : numéro, nombre, jeton, nom, rareté, 3 tampons
+              <ul className={iv.grid}>
+                {toks.map((e, i) => {
                   const top = e.vs[0];
                   if (!top) return null;
                   const j = jetonOf(e.name, e.serie);
                   const free = e.vs.some((v) => v.free);
                   const one = e.vs.length === 1 ? top.free : undefined;
+                  const has = new Set(e.vs.map((v) => v.g.variant || ''));
+                  const n = e.vs.reduce((a, v) => a + v.g.ids.length, 0);
+                  const no = (SERIES[serie] ?? []).findIndex((x) => x.name === e.name) + 1;
                   return (
-                    <li key={e.name} style={glowVars(j, top.g.variant || null) as CSSProperties}>
+                    <li key={e.name} className={iv.card} style={glowVars(j) as CSSProperties}>
                       <button
                         type="button"
+                        className={iv.cardBtn}
+                        style={{ '--i': Math.min(i, 24) } as CSSProperties}
                         disabled={!free || busy !== null}
                         onClick={() => (sfx.click(), one ? void save(one) : setPick(e.name))}
                         aria-label={jn(e.name)}
                       >
-                        <span className={s.pkArt}>
-                          <img className={vImg(top.g.variant || null)} src={texOf(j)} alt="" />
-                        </span>
+                        <span className={iv.num}>#{String(no).padStart(2, '0')}</span>
+                        <span className={iv.count}>×{n}</span>
+                        <img className="px" src={texOf(j)} alt="" />
                         <b>{jn(e.name)}</b>
-                        <small>1/{fmt(top.g.odds)}</small>
-                        {/* les mutations possédées, en pastilles */}
-                        <span className={s.pkDots}>
-                          {e.vs.map((v) => (
+                        <small>1/{fmt(j.odds)}</small>
+                        <span className={iv.vstamps}>
+                          {(['gold', 'celeste', 'ombre'] as const).map((v) => (
                             <i
-                              key={v.g.key}
-                              className={s.pkDot}
-                              data-v={v.g.variant || 'n'}
-                              title={vName(v.g.variant)}
+                              key={v}
+                              className={has.has(v) ? undefined : iv.vOff}
+                              title={vName(v)}
+                              style={{ backgroundImage: `url(/img/stamps/${v}.png)` }}
                             />
                           ))}
                         </span>

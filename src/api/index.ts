@@ -148,6 +148,7 @@ export const adminApi = {
   shop: () => rpc('admin_shop'),
   shopSet: (a: { p_item: string; p_price: number; p_active: boolean; p_stock: number }) => rpc('admin_shop_set', a),
   shopReroll: () => rpc('admin_shop_reroll'),
+  shopFeature: (p_item: string | null, p_pct: number) => rpc('admin_shop_feature', { p_item, p_pct }),
   // menu debug (Ctrl+Q) : agit seulement sur le compte de l'admin connecté
   debug: (p_action: string, p_n = 0, p_item?: string) => rpc('admin_debug', { p_action, p_n, p_item }),
   announce: (p_body: string, p_fullscreen: boolean, p_banner: boolean) =>

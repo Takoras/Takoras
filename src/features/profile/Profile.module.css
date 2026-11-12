@@ -725,6 +725,15 @@ ul.collGrid {
   width: 104px;
   height: 104px;
 }
+.pkMutGrid {
+  grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+}
+.pkStamp {
+  display: grid;
+  place-items: center;
+  min-height: 30px;
+  margin-top: 4px;
+}
 .pkDots {
   display: flex;
   gap: 4px;

@@ -199,6 +199,7 @@ export type Database = {
       admin_set_pseudo: { Args: { p: string; target: string }; Returns: undefined };
       admin_shop: { Args: never; Returns: Json };
       admin_shop_reroll: { Args: never; Returns: undefined };
+      admin_shop_feature: { Args: { p_item: string | null; p_pct: number }; Returns: undefined };
       admin_shop_set: { Args: { p_active: boolean; p_item: string; p_price: number; p_stock: number }; Returns: undefined };
       admin_stats: { Args: never; Returns: Json };
       admin_dashboard: { Args: { p_days?: number }; Returns: Json };

@@ -59,8 +59,8 @@ test('admin : boutique, annonce, code promo, retours, patch notes FR+EN', async 
     .getByRole('navigation', { name: 'Rubriques admin' })
     .getByRole('button', { name: /Boutique/ })
     .click();
-  await page.getByRole('spinbutton', { name: 'Prix de potion1' }).fill('250');
-  await page.getByRole('button', { name: 'OK' }).click();
+  await page.getByRole('spinbutton', { name: 'Prix de potion1', exact: true }).fill('250');
+  await page.getByRole('spinbutton', { name: 'Prix de potion1', exact: true }).press('Enter');
   await expect.poll(() => calls).toContain('admin_shop_set');
   await page
     .getByRole('navigation', { name: 'Rubriques admin' })

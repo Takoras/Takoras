@@ -4,3 +4,5 @@
 --   admin_set_pseudo sauf sur l'équipe) ; eco_state renvoie 'mod'.
 -- * admin_stats_cat(p_cat, p_days) : players, luck, eco, social, alerts.
 -- * exclusifs du passe (a_oeil, b_yeux) : data.pass_only, contrainte shop_items_pass_only_check, _stock = 0.
+-- * boutique : _featured accepte un objet à la une forcé (shop_settings feat_item:<période> / feat_pct:<période>),
+--   admin_shop_feature(p_item, p_pct), admin_shop renvoie period_price, featured, off, forced, pass_only.
