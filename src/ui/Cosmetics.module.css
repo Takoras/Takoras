@@ -1,61 +1,66 @@
 /* ======================================================================
-   Cosmétiques de profil, en pixel art sobre : aplats ombrés pour les pseudos (comme un sprite), anneaux et
-   particules dessinés en pixels (canvas agrandis sans lissage). Pas de flou, pas de dégradé doux.
+   Cosmétiques de profil, sobres et dans la DA du jeu : pseudo uni, anneau fin fixe, fond pixel PixelBg.
    ====================================================================== */
 
-/* ---------- pseudo : une couleur unie et une ombre d'un pixel, comme le texte d'un sprite ---------- */
-.name {
-  text-shadow: 0 2px 0 var(--sh, rgb(0 0 0 / 55%));
-}
+/* ---------- pseudo : une couleur unie ---------- */
 .n_or {
-  --sh: #8a5a00;
-  color: #ffd65a;
+  color: #f2c230;
 }
 .n_rose {
-  --sh: #9d2b63;
-  color: #ff9cc8;
+  color: #ff8fc0;
 }
 .n_glace {
-  --sh: #2a6aa8;
-  color: #d8f0ff;
+  color: #a9dcff;
 }
 /* arc-en-ciel : la couleur change par crans, sans fondu */
 .n_arc {
-  --sh: rgb(0 0 0 / 55%);
   color: #ff6b6b;
-  animation: rainbow 5s steps(1) infinite;
+  animation: rainbow 10s steps(1) infinite;
 }
 @keyframes rainbow {
-  20% { color: #f2c230; }
-  40% { color: #4ade80; }
-  60% { color: #38bdf8; }
-  80% { color: #a78bfa; }
+  20% {
+    color: #f2c230;
+  }
+  40% {
+    color: #4ade80;
+  }
+  60% {
+    color: #38bdf8;
+  }
+  80% {
+    color: #a78bfa;
+  }
 }
 
-/* ---------- aura : un anneau de pixels autour de la photo ---------- */
+/* ---------- aura : anneau fin fixe, séparé de la photo par un liseré du fond ---------- */
 .aura {
-  position: relative;
   display: inline-grid;
   place-items: center;
+  border-radius: 50%;
+  outline: 3px solid var(--ring);
+  outline-offset: 3px;
 }
-.ring {
-  position: absolute;
-  inset: -14%;
-  z-index: 1;
-  width: 128%;
-  height: 128%;
-  image-rendering: pixelated;
-  pointer-events: none;
+.au_bleue {
+  --ring: #3966f7;
+}
+.au_or {
+  --ring: #f2c230;
+}
+.au_flamme {
+  --ring: #ff7a1a;
+}
+.au_ombre {
+  --ring: #8b5cf6;
 }
 
-/* ---------- effet de bannière : particules en pixels ---------- */
+/* ---------- effet de bannière : le fond pixel du jeu ---------- */
 .bfx {
   position: absolute;
   inset: 0;
-  z-index: 1;
+  z-index: 0;
   width: 100%;
   height: 100%;
-  image-rendering: pixelated;
+  opacity: 0.6;
   pointer-events: none;
 }
 
