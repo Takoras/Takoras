@@ -294,6 +294,10 @@ export type Database = {
         Args: { p_serie: string; force?: string; luck?: number; n: number; p_variant?: string };
         Returns: Json;
       };
+      equip_cosmetics: {
+        Args: { p_name: string | null; p_aura: string | null; p_bfx: string | null };
+        Returns: undefined;
+      };
       update_profile: {
         Args: { p_avatar: string; p_banner: string | null; p_bio: string; p_showcase: (number | null)[] };
         Returns: undefined;

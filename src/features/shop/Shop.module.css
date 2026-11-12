@@ -500,3 +500,12 @@
 .gainBig {
   font-size: var(--fs-lg);
 }
+
+/* objet à la une = cosmétique : l'aperçu en grand */
+.heroCosm {
+  display: grid;
+  place-items: center;
+  width: clamp(160px, 16vw, 240px);
+  aspect-ratio: 1;
+  scale: 1.6;
+}

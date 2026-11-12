@@ -32,6 +32,7 @@ import { confirm } from '@/ui/confirm';
 import { Modal } from '@/ui/Modal';
 import { PixelBg } from '@/ui/PixelBg';
 import { useStaggerIn } from '@/ui/useStaggerIn';
+import { Aura, BannerFx, COSM_NAMES, COSMETICS, CosmeticPreview, nameCls } from '@/ui/Cosmetics';
 import { toast } from '@/ui/toast';
 import { VTag } from '@/ui/VTag';
 import { JetonModal } from '../inventory/JetonModal';
@@ -67,6 +68,10 @@ export type Prof = {
   best_pull: { jeton: string; odds: number; variant: string | null; eff: number } | null;
   collection: number;
   owned: number;
+  name_fx?: string | null;
+  aura?: string | null;
+  banner_fx?: string | null;
+  cosmetics?: string[] | null;
 };
 
 // Profil d'un joueur, même DA que la boutique et le passe : bannière (ou fond pixel à la couleur de son meilleur
@@ -152,17 +157,21 @@ export default function Profile() {
           ) : bestBanner ? (
             <PixelBg className={s.bannerBg} odds={bp?.eff ?? 1} glow={tone} still={reducedFx()} />
           ) : null}
+          <BannerFx id={p.banner_fx} />
         </div>
       </div>
 
       {/* la carte du joueur chevauche la bannière : photo, pseudo, bio, actions ; à droite son rang */}
       <header className={s.head}>
         <div className={s.pp}>
-          <Avatar pseudo={p.pseudo} avatar={p.avatar} size={128} />
+          <Aura id={p.aura}>
+            <Avatar pseudo={p.pseudo} avatar={p.avatar} size={128} />
+          </Aura>
         </div>
         <div className={s.id}>
           <h1>
-            {p.pseudo} <small className={s.num}>#{String(p.num).padStart(6, '0')}</small>
+            <span className={nameCls(p.name_fx)}>{p.pseudo}</span>{' '}
+            <small className={s.num}>#{String(p.num).padStart(6, '0')}</small>
           </h1>
           {p.bio ? <p className={s.bio}>{p.bio}</p> : null}
           <div className={s.headActions}>
@@ -603,6 +612,10 @@ function EditProfile({ p, onClose }: { p: Prof; onClose: () => void }) {
   const [bio, setBio] = useState(p.bio);
   const [banner, setBanner] = useState(p.banner ?? '');
   const [avatar, setAv] = useState(p.avatar || 'default');
+  const [nameFx, setNameFx] = useState(p.name_fx ?? '');
+  const [auraFx, setAuraFx] = useState(p.aura ?? '');
+  const [bannerFx, setBannerFx] = useState(p.banner_fx ?? '');
+  const owned = p.cosmetics ?? [];
   const [busy, setBusy] = useState(false);
   const canRename = !!p.pseudo_free || !p.pseudo_next;
   const pps = ['default', ...FREE_PP, ...Object.keys(AVATARS).filter((a) => !FREE_PP.includes(a))];
@@ -617,6 +630,8 @@ function EditProfile({ p, onClose }: { p: Prof; onClose: () => void }) {
         name = pseudo;
       }
       await saveProfile(p, { p_banner: banner || null, p_bio: bio.trim(), p_avatar: avatar });
+      if (nameFx !== (p.name_fx ?? '') || auraFx !== (p.aura ?? '') || bannerFx !== (p.banner_fx ?? ''))
+        await accountApi.equipCosmetics(nameFx || null, auraFx || null, bannerFx || null);
       setAvatar(name, avatar);
       sfx.upgrade();
       onClose();
@@ -643,17 +658,22 @@ function EditProfile({ p, onClose }: { p: Prof; onClose: () => void }) {
         <div className={s.prev} style={{ '--tone': hexRGB(tone) } as CSSProperties} aria-hidden>
           <div className={`${s.prevBanner} ${banner === 'best' ? s.prevBest : ''}`}>
             {banner && BANNER_IMG[banner] ? <img className="px" src={BANNER_IMG[banner]} alt="" /> : null}
+            <BannerFx id={bannerFx} />
           </div>
           <div className={s.prevId}>
-            <span className={s.prevPp}>
-              {avatar === 'default' ? (
-                <span>{(pseudo[0] ?? '?').toUpperCase()}</span>
-              ) : (
-                <img className="px" src={AVATARS[avatar]} alt="" />
-              )}
-            </span>
+            <Aura id={auraFx}>
+              <span className={s.prevPp}>
+                {avatar === 'default' ? (
+                  <span>{(pseudo[0] ?? '?').toUpperCase()}</span>
+                ) : (
+                  <img className="px" src={AVATARS[avatar]} alt="" />
+                )}
+              </span>
+            </Aura>
             <span className={s.prevTxt}>
-              <b>{pseudo || p.pseudo}</b>
+              <b>
+                <span className={nameCls(nameFx)}>{pseudo || p.pseudo}</span>
+              </b>
               <small>{bio.trim() || '…'}</small>
             </span>
           </div>
@@ -717,6 +737,47 @@ function EditProfile({ p, onClose }: { p: Prof; onClose: () => void }) {
               );
             })}
           </div>
+        </fieldset>
+
+        {/* effets achetés en boutique : couleur du pseudo, aura de la photo, effet de bannière */}
+        <fieldset className={s.peSet}>
+          <legend>Effets</legend>
+          {owned.length ? (
+            <div className={s.fxRows}>
+              {(
+                [
+                  ['Pseudo', COSMETICS.name, nameFx, setNameFx],
+                  ['Aura', COSMETICS.aura, auraFx, setAuraFx],
+                  ['Bannière', COSMETICS.bfx, bannerFx, setBannerFx],
+                ] as const
+              ).map(([lbl, ids, cur, set]) => {
+                const mine = ids.filter((x) => owned.includes(x));
+                if (!mine.length) return null;
+                return (
+                  <div key={lbl} className={s.fxRow}>
+                    <span className={s.fxLbl}>{lbl}</span>
+                    <div className={s.fxOpts}>
+                      <button type="button" aria-pressed={!cur} onClick={() => set('')}>
+                        {t('ui.none')}
+                      </button>
+                      {mine.map((x) => (
+                        <button key={x} type="button" aria-pressed={cur === x} onClick={() => (sfx.click(), set(x))}>
+                          <span className={s.fxPv}>
+                            <CosmeticPreview id={x} label={pseudo || p.pseudo} />
+                          </span>
+                          <small>{COSM_NAMES[x]}</small>
+                        </button>
+                      ))}
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
+          ) : (
+            <p className={s.peNone}>
+              Couleur de pseudo, aura, effet de bannière : ils arrivent dans la boutique mystère.
+            </p>
+          )}
         </fieldset>
 
         <fieldset className={s.peSet}>

@@ -1,0 +1,188 @@
+/* ======================================================================
+   Cosmétiques de profil : pseudo coloré, aura de photo, effet de bannière. Tout en CSS.
+   ====================================================================== */
+
+/* ---------- pseudo ---------- */
+.name {
+  background-clip: text;
+  -webkit-background-clip: text;
+  color: transparent;
+  -webkit-text-fill-color: transparent;
+}
+.n_or {
+  background-image: linear-gradient(180deg, #fff3b0 0%, #f2c230 55%, #c98a12 100%);
+}
+.n_rose {
+  background-image: linear-gradient(180deg, #ffe1ef 0%, #f472b6 60%, #db2777 100%);
+}
+.n_glace {
+  background-image: linear-gradient(180deg, #ffffff 0%, #bfe8ff 50%, #7cc7ff 100%);
+}
+.n_arc {
+  background-image: linear-gradient(90deg, #ff6b6b, #f2c230, #4ade80, #38bdf8, #a78bfa, #ff6b6b);
+  background-size: 200% 100%;
+  animation: rainbow 4s linear infinite;
+}
+@keyframes rainbow {
+  to {
+    background-position: 200% 0;
+  }
+}
+
+/* ---------- aura ---------- */
+.aura {
+  position: relative;
+  display: inline-grid;
+  place-items: center;
+  isolation: isolate;
+}
+.ring {
+  position: absolute;
+  inset: -14%;
+  z-index: -1;
+  border-radius: 50%;
+  pointer-events: none;
+}
+.au_bleue .ring {
+  background: radial-gradient(closest-side, transparent 66%, rgb(91 140 255 / 85%) 74%, rgb(91 140 255 / 0%) 100%);
+}
+.au_or .ring {
+  background: radial-gradient(closest-side, transparent 66%, rgb(242 194 48 / 95%) 74%, rgb(242 194 48 / 0%) 100%);
+  animation: auraPulse 2.6s ease-in-out infinite;
+}
+.au_flamme .ring {
+  inset: -22%;
+  background: conic-gradient(from 0deg, #ff4d00, #ffb800, #ff4d00, #ff7a00, #ffb800, #ff4d00);
+  mask: radial-gradient(closest-side, transparent 58%, #000 64%, transparent 100%);
+  animation: auraSpin 3s linear infinite;
+}
+.au_ombre .ring {
+  inset: -24%;
+  background: conic-gradient(from 0deg, #2e1065, #a855f7, #1e1b4b, #7c3aed, #2e1065);
+  mask: radial-gradient(closest-side, transparent 56%, #000 63%, transparent 100%);
+  animation:
+    auraSpin 6s linear infinite reverse,
+    auraPulse 3.4s ease-in-out infinite;
+}
+@keyframes auraSpin {
+  to {
+    rotate: 360deg;
+  }
+}
+@keyframes auraPulse {
+  50% {
+    opacity: 0.6;
+    scale: 1.04;
+  }
+}
+
+/* ---------- effet de bannière ---------- */
+.bfx {
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+  border-radius: inherit;
+  pointer-events: none;
+}
+/* étoiles qui scintillent */
+.fx_etoiles {
+  background-image:
+    radial-gradient(2px 2px at 12% 30%, #fff, transparent), radial-gradient(2px 2px at 28% 70%, #fff, transparent),
+    radial-gradient(3px 3px at 46% 22%, #fff7c2, transparent), radial-gradient(2px 2px at 63% 58%, #fff, transparent),
+    radial-gradient(3px 3px at 78% 28%, #fff, transparent), radial-gradient(2px 2px at 90% 66%, #fff7c2, transparent),
+    radial-gradient(2px 2px at 36% 46%, #fff, transparent), radial-gradient(2px 2px at 70% 82%, #fff, transparent);
+  animation: twinkle 2.4s ease-in-out infinite;
+}
+.fx_etoiles::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background-image:
+    radial-gradient(2px 2px at 20% 50%, #fff, transparent), radial-gradient(3px 3px at 55% 40%, #fff, transparent),
+    radial-gradient(2px 2px at 84% 48%, #fff, transparent), radial-gradient(2px 2px at 8% 80%, #fff, transparent);
+  animation: twinkle 2.4s ease-in-out -1.2s infinite;
+}
+@keyframes twinkle {
+  50% {
+    opacity: 0.25;
+  }
+}
+/* neige qui tombe doucement */
+.fx_neige {
+  background-image:
+    radial-gradient(3px 3px at 10% 10%, #fff, transparent), radial-gradient(2px 2px at 30% 40%, #fff, transparent),
+    radial-gradient(3px 3px at 50% 20%, #fff, transparent), radial-gradient(2px 2px at 70% 60%, #fff, transparent),
+    radial-gradient(3px 3px at 90% 30%, #fff, transparent), radial-gradient(2px 2px at 20% 80%, #fff, transparent),
+    radial-gradient(2px 2px at 60% 90%, #fff, transparent), radial-gradient(3px 3px at 80% 85%, #fff, transparent);
+  /* deux fois plus haute que la bannière, motif répété : elle glisse vers le bas en boucle sans couture */
+  inset: -100% 0 0;
+  background-size: 100% 50%;
+  animation: snow 9s linear infinite;
+  opacity: 0.85;
+}
+@keyframes snow {
+  to {
+    translate: 0 50%;
+  }
+}
+/* braises qui montent */
+.fx_braises {
+  background-image:
+    radial-gradient(3px 3px at 12% 90%, #ffb800, transparent), radial-gradient(2px 2px at 26% 70%, #ff6a00, transparent),
+    radial-gradient(3px 3px at 44% 95%, #ffd166, transparent), radial-gradient(2px 2px at 61% 75%, #ff6a00, transparent),
+    radial-gradient(3px 3px at 77% 92%, #ffb800, transparent), radial-gradient(2px 2px at 92% 72%, #ff4d00, transparent);
+  inset: 0 0 -100%;
+  background-size: 100% 50%;
+  animation: embers 5s linear infinite;
+}
+.fx_braises::after {
+  content: '';
+  position: absolute;
+  inset: 50% 0 0;
+  background: linear-gradient(to top, rgb(255 90 0 / 22%), transparent 55%);
+}
+@keyframes embers {
+  to {
+    translate: 0 -50%;
+  }
+}
+
+/* ---------- aperçus (boutique, éditeur) ---------- */
+.pvName {
+  display: grid;
+  place-items: center;
+  height: 100%;
+  font-family: var(--font-display);
+  font-size: 28px;
+}
+.pvAura {
+  display: grid;
+  place-items: center;
+  height: 100%;
+}
+.pvAura img {
+  width: 64px;
+  height: 64px;
+  border-radius: 50%;
+  object-fit: cover;
+}
+.pvBanner {
+  position: relative;
+  display: block;
+  width: 100%;
+  max-width: 180px;
+  aspect-ratio: 3;
+  margin: auto;
+  overflow: hidden;
+  border-radius: 8px;
+  background: linear-gradient(135deg, #1d2440, #2a1f45);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .n_arc,
+  .ring,
+  .bfx,
+  .bfx::after {
+    animation: none !important;
+  }
+}

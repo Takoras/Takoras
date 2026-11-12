@@ -1,6 +1,7 @@
 import type { Key, Lang } from '@/i18n';
 import { translate } from '@/i18n';
 import { AVATARS } from '@/lib/avatars';
+import { COSM_NAMES } from '@/ui/Cosmetics';
 
 // Objets de la boutique / de l'inventaire : image et textes (mêmes règles que l'ancien site)
 export const BANNER_IMG: Record<string, string> = {
@@ -51,5 +52,10 @@ export function itemText(it: ShopItem, lang: Lang): [string, string] {
   if (it.kind === 'instant') return [t('it_instant'), t('it_instant_d', { n: Number(it.data.pulls ?? 1) })];
   if (it.kind === 'hourglass') return [t('it_hourglass'), t('it_hourglass_d', { n: it.data.minutes ?? 0 })];
   if (it.kind === 'avatar') return [t('it_pp', { n: t('pp_' + it.id.slice(2)) }), t('it_pp_d')];
+  // cosmétiques de profil
+  const cn = COSM_NAMES[it.id] ?? it.id;
+  if (it.kind === 'name') return [t('it_name', { n: cn }), t('it_cosm_d')];
+  if (it.kind === 'aura') return [t('it_aura', { n: cn }), t('it_cosm_d')];
+  if (it.kind === 'bfx') return [t('it_bfx', { n: cn }), t('it_cosm_d')];
   return [t('it_banner', { n: bannerName(it.id.slice(2), lang) }), t('it_banner_d')];
 }

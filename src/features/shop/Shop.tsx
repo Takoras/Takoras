@@ -14,6 +14,7 @@ import { PixelBg } from '@/ui/PixelBg';
 import { toast } from '@/ui/toast';
 import { useSwing, useSwingAll } from '@/ui/useSwing';
 import { useStaggerIn } from '@/ui/useStaggerIn';
+import { CosmeticPreview, isCosmetic } from '@/ui/Cosmetics';
 import { NeedLogin } from '@/app/NeedLogin';
 import { flyCoins, shockwave } from '@/ui/fx';
 import { useNow } from '../eco/eco';
@@ -45,7 +46,7 @@ const catOf = (it: Slot) =>
     ? it.group
     : it.kind === 'potion'
       ? 'potion'
-      : it.kind === 'banner' || it.kind === 'avatar'
+      : it.kind === 'banner' || it.kind === 'avatar' || isCosmetic(it.kind)
         ? 'banner'
         : 'util';
 // rareté d'un objet (en « 1 sur X », comme les jetons) : le fond de la vedette et le son de la révélation en dépendent
@@ -417,12 +418,18 @@ function Hero(p: CardProps & { off: number }) {
       {/* fond selon la rareté de l'objet (comme les jetons), à sa couleur */}
       <PixelBg className={s.heroBg} odds={oddsOf(it)} glow={hexOf(glow)} center={art} still={reducedFx()} />
       <div ref={art} className={s.heroArt}>
-        <img
-          className={`px ${img.wide ? s.wide : ''}`}
-          src={img.src}
-          alt=""
-          style={img.tint ? ({ '--df': img.tint } as CSSProperties) : undefined}
-        />
+        {isCosmetic(it.kind) ? (
+          <span className={s.heroCosm}>
+            <CosmeticPreview id={it.id} />
+          </span>
+        ) : (
+          <img
+            className={`px ${img.wide ? s.wide : ''}`}
+            src={img.src}
+            alt=""
+            style={img.tint ? ({ '--df': img.tint } as CSSProperties) : undefined}
+          />
+        )}
       </div>
       <div className={s.heroInfo}>
         <span className={s.featRow}>
@@ -462,12 +469,16 @@ function Card(p: CardProps & { slot: number }) {
           {it.owned ? t('ui.unlocked_b') : stockLeft ? `×${stockLeft}` : t('ui.sold_out')}
         </span>
         <div className={s.art}>
-          <img
-            className={`px ${img.wide ? s.wide : ''}`}
-            src={img.src}
-            alt=""
-            style={img.tint ? ({ '--df': img.tint } as CSSProperties) : undefined}
-          />
+          {isCosmetic(it.kind) ? (
+            <CosmeticPreview id={it.id} />
+          ) : (
+            <img
+              className={`px ${img.wide ? s.wide : ''}`}
+              src={img.src}
+              alt=""
+              style={img.tint ? ({ '--df': img.tint } as CSSProperties) : undefined}
+            />
+          )}
         </div>
         <h3>{name}</h3>
         {/* ligne réservée même sans description : toutes les cases gardent la même taille */}

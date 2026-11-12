@@ -903,6 +903,59 @@ ul.collGrid {
   background: repeating-linear-gradient(-8deg, rgba(var(--tone), 0.35) 0 14px, transparent 14px 48px),
     rgba(var(--tone), 0.16);
 }
+.fxRows {
+  display: grid;
+  gap: var(--s-4);
+}
+.fxRow {
+  display: grid;
+  gap: var(--s-2);
+}
+.fxLbl {
+  color: var(--muted);
+  font-size: var(--fs-xs);
+  font-weight: 700;
+  letter-spacing: var(--tracking-caps);
+  text-transform: uppercase;
+}
+.fxOpts {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--s-2);
+}
+.fxOpts button {
+  display: grid;
+  justify-items: center;
+  align-content: center;
+  gap: 4px;
+  min-width: 96px;
+  min-height: 92px;
+  padding: var(--s-2);
+  border: 0;
+  border-radius: 12px;
+  background: rgb(255 255 255 / 4%);
+  color: var(--text-2);
+  font: inherit;
+  font-size: var(--fs-sm);
+  cursor: pointer;
+  outline: 3px solid transparent;
+  outline-offset: 2px;
+  transition: outline-color var(--t-fast);
+}
+.fxOpts button[aria-pressed='true'] {
+  outline-color: #3966f7;
+}
+.fxOpts small {
+  color: var(--muted);
+  font-size: var(--fs-xs);
+}
+.fxPv {
+  display: grid;
+  place-items: center;
+  width: 140px;
+  height: 56px;
+  font-size: 0.7em;
+}
 .peNone {
   margin: 0;
   padding: var(--s-4);

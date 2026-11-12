@@ -444,6 +444,7 @@ export async function fakeSupabase(
           banner: prof.banner,
           banners: ['plaine'],
           avatars: [],
+          cosmetics: ['n_or', 'n_arc', 'au_bleue', 'au_ombre', 'fx_neige', 'fx_braises'],
           email: 'test@example.com',
           provider: 'discord',
           pseudo_free: false,
@@ -461,6 +462,10 @@ export async function fakeSupabase(
           ...base,
           pseudo: 'Ami',
           bio: 'Salut !',
+          // cosmétiques portés (boutique)
+          name_fx: 'n_arc',
+          aura: 'au_flamme',
+          banner_fx: 'fx_etoiles',
           showcase: [
             { id: 99, jeton: 'Mobu', odds: 2, variant: 'gold' },
             { id: 98, jeton: 'Vyolis', odds: 1000, variant: 'ombre' },
@@ -471,6 +476,7 @@ export async function fakeSupabase(
         });
       return json(null);
     }
+    if (rpc === 'equip_cosmetics') return json(null);
     if (rpc === 'update_profile') {
       const b = JSON.parse(route.request().postData() ?? '{}') as {
         p_avatar: string;
