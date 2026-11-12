@@ -96,7 +96,7 @@ export function Live() {
         {t('ui.live')}
         {online ? <span className={s.online}>· {t('ui.online', { n: online })}</span> : null}
       </div>
-      <div className={s.ticker}>
+      <div className={s.ticker} data-still>
         <ul className={`${s.track} ${rows.length >= 6 ? s.scroll : ''}`}>
           {loop.map((r, i) => {
             const j = jetonOf(r.jeton, r.serie),

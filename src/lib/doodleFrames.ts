@@ -121,6 +121,7 @@ const redo = new WeakMap<HTMLImageElement, number>();
 const banned = new WeakSet<HTMLImageElement>();
 const eligible = (img: HTMLImageElement) =>
   !banned.has(img) &&
+  !img.closest('[data-still]') && // zones qui défilent (bande « En direct ») : images fixes
   img.classList.contains('px') &&
   !img.classList.contains('still') &&
   !img.matches('.v-gold, .v-celeste, .v-ombre') &&

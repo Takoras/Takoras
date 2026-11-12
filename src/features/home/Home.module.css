@@ -405,15 +405,46 @@
   animation: pulse 1.6s infinite;
 }
 .ticker {
+  position: relative;
   flex: 1;
   overflow: hidden;
-  mask-image: linear-gradient(90deg, transparent, #000 6%, #000 94%, transparent);
+}
+/* fondu des bords : deux dégradés posés par-dessus (un masque sur une bande qui défile la faisait redessiner
+   en continu, très lourd sur téléphone) */
+.ticker::before,
+.ticker::after {
+  content: '';
+  position: absolute;
+  inset: 0 auto 0 0;
+  z-index: 1;
+  width: 6%;
+  background: linear-gradient(90deg, var(--bg, #0b0b0f), transparent);
+  pointer-events: none;
+}
+.ticker::after {
+  inset: 0 0 0 auto;
+  background: linear-gradient(270deg, var(--bg, #0b0b0f), transparent);
 }
 .track {
   display: flex;
   gap: var(--s-2);
   width: max-content;
   list-style: none;
+  will-change: transform; /* la bande glisse sur son propre calque : rien n'est redessiné pendant le défilement */
+}
+/* dans la bande, les images restent fixes (pas de doodle) : sinon toute la bande était redessinée à chaque pas.
+   Les mutations gardent leur couleur. */
+.track img {
+  animation: none !important;
+}
+.track img:global(.v-gold) {
+  filter: url('#vgold') !important;
+}
+.track img:global(.v-celeste) {
+  filter: url('#vceleste') !important;
+}
+.track img:global(.v-ombre) {
+  filter: url('#vombre') !important;
 }
 .scroll {
   animation: scroll 50s linear infinite;
@@ -762,8 +793,9 @@
   text-transform: uppercase;
   letter-spacing: 0.1em;
 }
-.liveDiag .ticker {
-  mask-image: none;
+.liveDiag .ticker::before,
+.liveDiag .ticker::after {
+  display: none; /* la bande en biais traverse tout l'écran : pas de fondu sur les bords */
 }
 .liveDiag .track li {
   border: 0;

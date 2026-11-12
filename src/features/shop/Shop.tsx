@@ -14,6 +14,7 @@ import { PixelBg } from '@/ui/PixelBg';
 import { toast } from '@/ui/toast';
 import { useSwing, useSwingAll } from '@/ui/useSwing';
 import { useStaggerIn } from '@/ui/useStaggerIn';
+import { NeedLogin } from '@/app/NeedLogin';
 import { flyCoins, shockwave } from '@/ui/fx';
 import { useNow } from '../eco/eco';
 import { openInfo } from '../info/store';
@@ -280,6 +281,8 @@ export default function Shop() {
     }
   };
 
+  // pas connecté : la boutique demande de se connecter (comme l'inventaire, le passe…)
+  if (!user) return <NeedLogin title={t('ui.nav_shop')} />;
   const items = data?.items ?? [];
   // la grille du bas : le rayon choisi, sans l'objet à la une (il est déjà en grand en haut)
   const list = items.filter((it, i) => catOf(it) === cat && slotOf(it, i) !== data?.featured_slot);
