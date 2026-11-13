@@ -2,6 +2,7 @@ import { useEffect, useRef, useState, type CSSProperties } from 'react';
 import { hexRGB } from '@/data/jetons';
 import { reducedFx } from '@/lib/settings';
 import { useT } from '@/i18n/useT';
+import { Icon } from '@/app/Icon';
 import { Button } from '@/ui/Button';
 import { Modal } from '@/ui/Modal';
 import { PixelBg } from '@/ui/PixelBg';
@@ -141,7 +142,12 @@ export function RewardSheet({
   return (
     <Modal open={!!info} onClose={close} wide noX bare fading={closing}>
       {info ? (
-        <div key={key} ref={card} className={`${js.sheet} ${closing ? js.closing : ''}`} style={vars}>
+        <div
+          key={key}
+          ref={card}
+          className={`${js.sheet} ${closing ? js.closing : ''} ${info.prem ? s.premSheet : ''}`}
+          style={vars}
+        >
           <PixelBg className={js.pxbg} odds={info.odds} glow={info.color} center={coin} still={reducedFx()} />
           <button type="button" className={js.x} onClick={close} aria-label={t('ui.close')}>
             <svg viewBox="0 0 24 24" width="20" height="20" aria-hidden>
@@ -149,12 +155,21 @@ export function RewardSheet({
             </svg>
           </button>
           <div className={js.stage}>
-            {/* à gauche : gratuit / premium, le nom de la récompense, son palier en pastille */}
-            <div ref={idBox} className={`${tc.card} ${tc.id} ${js.id} ${js.box}`}>
-              <span className={`${s.tag} ${info.prem ? s.gold : ''}`}>
-                {info.prem ? t('ui.bp_prem_short') : t('ui.bp_free')}
-              </span>
-              <h2 className={`${tc.name} ${s.title}`}>{info.title}</h2>
+            {/* à gauche : gratuit / premium et le nom de la récompense ; premium : tout en or, ça se voit */}
+            <div
+              ref={idBox}
+              className={`${tc.card} ${tc.id} ${js.id} ${js.box} ${info.prem ? s.premBox : ''}`}
+              style={info.prem ? ({ '--tc': '#f2c230' } as CSSProperties) : undefined}
+            >
+              {info.prem ? (
+                <span className={`${s.tag} ${s.gold} ${s.big}`}>
+                  <Icon name="star" size={16} />
+                  {t('ui.bp_prem')}
+                </span>
+              ) : (
+                <span className={s.tag}>{t('ui.bp_free')}</span>
+              )}
+              <h2 className={`${tc.name} ${s.title} ${info.prem ? `${tc.shine} ${s.goldTitle}` : ''}`}>{info.title}</h2>
             </div>
             {/* au centre : la récompense en grand, qui flotte, avec rayons et lueur */}
             <div className={js.center}>
@@ -166,7 +181,7 @@ export function RewardSheet({
                 ))}
               </span>
               <span className={js.pin}>
-                <div ref={coin} className={`${js.coin} ${s.art}`} onPointerMove={tilt} onPointerLeave={untilt}>
+                <div ref={coin} className={`${js.coin} ${s.art} ${info.shape === 'wide' ? s.wideCoin : ''}`} onPointerMove={tilt} onPointerLeave={untilt}>
                   <img className={`px ${info.shape ? s[info.shape] : ''}`} src={info.img} alt="" />
                 </div>
               </span>

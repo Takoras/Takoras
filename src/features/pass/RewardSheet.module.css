@@ -31,10 +31,14 @@
   object-fit: cover;
 }
 .art img.wide {
-  width: 160%;
-  margin-left: -30%;
   border-radius: 12px;
   object-fit: cover;
+}
+/* bannière : montrée en entier, en rectangle large (pas recadrée en carré) */
+.art.wideCoin {
+  width: 360px;
+  height: 140px;
+  margin-top: 60px;
 }
 .about {
   display: grid;
@@ -53,5 +57,24 @@
   color: #86efac;
 }
 .state.ready {
+  color: #fde68a;
+}
+
+/* ---------- premium : ça doit se voir ---------- */
+.premSheet {
+  outline: 2px solid rgb(242 194 48 / 55%);
+  outline-offset: -2px;
+}
+.tag.big {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 5px 12px;
+  font-size: var(--fs-sm);
+}
+.premBox {
+  background: linear-gradient(160deg, rgb(242 194 48 / 16%), rgb(242 194 48 / 4%) 60%), rgb(20 18 12 / 70%);
+}
+.goldTitle {
   color: #fde68a;
 }

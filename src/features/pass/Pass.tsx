@@ -47,15 +47,19 @@ const ITEMS: Record<string, ShopItem & { price: number }> = {
 };
 const worth = (r: Reward) => (!r ? 0 : r.coins ? r.coins : (ITEMS[r.item ?? '']?.price ?? 0) * (r.qty ?? 1));
 const isCosmetic = (r: Reward) => !!r?.item && (r.item.startsWith('b_') || r.item.startsWith('a_'));
-// fond d'une récompense : le MÊME que l'objet dans la boutique (couleur et richesse) ; les pièces, un fond simple ;
+// fond d'une récompense : le MÊME que l'objet dans la boutique (couleur et richesse) ; les exclusifs du passe, le plus
+// riche (rose) ; les pièces, un fond simple ;
 // côté premium, deux paliers plus beau (ça donne envie)
 const rewardLook = (r: Reward, prem: boolean) => {
   const it = ITEMS[r?.item ?? ''];
   const base = r?.coins
     ? { color: '#f2c230', odds: 10 }
-    : it
-      ? { color: rgbHex(itemGlow(it)), odds: itemOdds(it) }
-      : { color: '#8eaaff', odds: 100 };
+    : r?.item?.startsWith('a_') || r?.item?.startsWith('b_')
+      ? // exclusifs du passe (photo, bannière) : jamais en boutique, le fond le plus riche
+        { color: '#ff7aa2', odds: 1_000_000 }
+      : it
+        ? { color: rgbHex(itemGlow(it)), odds: itemOdds(it) }
+        : { color: '#8eaaff', odds: 100 };
   return prem ? { color: base.color, odds: Math.max(1000, base.odds * 30) } : base;
 };
 const icon = (r: Reward) =>
