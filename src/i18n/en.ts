@@ -9,6 +9,8 @@ export const en: Dict = {
     lk_pass: 'Pass',
     lk_id: 'Identity',
     lk_bfx: 'Banner effect',
+    lk_peek: 'Trying on: {n} not unlocked yet, won’t be saved',
+    lk_peek_off: 'Stop trying',
     lk_try: 'Trying on: not equipped yet',
     pk_normal: 'Normal',
     pp_photo: 'Profile picture',

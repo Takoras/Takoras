@@ -745,7 +745,14 @@ function EditProfile({ p, onClose }: { p: Prof; onClose: () => void }) {
   useSwingAll(panelRef, `.${lk.tile}`, 0.35, tab);
   // survoler une case l'essaie sur l'aperçu (même verrouillée), sans rien changer
   const [hov, setHov] = useState<{ k: Tab; v: string } | null>(null);
-  const show = (k: Tab, v: string) => (hov?.k === k ? hov.v : v);
+  // toucher une case verrouillée l'essaie pour de bon (aussi au doigt) : elle reste sur l'aperçu, sans être
+  // enregistrée, avec de quoi aller la débloquer
+  const [peek, setPeek] = useState<Partial<Record<Tab, { v: string; to: string }>>>({});
+  const show = (k: Tab, v: string) => (hov?.k === k ? hov.v : (peek[k]?.v ?? v));
+  const unpeek = (pk: typeof peek, k: Tab) =>
+    Object.fromEntries(Object.entries(pk).filter(([x]) => x !== k)) as typeof peek;
+  const peeks = Object.values(peek);
+  const peekTo = peeks.some((x) => x?.to === '/shop') || !peeks.length ? '/shop' : '/pass';
   const vAv = show('pp', avatar),
     vBanner = show('banner', banner),
     vName = show('name', nameFx),
@@ -821,8 +828,16 @@ function EditProfile({ p, onClose }: { p: Prof; onClose: () => void }) {
   };
   const tp = (k: Tab, v: string, to = '/shop') => ({
     lockTag: to === '/pass' ? t('ui.lk_pass') : t('ui.nav_shop'),
-    onPick: () => (sfx.click(), setter[k](v)),
-    onLocked: () => goShop(to),
+    onPick: () => {
+      sfx.click();
+      setter[k](v);
+      setPeek((pk) => unpeek(pk, k));
+    },
+    onLocked: () => {
+      sfx.click();
+      setPeek((pk) => (pk[k]?.v === v ? unpeek(pk, k) : { ...pk, [k]: { v, to } }));
+    },
+    peeked: peek[k]?.v === v,
     onTry: () => setHov({ k, v }),
     onUntry: () => setHov((h) => (h?.k === k && h.v === v ? null : h)),
     lockLabel: t('ui.pp_shop'),
@@ -842,8 +857,8 @@ function EditProfile({ p, onClose }: { p: Prof; onClose: () => void }) {
         }}
       >
         {/* aperçu en direct : ce que les autres verront */}
-        <div className={lk.stage} style={{ '--tone': hexRGB(tone) } as CSSProperties} aria-hidden>
-          <div className={lk.card}>
+        <div className={lk.stage} style={{ '--tone': hexRGB(tone) } as CSSProperties}>
+          <div className={lk.card} aria-hidden>
             <div className={lk.banner}>
               {vBanner === 'best' ? (
                 <PixelBg className={lk.bannerBg} odds={bestOdds} glow={tone} still={reducedFx()} />
@@ -869,6 +884,20 @@ function EditProfile({ p, onClose }: { p: Prof; onClose: () => void }) {
               </b>
               <small className={lk.bio}>{bio.trim() || '…'}</small>
             </div>
+          </div>
+          {/* essai d'un cosmétique pas encore débloqué : on le voit, mais il ne sera pas enregistré */}
+          <div className={`${lk.peek} ${peeks.length ? lk.peekOn : ''}`} aria-live="polite">
+            {peeks.length ? (
+              <>
+                <span className={lk.peekTxt}>{t('ui.lk_peek', { n: peeks.length })}</span>
+                <Button size="sm" variant="primary" onClick={() => goShop(peekTo)}>
+                  {peekTo === '/pass' ? t('ui.lk_pass') : t('ui.nav_shop')}
+                </Button>
+                <Button size="sm" onClick={() => (sfx.click(), setPeek({}))}>
+                  {t('ui.lk_peek_off')}
+                </Button>
+              </>
+            ) : null}
           </div>
         </div>
 
@@ -1011,6 +1040,7 @@ function LockerTile({
   label,
   rar,
   wide,
+  peeked,
   lockLabel,
   lockTag,
   onPick,
@@ -1025,6 +1055,8 @@ function LockerTile({
   /** rareté d'un cosmétique : [nom, couleur] */
   rar?: [string, string];
   wide?: boolean;
+  /** case verrouillée en cours d'essai sur l'aperçu */
+  peeked?: boolean;
   lockLabel: string;
   lockTag: string;
   onPick: () => void;
@@ -1036,8 +1068,8 @@ function LockerTile({
   return (
     <button
       type="button"
-      className={`${lk.tile} ${wide ? lk.wide : ''} ${have ? '' : lk.lockedT}`}
-      aria-pressed={on}
+      className={`${lk.tile} ${wide ? lk.wide : ''} ${have ? '' : lk.lockedT} ${peeked ? lk.peeked : ''}`}
+      aria-pressed={on || !!peeked}
       aria-label={have ? label : `${label} · ${lockLabel}`}
       onClick={have ? onPick : onLocked}
       onPointerEnter={onTry}

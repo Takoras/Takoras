@@ -7,6 +7,8 @@ export const fr = {
     lk_pass: 'Passe',
     lk_id: 'Identité',
     lk_bfx: 'Effet de bannière',
+    lk_peek: 'Essai : {n} pas encore débloqué(s), pas enregistré',
+    lk_peek_off: 'Retirer l’essai',
     lk_try: 'Essayage : pas encore équipé',
     pk_normal: 'Normal',
     pp_photo: 'Photo de profil',

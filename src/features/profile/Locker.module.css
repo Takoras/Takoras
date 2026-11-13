@@ -82,6 +82,7 @@
 }
 .name {
   max-width: 100%;
+  margin-top: 10px; /* les contours rares débordent de la photo : le pseudo reste dégagé */
   overflow: hidden;
   font-family: var(--font-display);
   font-size: clamp(24px, 2.4vw, 32px);
@@ -378,7 +379,8 @@
   filter: grayscale(0.85) brightness(0.55);
   transition: filter 0.25s;
 }
-.lockedT:hover .tileArt {
+.lockedT:hover .tileArt,
+.peeked .tileArt {
   filter: none;
 }
 .lockedT small {
@@ -423,4 +425,32 @@
   font-weight: 800;
   letter-spacing: var(--tracking-caps);
   text-transform: uppercase;
+}
+
+/* essai d'un cosmétique pas débloqué : une bande sous l'aperçu qui se déplie en douceur */
+.peek {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--s-2);
+  max-height: 0;
+  overflow: hidden;
+  opacity: 0;
+  transition:
+    max-height 0.35s var(--ease-out),
+    opacity 0.25s,
+    padding 0.35s var(--ease-out);
+}
+.peekOn {
+  max-height: 140px;
+  padding: var(--s-3);
+  border-radius: 14px;
+  background: rgb(242 194 48 / 10%);
+  opacity: 1;
+}
+.peekTxt {
+  flex: 1 1 100%;
+  color: #fde68a;
+  font-size: var(--fs-sm);
+  font-weight: 700;
 }
