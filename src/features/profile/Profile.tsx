@@ -889,7 +889,56 @@ function EditProfile({ p, onClose }: { p: Prof; onClose: () => void }) {
           <div className={`${lk.peek} ${peeks.length ? lk.peekOn : ''}`} aria-live="polite">
             {peeks.length ? (
               <>
-                <span className={lk.peekTxt}>{t('ui.lk_peek', { n: peeks.length })}</span>
+                <span className={lk.peekTxt}>{t('ui.lk_peek')}</span>
+                {/* chaque cosmétique essayé : son petit aperçu, son nom, sa rareté, et de quoi l'enlever */}
+                <ul className={lk.peekList}>
+                  {(Object.entries(peek) as [Tab, { v: string; to: string }][]).map(([k, { v }]) => {
+                    const cosm = k === 'name' || k === 'aura' || k === 'bfx';
+                    const r = cosm ? cosmRar(v) : null;
+                    const name =
+                      k === 'pp' ? ppName(v) : k === 'banner' ? bannerName(v, lang) : cosmName(v, lang);
+                    return (
+                      <li key={k} className={lk.peekItem}>
+                        <span className={lk.peekArt} aria-hidden>
+                          {k === 'pp' ? (
+                            <img className={`px ${lk.shRound}`} src={AVATARS[v]} alt="" />
+                          ) : k === 'banner' ? (
+                            <img className={`px ${lk.shWide}`} src={BANNER_IMG[v]} alt="" />
+                          ) : k === 'name' ? (
+                            <b className={`${lk.shAa} ${nameCls(v)}`}>Aa</b>
+                          ) : k === 'aura' ? (
+                            <span className={lk.shAura}>
+                              <Aura id={v}>
+                                <span className={lk.shDot} />
+                              </Aura>
+                            </span>
+                          ) : (
+                            <span className={lk.peekBfx}>
+                              <BannerFx id={v} />
+                            </span>
+                          )}
+                        </span>
+                        <span className={lk.peekName}>
+                          <b>{name}</b>
+                          <small style={r ? { color: rarCol(r) } : undefined}>
+                            {TABS.find((x) => x[0] === k)?.[2]}
+                            {r ? ` · ${t(rarKey(r))}` : ''}
+                          </small>
+                        </span>
+                        <button
+                          type="button"
+                          className={lk.peekX}
+                          aria-label={`${t('ui.lk_peek_off')} · ${name}`}
+                          onClick={() => (sfx.click(), setPeek((pk) => unpeek(pk, k)))}
+                        >
+                          <svg viewBox="0 0 24 24" width="14" height="14" aria-hidden>
+                            <path d="M6 6l12 12M18 6 6 18" stroke="currentColor" strokeWidth="2.6" strokeLinecap="round" />
+                          </svg>
+                        </button>
+                      </li>
+                    );
+                  })}
+                </ul>
                 <Button size="sm" variant="primary" onClick={() => goShop(peekTo)}>
                   {peekTo === '/pass' ? t('ui.lk_pass') : t('ui.nav_shop')}
                 </Button>
