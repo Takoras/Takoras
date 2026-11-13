@@ -28,7 +28,8 @@ test('bestiaire : grille, filtres, fiche, vente, verrou', async ({ page }) => {
   await page.keyboard.press('Escape');
   await expect(page.getByRole('button', { name: /×4 Mobu/ })).toBeVisible(); // 1 vendu
 
-  // verrouiller Vyolis
+  // verrouiller Vyolis (une fois la fiche de Mobu refermée)
+  await expect(page.getByRole('dialog')).toHaveCount(0);
   await page.getByRole('button', { name: /×1 Vyolis/ }).click({ force: true });
   await page
     .getByRole('dialog')
