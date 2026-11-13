@@ -13,16 +13,23 @@ export function useSwing(ref: RefObject<HTMLElement | null>, strength = 1) {
 }
 
 // Même balancement pour chaque élément d'un groupe (boutons, onglets…) qui correspond au sélecteur
-export function useSwingAll(ref: RefObject<HTMLElement | null>, selector: string, strength = 1, key: unknown = 0) {
+// `kick` : élan donné au clic (degrés/s, 0 = rien), pour un balancement franc d'environ une demi-seconde
+export function useSwingAll(
+  ref: RefObject<HTMLElement | null>,
+  selector: string,
+  strength = 1,
+  key: unknown = 0,
+  kick = 0,
+) {
   useEffect(() => {
     const root = ref.current;
     if (!root) return;
-    const offs = [...root.querySelectorAll<HTMLElement>(selector)].map((el) => attachSwing(el, strength));
+    const offs = [...root.querySelectorAll<HTMLElement>(selector)].map((el) => attachSwing(el, strength, kick));
     return () => offs.forEach((f) => f());
-  }, [ref, selector, strength, key]);
+  }, [ref, selector, strength, key, kick]);
 }
 
-export function attachSwing(el: HTMLElement, strength = 1) {
+export function attachSwing(el: HTMLElement, strength = 1, kick = 0) {
   {
     const st = { a: 0, v: 0, raf: 0, last: 0, lastX: 0, lastT: 0 };
 
@@ -39,9 +46,9 @@ export function attachSwing(el: HTMLElement, strength = 1) {
       }
       st.raf = requestAnimationFrame(step);
     };
-    const push = (amount: number) => {
+    const push = (amount: number, raw = false) => {
       if (reducedFx() || matchMedia('(prefers-reduced-motion: reduce)').matches) return;
-      st.v += Math.max(-90, Math.min(90, amount * strength));
+      st.v += raw ? amount : Math.max(-90, Math.min(90, amount * strength));
       if (!st.raf) st.raf = requestAnimationFrame(step);
     };
     const onEnter = (e: PointerEvent) => {
@@ -57,11 +64,18 @@ export function attachSwing(el: HTMLElement, strength = 1) {
       st.lastT = now;
       push(vx * 14);
     };
+    // clic : un bon coup, du côté opposé à l'endroit touché (comme une pichenette)
+    const onDown = (e: PointerEvent) => {
+      const r = el.getBoundingClientRect();
+      push(e.clientX < r.left + r.width / 2 ? kick : -kick, true);
+    };
     el.addEventListener('pointerenter', onEnter);
     el.addEventListener('pointermove', onMove);
+    if (kick) el.addEventListener('pointerdown', onDown);
     return () => {
       el.removeEventListener('pointerenter', onEnter);
       el.removeEventListener('pointermove', onMove);
+      el.removeEventListener('pointerdown', onDown);
       cancelAnimationFrame(st.raf);
     };
   }

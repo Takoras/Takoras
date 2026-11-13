@@ -55,7 +55,7 @@ export function Layout() {
   const t = useT();
   // les cases du menu se balancent au survol, accrochées par le haut (comme les rayons du site)
   const railRef = useRef<HTMLDivElement>(null);
-  useSwingAll(railRef, `.${s.railIco}`, 0.5);
+  useSwingAll(railRef, `.${s.railIco}`, 0.5, 0, 110); // au clic : un balancement franc (~0,5 s)
   const { pathname } = useLocation();
   const user = useAuth((x) => x.user);
   const me = useMe();
