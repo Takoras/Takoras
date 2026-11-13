@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState, type CSSProperties } from 'react';
+import { useEffect, useLayoutEffect, useRef, useState, type CSSProperties } from 'react';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { errorText, passApi } from '@/api';
 import { itemImg, itemText, type ShopItem } from '@/data/items';
@@ -78,6 +78,60 @@ export default function Pass() {
   const swingKey = tab === 'rewards' ? d : tab;
   useSwingAll(list, `.${s.tile}`, 0.45, swingKey);
   useSwingAll(pageRef, `.${s.hero}, .${s.prem}`, 0.25, swingKey);
+  // le chemin : une courbe qui passe par tous les numéros (chaque colonne monte ou descend sur une vague),
+  // remplie jusqu'à la progression, avec un point lumineux au bout. Mesuré sur la page, redessiné si ça bouge.
+  const svgRef = useRef<SVGSVGElement>(null);
+  const baseRef = useRef<SVGPathElement>(null);
+  const fillRef = useRef<SVGPathElement>(null);
+  const headRef = useRef<SVGCircleElement>(null);
+  useLayoutEffect(() => {
+    const ol = list.current,
+      svg = svgRef.current;
+    if (!ol || !svg || !d || tab !== 'rewards') return;
+    const into0 = d.xp - tier * XP_TIER;
+    const draw = () => {
+      const nums = [...ol.querySelectorAll<HTMLElement>('[data-num]')];
+      if (!nums.length) return;
+      const ob = ol.getBoundingClientRect(),
+        z = ob.width / (ol.offsetWidth || 1) || 1;
+      const pts = nums.map((n) => {
+        const r = n.getBoundingClientRect();
+        return [(r.left + r.width / 2 - ob.left) / z + ol.scrollLeft, (r.top + r.height / 2 - ob.top) / z] as const;
+      });
+      const first = pts[0] ?? [0, 0];
+      const all = [[first[0] - 70, first[1]] as const, ...pts];
+      // courbe douce qui passe par chaque point (Catmull-Rom → Bézier)
+      let path = `M${all[0]?.[0]},${all[0]?.[1]}`;
+      for (let i = 0; i < all.length - 1; i++) {
+        const p1 = all[i] ?? first,
+          p2 = all[i + 1] ?? p1,
+          p0 = all[i - 1] ?? p1,
+          p3 = all[i + 2] ?? p2;
+        path += ` C${p1[0] + (p2[0] - p0[0]) / 6},${p1[1] + (p2[1] - p0[1]) / 6} ${p2[0] - (p3[0] - p1[0]) / 6},${p2[1] - (p3[1] - p1[1]) / 6} ${p2[0]},${p2[1]}`;
+      }
+      svg.setAttribute('width', String(ol.scrollWidth));
+      svg.setAttribute('height', String(ol.scrollHeight));
+      baseRef.current?.setAttribute('d', path);
+      fillRef.current?.setAttribute('d', path);
+      // progression : de 0 (avant le palier 1) à 1 (palier 50), par segments égaux
+      const u = Math.max(0, Math.min(1, (tier + (tier < 50 ? into0 / XP_TIER : 0)) / (all.length - 1)));
+      fillRef.current?.style.setProperty('stroke-dasharray', `${u} 1`);
+      const fp = fillRef.current;
+      if (fp && headRef.current) {
+        const p = fp.getPointAtLength(fp.getTotalLength() * u);
+        headRef.current.setAttribute('cx', String(p.x));
+        headRef.current.setAttribute('cy', String(p.y));
+      }
+    };
+    draw();
+    const ro = new ResizeObserver(draw);
+    ro.observe(ol);
+    const id = setTimeout(draw, 700); // après l'arrivée en cascade des cases
+    return () => {
+      ro.disconnect();
+      clearTimeout(id);
+    };
+  }, [d, tier, tab]);
   // le palier en cours est au milieu de la route, sans chercher (à l'arrivée et en revenant sur l'onglet)
   const centered = useRef(false);
   useEffect(() => {
@@ -391,8 +445,14 @@ export default function Pass() {
         type="button"
         className={cls}
         data-k={`${tr}-${prem ? 1 : 0}`}
-        disabled={can && busy}
-        onClick={() => (can ? void claim(tr, prem, r) : (sfx.click(), setInfo({ t: tr, prem })))}
+        // chaque case penche un peu (son angle à elle) et flotte à son rythme
+        style={
+          {
+            '--tilt': `${((((tr * 37 + (prem ? 3 : 0)) % 7) - 3) * 0.8).toFixed(1)}deg`,
+            '--fd': `${-((tr * 0.37) % 5).toFixed(2)}s`,
+          } as CSSProperties
+        }
+        onClick={() => (sfx.click(), setInfo({ t: tr, prem }))}
       >
         {/* nom lu par les lecteurs d'écran, puis ce qui est écrit dans la case */}
         {can ? <span className="visually-hidden">{t('ui.bp_claim')} · </span> : null}
@@ -405,6 +465,7 @@ export default function Pass() {
   const infoTier = info ? d.tiers.find((x) => x.t === info.t) : undefined;
   const infoR: Reward = info && infoTier ? (info.prem ? infoTier.prem : infoTier.free) : null;
   const infoGot = !!info && (info.prem ? d.pclaimed : d.claimed).includes(info.t);
+  const infoCan = !!info && !!infoR && !infoGot && info.t <= tier && !(info.prem && !d.premium);
   const infoItem = ITEMS[infoR?.item ?? ''];
   const infoDesc = !infoR
     ? ''
@@ -534,6 +595,17 @@ export default function Pass() {
             {/* les 50 paliers : premium en haut, numéro sur la ligne de progression, gratuit en bas */}
             {/* eslint-disable-next-line jsx-a11y/no-noninteractive-tabindex -- liste qui défile au clavier */}
             <ol ref={list} className={s.track} tabIndex={0} aria-label={t('ui.bp_title')}>
+              <svg ref={svgRef} className={s.path} aria-hidden>
+                <defs>
+                  <linearGradient id="bp-path" x1="0" x2="1" y1="0" y2="0">
+                    <stop offset="0" stopColor="#3966f7" />
+                    <stop offset="1" stopColor="#8eaaff" />
+                  </linearGradient>
+                </defs>
+                <path ref={baseRef} className={s.pathBase} />
+                <path ref={fillRef} className={s.pathFill} pathLength={1} />
+                <circle ref={headRef} className={s.pathHead} r={9} />
+              </svg>
               {d.tiers.map((x) => {
                 // remplissage de la ligne jusqu'à ce palier : plein si atteint, en partie pour le prochain
                 const f = x.t <= tier ? 1 : x.t === tier + 1 ? pct / 100 : 0;
@@ -542,10 +614,12 @@ export default function Pass() {
                     key={x.t}
                     className={x.t <= tier ? s.reached : undefined}
                     aria-current={x.t === Math.min(50, tier + 1) ? 'step' : undefined}
-                    style={{ '--f': f } as CSSProperties}
+                    style={{ '--f': f, '--wy': `${(Math.sin(x.t * 0.9) * 38).toFixed(1)}px` } as CSSProperties}
                   >
                     {tile(x.t, x.prem, true)}
-                    <span className={s.num}>{x.t}</span>
+                    <span className={s.num} data-num>
+                      {x.t}
+                    </span>
                     {tile(x.t, x.free, false)}
                   </li>
                 );
@@ -571,6 +645,18 @@ export default function Pass() {
                   <h3>{label(infoR)}</h3>
                   <p>{infoDesc}</p>
                   <p className={`${s.infoState} ${infoGot ? s.ok : ''}`}>{infoState}</p>
+                  {infoCan ? (
+                    <Button
+                      variant="primary"
+                      loading={busy}
+                      onClick={async () => {
+                        await claim(info.t, info.prem, infoR);
+                        setInfo(null);
+                      }}
+                    >
+                      {t('ui.bp_claim')}
+                    </Button>
+                  ) : null}
                 </div>
               </div>
             ) : null}

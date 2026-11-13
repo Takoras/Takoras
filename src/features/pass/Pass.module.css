@@ -335,7 +335,7 @@
   display: flex;
   gap: var(--gap);
   margin: 0;
-  padding: var(--s-4) 32px;
+  padding: 56px 32px; /* de la place pour la vague */
   overflow-x: auto;
   scrollbar-width: none;
   cursor: grab;
@@ -352,14 +352,17 @@
 }
 .track li {
   position: relative;
+  z-index: 1;
+  translate: 0 var(--wy, 0); /* chaque colonne monte ou descend : le chemin ondule */
   display: grid;
   grid-template-rows: auto 44px auto;
   gap: 10px;
   place-items: center;
   transition: --f 1s cubic-bezier(0.2, 0.7, 0.3, 1);
 }
-/* la ligne de progression : du palier d'avant jusqu'à celui-ci, remplie selon --f (0 à 1) */
+/* (ancienne ligne droite : remplacée par le chemin en courbe, .path) */
 .track li::before {
+  display: none;
   content: '';
   position: absolute;
   top: 50%;
@@ -378,6 +381,7 @@
 }
 /* tête de la progression : un point lumineux au bout de la ligne */
 .track li[aria-current]::after {
+  display: none;
   content: '';
   position: absolute;
   top: 50%;
@@ -429,6 +433,10 @@ li[aria-current] .num {
 
 /* ---------- une case de la route ---------- */
 .tile {
+  /* vivante : penchée (--tilt), elle flotte à son rythme, suit un peu la souris et se balance au survol */
+  --dz: 1;
+  transform: translate(calc(var(--mpx, 0) * -7px * var(--dz)), calc(var(--mpy, 0) * -5px * var(--dz)));
+  animation: tileFloat 5.5s ease-in-out var(--fd, 0s) infinite;
   position: relative;
   display: grid;
   grid-template-rows: 1fr auto auto;
@@ -442,16 +450,56 @@ li[aria-current] .num {
   font: inherit;
   color: var(--text);
   text-align: center;
-  rotate: var(--swing, 0deg);
+  rotate: calc(var(--tilt, 0deg) + var(--swing, 0deg));
   transform-origin: 50% 0;
   transition:
     background-color var(--t-fast),
-    opacity 0.4s;
+    opacity 0.4s,
+    scale 0.3s var(--ease-out);
+}
+@keyframes tileFloat {
+  0%,
+  100% {
+    translate: 0 0;
+  }
+  50% {
+    translate: 0 -5px;
+  }
+}
+/* le chemin en courbe derrière les cases */
+.path {
+  position: absolute;
+  top: 0;
+  left: 0;
+  z-index: 0;
+  overflow: visible;
+  pointer-events: none;
+}
+.pathBase,
+.pathFill {
+  fill: none;
+  stroke-width: 6;
+  stroke-linecap: round;
+}
+.pathBase {
+  stroke: rgb(255 255 255 / 7%);
+}
+.pathFill {
+  stroke: url('#bp-path');
+  transition: stroke-dasharray 1s cubic-bezier(0.2, 0.7, 0.3, 1);
+}
+.pathHead {
+  fill: #fff;
+  transform-box: fill-box;
+  transform-origin: center;
+  animation: headPulse 1.8s ease-in-out infinite;
 }
 .tile:hover {
   background: rgb(255 255 255 / 6%);
+  scale: 1.05;
 }
 .tile.gold {
+  --dz: 1.5; /* le premium suit plus la souris (plus proche) */
   background: rgb(242 194 48 / 7%);
 }
 .tile.gold:hover {

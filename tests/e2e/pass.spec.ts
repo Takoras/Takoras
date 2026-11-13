@@ -13,7 +13,10 @@ test('passe de combat : palier, récupérer une récompense gratuite, premium pa
   await expect(pd.getByRole('button', { name: /Débloquer/ })).toBeDisabled();
   await expect(pd.getByText(/€/)).toHaveCount(0);
   await page.keyboard.press('Escape');
-  await page.getByRole('button', { name: /^Récupérer ·/ }).first().click();
+  await expect(pd).toBeHidden();
+  // un clic sur la case ouvre sa fiche ; « Récupérer » dedans la prend
+  await page.getByRole('button', { name: /^Récupérer ·/ }).first().click({ force: true });
+  await page.getByRole('dialog').getByRole('button', { name: 'Récupérer' }).click();
   // plus de notification : la case éclate et la récompense file vers le solde ou l'inventaire
   await expect.poll(() => calls).toContain('bp_claim');
   // plusieurs paliers prêts : « Tout récupérer » d'un coup
