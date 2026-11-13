@@ -443,7 +443,7 @@ export async function fakeSupabase(
         pulls: 120,
         collection: 3,
         owned: 6,
-        best_pull: { jeton: 'Vyolis', odds: 1000, variant: null, eff: 1000 },
+        best_pull: { jeton: process.env.BEST_OMBRE ? 'Takoras' : 'Vyolis', odds: process.env.BEST_OMBRE ? 1000000 : 1000, variant: process.env.BEST_OMBRE ? 'ombre' : null, eff: process.env.BEST_OMBRE ? 500000000 : 1000 },
       };
       if (who.toLowerCase() === st.pseudo.toLowerCase())
         return json({

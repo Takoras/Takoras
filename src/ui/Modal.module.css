@@ -80,8 +80,10 @@
   animation: none;
 }
 
-/* fiche jeton : grande, presque tout l'écran sur téléphone */
+/* fiche jeton : grande, presque tout l'écran sur téléphone ; même taille sur toutes les pages (on annule le
+   zoom propre à la page --pz et on garde celui de l'inventaire) */
 .noRise.wide {
+  zoom: calc(0.9 / var(--pz, 1));
   width: min(100% - 2 * var(--gutter), 1040px);
 }
 

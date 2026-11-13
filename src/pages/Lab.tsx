@@ -3,6 +3,7 @@ import { startRing, closeRing, startRingTuto, ringPlayTurn, RNG } from '@/engine
 import { CINE } from '@/engines/cinema.js';
 import { SERIES } from '@/data/jetons';
 import { Button } from '@/ui/Button';
+import { PixelBg } from '@/ui/PixelBg';
 
 // Labo de développement (jamais dans le site en ligne) : lancer les moteurs portés et vérifier qu'ils ne fuient pas.
 type LeakReport = { rounds: number; overlays: number; listenersLeft: number; rafAfterClose: number };
@@ -139,6 +140,26 @@ export default function Lab() {
         </Button>
       </div>
       {report ? <pre data-testid="leak">{JSON.stringify(report, null, 2)}</pre> : null}
+      {/* les 11 paliers du fond des jetons, du plus simple au plus beau */}
+      <h2>Fonds de rareté</h2>
+      <div data-testid="bgs" style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: 12 }}>
+        {[1, 10, 60, 250, 1000, 5000, 25_000, 100_000, 500_000, 1_000_000, 100_000_000].map((o, i) => (
+          <div
+            key={o}
+            style={{ position: 'relative', height: 200, borderRadius: 14, overflow: 'hidden', background: '#101018' }}
+          >
+            <PixelBg
+              odds={o}
+              glow={['#3cc8ea', '#a855f7', '#f2c230', '#4ade80'][i % 4] ?? '#3cc8ea'}
+              className="lab-bg"
+            />
+            <b style={{ position: 'absolute', left: 10, top: 8, fontSize: 12 }}>
+              {i} · 1/{o.toLocaleString('fr-FR')}
+            </b>
+          </div>
+        ))}
+      </div>
+      <style>{'.lab-bg{position:absolute;inset:0;width:100%;height:100%;opacity:.6}'}</style>
     </section>
   );
 }

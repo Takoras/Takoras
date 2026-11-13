@@ -237,6 +237,20 @@ export function JetonModal({
                 </div>
               </span>
               <i className={s.floor} aria-hidden />
+              {/* une seule version (meilleur tirage) : son tampon seul, pour garder la même fiche qu'ailleurs */}
+              {single && !locked ? (
+                <div className={s.stamps} aria-hidden>
+                  {pv ? (
+                    <span className={s.stamp} aria-pressed>
+                      <span style={{ backgroundImage: `url(/img/stamps/${pv}.png)` }} />
+                    </span>
+                  ) : (
+                    <span className={`${s.stamp} ${s.off}`} style={{ visibility: 'hidden' }}>
+                      <span />
+                    </span>
+                  )}
+                </div>
+              ) : null}
               {locked || single ? null : (
                 <div className={s.stamps} role="group" aria-label={t('ui.bst_variants')}>
                   {VS.map((v) => {
