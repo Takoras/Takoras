@@ -16,6 +16,7 @@ import { toast } from '@/ui/toast';
 import { flyCoins, flyIcons, shockwave } from '@/ui/fx';
 import { useSwingAll } from '@/ui/useSwing';
 import { useStaggerIn } from '@/ui/useStaggerIn';
+import { RewardSheet } from './RewardSheet';
 import s from './Pass.module.css';
 
 type Reward = { coins?: number; item?: string; qty?: number } | null;
@@ -46,6 +47,27 @@ const ITEMS: Record<string, ShopItem & { price: number }> = {
 };
 const worth = (r: Reward) => (!r ? 0 : r.coins ? r.coins : (ITEMS[r.item ?? '']?.price ?? 0) * (r.qty ?? 1));
 const isCosmetic = (r: Reward) => !!r?.item && (r.item.startsWith('b_') || r.item.startsWith('a_'));
+// couleur et valeur d'une récompense (fond de sa fiche) : pièces en or, potions en violet, sablier ambré,
+// exclusifs (photo, bannière) en rose ; plus elle vaut cher, plus le fond est riche
+const POT_ODDS: Record<string, number> = {
+  potion1: 10,
+  potion2: 100,
+  potion3: 1000,
+  potion10: 10_000,
+  potion25: 50_000,
+  potion50: 100_000,
+  potion100: 500_000,
+};
+const rewardLook = (r: Reward) =>
+  !r
+    ? { color: '#3966f7', odds: 1 }
+    : r.coins
+      ? { color: '#f2c230', odds: Math.max(10, r.coins / 4) }
+      : r.item?.startsWith('potion')
+        ? { color: '#a78bfa', odds: POT_ODDS[r.item] ?? 1000 }
+        : r.item === 'hourglass'
+          ? { color: '#e0a15b', odds: 250 }
+          : { color: '#ff7aa2', odds: 1_000_000 };
 const icon = (r: Reward) =>
   r?.coins ? '/img/piece.png' : itemImg(ITEMS[r?.item ?? ''] ?? { id: 'hourglass', kind: 'hourglass' }).src;
 const GOLD = 'rgb(242 194 48)';
@@ -627,40 +649,32 @@ export default function Pass() {
             </ol>
           </div>
 
-          {/* fenêtre d'un palier : ce que c'est, combien, et où on en est */}
-          <Modal open={!!infoR} onClose={() => setInfo(null)} title={info ? t('ui.bp_tier_n', { n: info.t }) : ''}>
-            {info && infoR ? (
-              <div className={`${s.info} ${info.prem ? s.infoGold : ''}`}>
-                <div className={s.infoArt}>
-                  <span>
-                    <img
-                      className={`px ${infoR.item?.startsWith('b_') ? s.wide : infoR.item?.startsWith('a_') ? s.round : ''}`}
-                      src={icon(infoR)}
-                      alt=""
-                    />
-                  </span>
-                </div>
-                <div className={s.infoTxt}>
-                  <span className={s.infoTag}>{info.prem ? t('ui.bp_prem_short') : t('ui.bp_free')}</span>
-                  <h3>{label(infoR)}</h3>
-                  <p>{infoDesc}</p>
-                  <p className={`${s.infoState} ${infoGot ? s.ok : ''}`}>{infoState}</p>
-                  {infoCan ? (
-                    <Button
-                      variant="primary"
-                      loading={busy}
-                      onClick={async () => {
-                        await claim(info.t, info.prem, infoR);
-                        setInfo(null);
-                      }}
-                    >
-                      {t('ui.bp_claim')}
-                    </Button>
-                  ) : null}
-                </div>
-              </div>
-            ) : null}
-          </Modal>
+          {/* fiche d'une récompense : même DA que la fiche d'un jeton */}
+          <RewardSheet
+            info={
+              info && infoR
+                ? {
+                    tier: info.t,
+                    prem: info.prem,
+                    title: label(infoR),
+                    img: icon(infoR),
+                    shape: infoR.item?.startsWith('b_') ? 'wide' : infoR.item?.startsWith('a_') ? 'round' : undefined,
+                    desc: infoDesc,
+                    state: infoState,
+                    got: infoGot,
+                    can: infoCan,
+                    ...rewardLook(infoR),
+                  }
+                : null
+            }
+            busy={busy}
+            onClaim={async () => {
+              if (!info || !infoR) return;
+              await claim(info.t, info.prem, infoR);
+              setInfo(null);
+            }}
+            onClose={() => setInfo(null)}
+          />
 
           <Modal open={premOpen} onClose={() => setPremOpen(false)} title={t('ui.bp_prem')}>
             <div className={s.premium}>
