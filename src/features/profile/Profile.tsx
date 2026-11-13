@@ -411,7 +411,7 @@ function Collection({
           <li
             key={j.name}
             style={(c ? glowVars(j) : { '--g': '113, 113, 122' }) as CSSProperties}
-            className={`${iv.card} ${c ? '' : iv.unk}`}
+            className={`dd-card ${iv.card} ${c ? '' : iv.unk}`}
           >
             <button
               type="button"
@@ -626,7 +626,7 @@ function ShowcasePicker({ p, slot, onClose }: { p: Prof; slot: number; onClose: 
                     const n = e.vs.reduce((a, v) => a + v.g.ids.length, 0);
                     const no = (SERIES[serie] ?? []).findIndex((x) => x.name === e.name) + 1;
                     return (
-                      <li key={e.name} className={iv.card} style={{ ...glowVars(j), '--n': i } as CSSProperties}>
+                      <li key={e.name} className={`dd-card ${iv.card}`} style={{ ...glowVars(j), '--n': i } as CSSProperties}>
                         <button
                           type="button"
                           className={iv.cardBtn}

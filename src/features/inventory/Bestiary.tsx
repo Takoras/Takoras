@@ -435,7 +435,7 @@ function CardView({
       data-key={c.j.name}
       data-sig={`${n}|${locked}|${badge?.[1] ?? ''}`}
       style={(known ? glowVars(j) : { '--g': '113, 113, 122' }) as CSSProperties}
-      className={[s.card, !n && (c.seen ? s.gone : s.unk), q && s.sel, locked && s.locked].filter(Boolean).join(' ')}
+      className={['dd-card', s.card, !n && (c.seen ? s.gone : s.unk), q && s.sel, locked && s.locked].filter(Boolean).join(' ')}
     >
       <button
         type="button"

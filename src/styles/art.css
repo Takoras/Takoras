@@ -199,3 +199,9 @@ html.reduce-fx img.px.dd-on {
 html img.px[src*='.gif']:not(.v-gold, .v-celeste, .v-ombre) {
   animation: none !important;
 }
+
+/* … sauf dans les cases de jetons (inventaire, collections du profil, choix de la vitrine) : là ils sont petits,
+   le doodle ne coûte presque rien et ils gardent le même style que les autres jetons */
+html .dd-card img.px[src*='.gif']:not(.v-gold, .v-celeste, .v-ombre) {
+  animation: doodle 0.9s steps(1) infinite !important;
+}
