@@ -22,6 +22,8 @@ export type RewardInfo = {
   img: string;
   /** image large (bannière) ou ronde (photo de profil) */
   shape?: 'wide' | 'round';
+  /** combien on en reçoit (autocollant sur l'image) */
+  qty?: number;
   desc: string;
   state: string;
   got: boolean;
@@ -169,7 +171,10 @@ export function RewardSheet({
               ) : (
                 <span className={s.tag}>{t('ui.bp_free')}</span>
               )}
-              <h2 className={`${tc.name} ${s.title} ${info.prem ? s.goldTitle : ''}`}>{info.title}</h2>
+              <h2 className={`${tc.name} ${s.title} ${info.prem ? s.goldTitle : ''}`}>
+                {info.title}
+                {info.qty ? <span className="visually-hidden"> ×{info.qty}</span> : null}
+              </h2>
             </div>
             {/* au centre : la récompense en grand, qui flotte, avec rayons et lueur */}
             <div className={js.center}>
@@ -183,6 +188,7 @@ export function RewardSheet({
               <span className={js.pin}>
                 <div ref={coin} className={`${js.coin} ${s.art} ${info.shape === 'wide' ? s.wideCoin : ''}`} onPointerMove={tilt} onPointerLeave={untilt}>
                   <img className={`px ${info.shape ? s[info.shape] : ''}`} src={info.img} alt="" />
+                  {info.qty ? <i className={s.qty}>×{info.qty}</i> : null}
                 </div>
               </span>
               <i className={js.floor} aria-hidden />

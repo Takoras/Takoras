@@ -266,9 +266,11 @@ export default function Pass() {
     if (!r) return '';
     if (r.coins) return t('ui.bp_coins', { n: n(r.coins) });
     const it = ITEMS[r.item ?? ''];
-    return `${it ? itemText(it, lang)[0] : r.item}${(r.qty ?? 1) > 1 ? ` ×${r.qty}` : ''}`;
+    return it ? itemText(it, lang)[0] : (r.item ?? '');
   };
-  const amount = (r: Reward) => (r?.coins ? n(r.coins) : (r?.qty ?? 1) > 1 ? `×${r?.qty}` : '');
+  const amount = (r: Reward) => (r?.coins ? n(r.coins) : '');
+  // combien on en reçoit : un petit autocollant collé à l'image (à part de l'effet, ex. « Chance ×10 »)
+  const sticker = (r: Reward) => (!r?.coins && (r?.qty ?? 1) > 1 ? <i className={s.qty}>×{r?.qty}</i> : null);
   const tileOf = (tr: number, p: boolean) => list.current?.querySelector<HTMLElement>(`[data-k="${tr}-${p ? 1 : 0}"]`);
 
   // l'effet d'une case récupérée : éclair, deux ondes de choc, petit « pop », et la récompense s'envole
@@ -442,6 +444,7 @@ export default function Pass() {
             src={icon(r)}
             alt=""
           />
+          {sticker(r)}
         </span>
         <b className={s.amt}>{amount(r) || '\u00a0'}</b>
         <small className={s.lbl}>{name(r)}</small>
@@ -514,6 +517,7 @@ export default function Pass() {
             src={icon(r)}
             alt=""
           />
+          {sticker(r)}
         </span>
         <b>{amount(r) || '\u00a0'}</b>
         <small>{name(r)}</small>
@@ -651,6 +655,7 @@ export default function Pass() {
                     tier: info.t,
                     prem: info.prem,
                     title: label(infoR),
+                    qty: !infoR.coins && (infoR.qty ?? 1) > 1 ? infoR.qty : undefined,
                     img: icon(infoR),
                     shape: infoR.item?.startsWith('b_') ? 'wide' : infoR.item?.startsWith('a_') ? 'round' : undefined,
                     desc: infoDesc,

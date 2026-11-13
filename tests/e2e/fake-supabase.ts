@@ -615,7 +615,9 @@ export async function fakeSupabase(
               ? { item: 'b_yeux', qty: 1 }
               : i + 1 === 50
                 ? { item: 'a_oeil', qty: 1 }
-                : { item: 'potion10', qty: 1 },
+                : i + 1 === 2
+                  ? { item: 'potion10', qty: 3 }
+                  : { item: 'potion10', qty: 1 },
         })),
       });
     if (rpc === 'bp_claim') {
