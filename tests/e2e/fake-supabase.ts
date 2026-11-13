@@ -125,7 +125,7 @@ export async function fakeSupabase(
     avatar: 'default',
     bio: '',
     banner: null,
-    showcase: [],
+    showcase: process.env.SC_V ? [16] : [],
   };
   const items = [
     { item: 'potion1', kind: 'potion', data: { mult: 1.3, rolls: 5 }, qty: 3 },
@@ -475,7 +475,7 @@ export async function fakeSupabase(
           pseudo_free: false,
           pseudo_next: null,
           showcase: [
-            prof.showcase[0] ? { id: 16, jeton: 'Vyolis', odds: 1000, variant: null } : null,
+            prof.showcase[0] ? { id: 16, jeton: 'Vyolis', odds: 1000, variant: process.env.SC_V ?? null } : null,
             null,
             null,
             null,

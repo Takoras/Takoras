@@ -574,18 +574,29 @@ function ShowcasePicker({ p, slot, onClose }: { p: Prof; slot: number; onClose: 
       <div className={s.pk}>
         {/* ce qu'il y a dans la case maintenant */}
         {cur ? (
-          <div className={s.pkCur} style={glowVars(jetonOf(cur.jeton), cur.variant) as CSSProperties}>
-            <img className={vImg(cur.variant)} src={texOf(jetonOf(cur.jeton))} alt="" />
-            <span>
-              <b>
-                {jn(cur.jeton)} <VTag v={cur.variant} />
-              </b>
-              <small>1/{fmt(vOdds(cur.odds, (cur.variant ?? '') as Variant))}</small>
-            </span>
-            <Button size="sm" onClick={() => void save(null)} loading={busy === -1}>
-              {t('ui.pick_remove')}
-            </Button>
-          </div>
+          (() => {
+            const cj = jetonOf(cur.jeton);
+            const co = vOdds(cur.odds, (cur.variant ?? '') as Variant);
+            return (
+              <div className={s.pkCur} style={glowVars(cj, cur.variant) as CSSProperties}>
+                {/* le fond pixel du jeton (couleur de la mutation), comme sa fiche */}
+                <PixelBg className={s.pkCurBg} odds={co} glow={colorOf(cj, cur.variant)} still={reducedFx()} />
+                <span className={s.pkCurArt}>
+                  <img className={`px ${vImg(cur.variant)}`} src={texOf(cj)} alt="" />
+                </span>
+                <span className={s.pkCurId}>
+                  <b>{jn(cur.jeton)}</b>
+                  <span className={s.pkCurMeta}>
+                    <VTag v={cur.variant} />
+                    <em>1/{fmt(co)}</em>
+                  </span>
+                </span>
+                <Button size="sm" onClick={() => void save(null)} loading={busy === -1}>
+                  {t('ui.pick_remove')}
+                </Button>
+              </div>
+            );
+          })()
         ) : null}
 
         {
