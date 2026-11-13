@@ -1,11 +1,10 @@
 import { useEffect, useMemo, useState, type CSSProperties } from 'react';
 import { RCFG } from '@/engines/ring-config.js';
 import { sfx } from '@/engines/sound.js';
-import { glowVars, jetonOf, texOf, vImg, vOdds, colorOf, type Variant } from '@/data/jetons';
+import { glowVars, jetonOf, texOf, vImg } from '@/data/jetons';
 import { powerInfo } from '@/data/kit';
 import { reducedFx, useSettings } from '@/lib/settings';
 import { Button } from '@/ui/Button';
-import { PixelBg } from '@/ui/PixelBg';
 import { useDeck } from '../combat/team';
 import {
   activeOf,
@@ -26,9 +25,9 @@ import {
 import { duelText, fill } from './text';
 import s from './Duel.module.css';
 
-// Duel (prototype) : plateau au tour par tour contre l'IA. En haut l'adversaire (sa réserve, puis son jeton devant),
-// en bas toi (ton jeton devant, puis ta réserve) et tes trois actions. Chaque coup se voit : le jeton s'élance,
-// celui touché tremble et perd ses PV avec un chiffre qui s'envole.
+// Duel (prototype) : le combat prend tout l'écran. En haut la réserve de l'ordi, puis son jeton en jeu ; au milieu
+// l'espace de jeu ; puis ton jeton en jeu et ta réserve. Pour attaquer, le jeton se soulève (3D), s'abat sur l'adversaire
+// en accélérant, puis revient doucement à sa place ; celui qui est touché tremble et perd ses PV.
 const NAMES = [...Object.keys(RCFG.TOKENS), 'Coton'];
 const randomTeam = () =>
   [...NAMES]
@@ -42,8 +41,72 @@ const clearTimers = () => {
   TIMERS.forEach(clearTimeout);
   TIMERS.clear();
 };
+const wait = (ms: number) =>
+  new Promise<void>((ok) => {
+    const id = window.setTimeout(() => {
+      TIMERS.delete(id);
+      ok();
+    }, ms);
+    TIMERS.add(id);
+  });
 
-type Fx = Record<number, { k: number; hit?: number; heal?: number; block?: string; lunge?: boolean; ko?: boolean }>;
+// ---------- le coup : se soulever, frapper, revenir ----------
+const SLAM = 1150; // durée totale
+const IMPACT = 0.56; // moment du choc (fraction)
+function tokenEl(uid: number) {
+  return document.querySelector<HTMLElement>(`[data-uid="${uid}"] [data-lift]`);
+}
+function slam(from: number, to: number | null, side: Side) {
+  const a = tokenEl(from);
+  if (!a || reducedFx()) return;
+  const sh = a.parentElement?.querySelector<HTMLElement>('[data-shadow]');
+  const tilt = side === 0 ? 26 : -26;
+  const r0 = a.getBoundingClientRect();
+  const b = to != null ? tokenEl(to) : null;
+  let dx = 0,
+    dy = 0;
+  if (b && to !== from) {
+    const r1 = b.getBoundingClientRect();
+    // on s'arrête au bord du jeton visé (il ne passe pas à travers)
+    const k = 1 - Math.min(0.45, (r1.height * 0.55) / Math.max(1, Math.hypot(r1.x - r0.x, r1.y - r0.y)));
+    dx = (r1.left + r1.width / 2 - (r0.left + r0.width / 2)) * k;
+    dy = (r1.top + r1.height / 2 - (r0.top + r0.height / 2)) * k;
+  }
+  // pendant le coup, il passe au-dessus de tout (plaques, étiquette du milieu)
+  const box = a.closest<HTMLElement>('[data-uid]');
+  if (box) {
+    box.style.zIndex = '5';
+    window.setTimeout(() => box.style.removeProperty('z-index'), SLAM);
+  }
+  const P = 'perspective(700px)';
+  const hit = to != null && to !== from;
+  a.animate(
+    [
+      { transform: `${P} translate(0, 0) rotateX(0deg) scale(1)`, easing: 'cubic-bezier(.2,.8,.3,1)' },
+      // il se soulève et se penche en arrière, comme une main qui le prend
+      { transform: `${P} translate(0, ${side === 0 ? -26 : 26}px) rotateX(${tilt}deg) scale(1.22)`, offset: 0.36, easing: 'cubic-bezier(.55,0,.95,.45)' },
+      // il s'abat (de plus en plus vite)
+      hit
+        ? { transform: `${P} translate(${dx}px, ${dy}px) rotateX(${-tilt * 0.35}deg) scale(1.02)`, offset: IMPACT, easing: 'cubic-bezier(.25,.75,.3,1)' }
+        : { transform: `${P} translate(0, 0) rotateY(360deg) scale(1.1)`, offset: IMPACT, easing: 'cubic-bezier(.25,.75,.3,1)' },
+      // et revient doucement à sa place
+      { transform: `${P} translate(0, 0) rotateX(0deg) scale(1)` },
+    ],
+    { duration: SLAM },
+  );
+  // son ombre reste sur la table : elle s'éloigne et pâlit quand il monte, le suit quand il frappe
+  sh?.animate(
+    [
+      { transform: 'translate(0, 0) scale(1)', opacity: 1, easing: 'cubic-bezier(.2,.8,.3,1)' },
+      { transform: `translate(0, ${side === 0 ? 10 : -10}px) scale(1.25)`, opacity: 0.35, offset: 0.36, easing: 'cubic-bezier(.55,0,.95,.45)' },
+      { transform: `translate(${dx}px, ${dy}px) scale(1)`, opacity: 1, offset: IMPACT, easing: 'cubic-bezier(.25,.75,.3,1)' },
+      { transform: 'translate(0, 0) scale(1)', opacity: 1 },
+    ],
+    { duration: SLAM },
+  );
+}
+
+type Fx = Record<number, { k: number; hit?: number; heal?: number; block?: string; ko?: boolean }>;
 type Mode = null | 'switch' | 'aim';
 
 export default function Duel() {
@@ -73,62 +136,7 @@ export default function Duel() {
   useEffect(() => clearTimers, []);
 
   const nameOf = (uid: number, state: State) => unitById(state, uid)?.name ?? '';
-  const pwName = (name: string) => {
-    const id = powerOf(name).id;
-    return T.n[id] ?? powerInfo(name, lang).name;
-  };
-  // joue une action, puis montre ses effets un par un
-  const run = (side: Side, a: Action) => {
-    const next = play(st, side, a);
-    if (next === st) return;
-    setStarted(true);
-    setMode(null);
-    setBusy(true);
-    const evs = next.log;
-    const step = reducedFx() ? 0 : 420;
-    let t = 0;
-    const at = (ms: number, f: () => void) => {
-      const id = window.setTimeout(() => {
-        TIMERS.delete(id);
-        f();
-      }, ms);
-      TIMERS.add(id);
-    };
-    // le texte du coup
-    const first = evs.find((e) => e.k === 'attack' || e.k === 'power' || e.k === 'swap' || e.k === 'skip');
-    if (first) setLine(lineOf(first, next, side));
-    // on affiche l'état d'avant pendant l'élan, puis le nouvel état arrive avec les coups
-    evs.forEach((e: Ev) => {
-      if (e.k === 'attack' || e.k === 'power') {
-        at(t, () => {
-          setFx((f) => ({ ...f, [e.uid]: { k: Math.random(), lunge: true } }));
-          if (e.k === 'power') sfx.upgrade();
-          else sfx.click();
-        });
-        t += step * 0.6;
-      } else if (e.k === 'hit' || e.k === 'heal' || e.k === 'block' || e.k === 'ko') {
-        at(t, () => {
-          setSt(next);
-          setFx((f) => ({
-            ...f,
-            [e.uid]: {
-              k: Math.random(),
-              ...(e.k === 'hit' ? { hit: e.n } : {}),
-              ...(e.k === 'heal' ? { heal: e.n } : {}),
-              ...(e.k === 'block' ? { block: e.what } : {}),
-              ...(e.k === 'ko' ? { ko: true } : {}),
-            },
-          }));
-          if (e.k === 'hit') sfx.deny?.();
-        });
-        t += step * (e.k === 'ko' ? 1.2 : 0.7);
-      }
-    });
-    at(t, () => {
-      setSt(next);
-      setBusy(false);
-    });
-  };
+  const pwName = (name: string) => T.n[powerOf(name).id] ?? powerInfo(name, lang).name;
   const lineOf = (e: Ev, state: State, side: Side) => {
     if (e.k === 'attack') return fill(T.attacks, { a: nameOf(e.uid, state) });
     if (e.k === 'power') return fill(T.uses_pw, { a: nameOf(e.uid, state), p: pwName(nameOf(e.uid, state)) });
@@ -136,13 +144,61 @@ export default function Duel() {
     if (e.k === 'swap') return fill(T.swaps, { a: activeOf(state, e.side ?? side).name });
     return '';
   };
+  const show = (evs: Ev[]) =>
+    setFx((f) => {
+      const n = { ...f };
+      evs.forEach((e) => {
+        if (e.k === 'hit') n[e.uid] = { k: Math.random(), hit: e.n };
+        else if (e.k === 'heal') n[e.uid] = { k: Math.random(), heal: e.n };
+        else if (e.k === 'block') n[e.uid] = { k: Math.random(), block: e.what };
+        else if (e.k === 'ko') n[e.uid] = { ...n[e.uid], k: n[e.uid]?.k ?? Math.random(), ko: true };
+      });
+      return n;
+    });
 
-  // l'IA joue quand c'est son tour (ou qu'elle doit remplacer un jeton)
+  // joue une action et la montre : coup par coup (élan, choc, PV), puis la main passe
+  const run = async (side: Side, a: Action) => {
+    const next = play(st, side, a);
+    if (next === st) return;
+    setStarted(true);
+    setMode(null);
+    setBusy(true);
+    const evs = next.log;
+    const first = evs.find((e) => e.k === 'attack' || e.k === 'power' || e.k === 'swap' || e.k === 'skip');
+    if (first) setLine(lineOf(first, next, side));
+    const fast = reducedFx();
+    // découpe en coups : chaque élan (attaque / pouvoir) avec les effets qui le suivent
+    const groups: { lead?: Ev; rest: Ev[] }[] = [];
+    evs.forEach((e) => {
+      if (e.k === 'attack' || e.k === 'power') groups.push({ lead: e, rest: [] });
+      else if (groups.length) groups[groups.length - 1]?.rest.push(e);
+      else groups.push({ rest: [e] });
+    });
+    for (const g of groups) {
+      const lead = g.lead;
+      if (lead && (lead.k === 'attack' || lead.k === 'power')) {
+        const tgt = g.rest.find((e) => e.k === 'hit' || e.k === 'block');
+        const to = tgt && 'uid' in tgt ? tgt.uid : null;
+        const who = unitById(st, lead.uid) ? (st.teams[0].units.some((u) => u.uid === lead.uid) ? 0 : 1) : side;
+        if (lead.k === 'power') sfx.upgrade();
+        slam(lead.uid, to === lead.uid ? null : to, who as Side);
+        await wait(fast ? 0 : SLAM * IMPACT);
+        sfx.click();
+      }
+      setSt(next);
+      show(g.rest);
+      await wait(fast ? 0 : lead ? SLAM * (1 - IMPACT) : 450);
+    }
+    setSt(next);
+    setBusy(false);
+  };
+
+  // l'ordi joue quand c'est son tour (ou qu'il doit remplacer un jeton)
   useEffect(() => {
     if (busy || st.winner !== null) return;
     const side: Side | null = st.need === 1 ? 1 : st.need === null && st.turn === 1 ? 1 : null;
     if (side === null) return;
-    const id = window.setTimeout(() => run(1, aiMove(st, 1)), reducedFx() ? 0 : 650);
+    const id = window.setTimeout(() => void run(1, aiMove(st, 1)), reducedFx() ? 0 : 700);
     return () => clearTimeout(id);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [st, busy]);
@@ -156,15 +212,63 @@ export default function Duel() {
   const onPower = () => {
     if (!myTurn || !ready) return;
     if (pw.target) setMode('aim');
-    else run(0, { t: 'power' });
+    else void run(0, { t: 'power' });
   };
-  const status = mustSend ? T.send : mode === 'aim' ? T.aim : mode === 'switch' ? T.pickSwap : busy ? line : st.turn === 0 ? T.you : T.foe;
+  const status = mustSend
+    ? T.send
+    : mode === 'aim'
+      ? T.aim
+      : mode === 'switch'
+        ? T.pickSwap
+        : busy
+          ? line
+          : st.turn === 0
+            ? T.you
+            : T.foe;
 
-  const card = (u: Unit, side: Side, big: boolean, onClick?: () => void) => {
+  // un jeton posé sur la table (avec son ombre), et ses chiffres qui s'envolent
+  const token = (u: Unit, big: boolean) => {
     const j = jetonOf(u.name, u.serie);
     const f = fx[u.uid];
+    return (
+      <span className={`${s.tok} ${big ? s.tokBig : s.tokSmall} ${u.hp <= 0 ? s.dead : ''}`}>
+        <i className={s.shadow} data-shadow aria-hidden />
+        <span className={s.lift} data-lift>
+          <span key={f?.hit ? f.k : 'still'} className={`${s.face} ${f?.hit ? s.hit : ''}`}>
+            <img className={vImg(u.variant)} src={texOf(j)} alt="" />
+          </span>
+        </span>
+        {f?.hit ? (
+          <span key={`h${f.k}`} className={s.float}>
+            −{f.hit}
+          </span>
+        ) : null}
+        {f?.heal ? (
+          <span key={`g${f.k}`} className={`${s.float} ${s.heal}`}>
+            +{f.heal}
+          </span>
+        ) : null}
+        {f?.block ? (
+          <span key={`b${f.k}`} className={`${s.float} ${s.block}`}>
+            {T[`st_${f.block}` as 'st_shield']}
+          </span>
+        ) : null}
+      </span>
+    );
+  };
+  const hpBar = (u: Unit) => {
     const pct = Math.max(0, (u.hp / u.max) * 100);
-    const stats = [
+    return (
+      <span className={s.hp} aria-label={`${u.hp}/${u.max} PV`}>
+        <i style={{ width: `${pct}%` }} className={pct < 25 ? s.low : pct < 55 ? s.mid : undefined} />
+      </span>
+    );
+  };
+  // le jeton en jeu : grand, avec sa plaque (nom, PV, pouvoir et ses crans, effets en cours)
+  const spot = (u: Unit, side: Side, onClick?: () => void) => {
+    const j = jetonOf(u.name, u.serie);
+    const p = powerOf(u.name);
+    const effects = [
       u.frozen && T.st_frozen,
       u.weak && T.st_weak,
       u.held && T.st_held,
@@ -174,31 +278,15 @@ export default function Duel() {
       u.jelly && T.st_jelly,
       u.nova && T.st_nova,
     ].filter(Boolean) as string[];
-    const p = powerOf(u.name);
     const body = (
       <>
-        {big ? (
-          <PixelBg
-            className={s.bg}
-            odds={vOdds(j.odds, u.variant as Variant)}
-            glow={colorOf(j, u.variant)}
-            still={reducedFx()}
-          />
-        ) : null}
-        <span className={s.art}>
-          <img className={vImg(u.variant)} src={texOf(j)} alt="" />
-        </span>
-        <b className={s.name}>{u.name}</b>
-        <span className={s.hp} aria-label={`${u.hp}/${u.max} PV`}>
-          <i
-            style={{ width: `${pct}%` }}
-            className={pct < 25 ? s.low : pct < 55 ? s.mid : undefined}
-          />
-        </span>
-        <small className={s.hpN}>
-          {u.hp}/{u.max}
-        </small>
-        {big ? (
+        {token(u, true)}
+        <span className={s.plate}>
+          <b className={s.name}>{u.name}</b>
+          {hpBar(u)}
+          <small className={s.hpN}>
+            {u.hp}/{u.max}
+          </small>
           <span className={s.pw}>
             <span className={s.pwName}>{pwName(u.name)}</span>
             <span className={s.pips} aria-hidden>
@@ -207,99 +295,86 @@ export default function Duel() {
               ))}
             </span>
           </span>
-        ) : null}
-        {stats.length ? (
-          <span className={s.chips}>
-            {stats.map((x) => (
-              <em key={x}>{x}</em>
-            ))}
-          </span>
-        ) : null}
-        {f?.hit ? (
-          <span key={f.k} className={s.float}>
-            −{f.hit}
-          </span>
-        ) : null}
-        {f?.heal ? (
-          <span key={f.k} className={`${s.float} ${s.heal}`}>
-            +{f.heal}
-          </span>
-        ) : null}
-        {f?.block ? (
-          <span key={f.k} className={`${s.float} ${s.block}`}>
-            {T[`st_${f.block === 'shield' ? 'shield' : f.block}` as 'st_shield']}
-          </span>
-        ) : null}
+          {effects.length ? (
+            <span className={s.chips}>
+              {effects.map((x) => (
+                <em key={x}>{x}</em>
+              ))}
+            </span>
+          ) : null}
+        </span>
       </>
     );
-    const cls = [
-      s.card,
-      big ? s.big : s.small,
-      side ? s.foeCard : s.meCard,
-      u.hp <= 0 && s.dead,
-      f?.lunge && s.lunge,
-      f?.hit && s.hit,
-      onClick && s.pickable,
-    ]
-      .filter(Boolean)
-      .join(' ');
-    const style = { ...glowVars(j, u.variant) } as CSSProperties;
+    const cls = `${s.spot} ${side ? s.spotFoe : s.spotMe} ${onClick ? s.pickable : ''}`;
+    const style = glowVars(j, u.variant) as CSSProperties;
     return onClick ? (
-      <button key={`${u.uid}-${f?.k ?? 0}`} type="button" className={cls} style={style} onClick={onClick}>
+      <button key={u.uid} type="button" data-uid={u.uid} className={cls} style={style} onClick={onClick}>
         {body}
       </button>
     ) : (
-      <div key={`${u.uid}-${f?.k ?? 0}`} className={cls} style={style}>
+      <div key={u.uid} data-uid={u.uid} className={cls} style={style}>
         {body}
       </div>
     );
   };
+  // la réserve : trois emplacements ; celui du jeton en jeu reste vide (creux dans la table)
   const bench = (side: Side) =>
     st.teams[side].units.map((u, i) => {
-      if (i === st.teams[side].active) return null;
-      const canPick =
-        side === 0
-          ? u.hp > 0 && ((mode === 'switch' && myTurn) || mustSend)
-          : mode === 'aim' && u.hp > 0;
-      return card(
-        u,
-        side,
-        false,
-        canPick
-          ? () => {
-              if (side === 0) run(0, mustSend ? { t: 'send', to: i } : { t: 'switch', to: i });
-              else run(0, { t: 'power', target: u.uid });
-            }
-          : undefined,
+      if (i === st.teams[side].active)
+        return <span key={`slot${i}`} className={`${s.slot} ${s.empty}`} aria-hidden />;
+      const can =
+        side === 0 ? u.hp > 0 && ((mode === 'switch' && myTurn) || mustSend) : mode === 'aim' && u.hp > 0;
+      const onClick = can
+        ? () => {
+            if (side === 0) void run(0, mustSend ? { t: 'send', to: i } : { t: 'switch', to: i });
+            else void run(0, { t: 'power', target: u.uid });
+          }
+        : undefined;
+      const style = glowVars(jetonOf(u.name, u.serie), u.variant) as CSSProperties;
+      const inner = (
+        <>
+          {token(u, false)}
+          {hpBar(u)}
+        </>
+      );
+      return onClick ? (
+        <button
+          key={u.uid}
+          type="button"
+          data-uid={u.uid}
+          className={`${s.slot} ${s.pickable}`}
+          style={style}
+          onClick={onClick}
+          aria-label={u.name}
+        >
+          {inner}
+        </button>
+      ) : (
+        <span key={u.uid} data-uid={u.uid} className={s.slot} style={style} title={u.name}>
+          {inner}
+        </span>
       );
     });
 
   return (
     <section className={s.page}>
       <h1 className="visually-hidden">{T.title}</h1>
-      <p className={s.status} aria-live="polite">
-        <span key={status}>{status}</span>
-        {st.teams[1].thorns ? <em className={s.side}>{T.st_thorns}</em> : null}
-        {st.teams[0].sealed ? <em className={s.side}>{T.st_sealed}</em> : null}
-      </p>
-      <div className={s.board}>
-        <div className={`${s.team} ${s.foeTeam}`}>
-          <small className={s.who}>{T.bot}</small>
-          <div className={s.front}>
-            {card(
-              foe,
-              1,
-              true,
-              mode === 'aim' && pw.target === 'any' ? () => run(0, { t: 'power', target: foe.uid }) : undefined,
-            )}
-          </div>
-          <div className={s.row}>{bench(1)}</div>
+      <div className={s.table}>
+        <div className={`${s.rim} ${s.rimFoe}`}>{bench(1)}</div>
+        <div className={s.mat}>
+          {spot(
+            foe,
+            1,
+            mode === 'aim' && pw.target === 'any' ? () => void run(0, { t: 'power', target: foe.uid }) : undefined,
+          )}
+          <p className={s.status} aria-live="polite">
+            <span key={status}>{status}</span>
+            {st.teams[1].thorns ? <em className={s.side}>{T.st_thorns}</em> : null}
+            {st.teams[0].sealed ? <em className={s.side}>{T.st_sealed}</em> : null}
+          </p>
+          {spot(me, 0)}
         </div>
-        <div className={`${s.team} ${s.meTeam}`}>
-          <small className={`${s.who} ${s.whoMe}`}>{T.me}</small>
-          <div className={s.front}>{card(me, 0, true)}</div>
-          <div className={s.row}>{bench(0)}</div>
-        </div>
+        <div className={`${s.rim} ${s.rimMe}`}>{bench(0)}</div>
       </div>
 
       <div className={s.actions}>
@@ -307,7 +382,7 @@ export default function Duel() {
           <Button onClick={() => setMode(null)}>{T.cancel}</Button>
         ) : (
           <>
-            <Button variant="primary" disabled={!myTurn} onClick={() => run(0, { t: 'attack' })}>
+            <Button variant="primary" disabled={!myTurn} onClick={() => void run(0, { t: 'attack' })}>
               {T.attack} <small className={s.dmg}>−{attackDmg(me)}</small>
             </Button>
             <Button disabled={!myTurn || !ready} onClick={onPower} title={T.d[pw.id]}>

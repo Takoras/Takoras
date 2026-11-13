@@ -5,7 +5,7 @@ test('duel : attaquer, l’ordi répond, puis c’est de nouveau à moi', async 
   await fakeSupabase(page, {}, [], { deck: [11, 16, 17] });
   await page.goto('/duel');
   await expect(page.getByText('À toi')).toBeVisible();
-  const foeHp = page.locator('[class*="foeCard"][class*="big"] [class*="hpN"]');
+  const foeHp = page.locator('[class*="spotFoe"] [class*="hpN"]');
   const before = await foeHp.innerText();
   await page.getByRole('button', { name: /Attaquer/ }).click({ force: true });
   await expect(foeHp).not.toHaveText(before);
