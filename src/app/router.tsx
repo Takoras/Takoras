@@ -63,6 +63,8 @@ export const router = createBrowserRouter([
       },
       { path: '/friends', lazy: page(() => import('@/features/social/Friends')) },
       { path: '/pass', lazy: page(() => import('@/features/pass/Pass')) },
+      // Duel : nouveau combat au tour par tour (prototype contre l'IA, pas encore dans le menu)
+      { path: '/duel', lazy: page(() => import('@/features/duel/Duel')) },
       { path: '/profile', lazy: profile },
       { path: '/profile/:pseudo', lazy: profile },
       { path: '/privacy', lazy: page(() => import('@/pages/Privacy')) },

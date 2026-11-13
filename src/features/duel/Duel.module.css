@@ -1,0 +1,465 @@
+/* ======================================================================
+   Duel (prototype) : plateau au tour par tour. Cartes de jetons dans la DA de l'inventaire (cases sombres,
+   jeton en pixel art, fond pixel à sa couleur pour ceux qui sont devant), barres de PV nettes, crans de charge.
+   ====================================================================== */
+.page {
+  display: grid;
+  gap: var(--s-3);
+  width: min(100%, 980px);
+  margin: 0 auto;
+  padding-bottom: var(--s-6);
+}
+.board {
+  display: grid;
+  gap: var(--s-3);
+}
+/* une équipe : son jeton devant, sa réserve à côté. Téléphone debout : l'adversaire en haut (réserve au-dessus),
+   toi en bas (réserve en dessous). Écran large : toi à gauche, l'adversaire à droite, face à face. */
+.team {
+  display: flex;
+  flex-direction: column;
+  gap: var(--s-2);
+}
+.foeTeam {
+  flex-direction: column-reverse;
+}
+@media (min-width: 760px) {
+  .board {
+    grid-template-columns: 1fr 1fr;
+    align-items: center;
+  }
+  .meTeam {
+    order: -1;
+  }
+  .foeTeam {
+    flex-direction: column;
+  }
+}
+.row {
+  display: flex;
+  justify-content: center;
+  gap: var(--s-3);
+}
+.front {
+  display: flex;
+  justify-content: center;
+}
+
+/* ---------- carte d'un jeton ---------- */
+.card {
+  position: relative;
+  isolation: isolate;
+  overflow: hidden;
+  display: grid;
+  justify-items: center;
+  gap: 4px;
+  padding: var(--s-3);
+  border: 0;
+  border-radius: 16px;
+  background: var(--surface-2);
+  color: inherit;
+  font: inherit;
+  text-align: center;
+  transition:
+    opacity 0.4s,
+    filter 0.4s,
+    scale 0.25s var(--ease-out);
+  animation: cardIn 0.35s var(--ease-out) both;
+}
+@keyframes cardIn {
+  from {
+    opacity: 0;
+    translate: 0 10px;
+  }
+}
+.big {
+  width: min(100%, 300px);
+  padding: var(--s-4) var(--s-4) var(--s-3);
+  rotate: -1deg;
+}
+.foeCard.big {
+  rotate: 1deg;
+}
+.small {
+  width: 128px;
+  padding: var(--s-2);
+  gap: 2px;
+}
+.bg {
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  width: 100%;
+  height: 100%;
+  opacity: 0.75;
+}
+.art {
+  display: grid;
+  place-items: center;
+}
+.big .art img {
+  width: 104px;
+  height: 104px;
+  animation: bob 3.6s ease-in-out infinite;
+}
+.small .art img {
+  width: 52px;
+  height: 52px;
+}
+@keyframes bob {
+  50% {
+    translate: 0 -4px;
+  }
+}
+.name {
+  font-family: var(--font-display);
+  font-size: var(--fs-md);
+  line-height: 1.1;
+}
+.small .name {
+  font-size: var(--fs-xs);
+}
+
+/* barre de PV : pleine et nette, verte → jaune → rouge ; elle descend en glissant */
+.hp {
+  display: block;
+  width: 100%;
+  height: 10px;
+  overflow: hidden;
+  border-radius: 4px;
+  background: rgb(0 0 0 / 45%);
+}
+.small .hp {
+  height: 6px;
+}
+.hp i {
+  display: block;
+  height: 100%;
+  background: #4ade80;
+  transition:
+    width 0.5s var(--ease-out),
+    background-color 0.3s;
+}
+.hp i.mid {
+  background: #facc15;
+}
+.hp i.low {
+  background: #f43f5e;
+}
+.hpN {
+  color: var(--text-2);
+  font-size: var(--fs-xs);
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+}
+
+/* pouvoir : son nom et ses crans de charge */
+.pw {
+  display: flex;
+  align-items: center;
+  gap: var(--s-2);
+  padding: 3px 10px;
+  border-radius: var(--r-pill);
+  background: rgb(10 10 16 / 70%);
+}
+.pwName {
+  font-size: var(--fs-xs);
+  font-weight: 800;
+}
+.pips {
+  display: flex;
+  gap: 3px;
+}
+.pips i {
+  width: 8px;
+  height: 8px;
+  border-radius: 2px;
+  background: rgb(255 255 255 / 15%);
+  transition: background-color 0.3s;
+}
+.pips i.on {
+  background: rgb(var(--g));
+}
+
+/* effets en cours (gelé, rempart…) */
+.chips {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 4px;
+}
+.chips em {
+  padding: 1px 7px;
+  border-radius: var(--r-pill);
+  background: rgb(255 255 255 / 10%);
+  color: var(--text);
+  font-size: 10px;
+  font-style: normal;
+  font-weight: 800;
+  letter-spacing: var(--tracking-caps);
+  text-transform: uppercase;
+}
+
+/* ---------- coups ---------- */
+/* le jeton qui joue s'élance vers l'adversaire */
+.lunge {
+  animation: lungeUp 0.36s var(--ease-out);
+}
+.foeCard.lunge {
+  animation: lungeDown 0.36s var(--ease-out);
+}
+@keyframes lungeUp {
+  45% {
+    translate: 0 -18px;
+    scale: 1.04;
+  }
+}
+@keyframes lungeDown {
+  45% {
+    translate: 0 18px;
+    scale: 1.04;
+  }
+}
+/* celui qui est touché tremble par crans */
+.hit {
+  animation: shake 0.32s steps(6);
+}
+@keyframes shake {
+  20% {
+    translate: -5px 0;
+  }
+  40% {
+    translate: 4px 0;
+  }
+  60% {
+    translate: -3px 0;
+  }
+  80% {
+    translate: 2px 0;
+  }
+}
+.float {
+  position: absolute;
+  top: 34%;
+  left: 50%;
+  z-index: 2;
+  translate: -50% 0;
+  font-family: var(--font-display);
+  font-size: 30px;
+  color: #ff5c7a;
+  pointer-events: none;
+  animation: floatUp 0.9s var(--ease-out) forwards;
+}
+.small .float {
+  font-size: 20px;
+}
+.float.heal {
+  color: #4ade80;
+}
+.float.block {
+  color: #e2e8f0;
+  font-size: 16px;
+  letter-spacing: var(--tracking-caps);
+  text-transform: uppercase;
+}
+@keyframes floatUp {
+  from {
+    opacity: 0;
+    translate: -50% 8px;
+  }
+  20% {
+    opacity: 1;
+  }
+  to {
+    opacity: 0;
+    translate: -50% -36px;
+  }
+}
+.dead {
+  opacity: 0.35;
+  filter: grayscale(1);
+}
+.small.dead .art img {
+  animation: none;
+}
+
+/* une carte qu'on peut choisir (changer, viser, remplacer) */
+.pickable {
+  cursor: pointer;
+  outline: 2px solid rgb(var(--g));
+  outline-offset: 2px;
+  animation: pick 1.2s ease-in-out infinite;
+}
+.pickable:hover {
+  scale: 1.04;
+}
+@keyframes pick {
+  50% {
+    outline-offset: 5px;
+  }
+}
+
+/* ---------- au milieu : à qui de jouer, ce qui vient de se passer ---------- */
+.status {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: center;
+  gap: var(--s-2);
+  min-height: 34px;
+  margin: 0;
+  font-family: var(--font-display);
+  font-size: var(--fs-md);
+}
+.status > span {
+  animation: cardIn 0.25s var(--ease-out);
+}
+.side {
+  padding: 1px 8px;
+  border-radius: var(--r-pill);
+  background: rgb(244 63 94 / 15%);
+  color: #fda4af;
+  font-family: var(--font-body, inherit);
+  font-size: var(--fs-xs);
+  font-style: normal;
+  font-weight: 800;
+}
+
+/* ---------- actions ---------- */
+.actions {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: var(--s-2);
+  width: min(100%, 640px);
+  margin: 0 auto;
+}
+.actions:has(> :only-child) {
+  grid-template-columns: 1fr;
+}
+.dmg {
+  margin-left: 6px;
+  opacity: 0.75;
+  font-size: var(--fs-xs);
+}
+.desc {
+  min-height: 2.8em;
+  margin: 0;
+  color: var(--muted);
+  font-size: var(--fs-sm);
+  text-align: center;
+}
+
+/* ---------- fin ---------- */
+.end {
+  position: fixed;
+  inset: 0;
+  z-index: 50;
+  display: grid;
+  place-items: center;
+  background: rgb(0 0 0 / 55%);
+  animation: fadeIn 0.3s ease-out;
+}
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+  }
+}
+.endBox {
+  display: grid;
+  justify-items: center;
+  gap: var(--s-4);
+  padding: var(--s-6) var(--s-8, 48px);
+  border-radius: 20px;
+  background: var(--surface-2);
+  animation: cardIn 0.4s var(--ease-out);
+}
+.endBox h2 {
+  margin: 0;
+  font-family: var(--font-display);
+  font-size: 44px;
+}
+.winT {
+  color: #fde68a;
+}
+.loseT {
+  color: var(--text-2);
+}
+
+/* écran bas (téléphone tourné, petit PC) : cartes plus compactes pour tout voir sans défiler */
+@media (max-height: 760px) {
+  .big {
+    padding: var(--s-3) var(--s-3) var(--s-2);
+  }
+  .big .art img {
+    width: 76px;
+    height: 76px;
+  }
+  .small .art img {
+    width: 40px;
+    height: 40px;
+  }
+  .desc {
+    min-height: 0;
+  }
+}
+@media (max-width: 759px) and (max-height: 760px) {
+  .board {
+    grid-template-columns: 1fr 1fr;
+    align-items: center;
+  }
+  .meTeam {
+    order: -1;
+  }
+  .foeTeam {
+    flex-direction: column;
+  }
+  .small {
+    width: 96px;
+  }
+}
+@media (max-width: 520px) {
+  .small {
+    width: 108px;
+  }
+  .big .art img {
+    width: 84px;
+    height: 84px;
+  }
+  .actions :global(button) {
+    padding-inline: 6px;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .lunge,
+  .hit,
+  .pickable,
+  .big .art img {
+    animation: none;
+  }
+}
+
+/* qui est qui : petite étiquette au-dessus de chaque équipe */
+.who {
+  align-self: center;
+  padding: 2px 12px;
+  border-radius: var(--r-pill);
+  background: rgb(255 255 255 / 6%);
+  color: var(--muted);
+  font-size: var(--fs-xs);
+  font-weight: 800;
+  letter-spacing: var(--tracking-caps);
+  text-transform: uppercase;
+}
+.whoMe {
+  background: rgb(61 107 255 / 18%);
+  color: #b9c9ff;
+}
+/* téléphone debout : l'adversaire est en ordre inversé, son étiquette reste en haut */
+.foeTeam > .who {
+  order: 1;
+}
+@media (min-width: 760px), (max-height: 760px) {
+  .foeTeam > .who {
+    order: 0;
+  }
+}
