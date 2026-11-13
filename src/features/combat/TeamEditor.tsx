@@ -290,7 +290,6 @@ function PickSheet({
       name={o.name}
       serie={o.serie}
       variant={best}
-      demo
       found={{ gold: 'gold' in o.vars, celeste: 'celeste' in o.vars, ombre: 'ombre' in o.vars }}
       pick={inTeam ? undefined : (x) => setV(x in o.vars ? x : baseVariant(o))}
       onClose={onClose}

@@ -63,12 +63,11 @@ test('CSP : aucune violation sur tout le site', async ({ page, isMobile }) => {
   await page.getByRole('button', { name: /Mobu/ }).first().click();
   await page.waitForTimeout(400);
   await check('fiche jeton');
-  // Ring + IA (fil séparé)
-  await page.goto('/combat');
-  await page.getByRole('button', { name: /Entraînement/ }).click();
-  await expect(page.locator('.rg.on canvas')).toBeVisible();
+  // Duel contre l'ordi
+  await page.goto('/duel');
+  await page.getByRole('button', { name: /Attaquer/ }).click({ force: true });
   await page.waitForTimeout(2500);
-  await check('Ring');
+  await check('Duel');
   expect(seen, seen.join('\n')).toEqual([]);
   void isMobile;
 });

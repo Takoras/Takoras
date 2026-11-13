@@ -1,8 +1,6 @@
-import { useEffect, useRef, useState, type CSSProperties, type ReactNode } from 'react';
+import { useRef, useState, type CSSProperties, type ReactNode } from 'react';
 import { useSwing } from '@/ui/useSwing';
-import { useQueryClient } from '@tanstack/react-query';
-import { useMe } from '@/api/queries';
-import { combatApi } from '@/api';
+import { useNavigate } from 'react-router';
 import { jetonOf, texOf, vImg, vOdds, glowVars } from '@/data/jetons';
 import { RCFG } from '@/engines/ring-config.js';
 import { sfx } from '@/engines/sound.js';
@@ -13,63 +11,30 @@ import { useSettings } from '@/lib/settings';
 import { useT } from '@/i18n/useT';
 import { Button } from '@/ui/Button';
 import { Segmented } from '@/ui/Segmented';
-import { toast } from '@/ui/toast';
 import { MutationStamp } from '@/ui/MutationStamp';
-import { lvlOf, useInventory } from '../inventory/inv';
-import { botTeam, useDeck, type Member } from './team';
-import { call, fetchMatch, toLocal, useRanked, watchMatch, type RankedMe } from './rankedApi';
-import { RankAround, RankCard, SearchModal } from './Ranked';
+import { useInventory } from '../inventory/inv';
+import { useDeck, type Member } from './team';
+import { useRanked } from './rankedApi';
+import { RankAround, RankCard } from './Ranked';
 import { RankRoad } from './RankRoad';
 import { useStaggerIn } from '@/ui/useStaggerIn';
-import rs from './Ranked.module.css';
 import { TeamEditor } from './TeamEditor';
 import { JetonModal } from '../inventory/JetonModal';
 import s from './Combat.module.css';
 
-// Le Ring (canvas, sons, effets) n'est téléchargé qu'au lancement d'une partie
-const ring = () => import('@/engines/ring.js');
-let loaded: Awaited<ReturnType<typeof ring>> | null = null;
-const loadRing = async () => {
-  loaded ??= await ring();
-  // Tests de bout en bout : accès à l'état du Ring, seulement sur le serveur de développement
-  if (import.meta.env.DEV) (window as unknown as { __ring?: typeof loaded }).__ring = loaded;
-  return loaded;
-};
-
-// Une des 5 maps au hasard à chaque partie
-const POOL = RCFG.MAPS.filter((m) => m.pool !== false);
-const randomMap = () => POOL[Math.floor(Math.random() * POOL.length)]?.id;
-
-// Lance le tuto du Ring (sans compte possible)
-export const playTuto = async (onEnd?: () => void) => {
-  sfx.click();
-  (await loadRing()).startRingTuto(() => onEnd?.());
-};
-
-// Page Combat : rang, JOUER (classé), Entraînement contre l'IA, équipe de 3 jetons, aide, route des rangs.
-// Le tuto du Ring est obligatoire avant le premier match (classé comme entraînement).
+// Page Combat : rang, JOUER (le Duel au tour par tour), équipe de 3 jetons, classement autour de soi, route des rangs.
 export default function Combat() {
   const t = useT();
   const user = useAuth((x) => x.user);
-  const me = useMe();
   const inv = useInventory();
   const deck = useDeck();
   const ranked = useRanked();
-  const qc = useQueryClient();
+  const nav = useNavigate();
   // équipe : null = fermé, sinon la place visée (-1 = aucune)
   const [editing, setEditing] = useState<number | null>(null);
   const [ptab, setPtab] = useState<'play' | 'rank'>('play');
-  const [searching, setSearching] = useState(false);
   const [sheet, setSheet] = useState<{ u: Member; i: number } | null>(null);
   const editFrom = (i: number) => setEditing(i);
-  // Quitter la page ferme le Ring (plus de boucle d'animation ni d'écouteur qui traîne)
-  useEffect(
-    () => () => {
-      if (loaded?.RNG.st) loaded.closeRing();
-    },
-    [],
-  );
-
   // la page attend son rang et son équipe, puis ses blocs apparaissent l'un après l'autre (plus de saut au chargement)
   const pageRef = useRef<HTMLElement>(null);
   useStaggerIn(
@@ -87,94 +52,18 @@ export default function Combat() {
           <Button variant="primary" onClick={() => openUI('account')}>
             {t('ui.login')}
           </Button>
-          <Button onClick={() => void playTuto()}>{t('arena.tryTuto')}</Button>
+          <Button onClick={() => void nav('/duel')}>{t('arena.train')}</Button>
         </div>
       </section>
     );
 
   const team = deck.data ?? [null, null, null];
   const full = team.every(Boolean);
-  const lvl = (u: Member) => lvlOf(inv.data, u.serie, u.name);
   const rk = ranked.data;
   const elo = rk?.elo ?? RCFG.ELO.start;
-  const tutoOk = !!rk?.tuto_done;
-  const refresh = () => void qc.invalidateQueries({ queryKey: ['ranked'] });
-
-  // Tuto obligatoire : sans bouton « Passer » ; fini = le classé et l'entraînement sont débloqués
-  const firstTuto = async () => {
+  const play = () => {
     sfx.click();
-    (await loadRing()).startRingTuto(() => refresh(), {
-      must: true,
-      // tuto fini : on referme l'arène et JOUER est tout de suite débloqué (sans attendre le serveur)
-      onDone: () => {
-        qc.setQueryData<RankedMe>(['ranked', user.id], (d) => (d ? { ...d, tuto_done: true } : d));
-        setTimeout(() => loaded?.closeRing(), 900);
-        void combatApi
-          .rankedTutoDone()
-          .then(() => toast(t('arena.tutoDoneToast')))
-          .catch(() => toast(t('arena.errNet'), true))
-          .finally(refresh);
-      },
-    });
-  };
-
-  // Entre dans un match classé (nouveau ou en cours) : l'écran se cale sur le serveur et suit le match en direct
-  const enterMatch = async (id: string) => {
-    const [R, m] = await Promise.all([loadRing(), fetchMatch(id)]);
-    if (!m || m.status !== 'live' || !user) return refresh();
-    const meSide = m.p1 === user.id ? 0 : 1;
-    const bodies = (m.state as { bodies: { side: number; name: string; lvl: number; variant: string }[] }).bodies;
-    const teams = [0, 1].map((sd) => bodies.filter((b) => b.side === sd)) as [typeof bodies, typeof bodies];
-    const online = {
-      me: meSide as 0 | 1,
-      state: m.state,
-      turn: m.turn,
-      deadline: toLocal(m.deadline),
-      toLocal,
-      shoot: (shot: unknown) => void call('shoot', { match: id, turn: online.turn, shot }),
-      tick: () => void call('tick', { match: id }),
-      forfeit: () => void call('forfeit', { match: id }).then(refresh),
-    };
-    let stop = () => {};
-    R.startRing(teams, {
-      names: m.names,
-      online,
-      onEnd: (r) => {
-        stop();
-        refresh();
-        if (r === 'again') setSearching(true);
-      },
-    });
-    stop = watchMatch(id, (row) => R.ringOnline(row));
-    R.ringOnline(m);
-  };
-  const searchError = (code: string) => {
-    setSearching(false);
-    sfx.deny();
-    const key =
-      code === 'tuto_required'
-        ? 'arena.errTuto'
-        : code === 'deck_size'
-          ? 'arena.errDeck'
-          : code === 'deck_budget'
-            ? 'arena.errBudget'
-            : 'arena.errNet';
-    toast(t(key), true);
-    refresh();
-  };
-
-  const train = async () => {
-    const R = await loadRing();
-    const mine = team.filter((u): u is Member => !!u).map((u) => ({ name: u.name, lvl: lvl(u), variant: u.variant }));
-    sfx.click();
-    R.startRing([mine, botTeam(mine.map((u) => u.lvl))], {
-      names: [me.data?.pseudo ?? R.rt('you'), R.rt('bot')],
-      ai: 'smart', // prédit ton tir, esquive au bord du vide
-      map: randomMap(),
-      onEnd: (r) => {
-        if (r === 'again') void train();
-      },
-    });
+    void nav('/duel');
   };
 
   return (
@@ -201,62 +90,13 @@ export default function Combat() {
               <RankCard me={rk} />
             </div>
           </Float>
-          {ranked.isPending ? null : !tutoOk ? (
-            <div className={`${rs.lock} ${s.lockBox}`}>
-              <h2>{t('arena.tutoLock')}</h2>
-              <Button variant="primary" onClick={() => void firstTuto()}>
-                {t('arena.tutoStart')}
-              </Button>
-            </div>
-          ) : (
-            <div className={s.playCol} data-tour="fight">
-              {rk?.live ? (
-                <Float className={s.playMain} tilt={-1.2} fl={5.5}>
-                  <button type="button" className={s.play} onClick={() => void enterMatch(rk.live ?? '')}>
-                    <b>{t('arena.resume')}</b>
-                  </button>
-                </Float>
-              ) : (
-                <Float className={s.playMain} tilt={-1.2} fl={5.5}>
-                  <button
-                    type="button"
-                    className={s.play}
-                    disabled={!full}
-                    onClick={() => {
-                      sfx.click();
-                      setSearching(true);
-                    }}
-                  >
-                    <b>{t('arena.play')}</b>
-                  </button>
-                </Float>
-              )}
-              <div className={s.subRow}>
-                <Float tilt={1.5} fl={6.5}>
-                  <button
-                    type="button"
-                    className={`${s.play} ${s.ghost}`}
-                    disabled={!full}
-                    onClick={() => void train()}
-                  >
-                    <b>{t('arena.train')}</b>
-                  </button>
-                </Float>
-                {/* revoir le tuto : un petit « ? » au lieu d'un bloc d'explications */}
-                <Float tilt={-3} fl={7}>
-                  <button
-                    type="button"
-                    className={s.helpBtn}
-                    onClick={() => void playTuto()}
-                    aria-label={t('arena.tuto')}
-                    title={t('arena.tuto')}
-                  >
-                    ?
-                  </button>
-                </Float>
-              </div>
-            </div>
-          )}
+          <div className={s.playCol} data-tour="fight">
+            <Float className={s.playMain} tilt={-1.2} fl={5.5}>
+              <button type="button" className={s.play} disabled={!full} onClick={play}>
+                <b>{t('arena.play')}</b>
+              </button>
+            </Float>
+          </div>
         </div>
 
         <Sat className={s.satTeam}>
@@ -282,18 +122,6 @@ export default function Combat() {
         <RankRoad elo={elo} />
       </div>
 
-      {searching ? (
-        <SearchModal
-          elo={elo}
-          onClose={() => setSearching(false)}
-          onError={searchError}
-          onMatch={(id) => {
-            setSearching(false);
-            refresh();
-            void enterMatch(id);
-          }}
-        />
-      ) : null}
       {editing !== null && inv.data ? (
         <TeamEditor
           groups={inv.data.groups}
@@ -309,7 +137,6 @@ export default function Combat() {
           serie={sheet.u.serie}
           variant={sheet.u.variant}
           found={{ [sheet.u.variant]: true }}
-          demo
           onClose={() => setSheet(null)}
         >
           <Button

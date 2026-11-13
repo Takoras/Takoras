@@ -15,8 +15,6 @@ const profile = page(() => import('@/features/profile/Profile'));
 // Combat : chargé seulement quand on ouvre la page (le Ring, lui, au lancement d'une partie)
 const Combat = lazy(() => import('@/features/combat/Combat'));
 
-// Labo des moteurs : seulement en développement (absent du site en ligne)
-const Lab = import.meta.env.DEV ? lazy(() => import('@/pages/Lab')) : null;
 
 // Anciennes adresses en français (liens déjà partagés) → nouvelle adresse en anglais, même suite (/profil/Pseudo → /profile/Pseudo)
 const OLD: [string, string][] = [
@@ -75,7 +73,6 @@ export const router = createBrowserRouter([
         { path: from, element: <OldPath from={from} to={to} /> },
         { path: `${from}/*`, element: <OldPath from={from} to={to} /> },
       ]),
-      ...(Lab ? [{ path: '/__lab', element: <Lab /> }] : []),
       { path: '*', element: <NotFound /> },
     ],
   },

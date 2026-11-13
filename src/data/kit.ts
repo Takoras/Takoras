@@ -1,8 +1,20 @@
-import { RG } from '@/engines/ring-engine.js';
 import { RCFG } from '@/engines/ring-config.js';
 import { dictOf, type Lang } from '@/i18n';
 
-// Infos de combat d'un jeton (pouvoir, stats du Ring) sans charger tout l'écran du Ring.
+// Infos de combat d'un jeton : pouvoir et stats (poids, puissance, taille), avec niveau et mutation.
+// Les valeurs de chaque jeton sont dans ring-config.js (RCFG.TOKENS).
+export const kitOf = (name: string) => RCFG.TOKENS[name] ?? RCFG.DEFAULT_TOKEN;
+// bonus = niveau (rendements décroissants) + mutation, plafonné
+const bonus = (lvl = 1, variant = '') =>
+  Math.min(
+    RCFG.POWER_CAP,
+    RCFG.LEVEL_BONUS * (1 - Math.exp(-(Math.max(1, lvl) - 1) / RCFG.LEVEL_CURVE)) + ((RCFG.MUTATION[variant] ?? 1) - 1),
+  );
+export function tokenStats(name: string, lvl = 1, variant = '') {
+  const k = kitOf(name),
+    m = 1 + bonus(lvl, variant);
+  return { mass: k.mass * m, power: k.power * m, r: k.r };
+}
 // Plus de catégories (combattant, tank…) : chaque jeton se définit par ses stats et son pouvoir.
 
 // Couleur de chaque pouvoir (mêmes valeurs que le Ring)
@@ -61,7 +73,7 @@ export const PW_COL: Record<string, string> = {
 
 type PwDict = Record<string, readonly [string, string]>;
 export function powerInfo(name: string, lang: Lang) {
-  const k = RG.kit(name),
+  const k = kitOf(name),
     r = dictOf(lang).ring;
   const pw = r.pw as unknown as PwDict;
   const [n, d] = pw[k.pw] ?? pw.none ?? ['', ''];
@@ -76,6 +88,6 @@ export function powerInfo(name: string, lang: Lang) {
   return { pw: k.pw, name: n, desc: d, when, col: PW_COL[k.pw] ?? '#888888' };
 }
 
-export const ringStats = (name: string, lvl = 1, variant = '') => RG.stats(name, lvl, variant);
+export const ringStats = tokenStats;
 export const RING_MAX = RCFG.STAT_MAX;
 export const LEVEL_MAX = RCFG.LEVEL_MAX;

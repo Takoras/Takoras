@@ -1,4 +1,4 @@
-// Environnement des moteurs portés de l'ancien site (ring, cinéma, motion) : les mêmes petits outils que les globales
+// Environnement des moteurs portés de l'ancien site (cinéma, motion, ouverture) : les mêmes petits outils que les globales
 // d'autrefois (SETTINGS, t, esc, jetonOf…), mais branchés sur les réglages, les traductions et le catalogue React.
 import { locale, potatoFx, reducedFx as rfx, speedFactor, useSettings } from '@/lib/settings';
 import { dictOf, translate, type Key } from '@/i18n';
@@ -46,7 +46,9 @@ import { useAuth } from '@/lib/auth';
 import { errorText } from '@/api/rpc';
 import { toast as toastUI } from '@/ui/toast';
 import type { Me } from '@/api/queries';
-import { CB } from './combat-engine.js';
+import { powerInfo, tokenStats } from '@/data/kit';
+import { powerOf } from '@/features/duel/rules';
+import { duelText } from '@/features/duel/text';
 import { RCFG } from './ring-config.js';
 export { sb, VARIANTS };
 export { vOdds } from '@/data/jetons';
@@ -103,8 +105,19 @@ export const PULLS = [
 // Stats affichées dans la fiche d'un jeton (même calcul que l'ancien ui.js)
 export const STAT_MAX = { s_mass: RCFG.STAT_MAX.mass, s_pow: RCFG.STAT_MAX.power, s_size: RCFG.STAT_MAX.r };
 export function statsOf(name: string, odds: number, variant = '', lvl = 1) {
-  const c = CB.stats(name, odds, lvl, variant);
-  return { s_mass: Math.round(c.mass * 100) / 100, s_pow: Math.round(c.power), s_size: c.r, power: CB.power(c), lvl };
+  void odds;
+  const c = tokenStats(name, lvl, variant);
+  // note globale des cartes
+  const power = Math.round(c.mass * 300 + c.power / 4 + c.r * 2);
+  return { s_mass: Math.round(c.mass * 100) / 100, s_pow: Math.round(c.power), s_size: c.r, power, lvl };
+}
+
+// Pouvoir d'un jeton (celui du Duel) : son nom et ce qu'il fait
+export function powerText(name: string) {
+  const lang = useSettings.getState().lang;
+  const T = duelText(lang);
+  const id = powerOf(name).id;
+  return { name: T.n[id] ?? powerInfo(name, lang).name, desc: T.d[id] ?? '' };
 }
 
 // Crochets : ce que le moteur demande au reste du site (économie, historique…). React les branche au démarrage.

@@ -1,5 +1,4 @@
 import type { Page } from '@playwright/test';
-import { RG } from '../../src/engines/ring-engine.js';
 
 // Supabase simulé : une fausse session dans le navigateur + de fausses réponses aux RPC.
 // Aucun appel ne part vers le vrai serveur pendant ces tests.
@@ -140,7 +139,7 @@ export async function fakeSupabase(
     p2: string;
     names: string[];
     map: string;
-    state: ReturnType<typeof RG.create>;
+    state: unknown;
     turn: number;
     ready1: boolean;
     ready2: boolean;
@@ -155,8 +154,7 @@ export async function fakeSupabase(
   const team = (names: string[]) => names.map((name) => ({ name, lvl: 1, variant: '' }));
   const resolveTurn = (m: FMatch, mine: unknown) => {
     const shots = [null, mine],
-      before = RG.clone(m.state);
-    RG.resolve(m.state, shots as never);
+      before = JSON.parse(JSON.stringify(m.state)) as unknown;
     Object.assign(m, {
       turn: m.turn + 1,
       ready1: false,
@@ -240,7 +238,7 @@ export async function fakeSupabase(
           p2: user.id,
           names: ['Rival', st.pseudo],
           map: 'volcan',
-          state: RG.create([team(['Rouillé', 'Givre', 'Azura']), team(['Mobu', 'Vyolis', 'Pikko'])], 'volcan'),
+          state: { teams: [team(['Rouillé', 'Givre', 'Azura']), team(['Mobu', 'Vyolis', 'Pikko'])] },
           turn: 1,
           ready1: false,
           ready2: false,

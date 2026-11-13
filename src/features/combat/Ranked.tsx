@@ -1,15 +1,12 @@
 /* eslint-disable react-refresh/only-export-components -- le hook du nom de rang vit avec ses badges */
-import { useEffect, useRef, useState, type CSSProperties } from 'react';
+import type { CSSProperties } from 'react';
 import { locale, useSettings } from '@/lib/settings';
 import { useT } from '@/i18n/useT';
-import { sfx } from '@/engines/sound.js';
-import { Button } from '@/ui/Button';
-import { Modal } from '@/ui/Modal';
 import { Link } from 'react-router';
 import { useQuery } from '@tanstack/react-query';
 import { combatApi } from '@/api';
 import { useAuth } from '@/lib/auth';
-import { call, rankOf, ROAD, type Rank, type RankedMe } from './rankedApi';
+import { rankOf, ROAD, type Rank, type RankedMe } from './rankedApi';
 import s from './Ranked.module.css';
 
 // Nom d'un rang : « Bois 2 », « Maître », « Takoras »
@@ -80,76 +77,6 @@ export function RankCard({ me }: { me: RankedMe | undefined }) {
         </div>
       </div>
     </div>
-  );
-}
-
-// Recherche d'un adversaire : on redemande au serveur toutes les 3 s (l'écart d'Elo toléré grandit avec l'attente)
-export function SearchModal({
-  elo,
-  onMatch,
-  onError,
-  onClose,
-}: {
-  elo: number;
-  onMatch: (id: string) => void;
-  onError: (code: string) => void;
-  onClose: () => void;
-}) {
-  const t = useT();
-  const [sec, setSec] = useState(0);
-  const [win, setWin] = useState(75);
-  const live = useRef(true);
-  const cbs = useRef({ onMatch, onError });
-  useEffect(() => {
-    cbs.current = { onMatch, onError };
-  });
-  useEffect(() => {
-    live.current = true;
-    const t0 = Date.now();
-    const clock = setInterval(() => setSec(Math.floor((Date.now() - t0) / 1000)), 250);
-    let timer = 0;
-    const tick = async () => {
-      const r = await call('join').catch(
-        () => ({ error: 'network', now: 0 }) as { error: string; now: number; match?: string; window?: number },
-      );
-      if (!live.current) return;
-      if (r.match) {
-        live.current = false;
-        sfx.announce?.();
-        return cbs.current.onMatch(r.match);
-      }
-      if (r.error) {
-        live.current = false;
-        return cbs.current.onError(r.error);
-      }
-      if (r.window) setWin(r.window);
-      // on redemande de moins en moins souvent si l'attente dure (économise les appels au serveur du classé)
-      const waited = Date.now() - t0;
-      timer = window.setTimeout(() => void tick(), waited < 20_000 ? 3000 : waited < 60_000 ? 5000 : 8000);
-    };
-    void tick();
-    return () => {
-      clearInterval(clock);
-      clearTimeout(timer);
-      if (live.current) void call('cancel');
-      live.current = false;
-    };
-  }, []);
-  const mm = String(Math.floor(sec / 60)),
-    ss = String(sec % 60).padStart(2, '0');
-  return (
-    <Modal open onClose={onClose} title={t('arena.searching')}>
-      <div className={s.search} data-busy>
-        <span className={s.radar} aria-hidden>
-          <RankBadge r={rankOf(elo)} size={52} />
-        </span>
-        <b className={s.clock} aria-live="off">
-          {mm}:{ss}
-        </b>
-        <p className="muted">{t('arena.searchTxt', { e: elo, w: win })}</p>
-        <Button onClick={onClose}>{t('arena.cancel')}</Button>
-      </div>
-    </Modal>
   );
 }
 

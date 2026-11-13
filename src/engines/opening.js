@@ -1,7 +1,7 @@
 // Ouverture des tirages. Repris de legacy/ (transitions.js + opening.js) ; ce fichier est maintenant la référence (plus régénéré).
 import { colorOf, SERIES, texOf } from '@/data/jetons';
 import { burstAt } from '@/lib/pfx';
-import { $, ACC, LOCALE, PULLS, SETTINGS, serieTheme, STAT_MAX, VARIANTS, errText, fmt, fmtLuck, jn, jnH, reducedFx, saveSettings, sb, sfx, sparkStyle, speed, statsOf, t, toast, vCls, vOdds, vTag, host } from './env';
+import { $, ACC, LOCALE, PULLS, SETTINGS, serieTheme, STAT_MAX, VARIANTS, errText, fmt, fmtLuck, jn, jnH, reducedFx, saveSettings, sb, sfx, sparkStyle, speed, statsOf, powerText, esc, t, toast, vCls, vOdds, vTag, host } from './env';
 import { CINE } from './cinema.js';
 import { attachSwing } from '@/ui/useSwing';
 import { styleActive, styleClean, styleHold, styleReveal, styleStart, styleTap } from './opening-styles.js';
@@ -476,20 +476,15 @@ function fillInfo(j, variant = '') {
   $('op-stats').innerHTML = sess.cur.stats
     .map(([k, v, w]) => `<div class="stat"><span class="muted">${t(k)}</span><div class="bar"><i data-w="${w}"></i></div><b>${v}</b></div>`).join('');
   requestAnimationFrame(() => requestAnimationFrame(() => $('op-stats').querySelectorAll('i').forEach(i => { i.style.width = i.dataset.w + '%'; })));
-  // la capacité du jeton (celle du Ring), sous les stats, dans la même fiche
-  const box = document.createElement('div');
-  box.className = 'op-abil';
-  $('op-stats').appendChild(box);
-  ringMod().then(m => {
-    if (!box.isConnected) return;
-    const p = m.powerText(j.name);
-    if (!p || p.pw === 'none') return box.remove();
-    box.innerHTML = `<b>${p.name}</b>${p.when ? ` <small>${p.when}</small>` : ''}<p>${p.desc}</p>`;
-  }).catch(() => box.remove());
+  // le pouvoir du jeton (celui du Duel), sous les stats, dans la même fiche
+  const p = powerText(j.name);
+  if (p.desc) {
+    const box = document.createElement('div');
+    box.className = 'op-abil';
+    box.innerHTML = `<b>${esc(p.name)}</b><p>${esc(p.desc)}</p>`;
+    $('op-stats').appendChild(box);
+  }
 }
-// le Ring est chargé à part (gros fichier) : on ne le charge qu'à la première révélation
-let ringP = null;
-const ringMod = () => (ringP ||= import('./ring.js'));
 
 // Pause finale : le haut disparaît, zoom sur le jeton qui tremble, on clique pour révéler
 function hold(restored) {

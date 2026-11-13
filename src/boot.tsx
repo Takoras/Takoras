@@ -6,7 +6,6 @@ import { RouterProvider } from 'react-router';
 import { router } from './app/router';
 import { redirectLegacyHash } from './app/legacyHash';
 import { AccountModal } from './app/AccountModal';
-import { RingSheetHost } from './features/combat/RingSheet';
 import { SettingsModal } from './app/SettingsModal';
 import { InfoGate } from './features/info/InfoGate';
 import { ToastHost } from './ui/toast';
@@ -69,7 +68,6 @@ void ready.finally(() =>
         <InfoGate />
         <ConfirmHost />
         <ToastHost />
-        <RingSheetHost />
       </QueryClientProvider>
     </StrictMode>,
   ),

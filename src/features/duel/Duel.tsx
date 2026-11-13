@@ -226,6 +226,50 @@ export default function Duel() {
             ? T.you
             : T.foe;
 
+  // effet au clic d'une action : le bouton fait un petit zoom avec des éclats de pixels ; pour une attaque ou un
+  // pouvoir, une onde part aussi de ton jeton. Tout est instantané : ça ne retarde jamais le coup.
+  const pop = (e: React.MouseEvent<HTMLElement>, wave = false) => {
+    if (reducedFx()) return;
+    const b = e.currentTarget;
+    b.animate([{ scale: 1 }, { scale: 1.12, offset: 0.35 }, { scale: 1 }], {
+      duration: 260,
+      easing: 'cubic-bezier(.2,.8,.3,1)',
+    });
+    const r = b.getBoundingClientRect();
+    const host = document.body;
+    for (let i = 0; i < 10; i++) {
+      const p = document.createElement('i');
+      p.className = s.spark ?? '';
+      const a = (i / 10) * Math.PI * 2 + Math.random() * 0.4,
+        d = 26 + Math.random() * 30;
+      p.style.left = `${e.clientX || r.left + r.width / 2}px`;
+      p.style.top = `${e.clientY || r.top + r.height / 2}px`;
+      host.appendChild(p);
+      p.animate(
+        [
+          { transform: 'translate(-50%, -50%) scale(1)', opacity: 1 },
+          { transform: `translate(calc(-50% + ${Math.cos(a) * d}px), calc(-50% + ${Math.sin(a) * d}px)) scale(.4)`, opacity: 0 },
+        ],
+        { duration: 380 + Math.random() * 120, easing: 'cubic-bezier(.2,.8,.3,1)' },
+      ).onfinish = () => p.remove();
+    }
+    if (wave) {
+      const t = document.querySelector<HTMLElement>(`[data-uid="${me.uid}"] [data-lift]`);
+      if (t) {
+        const w = document.createElement('i');
+        w.className = s.wave ?? '';
+        t.appendChild(w);
+        w.animate(
+          [
+            { transform: 'scale(.9)', opacity: 0.9 },
+            { transform: 'scale(1.7)', opacity: 0 },
+          ],
+          { duration: 420, easing: 'cubic-bezier(.2,.8,.3,1)' },
+        ).onfinish = () => w.remove();
+      }
+    }
+  };
+
   // un jeton posé sur la table (avec son ombre), et ses chiffres qui s'envolent
   const token = (u: Unit, big: boolean) => {
     const j = jetonOf(u.name, u.serie);
@@ -265,7 +309,7 @@ export default function Duel() {
     );
   };
   // le jeton en jeu : grand, avec sa plaque (nom, PV, pouvoir et ses crans, effets en cours)
-  const spot = (u: Unit, side: Side, onClick?: () => void) => {
+  const spot = (u: Unit, side: Side, onClick?: () => void, extra?: React.ReactNode) => {
     const j = jetonOf(u.name, u.serie);
     const p = powerOf(u.name);
     const effects = [
@@ -303,6 +347,7 @@ export default function Duel() {
             </span>
           ) : null}
         </span>
+        {extra}
       </>
     );
     const cls = `${s.spot} ${side ? s.spotFoe : s.spotMe} ${onClick ? s.pickable : ''}`;
@@ -372,29 +417,30 @@ export default function Duel() {
             {st.teams[1].thorns ? <em className={s.side}>{T.st_thorns}</em> : null}
             {st.teams[0].sealed ? <em className={s.side}>{T.st_sealed}</em> : null}
           </p>
-          {spot(me, 0)}
-        </div>
-        <div className={`${s.rim} ${s.rimMe}`}>{bench(0)}</div>
-      </div>
-
-      <div className={s.actions}>
+          {spot(me, 0, undefined, (
+      <div className={s.acts}>
         {mode ? (
-          <Button onClick={() => setMode(null)}>{T.cancel}</Button>
+          <Button onClick={(e) => (pop(e), setMode(null))}>{T.cancel}</Button>
         ) : (
           <>
-            <Button variant="primary" disabled={!myTurn} onClick={() => void run(0, { t: 'attack' })}>
+            <Button variant="primary" disabled={!myTurn} onClick={(e) => (pop(e, true), void run(0, { t: 'attack' }))}>
               {T.attack} <small className={s.dmg}>−{attackDmg(me)}</small>
             </Button>
-            <Button disabled={!myTurn || !ready} onClick={onPower} title={T.d[pw.id]}>
+            <Button disabled={!myTurn || !ready} onClick={(e) => (pop(e, true), onPower())} title={T.d[pw.id]}>
               {pwName(me.name)}
               {me.usesLeft !== undefined ? <small className={s.dmg}>{fill(T.uses, { n: me.usesLeft })}</small> : null}
             </Button>
-            <Button disabled={!myTurn || !canSwitch(st, 0)} onClick={() => setMode('switch')}>
+            <Button disabled={!myTurn || !canSwitch(st, 0)} onClick={(e) => (pop(e), setMode('switch'))}>
               {T.switch}
             </Button>
           </>
         )}
       </div>
+          ))}
+        </div>
+        <div className={`${s.rim} ${s.rimMe}`}>{bench(0)}</div>
+      </div>
+
       <p className={s.desc}>{T.d[pw.id]}</p>
 
       {st.winner !== null && !busy ? (

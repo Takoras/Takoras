@@ -5,7 +5,6 @@ import { useJn } from '@/lib/names';
 import { reducedFx, useSettings } from '@/lib/settings';
 import { useT } from '@/i18n/useT';
 import { Modal } from '@/ui/Modal';
-import { PowerDemo } from '../combat/PowerDemo';
 import { spring } from '@/ui/spring';
 import { PixelBg } from '@/ui/PixelBg';
 import { useSwing } from '@/ui/useSwing';
@@ -32,7 +31,6 @@ export function JetonModal({
   facts,
   pick,
   onShow,
-  demo,
   single,
   onClose,
   children,
@@ -46,8 +44,6 @@ export function JetonModal({
   pick?: (v: string) => void;
   /** la mutation montrée change (bestiaire : les boutons de vente suivent) */
   onShow?: (v: string) => void;
-  /** montre la vidéo d'exemple du pouvoir (éditeur d'équipe) */
-  demo?: boolean;
   /** une seule version du jeton (meilleur tirage du profil) : pas de tampons pour changer de mutation */
   single?: boolean;
   onClose: () => void;
@@ -201,12 +197,6 @@ export function JetonModal({
             >
               {locked ? <p className={s.unknownTag}>{t('ui.bst_unknown_tag')}</p> : null}
               {facts && !locked ? <ul className={s.facts}>{facts}</ul> : null}
-              {/* vidéo d'exemple du pouvoir (éditeur d'équipe) */}
-              {demo && !locked ? (
-                <div className={s.demo}>
-                  <PowerDemo name={j.name} />
-                </div>
-              ) : null}
             </TokenId>
             <div className={s.center}>
               <i className={s.rays} aria-hidden />
