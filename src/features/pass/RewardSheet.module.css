@@ -34,11 +34,17 @@
   border-radius: 12px;
   object-fit: cover;
 }
-/* bannière : montrée en entier, en rectangle large (pas recadrée en carré) */
+/* bannière : montrée en entier, en rectangle large, sans dépasser de la colonne du milieu (340 px max) */
 .art.wideCoin {
-  width: 360px;
-  height: 140px;
-  margin-top: 60px;
+  width: min(300px, 100%);
+  height: auto;
+  aspect-ratio: 300 / 118;
+  margin-top: 70px;
+}
+.art.wideCoin img,
+.art img.wide {
+  width: 100%;
+  height: 100%;
 }
 .about {
   display: grid;
@@ -60,21 +66,35 @@
   color: #fde68a;
 }
 
-/* ---------- premium : ça doit se voir ---------- */
-.premSheet {
-  outline: 2px solid rgb(242 194 48 / 55%);
-  outline-offset: -2px;
-}
+/* ---------- premium : étiquette dorée pleine et nom en or, rien de plus ---------- */
 .tag.big {
   display: inline-flex;
+  white-space: nowrap;
   align-items: center;
   gap: 6px;
   padding: 5px 12px;
   font-size: var(--fs-sm);
 }
-.premBox {
-  background: linear-gradient(160deg, rgb(242 194 48 / 16%), rgb(242 194 48 / 4%) 60%), rgb(20 18 12 / 70%);
+.tag.gold.big {
+  background: #f2c230;
+  color: #241a02;
 }
 .goldTitle {
   color: #fde68a;
+}
+
+@media (max-width: 760px) {
+  .tag {
+    justify-self: center;
+  }
+  .art.wideCoin {
+    width: min(280px, 100%);
+    margin-top: 40px;
+  }
+}
+@media (max-height: 720px) {
+  .art.wideCoin {
+    width: min(260px, 100%);
+    margin-top: 30px;
+  }
 }

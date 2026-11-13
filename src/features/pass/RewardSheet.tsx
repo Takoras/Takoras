@@ -145,7 +145,7 @@ export function RewardSheet({
         <div
           key={key}
           ref={card}
-          className={`${js.sheet} ${closing ? js.closing : ''} ${info.prem ? s.premSheet : ''}`}
+          className={`${js.sheet} ${closing ? js.closing : ''}`}
           style={vars}
         >
           <PixelBg className={js.pxbg} odds={info.odds} glow={info.color} center={coin} still={reducedFx()} />
@@ -155,10 +155,10 @@ export function RewardSheet({
             </svg>
           </button>
           <div className={js.stage}>
-            {/* à gauche : gratuit / premium et le nom de la récompense ; premium : tout en or, ça se voit */}
+            {/* à gauche : gratuit / premium et le nom de la récompense ; premium : étiquette et nom en or */}
             <div
               ref={idBox}
-              className={`${tc.card} ${tc.id} ${js.id} ${js.box} ${info.prem ? s.premBox : ''}`}
+              className={`${tc.card} ${tc.id} ${js.id} ${js.box}`}
               style={info.prem ? ({ '--tc': '#f2c230' } as CSSProperties) : undefined}
             >
               {info.prem ? (
@@ -169,7 +169,7 @@ export function RewardSheet({
               ) : (
                 <span className={s.tag}>{t('ui.bp_free')}</span>
               )}
-              <h2 className={`${tc.name} ${s.title} ${info.prem ? `${tc.shine} ${s.goldTitle}` : ''}`}>{info.title}</h2>
+              <h2 className={`${tc.name} ${s.title} ${info.prem ? s.goldTitle : ''}`}>{info.title}</h2>
             </div>
             {/* au centre : la récompense en grand, qui flotte, avec rayons et lueur */}
             <div className={js.center}>
