@@ -1,7 +1,7 @@
 import { useEffect, useLayoutEffect, useRef, useState, type CSSProperties } from 'react';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { errorText, passApi } from '@/api';
-import { itemImg, itemText, type ShopItem } from '@/data/items';
+import { itemImg, itemText, type ShopItem, itemGlow, itemOdds, rgbHex } from '@/data/items';
 import { sfx } from '@/engines/sound.js';
 import { useAuth } from '@/lib/auth';
 import { locale, reducedFx, useSettings } from '@/lib/settings';
@@ -47,27 +47,17 @@ const ITEMS: Record<string, ShopItem & { price: number }> = {
 };
 const worth = (r: Reward) => (!r ? 0 : r.coins ? r.coins : (ITEMS[r.item ?? '']?.price ?? 0) * (r.qty ?? 1));
 const isCosmetic = (r: Reward) => !!r?.item && (r.item.startsWith('b_') || r.item.startsWith('a_'));
-// couleur et valeur d'une récompense (fond de sa fiche) : pièces en or, potions en violet, sablier ambré,
-// exclusifs (photo, bannière) en rose ; plus elle vaut cher, plus le fond est riche
-const POT_ODDS: Record<string, number> = {
-  potion1: 10,
-  potion2: 100,
-  potion3: 1000,
-  potion10: 10_000,
-  potion25: 50_000,
-  potion50: 100_000,
-  potion100: 500_000,
+// fond d'une récompense : le MÊME que l'objet dans la boutique (couleur et richesse) ; les pièces, un fond simple ;
+// côté premium, deux paliers plus beau (ça donne envie)
+const rewardLook = (r: Reward, prem: boolean) => {
+  const it = ITEMS[r?.item ?? ''];
+  const base = r?.coins
+    ? { color: '#f2c230', odds: 10 }
+    : it
+      ? { color: rgbHex(itemGlow(it)), odds: itemOdds(it) }
+      : { color: '#8eaaff', odds: 100 };
+  return prem ? { color: base.color, odds: Math.max(1000, base.odds * 30) } : base;
 };
-const rewardLook = (r: Reward) =>
-  !r
-    ? { color: '#3966f7', odds: 1 }
-    : r.coins
-      ? { color: '#f2c230', odds: Math.max(10, r.coins / 4) }
-      : r.item?.startsWith('potion')
-        ? { color: '#a78bfa', odds: POT_ODDS[r.item] ?? 1000 }
-        : r.item === 'hourglass'
-          ? { color: '#e0a15b', odds: 250 }
-          : { color: '#ff7aa2', odds: 1_000_000 };
 const icon = (r: Reward) =>
   r?.coins ? '/img/piece.png' : itemImg(ITEMS[r?.item ?? ''] ?? { id: 'hourglass', kind: 'hourglass' }).src;
 const GOLD = 'rgb(242 194 48)';
@@ -663,7 +653,7 @@ export default function Pass() {
                     state: infoState,
                     got: infoGot,
                     can: infoCan,
-                    ...rewardLook(infoR),
+                    ...rewardLook(infoR, info.prem),
                   }
                 : null
             }

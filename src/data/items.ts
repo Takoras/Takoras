@@ -27,6 +27,41 @@ export type ShopItem = {
   kind: string;
   data: { mult?: number; rolls?: number; minutes?: number } & Record<string, unknown>;
 };
+// Fond d'un objet (sa couleur et sa « rareté », en 1 sur X comme les jetons) : le MÊME partout (boutique, passe…)
+const POTION_ODDS: Record<number, number> = {
+  1.3: 1,
+  2: 100,
+  5: 1000,
+  10: 10_000,
+  25: 50_000,
+  50: 100_000,
+  100: 500_000,
+};
+const POTION_GLOW: Record<number, string> = {
+  1.3: '134, 239, 172',
+  2: '196, 181, 253',
+  5: '242, 194, 48',
+  10: '103, 232, 249',
+  25: '244, 114, 182',
+  50: '245, 205, 82',
+  100: '255, 255, 255',
+};
+export const itemOdds = (it: Pick<ShopItem, 'kind' | 'data'>) =>
+  it.kind === 'potion' ? (POTION_ODDS[it.data.mult ?? 0] ?? ((it.data.mult ?? 0) >= 250 ? 1_000_000 : 1)) : 100;
+/** couleur « r, g, b » */
+export const itemGlow = (it: Pick<ShopItem, 'kind' | 'data'>) =>
+  it.kind === 'potion'
+    ? (POTION_GLOW[it.data.mult ?? 0] ?? '61, 107, 255')
+    : it.kind === 'banner'
+      ? '242, 194, 48'
+      : '142, 170, 255';
+export const rgbHex = (rgb: string) =>
+  '#' +
+  rgb
+    .split(',')
+    .map((n) => (+n).toString(16).padStart(2, '0'))
+    .join('');
+
 export function itemImg(it: Pick<ShopItem, 'id' | 'kind'>): { src: string; tint?: string; wide?: boolean } {
   if (it.kind === 'avatar') return { src: AVATARS[it.id.slice(2)] ?? '' };
   if (it.kind === 'banner') return { src: BANNER_IMG[it.id.slice(2)] ?? '', wide: true };

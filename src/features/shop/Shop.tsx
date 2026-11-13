@@ -2,7 +2,7 @@ import { useLayoutEffect, useRef, useState, type CSSProperties, type FormEvent }
 import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { errorText, publicApi, shopApi } from '@/api';
 import { useMe } from '@/api/queries';
-import { bannerName, hms, itemImg, itemText, type ShopItem } from '@/data/items';
+import { bannerName, hms, itemImg, itemText, type ShopItem, itemGlow, itemOdds, rgbHex } from '@/data/items';
 import { useAuth } from '@/lib/auth';
 import { locale, reducedFx, useSettings } from '@/lib/settings';
 import { useT } from '@/i18n/useT';
@@ -51,40 +51,10 @@ const catOf = (it: Slot) =>
       : it.kind === 'banner' || it.kind === 'avatar' || isCosmetic(it.kind)
         ? 'banner'
         : 'util';
-// rareté d'un objet (en « 1 sur X », comme les jetons) : le fond de la vedette et le son de la révélation en dépendent
-const POTION_ODDS: Record<number, number> = {
-  1.3: 1,
-  2: 100,
-  5: 1000,
-  10: 10_000,
-  25: 50_000,
-  50: 100_000,
-  100: 500_000,
-};
-const oddsOf = (it: Item) =>
-  it.kind === 'potion' ? (POTION_ODDS[it.data.mult ?? 0] ?? ((it.data.mult ?? 0) >= 250 ? 1_000_000 : 1)) : 100;
-// Couleur de chaque objet (celle de la potion), pour son fond et sa lumière
-const POTION_GLOW: Record<number, string> = {
-  1.3: '134, 239, 172',
-  2: '196, 181, 253',
-  5: '242, 194, 48',
-  10: '103, 232, 249',
-  25: '244, 114, 182',
-  50: '245, 205, 82',
-  100: '255, 255, 255',
-};
-const glowOf = (it: Item) =>
-  it.kind === 'potion'
-    ? (POTION_GLOW[it.data.mult ?? 0] ?? '61, 107, 255')
-    : it.kind === 'banner'
-      ? '242, 194, 48'
-      : '142, 170, 255';
-const hexOf = (rgb: string) =>
-  '#' +
-  rgb
-    .split(',')
-    .map((n) => (+n).toString(16).padStart(2, '0'))
-    .join('');
+// fond d'un objet : le même que partout ailleurs (data/items.ts)
+const oddsOf = (it: Item) => itemOdds(it);
+const glowOf = (it: Item) => itemGlow(it);
+const hexOf = rgbHex;
 const Coin = ({ size = 14 }: { size?: number }) => (
   <img className="px" src="/img/piece.png" alt="" width={size} height={size} />
 );

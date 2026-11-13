@@ -155,7 +155,6 @@ export function RewardSheet({
                 {info.prem ? t('ui.bp_prem_short') : t('ui.bp_free')}
               </span>
               <h2 className={`${tc.name} ${s.title}`}>{info.title}</h2>
-              <span className={tc.rarity}>{t('ui.bp_tier_n', { n: info.tier })}</span>
             </div>
             {/* au centre : la récompense en grand, qui flotte, avec rayons et lueur */}
             <div className={js.center}>
