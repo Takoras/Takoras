@@ -754,98 +754,154 @@ const CINE = (() => {
         }
       },
     },
-    // ---------------------------------------------------------------- Takoras : « Bien joué. », puis tous les jetons viennent s'écraser au centre… et il les fait exploser
+    // ---------------------------------------------------------------- Takoras (1/1 000 000) : 10 s, sans un mot.
+    // Un cœur qui bat dans le noir → saut en hyperespace → vortex : les 16 jetons sont aspirés autour du jeton
+    // mystère qui se fissure de lumière → tout implose en un point, silence → détonation (ondes de choc en trois
+    // couleurs, rayons qui tournent, débris pixel, les jetons projetés) et Takoras sort du centre.
     Takoras: {
-      R: 12.4, c: ['#04030c', '#1d3fae', '#3cc8ea', '#ffffff'], noSpin: true,
-      BOOM: 9.6,
+      R: 10, c: ['#03020a', '#1d3fae', '#3cc8ea', '#ffffff'], noSpin: true,
+      WARP: 1.6, VORTEX: 4.2, IMP: 6.6, SING: 7.6, BOOM: 8.1,
       init(c) {
-        const others = SERIES.Takoras.filter(o => o.name !== 'Takoras' && o.img), M = c.M;
-        c.st.toks = others.map((o, i) => {
-          const im = new Image(); im.src = o.img;
-          const ring = i < 6 ? 0 : 1, n = ring ? others.length - 6 : 6, k = ring ? i - 6 : i;
-          return { im, at: 3.4 + i * (.33 - i * .006), from: (i * 2.399 + .4) % TAU, slot: k / n * TAU + ring * .31, r: ring ? M * .36 : M * .19 };
-        });
+        const others = SERIES.Takoras.filter(o => o.name !== 'Takoras' && o.img);
+        c.st.toks = others.map((o, i) => { const im = new Image(); im.src = o.img; return { im, a: i / others.length * TAU, r0: rnd(.75, 1.05), d: i * .11 }; });
         c.st.real = new Image(); c.st.real.src = '/img/jetons/serie-takoras/takoras.gif';
-        c.st.clock = 0;
+        c.st.stars = Array.from({ length: 240 }, () => ({ a: rnd(0, TAU), z: rnd(.05, 1), s: rnd(.6, 1.4), k: Math.floor(rnd(0, 4)) }));
+        c.st.cracks = Array.from({ length: 14 }, (_, i) => ({ a: i / 14 * TAU + rnd(-.2, .2), at: this.VORTEX + .6 + i * .12, w: rnd(.05, .11) }));
+        c.st.debris = [];
+        c.st.spin = 0;
       },
       music(m, R) {
-        const C = 65.4, B = this.BOOM;
-        // « Bien joué. » : rien qu'une nappe grave et large qui respire (pas de notes)
-        m.I.warm(chordHz(m, C, [12, 19, 24, 27]), m.T(.15), 3.1, .05); m.I.sub(C, m.T(.15), 3.1, .16);
-        m.I.choir(chordHz(m, C, [24, 31, 36]), m.T(.6), 2.6, .03); m.I.swell(m.T(1.9), 1.2, .05);
-        // le grand coup qui lance la suite
-        m.I.taiko(m.T(3.2), .9); m.I.impact(m.T(3.2), .6);
-        // cordes graves qui martèlent pendant que les jetons arrivent
-        bars(m, 3.2, B, 92, [[0, 3, 7], [-4, 0, 3], [-2, 2, 5], [-5, -2, 2]], (t, c2, i, b, len) => {
-          m.I.strings(chordHz(m, C, c2, 1), t, len + .05, .028 + i * .004);
-          for (let k = 0; k < 8; k++) m.I.bass(m.hz(C, c2[0] + 12), t + k * b / 2, .2, .07);
-          if (i >= 2) m.I.choir(chordHz(m, C, c2, 2), t, len, .03 + i * .004);
+        const C = 65.4, { WARP, VORTEX, IMP, SING, BOOM } = this;
+        // le cœur : battements graves dans le noir (boum-boum), une nappe très basse qui respire
+        [.2, .42, 1.05, 1.27].forEach((s, i) => { m.I.kick(m.T(s), i % 2 ? .35 : .5); m.I.sub(C / 2, m.T(s), .5, .12); });
+        m.I.sub(C, m.T(.1), WARP + .4, .1);
+        // hyperespace : un souffle qui monte, un chœur qui s'ouvre, les cymbales accélèrent
+        m.I.whoosh(m.T(WARP - .3), 1.4, .16); m.I.swell(m.T(WARP), VORTEX - WARP, .1);
+        m.I.choir(chordHz(m, C, [24, 31, 36]), m.T(WARP), VORTEX - WARP + .3, .045);
+        for (let s = WARP, g = .3; s < VORTEX; s += g, g = Math.max(.09, g * .9)) m.I.hat(m.T(s), .03);
+        // vortex : tambours qui s'emballent, cordes qui montent, coups de cuivres
+        bars(m, VORTEX, IMP, 110, [[0, 3, 7], [-2, 2, 5], [-4, 0, 3], [-5, -1, 2]], (t, c2, i, b, len) => {
+          m.I.strings(chordHz(m, C, c2, 1), t, len + .05, .03 + i * .006);
+          m.I.brass(m.hz(C, c2[0] + 12), t, .5, .045);
+          for (let k = 0; k < 4; k++) m.I.taiko(t + k * b, .35 + i * .08);
         });
-        // chaque jeton qui s'écrase : un tambour, et tous les 4 un « braam » de cuivres graves
-        this.init && Array.from({ length: 16 }, (_, i) => 3.4 + i * (.33 - i * .006) + .5).forEach((at, i) => {
-          m.I.taiko(m.T(at), .45 + i * .02);
-          if (i % 4 === 3) [0, 7, 12].forEach(n => m.I.brass(m.hz(C, n + 12 + Math.floor(i / 4) * 2), m.T(at), .9, .045));
-        });
-        // la masse tremble : roulement de tambours qui accélère
-        for (let t = 8.4, gap = .22; t < B - .05; t += gap, gap = Math.max(.05, gap * .86)) m.I.taiko(m.T(t), .3 + (t - 8.4) * .25);
-        m.I.swell(m.T(8.5), B - 8.5, .14); m.I.choir(chordHz(m, C, [24, 31, 36, 39]), m.T(8.4), B - 8.4, .06);
-        // l'explosion, puis le ralenti (tout s'étouffe sous un grand accord)
-        m.I.impact(m.T(B), 1); m.I.crash(m.T(B), .18);
-        [0, 7, 12, 15].forEach(n => m.I.brass(m.hz(C, n + 12), m.T(B), 2.2, .05));
-        m.slow(true, B + .05);
-        m.I.choir(chordHz(m, C, [24, 31, 36, 40]), m.T(B + .05), 2.2, .07); m.I.sub(m.hz(C, -12), m.T(B), 2.2, .2);
-        m.slow(false, 11.8);
-        m.I.swell(m.T(11.8), R - 11.8, .1);
+        for (let s = IMP - 1, g = .16; s < IMP; s += g, g = Math.max(.04, g * .82)) m.I.tom(m.T(s), 150 + (s - IMP + 1) * 120, .3);
+        // implosion : tout est aspiré (souffle à l'envers), le son s'étouffe
+        m.I.whoosh(m.T(IMP), SING - IMP, .2, false); m.I.rumble(m.T(IMP), SING - IMP + .2, .3);
+        m.slow(true, IMP + .2);
+        // le silence : un seul tintement et le grave qui tient
+        m.I.tink(m.T(SING + .1), .06); m.I.sub(C / 2, m.T(SING), BOOM - SING, .12);
+        // détonation
+        m.slow(false, BOOM - .05);
+        m.I.impact(m.T(BOOM), 1); m.I.crash(m.T(BOOM), .2); m.I.shatter(m.T(BOOM + .05), .1);
+        [0, 7, 12, 15, 19].forEach(n => m.I.brass(m.hz(C, n + 12), m.T(BOOM), 1.8, .05));
+        m.I.choir(chordHz(m, C, [24, 31, 36, 39]), m.T(BOOM), R - BOOM + .4, .07); m.I.sub(m.hz(C, -12), m.T(BOOM), 1.8, .22);
+        m.I.swell(m.T(R - 1.1), 1, .12);
         revealHit(m, R, C * 4, [0, 4, 7, 12], 'bell');
         [0, 7, 12, 16].forEach(n => m.I.brass(m.hz(C, n + 12), m.T(R), 2.2, .05));
-        m.I.choir(chordHz(m, C, [24, 28, 31, 36]), m.T(R), 2.4, .06);
       },
       scene(c) {
-        const { x, w, h, cx, cy, M, t, st, dt } = c, [, dk, ac, li] = this.c, B = this.BOOM;
-        x.fillStyle = '#000'; x.fillRect(0, 0, w, h);
-        c.fx.title(tr('cine_gg'), t > .3 && t < 2.8);
-        if (t < 3.2) return;
-        const slow = t > B + .05 && t < 11.8 ? .18 : 1; st.clock += dt * slow;
-        // la caméra pousse doucement vers le centre ; chaque impact donne un petit coup
-        st.punch = Math.max(0, (st.punch || 0) - dt * 4);
-        const zoom = 1 + E.io(seg(t, 3.2, B)) * .12 + st.punch * .05;
-        x.save(); x.translate(cx, cy); x.scale(zoom, zoom); x.translate(-cx, -cy);
-        // la galaxie au fond
-        const ga = seg(t, 3.2, 4.2);
-        for (let i = 0; i < 420; i++) { const arm = i % 3, d = (i / 420) * M * .95, a = arm * 2.09 + d * .045 + st.clock * .2; P(x, cx + Math.cos(a) * d * 1.3 + Math.sin(i) * 3, cy + Math.sin(a) * d * .7 + Math.cos(i) * 3, 1, rgba([ac, dk, li, '#ff7aa2', '#8b5cf6'][i % 5], ga * (.45 * (1 - d / (M * .95)) + .1))); }
-        const sz = M * .2, boom = t >= B;
-        if (!boom) {
-          // ils arrivent de loin, accélèrent, et s'écrasent au centre un par un
-          let hits = 0;
-          st.toks.forEach(o => {
-            const u = seg(t, o.at, o.at + .5); if (u <= 0) return;
-            const rot = o.slot + st.clock * .15;
-            const sx = cx + Math.cos(o.from) * Math.max(w, h) * .9, sy = cy + Math.sin(o.from) * Math.max(w, h) * .9;
-            const tx = cx + Math.cos(rot) * o.r, ty = cy + Math.sin(rot) * o.r * .92;
-            if (u >= 1 && !o.hit) { o.hit = true; hits++; }
-            const k = E.in(u, 2.2), X = lerp(sx, tx, k), Y = lerp(sy, ty, k);
-            if (u < 1) for (let q = 1; q < 6; q++) coin(x, o.im, lerp(sx, tx, E.in(Math.max(0, u - q * .04), 2.2)), lerp(sy, ty, E.in(Math.max(0, u - q * .04), 2.2)), sz, { alpha: .12 * (6 - q) / 5 });
-            const settle = o.hit ? E.spring(clamp((t - o.at - .5) / .5)) : 1;
-            coin(x, o.im, X, Y, sz * (o.hit ? .8 + .2 * settle : 1.15 - .15 * u), { rot: Math.sin(t * 2 + o.slot) * .05 });
-          });
-          if (hits) { st.punch = 1; c.fx.shake(3); c.fx.flash('#ffffff', .18); }
-          const q = seg(t, 8.4, B);
-          glow(x, cx, cy, M * (.15 + .5 * q), li, .2 + .7 * E.in(q, 2));
-          c.fx.shake(E.in(q, 3) * 4);
-          if (t > B - .15) c.fx.flash(li, .6);
-          x.restore();
-          return;
+        const { x, w, h, cx, cy, M, t, st, dt } = c, [bg, dk, ac, li] = this.c, { R, WARP, VORTEX, IMP, SING, BOOM } = this;
+        const PAL = [ac, li, '#8b5cf6', '#ff7aa2'];
+        x.fillStyle = bg; x.fillRect(0, 0, w, h);
+        // ---------- le cœur qui bat (0 → WARP), puis une lueur qui reste au centre
+        const beat = [.2, .42, 1.05, 1.27].reduce((a, s) => a + (t > s ? Math.exp(-(t - s) * 7) : 0), 0);
+        if (t < SING) {
+          const base = t < WARP ? .05 : .09;
+          glow(x, cx, cy, M * (base + beat * .07), dk, .5 + beat * .4);
+          glow(x, cx, cy, M * (.02 + beat * .03), li, .6 + beat * .4);
         }
-        // l'explosion : Takoras sort du lot, les jetons volent et retombent au ralenti
-        if (!st.flung) { st.flung = true; c.fx.flash('#ffffff', 1); st.toks.forEach(o => { const rot = o.slot + st.clock * .15, a = rot + rnd(-.25, .25), v = rnd(110, 200); o.x = cx + Math.cos(rot) * o.r; o.y = cy + Math.sin(rot) * o.r; o.vx = Math.cos(a) * v; o.vy = Math.sin(a) * v - 70; o.ro = 0; o.vr = rnd(-3, 3); }); }
-        const cdt = dt * slow;
-        st.toks.forEach(o => { o.vy += 150 * cdt; o.x += o.vx * cdt; o.y += o.vy * cdt; o.ro += o.vr * cdt; coin(x, o.im, o.x, o.y, sz, { rot: o.ro }); });
-        [0, .3, .6].forEach(d => { const u = seg(t, B + d, B + 1.3 + d); if (u <= 0 || u >= 1) return; x.strokeStyle = rgba(d ? ac : li, 1 - u); x.lineWidth = 3 - d * 2; x.beginPath(); x.arc(cx, cy, E.out(u) * M * 1.1, 0, TAU); x.stroke(); });
-        glow(x, cx, cy, M * .55, ac, .55);
-        coin(x, st.real, cx, cy, M * .4 * E.back(seg(t, B, B + .7)));
-        x.restore();
-        if (t > 11.75 && t < 11.9) c.fx.flash(li, .6);
-        c.fx.shake(slow < 1 ? .7 : 1.8);
+        // ---------- hyperespace : des étoiles qui filent vers nous (WARP → IMP), aspirées à l'implosion
+        const warp = E.in(seg(t, WARP - .3, VORTEX), 2), imp = E.in(seg(t, IMP, SING), 3);
+        if (t > WARP - .3 && t < SING) {
+          const sp = .15 + warp * 1.6;
+          st.stars.forEach(s => {
+            s.z -= dt * sp * s.s * (1 - imp);
+            if (s.z <= .02) { s.z = 1; s.a = rnd(0, TAU); }
+            const r1 = (M * .06) / s.z, r2 = (M * .06) / Math.min(1, s.z + .02 + warp * .1);
+            const pull = 1 - imp; // implosion : tout revient vers le centre
+            const a = s.a + st.spin * .15;
+            const X1 = cx + Math.cos(a) * r1 * pull, Y1 = cy + Math.sin(a) * r1 * pull, X2 = cx + Math.cos(a) * r2 * pull, Y2 = cy + Math.sin(a) * r2 * pull;
+            const al = seg(t, WARP - .3, WARP + .4) * (1 - s.z * .6);
+            x.strokeStyle = rgba(PAL[s.k], al); x.lineWidth = s.z < .2 ? 2 : 1;
+            x.beginPath(); x.moveTo(X1, Y1); x.lineTo(X2, Y2); x.stroke();
+          });
+        }
+        // ---------- vortex : spirale de lumière, les jetons aspirés, le jeton mystère qui se fissure
+        if (t > VORTEX - .4 && t < SING) {
+          const vk = seg(t, VORTEX - .4, IMP);
+          st.spin += dt * lerp(.6, 9, E.in(vk, 2)) * (1 + imp * 3);
+          const shrink = 1 - imp * .97; // tout se resserre en un point
+          x.save(); x.translate(cx, cy); x.scale(shrink, shrink); x.translate(-cx, -cy);
+          // bras de la spirale (pixels)
+          const arms = 3, n = 180, ga = seg(t, VORTEX - .4, VORTEX + .4);
+          for (let i = 0; i < n; i++) {
+            const arm = i % arms, d = (i / n) * M * .8, a = arm * TAU / arms + d * .05 - st.spin;
+            P(x, cx + Math.cos(a) * d, cy + Math.sin(a) * d * .8, d < M * .2 ? 2 : 1, rgba(PAL[i % 4], ga * (1 - d / (M * .8)) * .9));
+          }
+          // les 16 jetons, aspirés en spirale (leur traînée derrière eux)
+          st.toks.forEach(o => {
+            const u = E.in(seg(t, VORTEX + o.d, IMP + .3), 1.6);
+            const rr = M * .55 * o.r0 * (1 - u * .85), a = o.a - st.spin * (1 + u);
+            const sz = M * .13 * (1 - u * .55);
+            for (let q = 3; q >= 1; q--) { const aq = a + q * .12; coin(x, o.im, cx + Math.cos(aq) * rr, cy + Math.sin(aq) * rr * .8, sz, { alpha: .12 * (4 - q) * ga, rot: -st.spin }); }
+            coin(x, o.im, cx + Math.cos(a) * rr, cy + Math.sin(a) * rr * .8, sz, { alpha: ga, rot: -st.spin * .5 });
+          });
+          // fissures : des rayons de lumière qui percent depuis le jeton, de plus en plus nombreux
+          st.cracks.forEach(k => {
+            const u = seg(t, k.at, k.at + .5); if (u <= 0) return;
+            const L = Math.hypot(w, h) * E.out(u), a = k.a + st.spin * .05;
+            x.fillStyle = rgba(li, .55 * u); x.beginPath(); x.moveTo(cx, cy);
+            x.lineTo(cx + Math.cos(a - k.w) * L, cy + Math.sin(a - k.w) * L); x.lineTo(cx + Math.cos(a + k.w) * L, cy + Math.sin(a + k.w) * L); x.fill();
+          });
+          // le jeton mystère au centre : il tourne de plus en plus vite et blanchit
+          const ms = M * .24 * (1 + E.in(vk, 3) * .2);
+          glow(x, cx, cy, ms * 1.4, ac, .5 + vk * .4);
+          coin(x, c.mys, cx + Math.sin(t * 50) * vk * 1.5, cy, ms, { ang: t * lerp(1, 28, E.in(vk, 2)), tint: li, tintA: E.in(vk, 3) * .85 });
+          x.restore();
+          c.fx.shake(E.in(vk, 3) * 3 + imp * 4);
+        }
+        // ---------- le silence : un seul point de lumière qui tremble dans le noir
+        if (t >= SING && t < BOOM) {
+          const q = seg(t, SING, BOOM);
+          P(x, cx - 1 + rnd(-q, q), cy - 1 + rnd(-q, q), 3, li);
+          glow(x, cx, cy, 3 + q * 10, ac, .9);
+          c.fx.shake(q * 1.5);
+        }
+        // ---------- détonation
+        if (t >= BOOM) {
+          const b = t - BOOM;
+          if (!st.boomed) {
+            st.boomed = true; c.fx.flash('#ffffff', 1);
+            st.debris = Array.from({ length: 260 }, () => { const a = rnd(0, TAU), v = rnd(40, 320); return { x: cx, y: cy, vx: Math.cos(a) * v, vy: Math.sin(a) * v, k: Math.floor(rnd(0, 4)), s: rnd(1, 3) }; });
+            st.toks.forEach(o => { const a = rnd(0, TAU), v = rnd(140, 260); o.x = cx; o.y = cy; o.vx = Math.cos(a) * v; o.vy = Math.sin(a) * v; o.ro = 0; o.vr = rnd(-6, 6); });
+          }
+          // rayons géants qui tournent (alternés bleu / blanc), s'effacent peu à peu
+          const ra = 1 - seg(t, BOOM + .6, R), RR = Math.hypot(w, h);
+          for (let i = 0; i < 18; i++) {
+            const a0 = b * .5 + i / 18 * TAU, a1 = a0 + Math.PI / 18 * .55;
+            x.fillStyle = rgba(i % 2 ? ac : li, .14 * ra + .05);
+            x.beginPath(); x.moveTo(cx, cy); x.lineTo(cx + Math.cos(a0) * RR, cy + Math.sin(a0) * RR); x.lineTo(cx + Math.cos(a1) * RR, cy + Math.sin(a1) * RR); x.fill();
+          }
+          // ondes de choc en trois couleurs, un peu décalées (effet de prisme)
+          [0, .14, .28, .6].forEach((d, i) => {
+            const u = seg(t, BOOM + d, BOOM + d + 1.2); if (u <= 0 || u >= 1) return;
+            const r = E.out(u, 3) * M * 1.3;
+            [[ac, -2], ['#ff7aa2', 0], ['#8b5cf6', 2]].forEach(([col, off]) => { x.strokeStyle = rgba(col, (1 - u) * .9); x.lineWidth = i === 0 ? 4 : 2; x.beginPath(); x.arc(cx + off, cy, r, 0, TAU); x.stroke(); });
+          });
+          // débris pixel et jetons projetés, freinés par l'air
+          const drag = Math.exp(-dt * 1.6);
+          st.debris.forEach(p => { p.vx *= drag; p.vy *= drag; p.x += p.vx * dt; p.y += p.vy * dt; P(x, p.x, p.y, p.s, rgba(PAL[p.k], 1 - seg(t, BOOM + .8, R))); });
+          st.toks.forEach(o => { o.vx *= drag; o.vy *= drag; o.x += o.vx * dt; o.y += o.vy * dt; o.ro += o.vr * dt; coin(x, o.im, o.x, o.y, M * .11, { rot: o.ro, alpha: 1 - seg(t, BOOM + 1.2, R) }); });
+          // Takoras sort du centre : silhouette blanche qui grossit, puis ses couleurs
+          const e = E.back(seg(t, BOOM + .25, BOOM + 1.1));
+          glow(x, cx, cy, M * (.3 + .25 * e), ac, .7);
+          glow(x, cx, cy, M * .12 * e, li, .9);
+          coin(x, st.real, cx, cy, M * .42 * e, { tint: li, tintA: 1 - seg(t, BOOM + .9, BOOM + 1.6) });
+          c.fx.shake(Math.max(0, 6 * (1 - b / 1.2)) + .6);
+          if (t > R - .12) c.fx.flash(li, .7);
+        }
+        vignette(x, w, h, bg, .6);
       },
     },
   };
@@ -991,7 +1047,9 @@ const CINE = (() => {
       }
       const mys = new Image(); mys.src = MYSTERE;
       // effets communs : flash coloré, écran blanc, tremblement, carton de texte
-      let flashA = 0, flashC = '#ffffff', whiteA = 0, shakeA = 0;
+      // entrée : on part d'un écran blanc qui s'efface (un flash entre le dernier clic de l'ouverture et le film, pas une coupure)
+      let flashA = 1.15, flashC = '#ffffff', whiteA = 0, shakeA = 0;
+      fl.style.background = '#fff'; fl.style.opacity = '1';
       const fx = {
         flash(col, a) { flashC = col; flashA = Math.max(flashA, a); },
         white(a) { whiteA = Math.max(whiteA, a); },
