@@ -32,7 +32,7 @@ import { confirm } from '@/ui/confirm';
 import { Modal } from '@/ui/Modal';
 import { PixelBg } from '@/ui/PixelBg';
 import { useStaggerIn } from '@/ui/useStaggerIn';
-import { Aura, BannerFx, cosmName, COSMETICS, CosmeticPreview, nameCls } from '@/ui/Cosmetics';
+import { Aura, BannerFx, cosmName, cosmRar, COSMETICS, CosmeticPreview, nameCls, rarCol, rarKey } from '@/ui/Cosmetics';
 import { toast } from '@/ui/toast';
 import { VTag } from '@/ui/VTag';
 import { JetonModal } from '../inventory/JetonModal';
@@ -979,6 +979,7 @@ function EditProfile({ p, onClose }: { p: Prof; onClose: () => void }) {
                         on={{ name: nameFx, aura: auraFx, bfx: bannerFx }[tab] === x}
                         have={owned.includes(x)}
                         label={cosmName(x, lang)}
+                        rar={[t(rarKey(cosmRar(x))), rarCol(cosmRar(x))]}
                         wide={tab === 'bfx'}
                       >
                         <CosmeticPreview id={x} label={(pseudo || p.pseudo).slice(0, 8)} />
@@ -1008,6 +1009,7 @@ function LockerTile({
   on,
   have,
   label,
+  rar,
   wide,
   lockLabel,
   lockTag,
@@ -1020,6 +1022,8 @@ function LockerTile({
   on: boolean;
   have: boolean;
   label: string;
+  /** rareté d'un cosmétique : [nom, couleur] */
+  rar?: [string, string];
   wide?: boolean;
   lockLabel: string;
   lockTag: string;
@@ -1043,6 +1047,11 @@ function LockerTile({
     >
       <span className={lk.tileArt}>{children}</span>
       <small>{label}</small>
+      {rar ? (
+        <em className={lk.rar} style={{ color: rar[1] }}>
+          {rar[0]}
+        </em>
+      ) : null}
       {on ? <img className={`px ${lk.check}`} src="/img/ui/ok.png" alt="" /> : null}
       {have ? null : (
         <i className={lk.lock} aria-hidden>

@@ -1,0 +1,6 @@
+-- Appliquée via MCP (cosmetics_30_rarity_personal_shop).
+-- 30 contours (au_), 30 effets de bannière (fx_), 7 effets de pseudo (n_) avec une rareté dans data.rar
+-- (common 3 000, rare 8 000, epic 20 000, legend 50 000 pièces).
+-- Boutique de cosmétiques personnelle : _cosm_today(uid, period) tire 4 cosmétiques par joueur et par jour,
+-- pondérés par rareté (50 / 25 / 12 / 5), le premier en promo (_cosm_off : 20 à 50 %), prix via _price_u.
+-- _featured, _shop_slots, _stock, shop_today et buy_item mis à jour ; potions et objets restent communs à tous.

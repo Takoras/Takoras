@@ -87,10 +87,10 @@
 }
 .ring {
   position: absolute;
-  inset: -12.5%;
+  inset: -25%;
   z-index: 1;
-  width: 125%;
-  height: 125%;
+  width: 150%;
+  height: 150%;
   image-rendering: pixelated;
   pointer-events: none;
 }
@@ -139,8 +139,8 @@
 .pvBanner {
   position: relative;
   display: block;
-  width: 100%;
-  max-width: 180px;
+  width: 180px;
+  max-width: 100%;
   aspect-ratio: 3;
   margin: auto;
   overflow: hidden;

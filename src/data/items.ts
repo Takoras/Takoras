@@ -1,7 +1,7 @@
 import type { Key, Lang } from '@/i18n';
 import { translate } from '@/i18n';
 import { AVATARS } from '@/lib/avatars';
-import { cosmName } from '@/ui/Cosmetics';
+import { cosmName, cosmRar, isCosmetic, RAR_ODDS, type CRar } from '@/ui/Cosmetics';
 
 // Objets de la boutique / de l'inventaire : image et textes (mêmes règles que l'ancien site)
 export const BANNER_IMG: Record<string, string> = {
@@ -46,11 +46,24 @@ const POTION_GLOW: Record<number, string> = {
   50: '245, 205, 82',
   100: '255, 255, 255',
 };
-export const itemOdds = (it: Pick<ShopItem, 'kind' | 'data'>) =>
-  it.kind === 'potion' ? (POTION_ODDS[it.data.mult ?? 0] ?? ((it.data.mult ?? 0) >= 250 ? 1_000_000 : 1)) : 100;
-/** couleur « r, g, b » */
-export const itemGlow = (it: Pick<ShopItem, 'kind' | 'data'>) =>
+// cosmétiques : la couleur de leur rareté (celle des jetons) et un fond d'autant plus chargé qu'ils sont rares
+const RAR_GLOW: Record<CRar, string> = {
+  common: '203, 213, 225',
+  rare: '56, 189, 248',
+  epic: '183, 155, 255',
+  legend: '251, 191, 36',
+};
+export const itemOdds = (it: Pick<ShopItem, 'id' | 'kind' | 'data'>) =>
   it.kind === 'potion'
+    ? (POTION_ODDS[it.data.mult ?? 0] ?? ((it.data.mult ?? 0) >= 250 ? 1_000_000 : 1))
+    : isCosmetic(it.kind)
+      ? RAR_ODDS[cosmRar(it.id)]
+      : 100;
+/** couleur « r, g, b » */
+export const itemGlow = (it: Pick<ShopItem, 'id' | 'kind' | 'data'>) =>
+  isCosmetic(it.kind)
+    ? RAR_GLOW[cosmRar(it.id)]
+    : it.kind === 'potion'
     ? (POTION_GLOW[it.data.mult ?? 0] ?? '61, 107, 255')
     : it.kind === 'banner'
       ? '242, 194, 48'

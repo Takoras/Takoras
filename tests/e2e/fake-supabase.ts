@@ -469,6 +469,7 @@ export async function fakeSupabase(
             'au_ombre',
             'fx_neige',
             'fx_braises',
+            ...(process.env.SC_ALL ? process.env.SC_ALL.split(',') : []),
           ],
           email: 'test@example.com',
           provider: 'discord',
@@ -489,8 +490,8 @@ export async function fakeSupabase(
           bio: 'Salut !',
           // cosmétiques portés (boutique)
           name_fx: 'n_arc',
-          aura: 'au_flamme',
-          banner_fx: 'fx_etoiles',
+          aura: process.env.SC_AU ?? 'au_flamme',
+          banner_fx: process.env.SC_FX ?? 'fx_etoiles',
           showcase: [
             { id: 99, jeton: 'Mobu', odds: 2, variant: 'gold' },
             { id: 98, jeton: 'Vyolis', odds: 1000, variant: 'ombre' },

@@ -414,3 +414,13 @@
     animation: none;
   }
 }
+
+/* rareté d'un cosmétique, sous son nom (couleurs des raretés des jetons) */
+.rar {
+  margin-top: -2px;
+  font-size: 10px;
+  font-style: normal;
+  font-weight: 800;
+  letter-spacing: var(--tracking-caps);
+  text-transform: uppercase;
+}

@@ -14,7 +14,7 @@ import { PixelBg } from '@/ui/PixelBg';
 import { toast } from '@/ui/toast';
 import { useSwing, useSwingAll } from '@/ui/useSwing';
 import { useStaggerIn } from '@/ui/useStaggerIn';
-import { CosmeticPreview, isCosmetic } from '@/ui/Cosmetics';
+import { CosmeticPreview, cosmRar, isCosmetic, rarCol, rarKey } from '@/ui/Cosmetics';
 import { NeedLogin } from '@/app/NeedLogin';
 import { flyCoins, shockwave } from '@/ui/fx';
 import { useNow } from '../eco/eco';
@@ -501,6 +501,11 @@ function Hero(p: CardProps & { off: number }) {
         </span>
         <h2>{name}</h2>
         {it.kind === 'potion' ? <p>{desc}</p> : null}
+        {isCosmetic(it.kind) ? (
+          <p className={s.rar} style={{ color: rarCol(cosmRar(it.id)) }}>
+            {t(rarKey(cosmRar(it.id)))}
+          </p>
+        ) : null}
         <span className={s.stock}>
           {it.owned
             ? t('ui.unlocked_b')
@@ -549,7 +554,13 @@ function Card(p: CardProps & { slot: number }) {
         </div>
         <h3>{name}</h3>
         {/* ligne réservée même sans description : toutes les cases gardent la même taille */}
-        <p className="muted">{it.kind === 'potion' ? desc : '\u00a0'}</p>
+        {isCosmetic(it.kind) ? (
+          <p className={s.rar} style={{ color: rarCol(cosmRar(it.id)) }}>
+            {t(rarKey(cosmRar(it.id)))}
+          </p>
+        ) : (
+          <p className="muted">{it.kind === 'potion' ? desc : '\u00a0'}</p>
+        )}
         <Buy {...p} card={() => ref.current} />
       </div>
     </li>
