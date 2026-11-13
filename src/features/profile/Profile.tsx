@@ -1,4 +1,4 @@
-import { useRef, useState, type CSSProperties } from 'react';
+import { useLayoutEffect, useRef, useState, type CSSProperties } from 'react';
 import { useSwingAll } from '@/ui/useSwing';
 import { SerieName } from '@/ui/SerieName';
 import { useNavigate, useParams } from 'react-router';
@@ -504,6 +504,28 @@ function ShowcasePicker({ p, slot, onClose }: { p: Prof; slot: number; onClose: 
   const inv = useInventory();
   const series = Object.keys(SERIES);
   const [serie, setSerie] = useState(series[0] ?? 'Takoras');
+  // changer de série : la fenêtre s'agrandit ou rétrécit en douceur (on part de l'ancienne hauteur), et les
+  // jetons de la nouvelle série apparaissent un à un
+  const boxRef = useRef<HTMLDivElement>(null);
+  const fromH = useRef<number | null>(null);
+  const switchSerie = (x: string) => {
+    if (x === serie) return;
+    sfx.click();
+    fromH.current = boxRef.current?.offsetHeight ?? null;
+    setSerie(x);
+  };
+  useLayoutEffect(() => {
+    const el = boxRef.current,
+      h0 = fromH.current;
+    fromH.current = null;
+    if (!el || h0 == null || reducedFx()) return;
+    const h1 = el.offsetHeight;
+    if (Math.abs(h1 - h0) < 2) return;
+    el.animate([{ height: `${h0}px` }, { height: `${h1}px` }], {
+      duration: 420,
+      easing: 'cubic-bezier(.2,.8,.2,1)',
+    });
+  }, [serie]);
   // jeton ouvert dans sa fiche, et la mutation choisie en bas de la fiche
   const [open, setOpen] = useState<string | null>(null);
   const [pv, setPv] = useState('');
@@ -548,7 +570,7 @@ function ShowcasePicker({ p, slot, onClose }: { p: Prof; slot: number; onClose: 
     }
   };
   return (
-    <Modal open onClose={onClose} title={t('ui.pick_title', { n: slot + 1 })} wide>
+    <Modal open onClose={onClose} title={t('ui.pick_title', { n: slot + 1 })} xl>
       <div className={s.pk}>
         {/* ce qu'il y a dans la case maintenant */}
         {cur ? (
@@ -571,64 +593,66 @@ function ShowcasePicker({ p, slot, onClose }: { p: Prof; slot: number; onClose: 
             <div className={s.pkBar}>
               <div className={s.pkSeries} role="tablist">
                 {series.map((x) => (
-                  <button key={x} type="button" role="tab" aria-selected={x === serie} onClick={() => setSerie(x)}>
+                  <button key={x} type="button" role="tab" aria-selected={x === serie} onClick={() => switchSerie(x)}>
                     <SerieName name={x} h="1.2em" />
                   </button>
                 ))}
               </div>
             </div>
-            {!inv.data ? (
-              <p className="muted" aria-busy>
-                …
-              </p>
-            ) : toks.length ? (
-              // les mêmes cases que le bestiaire de l'inventaire : numéro, nombre, jeton, nom, rareté, 3 tampons
-              <ul className={`${iv.grid} ${s.pkTok}`}>
-                {toks.map((e, i) => {
-                  const top = e.vs[0];
-                  if (!top) return null;
-                  const j = jetonOf(e.name, e.serie);
-                  const has = new Set(e.vs.map((v) => v.g.variant || ''));
-                  const n = e.vs.reduce((a, v) => a + v.g.ids.length, 0);
-                  const no = (SERIES[serie] ?? []).findIndex((x) => x.name === e.name) + 1;
-                  return (
-                    <li key={e.name} className={iv.card} style={glowVars(j) as CSSProperties}>
-                      <button
-                        type="button"
-                        className={iv.cardBtn}
-                        style={{ '--i': Math.min(i, 24) } as CSSProperties}
-                        disabled={busy !== null}
-                        onClick={() => {
-                          sfx.click();
-                          // s'ouvre sur la première version encore libre (sinon la première)
-                          setPv((e.vs.find((v) => v.free) ?? top).g.variant || '');
-                          setOpen(e.name);
-                        }}
-                        aria-label={jn(e.name)}
-                      >
-                        <span className={iv.num}>#{String(no).padStart(2, '0')}</span>
-                        <span className={iv.count}>×{n}</span>
-                        <img className="px" src={texOf(j)} alt="" />
-                        <b>{jn(e.name)}</b>
-                        <small>1/{fmt(j.odds)}</small>
-                        <span className={iv.vstamps}>
-                          {(['gold', 'celeste', 'ombre'] as const).map((v) => (
-                            <i
-                              key={v}
-                              className={has.has(v) ? undefined : iv.vOff}
-                              title={vName(v)}
-                              style={{ backgroundImage: `url(/img/stamps/${v}.png)` }}
-                            />
-                          ))}
-                        </span>
-                      </button>
-                    </li>
-                  );
-                })}
-              </ul>
-            ) : (
-              <p className={s.pkEmpty}>{t('ui.none')}</p>
-            )}
+            <div ref={boxRef} className={s.pkBox}>
+              {!inv.data ? (
+                <p className="muted" aria-busy>
+                  …
+                </p>
+              ) : toks.length ? (
+                // les mêmes cases que le bestiaire de l'inventaire : numéro, nombre, jeton, nom, rareté, 3 tampons
+                <ul key={serie} className={`${iv.grid} ${s.pkTok}`}>
+                  {toks.map((e, i) => {
+                    const top = e.vs[0];
+                    if (!top) return null;
+                    const j = jetonOf(e.name, e.serie);
+                    const has = new Set(e.vs.map((v) => v.g.variant || ''));
+                    const n = e.vs.reduce((a, v) => a + v.g.ids.length, 0);
+                    const no = (SERIES[serie] ?? []).findIndex((x) => x.name === e.name) + 1;
+                    return (
+                      <li key={e.name} className={iv.card} style={{ ...glowVars(j), '--n': i } as CSSProperties}>
+                        <button
+                          type="button"
+                          className={iv.cardBtn}
+                          style={{ '--i': Math.min(i, 24) } as CSSProperties}
+                          disabled={busy !== null}
+                          onClick={() => {
+                            sfx.click();
+                            // s'ouvre sur la première version encore libre (sinon la première)
+                            setPv((e.vs.find((v) => v.free) ?? top).g.variant || '');
+                            setOpen(e.name);
+                          }}
+                          aria-label={jn(e.name)}
+                        >
+                          <span className={iv.num}>#{String(no).padStart(2, '0')}</span>
+                          <span className={iv.count}>×{n}</span>
+                          <img className="px" src={texOf(j)} alt="" />
+                          <b>{jn(e.name)}</b>
+                          <small>1/{fmt(j.odds)}</small>
+                          <span className={iv.vstamps}>
+                            {(['gold', 'celeste', 'ombre'] as const).map((v) => (
+                              <i
+                                key={v}
+                                className={has.has(v) ? undefined : iv.vOff}
+                                title={vName(v)}
+                                style={{ backgroundImage: `url(/img/stamps/${v}.png)` }}
+                              />
+                            ))}
+                          </span>
+                        </button>
+                      </li>
+                    );
+                  })}
+                </ul>
+              ) : (
+                <p className={s.pkEmpty}>{t('ui.none')}</p>
+              )}
+            </div>
           </div>
         }
       </div>
