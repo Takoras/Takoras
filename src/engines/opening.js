@@ -1,5 +1,5 @@
 // Ouverture des tirages. Repris de legacy/ (transitions.js + opening.js) ; ce fichier est maintenant la référence (plus régénéré).
-import { SERIES, texOf } from '@/data/jetons';
+import { colorOf, SERIES, texOf } from '@/data/jetons';
 import { burstAt } from '@/lib/pfx';
 import { $, ACC, LOCALE, PULLS, SETTINGS, serieTheme, STAT_MAX, VARIANTS, errText, fmt, fmtLuck, jn, jnH, reducedFx, saveSettings, sb, sfx, sparkStyle, speed, statsOf, t, toast, vCls, vOdds, vTag, host } from './env';
 import { CINE } from './cinema.js';
@@ -260,7 +260,7 @@ const tierOf = () => '235, 235, 255';
 const MYTHIC = 100000, GOD = 1000000; // mise en scène spéciale à partir de 1/100 000, et encore plus pour 1/1 000 000
 const hexRGB = h => [1, 3, 5].map(i => parseInt(h.slice(i, i + 2), 16)).join(', ');
 const jetonHTML = (j, size, v = '') =>
-  `<img class="jeton${vCls(v)}" src="${texOf(j)}" alt="${j.name}" style="width:${size}px;height:${size}px;filter:drop-shadow(0 0 ${Math.max(4, size / 8)}px ${j.glow})">`;
+  `<img class="jeton${vCls(v)}" src="${texOf(j)}" alt="${j.name}" style="width:${size}px;height:${size}px;filter:drop-shadow(0 0 ${Math.max(4, size / 8)}px ${colorOf(j, v)})">`;
 
 // Réglages de test (menu debug)
 const debug = { luck: 1, force: '' };
@@ -628,8 +628,10 @@ function reveal(restored, quiet = false) {
   opening.classList.remove('hold');
   opCoin.classList.add('done');
   $('op-hint').textContent = '';
-  opening.style.setProperty('--tier', hexRGB(j.glow));
-  startBg(j);
+  // couleur du jeton tel qu'il est sorti : celle de sa mutation (Ombre = violet…), sinon la sienne
+  const jc = colorOf(j, r.variant);
+  opening.style.setProperty('--tier', hexRGB(jc));
+  startBg({ ...j, glow: jc });
   const spin = opCoin.querySelector('.spin');
   spin.innerHTML = coin3D(texOf(j), j.name, '', vCls(r.variant)); // la mutation se voit dès la rotation
   spin.style.scale = texScale(j) === 1 ? '' : texScale(j); // face, reflet et tranche ensemble // pas d'ombre sur l'image (elle serait coupée en carré en 3D) : le halo est derrière
@@ -672,7 +674,7 @@ function reveal(restored, quiet = false) {
   opening.classList.toggle('mythic', j.odds >= MYTHIC); // jeton animé : halo qui pulse, reflet qui passe, étincelles
   opening.classList.toggle('god', j.odds >= GOD);       // + couleurs arc-en-ciel
   opening.classList.toggle('cinema', j.odds >= GOD);
-  opening.style.setProperty('--jg', j.glow);
+  opening.style.setProperty('--jg', jc);
   opening.classList.add('revealed');
   opCoin.style.setProperty('--boost', j.odds >= MYTHIC ? 1.6 : j.odds >= RARE ? 1 : .5);
   updateActions();
@@ -686,7 +688,7 @@ function reveal(restored, quiet = false) {
   if (quiet) { addToHistory(j, r.variant); if (r.variant) setTimeout(() => { if (run === r) variantFx(r.variant, j.odds); }, 650); return; }
   if (own) { addToHistory(j, r.variant); if (r.variant) setTimeout(() => { if (run === r) variantFx(r.variant, j.odds); }, 900); return; }
   pop(lv); rays(lv); tint(.25 + lv * .2, 300 + lv * 250);
-  if (lv >= 1) burstAt(opCoin, j.glow, .6 + lv * .2); // particules dessinées à la main, à la couleur du jeton (jetons pas communs)
+  if (lv >= 1) burstAt(opCoin, jc, .6 + lv * .2); // particules dessinées à la main, à la couleur du jeton (jetons pas communs)
   burst(Math.round(10 + lv * 12));
   shake(lv * .7);
   if (j.odds >= MYTHIC) {
@@ -881,17 +883,17 @@ function turboHit(j, v = '') {
   if (!c) { c = document.createElement('div'); c.id = 'op-combo'; c.className = 'op-combo'; opening.appendChild(c); }
   c.hidden = false;
   $('op-odds').textContent = '1/' + vOdds(j.odds, v).toLocaleString(LOCALE());
-  c.style.setProperty('--cg', hexRGB(j.glow));
+  c.style.setProperty('--cg', hexRGB(colorOf(j, v)));
   c.innerHTML = `<b>×${combo}</b><small>${jnH(j.name)}</small>`;
   c.classList.remove('pop'); void c.offsetWidth; c.classList.add('pop');
   const z = opCoin.querySelector('.zoom');
   // petit coup de zoom, sans flash blanc : le jeton reste bien visible
   z?.animate([{ transform: 'scale(1.28)', filter: 'brightness(1.6)' }, { transform: 'scale(.95)', offset: .55 }, { transform: 'scale(1)', filter: 'none' }], { duration: 170, easing: 'cubic-bezier(.2, .9, .3, 1)' });
   // chaque jeton : étincelles à sa couleur ; un peu rare : rayons + flash ; tous les 10 : gros coup
-  opening.style.setProperty('--tier', hexRGB(j.glow));
+  opening.style.setProperty('--tier', hexRGB(colorOf(j, v)));
   // effets légers à chaque jeton (ça défile vite) ; les gros effets seulement sur les jetons rares et tous les 10
   burst(j.odds >= 100 ? 6 : 3);
-  if (j.odds >= 400 || v) { rays(.5); tint(.25, 220); shake(.35); burstAt(opCoin, j.glow, .45); }
+  if (j.odds >= 400 || v) { rays(.5); tint(.25, 220); shake(.35); burstAt(opCoin, colorOf(j, v), .45); }
   else if (combo % 10 === 0) { rays(.7); shake(.4); }
 }
 $('op-auto')?.addEventListener('click', e => {
@@ -907,15 +909,15 @@ function showRecap() {
   sess.recap = true;
   save();
   stopBg();
-  const list = sess.results.map(findJeton), vars = sess.rvars || [], best = list.reduce((a, b) => (b.odds > a.odds ? b : a));
-  opening.style.setProperty('--tier', hexRGB(best.glow));
-  startBg(best);
+  const list = sess.results.map(findJeton), vars = sess.rvars || [], best = list.reduce((a, b) => (b.odds > a.odds ? b : a)), bestC = colorOf(best, vars[list.indexOf(best)]);
+  opening.style.setProperty('--tier', hexRGB(bestC));
+  startBg({ ...best, glow: bestC });
   // Les doublons sont regroupés en une seule carte « ×N », du plus rare au plus commun (50 pulls tiennent sur un écran)
   const g = new Map();
   list.forEach((j, i) => { const k = j.name + '|' + (vars[i] || ''); const x = g.get(k) || { j, v: vars[i] || '', n: 0, lk: 0 }; x.n++; x.lk = Math.max(x.lk, +(sess.lucks || [])[i] || 0); g.set(k, x); });
   const cards = [...g.values()].sort((a, b) => vOdds(b.j.odds, b.v) - vOdds(a.j.odds, a.v));
   $('op-recap-grid').innerHTML = cards.map(({ j, v, n, lk }, i) =>
-    `<div class="rc${i === 0 ? ' best' : ''}" style="--g:${hexRGB(j.glow)};animation-delay:${Math.min(i, 20) * 45}ms">${i === 0 ? `<span class="rc-tag">${t('best')}</span>` : ''}${n > 1 ? `<span class="rc-n">×${n}</span>` : ''}${jetonHTML(j, 72, v)}<b>${jnH(j.name)}${vTag(v)}</b><small>1/${vOdds(j.odds, v).toLocaleString(LOCALE())}${lk > 1 ? ` · ×${fmtLuck(lk)}` : ''}</small></div>`).join('');
+    `<div class="rc${i === 0 ? ' best' : ''}" style="--g:${hexRGB(colorOf(j, v))};animation-delay:${Math.min(i, 20) * 45}ms">${i === 0 ? `<span class="rc-tag">${t('best')}</span>` : ''}${n > 1 ? `<span class="rc-n">×${n}</span>` : ''}${jetonHTML(j, 72, v)}<b>${jnH(j.name)}${vTag(v)}</b><small>1/${vOdds(j.odds, v).toLocaleString(LOCALE())}${lk > 1 ? ` · ×${fmtLuck(lk)}` : ''}</small></div>`).join('');
   $('op-recap-tag').textContent = t('recap_tag', { n: sess.total });
   $('op-recap-title').textContent = t('recap_title', { n: sess.total });
   if (typeof ecoDecorate === 'function') ecoDecorate();
@@ -930,7 +932,7 @@ function addToHistory(j, variant = '', luck = +(sess?.lucks || [])[sess?.results
   const serie = SERIES[PULLS[sess.pull].name] ? PULLS[sess.pull].name : 'Takoras';
   if (accRecordPull({ ...j, variant, luck }, serie)) return renderHist(); // connecté : enregistré en ligne
   const h = loadLocalHist();
-  h.unshift({ name: j.name, odds: j.odds, glow: j.glow, img: texOf(j), ts: Date.now() });
+  h.unshift({ name: j.name, odds: j.odds, glow: colorOf(j, variant), img: texOf(j), ts: Date.now() });
   try { localStorage.setItem('takoras-hist', JSON.stringify(h.slice(0, 30))); } catch {}
   renderHist();
 }

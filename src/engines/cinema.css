@@ -5,7 +5,7 @@
 .opening.cinema.hold .op-coin .spin { animation-duration: .05s; }
 .cine-line { height: 2px; width: 0; background: #fff; box-shadow: 0 0 20px #fff, 0 0 60px rgba(255, 255, 255, .6); }
 .cine-text { font-family: var(--font-display); font-weight: 700; font-size: clamp(16px, 2.4vw, 24px); color: #fff; opacity: 0; letter-spacing: .2em; padding-left: .9em; }
-.cine { position: fixed; inset: 0; z-index: 95; background: #000; overflow: hidden; cursor: pointer; transition: opacity .6s; animation: cineIn .18s ease-out; }
+.cine { position: fixed; inset: 0; z-index: 95; background: #000; overflow: hidden; cursor: pointer; transition: opacity .6s; animation: cineIn .22s cubic-bezier(.4, 0, .2, 1); }
 /* le film arrive en blanc (flash) au lieu d'apparaître d'un coup */
 @keyframes cineIn { from { opacity: 0; } }
 .cine.out { opacity: 0; pointer-events: none; }

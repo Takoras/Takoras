@@ -1,5 +1,5 @@
 import { useRef, useSyncExternalStore, type CSSProperties } from 'react';
-import { glowVars, jetonOf, texOf, vImg, vOdds, type Variant } from '@/data/jetons';
+import { colorOf, glowVars, jetonOf, texOf, vImg, vOdds, type Variant } from '@/data/jetons';
 import { host, sfx } from '@/engines/env';
 import { useJn } from '@/lib/names';
 import { reducedFx } from '@/lib/settings';
@@ -88,7 +88,12 @@ function Compare({
         className={`${s.col} ${s[who]}`}
         style={{ ...glowVars(j, x.variant), '--gc': 'rgb(var(--g))', '--ga': 1 } as CSSProperties}
       >
-        <PixelBg className={js.pxbg} odds={vOdds(j.odds, x.variant as Variant)} glow={j.glow} still={reducedFx()} />
+        <PixelBg
+          className={js.pxbg}
+          odds={vOdds(j.odds, x.variant as Variant)}
+          glow={colorOf(j, x.variant)}
+          still={reducedFx()}
+        />
         <div className={s.coinWrap}>
           <i className={js.rays} aria-hidden />
           <i className={js.aura} aria-hidden />

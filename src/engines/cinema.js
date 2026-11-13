@@ -764,7 +764,6 @@ const CINE = (() => {
       init(c) {
         const others = SERIES.Takoras.filter(o => o.name !== 'Takoras' && o.img);
         c.st.toks = others.map((o, i) => { const im = new Image(); im.src = o.img; return { im, a: i / others.length * TAU, r0: rnd(.75, 1.05), d: i * .11 }; });
-        c.st.real = new Image(); c.st.real.src = '/img/jetons/serie-takoras/takoras.gif';
         c.st.stars = Array.from({ length: 240 }, () => ({ a: rnd(0, TAU), z: rnd(.05, 1), s: rnd(.6, 1.4), k: Math.floor(rnd(0, 4)) }));
         c.st.cracks = Array.from({ length: 14 }, (_, i) => ({ a: i / 14 * TAU + rnd(-.2, .2), at: this.VORTEX + .6 + i * .12, w: rnd(.05, .11) }));
         c.st.debris = [];
@@ -807,7 +806,7 @@ const CINE = (() => {
         // ---------- le cœur qui bat (0 → WARP), puis une lueur qui reste au centre
         const beat = [.2, .42, 1.05, 1.27].reduce((a, s) => a + (t > s ? Math.exp(-(t - s) * 7) : 0), 0);
         if (t < SING) {
-          const base = t < WARP ? .05 : .09;
+          const base = (t < WARP ? .05 : .09) * (1 - E.in(seg(t, IMP, SING), 2) * .8);
           glow(x, cx, cy, M * (base + beat * .07), dk, .5 + beat * .4);
           glow(x, cx, cy, M * (.02 + beat * .03), li, .6 + beat * .4);
         }
@@ -857,14 +856,15 @@ const CINE = (() => {
           // le jeton mystère au centre : il tourne de plus en plus vite et blanchit
           const ms = M * .24 * (1 + E.in(vk, 3) * .2);
           glow(x, cx, cy, ms * 1.4, ac, .5 + vk * .4);
-          coin(x, c.mys, cx + Math.sin(t * 50) * vk * 1.5, cy, ms, { ang: t * lerp(1, 28, E.in(vk, 2)), tint: li, tintA: E.in(vk, 3) * .85 });
+          st.ang = (st.ang || 0) + dt * lerp(1, 26, E.in(vk, 2)); // vitesse qui monte en douceur (pas de saut d'angle)
+          coin(x, c.mys, cx + Math.sin(t * 50) * vk * 1.5, cy, ms, { ang: st.ang, tint: li, tintA: E.in(vk, 3) * .85 });
           x.restore();
           c.fx.shake(E.in(vk, 3) * 3 + imp * 4);
         }
         // ---------- le silence : un seul point de lumière qui tremble dans le noir
-        if (t >= SING && t < BOOM) {
+        if (t >= SING - .15 && t < BOOM) {
           const q = seg(t, SING, BOOM);
-          P(x, cx - 1 + rnd(-q, q), cy - 1 + rnd(-q, q), 3, li);
+          P(x, cx - 1 + Math.sin(t * 47) * q, cy - 1 + Math.cos(t * 39) * q, 3, li);
           glow(x, cx, cy, 3 + q * 10, ac, .9);
           c.fx.shake(q * 1.5);
         }
@@ -880,7 +880,7 @@ const CINE = (() => {
           const ra = 1 - seg(t, BOOM + .6, R), RR = Math.hypot(w, h);
           for (let i = 0; i < 18; i++) {
             const a0 = b * .5 + i / 18 * TAU, a1 = a0 + Math.PI / 18 * .55;
-            x.fillStyle = rgba(i % 2 ? ac : li, .14 * ra + .05);
+            x.fillStyle = rgba(i % 2 ? ac : li, (.14 * ra + .05) * E.out(seg(b, 0, .25)));
             x.beginPath(); x.moveTo(cx, cy); x.lineTo(cx + Math.cos(a0) * RR, cy + Math.sin(a0) * RR); x.lineTo(cx + Math.cos(a1) * RR, cy + Math.sin(a1) * RR); x.fill();
           }
           // ondes de choc en trois couleurs, un peu décalées (effet de prisme)
@@ -892,12 +892,18 @@ const CINE = (() => {
           // débris pixel et jetons projetés, freinés par l'air
           const drag = Math.exp(-dt * 1.6);
           st.debris.forEach(p => { p.vx *= drag; p.vy *= drag; p.x += p.vx * dt; p.y += p.vy * dt; P(x, p.x, p.y, p.s, rgba(PAL[p.k], 1 - seg(t, BOOM + .8, R))); });
-          st.toks.forEach(o => { o.vx *= drag; o.vy *= drag; o.x += o.vx * dt; o.y += o.vy * dt; o.ro += o.vr * dt; coin(x, o.im, o.x, o.y, M * .11, { rot: o.ro, alpha: 1 - seg(t, BOOM + 1.2, R) }); });
-          // Takoras sort du centre : silhouette blanche qui grossit, puis ses couleurs
-          const e = E.back(seg(t, BOOM + .25, BOOM + 1.1));
-          glow(x, cx, cy, M * (.3 + .25 * e), ac, .7);
+          st.toks.forEach(o => { o.vx *= drag; o.vy *= drag; o.x += o.vx * dt; o.y += o.vy * dt; o.ro += o.vr * dt; coin(x, o.im, o.x, o.y, M * .11 * E.out(seg(b, 0, .45)), { rot: o.ro, alpha: 1 - seg(t, BOOM + 1.2, R) }); });
+          // le jeton mystère sort du centre (on ne montre pas encore Takoras : sa mutation se voit à la révélation) ;
+          // il grossit, tourne de moins en moins vite et se pose de face juste avant la révélation
+          const e = E.back(seg(t, BOOM + .2, BOOM + 1.1));
+          st.ang2 = (st.ang2 || 0) + dt * lerp(18, 0, E.out(seg(t, BOOM + .2, R - .2), 3));
+          glow(x, cx, cy, M * (.3 + .25 * e), ac, .7 * E.out(seg(b, 0, .3)));
           glow(x, cx, cy, M * .12 * e, li, .9);
-          coin(x, st.real, cx, cy, M * .42 * e, { tint: li, tintA: 1 - seg(t, BOOM + .9, BOOM + 1.6) });
+          // dernière demi-seconde : il glisse vers la place et la taille de la révélation, et se pose de face
+          const land = E.io(seg(t, R - .6, R));
+          const face = Math.round(st.ang2 / Math.PI) * Math.PI;
+          const ry = lerp(cy, h * .42, land), rs = lerp(M * .42 * e, Math.min(w, h) * .5 * .55, land);
+          coin(x, c.mys, cx, ry, rs, { ang: lerp(st.ang2, face, land), tint: li, tintA: 1 - seg(t, BOOM + .9, BOOM + 1.6) });
           c.fx.shake(Math.max(0, 6 * (1 - b / 1.2)) + .6);
           if (t > R - .12) c.fx.flash(li, .7);
         }
@@ -1048,7 +1054,7 @@ const CINE = (() => {
       const mys = new Image(); mys.src = MYSTERE;
       // effets communs : flash coloré, écran blanc, tremblement, carton de texte
       // entrée : on part d'un écran blanc qui s'efface (un flash entre le dernier clic de l'ouverture et le film, pas une coupure)
-      let flashA = 1.15, flashC = '#ffffff', whiteA = 0, shakeA = 0;
+      let flashA = 0, flashC = '#ffffff', whiteA = 0, shakeA = 0;
       fl.style.background = '#fff'; fl.style.opacity = '1';
       const fx = {
         flash(col, a) { flashC = col; flashA = Math.max(flashA, a); },
@@ -1092,9 +1098,12 @@ const CINE = (() => {
         // tremblement (petit zoom pour ne jamais voir les bords)
         cv.style.transform = shakeA > .05 ? `translate(${rnd(-shakeA, shakeA) * S}px, ${rnd(-shakeA, shakeA) * S}px) scale(1.03)` : '';
         // écran blanc (Astra, Néphéris) et flash
-        const fa = Math.max(whiteA, flashA);
-        fl.style.opacity = fa; fl.style.background = whiteA >= flashA ? '#fff' : flashC;
-        flashA = Math.max(0, flashA - c.dt * 2.6);
+        // flash d'entrée : il tient un instant, puis s'efface en douceur (lent, rapide, lent) jusqu'au film
+        const intro = 1 - E.io(seg(tt - jump, .08, .95));
+        const fa = Math.max(whiteA, flashA, intro);
+        fl.style.opacity = fa; fl.style.background = whiteA >= flashA || intro >= flashA ? '#fff' : flashC;
+        // les autres flashs s'éteignent en douceur (décroissance exponentielle, pas en ligne droite)
+        flashA = flashA > .01 ? flashA * Math.exp(-c.dt * 4.2) : 0;
         if (tt >= D) return finish();
         requestAnimationFrame(frame);
       }

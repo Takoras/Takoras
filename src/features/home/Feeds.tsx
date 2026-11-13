@@ -2,7 +2,7 @@ import { useEffect, useRef } from 'react';
 import { Link } from 'react-router';
 import { useHistory, useLive, useMe } from '@/api/queries';
 import { useOnline } from '@/lib/online';
-import { jetonOf, texOf, vOdds, VARIANTS } from '@/data/jetons';
+import { jetonOf, texOf, vOdds, VARIANTS, colorOf } from '@/data/jetons';
 import { useAuth } from '@/lib/auth';
 import { useJn } from '@/lib/names';
 import { locale, reducedFx, useSettings } from '@/lib/settings';
@@ -49,7 +49,7 @@ export function History() {
                   alt=""
                   width={28}
                   height={28}
-                  style={{ '--df': `drop-shadow(0 0 4px ${j.glow})` } as React.CSSProperties}
+                  style={{ '--df': `drop-shadow(0 0 4px ${colorOf(j, r.variant)})` } as React.CSSProperties}
                 />
                 <div>
                   <b>{jn(r.jeton)}</b>
