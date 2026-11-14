@@ -386,16 +386,26 @@ export default function Pass() {
       for (const [tr, p, rw] of todo) {
         const gap = (w[i++] ?? 0.25) * k;
         aim(tileOf(tr, p));
-        qc.setQueryData(['pass', user.id], (o: PassState | undefined) =>
-          o ? (p ? { ...o, pclaimed: [...o.pclaimed, tr] } : { ...o, claimed: [...o.claimed, tr] }) : o,
-        );
-        await frame();
-        burst(tileOf(tr, p), rw, p, true);
+        // seule la case change d'aspect (pas de nouveau rendu de toute la route à chaque case : c'était le lag) ;
+        // la page se met à jour une seule fois, à la fin
+        const el = tileOf(tr, p);
+        el?.classList.remove(s.ready ?? '');
+        el?.classList.add(s.got ?? '');
+        burst(el, rw, p, true);
         sfx.click();
         await wait(gap);
       }
       await wait(300);
       cam.on = false;
+      qc.setQueryData(['pass', user.id], (o: PassState | undefined) =>
+        o
+          ? {
+              ...o,
+              claimed: [...o.claimed, ...todo.filter(([, p]) => !p).map(([tr]) => tr)],
+              pclaimed: [...o.pclaimed, ...todo.filter(([, p]) => p).map(([tr]) => tr)],
+            }
+          : o,
+      );
       sfx.upgrade();
       await wait(700);
       qc.setQueryData(['me', user.id], (old: object | undefined) => ({ ...old, ...r.state }));

@@ -356,6 +356,17 @@ html.q-potato *::after {
 html.q-potato :not(img, canvas, svg, svg *) {
   filter: none !important;
 }
+/* patate : pas de doodle (ni le précalculé, ni le filtre en direct), pas d'effet au survol (rien ne grossit,
+   ne penche ni ne glisse sous la souris) : le site tient sur n'importe quel appareil */
+html.q-potato img.px {
+  content: normal !important;
+  animation: none !important;
+  filter: var(--df, none) !important;
+}
+html.q-potato :hover {
+  scale: none !important;
+  rotate: none !important;
+}
 
 /* « … » de chargement : affichés seulement si l'attente dure (au-delà de 0,7 s). Sur un chargement normal on ne voit
    rien, au lieu d'un texte qui apparaît puis saute quand la page arrive. */
