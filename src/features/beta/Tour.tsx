@@ -29,12 +29,6 @@ const STEPS: Step[] = [
     en: ['Your collection', 'All your tokens, by series. Tap one to see its card.'],
   },
   {
-    to: '/combat',
-    sel: '[data-tour="fight"]',
-    fr: ['Le combat', 'Choisis 3 jetons et affronte les autres joueurs en classé.'],
-    en: ['Fights', 'Pick 3 tokens and fight other players in ranked.'],
-  },
-  {
     to: '/pass',
     sel: '[data-tour="pass"]',
     fr: ['Le passe', 'Gagne de l’XP en jouant et récupère une récompense à chaque palier.'],

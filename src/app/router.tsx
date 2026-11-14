@@ -1,4 +1,3 @@
-import { lazy, Suspense } from 'react';
 import { createBrowserRouter, Navigate, useLocation } from 'react-router';
 import Home from '@/features/home/Home';
 import AdminGate from '@/features/admin/AdminGate';
@@ -13,7 +12,6 @@ const bestiary = page(() => import('@/features/inventory/Bestiary'));
 const profile = page(() => import('@/features/profile/Profile'));
 
 // Combat : chargé seulement quand on ouvre la page (le Ring, lui, au lancement d'une partie)
-const Combat = lazy(() => import('@/features/combat/Combat'));
 
 
 // Anciennes adresses en français (liens déjà partagés) → nouvelle adresse en anglais, même suite (/profil/Pseudo → /profile/Pseudo)
@@ -45,24 +43,10 @@ export const router = createBrowserRouter([
       { path: '/inventory/items', lazy: page(() => import('@/features/inventory/Items')) },
       { path: '/shop', lazy: page(() => import('@/features/shop/Shop')) },
       { path: '/leaderboard', lazy: page(() => import('@/features/board/Board')) },
-      {
-        path: '/combat',
-        element: (
-          <Suspense
-            fallback={
-              <p className="muted" aria-busy>
-                …
-              </p>
-            }
-          >
-            <Combat />
-          </Suspense>
-        ),
-      },
+      // plus de combat pour l'instant : l'ancienne adresse ramène à l'accueil
+      { path: '/combat', element: <Navigate to="/" replace /> },
       { path: '/friends', lazy: page(() => import('@/features/social/Friends')) },
       { path: '/pass', lazy: page(() => import('@/features/pass/Pass')) },
-      // Duel : nouveau combat au tour par tour (prototype contre l'IA, pas encore dans le menu)
-      { path: '/duel', lazy: page(() => import('@/features/duel/Duel')) },
       { path: '/profile', lazy: profile },
       { path: '/profile/:pseudo', lazy: profile },
       { path: '/privacy', lazy: page(() => import('@/pages/Privacy')) },

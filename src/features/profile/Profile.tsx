@@ -41,8 +41,6 @@ import { NeedLogin } from '@/app/NeedLogin';
 import { Icon } from '@/app/Icon';
 import { FriendButton } from '../social/FriendButton';
 import { ReportButton } from './ReportButton';
-import { RankBadge, useRankName } from '../combat/Ranked';
-import { rankOf } from '../combat/rankedApi';
 import iv from '../inventory/Inventory.module.css';
 import s from './Profile.module.css';
 import lk from './Locker.module.css';
@@ -189,9 +187,8 @@ export default function Profile() {
             ) : null}
           </div>
         </div>
-        {/* à droite : le rang classé, et ses chiffres juste en dessous */}
+        {/* à droite : ses chiffres */}
         <div className={s.rankCol}>
-          <EloHero pseudo={p.pseudo} wins={p.wins || 0} losses={p.losses || 0} />
           <ul className={s.strip}>
             <li>
               <b>{fmt(p.pulls)}</b> {t('ui.st_pulls')}
@@ -468,6 +465,7 @@ function TheirJeton({
       name={jeton?.name ?? null}
       variant={jeton?.variant}
       locked={jeton?.locked}
+      mystery={jeton?.locked}
       single={jeton?.single}
       found={Object.fromEntries(rows.map((r) => [r.variant ?? '', true]))}
       facts={
@@ -1143,36 +1141,3 @@ function LockerTile({
   );
 }
 
-// Rang classé en grand sur le profil : gros badge qui brille, nom du rang dans sa couleur, Elo énorme
-function EloHero({ pseudo, wins, losses }: { pseudo: string; wins: number; losses: number }) {
-  const t = useT();
-  const lang = useSettings((x) => x.lang);
-  const name = useRankName();
-  const q = useQuery({
-    queryKey: ['ranked-of', pseudo],
-    queryFn: async () => (await publicApi.rankedOf(pseudo)) as unknown as { elo: number; games: number } | null,
-  });
-  const elo = q.data?.elo ?? 1000;
-  const r = rankOf(elo);
-  return (
-    <div className={s.elo} style={{ '--rc': r.col } as CSSProperties} aria-label={`${name(r)} · ${elo} Elo`}>
-      <span className={s.eloBadge}>
-        <RankBadge r={r} size={104} />
-      </span>
-      <div>
-        <small className={s.eloRank}>{name(r)}</small>
-        <b>
-          {elo.toLocaleString(locale(lang))} <span>Elo</span>
-        </b>
-        {q.data?.games ? null : <small className="muted">{t('ui.elo_none')}</small>}
-        {wins || losses ? (
-          <span className={s.record}>
-            <em className={s.win}>{wins} V</em>
-            <em className={s.loss}>{losses} D</em>
-            <em>{Math.round((wins / Math.max(1, wins + losses)) * 100)} %</em>
-          </span>
-        ) : null}
-      </div>
-    </div>
-  );
-}

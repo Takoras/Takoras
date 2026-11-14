@@ -363,7 +363,6 @@ export default function Bestiary() {
             <>
               <li>{t('ui.inv_have', { n: og?.ids.length ?? 0 })}</li>
               {oc ? <li>{t('ui.bst_got', { n: oc.total })}</li> : null}
-              {og?.deck ? <li>{t('ui.in_deck')}</li> : null}
               {og?.shown ? <li>{t('ui.shown_n', { n: og.shown })}</li> : null}
               {/* la chance la plus basse avec laquelle il a été tiré : plus elle est basse, plus c'est fort */}
               {og && og.luck > 1 ? <li>{t('ui.best_luck', { l: fmtLuck(og.luck) })}</li> : null}
@@ -425,9 +424,7 @@ function CardView({
     all = [g, ...Object.values(c.vs)].filter((x): x is Group => !!x);
   // jamais trouvé : mystère total (fond gris neutre, pas de numéro, pas de rareté, pas de nom)
   const known = n > 0 || c.seen;
-  const badge = all.some((x) => x.deck)
-    ? ['', t('ui.in_deck')]
-    : all.some((x) => x.shown)
+  const badge = all.some((x) => x.shown)
       ? ['', t('ui.in_showcase')]
       : locked
         ? ['', t('ui.lock')]

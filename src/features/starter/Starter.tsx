@@ -2,7 +2,6 @@ import type { CSSProperties } from 'react';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { errorText, passApi } from '@/api';
 import { glowVars, jetonOf, texOf } from '@/data/jetons';
-import { powerInfo } from '@/data/kit';
 import { sfx } from '@/engines/sound.js';
 import { useAuth } from '@/lib/auth';
 import { useJn } from '@/lib/names';
@@ -63,17 +62,13 @@ export function Starter() {
         <h2 id="st-t">{t('ui.st_pick')}</h2>
         <ul className={s.choices}>
           {d.choices.map((name) => {
-            const j = jetonOf(name),
-              k = powerInfo(name, lang);
+            const j = jetonOf(name);
             return (
               <li key={name} style={glowVars(j) as CSSProperties}>
                 <button type="button" onClick={() => void pick(name)}>
                   <img className="px" src={texOf(j)} alt="" />
                   <b>{jn(name)}</b>
-                  <small className={s.pw} style={{ color: k.col }}>
-                    {k.name}
-                  </small>
-                  <small>{k.desc}</small>
+                  <small>1/{j.odds.toLocaleString(lang)}</small>
                 </button>
               </li>
             );

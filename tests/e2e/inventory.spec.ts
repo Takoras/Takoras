@@ -19,7 +19,7 @@ test('bestiaire : grille, filtres, fiche, vente, verrou', async ({ page }) => {
   // fiche de Mobu (5 en tout, dont 4 normaux) : vendre 1 (plus de montée de niveau pour l'instant)
   await page.getByRole('button', { name: /×5 Mobu/ }).click({ force: true });
   const dlg = page.getByRole('dialog');
-  await expect(dlg.getByText('Gélatine')).toBeVisible();
+  await expect(dlg.getByText('Tu en as 4')).toBeVisible();
   await dlg.getByRole('button', { name: /Vendre 1/ }).click();
   // la fiche reste ouverte et se met à jour
   await expect(dlg.getByText('Tu en as 3')).toBeVisible();
@@ -34,7 +34,7 @@ test('bestiaire : grille, filtres, fiche, vente, verrou', async ({ page }) => {
   await page
     .getByRole('dialog')
     .getByRole('button', { name: /Verrouiller/ })
-    .click({ force: true }); // la fiche flotte (animation continue) : pas d'attente de stabilité
+    .dispatchEvent('click'); // la fiche se déplie et flotte (animation continue) : clic direct sur le bouton
   await expect.poll(() => calls.includes('lock_pulls')).toBe(true);
 });
 

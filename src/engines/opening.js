@@ -1,7 +1,7 @@
 // Ouverture des tirages. Repris de legacy/ (transitions.js + opening.js) ; ce fichier est maintenant la référence (plus régénéré).
 import { colorOf, SERIES, texOf } from '@/data/jetons';
 import { burstAt } from '@/lib/pfx';
-import { $, ACC, LOCALE, PULLS, SETTINGS, serieTheme, STAT_MAX, VARIANTS, errText, fmt, fmtLuck, jn, jnH, reducedFx, saveSettings, sb, sfx, sparkStyle, speed, statsOf, powerText, esc, t, toast, vCls, vOdds, vTag, host } from './env';
+import { $, ACC, LOCALE, PULLS, SETTINGS, serieTheme, VARIANTS, errText, fmt, fmtLuck, jn, jnH, reducedFx, saveSettings, sb, sfx, sparkStyle, speed, t, toast, vCls, vOdds, vTag, host } from './env';
 import { CINE } from './cinema.js';
 import { attachSwing } from '@/ui/useSwing';
 import { styleActive, styleClean, styleHold, styleReveal, styleStart, styleTap } from './opening-styles.js';
@@ -24,7 +24,7 @@ const select = (i) => { current = i; };
 
 // HTML de l’écran (textes traduits au passage)
 if (!document.getElementById('opening')) {
-  document.body.insertAdjacentHTML('beforeend', "<div class=\"opening\" id=\"opening\" aria-hidden=\"true\">\n    <div class=\"op-bg\" id=\"op-bg\"></div>\n    <div class=\"op-rays\"></div>\n    <div class=\"op-glow\"></div>\n    <div class=\"op-vignette\"></div>\n    <div class=\"op-bars\"></div>\n    <div class=\"op-top\">\n      <div class=\"eyebrow\" id=\"op-tag\">Pull Takoras</div>\n      <div class=\"op-odds\" id=\"op-odds\">1/1</div>\n    </div>\n    <div class=\"op-autobar\"><button class=\"op-auto\" id=\"op-auto\" hidden></button><button class=\"op-auto op-skip\" id=\"op-skip\" hidden></button></div>\n    <div class=\"op-main\">\n      <div class=\"op-coin-col\">\n        <button class=\"op-coin\" id=\"op-coin\" aria-label=\"Cliquer sur le jeton\"></button>\n        <p class=\"op-hint\" id=\"op-hint\">Clique sur le jeton</p>\n      </div>\n      <div class=\"op-info\" id=\"op-info\">\n        <div class=\"op-id\"><img class=\"op-serie\" src=\"/img/logo-takoras.png?v=2\" alt=\"Takoras\">\n        <h2 class=\"op-name\" id=\"op-name\"></h2>\n        <div class=\"op-rarity\" id=\"op-rarity\"></div></div>\n        <div class=\"op-stats\" id=\"op-stats\"></div>\n        <p class=\"op-note\" data-i18n=\"stats_note\">Statistiques provisoires · combats bientôt</p>\n        <div class=\"op-actions\">\n          <button class=\"btn primary\" id=\"op-next\" hidden>Suivant</button>\n          <button class=\"btn primary\" id=\"op-recap\" hidden data-i18n=\"see_recap\">Voir le récap</button>\n          <button class=\"btn primary\" id=\"op-again\">Pull encore · <span id=\"op-price\">100</span> ◆</button>\n          <button class=\"btn ghost\" id=\"op-back\" data-i18n=\"back\">Retour</button>\n        </div>\n      </div>\n    </div>\n    <button class=\"op-recap-x\" id=\"op-recap-x\" aria-label=\"Fermer\">✕</button>\n    <div class=\"op-recap-view\">\n      <div class=\"eyebrow\" id=\"op-recap-tag\">Récap</div>\n      <h2 class=\"op-name\" id=\"op-recap-title\">Tes jetons</h2>\n      <div class=\"op-recap-grid\" id=\"op-recap-grid\"></div>\n      <div class=\"op-actions\">\n        <button class=\"btn primary\" id=\"op-recap-again\">Pull ×10 encore · <span id=\"op-recap-price\">1 000</span> ◆</button>\n        <button class=\"btn ghost\" id=\"op-recap-back\" data-i18n=\"back\">Retour</button>\n      </div>\n    </div>\n  </div>\n  <div class=\"fx\" id=\"fx\"></div>");
+  document.body.insertAdjacentHTML('beforeend', "<div class=\"opening\" id=\"opening\" aria-hidden=\"true\">\n    <div class=\"op-bg\" id=\"op-bg\"></div>\n    <div class=\"op-rays\"></div>\n    <div class=\"op-glow\"></div>\n    <div class=\"op-vignette\"></div>\n    <div class=\"op-bars\"></div>\n    <div class=\"op-top\">\n      <div class=\"eyebrow\" id=\"op-tag\">Pull Takoras</div>\n      <div class=\"op-odds\" id=\"op-odds\">1/1</div>\n    </div>\n    <div class=\"op-autobar\"><button class=\"op-auto\" id=\"op-auto\" hidden></button><button class=\"op-auto op-skip\" id=\"op-skip\" hidden></button></div>\n    <div class=\"op-main\">\n      <div class=\"op-coin-col\">\n        <button class=\"op-coin\" id=\"op-coin\" aria-label=\"Cliquer sur le jeton\"></button>\n        <p class=\"op-hint\" id=\"op-hint\">Clique sur le jeton</p>\n      </div>\n      <div class=\"op-info\" id=\"op-info\">\n        <div class=\"op-id\"><img class=\"op-serie\" src=\"/img/logo-takoras.png?v=2\" alt=\"Takoras\">\n        <h2 class=\"op-name\" id=\"op-name\"></h2>\n        <div class=\"op-rarity\" id=\"op-rarity\"></div></div>\n        <div class=\"op-stats\" id=\"op-stats\"></div>\n        <div class=\"op-actions\">\n          <button class=\"btn primary\" id=\"op-next\" hidden>Suivant</button>\n          <button class=\"btn primary\" id=\"op-recap\" hidden data-i18n=\"see_recap\">Voir le récap</button>\n          <button class=\"btn primary\" id=\"op-again\">Pull encore · <span id=\"op-price\">100</span> ◆</button>\n          <button class=\"btn ghost\" id=\"op-back\" data-i18n=\"back\">Retour</button>\n        </div>\n      </div>\n    </div>\n    <button class=\"op-recap-x\" id=\"op-recap-x\" aria-label=\"Fermer\">✕</button>\n    <div class=\"op-recap-view\">\n      <div class=\"eyebrow\" id=\"op-recap-tag\">Récap</div>\n      <h2 class=\"op-name\" id=\"op-recap-title\">Tes jetons</h2>\n      <div class=\"op-recap-grid\" id=\"op-recap-grid\"></div>\n      <div class=\"op-actions\">\n        <button class=\"btn primary\" id=\"op-recap-again\">Pull ×10 encore · <span id=\"op-recap-price\">1 000</span> ◆</button>\n        <button class=\"btn ghost\" id=\"op-recap-back\" data-i18n=\"back\">Retour</button>\n      </div>\n    </div>\n  </div>\n  <div class=\"fx\" id=\"fx\"></div>");
   document.querySelectorAll('#opening [data-i18n]').forEach((el) => { el.textContent = t(el.dataset.i18n); });
   document.getElementById('op-coin')?.setAttribute('aria-label', t('tap_coin_a'));
   document.getElementById('op-recap-x')?.setAttribute('aria-label', t('close'));
@@ -465,25 +465,9 @@ function effects(v) {
 
 // Fiche du jeton (stats provisoires : plus il est rare, plus elles sont hautes)
 function fillInfo(j, variant = '') {
-  const lvl = Math.log10(j.odds) / 6; // 0 → 1 pour 1/1 → 1/1 000 000
-  const stat = (k, base) => { const v = Math.round(base * (.35 + lvl * .65) * (.85 + Math.random() * .3)); return [k, v, Math.min(100, v / base * 100)]; };
   $('op-name').innerHTML = jnH(j.name) + vTag(variant);
   const lk = +(sess.lucks || [])[sess.idx] || 0; // chance active quand ce jeton a été tiré
   $('op-rarity').innerHTML = '1/' + vOdds(j.odds, variant).toLocaleString(LOCALE()) + (lk > 1 ? ` <span class="op-luck">×${fmtLuck(lk)}</span>` : '');
-  // Mêmes stats que dans l'inventaire (stables pour un même jeton)
-  const S = statsOf(j.name, j.odds, variant);
-  sess.cur.stats = ['s_mass', 's_pow', 's_size'].map(k => [k, S[k], Math.min(100, S[k] / STAT_MAX[k] * 100)]);
-  $('op-stats').innerHTML = sess.cur.stats
-    .map(([k, v, w]) => `<div class="stat"><span class="muted">${t(k)}</span><div class="bar"><i data-w="${w}"></i></div><b>${v}</b></div>`).join('');
-  requestAnimationFrame(() => requestAnimationFrame(() => $('op-stats').querySelectorAll('i').forEach(i => { i.style.width = i.dataset.w + '%'; })));
-  // le pouvoir du jeton (celui du Duel), sous les stats, dans la même fiche
-  const p = powerText(j.name);
-  if (p.desc) {
-    const box = document.createElement('div');
-    box.className = 'op-abil';
-    box.innerHTML = `<b>${esc(p.name)}</b><p>${esc(p.desc)}</p>`;
-    $('op-stats').appendChild(box);
-  }
 }
 
 // Pause finale : le haut disparaît, zoom sur le jeton qui tremble, on clique pour révéler

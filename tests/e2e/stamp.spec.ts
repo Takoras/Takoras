@@ -15,9 +15,4 @@ test('tampon de mutation : taille fixe partout (étiquettes du jeu et du site)',
   });
   const box = await page.locator('#op-test .vstamp').boundingBox();
   expect(box?.width ?? 999).toBeLessThanOrEqual(16);
-  // combat : jetons de l'équipe avec leur mutation
-  await page.goto('/combat');
-  const stamps = page.locator('[class*="stamp_"]');
-  await expect(stamps.first()).toBeVisible();
-  for (const b of await stamps.all()) expect((await b.boundingBox())?.width ?? 999).toBeLessThanOrEqual(28);
 });

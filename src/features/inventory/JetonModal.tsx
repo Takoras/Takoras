@@ -1,14 +1,13 @@
 import { useEffect, useRef, useState, type CSSProperties, type PointerEvent, type ReactNode } from 'react';
-import { hexRGB, jetonOf, texOf, texScale, vImg, vOdds, glowVars, type Variant } from '@/data/jetons';
-import { powerInfo } from '@/data/kit';
+import { hexRGB, jetonOf, MYSTERE, texOf, texScale, vImg, vOdds, glowVars, type Variant } from '@/data/jetons';
 import { useJn } from '@/lib/names';
-import { reducedFx, useSettings } from '@/lib/settings';
+import { reducedFx } from '@/lib/settings';
 import { useT } from '@/i18n/useT';
 import { Modal } from '@/ui/Modal';
 import { spring } from '@/ui/spring';
 import { PixelBg } from '@/ui/PixelBg';
 import { useSwing } from '@/ui/useSwing';
-import { TokenId, TokenStats } from '@/ui/TokenCards';
+import { TokenId } from '@/ui/TokenCards';
 import s from './JetonSheet.module.css';
 
 const VS = ['gold', 'celeste', 'ombre'] as const;
@@ -27,6 +26,7 @@ export function JetonModal({
   serie,
   variant = '',
   locked,
+  mystery,
   found,
   facts,
   pick,
@@ -39,6 +39,8 @@ export function JetonModal({
   serie?: string;
   variant?: string;
   locked?: boolean;
+  /** jeton qu'on ne doit pas dévoiler (collection d'un autre joueur) : « ? » et « ??? », comme dans la grille */
+  mystery?: boolean;
   found?: Partial<Record<string, boolean | number>>;
   facts?: ReactNode;
   pick?: (v: string) => void;
@@ -51,7 +53,6 @@ export function JetonModal({
 }) {
   const t = useT();
   const jn = useJn();
-  const lang = useSettings((x) => x.lang);
   const coin = useRef<HTMLDivElement>(null);
   const card = useRef<HTMLDivElement>(null);
   // les boîtes de texte flottent et se balancent au passage de la souris, comme les blocs de l'accueil
@@ -145,7 +146,6 @@ export function JetonModal({
   const pv = over && over.n === name ? over.v : variant;
   const setPv = (v: string) => setOver({ n: name, v });
   const j = jetonOf(name ?? '', serie);
-  const k = powerInfo(j.name, lang);
   const tilt = (e: PointerEvent) => {
     const c = coin.current;
     if (!c || reducedFx()) return;
@@ -163,11 +163,13 @@ export function JetonModal({
   };
   // jeton pas encore découvert : on le montre quand même en aperçu (son dessin, ses stats, son pouvoir),
   // avec une étiquette « pas encore découvert » ; seules les mutations trouvées et les infos du joueur sont cachées
+  // jeton mystère : ni sa couleur ni son fond ne doivent le trahir (gris neutre, fond le plus simple)
+  const glow = mystery ? '#71717a' : j.glow;
   const vars = {
-    ...glowVars(j, pv),
-    '--ga': 1,
-    '--pw': hexRGB(k.col),
-    ...(pv ? { '--g': VCOL[pv as Variant] } : {}),
+    ...glowVars({ glow, odds: mystery ? 1 : j.odds }, mystery ? '' : pv),
+    '--ga': mystery ? 0 : 1,
+    '--pw': hexRGB(glow),
+    ...(pv && !mystery ? { '--g': VCOL[pv as Variant] } : {}),
   } as unknown as CSSProperties;
   return (
     <Modal open={!!name} onClose={close} wide noX bare fading={closing}>
@@ -176,8 +178,8 @@ export function JetonModal({
           {/* le fond pixel art de l'ouverture : plus le jeton est rare, plus il est chargé */}
           <PixelBg
             className={s.pxbg}
-            odds={vOdds(j.odds, pv)}
-            glow={pv && pv in VHEX ? VHEX[pv as Variant] : j.glow}
+            odds={mystery ? 1 : vOdds(j.odds, pv)}
+            glow={mystery ? glow : pv && pv in VHEX ? VHEX[pv as Variant] : j.glow}
             center={coin}
             still={reducedFx()}
           />
@@ -192,8 +194,8 @@ export function JetonModal({
               ref={idBox}
               className={`${s.id} ${s.box}`}
               serie={serie ?? 'Takoras'}
-              name={jn(j.name)}
-              odds={vOdds(j.odds, pv)}
+              name={mystery ? '???' : jn(j.name)}
+              odds={mystery ? null : vOdds(j.odds, pv)}
             >
               {locked ? <p className={s.unknownTag}>{t('ui.bst_unknown_tag')}</p> : null}
               {facts && !locked ? <ul className={s.facts}>{facts}</ul> : null}
@@ -215,9 +217,9 @@ export function JetonModal({
                   className={`${s.coin} jm-coin`}
                   onPointerMove={tilt}
                   onPointerLeave={untilt}
-                  style={texScale(j) !== 1 ? { scale: String(texScale(j)) } : undefined}
+                  style={!mystery && texScale(j) !== 1 ? { scale: String(texScale(j)) } : undefined}
                 >
-                  <Face cls={locked ? 'px' : vImg(pv)} src={texOf(j)} alt={jn(j.name)} />
+                  <Face cls={locked ? 'px' : vImg(pv)} src={mystery ? MYSTERE : texOf(j)} alt={mystery ? '???' : jn(j.name)} />
                   {locked ? null : (
                     <i
                       className={s.glare}
@@ -268,12 +270,6 @@ export function JetonModal({
                 </div>
               )}
             </div>
-            {
-              <div className={s.power}>
-                {/* même fiche que la révélation du tirage : stats en barres puis la capacité */}
-                <TokenStats ref={rsBox} className={`${s.rs} ${s.box}`} name={j.name} odds={j.odds} variant={pv} />
-              </div>
-            }
           </div>
           {children ? <div className={s.actions}>{children}</div> : null}
         </div>

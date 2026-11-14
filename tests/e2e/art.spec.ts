@@ -41,30 +41,3 @@ test('effets réduits : images fixes mais la variante garde sa couleur', async (
   expect(st.a).toBe('none');
   expect(st.f).toContain('vgold'); // la palette dorée reste, sans le doodle
 });
-
-// Les classes de variante des CSS Modules existent bien (une config les renommait en camelCase et les vidait)
-test('mutations : vrais tampons dans l’éditeur d’équipe, onglets colorés dans le Bestiaire', async ({ page }) => {
-  await fakeSupabase(page, {}, [], { deck: [15, 16, 17] });
-  await page.goto('/combat');
-  // toucher un jeton de l'équipe ouvre tout de suite l'éditeur, cette place visée
-  await page
-    .getByRole('region', { name: 'Équipe' })
-    .getByRole('button', { name: /Changer ce jeton/ })
-    .first()
-    .click();
-  // les tampons sont dans la fiche du jeton (même fiche que le bestiaire)
-  await page.getByRole('dialog').getByRole('button', { name: 'Mobu', exact: true }).click();
-  const b = page.getByRole('dialog').getByRole('button', { name: 'Doré' });
-  expect(
-    await b
-      .locator('span')
-      .first()
-      .evaluate((el) => getComputedStyle(el).backgroundImage),
-  ).toContain('stamps/gold.png');
-  await page.keyboard.press('Escape');
-  await page.keyboard.press('Escape');
-  await page.goto('/inventory');
-  const tab = page.getByRole('tab', { name: /Doré/ });
-  await tab.click();
-  expect(await tab.evaluate((el) => getComputedStyle(el).borderTopColor)).toBe('rgb(250, 204, 21)');
-});

@@ -9,7 +9,7 @@ test.beforeEach(async ({ page }) => {
   });
 });
 
-const ROUTES = ['/', '/inventory', '/shop', '/combat', '/friends'];
+const ROUTES = ['/', '/inventory', '/shop', '/friends'];
 
 for (const path of ROUTES) {
   test(`${path} : charge sans erreur ni problème d’accessibilité grave`, async ({ page }) => {
@@ -54,7 +54,6 @@ for (const path of [
   '/profile',
   '/profile/Ami',
   '/friends',
-  '/combat',
   '/pass',
   '/shop',
 ]) {

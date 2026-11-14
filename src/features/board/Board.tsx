@@ -120,7 +120,7 @@ export function BoardSection({ kind: id, title }: { kind: 'pulls' | 'time'; titl
   );
 }
 
-// L'ancienne adresse /classement mène au Combat (le classement Elo y est)
+// L'ancienne adresse /classement mène à l'accueil
 export default function Board() {
-  return <Navigate to="/combat" replace />;
+  return <Navigate to="/" replace />;
 }

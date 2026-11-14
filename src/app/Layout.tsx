@@ -42,7 +42,6 @@ const Badge = ({ n }: { n: number }) =>
 // (relevé pour la lisibilité : les pages étaient réduites à 67-75 %, les textes devenaient trop petits)
 const PAGE_ZOOM: [string, number][] = [
   ['/inventory', 0.9],
-  ['/combat', 0.9],
   ['/shop', 0.85],
 ];
 // la boutique est plus large que les autres pages (la vitrine respire sur PC)

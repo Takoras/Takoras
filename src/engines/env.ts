@@ -46,10 +46,6 @@ import { useAuth } from '@/lib/auth';
 import { errorText } from '@/api/rpc';
 import { toast as toastUI } from '@/ui/toast';
 import type { Me } from '@/api/queries';
-import { powerInfo, tokenStats } from '@/data/kit';
-import { powerOf } from '@/features/duel/rules';
-import { duelText } from '@/features/duel/text';
-import { RCFG } from './ring-config.js';
 export { sb, VARIANTS };
 export { vOdds } from '@/data/jetons';
 export { sparkStyle } from './sparks.js';
@@ -101,24 +97,6 @@ export const PULLS = [
   // Bodako : on peut la choisir et voir sa collection ; l'ouverture attend le tirage par série côté serveur
   { group: '', name: 'Bodako', color: 'bodako', price: 300, free: false, img: '/img/jetons/bodako.png', soon: true },
 ] as { group: string; name: string; color: string; price: number; free: boolean; img: string; soon?: boolean }[];
-
-// Stats affichées dans la fiche d'un jeton (même calcul que l'ancien ui.js)
-export const STAT_MAX = { s_mass: RCFG.STAT_MAX.mass, s_pow: RCFG.STAT_MAX.power, s_size: RCFG.STAT_MAX.r };
-export function statsOf(name: string, odds: number, variant = '', lvl = 1) {
-  void odds;
-  const c = tokenStats(name, lvl, variant);
-  // note globale des cartes
-  const power = Math.round(c.mass * 300 + c.power / 4 + c.r * 2);
-  return { s_mass: Math.round(c.mass * 100) / 100, s_pow: Math.round(c.power), s_size: c.r, power, lvl };
-}
-
-// Pouvoir d'un jeton (celui du Duel) : son nom et ce qu'il fait
-export function powerText(name: string) {
-  const lang = useSettings.getState().lang;
-  const T = duelText(lang);
-  const id = powerOf(name).id;
-  return { name: T.n[id] ?? powerInfo(name, lang).name, desc: T.d[id] ?? '' };
-}
 
 // Crochets : ce que le moteur demande au reste du site (économie, historique…). React les branche au démarrage.
 export const host = {
