@@ -100,19 +100,24 @@
   padding-right: var(--s-8);
 }
 
+/* fermer : le même bouton rond que sur les fiches (JetonSheet .x) */
 .close {
   position: absolute;
   top: var(--s-3);
   right: var(--s-3);
   display: grid;
   place-items: center;
-  width: 36px;
-  height: 36px;
-  border-radius: var(--r-sm);
-  color: var(--muted);
+  width: 40px;
+  height: 40px;
+  border-radius: 999px;
+  background: rgb(0 0 0 / 55%);
+  color: var(--text);
+  transition:
+    scale var(--t-fast),
+    background-color var(--t-fast);
 }
 
 .close:hover {
-  background: var(--surface-2);
-  color: var(--text);
+  scale: 1.08;
+  background: rgb(0 0 0 / 70%);
 }

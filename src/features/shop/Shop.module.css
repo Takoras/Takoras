@@ -285,12 +285,13 @@
   font-size: var(--fs-xs);
 }
 .badge {
+  /* même pastille que le « ×N » des jetons de l'inventaire */
   position: absolute;
   top: 10px;
   right: 10px;
-  padding: 1px 8px;
+  padding: 0 6px;
   border-radius: var(--r-pill);
-  background: rgb(255 255 255 / 8%);
+  background: var(--surface-3);
   font-size: var(--fs-xs);
   font-weight: 700;
 }

@@ -220,7 +220,7 @@ html.reduce-fx .opening.turbo::after { display: block; filter: none; opacity: .3
 html.reduce-fx .opening.turbo::before { display: none; }
 .opening.turbo .op-main { position: relative; z-index: 2; }
 @media (pointer: coarse) { .opening.turbo::before { display: none; } }
-.rc-n { position: absolute; top: 6px; right: 8px; font-family: var(--font-display); font-weight: 700; font-size: 13px; color: #c4b5fd; }
+.rc-n { position: absolute; top: 5px; right: 6px; padding: 0 6px; border-radius: 999px; background: var(--surface-3); font-size: var(--fs-xs); font-weight: 700; color: var(--text); }
 .op-recap-x { display: none; position: fixed; top: calc(14px + env(safe-area-inset-top)); right: 14px; z-index: 9; width: 42px; height: 42px; border-radius: 50%;
   font-size: 18px; color: #fff; background: rgba(20, 18, 30, .85); border: 1px solid rgba(255, 255, 255, .18); }
 .op-recap-x:hover { background: rgba(255, 255, 255, .14); }
