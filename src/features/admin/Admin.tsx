@@ -11,6 +11,7 @@ import { FeedbackAdmin } from './FeedbackAdmin';
 import { ReportsAdmin } from './ReportsAdmin';
 import { PatchnotesAdmin } from './PatchnotesAdmin';
 import { Tests } from './Tests';
+import { Security } from './Security';
 import { setPreview } from '@/lib/preview';
 import { useMe } from '@/api/queries';
 import { Icon } from '@/app/Icon';
@@ -25,6 +26,7 @@ const GROUPS = [
     [
       ['players', 'users', 'Joueurs'],
       ['rep', 'shield', 'Signalements'],
+      ['sec', 'shield', 'Sécurité'],
       ['fb', 'bulb', 'Retours'],
     ],
   ],
@@ -130,6 +132,7 @@ export default function Admin() {
           {tab === 'rep' ? <ReportsAdmin /> : null}
           {tab === 'pn' ? <PatchnotesAdmin /> : null}
           {tab === 'tests' ? <Tests /> : null}
+          {tab === 'sec' ? <Security /> : null}
         </div>
       </div>
     </section>

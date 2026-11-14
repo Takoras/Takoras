@@ -1,0 +1,5 @@
+-- Appliquées via MCP (audit de sécurité du 14/11/2026) :
+--  revoke_internal_helpers : _featured, _is_mod, _cosm_today, _price_u, _cosm_off plus appelables depuis le site
+--  rate_limits_and_close_combat_rpcs : _rate sur update_profile (30) et lock_pulls (30, 5000 ids max) ;
+--    fonctions du combat supprimé (set_deck, ranked_*, level_up, leaderboard_elo/wins, my_deck) fermées
+--  admin_suspicious : vue admin « Sécurité » (gros gains de pièces sur 24 h, rafales de requêtes sur 10 min, bannis)

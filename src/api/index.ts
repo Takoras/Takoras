@@ -161,6 +161,7 @@ export const adminApi = {
   statsCat: (p_cat: string, p_days = 30) => rpc('admin_stats_cat', { p_cat, p_days }),
   setMod: (target: string, p_on: boolean) => rpc('admin_set_mod', { target, p_on }),
   shop: () => rpc('admin_shop'),
+  suspicious: () => rpcLoose('admin_suspicious'),
   shopSet: (a: { p_item: string; p_price: number; p_active: boolean; p_stock: number }) => rpc('admin_shop_set', a),
   shopReroll: () => rpc('admin_shop_reroll'),
   shopFeature: (p_item: string | null, p_pct: number) => rpc('admin_shop_feature', { p_item, p_pct }),
