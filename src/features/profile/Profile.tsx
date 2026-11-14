@@ -36,7 +36,7 @@ import { Aura, BannerFx, cosmName, cosmRar, COSMETICS, CosmeticPreview, isSecret
 import { toast } from '@/ui/toast';
 import { VTag } from '@/ui/VTag';
 import { JetonModal } from '../inventory/JetonModal';
-import { useInventory } from '../inventory/inv';
+import { cKey, useInventory } from '../inventory/inv';
 import { NeedLogin } from '@/app/NeedLogin';
 import { Icon } from '@/app/Icon';
 import { FriendButton } from '../social/FriendButton';
@@ -93,7 +93,14 @@ export default function Profile() {
     enabled: !!pseudo,
     queryFn: async () => (await publicApi.profile(pseudo)) as unknown as Prof | null,
   });
-  const [jeton, setJeton] = useState<{ name: string; variant: string; locked: boolean; single?: boolean } | null>(null);
+  const [jeton, setJeton] = useState<{
+    name: string;
+    variant: string;
+    locked: boolean;
+    single?: boolean;
+    /** jeton que TOI tu n'as jamais eu : sa fiche reste un mystère (comme dans ton inventaire) */
+    hidden?: boolean;
+  } | null>(null);
   const [slot, setSlot] = useState<number | null>(null);
   const [edit, setEdit] = useState(false);
   const [serie, setSerie] = useState<string | null>('Takoras'); // bestiaire montré en dessous (pas de fenêtre)
@@ -105,6 +112,7 @@ export default function Profile() {
   );
   useSwingAll(pageRef, `.${s.sc}, .${s.scEmpty}, .${s.best}, .${s.series} > button`, 0.4, prof.data);
 
+  const myInv = useInventory(); // (avant tout « return » : règle des hooks)
   if (!params.pseudo && !user) return <NeedLogin title={t('app.account')} />;
   if (prof.isError) return <p className="muted">{t('ui.err_generic')}</p>;
   if (!pseudo || prof.isPending)
@@ -121,6 +129,12 @@ export default function Profile() {
       </section>
     );
   const mine = !!me.data?.pseudo && p.pseudo === me.data.pseudo;
+  // ce que TOI tu as déjà trouvé : sur le profil d'un autre, un jeton que tu n'as jamais eu reste caché
+  const iKnow = (name: string) => {
+    if (mine) return true;
+    const serie = Object.keys(SERIES).find((k) => SERIES[k]?.some((j) => j.name === name)) ?? 'Takoras';
+    return !!myInv.data?.coll.has(cKey(serie, name));
+  };
   const bp = p.best_pull;
   const show = p.showcase ?? [];
   const total = Object.values(SERIES).reduce((n, l) => n + l.length, 0);
@@ -215,7 +229,9 @@ export default function Profile() {
             type="button"
             className={s.best}
             style={glowVars(jetonOf(bp.jeton), bp.variant) as CSSProperties}
-            onClick={() => setJeton({ name: bp.jeton, variant: bp.variant ?? '', locked: false, single: true })}
+            onClick={() =>
+              setJeton({ name: bp.jeton, variant: bp.variant ?? '', locked: false, single: true, hidden: !iKnow(bp.jeton) })
+            }
           >
             <PixelBg
               className={s.bestBg}
@@ -260,7 +276,7 @@ export default function Profile() {
                   <button
                     type="button"
                     onClick={() =>
-                      mine ? setSlot(i) : setJeton({ name: x.jeton, variant: x.variant ?? '', locked: false })
+                      mine ? setSlot(i) : setJeton({ name: x.jeton, variant: x.variant ?? '', locked: false, hidden: !iKnow(x.jeton) })
                     }
                   >
                     <span className={s.scArt}>
@@ -287,7 +303,8 @@ export default function Profile() {
           <Collection
             pseudo={p.pseudo}
             serie={serie}
-            onOpen={(name, locked) => setJeton({ name, variant: '', locked })}
+            known={iKnow}
+            onOpen={(name, locked) => setJeton({ name, variant: '', locked, hidden: !iKnow(name) })}
           />
         ) : null}
       </Swap>
@@ -381,10 +398,13 @@ function Bestiaries({
 function Collection({
   pseudo,
   serie,
+  known,
   onOpen,
 }: {
   pseudo: string;
   serie: string;
+  /** jetons que TOI tu as déjà trouvés (les autres restent des « ??? ») */
+  known: (name: string) => boolean;
   onOpen: (name: string, locked: boolean) => void;
 }) {
   const jn = useJn();
@@ -407,7 +427,8 @@ function Collection({
   return (
     <ul ref={gridRef} className={`${iv.grid} ${s.collGrid}`}>
       {all.map((j, i) => {
-        const c = got.get(j.name);
+        // pas à lui, ou jamais trouvé par toi : « ??? »
+        const c = known(j.name) ? got.get(j.name) : undefined;
         return (
           <li
             key={j.name}
@@ -454,7 +475,7 @@ function TheirJeton({
   onClose,
 }: {
   pseudo: string;
-  jeton: { name: string; variant: string; locked: boolean; single?: boolean } | null;
+  jeton: { name: string; variant: string; locked: boolean; single?: boolean; hidden?: boolean } | null;
   onClose: () => void;
 }) {
   const t = useT();
@@ -469,7 +490,7 @@ function TheirJeton({
       name={jeton?.name ?? null}
       variant={jeton?.variant}
       locked={jeton?.locked}
-      mystery={jeton?.locked}
+      mystery={jeton?.locked || jeton?.hidden}
       single={jeton?.single}
       found={Object.fromEntries(rows.map((r) => [r.variant ?? '', true]))}
       facts={

@@ -31,8 +31,6 @@
   --al-red-deep: #2443b3;
   --al-shadow: 0 2px 3px rgb(0 0 0 / 35%), 0 10px 22px rgb(0 0 0 / 40%);
   --al-shadow-lift: 0 6px 8px rgb(0 0 0 / 35%), 0 22px 40px rgb(0 0 0 / 50%);
-  --font-album: 'Archivo Black', 'Archivo Variable', system-ui, sans-serif;
-  --font-album-body: 'Archivo Variable', system-ui, sans-serif;
 
   /* Fonds et surfaces (du plus profond au plus proche) */
   --bg: #0e0e11;
