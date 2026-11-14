@@ -16,6 +16,7 @@ import { useSwingAll } from '@/ui/useSwing';
 import { useStaggerIn } from '@/ui/useStaggerIn';
 import { NeedLogin } from '@/app/NeedLogin';
 import { useFriends, type Friend } from './social';
+import { Swap } from '@/ui/Swap';
 import s from './Friends.module.css';
 
 type Tab = 'ok' | 'inc' | 'out';
@@ -194,40 +195,66 @@ export default function Friends() {
             </button>
           ))}
         </div>
-        {!fr.data ? (
-          <p className="muted" aria-busy>
-            …
-          </p>
-        ) : cur === 'ok' ? (
-          ok.length ? (
-            <ul key="ok" className={s.grid}>
-              {ok.map((f) => (
-                <li key={f.id} data-fid={f.id} className={`${s.card} ${f.online ? s.on : ''}`}>
-                  <Link to={href(f.pseudo)} className={s.cardLink}>
-                    <span className={s.ava}>
-                      <Avatar pseudo={f.pseudo} avatar={f.avatar} size={76} />
-                      <i className={s.dot} aria-hidden />
-                    </span>
-                    <b className={s.name}>{f.pseudo}</b>
-                    <small className={s.st}>{status(f)}</small>
-                    <span className={s.stats}>
-                      {f.elo != null ? (
-                        <span>
-                          <b>{f.elo}</b> Elo
-                        </span>
-                      ) : null}
-                      {f.collection != null ? (
-                        <span>
-                          <b>{f.collection}</b> {t('ui.fr_tokens')}
-                        </span>
-                      ) : null}
+        <Swap k={fr.data ? cur : 'load'}>
+          {!fr.data ? (
+            <p className="muted" aria-busy>
+              …
+            </p>
+          ) : cur === 'ok' ? (
+            ok.length ? (
+              <ul key="ok" className={s.grid}>
+                {ok.map((f) => (
+                  <li key={f.id} data-fid={f.id} className={`${s.card} ${f.online ? s.on : ''}`}>
+                    <Link to={href(f.pseudo)} className={s.cardLink}>
+                      <span className={s.ava}>
+                        <Avatar pseudo={f.pseudo} avatar={f.avatar} size={76} />
+                        <i className={s.dot} aria-hidden />
+                      </span>
+                      <b className={s.name}>{f.pseudo}</b>
+                      <small className={s.st}>{status(f)}</small>
+                      <span className={s.stats}>
+                        {f.collection != null ? (
+                          <span>
+                            <b>{f.collection}</b> {t('ui.fr_tokens')}
+                          </span>
+                        ) : null}
+                      </span>
+                    </Link>
+                    <button
+                      type="button"
+                      className={`${s.x} ${s.rm}`}
+                      onClick={() => void remove(f)}
+                      aria-label={`${t('ui.fr_remove')} ${f.pseudo}`}
+                    >
+                      ✕
+                    </button>
+                  </li>
+                ))}
+              </ul>
+            ) : (
+              <p className={s.empty}>{t('ui.fr_empty')}</p>
+            )
+          ) : (cur === 'inc' ? inc : out).length ? (
+            <ul key={cur} className={s.reqs}>
+              {(cur === 'inc' ? inc : out).map((f) => (
+                <li key={f.id} data-fid={f.id} className={`${s.req} ${cur === 'out' ? s.reqOut : ''}`}>
+                  <Link to={href(f.pseudo)} className={s.reqWho}>
+                    <Avatar pseudo={f.pseudo} avatar={f.avatar} size={48} />
+                    <span>
+                      <b>{f.pseudo}</b>
+                      <small>{cur === 'inc' ? t('ui.fr_wants') : t('ui.fr_sent')}</small>
                     </span>
                   </Link>
+                  {cur === 'inc' ? (
+                    <Button size="sm" variant="primary" onClick={() => void respond(f, true)}>
+                      {t('ui.fr_accept')}
+                    </Button>
+                  ) : null}
                   <button
                     type="button"
-                    className={`${s.x} ${s.rm}`}
-                    onClick={() => void remove(f)}
-                    aria-label={`${t('ui.fr_remove')} ${f.pseudo}`}
+                    className={s.x}
+                    onClick={() => void respond(f, false)}
+                    aria-label={`${t('ui.cancel')} · ${f.pseudo}`}
                   >
                     ✕
                   </button>
@@ -235,38 +262,9 @@ export default function Friends() {
               ))}
             </ul>
           ) : (
-            <p className={s.empty}>{t('ui.fr_empty')}</p>
-          )
-        ) : (cur === 'inc' ? inc : out).length ? (
-          <ul key={cur} className={s.reqs}>
-            {(cur === 'inc' ? inc : out).map((f) => (
-              <li key={f.id} data-fid={f.id} className={`${s.req} ${cur === 'out' ? s.reqOut : ''}`}>
-                <Link to={href(f.pseudo)} className={s.reqWho}>
-                  <Avatar pseudo={f.pseudo} avatar={f.avatar} size={48} />
-                  <span>
-                    <b>{f.pseudo}</b>
-                    <small>{cur === 'inc' ? t('ui.fr_wants') : t('ui.fr_sent')}</small>
-                  </span>
-                </Link>
-                {cur === 'inc' ? (
-                  <Button size="sm" variant="primary" onClick={() => void respond(f, true)}>
-                    {t('ui.fr_accept')}
-                  </Button>
-                ) : null}
-                <button
-                  type="button"
-                  className={s.x}
-                  onClick={() => void respond(f, false)}
-                  aria-label={`${t('ui.cancel')} · ${f.pseudo}`}
-                >
-                  ✕
-                </button>
-              </li>
-            ))}
-          </ul>
-        ) : (
-          <p className={s.empty}>{cur === 'inc' ? t('ui.fr_none_in') : t('ui.fr_none_out')}</p>
-        )}
+            <p className={s.empty}>{cur === 'inc' ? t('ui.fr_none_in') : t('ui.fr_none_out')}</p>
+          )}
+        </Swap>
       </div>
     </section>
   );

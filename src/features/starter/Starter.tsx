@@ -81,7 +81,6 @@ export function Starter() {
   const steps = [
     ['pull', st.pull],
     ['shop', st.shop],
-    ['ring', st.ring],
   ] as const;
   const all = steps.every(([, ok]) => ok);
   return (

@@ -42,6 +42,7 @@ import { Icon } from '@/app/Icon';
 import { FriendButton } from '../social/FriendButton';
 import { ReportButton } from './ReportButton';
 import iv from '../inventory/Inventory.module.css';
+import { Swap } from '@/ui/Swap';
 import s from './Profile.module.css';
 import lk from './Locker.module.css';
 
@@ -280,13 +281,16 @@ export default function Profile() {
 
       <Bestiaries pseudo={p.pseudo} open={serie} onOpen={(x) => setSerie(serie === x ? null : x)} />
       {/* le bestiaire de la série choisie, directement dans la page, comme dans l'inventaire */}
-      {serie ? (
-        <Collection
-          pseudo={p.pseudo}
-          serie={serie}
-          onOpen={(name, locked) => setJeton({ name, variant: '', locked })}
-        />
-      ) : null}
+      {/* ouvrir, fermer ou changer de série : la grille arrive / part en fondu, la page suit en douceur */}
+      <Swap k={serie}>
+        {serie ? (
+          <Collection
+            pseudo={p.pseudo}
+            serie={serie}
+            onOpen={(name, locked) => setJeton({ name, variant: '', locked })}
+          />
+        ) : null}
+      </Swap>
 
       {mine ? (
         <section className={s.private} aria-labelledby="pv-t">
@@ -571,31 +575,31 @@ function ShowcasePicker({ p, slot, onClose }: { p: Prof; slot: number; onClose: 
     <Modal open onClose={onClose} title={t('ui.pick_title', { n: slot + 1 })} xl>
       <div className={s.pk}>
         {/* ce qu'il y a dans la case maintenant */}
-        {cur ? (
-          (() => {
-            const cj = jetonOf(cur.jeton);
-            const co = vOdds(cur.odds, (cur.variant ?? '') as Variant);
-            return (
-              <div className={s.pkCur} style={glowVars(cj, cur.variant) as CSSProperties}>
-                {/* le fond pixel du jeton (couleur de la mutation), comme sa fiche */}
-                <PixelBg className={s.pkCurBg} odds={co} glow={colorOf(cj, cur.variant)} still={reducedFx()} />
-                <span className={s.pkCurArt}>
-                  <img className={`px ${vImg(cur.variant)}`} src={texOf(cj)} alt="" />
-                </span>
-                <span className={s.pkCurId}>
-                  <b>{jn(cur.jeton)}</b>
-                  <span className={s.pkCurMeta}>
-                    <VTag v={cur.variant} />
-                    <em>1/{fmt(co)}</em>
+        {cur
+          ? (() => {
+              const cj = jetonOf(cur.jeton);
+              const co = vOdds(cur.odds, (cur.variant ?? '') as Variant);
+              return (
+                <div className={s.pkCur} style={glowVars(cj, cur.variant) as CSSProperties}>
+                  {/* le fond pixel du jeton (couleur de la mutation), comme sa fiche */}
+                  <PixelBg className={s.pkCurBg} odds={co} glow={colorOf(cj, cur.variant)} still={reducedFx()} />
+                  <span className={s.pkCurArt}>
+                    <img className={`px ${vImg(cur.variant)}`} src={texOf(cj)} alt="" />
                   </span>
-                </span>
-                <Button size="sm" onClick={() => void save(null)} loading={busy === -1}>
-                  {t('ui.pick_remove')}
-                </Button>
-              </div>
-            );
-          })()
-        ) : null}
+                  <span className={s.pkCurId}>
+                    <b>{jn(cur.jeton)}</b>
+                    <span className={s.pkCurMeta}>
+                      <VTag v={cur.variant} />
+                      <em>1/{fmt(co)}</em>
+                    </span>
+                  </span>
+                  <Button size="sm" onClick={() => void save(null)} loading={busy === -1}>
+                    {t('ui.pick_remove')}
+                  </Button>
+                </div>
+              );
+            })()
+          : null}
 
         {
           <div key="tok" className={s.pkStep}>
@@ -624,7 +628,11 @@ function ShowcasePicker({ p, slot, onClose }: { p: Prof; slot: number; onClose: 
                     const n = e.vs.reduce((a, v) => a + v.g.ids.length, 0);
                     const no = (SERIES[serie] ?? []).findIndex((x) => x.name === e.name) + 1;
                     return (
-                      <li key={e.name} className={`dd-card ${iv.card}`} style={{ ...glowVars(j), '--n': i } as CSSProperties}>
+                      <li
+                        key={e.name}
+                        className={`dd-card ${iv.card}`}
+                        style={{ ...glowVars(j), '--n': i } as CSSProperties}
+                      >
                         <button
                           type="button"
                           className={iv.cardBtn}
@@ -893,8 +901,7 @@ function EditProfile({ p, onClose }: { p: Prof; onClose: () => void }) {
                   {(Object.entries(peek) as [Tab, { v: string; to: string }][]).map(([k, { v }]) => {
                     const cosm = k === 'name' || k === 'aura' || k === 'bfx';
                     const r = cosm ? cosmRar(v) : null;
-                    const name =
-                      k === 'pp' ? ppName(v) : k === 'banner' ? bannerName(v, lang) : cosmName(v, lang);
+                    const name = k === 'pp' ? ppName(v) : k === 'banner' ? bannerName(v, lang) : cosmName(v, lang);
                     return (
                       <li key={k} className={lk.peekItem}>
                         <span className={lk.peekArt} aria-hidden>
@@ -930,7 +937,12 @@ function EditProfile({ p, onClose }: { p: Prof; onClose: () => void }) {
                           onClick={() => (sfx.click(), setPeek((pk) => unpeek(pk, k)))}
                         >
                           <svg viewBox="0 0 24 24" width="14" height="14" aria-hidden>
-                            <path d="M6 6l12 12M18 6 6 18" stroke="currentColor" strokeWidth="2.6" strokeLinecap="round" />
+                            <path
+                              d="M6 6l12 12M18 6 6 18"
+                              stroke="currentColor"
+                              strokeWidth="2.6"
+                              strokeLinecap="round"
+                            />
                           </svg>
                         </button>
                       </li>
@@ -1142,4 +1154,3 @@ function LockerTile({
     </button>
   );
 }
-

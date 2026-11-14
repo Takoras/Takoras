@@ -47,3 +47,17 @@ begin
 end $function$;
 REVOKE ALL ON FUNCTION public.admin_reset_player(uuid) FROM PUBLIC, anon;
 GRANT EXECUTE ON FUNCTION public.admin_reset_player(uuid) TO authenticated;
+
+-- 3) Plus de combat : la quête de départ ne demande plus le tuto du Ring (ouvrir un tirage + acheter en boutique)
+create or replace function public.starter_quest_claim()
+returns json language plpgsql security definer set search_path to '' as $$
+declare uid uuid := auth.uid(); q json := public.starter_choices() -> 'quest'; ok int;
+begin
+  if uid is null then raise exception 'not_logged_in'; end if;
+  if not ((q->>'pull')::boolean and (q->>'shop')::boolean) then raise exception 'quest_not_done'; end if;
+  update public.profiles set starter_quest = true, coins = coins + 500 where id = uid and not starter_quest returning 1 into ok;
+  if ok is null then raise exception 'starter_done'; end if;
+  return public.eco_state();
+end $$;
+revoke all on function public.starter_quest_claim() from public, anon;
+grant execute on function public.starter_quest_claim() to authenticated;

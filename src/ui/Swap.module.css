@@ -1,0 +1,29 @@
+/* Swap : l'ancien contenu s'efface par-dessus pendant que le nouveau arrive (voir Swap.tsx) */
+.swap {
+  position: relative;
+  display: grid;
+}
+.cur,
+.out {
+  grid-area: 1 / 1;
+  min-width: 0;
+}
+.out {
+  pointer-events: none;
+  animation: swapOut 0.24s ease-in forwards;
+}
+.in {
+  animation: swapIn 0.32s cubic-bezier(0.2, 0.8, 0.2, 1) both;
+}
+@keyframes swapOut {
+  to {
+    opacity: 0;
+    translate: 0 -6px;
+  }
+}
+@keyframes swapIn {
+  from {
+    opacity: 0;
+    translate: 0 8px;
+  }
+}

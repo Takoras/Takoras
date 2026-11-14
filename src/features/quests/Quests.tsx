@@ -104,57 +104,64 @@ export function Quests() {
         <small className="muted">{t('ui.q_reset', { t: hms(left) })}</small>
       </div>
       <ul className={s.list}>
-        {data.quests.map((x) => {
-          const ok = x.value >= x.target,
-            item = x.item ? ITEM_IMG[x.item] : undefined;
-          return (
-            <li key={x.id} className={`${ok ? s.ok : ''} ${x.claimed ? s.claimed : ''}`}>
-              <div className={s.top}>
-                <span>{t(`ui.q_${x.stat}` as Parameters<typeof t>[0], { n: x.target })}</span>
-                <span className={s.rew}>
-                  {x.coins ? (
-                    <>
-                      {n(x.coins)} <img className="px" src="/img/piece.png" alt="" width={12} height={12} />
-                    </>
-                  ) : null}
-                  {item ? (
-                    <img
-                      className="px"
-                      src={item.src}
-                      alt={x.item ?? ''}
-                      width={18}
-                      height={18}
-                      style={item.tint ? ({ '--df': item.tint } as React.CSSProperties) : undefined}
-                    />
-                  ) : null}
-                  {x.qty > 1 ? `×${x.qty}` : ''}
-                </span>
-              </div>
-              <div
-                className={s.bar}
-                role="progressbar"
-                aria-valuenow={x.value}
-                aria-valuemin={0}
-                aria-valuemax={x.target}
-                aria-label={t('ui.q_title')}
-              >
-                <i style={{ width: `${Math.min(100, (x.value / x.target) * 100)}%` }} />
-                <b>
-                  {Math.min(x.value, x.target)}/{x.target}
-                </b>
-              </div>
-              {x.claimed ? (
-                <span className={s.check} aria-label="OK">
-                  ✓
-                </span>
-              ) : ok ? (
-                <Button variant="primary" size="sm" onClick={(e) => void claim(x.id, e.currentTarget, x.item ?? undefined)}>
-                  {t('ui.q_claim')}
-                </Button>
-              ) : null}
-            </li>
-          );
-        })}
+        {/* plus de combat : les quêtes de combat ne sont plus affichées */}
+        {data.quests
+          .filter((x) => x.stat !== 'battles' && x.stat !== 'wins')
+          .map((x) => {
+            const ok = x.value >= x.target,
+              item = x.item ? ITEM_IMG[x.item] : undefined;
+            return (
+              <li key={x.id} className={`${ok ? s.ok : ''} ${x.claimed ? s.claimed : ''}`}>
+                <div className={s.top}>
+                  <span>{t(`ui.q_${x.stat}` as Parameters<typeof t>[0], { n: x.target })}</span>
+                  <span className={s.rew}>
+                    {x.coins ? (
+                      <>
+                        {n(x.coins)} <img className="px" src="/img/piece.png" alt="" width={12} height={12} />
+                      </>
+                    ) : null}
+                    {item ? (
+                      <img
+                        className="px"
+                        src={item.src}
+                        alt={x.item ?? ''}
+                        width={18}
+                        height={18}
+                        style={item.tint ? ({ '--df': item.tint } as React.CSSProperties) : undefined}
+                      />
+                    ) : null}
+                    {x.qty > 1 ? `×${x.qty}` : ''}
+                  </span>
+                </div>
+                <div
+                  className={s.bar}
+                  role="progressbar"
+                  aria-valuenow={x.value}
+                  aria-valuemin={0}
+                  aria-valuemax={x.target}
+                  aria-label={t('ui.q_title')}
+                >
+                  <i style={{ width: `${Math.min(100, (x.value / x.target) * 100)}%` }} />
+                  <b>
+                    {Math.min(x.value, x.target)}/{x.target}
+                  </b>
+                </div>
+                {x.claimed ? (
+                  <span className={s.check} aria-label="OK">
+                    ✓
+                  </span>
+                ) : ok ? (
+                  <Button
+                    variant="primary"
+                    size="sm"
+                    onClick={(e) => void claim(x.id, e.currentTarget, x.item ?? undefined)}
+                  >
+                    {t('ui.q_claim')}
+                  </Button>
+                ) : null}
+              </li>
+            );
+          })}
       </ul>
     </section>
   );

@@ -733,14 +733,6 @@ export default function Pass() {
         <div className={s.missions} data-depth>
           <ul className={s.how} aria-label={t('ui.bp_xp_from')}>
             <li>
-              <b>+120</b>
-              {t('ui.bp_src_win')}
-            </li>
-            <li>
-              <b>+60</b>
-              {t('ui.bp_src_lose')}
-            </li>
-            <li>
               <b>+15</b>
               {t('ui.bp_src_pull')} <small>{d.pull_xp}/600</small>
             </li>
@@ -787,34 +779,37 @@ function Weekly() {
     <section className={s.weekly} aria-labelledby="wk-t">
       <h2 id="wk-t">{t('ui.wk_title')}</h2>
       <ul>
-        {q.data.quests.map((x) => {
-          const ok = x.value >= x.target;
-          return (
-            <li key={x.id} className={x.claimed ? s.wkDone : ok ? s.wkReady : undefined}>
-              <span>
-                <b>{t(`ui.wk_${x.id}`, { n: x.target })}</b>
-                <small>{t('ui.wk_reward', { c: n(x.coins) })}</small>
-              </span>
-              <span
-                className={s.wkBar}
-                role="progressbar"
-                aria-valuemin={0}
-                aria-valuemax={x.target}
-                aria-valuenow={x.value}
-                aria-label={t(`ui.wk_${x.id}`, { n: x.target })}
-              >
-                <i style={{ width: `${Math.min(100, (x.value / x.target) * 100)}%` }} />
-              </span>
-              {x.claimed ? (
-                <b className={s.ok}>✓</b>
-              ) : (
-                <Button size="sm" variant={ok ? 'primary' : 'ghost'} disabled={!ok} onClick={() => void claim(x.id)}>
-                  {ok ? t('ui.bp_claim') : `${x.value}/${x.target}`}
-                </Button>
-              )}
-            </li>
-          );
-        })}
+        {/* plus de combat : la mission « gagner des matchs » n'est plus affichée */}
+        {q.data.quests
+          .filter((x) => x.id !== 'wins')
+          .map((x) => {
+            const ok = x.value >= x.target;
+            return (
+              <li key={x.id} className={x.claimed ? s.wkDone : ok ? s.wkReady : undefined}>
+                <span>
+                  <b>{t(`ui.wk_${x.id}`, { n: x.target })}</b>
+                  <small>{t('ui.wk_reward', { c: n(x.coins) })}</small>
+                </span>
+                <span
+                  className={s.wkBar}
+                  role="progressbar"
+                  aria-valuemin={0}
+                  aria-valuemax={x.target}
+                  aria-valuenow={x.value}
+                  aria-label={t(`ui.wk_${x.id}`, { n: x.target })}
+                >
+                  <i style={{ width: `${Math.min(100, (x.value / x.target) * 100)}%` }} />
+                </span>
+                {x.claimed ? (
+                  <b className={s.ok}>✓</b>
+                ) : (
+                  <Button size="sm" variant={ok ? 'primary' : 'ghost'} disabled={!ok} onClick={() => void claim(x.id)}>
+                    {ok ? t('ui.bp_claim') : `${x.value}/${x.target}`}
+                  </Button>
+                )}
+              </li>
+            );
+          })}
       </ul>
     </section>
   );
