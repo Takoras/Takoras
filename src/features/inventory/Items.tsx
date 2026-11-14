@@ -71,7 +71,7 @@ export default function Items() {
             return part.length ? (
               <section key={k} aria-label={t(label)}>
                 <h2 className={s.itemCatTitle}>{t(label)}</h2>
-                <ul className={s.items}>
+                <ul className={s.items} data-depth>
                   {part.map((it, i) => (
                     <ItemCard
                       key={it.item}

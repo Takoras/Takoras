@@ -139,7 +139,7 @@ export default function Friends() {
 
   return (
     <section ref={pageRef} className={s.page}>
-      <header className={s.head}>
+      <header className={s.head} data-depth>
         <h1>{t('ui.fr_title')}</h1>
         <span className={s.chip}>
           <i className={s.dot} aria-hidden />
@@ -149,7 +149,7 @@ export default function Friends() {
       </header>
 
       {/* à gauche : ta carte et l'ajout (comme l'ancienne page) */}
-      <aside className={s.side}>
+      <aside className={s.side} data-depth>
         <div className={s.me}>
           <Avatar pseudo={pseudo0 || '?'} avatar={prof.data?.avatar} size={84} />
           <div className={s.meTxt}>
@@ -185,7 +185,7 @@ export default function Friends() {
       </aside>
 
       {/* à droite : les onglets (amis, demandes reçues, envoyées) */}
-      <div className={s.main}>
+      <div className={s.main} data-depth>
         <div className={s.tabs} role="tablist" aria-label={t('ui.fr_title')}>
           {TABS.map(([k, l, n]) => (
             <button key={k} type="button" role="tab" aria-selected={cur === k} onClick={() => setTab(k)}>

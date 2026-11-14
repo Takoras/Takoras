@@ -624,7 +624,7 @@ export default function Pass() {
             </div>
             {/* les 50 paliers : premium en haut, numéro sur la ligne de progression, gratuit en bas */}
             {/* eslint-disable-next-line jsx-a11y/no-noninteractive-tabindex -- liste qui défile au clavier */}
-            <ol ref={list} className={s.track} tabIndex={0} aria-label={t('ui.bp_title')}>
+            <ol ref={list} className={s.track} data-depth tabIndex={0} aria-label={t('ui.bp_title')}>
               <svg ref={svgRef} className={s.path} aria-hidden>
                 <defs>
                   <linearGradient id="bp-path" x1="0" x2="1" y1="0" y2="0">
@@ -730,7 +730,7 @@ export default function Pass() {
           </Modal>
         </>
       ) : (
-        <div className={s.missions}>
+        <div className={s.missions} data-depth>
           <ul className={s.how} aria-label={t('ui.bp_xp_from')}>
             <li>
               <b>+120</b>

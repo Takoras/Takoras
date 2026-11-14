@@ -701,7 +701,7 @@ function Redeem({ items }: { items: Item[] }) {
     }
   };
   return (
-    <section className={s.ticket} aria-labelledby="promo-t">
+    <section className={s.ticket} data-depth aria-labelledby="promo-t">
       <div>
         <h2 id="promo-t" className={s.h2}>
           {t('ui.promo_title')}

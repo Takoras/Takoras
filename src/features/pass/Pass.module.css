@@ -331,6 +331,8 @@
   color: var(--gold);
 }
 .track {
+  /* toute la route suit un peu la souris (un seul élément : avant, chaque case le faisait et ça coûtait cher) */
+  translate: calc(var(--mpx, 0) * -7px) calc(var(--mpy, 0) * -5px);
   position: relative;
   list-style: none;
   display: flex;
@@ -435,8 +437,6 @@ li[aria-current] .num {
 /* ---------- une case de la route ---------- */
 .tile {
   /* vivante : penchée (--tilt), elle flotte à son rythme, suit un peu la souris et se balance au survol */
-  --dz: 1;
-  transform: translate(calc(var(--mpx, 0) * -7px * var(--dz)), calc(var(--mpy, 0) * -5px * var(--dz)));
   animation: tileFloat 5.5s ease-in-out var(--fd, 0s) infinite;
   position: relative;
   display: grid;
@@ -500,7 +500,6 @@ li[aria-current] .num {
   scale: 1.05;
 }
 .tile.gold {
-  --dz: 1.5; /* le premium suit plus la souris (plus proche) */
   background: rgb(242 194 48 / 7%);
 }
 .tile.gold:hover {

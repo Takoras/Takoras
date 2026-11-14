@@ -341,7 +341,7 @@ function Bestiaries({
   return (
     <>
       <h2 className={s.h2}>{t('ui.bestiaries')}</h2>
-      <div className={s.series}>
+      <div className={s.series} data-depth>
         {Object.keys(SERIES).map((name) => {
           const all = SERIES[name] ?? [],
             got = new Set((q.data ?? []).filter((r) => (r.serie || 'Takoras') === name).map((r) => r.jeton));
