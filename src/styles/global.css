@@ -1,3 +1,6 @@
+@import '@fontsource-variable/outfit'; /* police libre (licence OFL) : grotesque géométrique, cahier de refonte § 3.1 */
+@import './tokens.css';
+
 /* profondeur à la souris (lib/mouseDepth.ts) : écrite sur chaque élément qui s'en sert, jamais héritée
    (sinon chaque mouvement de souris recalculait les styles de toute la page) */
 @property --mpx {
@@ -11,8 +14,6 @@
   initial-value: 0;
 }
 
-@import '@fontsource-variable/outfit'; /* police libre (licence OFL) : grotesque géométrique, cahier de refonte § 3.1 */
-@import './tokens.css';
 
 *,
 *::before,
