@@ -1,3 +1,4 @@
+-- Appliquée via MCP (best_luck_lowest)
 -- « Meilleure chance » d'un jeton : la chance la plus BASSE avec laquelle on l'a tiré (l'avoir eu à ×2 est bien plus
 -- fort qu'à ×900). Avant : max(luck).
 CREATE OR REPLACE FUNCTION public.my_inventory_groups()

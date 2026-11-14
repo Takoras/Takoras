@@ -1,0 +1,4 @@
+-- Appliquée via MCP (no_combat_deck_ignored).
+-- Plus de combat : l'ancienne équipe (profiles.deck) ne protège plus les jetons. sell_pulls, refund_pulls et
+-- my_inventory_groups ignorent deck (aucune donnée modifiée : les équipes restent en base mais ne bloquent plus rien).
+-- Voir les définitions appliquées dans la base (mêmes fonctions qu'avant, sans la condition sur deck).

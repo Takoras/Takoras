@@ -1,4 +1,4 @@
--- À appliquer (Supabase était déconnecté).
+-- Appliquée via MCP (admin_give_qty_reset_player_starter) le 14/11/2026.
 -- 1) Donner un objet : les cosmétiques (pseudo, contour, effet de bannière) vont dans profiles.cosmetics comme à
 --    l'achat (avant : ils finissaient par erreur dans user_items) ; quantité possible pour les objets à stock.
 CREATE OR REPLACE FUNCTION public.admin_give_item(target uuid, p_item text, p_qty integer DEFAULT 1)
