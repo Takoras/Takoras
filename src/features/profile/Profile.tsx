@@ -32,7 +32,7 @@ import { confirm } from '@/ui/confirm';
 import { Modal } from '@/ui/Modal';
 import { PixelBg } from '@/ui/PixelBg';
 import { useStaggerIn } from '@/ui/useStaggerIn';
-import { Aura, BannerFx, cosmName, cosmRar, COSMETICS, CosmeticPreview, nameCls, rarCol, rarKey } from '@/ui/Cosmetics';
+import { Aura, BannerFx, cosmName, cosmRar, COSMETICS, CosmeticPreview, isSecret, nameCls, rarCol, rarKey } from '@/ui/Cosmetics';
 import { toast } from '@/ui/toast';
 import { VTag } from '@/ui/VTag';
 import { JetonModal } from '../inventory/JetonModal';
@@ -1064,13 +1064,20 @@ function EditProfile({ p, onClose }: { p: Prof; onClose: () => void }) {
                       <LockerTile
                         key={x}
                         {...tp(tab, x)}
+                        {...(isSecret(x) && !owned.includes(x)
+                          ? { onTry: () => undefined, onLocked: () => sfx.deny(), onUntry: () => undefined }
+                          : {})}
                         on={{ name: nameFx, aura: auraFx, bfx: bannerFx }[tab] === x}
                         have={owned.includes(x)}
                         label={cosmName(x, lang)}
                         rar={[t(rarKey(cosmRar(x))), rarCol(cosmRar(x))]}
                         wide={tab === 'bfx'}
                       >
-                        <CosmeticPreview id={x} label={(pseudo || p.pseudo).slice(0, 8)} />
+                        <CosmeticPreview
+                          id={x}
+                          label={(pseudo || p.pseudo).slice(0, 8)}
+                          hidden={isSecret(x) && !owned.includes(x)}
+                        />
                       </LockerTile>
                     ))}
                   </>

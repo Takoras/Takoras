@@ -164,6 +164,7 @@ export const fr = {
     r_epic: 'Épique',
     r_legend: 'Légendaire',
     r_myth: 'Mythique',
+    r_secret: '???',
     search: 'Chercher…',
     sort_rarity: 'Chance',
     sort_count: 'Quantité',

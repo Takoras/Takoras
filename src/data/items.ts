@@ -52,6 +52,8 @@ const RAR_GLOW: Record<CRar, string> = {
   rare: '56, 189, 248',
   epic: '183, 155, 255',
   legend: '251, 191, 36',
+  myth: '240, 171, 252',
+  secret: '248, 113, 113',
 };
 export const itemOdds = (it: Pick<ShopItem, 'id' | 'kind' | 'data'>) =>
   it.kind === 'potion'

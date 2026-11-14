@@ -14,7 +14,7 @@ import { PixelBg } from '@/ui/PixelBg';
 import { toast } from '@/ui/toast';
 import { useSwing, useSwingAll } from '@/ui/useSwing';
 import { useStaggerIn } from '@/ui/useStaggerIn';
-import { CosmeticPreview, cosmRar, isCosmetic, rarCol, rarKey } from '@/ui/Cosmetics';
+import { CosmeticPreview, cosmRar, isCosmetic, isSecret, rarCol, rarKey } from '@/ui/Cosmetics';
 import { NeedLogin } from '@/app/NeedLogin';
 import { flyCoins, shockwave } from '@/ui/fx';
 import { useNow } from '../eco/eco';
@@ -484,7 +484,7 @@ function Hero(p: CardProps & { off: number }) {
       <div ref={art} className={s.heroArt}>
         {isCosmetic(it.kind) ? (
           <span className={s.heroCosm}>
-            <CosmeticPreview id={it.id} big />
+            <CosmeticPreview id={it.id} big hidden={isSecret(it.id) && !it.owned} />
           </span>
         ) : (
           <img
@@ -543,7 +543,7 @@ function Card(p: CardProps & { slot: number }) {
         </span>
         <div className={s.art}>
           {isCosmetic(it.kind) ? (
-            <CosmeticPreview id={it.id} />
+            <CosmeticPreview id={it.id} hidden={isSecret(it.id) && !it.owned} />
           ) : (
             <img
               className={`px ${img.wide ? s.wide : ''}`}

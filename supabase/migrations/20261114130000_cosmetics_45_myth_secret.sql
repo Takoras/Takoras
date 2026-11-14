@@ -1,0 +1,4 @@
+-- Appliquée via MCP (cosmetics_45_myth_secret).
+-- 15 contours + 15 effets de bannière de plus (45 de chaque), raretés Mythique (myth, 120 000) et ??? (secret, 250 000).
+-- _cosm_today : poids par rareté common 50 / rare 25 / epic 12 / legend 5 / myth 1,2 / secret 0,4
+-- (≈ 63 % / 26 % / 9 % / 2 % / 0,13 % / 0,04 % des cosmétiques proposés).

@@ -165,6 +165,7 @@ export const en: Dict = {
     r_epic: 'Epic',
     r_legend: 'Legendary',
     r_myth: 'Mythic',
+    r_secret: '???',
     search: 'Search…',
     sort_rarity: 'Odds',
     sort_count: 'Amount',

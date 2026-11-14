@@ -166,3 +166,12 @@
     animation: none;
   }
 }
+
+/* rareté « ??? » pas encore à toi : silhouette toute noire (on devine la forme, pas les couleurs) */
+.secret canvas,
+.secret b {
+  filter: brightness(0);
+}
+.secret .pvQ {
+  visibility: hidden;
+}
