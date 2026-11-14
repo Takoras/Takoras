@@ -1098,8 +1098,8 @@ const CINE = (() => {
         // tremblement (petit zoom pour ne jamais voir les bords)
         cv.style.transform = shakeA > .05 ? `translate(${rnd(-shakeA, shakeA) * S}px, ${rnd(-shakeA, shakeA) * S}px) scale(1.03)` : '';
         // écran blanc (Astra, Néphéris) et flash
-        // flash d'entrée : il tient un instant, puis s'efface en douceur (lent, rapide, lent) jusqu'au film
-        const intro = 1 - E.io(seg(tt - jump, .08, .95));
+        // flash d'entrée : un éclair net, qui s'efface vite (0,3 s) pour laisser place au film
+        const intro = 1 - E.out(seg(tt - jump, 0, .3));
         const fa = Math.max(whiteA, flashA, intro);
         fl.style.opacity = fa; fl.style.background = whiteA >= flashA || intro >= flashA ? '#fff' : flashC;
         // les autres flashs s'éteignent en douceur (décroissance exponentielle, pas en ligne droite)
