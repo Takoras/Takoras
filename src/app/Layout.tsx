@@ -170,7 +170,7 @@ export function Layout() {
       </nav>
 
       {/* en haut à droite : bêta, pièces, profil (pas de grande barre) */}
-      <div className={`${s.hud} ${hudReady ? '' : s.hudWait}`}>
+      <header className={`${s.hud} ${hudReady ? '' : s.hudWait}`}>
         {preview ? (
           <button type="button" className={s.previewChip} onClick={() => setPreview(false)}>
             {t('ui.admin_back')}
@@ -210,7 +210,7 @@ export function Layout() {
             {t('ui.login')}
           </Button>
         )}
-      </div>
+      </header>
 
       <Announcements />
       <main id="main" className={s.main} key={pathname}>

@@ -231,7 +231,7 @@
   white-space: nowrap;
 }
 .shTxt small {
-  color: var(--muted);
+  color: var(--text-2);
   font-size: var(--fs-xs);
 }
 .panel {
@@ -384,7 +384,7 @@
   filter: none;
 }
 .lockedT small {
-  opacity: 0.6;
+  color: var(--text-2);
 }
 
 .actions {

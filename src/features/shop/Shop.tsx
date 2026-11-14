@@ -379,6 +379,7 @@ export default function Shop() {
               })}
             </div>
           </div>
+          <h2 className="visually-hidden">{t(CATS.find((c) => c.k === cat)?.label ?? 'ui.cat_potions')}</h2>
           <ul ref={gridRef} className={s.grid}>
             {list.map((it) => {
               const slot = slotOf(it, items.indexOf(it));

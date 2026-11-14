@@ -1117,7 +1117,6 @@ function LockerTile({
       type="button"
       className={`${lk.tile} ${wide ? lk.wide : ''} ${have ? '' : lk.lockedT} ${peeked ? lk.peeked : ''}`}
       aria-pressed={on || !!peeked}
-      aria-label={have ? label : `${label} · ${lockLabel}`}
       onClick={have ? onPick : onLocked}
       onPointerEnter={onTry}
       onPointerLeave={onUntry}
@@ -1125,7 +1124,10 @@ function LockerTile({
       onBlur={onUntry}
     >
       <span className={lk.tileArt}>{children}</span>
-      <small>{label}</small>
+      <small>
+        {label}
+        {have ? null : <span className="visually-hidden"> · {lockLabel}</span>}
+      </small>
       {rar ? (
         <em className={lk.rar} style={{ color: rar[1] }}>
           {rar[0]}

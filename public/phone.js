@@ -39,7 +39,8 @@
     w = Math.max(1100, Math.min(2200, w));
     if (Math.abs(w - W) < 24) return; // pas de petits changements en boucle
     W = w;
-    m.setAttribute('content', 'width=' + W + ', user-scalable=no, viewport-fit=cover');
+    // zoom aux doigts autorisé (RGAA 10.4) ; le double-tap ne zoome pas (touch-action: manipulation dans global.css)
+    m.setAttribute('content', 'width=' + W + ', viewport-fit=cover');
   }
   fit();
   addEventListener('resize', fit);

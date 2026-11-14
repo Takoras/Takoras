@@ -62,10 +62,12 @@ for (const path of [
     await page.goto(path);
     await expect(page.locator('main h1')).toBeVisible();
     await page.waitForLoadState('networkidle');
-    const a11y = await new AxeBuilder({ page }).analyze();
+    await page.waitForTimeout(1200); // fondus d'apparition finis (sinon le contraste est mesuré à moitié transparent)
+    // RGAA : critères WCAG 2.1 A et AA, plus les bonnes pratiques (zones repérées, ordre des titres…)
+    const a11y = await new AxeBuilder({ page }).withTags(['wcag2a', 'wcag2aa', 'wcag21a', 'wcag21aa', 'best-practice']).analyze();
     expect(
       a11y.violations
-        .filter((v) => v.impact === 'critical' || v.impact === 'serious')
+        .filter((v) => v.impact !== 'minor')
         .map((v) => `${v.id}: ${v.nodes[0]?.html.slice(0, 120)}`),
     ).toEqual([]);
   });

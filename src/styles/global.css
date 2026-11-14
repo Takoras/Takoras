@@ -15,6 +15,11 @@
 }
 
 
+/* double-tap sans zoom (le zoom aux doigts reste possible, RGAA) */
+html {
+  touch-action: manipulation;
+}
+
 *,
 *::before,
 *::after {
