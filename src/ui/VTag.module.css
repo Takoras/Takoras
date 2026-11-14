@@ -1,4 +1,4 @@
-/* Étiquette de variante : mêmes couleurs que l'ancien site, avec le halo */
+/* Étiquette de mutation : la même partout (palette --mut-* de tokens.css) */
 .tag {
   display: inline-block;
   margin-left: 6px;
@@ -23,18 +23,14 @@
 }
 
 .gold {
-  color: #3b2400;
-  background: linear-gradient(135deg, #fef08a, #e8b422 60%, #fde68a);
-  box-shadow: 0 0 12px -2px rgb(250 204 21 / 80%);
+  color: var(--mut-gold-fg);
+  background: var(--mut-gold-bg);
 }
 .celeste {
-  color: #1e1b4b;
-  background: linear-gradient(135deg, #fff, #e0e7ff 50%, #c7d2fe);
-  box-shadow: 0 0 14px -2px rgb(224 231 255 / 90%);
+  color: var(--mut-celeste-fg);
+  background: var(--mut-celeste-bg);
 }
 .ombre {
-  color: #e9d5ff;
-  background: #0b0614;
-  border: 1px solid #a855f7;
-  box-shadow: 0 0 12px -2px rgb(168 85 247 / 90%);
+  color: var(--mut-ombre-fg);
+  background: var(--mut-ombre-bg);
 }

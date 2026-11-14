@@ -500,10 +500,24 @@
 .stamp:not(:disabled):hover {
   transform: translateY(-3px) rotate(-6deg);
 }
+/* tampon choisi : la même étiquette que partout (fond teinté uni de la mutation, palette --mut-* de tokens.css) */
 .stamp[aria-pressed='true'] {
-  background: color-mix(in srgb, var(--gc) 22%, transparent);
-  box-shadow: 0 0 0 2px color-mix(in srgb, var(--gc) 80%, transparent);
+  outline: 2px solid var(--mc);
+  outline-offset: -2px;
+  background: var(--mb);
   transform: scale(1.08);
+}
+.stamp[data-v='gold'] {
+  --mb: var(--mut-gold-bg);
+  --mc: var(--mut-gold);
+}
+.stamp[data-v='celeste'] {
+  --mb: var(--mut-celeste-bg);
+  --mc: var(--mut-celeste);
+}
+.stamp[data-v='ombre'] {
+  --mb: var(--mut-ombre-bg);
+  --mc: var(--mut-ombre);
 }
 .stamp.off {
   filter: grayscale(1) brightness(0.5);

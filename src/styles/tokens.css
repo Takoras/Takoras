@@ -4,6 +4,17 @@
  * réservé à l'action principale, l'or des pièces pour la monnaie, et la lumière vient des jetons eux-mêmes (--g).
  */
 :root {
+  /* Mutations : UNE seule palette pour toutes leurs étiquettes et tampons (fiche, ouverture, film, récap…) :
+     fond teinté uni + texte clair, sans dégradé ni halo */
+  --mut-gold-bg: rgb(250 204 21 / 16%);
+  --mut-gold-fg: #fde68a;
+  --mut-gold: #facc15;
+  --mut-celeste-bg: rgb(224 231 255 / 14%);
+  --mut-celeste-fg: #e0e7ff;
+  --mut-celeste: #c7d2fe;
+  --mut-ombre-bg: rgb(168 85 247 / 20%);
+  --mut-ombre-fg: #e9d5ff;
+  --mut-ombre: #a855f7;
   color-scheme: dark;
 
   /* Album à vignettes (accueil) aux couleurs de nuit : fond nuit, pages mates, vignettes, bleu pour l'action */

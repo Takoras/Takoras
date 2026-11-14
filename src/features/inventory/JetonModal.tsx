@@ -233,7 +233,7 @@ export function JetonModal({
               {single && !locked ? (
                 <div className={s.stamps} aria-hidden>
                   {pv ? (
-                    <span className={s.stamp} aria-pressed>
+                    <span className={s.stamp} data-v={pv} aria-pressed>
                       <span style={{ backgroundImage: `url(/img/stamps/${pv}.png)` }} />
                     </span>
                   ) : (
@@ -252,6 +252,7 @@ export function JetonModal({
                         key={v}
                         type="button"
                         className={`${s.stamp} ${has ? '' : s.off}`}
+                        data-v={v}
                         aria-pressed={pv === v}
                         disabled={!has}
                         title={t(`ui.v_${v}`)}

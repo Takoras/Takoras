@@ -12,9 +12,9 @@
 .btn.jm-close { position: static !important; }
 .vtag { display: inline-block; margin-left: 6px; padding: 2px 8px; border-radius: 99px; font-family: var(--font-body); font-size: 11px; font-weight: 800; letter-spacing: .06em;
   text-transform: uppercase; vertical-align: middle; line-height: 1.5; white-space: nowrap; -webkit-text-fill-color: currentColor; }
-.vtag.v-gold { color: #3b2400; background: linear-gradient(135deg, #fef08a, #e8b422 60%, #fde68a); box-shadow: 0 0 12px -2px rgba(250, 204, 21, .8); }
-.vtag.v-celeste { color: #1e1b4b; background: linear-gradient(135deg, #ffffff, #e0e7ff 50%, #c7d2fe); box-shadow: 0 0 14px -2px rgba(224, 231, 255, .9); }
-.vtag.v-ombre { color: #e9d5ff; background: #0b0614; border: 1px solid #a855f7; box-shadow: 0 0 12px -2px rgba(168, 85, 247, .9); }
+.vtag.v-gold { color: var(--mut-gold-fg); background: var(--mut-gold-bg); }
+.vtag.v-celeste { color: var(--mut-celeste-fg); background: var(--mut-celeste-bg); }
+.vtag.v-ombre { color: var(--mut-ombre-fg); background: var(--mut-ombre-bg); }
 img.v-gold, .opening.v-gold .op-coin .spin img.face, .opening.v-gold .op-coin .spin img.back { animation: vGold .9s steps(1) infinite !important; }
 img.v-celeste, .opening.v-celeste .op-coin .spin img.face, .opening.v-celeste .op-coin .spin img.back { animation: vCeleste .9s steps(1) infinite !important; }
 img.v-ombre, .opening.v-ombre .op-coin .spin img.face, .opening.v-ombre .op-coin .spin img.back { animation: vOmbre .9s steps(1) infinite !important; }
