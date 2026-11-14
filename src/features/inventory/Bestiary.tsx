@@ -365,8 +365,11 @@ export default function Bestiary() {
               {oc ? <li>{t('ui.bst_got', { n: oc.total })}</li> : null}
               {og?.shown ? <li>{t('ui.shown_n', { n: og.shown })}</li> : null}
               {/* la chance la plus basse avec laquelle il a été tiré : plus elle est basse, plus c'est fort */}
-              {og && og.luck > 1 ? <li>{t('ui.best_luck', { l: fmtLuck(og.luck) })}</li> : null}
-              {og && og.luck === 1 ? <li>{t('ui.best_luck_1')}</li> : null}
+              {og && og.luck >= 1 ? (
+                <li>
+                  {t('ui.best_luck')} <b className={s.luck}>×{fmtLuck(og.luck)}</b>
+                </li>
+              ) : null}
             </>
           }
           onClose={() => setOpen(null)}
