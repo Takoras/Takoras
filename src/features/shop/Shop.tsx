@@ -8,7 +8,7 @@ import { locale, reducedFx, useSettings } from '@/lib/settings';
 import { useT } from '@/i18n/useT';
 import type { Key } from '@/i18n';
 import { sfx } from '@/engines/sound.js';
-import { moDissolve } from '@/engines/motion.js';
+import { celebrateItem } from '@/ui/rewardFx';
 import { Button } from '@/ui/Button';
 import { PixelBg } from '@/ui/PixelBg';
 import { toast } from '@/ui/toast';
@@ -669,19 +669,12 @@ function Redeem({ items }: { items: Item[] }) {
         );
       });
       toast(t('ui.promo_ok') + (got.length ? ` : ${got.join(' · ')}` : ''));
-      const coin = document.querySelector<HTMLImageElement>('header img[src$="piece.png"]'),
-        rr = input.current?.getBoundingClientRect();
-      if (coin && rr)
-        for (let i = 0; i < 3; i++)
-          setTimeout(
-            () =>
-              moDissolve(
-                coin,
-                { left: rr.left + rr.width * (0.2 + i * 0.3) - 20, top: rr.top - 10, width: 40, height: 40 } as DOMRect,
-                0.8,
-              ),
-            i * 120,
-          );
+      // les objets du code filent vers l'inventaire (les pièces volent toutes seules vers le solde : ui/rewardFx)
+      (r.items ?? []).forEach((x, i) => {
+        const it = items.find((k) => k.id === x.item);
+        const src = it ? itemImg(it).src : '';
+        if (src) setTimeout(() => celebrateItem(src), 200 + i * 180);
+      });
       setCode('');
       if (r.items?.length) void qc.invalidateQueries({ queryKey: ['shop'] });
     } catch (err) {

@@ -7,6 +7,8 @@ import { useResetWatch } from '@/lib/resetWatch';
 import { installDoodleVisibility, kickDoodle } from '@/lib/doodle';
 import { installDoodleFrames } from '@/lib/doodleFrames';
 import { installMouseDepth } from '@/lib/mouseDepth';
+import { installRewardFx } from '@/ui/rewardFx';
+import { useQueryClient } from '@tanstack/react-query';
 import { qc } from '@/lib/queryClient';
 import { sfx } from '@/engines/sound.js';
 import { useAuth, signOut } from '@/lib/auth';
@@ -78,6 +80,8 @@ export function Layout() {
   }, [uid]);
   useEffect(installDoodleVisibility, []);
   useEffect(installDoodleFrames, []); // doodle précalculé : plus de filtre en direct (fini le lag avec beaucoup de jetons) // le doodle ne tourne que sur les images à l'écran
+  const qcl = useQueryClient();
+  useEffect(() => installRewardFx(qcl), [qcl]); // pièces gagnées : elles volent jusqu'au compteur
   useEffect(installMouseDepth, []); // les blocs glissent un tout petit peu avec la souris (inventaire, combat…)
   useEffect(() => {
     // nouvelle page : toujours en haut (avant, on gardait parfois la position de la page d'avant)

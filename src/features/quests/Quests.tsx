@@ -8,27 +8,16 @@ import { useAuth } from '@/lib/auth';
 import { locale, useSettings } from '@/lib/settings';
 import { useT } from '@/i18n/useT';
 import { sfx } from '@/engines/sound.js';
-import { moDissolve } from '@/engines/motion.js';
+import { flyCoins } from '@/ui/fx';
+import { celebrateItem } from '@/ui/rewardFx';
 import { Button } from '@/ui/Button';
 import { toast } from '@/ui/toast';
 import { useNow } from '../eco/eco';
 import s from './Quests.module.css';
 
-// Pluie de pièces du bouton vers le solde (en haut)
+// Pièces du bouton vers le solde : le même vol que partout (ui/fx.ts), et un objet gagné file vers l'inventaire
 function coinRain(from: HTMLElement, n: number) {
-  const coin = document.querySelector<HTMLImageElement>('header img[src$="piece.png"]');
-  if (!coin) return;
-  const r = from.getBoundingClientRect();
-  for (let i = 0; i < n; i++)
-    setTimeout(
-      () =>
-        moDissolve(
-          coin,
-          { left: r.left + r.width * (0.15 + i * 0.23) - 18, top: r.top - 8, width: 36, height: 36 } as DOMRect,
-          0.8,
-        ),
-      i * 100,
-    );
+  flyCoins(from.getBoundingClientRect(), n, () => undefined);
 }
 
 // Bonus du jour (série de jours) + 3 quêtes du jour, sur l'accueil
@@ -64,7 +53,7 @@ export function Quests() {
   const claimDaily = async (el: HTMLElement) => {
     try {
       const r = (await questApi.claimDaily()) as { amount: number; streak: number; state: unknown };
-      coinRain(el, 4);
+      coinRain(el, 4); // avant la mise à jour du solde : pas de deuxième vol
       burstAt(el, '#f5cd52', 1.2);
       sfx.upgrade();
       toast(t('ui.daily_got', { n: n(r.amount), s: r.streak }));
@@ -74,10 +63,12 @@ export function Quests() {
       toast(errorText(e, lang), true);
     }
   };
-  const claim = async (id: string, el: HTMLElement) => {
+  const claim = async (id: string, el: HTMLElement, item?: string) => {
     try {
-      refresh(await questApi.claimQuest(id));
+      const st = await questApi.claimQuest(id);
       coinRain(el, 3);
+      if (item && ITEM_IMG[item]) celebrateItem(ITEM_IMG[item].src);
+      refresh(st);
       burstAt(el, '#4ade80');
       sfx.upgrade();
       toast(t('ui.q_got'));
@@ -157,7 +148,7 @@ export function Quests() {
                   ✓
                 </span>
               ) : ok ? (
-                <Button variant="primary" size="sm" onClick={(e) => void claim(x.id, e.currentTarget)}>
+                <Button variant="primary" size="sm" onClick={(e) => void claim(x.id, e.currentTarget, x.item ?? undefined)}>
                   {t('ui.q_claim')}
                 </Button>
               ) : null}

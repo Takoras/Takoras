@@ -48,8 +48,13 @@ export function flyCoins(from: DOMRect, n: number, onLand: (i: number) => void) 
   flyIcons(from, '/img/piece.png', n, '[data-coin-target]', onLand);
 }
 
+// moment du dernier vol (rewardFx : pas de deuxième vol pour le même gain)
+let flyAt = -1e9;
+export const lastFly = () => flyAt;
+
 // Même vol pour n'importe quelle image (ex. un objet gagné qui file vers l'inventaire)
 export function flyIcons(from: DOMRect, src: string, n: number, sel: string, onLand: (i: number) => void, size = 30) {
+  flyAt = performance.now();
   const target = [...document.querySelectorAll<HTMLElement>(sel)].find((x) => x.getClientRects().length);
   const t = target?.getBoundingClientRect();
   const ex = t ? t.left + Math.min(22, t.width / 2) : innerWidth - 120;
@@ -116,8 +121,16 @@ export function flyIcons(from: DOMRect, src: string, n: number, sel: string, onL
       )
       .then(() => {
         onLand(i);
+        // la cible encaisse : un petit choc (elle gonfle et penche un instant)
         if (target)
-          target.animate([{ scale: '1' }, { scale: '1.14' }, { scale: '1' }], { duration: 280, easing: 'ease-out' });
+          target.animate(
+            [
+              { scale: '1', rotate: '0deg' },
+              { scale: '1.22', rotate: `${i % 2 ? -5 : 5}deg`, offset: 0.35 },
+              { scale: '1', rotate: '0deg' },
+            ],
+            { duration: 320, easing: 'cubic-bezier(.2,.8,.3,1)' },
+          );
         return img.animate([{ opacity: 1 }, { opacity: 0 }], { duration: 120, fill: 'forwards' }).finished;
       })
       .catch(() => onLand(i))

@@ -2,10 +2,11 @@ import { useEffect, useState, type CSSProperties } from 'react';
 import { Link } from 'react-router';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { adminApi } from '@/api';
-import { BANNER_IMG } from '@/data/items';
+import { BANNER_IMG, itemImg, itemText, type ShopItem } from '@/data/items';
+import { CosmeticPreview, isCosmetic } from '@/ui/Cosmetics';
 import { hexRGB, jetonOf, SERIES, texOf } from '@/data/jetons';
 import { useJn } from '@/lib/names';
-import { locale } from '@/lib/settings';
+import { locale, useSettings } from '@/lib/settings';
 import { Button } from '@/ui/Button';
 import { confirm } from '@/ui/confirm';
 import { useNow } from '@/features/eco/eco';
@@ -341,22 +342,7 @@ function PlayerBody({ id, P }: { id: string; P: Player }) {
               </div>
             </section>
 
-            <section className={s.box}>
-              <h3>Donner un objet</h3>
-              <div className={s.quick}>
-                {ITEMS.map(([it, l]) => (
-                  <Button
-                    key={it}
-                    size="sm"
-                    onClick={async () => {
-                      if (await act(() => adminApi.giveItem(id, it), `${l} donné à ${name}`)) await after();
-                    }}
-                  >
-                    {l}
-                  </Button>
-                ))}
-              </div>
-            </section>
+            <GiveItem id={id} name={name} after={after} />
             <Button
               variant="primary"
               block
@@ -566,14 +552,14 @@ function PlayerBody({ id, P }: { id: string; P: Player }) {
               onClick={async () => {
                 if (
                   !(await confirm(
-                    `Remettre ${name} à zéro ? (tirages, pièces, objets, classé, passe, tuto : tout est effacé)`,
+                    `Effacer TOUTES les stats de ${name} ? Tirages, jetons, pièces, objets, potions, cosmétiques, bannières, passe, quêtes, achats, historiques : tout part. Son compte et son pseudo restent. Impossible à annuler.`,
                     {
                       danger: true,
                     },
                   ))
                 )
                   return;
-                if (await act(() => adminApi.reset(id), `${name} remis à zéro`)) {
+                if (await act(() => adminApi.resetPlayer(id), `Stats de ${name} effacées`)) {
                   if (id === myId) {
                     forgetLocalProgress(); // c'est moi : je revois le tuto et tout comme un nouveau joueur
                     location.assign('/');
@@ -583,11 +569,105 @@ function PlayerBody({ id, P }: { id: string; P: Player }) {
                 }
               }}
             >
-              Remettre {name} à zéro
+              Effacer toutes les stats de {name}
             </Button>
           </>
         ) : null}
       </div>
     </div>
+  );
+}
+
+// Donner un objet : une barre de recherche sur TOUS les objets de la boutique (potions, sabliers, cosmétiques,
+// bannières, photos…), on choisit l'objet trouvé, la quantité, et on donne.
+function GiveItem({ id, name, after }: { id: string; name: string; after: () => Promise<void> }) {
+  const lang = useSettings((x) => x.lang);
+  const all = useQuery({ queryKey: ['admin-shop'], queryFn: async () => (await adminApi.shop()) as unknown as ShopItem[] });
+  const [q, setQ] = useState('');
+  const [pick, setPick] = useState<ShopItem | null>(null);
+  const [qty, setQty] = useState('1');
+  const unique = (it: ShopItem) => ['banner', 'avatar', 'name', 'aura', 'bfx'].includes(it.kind);
+  const label = (it: ShopItem) => itemText(it, lang)[0];
+  const norm = (x: string) => x.normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase();
+  const found = q.trim()
+    ? (all.data ?? []).filter((it) => norm(`${label(it)} ${it.id}`).includes(norm(q.trim()))).slice(0, 12)
+    : [];
+  const give = async () => {
+    if (!pick) return;
+    const n = unique(pick) ? 1 : Math.max(1, Math.min(1000, Math.trunc(+qty || 1)));
+    if (await act(() => adminApi.giveItemQty(id, pick.id, n), `${n > 1 ? `${n}× ` : ''}${label(pick)} donné à ${name}`))
+      await after();
+  };
+  const art = (it: ShopItem) =>
+    isCosmetic(it.kind) ? (
+      <span className={s.giArt}>
+        <CosmeticPreview id={it.id} label="Aa" />
+      </span>
+    ) : (
+      <img className={`px ${s.giImg}`} src={itemImg(it).src} alt="" />
+    );
+  return (
+    <section className={s.box}>
+      <h3>Donner un objet</h3>
+      <input
+        className={s.input}
+        type="search"
+        value={q}
+        onChange={(e) => {
+          setQ(e.target.value);
+          setPick(null);
+        }}
+        placeholder="Chercher un objet (potion, sablier, contour, bannière…)"
+        aria-label="Chercher un objet"
+      />
+      {found.length ? (
+        <ul className={s.giList} role="listbox" aria-label="Objets trouvés">
+          {found.map((it) => (
+            <li key={it.id}>
+              <button
+                type="button"
+                role="option"
+                aria-selected={pick?.id === it.id}
+                className={s.giItem}
+                onClick={() => setPick(it)}
+              >
+                {art(it)}
+                <span>{label(it)}</span>
+                <small className="muted">{it.id}</small>
+              </button>
+            </li>
+          ))}
+        </ul>
+      ) : q.trim() && all.data ? (
+        <p className="muted">Aucun objet ne correspond.</p>
+      ) : null}
+      {pick ? (
+        <form
+          className={s.row}
+          onSubmit={(e) => {
+            e.preventDefault();
+            void give();
+          }}
+        >
+          <b className={s.giPick}>
+            {art(pick)} {label(pick)}
+          </b>
+          {unique(pick) ? null : (
+            <input
+              className={s.input}
+              type="number"
+              min={1}
+              max={1000}
+              value={qty}
+              onChange={(e) => setQty(e.target.value)}
+              aria-label="Quantité"
+            />
+          )}
+          <Button type="submit" variant="primary" size="sm">
+            Donner
+          </Button>
+        </form>
+      ) : null}
+    </section>
   );
 }

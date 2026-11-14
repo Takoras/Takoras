@@ -119,6 +119,9 @@ export const betaApi = {
   giveJeton: (a: { p_serie: string; p_jeton: string; p_variant?: string; p_qty?: number }) => rpc('beta_give_jeton', a),
 };
 
+// fonctions serveur pas encore dans les types générés (migration à appliquer) : appel non typé
+const rpcLoose = rpc as unknown as (name: string, args?: Record<string, unknown>) => Promise<unknown>;
+
 export const adminApi = {
   players: (q = '') => rpc('admin_players', { q }),
   player: (target: string) => rpc('admin_player', { target }),
@@ -128,6 +131,24 @@ export const adminApi = {
   give: (target: string | null, p_coins = 0, p_pulls = 0) => rpc('admin_give', { target, p_coins, p_pulls }),
   giveJeton: (target: string, p_jeton: string) => rpc('admin_give_jeton', { target, p_jeton }),
   giveItem: (target: string, p_item: string) => rpc('admin_give_item', { target, p_item }),
+  // plusieurs d'un coup (admin_give_item avec p_qty) ; sans la migration, on donne un par un
+  giveItemQty: async (target: string, p_item: string, p_qty: number) => {
+    if (p_qty <= 1) return rpc('admin_give_item', { target, p_item });
+    try {
+      return await rpcLoose('admin_give_item', { target, p_item, p_qty });
+    } catch {
+      for (let i = 0; i < p_qty; i++) await rpc('admin_give_item', { target, p_item });
+      return null;
+    }
+  },
+  // TOUT effacer d'un joueur (admin_reset_player) ; sans la migration : l'ancienne remise à zéro
+  resetPlayer: async (target: string) => {
+    try {
+      return await rpcLoose('admin_reset_player', { target });
+    } catch {
+      return rpc('admin_reset', { target });
+    }
+  },
   setPseudo: (target: string, p: string) => rpc('admin_set_pseudo', { target, p }),
   ban: (target: string, p_ban: boolean) => rpc('admin_ban', { target, p_ban }),
   setTester: (target: string, p_on: boolean) => rpc('admin_set_tester', { target, p_on }),

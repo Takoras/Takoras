@@ -559,3 +559,53 @@ textarea.input {
     grid-template-columns: 1fr;
   }
 }
+
+/* donner un objet : résultats de la recherche */
+.giList {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+  gap: var(--s-2);
+  margin: var(--s-2) 0 0;
+  padding: 0;
+  list-style: none;
+}
+.giItem {
+  display: flex;
+  align-items: center;
+  gap: var(--s-2);
+  width: 100%;
+  padding: 6px 10px;
+  border: 0;
+  border-radius: 10px;
+  background: var(--surface-2);
+  color: inherit;
+  font: inherit;
+  text-align: left;
+  cursor: pointer;
+}
+.giItem[aria-selected='true'] {
+  outline: 2px solid var(--accent);
+}
+.giItem span {
+  flex: 1;
+  min-width: 0;
+  font-weight: 700;
+}
+.giImg {
+  width: 32px;
+  height: 32px;
+  object-fit: contain;
+}
+.giArt {
+  display: grid;
+  place-items: center;
+  width: 48px;
+  height: 32px;
+  overflow: hidden;
+  zoom: 0.6;
+}
+.giPick {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--s-2);
+}
