@@ -8,7 +8,7 @@
   text-align: left;
 }
 .box {
-  --tilt: -4deg;
+  --tilt: -3deg;
   --from: -70px;
   --bob: 7px;
   --dur: 5.2s;
@@ -16,30 +16,34 @@
   display: flex;
   align-items: center;
   gap: 16px;
-  padding: 18px 26px 18px 20px;
-  border-radius: 16px;
+  padding: 20px 26px 20px 22px;
+  /* même boîte que la fiche du jeton à la fin d'une ouverture */
+  border: 1px solid rgb(255 255 255 / 12%);
+  border-radius: 8px;
   background: var(--surface-2);
-  box-shadow: 0 14px 34px rgb(0 0 0 / 45%);
   rotate: calc(var(--tilt) + var(--swing, 0deg));
   transform-origin: 50% 0;
   opacity: 0;
   translate: var(--from) 0;
+  scale: 0.92;
   pointer-events: none;
   transition:
     opacity 0.3s var(--ease-out) calc(var(--i) * 90ms),
-    translate 0.6s cubic-bezier(0.2, 0.9, 0.25, 1.15) calc(var(--i) * 90ms);
+    scale 0.5s cubic-bezier(0.2, 1.15, 0.3, 1) calc(var(--i) * 90ms),
+    translate 0.5s cubic-bezier(0.2, 1.15, 0.3, 1) calc(var(--i) * 90ms);
 }
 /* la dérive : un léger flottement vertical, décalé pour chaque fiche */
 .box > * {
   animation: bob var(--dur) ease-in-out calc(var(--i) * -1.7s) infinite;
 }
+/* flotte doucement ET suit un peu la souris, comme la fiche du jeton (--mpx/--mpy écrits par mouseDepth.ts) */
 @keyframes bob {
   0%,
   100% {
-    translate: 0 0;
+    translate: calc(var(--mpx, 0) * -14px) calc(var(--mpy, 0) * -10px);
   }
   50% {
-    translate: 0 var(--bob);
+    translate: calc(var(--mpx, 0) * -14px) calc(var(--mpy, 0) * -10px + var(--bob));
   }
 }
 .left {
@@ -47,7 +51,7 @@
   top: 30%;
 }
 .right1 {
-  --tilt: 3deg;
+  --tilt: 2.5deg;
   --from: 70px;
   --dur: 6s;
   right: clamp(16px, 6vw, 130px);
@@ -64,6 +68,7 @@
 .on .box {
   opacity: 1;
   translate: 0 0;
+  scale: 1;
   pointer-events: auto;
 }
 .box img {

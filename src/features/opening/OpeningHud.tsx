@@ -80,15 +80,15 @@ function Hud({ on, shown, serie }: { on: boolean; shown: boolean; serie: string 
       {paid ? (
         <>
           <div className={`${s.box} ${s.left}`} style={{ '--i': 0 } as React.CSSProperties}>
-            <img className="px" src="/img/piece.png" alt="" />
-            <span>
+            <img data-depth className="px" src="/img/piece.png" alt="" />
+            <span data-depth>
               <small>{T.coins}</small>
               <b><Tween value={e.coins} ms={900} pow={4} format={fmt} /></b>
             </span>
           </div>
           <div className={`${s.box} ${s.right1}`} style={{ '--i': 1 } as React.CSSProperties}>
-            <img className="px" src="/img/jetons/mystere.png" alt="" />
-            <span>
+            <img data-depth className="px" src="/img/jetons/mystere.png" alt="" />
+            <span data-depth>
               <small>{T.buy}</small>
               <b><Tween value={Math.floor(e.coins / COIN_PULL.one)} format={fmt} /></b>
             </span>
@@ -97,24 +97,24 @@ function Hud({ on, shown, serie }: { on: boolean; shown: boolean; serie: string 
       ) : (
         <>
           <div className={`${s.box} ${s.left}`} style={{ '--i': 0 } as React.CSSProperties}>
-            <img className="px" src="/img/jetons/takoras.png" alt="" />
-            <span>
+            <img data-depth className="px" src="/img/jetons/takoras.png" alt="" />
+            <span data-depth>
               <small>{T.pulls}</small>
               <b><Tween value={e.stock} format={fmt} /></b>
               <em>{e.full ? T.full : T.next.replace('{t}', mmss(e.nextIn))}</em>
             </span>
           </div>
           <div className={`${s.box} ${s.right1}`} style={{ '--i': 1 } as React.CSSProperties}>
-            <img className="px" src="/img/potions/chance-10.png" alt="" />
-            <span>
+            <img data-depth className="px" src="/img/potions/chance-10.png" alt="" />
+            <span data-depth>
               <small>{T.luck}</small>
               <b className={e.luck > 1 ? s.lucky : ''}>×{String(Math.round(e.luck * 100) / 100).replace('.', lang === 'en' ? '.' : ',')}</b>
               {e.luck <= 1 ? <em>{T.none}</em> : null}
             </span>
           </div>
           <div className={`${s.box} ${s.right2} ${pityIn <= 1 ? s.ready : ''}`} style={{ '--i': 2 } as React.CSSProperties}>
-            <img className="px" src="/img/potions/chance-100.png" alt="" />
-            <span>
+            <img data-depth className="px" src="/img/potions/chance-100.png" alt="" />
+            <span data-depth>
               <small>{T.pity}</small>
               <b>{pityIn <= 1 ? T.pityNow : T.pityIn.replace('{n}', fmt(pityIn))}</b>
               <i className={s.bar}>

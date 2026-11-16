@@ -343,7 +343,7 @@ html.reduce-fx .op-id, html.reduce-fx .op-stats, html.reduce-fx .op-actions { an
   display: block;
   height: clamp(52px, 8vh, 78px);
   width: auto;
-  --df: drop-shadow(0 0 14px rgb(71 194 234 / 55%)) drop-shadow(0 4px 0 rgb(15 20 60 / 60%));
+  --df: drop-shadow(0 4px 0 rgb(15 20 60 / 60%)); /* pas de lueur derrière le logo, juste son ombre nette */
 }
 /* reflet qui traverse le logo de temps en temps */
 .op-tag-wrap::after {
