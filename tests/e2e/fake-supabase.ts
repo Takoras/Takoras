@@ -299,6 +299,17 @@ export async function fakeSupabase(
       st.coins -= 300 * n;
       return json({ state: { ...st }, results, variants: results.map(() => null), lucks: results.map(() => 1), ids: results.map((_, i) => i + 1) });
     }
+    if (rpc === 'sandbox_list')
+      return json({
+        viewing: null,
+        servers: [
+          { id: 1, name: 'Essai équilibrage', weekend: 'on', players: [
+            { id: 'p1', pseudo: 'T.Bob', coins: 5200, hours: 30, pulls: 640 },
+            { id: 'p2', pseudo: 'T.Alice', coins: 120000, hours: 150, pulls: 3100 },
+          ] },
+        ],
+      });
+    if (rpc === 'my_view') return json(process.env.SC_VIEW ? { pseudo: 'T.Bob', server: 'Essai équilibrage' } : null);
     if (rpc === 'refund_pulls') return json({ refunded: 0 });
     if (rpc === 'my_quests')
       return json({

@@ -170,6 +170,7 @@ export const adminApi = {
   shop: () => rpc('admin_shop'),
   suspicious: () => rpcLoose('admin_suspicious'),
   economy: (p_days = 14) => rpcLoose('admin_economy', { p_days }),
+
   shopSet: (a: { p_item: string; p_price: number; p_active: boolean; p_stock: number }) => rpc('admin_shop_set', a),
   shopReroll: () => rpc('admin_shop_reroll'),
   shopFeature: (p_item: string | null, p_pct: number) => rpc('admin_shop_feature', { p_item, p_pct }),
@@ -198,6 +199,18 @@ export const adminApi = {
   patchnoteSave: (a: { p_id: number | null; p_title: string; p_lines: Json; p_title_en?: string; p_lines_en?: Json }) =>
     rpc('admin_patchnote_save', a),
   patchnoteDelete: (p_id: number) => rpc('admin_patchnote_delete', { p_id }),
+};
+// Test serveur (modos) : serveurs de test, joueurs fantômes, profils au hasard, incarnation
+export const sandboxApi = {
+  list: () => rpcLoose('sandbox_list'),
+  create: (p_name: string) => rpcLoose('sandbox_create', { p_name }),
+  setWeekend: (p_id: number, p_mode: string) => rpcLoose('sandbox_set_weekend', { p_id, p_mode }),
+  addPlayer: (p_server: number, p_name: string) => rpcLoose('sandbox_add_player', { p_server, p_name }),
+  randomize: (p_player: string, p_hours: number) => rpcLoose('sandbox_randomize', { p_player, p_hours }),
+  remove: (p_player: string) => rpcLoose('sandbox_remove_player', { p_player }),
+  del: (p_id: number) => rpcLoose('sandbox_delete', { p_id }),
+  view: (p_player: string | null) => rpcLoose('sandbox_view', { p_player }),
+  myView: () => rpcLoose('my_view'),
 };
 
 // Lectures directes (seulement des SELECT, filtrés par la RLS)

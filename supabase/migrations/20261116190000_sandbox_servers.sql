@@ -1,0 +1,7 @@
+-- Appliquées via MCP (sandbox_servers, sandbox_effective_uid) : test serveur pour les modos.
+-- Tables sandbox_servers (nom, événement du week-end auto/on/off) et mod_views (modo → joueur incarné) ; profiles.sandbox.
+-- _uid() = joueur incarné (joueur de test seulement) sinon auth.uid() ; toutes les fonctions et politiques du jeu
+-- utilisent _uid() (même comportement sans incarnation). _real_mod() = vrai compte modo/admin.
+-- sandbox_list / create / set_weekend / add_player (compte fantôme « T.… » sans connexion) / randomize (profil réaliste)
+-- / remove_player / delete / view (incarner, null = revenir) ; my_view() pour le bandeau.
+-- Joueurs de test exclus du direct, des classements et du compteur en ligne ; _weekend() suit le réglage du serveur.

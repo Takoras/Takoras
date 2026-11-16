@@ -1,0 +1,36 @@
+/* bandeau d'incarnation : en bas au centre, au-dessus de tout, liseré doré pour qu'on ne l'oublie pas */
+.bar {
+  position: fixed;
+  left: 50%;
+  bottom: 16px;
+  z-index: 120;
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  max-width: calc(100vw - 32px);
+  padding: 8px 10px 8px 16px;
+  border: 1px solid rgb(242 194 48 / 70%);
+  border-radius: 10px;
+  background: var(--surface-2);
+  translate: -50% 0;
+  rotate: -0.6deg;
+  font-size: var(--fs-sm);
+  animation: barIn 0.4s cubic-bezier(0.2, 1.15, 0.3, 1) both;
+}
+.bar b {
+  color: #fde68a;
+}
+@keyframes barIn {
+  from {
+    opacity: 0;
+    translate: -50% 20px;
+  }
+}
+@media (max-width: 760px) {
+  .bar {
+    bottom: 76px;
+    flex-wrap: wrap;
+    justify-content: center;
+    text-align: center;
+  }
+}

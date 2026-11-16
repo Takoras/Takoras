@@ -13,6 +13,7 @@ import { PatchnotesAdmin } from './PatchnotesAdmin';
 import { Tests } from './Tests';
 import { Security } from './Security';
 import { Economy } from './Economy';
+import { Sandbox } from './Sandbox';
 import { setPreview } from '@/lib/preview';
 import { useMe } from '@/api/queries';
 import { Icon } from '@/app/Icon';
@@ -51,6 +52,7 @@ const GROUPS = [
     [
       ['global', 'gear', 'Global'],
       ['tests', 'flask', 'Tests'],
+      ['sandbox', 'flask', 'Test serveur'],
     ],
   ],
 ] as const;
@@ -72,7 +74,7 @@ export default function Admin() {
   // le modo ne voit que le tableau de bord et les signalements (le serveur refuse le reste de toute façon)
   const me = useMe();
   const isAdmin = !!me.data?.admin;
-  const allowed = (k: Tab) => isAdmin || k === 'dash' || k === 'rep';
+  const allowed = (k: Tab) => isAdmin || k === 'dash' || k === 'rep' || k === 'sandbox';
   const [tab0, setTabState] = useState<Tab>(saved);
   const tab: Tab = allowed(tab0) ? tab0 : 'dash';
   const setTab = (t: Tab) => {
@@ -136,6 +138,7 @@ export default function Admin() {
           {tab === 'tests' ? <Tests /> : null}
           {tab === 'sec' ? <Security /> : null}
           {tab === 'eco' ? <Economy /> : null}
+          {tab === 'sandbox' ? <Sandbox /> : null}
         </div>
       </div>
     </section>
