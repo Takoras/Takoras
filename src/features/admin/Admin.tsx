@@ -12,6 +12,7 @@ import { ReportsAdmin } from './ReportsAdmin';
 import { PatchnotesAdmin } from './PatchnotesAdmin';
 import { Tests } from './Tests';
 import { Security } from './Security';
+import { Economy } from './Economy';
 import { setPreview } from '@/lib/preview';
 import { useMe } from '@/api/queries';
 import { Icon } from '@/app/Icon';
@@ -33,6 +34,7 @@ const GROUPS = [
   [
     'Économie',
     [
+      ['eco', 'star', 'Suivi'],
       ['shop', 'shop', 'Boutique'],
       ['codes', 'star', 'Codes promo'],
     ],
@@ -133,6 +135,7 @@ export default function Admin() {
           {tab === 'pn' ? <PatchnotesAdmin /> : null}
           {tab === 'tests' ? <Tests /> : null}
           {tab === 'sec' ? <Security /> : null}
+          {tab === 'eco' ? <Economy /> : null}
         </div>
       </div>
     </section>

@@ -1,0 +1,3 @@
+-- Appliquée via MCP (eco_log_source_and_admin_economy) : eco_log.src = la RPC du site qui a bougé les pièces
+-- (request.path de PostgREST) ; admin_economy(p_days) : gains / dépenses par jour et par heure de jeu (hors admins),
+-- sources des pièces, soldes médian et 90 %.
