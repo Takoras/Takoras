@@ -15,9 +15,9 @@
   position: absolute;
   display: flex;
   align-items: center;
-  gap: 12px;
-  padding: 12px 18px 12px 14px;
-  border-radius: 12px;
+  gap: 16px;
+  padding: 18px 26px 18px 20px;
+  border-radius: 16px;
   background: var(--surface-2);
   box-shadow: 0 14px 34px rgb(0 0 0 / 45%);
   rotate: calc(var(--tilt) + var(--swing, 0deg));
@@ -43,23 +43,23 @@
   }
 }
 .left {
-  left: clamp(16px, 9vw, 160px);
+  left: clamp(16px, 7vw, 140px);
   top: 30%;
 }
 .right1 {
   --tilt: 3deg;
   --from: 70px;
   --dur: 6s;
-  right: clamp(16px, 8vw, 150px);
-  top: 24%;
+  right: clamp(16px, 6vw, 130px);
+  top: 22%;
 }
 .right2 {
   --tilt: -2deg;
   --from: 70px;
   --bob: -6px;
   --dur: 4.6s;
-  right: clamp(24px, 12vw, 210px);
-  top: 52%;
+  right: clamp(24px, 10vw, 190px);
+  top: 54%;
 }
 .on .box {
   opacity: 1;
@@ -67,8 +67,8 @@
   pointer-events: auto;
 }
 .box img {
-  width: 42px;
-  height: 42px;
+  width: 72px;
+  height: 72px;
   object-fit: contain;
   transition: scale var(--t-fast);
 }
@@ -81,18 +81,18 @@
 }
 .box small {
   color: var(--muted);
-  font-size: var(--fs-xs);
+  font-size: var(--fs-sm);
   font-weight: 700;
 }
 .box b {
   font-family: var(--font-display);
-  font-size: var(--fs-lg);
+  font-size: clamp(26px, 2.4vw, 36px);
   line-height: 1.1;
   font-variant-numeric: tabular-nums;
 }
 .box em {
   color: var(--text-2);
-  font-size: var(--fs-xs);
+  font-size: var(--fs-sm);
   font-style: normal;
   font-variant-numeric: tabular-nums;
 }
@@ -102,8 +102,8 @@
 .bar {
   display: block;
   width: 100%;
-  min-width: 140px;
-  height: 6px;
+  min-width: 190px;
+  height: 9px;
   margin-top: 4px;
   overflow: hidden;
   border-radius: 3px;
@@ -139,11 +139,14 @@
     padding: 6px 10px 6px 8px;
   }
   .box img {
-    width: 26px;
-    height: 26px;
+    width: 32px;
+    height: 32px;
   }
   .box b {
-    font-size: var(--fs-sm);
+    font-size: var(--fs-md);
+  }
+  .box small {
+    font-size: var(--fs-xs);
   }
   .box em,
   .bar {
