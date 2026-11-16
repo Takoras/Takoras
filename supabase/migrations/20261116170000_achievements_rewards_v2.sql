@@ -1,0 +1,2 @@
+-- Appliquée via MCP (achievements_rewards_v2) : récompenses recalibrées (≈ 10 pièces/tirage, ≈ 250/h) — succès de chance
+-- au-dessus de la revente du jeton (Takoras Ombre 25 M, Takoras 1,5 M), premier tirage 300, cosmétiques sous leur prix.
