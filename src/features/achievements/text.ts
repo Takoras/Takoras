@@ -10,6 +10,8 @@ const FR = {
   secret: 'Succès secret',
   secretHint: 'Continue à jouer pour le découvrir',
   of: '{a} sur {b}',
+  sort: 'Trier',
+  sorts: { ready: 'À récupérer', gain: 'Plus gros gain', easy: 'Plus simple', hard: 'Plus dur' } as Record<string, string>,
   cats: {
     pull: 'Tirages',
     coll: 'Collection',
@@ -88,6 +90,8 @@ const EN: typeof FR = {
   secret: 'Secret achievement',
   secretHint: 'Keep playing to find it',
   of: '{a} of {b}',
+  sort: 'Sort',
+  sorts: { ready: 'To claim', gain: 'Biggest reward', easy: 'Easiest', hard: 'Hardest' },
   cats: {
     pull: 'Pulls',
     coll: 'Collection',

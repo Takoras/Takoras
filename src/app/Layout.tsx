@@ -23,6 +23,7 @@ import { SocialLayer } from '@/features/social/SocialLayer';
 import { DebugPanel } from '@/features/admin/DebugPanel';
 import { BetaChip, BetaLayer, openPatchnotes } from '@/features/beta/Beta';
 import { BoostChip } from '@/features/boost/BoostChip';
+import { OpeningHud } from '@/features/opening/OpeningHud';
 import { openFeedback, openTester } from '@/features/beta/store';
 import { badgeOf, useFriends } from '@/features/social/social';
 import { isReady, useAchievements } from '@/features/achievements/Achievements';
@@ -183,6 +184,7 @@ export function Layout() {
         ) : null}
         <BetaChip />
         {user ? <BoostChip /> : null}
+        {user ? <OpeningHud /> : null}
         {user && (me.data?.tester || me.data?.admin) ? (
           // testeurs (choisis par l'admin) : la fiole ouvre le menu pour tout se donner et forcer des tirages
           <button type="button" className={s.testerBtn} onClick={openTester} aria-label={t('ui.tester_menu')}>

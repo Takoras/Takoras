@@ -7,6 +7,7 @@ import { useAuth } from '@/lib/auth';
 import { locale, reducedFx, useSettings } from '@/lib/settings';
 import { NeedLogin } from '@/app/NeedLogin';
 import { Button } from '@/ui/Button';
+import { Segmented } from '@/ui/Segmented';
 import { Swap } from '@/ui/Swap';
 import { toast } from '@/ui/toast';
 import { useStaggerIn } from '@/ui/useStaggerIn';
@@ -40,7 +41,7 @@ const CAT_IMG: Record<string, string> = {
   pass: '/img/ui/ico/star.png',
   quest: '/img/objets/recharge.png',
   social: '/img/pp/bleu.png',
-  cosm: '/img/pp/etoile.gif',
+  cosm: '/img/pp/yeux.png',
   time: '/img/objets/sablier.png',
 };
 // l'image d'un succès : celle de sa catégorie, ou plus précise (le jeton de cette rareté, le tampon de la mutation…)
@@ -72,6 +73,7 @@ export function useAchievements() {
     queryFn: async () => ((await achApi.mine()) as { list: Ach[] }).list,
   });
 }
+type Sort = 'ready' | 'gain' | 'easy' | 'hard';
 export const isReady = (a: Ach) => !a.claimed && a.value >= a.target;
 
 export default function Achievements() {
@@ -81,21 +83,29 @@ export default function Achievements() {
   const qc = useQueryClient();
   const q = useAchievements();
   const [cat, setCat] = useState<string>('all');
+  const [sort, setSort] = useState<Sort>('ready');
   const [busy, setBusy] = useState(false);
   const pageRef = useRef<HTMLElement>(null);
   const shelvesRef = useRef<HTMLDivElement>(null);
   const gridRef = useRef<HTMLDivElement>(null);
   useStaggerIn(pageRef, `.${s.head}, .${sh.shelf}`, !!q.data);
   useSwingAll(shelvesRef, `.${sh.shelf}`, 0.5, q.data ? 1 : 0, 70);
-  useSwingAll(gridRef, `.${s.card}`, 0.3, `${cat}|${q.data?.length ?? 0}`);
+  useSwingAll(gridRef, `.${s.card}`, 0.3, `${cat}|${sort}|${q.data?.length ?? 0}`);
   const fmt = (n: number) => n.toLocaleString(locale(lang));
   const list = q.data ?? [];
   const done = list.filter((a) => a.claimed).length;
   const ready = list.filter(isReady);
   const shown = cat === 'all' ? list : list.filter((a) => a.cat === cat);
-  // les prêts d'abord, puis en cours (du plus avancé au moins avancé), puis les obtenus
-  const order = (a: Ach) => (isReady(a) ? 0 : a.claimed ? 2 : 1);
-  const sorted = [...shown].sort((a, b) => order(a) - order(b) || b.value / b.target - a.value / a.target);
+  // tri : les obtenus toujours à la fin ; sinon prêts d'abord, plus grosse récompense, plus simple ou plus dur à finir
+  const pr = (a: Ach) => Math.min(1, a.value / a.target);
+  const order = (a: Ach) => (a.claimed ? 2 : sort === 'ready' && !isReady(a) ? 1 : 0);
+  const by: Record<Sort, (a: Ach, b: Ach) => number> = {
+    ready: (a, b) => pr(b) - pr(a),
+    gain: (a, b) => b.coins - a.coins,
+    easy: (a, b) => pr(b) - pr(a) || a.coins - b.coins,
+    hard: (a, b) => pr(a) - pr(b) || b.coins - a.coins,
+  };
+  const sorted = [...shown].sort((a, b) => order(a) - order(b) || by[sort](a, b));
 
   // succès récupéré : il s'efface, les autres glissent à leur nouvelle place, puis il réapparaît en douceur plus bas
   const [leaving, setLeaving] = useState<string | null>(null);
@@ -173,6 +183,17 @@ export default function Achievements() {
             <i style={{ width: `${list.length ? (done / list.length) * 100 : 0}%` }} />
           </span>
         </span>
+        <span className={s.sort}>
+          <Segmented<Sort>
+            value={sort}
+            label={T.sort}
+            options={(['ready', 'gain', 'easy', 'hard'] as const).map((k) => [k, T.sorts[k] ?? k] as const)}
+            onChange={(v) => {
+              sfx.click();
+              setSort(v);
+            }}
+          />
+        </span>
         {ready.length > 1 ? (
           <Button variant="primary" loading={busy} onClick={() => void claimAll()}>
             {T.claimAll.replace('{n}', String(ready.length))}
@@ -216,7 +237,7 @@ export default function Achievements() {
               …
             </p>
           ) : (
-            <Swap k={cat}>
+            <Swap k={`${cat}|${sort}`}>
               <ul className={s.grid}>
                 {sorted.map((a, i) => {
                   const hidden = a.secret && !a.claimed && a.value < a.target;
@@ -230,7 +251,7 @@ export default function Achievements() {
                       style={{ '--i': Math.min(i, 20) } as CSSProperties}
                     >
                       <span className={s.art}>
-                        <img className={`px ${hidden ? s.hiddenImg : ''}`} src={imgOf(a)} alt="" />
+                        <img className={`px ${hidden ? s.hiddenImg : ''}`} src={imgOf(a)} alt="" loading="lazy" decoding="async" width={64} height={64} />
                         {a.claimed ? <img className={`px ${s.check}`} src="/img/ui/ok.png" alt="" /> : null}
                       </span>
                       <b className={s.name}>{hidden ? T.secret : ((a.target === 1 && T.s1[a.stat]) || T.s[a.stat] || a.stat).replace('{n}', fmt(a.target))}</b>

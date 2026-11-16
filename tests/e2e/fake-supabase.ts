@@ -276,6 +276,7 @@ export async function fakeSupabase(
         streak: 2,
         streak_today: true,
         weekend_left: process.env.SC_WE ? 100000 : 0,
+        pity_in: 37,
         potions: [],
         luck: 1,
       });

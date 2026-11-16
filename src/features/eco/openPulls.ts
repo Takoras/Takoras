@@ -20,8 +20,12 @@ const eco = () => {
 };
 
 let busy = false;
+// série de l'ouverture en cours (pour les infos affichées pendant l'ouverture)
+let curSerie = 'Takoras';
+export const openingSerie = () => curSerie;
 // Ouvre 1 pull ou tout le stock (max 1000) : le serveur retire les pulls et tire les jetons, on joue l'animation
 export async function openPulls(n: number | 'all', serie = 'Takoras') {
+  curSerie = serie;
   if (serie !== 'Takoras') return openCoinPulls(n === 'all' ? 10 : n, serie);
   const user = useAuth.getState().user;
   if (!user) return openUI('account');

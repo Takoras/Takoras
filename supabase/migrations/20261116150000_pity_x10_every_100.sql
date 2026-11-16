@@ -1,0 +1,2 @@
+-- Appliquée via MCP (pity_x10_every_100) : profiles.pity ; take_pulls compte les tirages et le 100e a sa chance totale
+-- (potions comprises) ×10 (renvoie aussi 'pities') ; eco_state renvoie pity_in (tirages avant le prochain ×10).
