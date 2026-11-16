@@ -561,7 +561,7 @@ export default function Pass() {
           <div className={s.top}>
             {/* ta progression : grand palier, barre d'XP qui glisse, et ce que tu gagnes au prochain */}
             <div className={s.hero}>
-              <PixelBg className={s.heroBg} odds={1000 + tier * 2000} glow="#3966f7" still={reducedFx()} />
+              <PixelBg className={s.heroBg} odds={10} glow="#3966f7" still={reducedFx()} />
               <div className={s.lvl}>
                 <small>{t('ui.bp_tier')}</small>
                 <b>
