@@ -586,6 +586,8 @@ export const en: Dict = {
     price_down: 'Price drop!',
     price_up: 'A price changed',
     nav_friends: 'Friends',
+    nav_ach: 'Achievements',
+    st_ach: 'achievements',
     ann_title: 'Announcement',
     ann_ok: 'Got it!',
     ann_missed: 'You missed {n} other announcement(s):',

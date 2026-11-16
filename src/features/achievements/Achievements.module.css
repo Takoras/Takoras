@@ -1,0 +1,251 @@
+/* ======================================================================
+   Succès : même DA que la boutique et l'inventaire. Rayons de catégories (ceux de la boutique, ils penchent et se
+   balancent), cases sombres unies qui penchent un peu chacune, se balancent au survol et montent légèrement,
+   images pixel, barres pleines nettes, pièces qui volent à la récompense.
+   ====================================================================== */
+.page {
+  display: grid;
+  gap: var(--s-6);
+  width: 100%;
+  max-width: 1560px;
+  margin-inline: auto;
+}
+.head {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--s-4);
+}
+.head h1 {
+  margin: 0;
+  font-family: var(--font-display);
+  font-size: clamp(32px, 3.4vw, 46px);
+  line-height: 1;
+}
+/* total : 37/100 et sa barre */
+.total {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--s-3);
+  padding: 6px 14px;
+  border-radius: var(--r-pill);
+  background: var(--surface);
+  color: var(--text-2);
+  font-variant-numeric: tabular-nums;
+}
+.total b {
+  color: var(--text);
+  font-family: var(--font-display);
+  font-size: var(--fs-lg);
+}
+.bar {
+  display: block;
+  width: clamp(80px, 12vw, 180px);
+  height: 8px;
+  overflow: hidden;
+  border-radius: 3px;
+  background: var(--surface-3);
+}
+.bar i {
+  display: block;
+  height: 100%;
+  background: #f2c230;
+  transition: width 0.6s var(--ease-out);
+}
+
+.layout {
+  display: grid;
+  grid-template-columns: minmax(210px, 260px) minmax(0, 1fr);
+  align-items: start;
+  gap: var(--s-6);
+}
+/* les rayons restent à l'écran pendant qu'on fait défiler les succès */
+.shelves {
+  position: sticky;
+  top: 90px;
+}
+.shelves > button {
+  position: relative;
+}
+/* nombre de succès prêts à récupérer dans ce rayon */
+.dot {
+  margin-left: auto;
+  min-width: 22px;
+  padding: 0 6px;
+  border-radius: var(--r-pill);
+  background: #f2c230;
+  color: #241a02;
+  font-size: var(--fs-xs);
+  font-style: normal;
+  font-weight: 800;
+  text-align: center;
+}
+
+/* ---------- les succès ---------- */
+.grid {
+  list-style: none;
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+  gap: var(--s-4);
+  margin: 0;
+  padding: 0;
+}
+.card {
+  --tilt: -0.6deg;
+  position: relative;
+  display: grid;
+  justify-items: center;
+  align-content: start;
+  gap: 6px;
+  padding: var(--s-5) var(--s-4) var(--s-4);
+  border-radius: 14px;
+  background: var(--surface);
+  text-align: center;
+  rotate: calc(var(--tilt) + var(--swing, 0deg));
+  transform-origin: 50% 0;
+  transition:
+    translate 0.25s var(--ease-out),
+    background-color var(--t-fast);
+  animation: cardIn 0.4s var(--ease-out) calc(var(--i, 0) * 30ms) both;
+}
+.card:nth-child(2n) {
+  --tilt: 0.5deg;
+}
+.card:nth-child(3n) {
+  --tilt: -0.3deg;
+}
+.card:hover {
+  translate: 0 -3px;
+  background: var(--surface-2);
+}
+@keyframes cardIn {
+  from {
+    opacity: 0;
+    translate: 0 10px;
+  }
+}
+.art {
+  position: relative;
+  display: grid;
+  place-items: center;
+  width: 64px;
+  height: 64px;
+  margin-bottom: 4px;
+}
+.art img {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  transition: scale var(--t-fast);
+}
+.card:hover .art img {
+  scale: 1.08;
+}
+/* succès secret pas encore trouvé : son image en silhouette noire */
+.art img.hiddenImg {
+  filter: brightness(0);
+}
+.check {
+  position: absolute;
+  right: -10px;
+  top: -6px;
+  width: 22px !important;
+  height: 22px !important;
+}
+.name {
+  font-size: var(--fs-sm);
+  line-height: 1.25;
+}
+.cat {
+  color: var(--muted);
+  font-size: var(--fs-xs);
+}
+.prog {
+  display: block;
+  width: 100%;
+  height: 8px;
+  margin-top: 4px;
+  overflow: hidden;
+  border-radius: 3px;
+  background: var(--surface-3);
+}
+.prog i {
+  display: block;
+  height: 100%;
+  background: var(--accent);
+  transition: width 0.6s var(--ease-out);
+}
+.foot {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  width: 100%;
+}
+.count {
+  color: var(--text-2);
+  font-size: var(--fs-xs);
+  font-variant-numeric: tabular-nums;
+}
+.reward {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  color: #fde68a;
+  font-size: var(--fs-xs);
+  font-weight: 800;
+  font-variant-numeric: tabular-nums;
+}
+.card > :global(button) {
+  width: 100%;
+  margin-top: 4px;
+}
+/* prêt à récupérer : barre pleine en or, liseré doré */
+.ready {
+  outline: 2px solid #f2c230;
+  outline-offset: -2px;
+}
+.ready .prog i {
+  background: #f2c230;
+}
+/* obtenu : en retrait, barre verte */
+.done {
+  background: rgb(255 255 255 / 2%);
+}
+.done .prog i {
+  background: #4ade80;
+}
+.done .art img:not(.check) {
+  opacity: 0.75;
+}
+
+@media (max-width: 900px) {
+  .layout {
+    grid-template-columns: 1fr;
+  }
+  /* téléphone : les catégories en une bande compacte qu'on fait glisser, les succès juste dessous */
+  .shelves {
+    position: static;
+    grid-auto-flow: column;
+    grid-auto-columns: max-content;
+    overflow-x: auto;
+    padding: 4px 2px 8px;
+    scrollbar-width: none;
+  }
+  .shelves > button {
+    padding: 8px 12px;
+    white-space: nowrap;
+  }
+  .shelves > button img {
+    width: 26px;
+    height: 26px;
+  }
+  .shelves > button small {
+    display: none;
+  }
+}
+@media (max-width: 520px) {
+  .grid {
+    grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+    gap: var(--s-3);
+  }
+}

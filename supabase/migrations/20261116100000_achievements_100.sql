@@ -1,0 +1,3 @@
+-- Appliquée via MCP (achievements_100) : tables achievements (100 succès, 11 catégories) + achievement_claims,
+-- RLS sans policy ; _ach_stats(uid) calcule 39 stats côté serveur ; my_achievements(), claim_achievement(p_id)
+-- (rate limit, revérifie l'objectif, crédite les pièces) et achievements_of(p_pseudo) pour le profil public.

@@ -588,6 +588,8 @@ export const fr = {
     price_down: 'Prix en baisse !',
     price_up: 'Un prix a changé',
     nav_friends: 'Amis',
+    nav_ach: 'Succès',
+    st_ach: 'succès',
     ann_title: 'Annonce',
     ann_ok: 'Compris !',
     ann_missed: 'Tu as raté {n} autre(s) annonce(s) :',

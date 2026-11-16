@@ -355,6 +355,30 @@ export async function fakeSupabase(
       ],
     });
     if (rpc === 'shop_today') return json(shopNow());
+    // succès : quelques-uns par catégorie, certains prêts, d'autres obtenus, un secret
+    if (rpc === 'my_achievements') {
+      const L = [
+        ['pull', 'pulls', 1, 50, false, 1], ['pull', 'pulls', 100, 400, false, 120], ['pull', 'pulls', 1000, 3000, false, 120],
+        ['coll', 'takoras', 3, 150, false, 3], ['coll', 'takoras', 8, 1000, false, 3], ['coll', 'bodako', 1, 100, false, 0],
+        ['rare', 'r1000', 1, 1000, false, 1], ['rare', 'r1000000', 1, 100000, false, 0], ['rare', 'nopot1000', 1, 3000, true, 0],
+        ['mut', 'gold', 1, 500, false, 1], ['mut', 'ombre', 1, 4000, false, 1], ['mut', 'takoras_ombre', 1, 250000, true, 0],
+        ['eco', 'sold', 10, 100, false, 4], ['eco', 'coins', 10000, 500, false, 5000], ['shop', 'bought', 1, 100, false, 1],
+        ['shop', 'reveals', 10, 300, false, 2], ['pass', 'tier', 5, 500, false, 3], ['quest', 'streak', 3, 300, false, 3],
+        ['social', 'friends', 1, 200, false, 1], ['social', 'bio', 1, 100, false, 0], ['cosm', 'cosmetics', 5, 1500, false, 14],
+        ['cosm', 'c_myth', 1, 40000, false, 0], ['time', 'hours', 1, 200, false, 0],
+      ];
+      return json({
+        list: L.map(([cat, stat, target, coins, secret, value], i) => ({
+          id: `${cat}_${stat}_${target}`, cat, stat, target, coins, secret, value: Math.min(Number(value), Number(target)),
+          claimed: i % 5 === 0 && Number(value) >= Number(target),
+        })),
+      });
+    }
+    if (rpc === 'achievements_of') return json({ done: 12, total: 100 });
+    if (rpc === 'claim_achievement') {
+      st.coins += 100;
+      return json({ ...st });
+    }
     if (rpc === 'reveal_slot') {
       const gain = revealed ? 0 : 100;
       revealed = true;

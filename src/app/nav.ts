@@ -7,5 +7,6 @@ export const NAV: { to: string; key: Key; icon: string; tab?: boolean }[] = [
   { to: '/inventory', key: 'ui.nav_inv', icon: 'bag', tab: true },
   { to: '/shop', key: 'ui.nav_shop', icon: 'shop', tab: true },
   { to: '/pass', key: 'ui.bp_title', icon: 'star' },
+  { to: '/achievements', key: 'ui.nav_ach', icon: 'trophy' },
   { to: '/friends', key: 'ui.nav_friends', icon: 'users' },
 ];

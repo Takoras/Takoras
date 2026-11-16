@@ -3,7 +3,7 @@ import { useSwingAll } from '@/ui/useSwing';
 import { SerieName } from '@/ui/SerieName';
 import { useNavigate, useParams } from 'react-router';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
-import { accountApi, errorText, publicApi } from '@/api';
+import { accountApi, achApi, errorText, publicApi } from '@/api';
 import { useMe } from '@/api/queries';
 import { BANNER_IMG, bannerName } from '@/data/items';
 import {
@@ -112,6 +112,11 @@ export default function Profile() {
   );
   useSwingAll(pageRef, `.${s.sc}, .${s.scEmpty}, .${s.best}, .${s.series} > button`, 0.4, prof.data);
 
+  const achOf = useQuery({
+    queryKey: ['ach-of', (params.pseudo ?? me.data?.pseudo ?? '').toLowerCase()],
+    enabled: !!(params.pseudo ?? me.data?.pseudo),
+    queryFn: async () => (await achApi.of(params.pseudo ?? me.data?.pseudo ?? '')) as { done: number; total: number },
+  });
   const myInv = useInventory(); // (avant tout « return » : règle des hooks)
   if (!params.pseudo && !user) return <NeedLogin title={t('app.account')} />;
   if (prof.isError) return <p className="muted">{t('ui.err_generic')}</p>;
@@ -217,6 +222,14 @@ export default function Profile() {
               </b>{' '}
               {t('ui.bestiaries').toLowerCase()}
             </li>
+            {achOf.data ? (
+              <li>
+                <b>
+                  {achOf.data.done}/{achOf.data.total}
+                </b>{' '}
+                {t('ui.st_ach')}
+              </li>
+            ) : null}
             <li className={s.since}>{t('ui.joined', { d: new Date(p.joined).toLocaleDateString(locale(lang)) })}</li>
           </ul>
         </div>

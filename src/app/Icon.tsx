@@ -35,6 +35,7 @@ const PIX = new Set([
   'scroll',
   'user',
   'shop',
+  'trophy',
 ]);
 export function Icon({ name, size = 20 }: { name: keyof typeof P | string; size?: number }) {
   if (PIX.has(name)) {

@@ -24,6 +24,7 @@ import { DebugPanel } from '@/features/admin/DebugPanel';
 import { BetaChip, BetaLayer, openPatchnotes } from '@/features/beta/Beta';
 import { openFeedback, openTester } from '@/features/beta/store';
 import { badgeOf, useFriends } from '@/features/social/social';
+import { isReady, useAchievements } from '@/features/achievements/Achievements';
 import { publicApi } from '@/api';
 import { useOnlinePresence } from '@/lib/online';
 import { Icon } from './Icon';
@@ -121,6 +122,8 @@ export function Layout() {
   useOnlinePresence(user?.id);
   const fr = useFriends();
   const frN = user ? badgeOf(fr.data).req + badgeOf(fr.data).unread : 0;
+  const ach = useAchievements();
+  const achN = user ? (ach.data ?? []).filter(isReady).length : 0;
   const annN = useAnn(unreadAnn);
 
   return (
@@ -147,6 +150,7 @@ export function Layout() {
               </span>
               <span className={s.railTxt}>{t(n.key)}</span>
               {n.to === '/friends' ? <Badge n={frN} /> : null}
+              {n.to === '/achievements' ? <Badge n={achN} /> : null}
             </NavLink>
           ))}
         </div>

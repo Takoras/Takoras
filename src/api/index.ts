@@ -122,6 +122,13 @@ export const betaApi = {
 // fonctions serveur pas encore dans les types générés (migration à appliquer) : appel non typé
 const rpcLoose = rpc as unknown as (name: string, args?: Record<string, unknown>) => Promise<unknown>;
 
+// Succès (fonctions serveur : my_achievements, claim_achievement, achievements_of)
+export const achApi = {
+  mine: () => rpcLoose('my_achievements'),
+  claim: (p_id: string) => rpcLoose('claim_achievement', { p_id }),
+  of: (p_pseudo: string) => rpcLoose('achievements_of', { p_pseudo }),
+};
+
 export const adminApi = {
   players: (q = '') => rpc('admin_players', { q }),
   player: (target: string) => rpc('admin_player', { target }),
