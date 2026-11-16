@@ -1,3 +1,4 @@
+import { useEffect } from 'react';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { sandboxApi } from '@/api';
 import { useAuth } from '@/lib/auth';
@@ -12,8 +13,15 @@ export function ViewBanner() {
     queryKey: ['my-view', uid],
     enabled: !!uid,
     staleTime: 60_000,
-    queryFn: async () => (await sandboxApi.myView()) as unknown as { pseudo: string; server: string } | null,
+    queryFn: async () => (await sandboxApi.myView()) as unknown as { pseudo: string; server: string; server_id: number } | null,
   });
+  // pendant qu'on joue dans un serveur de test, ses faux joueurs continuent de jouer (un passage toutes les 20 s)
+  const sid = q.data?.server_id;
+  useEffect(() => {
+    if (!sid) return;
+    const id = setInterval(() => void sandboxApi.tick(sid).catch(() => undefined), 20_000);
+    return () => clearInterval(id);
+  }, [sid]);
   if (!q.data) return null;
   const back = async () => {
     await sandboxApi.view(null);

@@ -204,8 +204,13 @@ export const adminApi = {
 export const sandboxApi = {
   list: () => rpcLoose('sandbox_list'),
   create: (p_name: string) => rpcLoose('sandbox_create', { p_name }),
+  detail: (p_server: number) => rpcLoose('sandbox_detail', { p_server }),
+  player: (p_player: string) => rpcLoose('sandbox_player', { p_player }),
+  tick: (p_server: number) => rpcLoose('sandbox_tick', { p_server }),
+  generate: (p_server: number, p_n: number, p_min_h: number, p_max_h: number) =>
+    rpcLoose('sandbox_generate', { p_server, p_n, p_min_h, p_max_h }),
+  me: (p_server: number) => rpcLoose('sandbox_me', { p_server }),
   setWeekend: (p_id: number, p_mode: string) => rpcLoose('sandbox_set_weekend', { p_id, p_mode }),
-  addPlayer: (p_server: number, p_name: string) => rpcLoose('sandbox_add_player', { p_server, p_name }),
   randomize: (p_player: string, p_hours: number) => rpcLoose('sandbox_randomize', { p_player, p_hours }),
   remove: (p_player: string) => rpcLoose('sandbox_remove_player', { p_player }),
   del: (p_id: number) => rpcLoose('sandbox_delete', { p_id }),

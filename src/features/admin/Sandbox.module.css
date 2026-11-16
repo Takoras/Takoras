@@ -1,0 +1,217 @@
+/* Test serveur : les serveurs à gauche (comme des rayons), la fiche du serveur à droite */
+.wrap {
+  display: grid;
+  grid-template-columns: minmax(200px, 250px) minmax(0, 1fr);
+  align-items: start;
+  gap: var(--s-4);
+}
+.side {
+  display: grid;
+  gap: 8px;
+}
+.new {
+  display: flex;
+  gap: 6px;
+}
+.new input {
+  min-width: 0;
+  flex: 1;
+}
+.srv {
+  --tilt: -0.4deg;
+  display: grid;
+  gap: 2px;
+  padding: 10px 14px;
+  border: 0;
+  border-radius: 10px;
+  background: var(--surface);
+  color: var(--text);
+  font: inherit;
+  text-align: left;
+  cursor: pointer;
+  rotate: var(--tilt);
+  transition:
+    background-color var(--t-fast),
+    translate 0.2s var(--ease-out);
+}
+.srv:nth-child(2n) {
+  --tilt: 0.4deg;
+}
+.srv:hover {
+  background: var(--surface-2);
+  translate: 3px 0;
+}
+.srv[aria-pressed='true'] {
+  background: rgb(61 107 255 / 18%);
+  outline: 2px solid rgb(142 170 255 / 50%);
+  outline-offset: -2px;
+}
+.srv small {
+  color: var(--muted);
+  font-size: var(--fs-xs);
+}
+.on {
+  color: #4ade80;
+}
+.main {
+  display: grid;
+  gap: var(--s-4);
+  min-width: 0;
+}
+.head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--s-4);
+}
+.head h3 {
+  margin: 0;
+}
+.cols {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+  gap: var(--s-4);
+  align-items: start;
+}
+.top {
+  display: grid;
+  gap: 4px;
+  margin: 0;
+  padding-left: 22px;
+}
+.top li {
+  display: flex;
+  justify-content: space-between;
+  gap: 8px;
+}
+.top button,
+.log b {
+  border: 0;
+  background: none;
+  color: var(--text);
+  font: inherit;
+  font-weight: 700;
+  cursor: pointer;
+  padding: 0;
+}
+.top span {
+  color: var(--muted);
+  font-variant-numeric: tabular-nums;
+}
+.players {
+  display: grid;
+  gap: 4px;
+  max-height: 420px;
+  overflow-y: auto;
+  scrollbar-width: thin;
+}
+.pl {
+  display: grid;
+  grid-template-columns: auto auto 1fr;
+  align-items: center;
+  column-gap: 8px;
+  padding: 6px 10px;
+  border: 0;
+  border-radius: 8px;
+  background: transparent;
+  color: var(--text);
+  font: inherit;
+  text-align: left;
+  cursor: pointer;
+}
+.pl:hover,
+.pl[aria-pressed='true'] {
+  background: var(--surface-2);
+}
+.pl small {
+  grid-column: 2 / -1;
+  color: var(--muted);
+  font-size: var(--fs-xs);
+}
+.pl em {
+  justify-self: start;
+  padding: 0 6px;
+  border-radius: var(--r-pill);
+  background: rgb(242 194 48 / 20%);
+  color: #fde68a;
+  font-size: var(--fs-xs);
+  font-style: normal;
+  font-weight: 800;
+}
+.dot,
+.dotOn {
+  display: inline-block;
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: var(--surface-3);
+}
+.dotOn {
+  background: #4ade80;
+}
+.log {
+  display: grid;
+  gap: 4px;
+  max-height: 420px;
+  margin: 0;
+  padding: 0;
+  overflow-y: auto;
+  list-style: none;
+  font-size: var(--fs-sm);
+  scrollbar-width: thin;
+}
+.log li {
+  animation: logIn 0.35s var(--ease-out) both;
+}
+.log time {
+  color: var(--muted);
+  font-size: var(--fs-xs);
+  font-variant-numeric: tabular-nums;
+}
+@keyframes logIn {
+  from {
+    opacity: 0;
+    translate: 0 -4px;
+  }
+}
+.one {
+  display: grid;
+  gap: var(--s-3);
+}
+.one h4 {
+  margin: 0;
+}
+.oneHead {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+.oneHead h3 {
+  margin: 0;
+}
+.x {
+  margin-left: auto;
+  border: 0;
+  background: none;
+  color: var(--muted);
+  font: inherit;
+  cursor: pointer;
+}
+@media (max-width: 1100px) {
+  .wrap,
+  .cols {
+    grid-template-columns: 1fr;
+  }
+}
+.gen {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px 10px;
+}
+.gen input {
+  width: 72px;
+}
+.players {
+  max-height: 300px;
+}

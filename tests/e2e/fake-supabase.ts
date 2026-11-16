@@ -303,10 +303,24 @@ export async function fakeSupabase(
       return json({
         viewing: null,
         servers: [
-          { id: 1, name: 'Essai équilibrage', weekend: 'on', players: [
-            { id: 'p1', pseudo: 'T.Bob', coins: 5200, hours: 30, pulls: 640 },
-            { id: 'p2', pseudo: 'T.Alice', coins: 120000, hours: 150, pulls: 3100 },
-          ] },
+          { id: 1, name: 'Équilibrage', weekend: 'on', players: 24, online: 7 },
+          { id: 2, name: 'Bodako', weekend: 'auto', players: 8, online: 0 },
+        ],
+      });
+    if (rpc === 'sandbox_tick') return json(3);
+    if (rpc === 'sandbox_detail')
+      return json({
+        id: 1, name: 'Équilibrage', weekend: 'on', me: null, online: 7,
+        players: Array.from({ length: 12 }, (_, i) => ({
+          id: 'p' + i, pseudo: (['T.Nyx42', 'T.Kaz', 'T.Lumi_tk', 'T.Zedgg', 'T.Mira7', 'T.Pixel'][i % 6] ?? 'T.x') + (i > 5 ? i : ''),
+          coins: 1200 * (i + 1), bot: true, mine: false, online: i % 3 === 0, hours: 5 + i * 7, pulls: 100 + i * 140, best: 1000, friends: i % 5,
+        })),
+        log: [
+          { id: 9, at: new Date().toISOString(), msg: 'ouvre 6 tirages : Azura Doré 1/150', pseudo: 'T.Nyx42' },
+          { id: 8, at: new Date().toISOString(), msg: 'revend 14 jetons (+38 pièces)', pseudo: 'T.Kaz' },
+          { id: 7, at: new Date().toISOString(), msg: 'se connecte', pseudo: 'T.Lumi_tk' },
+          { id: 6, at: new Date().toISOString(), msg: 'achète une potion ×2 (−300)', pseudo: 'T.Zedgg' },
+          { id: 5, at: new Date().toISOString(), msg: 'récupère le bonus du jour (série 4)', pseudo: 'T.Mira7' },
         ],
       });
     if (rpc === 'my_view') return json(process.env.SC_VIEW ? { pseudo: 'T.Bob', server: 'Essai équilibrage' } : null);

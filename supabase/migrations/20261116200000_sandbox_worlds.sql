@@ -1,0 +1,6 @@
+-- Appliquée via MCP (sandbox_worlds) : chaque serveur de test est un monde à part (_world() ; direct, classements,
+-- joueurs en ligne, profils et demandes d'amis filtrés par monde). sandbox_generate (N faux joueurs réalistes avec
+-- style de jeu et amis), sandbox_me (compte du modo dans le serveur, tout débloqué), sandbox_tick (les faux joueurs
+-- jouent : connexion/déconnexion, tirages, revente, potion, bonus du jour ; ≤ 25 joueurs × 6 tirages par passage,
+-- appelé seulement quand la page du serveur est ouverte ou qu'on joue dedans), sandbox_log (journal, 3 000 lignes max),
+-- sandbox_detail / sandbox_player pour le panneau. sandbox_add_player supprimée.
