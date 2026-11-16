@@ -7,7 +7,16 @@ export type Speed = 'normal' | 'rapide' | 'instant';
 // qualité graphique : haut = tout, moyen = sans le décor inutile, bas = effets allégés, patate = plus aucune animation
 export type Fx = 'auto' | 'high' | 'medium' | 'low' | 'potato';
 export type Variant = 'gold' | 'celeste' | 'ombre';
-export type Settings = { speed: Speed; lang: Lang; volume: number; fx: Fx; autoMin: number; autoVars: Variant[] };
+export type Settings = {
+  speed: Speed;
+  lang: Lang;
+  volume: number;
+  fx: Fx;
+  autoMin: number;
+  autoVars: Variant[];
+  /** animation d'ouverture pour tous les jetons (sinon seulement ceux qu'on n'a pas encore : on peut enchaîner) */
+  animKnown: boolean;
+};
 
 const KEY = 'takoras-settings';
 export const DEFAULTS: Settings = {
@@ -17,6 +26,7 @@ export const DEFAULTS: Settings = {
   fx: 'auto',
   autoMin: 1000,
   autoVars: ['gold', 'celeste', 'ombre'],
+  animKnown: true,
 };
 
 function load(): Settings {
@@ -32,6 +42,7 @@ function load(): Settings {
     if (old === 'reduced') s.fx = 'low';
     if (!['auto', 'high', 'medium', 'low', 'potato'].includes(s.fx)) s.fx = DEFAULTS.fx;
     s.volume = Math.max(0, Math.min(100, Number(s.volume) || 0));
+    s.animKnown = s.animKnown !== false;
     return s;
   } catch {
     return { ...DEFAULTS };

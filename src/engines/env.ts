@@ -116,6 +116,10 @@ export const host = {
   loadLocalHist: (): unknown[] => [],
   renderHist: (): void => undefined,
   toggleAdmin: (): void => undefined,
+  // jetons déjà eus avant l'ouverture (« série|nom|mutation ») : sans animation si le réglage le demande ; null = inconnu
+  known: null as Set<string> | null,
+  // fiche du jeton révélé : ce qui reste pour continuer (tirages pour Takoras, pièces pour une série payante)
+  leftInfo: (): { label: string; value: string } | null => null,
   // Confirmation (abandon du Ring…) : remplacée au démarrage par la fenêtre maison du site
   ask: (text: string): Promise<boolean> => Promise.resolve(window.confirm(text)),
   // Fiche d'un jeton pendant un match (React : features/combat/RingSheet.tsx) ; null = fermer

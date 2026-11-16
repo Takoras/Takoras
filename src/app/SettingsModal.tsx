@@ -34,6 +34,18 @@ export function SettingsModal() {
           />
         </div>
         <div className={s.row}>
+          <b>{t('ui.set_anim')}</b>
+          <Segmented<'all' | 'new'>
+            label={t('ui.set_anim')}
+            value={st.animKnown ? 'all' : 'new'}
+            onChange={(v) => st.set({ animKnown: v === 'all' })}
+            options={[
+              ['all', t('ui.an_all')],
+              ['new', t('ui.an_new')],
+            ]}
+          />
+        </div>
+        <div className={s.row}>
           <b>{t('ui.set_lang')}</b>
           <Segmented<Lang>
             label={t('ui.set_lang')}

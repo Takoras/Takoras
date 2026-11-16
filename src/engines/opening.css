@@ -449,3 +449,9 @@ html.q-calm .op-bg, html.q-calm .op-main { animation: none; }
 /* jeton mystère : ni lueur ronde ni vignette (le fond pixel sobre de la page les remplace), elles reviennent à la révélation */
 .opening:not(.revealed) .op-glow, .opening:not(.revealed):not(.hold) .op-vignette { opacity: 0; }
 .op-glow { transition: opacity .4s, background .4s, translate .8s var(--ease); }
+
+/* fiche du jeton révélé, boîte de droite : chance totale du tirage et ce qui reste (une ligne chacun, chiffre à droite) */
+.op-st { display: flex; align-items: baseline; justify-content: space-between; gap: 16px; }
+.op-st span { color: var(--muted); font-size: 15px; font-weight: 700; }
+.op-st b { font-family: var(--font-display); font-size: clamp(24px, 2.2vw, 32px); font-variant-numeric: tabular-nums; }
+.op-st b.op-st-up { color: #4ade80; }

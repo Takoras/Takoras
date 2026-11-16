@@ -9,6 +9,7 @@ import { sfx } from '@/engines/sound.js';
 import { openUI } from '@/app/ui-store';
 import { toast } from '@/ui/toast';
 import { MAX_OPEN, mmss, predictEco } from './eco';
+import type { InvData } from '../inventory/inv';
 
 // Le moteur d'ouverture n'est chargé qu'au premier pull (il est lourd) : import à la demande
 const engine = () => import('@/engines/opening.js');
@@ -20,6 +21,14 @@ const eco = () => {
 };
 
 let busy = false;
+// avant chaque ouverture : les jetons (et mutations) que le joueur a déjà, pour sauter l'animation des doublons
+function snapKnown() {
+  const inv = qc.getQueryData<InvData>(['inv', useAuth.getState().user?.id]);
+  if (!inv) return (host.known = null);
+  const k = new Set<string>();
+  inv.coll.forEach((c, key) => Object.entries(c.vars).forEach(([v, n]) => n > 0 && k.add(`${key}|${v}`)));
+  host.known = k;
+}
 // série de l'ouverture en cours (pour les infos affichées pendant l'ouverture)
 let curSerie = 'Takoras';
 export const openingSerie = () => curSerie;
@@ -35,6 +44,7 @@ export async function openPulls(n: number | 'all', serie = 'Takoras') {
   const count = n === 'all' ? Math.min(e.stock, MAX_OPEN) : Math.min(1, e.stock);
   if (!count) return sfx.deny();
   busy = true;
+  snapKnown();
   try {
     const { debug, buy } = await engine();
     const test = me.admin || me.tester; // tirages de test : seulement admin et testeurs (le serveur vérifie aussi)
@@ -86,6 +96,14 @@ export function installOpeningHost() {
   host.openPulls = (n, serie) => void openPulls(n, serie);
   host.applyState = (st) => qc.setQueryData(meKey(), (old: object | undefined) => ({ ...old, ...(st as object) }));
   host.ecoDecorate = ecoDecorate;
+  host.leftInfo = () => {
+    const e = eco();
+    if (!e) return null;
+    const lang = useSettings.getState().lang;
+    return curSerie === 'Takoras'
+      ? { label: translate(lang, 'ui.op_left'), value: e.stock.toLocaleString(lang) }
+      : { label: translate(lang, 'ui.op_coins'), value: e.coins.toLocaleString(lang) };
+  };
   host.accRecordPull = () => {
     void qc.invalidateQueries({ queryKey: ['history'] });
     void qc.invalidateQueries({ queryKey: ['live'] });
@@ -117,6 +135,7 @@ async function openCoinPulls(n: number, serie: string) {
   const cost = n >= 10 ? COIN_PULL.ten : COIN_PULL.one * n;
   if (e.coins < cost) return sfx.deny();
   busy = true;
+  snapKnown();
   try {
     const { debug, buy } = await engine();
     const data = (await ecoApi.takePullsSerie(

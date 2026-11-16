@@ -394,7 +394,13 @@ function startOpening() {
   if (c.phase === 'hold') hold(true);
   if (c.phase === 'revealed') reveal(true);
   renderAuto();
-  if (sess.auto) autoRun(); // tout de suite : on ne voit jamais le jeton mystère
+  if (sess.auto) return autoRun(); // tout de suite : on ne voit jamais le jeton mystère
+  // réglage « animation seulement pour les nouveaux jetons » : un jeton (avec sa mutation) déjà eu se révèle tout de suite
+  if (c.phase === 'count' && SETTINGS.animKnown === false && host.known?.has(`${p.name}|${c.name}|${c.variant || ''}`)) {
+    const r = run;
+    r.done = true;
+    setTimeout(() => { if (run === r) reveal(); }, 60);
+  }
 }
 
 function setTier(v) {
@@ -468,6 +474,13 @@ function fillInfo(j, variant = '') {
   $('op-name').innerHTML = jnH(j.name) + vTag(variant);
   const lk = +(sess.lucks || [])[sess.idx] || 0; // chance active quand ce jeton a été tiré
   $('op-rarity').innerHTML = '1/' + vOdds(j.odds, variant).toLocaleString(LOCALE()) + (lk > 1 ? ` <span class="op-luck">×${fmtLuck(lk)}</span>` : '');
+  // boîte de droite : la chance totale de ce tirage (potions et ×10 compris) et ce qui reste pour continuer
+  const left = host.leftInfo?.();
+  const todo = sess.total > 1 ? sess.total - sess.idx - 1 : 0;
+  $('op-stats').innerHTML =
+    `<div class="op-st"><span>${t('op_luck')}</span><b class="${lk > 1 ? 'op-st-up' : ''}">×${fmtLuck(Math.max(1, lk))}</b></div>` +
+    (left ? `<div class="op-st"><span>${left.label}</span><b>${left.value}</b></div>` : '') +
+    (todo ? `<div class="op-st"><span>${t('op_todo')}</span><b>${todo.toLocaleString(LOCALE())}</b></div>` : '');
 }
 
 // Pause finale : le haut disparaît, zoom sur le jeton qui tremble, on clique pour révéler
@@ -662,6 +675,7 @@ function reveal(restored, quiet = false) {
   sess.cur.phase = 'revealed';
   sess.results.push(j.name); (sess.rvars ||= []).push(r.variant || '');
   save();
+  host.known?.add(`${PULLS[sess.pull]?.name || 'Takoras'}|${j.name}|${r.variant || ''}`); // un doublon plus loin dans la série passe tout de suite
   if (!quiet) { if (!own) sfx.reveal(j.odds); if (j.odds >= MYTHIC) sfx.impact(); } // après une cinématique, sa musique a déjà fait la révélation
   // dopamine : le jeton claque, des rayons jaillissent derrière, étincelles, flash à sa couleur, secousse
   if (quiet) { addToHistory(j, r.variant); if (r.variant) setTimeout(() => { if (run === r) variantFx(r.variant, j.odds); }, 650); return; }
