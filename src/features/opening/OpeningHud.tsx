@@ -9,9 +9,10 @@ import { mmss, predictEco } from '../eco/eco';
 import { openingSerie } from '../eco/openPulls';
 import s from './OpeningHud.module.css';
 
-// Pendant une ouverture : à gauche, ce qui compte sur le moment (tirages qui restent et prochaine recharge, chance des
-// potions, prochain tirage ×10) ; pour une série payée en pièces, le solde et combien de tirages il paie encore.
-// Les cases arrivent l'une après l'autre, se balancent au survol, et les nombres défilent quand ils changent.
+// Pendant une ouverture, autour du jeton mystère : des fiches qui flottent dans l'espace (une à gauche, deux à droite),
+// chacune penchée et qui dérive doucement : tirages qui restent, chance des potions, prochain tirage ×10 ; pour une série
+// payée en pièces, le solde et combien de tirages il paie encore. Elles arrivent des côtés, se balancent au survol,
+// les nombres défilent quand ils changent, et elles s'écartent quand le jeton est révélé (sa fiche prend la place).
 const TXT = {
   fr: { pulls: 'Tirages', next: '+1 dans {t}', full: 'Stock plein', luck: 'Chance', pity: 'Chance ×10', pityIn: 'dans {n} tirages', pityNow: 'au prochain tirage', coins: 'Pièces', buy: 'Tirages payables', none: 'Aucune potion' },
   en: { pulls: 'Pulls', next: '+1 in {t}', full: 'Stock full', luck: 'Luck', pity: 'Luck ×10', pityIn: 'in {n} pulls', pityNow: 'on the next pull', coins: 'Coins', buy: 'Affordable pulls', none: 'No potion' },
@@ -20,6 +21,7 @@ const TXT = {
 export function OpeningHud() {
   const [host, setHost] = useState<HTMLElement | null>(null);
   const [on, setOn] = useState(false);
+  const [shown, setShown] = useState(false);
   const [serie, setSerie] = useState('Takoras');
   // l'écran d'ouverture est créé au premier tirage : on l'attend, puis on suit son ouverture et sa fermeture
   useEffect(() => {
@@ -30,6 +32,7 @@ export function OpeningHud() {
         const v = el.classList.contains('on');
         if (v) setSerie(openingSerie());
         setOn(v);
+        setShown(v && !el.classList.contains('revealed') && !el.classList.contains('recap'));
       };
       sync();
       mo?.disconnect();
@@ -52,10 +55,10 @@ export function OpeningHud() {
     };
   }, []);
   if (!host) return null;
-  return createPortal(<Hud on={on} serie={serie} />, host);
+  return createPortal(<Hud on={on} shown={shown} serie={serie} />, host);
 }
 
-function Hud({ on, serie }: { on: boolean; serie: string }) {
+function Hud({ on, shown, serie }: { on: boolean; shown: boolean; serie: string }) {
   const lang = useSettings((x) => x.lang);
   const T = TXT[lang === 'en' ? 'en' : 'fr'];
   const me = useMe();
@@ -73,17 +76,17 @@ function Hud({ on, serie }: { on: boolean; serie: string }) {
   const pityIn = Math.max(1, Number(me.data.pity_in ?? 100));
   const paid = serie !== 'Takoras';
   return (
-    <div ref={ref} className={`${s.hud} ${on ? s.on : ''}`} aria-hidden={!on}>
+    <div ref={ref} className={`${s.hud} ${shown ? s.on : ''}`} aria-hidden={!shown}>
       {paid ? (
         <>
-          <div className={s.box} style={{ '--i': 0 } as React.CSSProperties}>
+          <div className={`${s.box} ${s.left}`} style={{ '--i': 0 } as React.CSSProperties}>
             <img className="px" src="/img/piece.png" alt="" />
             <span>
               <small>{T.coins}</small>
               <b><Tween value={e.coins} ms={900} pow={4} format={fmt} /></b>
             </span>
           </div>
-          <div className={s.box} style={{ '--i': 1 } as React.CSSProperties}>
+          <div className={`${s.box} ${s.right1}`} style={{ '--i': 1 } as React.CSSProperties}>
             <img className="px" src="/img/jetons/mystere.png" alt="" />
             <span>
               <small>{T.buy}</small>
@@ -93,7 +96,7 @@ function Hud({ on, serie }: { on: boolean; serie: string }) {
         </>
       ) : (
         <>
-          <div className={s.box} style={{ '--i': 0 } as React.CSSProperties}>
+          <div className={`${s.box} ${s.left}`} style={{ '--i': 0 } as React.CSSProperties}>
             <img className="px" src="/img/jetons/takoras.png" alt="" />
             <span>
               <small>{T.pulls}</small>
@@ -101,7 +104,7 @@ function Hud({ on, serie }: { on: boolean; serie: string }) {
               <em>{e.full ? T.full : T.next.replace('{t}', mmss(e.nextIn))}</em>
             </span>
           </div>
-          <div className={s.box} style={{ '--i': 1 } as React.CSSProperties}>
+          <div className={`${s.box} ${s.right1}`} style={{ '--i': 1 } as React.CSSProperties}>
             <img className="px" src="/img/potions/chance-10.png" alt="" />
             <span>
               <small>{T.luck}</small>
@@ -109,7 +112,7 @@ function Hud({ on, serie }: { on: boolean; serie: string }) {
               {e.luck <= 1 ? <em>{T.none}</em> : null}
             </span>
           </div>
-          <div className={`${s.box} ${pityIn <= 1 ? s.ready : ''}`} style={{ '--i': 2 } as React.CSSProperties}>
+          <div className={`${s.box} ${s.right2} ${pityIn <= 1 ? s.ready : ''}`} style={{ '--i': 2 } as React.CSSProperties}>
             <img className="px" src="/img/potions/chance-100.png" alt="" />
             <span>
               <small>{T.pity}</small>

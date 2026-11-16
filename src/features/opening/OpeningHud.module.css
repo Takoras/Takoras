@@ -1,37 +1,65 @@
-/* Infos pendant l'ouverture : cases sombres comme les fiches de l'inventaire, en colonne à gauche (en haut sur téléphone) */
+/* Infos pendant l'ouverture : des fiches qui flottent autour du jeton (une à gauche, deux à droite), penchées, qui
+   dérivent doucement chacune à son rythme, arrivent des côtés et s'écartent quand le jeton est révélé */
 .hud {
   position: absolute !important;
-  left: clamp(12px, 3vw, 40px);
-  top: 50%;
+  inset: 0;
   z-index: 6;
-  display: grid;
-  gap: 10px;
-  translate: 0 -50%;
   pointer-events: none;
   text-align: left;
 }
 .box {
-  --tilt: -1deg;
+  --tilt: -4deg;
+  --from: -70px;
+  --bob: 7px;
+  --dur: 5.2s;
+  position: absolute;
   display: flex;
   align-items: center;
   gap: 12px;
-  min-width: 210px;
-  padding: 10px 14px;
+  padding: 12px 18px 12px 14px;
   border-radius: 12px;
-  background: var(--surface);
+  background: var(--surface-2);
+  box-shadow: 0 14px 34px rgb(0 0 0 / 45%);
   rotate: calc(var(--tilt) + var(--swing, 0deg));
   transform-origin: 50% 0;
   opacity: 0;
-  translate: -24px 0;
+  translate: var(--from) 0;
+  pointer-events: none;
   transition:
-    opacity 0.35s var(--ease-out) calc(var(--i) * 70ms),
-    translate 0.45s cubic-bezier(0.2, 0.8, 0.2, 1.2) calc(var(--i) * 70ms);
+    opacity 0.3s var(--ease-out) calc(var(--i) * 90ms),
+    translate 0.6s cubic-bezier(0.2, 0.9, 0.25, 1.15) calc(var(--i) * 90ms);
 }
-.box:nth-child(2) {
-  --tilt: 0.8deg;
+/* la dérive : un léger flottement vertical, décalé pour chaque fiche */
+.box > * {
+  animation: bob var(--dur) ease-in-out calc(var(--i) * -1.7s) infinite;
 }
-.box:nth-child(3) {
-  --tilt: -0.5deg;
+@keyframes bob {
+  0%,
+  100% {
+    translate: 0 0;
+  }
+  50% {
+    translate: 0 var(--bob);
+  }
+}
+.left {
+  left: clamp(16px, 9vw, 160px);
+  top: 30%;
+}
+.right1 {
+  --tilt: 3deg;
+  --from: 70px;
+  --dur: 6s;
+  right: clamp(16px, 8vw, 150px);
+  top: 24%;
+}
+.right2 {
+  --tilt: -2deg;
+  --from: 70px;
+  --bob: -6px;
+  --dur: 4.6s;
+  right: clamp(24px, 12vw, 210px);
+  top: 52%;
 }
 .on .box {
   opacity: 1;
@@ -39,13 +67,13 @@
   pointer-events: auto;
 }
 .box img {
-  width: 40px;
-  height: 40px;
+  width: 42px;
+  height: 42px;
   object-fit: contain;
   transition: scale var(--t-fast);
 }
 .box:hover img {
-  scale: 1.1;
+  scale: 1.12;
 }
 .box span {
   display: grid;
@@ -74,6 +102,7 @@
 .bar {
   display: block;
   width: 100%;
+  min-width: 140px;
   height: 6px;
   margin-top: 4px;
   overflow: hidden;
@@ -86,7 +115,7 @@
   background: #f2c230;
   transition: width 0.6s var(--ease-out);
 }
-/* le prochain tirage a sa chance ×10 : la case le montre en or */
+/* le prochain tirage a sa chance ×10 : la fiche le montre en or */
 .ready {
   outline: 2px solid #f2c230;
   outline-offset: -2px;
@@ -94,22 +123,24 @@
 .ready b {
   color: #fde68a;
 }
-@media (max-width: 760px) {
-  .hud {
-    left: 50%;
-    top: 12px;
-    translate: -50% 0;
-    grid-auto-flow: column;
-    gap: 6px;
+:global(html.reduce-fx) .box > *,
+:global(html.q-potato) .box > * {
+  animation: none;
+}
+@media (prefers-reduced-motion: reduce) {
+  .box > * {
+    animation: none;
   }
+}
+/* téléphone : les trois fiches au-dessus du jeton, en quinconce */
+@media (max-width: 760px) {
   .box {
-    min-width: 0;
     gap: 6px;
-    padding: 6px 8px;
+    padding: 6px 10px 6px 8px;
   }
   .box img {
-    width: 24px;
-    height: 24px;
+    width: 26px;
+    height: 26px;
   }
   .box b {
     font-size: var(--fs-sm);
@@ -117,5 +148,20 @@
   .box em,
   .bar {
     display: none;
+  }
+  .left {
+    left: 12px;
+    top: auto;
+    bottom: 18%;
+  }
+  .right1 {
+    right: 12px;
+    top: auto;
+    bottom: 24%;
+  }
+  .right2 {
+    right: 28px;
+    top: auto;
+    bottom: 12%;
   }
 }
