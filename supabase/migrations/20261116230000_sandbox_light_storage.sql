@@ -1,0 +1,4 @@
+-- Appliquée via SQL (MCP) : faux joueurs légers. sandbox_randomize ne garde en lignes que les 20 jetons les plus rares
+-- (les autres tirages ne comptent que dans pull_stats / pull_days, sur 7 jours) ; sandbox_tick ne crée de ligne que
+-- pour un jeton 1/100+ ou muté (les communs vont dans les stats et sont souvent revendus tout de suite) ; journal
+-- limité à 600 lignes par serveur. ≈ 5,5 Ko de données par faux joueur de 80 h (contre ~100 Ko avant).
