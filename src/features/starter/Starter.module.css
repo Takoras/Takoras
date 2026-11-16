@@ -70,3 +70,53 @@
 .ok {
   color: var(--text-2);
 }
+
+/* cadeaux de départ : quatre cases qui penchent un peu et se balancent au survol (--swing), comme les rayons */
+.gifts {
+  list-style: none;
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: var(--s-2);
+  margin: 0;
+  padding: 0;
+}
+.gifts button {
+  --tilt: -0.6deg;
+  display: grid;
+  justify-items: center;
+  gap: 2px;
+  width: 100%;
+  padding: var(--s-3) var(--s-2);
+  border: 1px solid rgb(255 255 255 / 7%);
+  border-radius: 8px;
+  background: var(--surface);
+  color: var(--text);
+  font: inherit;
+  text-align: center;
+  cursor: pointer;
+  rotate: calc(var(--tilt) + var(--swing, 0deg));
+  transform-origin: 50% 0;
+  transition:
+    background-color var(--t-fast),
+    translate 0.2s var(--ease-out);
+}
+.gifts li:nth-child(2n) button {
+  --tilt: 0.6deg;
+}
+.gifts button:hover {
+  background: var(--surface-3);
+  translate: 0 -2px;
+}
+.gifts img {
+  width: 44px;
+  height: 44px;
+  object-fit: contain;
+  transition: scale var(--t-fast);
+}
+.gifts button:hover img {
+  scale: 1.1;
+}
+.gifts small {
+  color: var(--text-2);
+  font-size: var(--fs-xs);
+}

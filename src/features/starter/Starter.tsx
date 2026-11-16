@@ -1,14 +1,15 @@
-import type { CSSProperties } from 'react';
+import { useRef } from 'react';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { errorText, passApi } from '@/api';
-import { glowVars, jetonOf, texOf } from '@/data/jetons';
 import { sfx } from '@/engines/sound.js';
 import { useAuth } from '@/lib/auth';
-import { useJn } from '@/lib/names';
 import { useSettings } from '@/lib/settings';
+import type { Key } from '@/i18n';
 import { useT } from '@/i18n/useT';
 import { Button } from '@/ui/Button';
 import { toast } from '@/ui/toast';
+import { celebrateItem } from '@/ui/rewardFx';
+import { useSwingAll } from '@/ui/useSwing';
 import s from './Starter.module.css';
 
 type StarterData = {
@@ -17,10 +18,17 @@ type StarterData = {
   quest: { pull: boolean; shop: boolean; ring: boolean; done: boolean } | null;
 };
 
-// Nouveau joueur : choisir son jeton de départ (1 parmi 3), puis la quête tuto (pull → boutique → Ring) qui rapporte 500 pièces
+// Nouveau joueur : choisir son cadeau de départ (chance, tirages, pièces ou un cosmétique), puis la quête tuto
+// (un tirage → la boutique) qui rapporte 500 pièces. Les cadeaux penchent et se balancent comme les rayons de la boutique.
+const GIFT_IMG: Record<string, string> = {
+  luck: '/img/potions/chance-2.png',
+  pulls: '/img/objets/sablier.png',
+  coins: '/img/piece.png',
+  cosm: '/img/pp/yeux.png',
+};
 export function Starter() {
   const t = useT();
-  const jn = useJn();
+  const listRef = useRef<HTMLUListElement>(null);
   const lang = useSettings((x) => x.lang);
   const uid = useAuth((x) => x.user?.id);
   const qc = useQueryClient();
@@ -30,17 +38,20 @@ export function Starter() {
     queryFn: async () => (await passApi.starter()) as unknown as StarterData,
   });
   const d = q.data;
+  useSwingAll(listRef, 'button', 0.5, d?.pending ? 1 : 0, 70);
   if (!d || (!d.pending && (!d.quest || d.quest.done))) return null;
   const after = (st: unknown) => {
     qc.setQueryData(['me', uid], st);
     void q.refetch();
     void qc.invalidateQueries({ queryKey: ['inv'] });
   };
-  const pick = async (name: string) => {
+  const pick = async (g: string) => {
     try {
-      after(await passApi.starterPick(name));
+      const r = (await passApi.starterGift(g)) as unknown as { state: unknown };
+      after(r.state);
       sfx.upgrade();
-      toast(t('ui.st_picked', { n: jn(name) }));
+      if (g === 'luck' || g === 'pulls') celebrateItem(GIFT_IMG[g] ?? '');
+      toast(t('ui.st_g_got', { n: t(`ui.st_g_${g}` as Key) }));
     } catch (e) {
       sfx.deny();
       toast(errorText(e, lang), true);
@@ -60,19 +71,16 @@ export function Starter() {
     return (
       <section className={s.box} aria-labelledby="st-t">
         <h2 id="st-t">{t('ui.st_pick')}</h2>
-        <ul className={s.choices}>
-          {d.choices.map((name) => {
-            const j = jetonOf(name);
-            return (
-              <li key={name} style={glowVars(j) as CSSProperties}>
-                <button type="button" onClick={() => void pick(name)}>
-                  <img className="px" src={texOf(j)} alt="" />
-                  <b>{jn(name)}</b>
-                  <small>1/{j.odds.toLocaleString(lang)}</small>
-                </button>
-              </li>
-            );
-          })}
+        <ul ref={listRef} className={s.gifts}>
+          {d.choices.map((g) => (
+            <li key={g}>
+              <button type="button" onClick={() => void pick(g)}>
+                <img className="px" src={GIFT_IMG[g]} alt="" />
+                <b>{t(`ui.st_g_${g}` as Key)}</b>
+                <small>{t(`ui.st_g_${g}_d` as Key)}</small>
+              </button>
+            </li>
+          ))}
         </ul>
       </section>
     );

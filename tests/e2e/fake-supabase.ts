@@ -308,6 +308,7 @@ export async function fakeSupabase(
         ],
       });
     if (rpc === 'sandbox_tick') return json(3);
+    if (rpc === 'starter_choices' && process.env.SC_ST) return json({ pending: true, choices: ['luck', 'pulls', 'coins', 'cosm'], quest: null });
     if (rpc === 'sandbox_detail')
       return json({
         id: 1, name: 'Équilibrage', weekend: 'on', me: null, online: 7,

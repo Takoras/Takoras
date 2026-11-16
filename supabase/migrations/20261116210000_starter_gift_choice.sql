@@ -1,0 +1,2 @@
+-- Appliquée via MCP (starter_gift_choice) : starter_choices propose 4 cadeaux (luck, pulls, coins, cosm) au lieu de
+-- 3 jetons ; starter_gift(p_gift) : 5 potions ×2 + 1 ×5 / 30 tirages + sablier / 3 000 pièces / un cosmétique commun.
