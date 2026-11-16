@@ -324,6 +324,7 @@ export const en: Dict = {
     st_g_cosm: 'Cosmetic',
     st_g_cosm_d: 'A random profile effect',
     st_g_got: 'Gift received: {n}',
+    st_g_title: 'Your starter gift',
     st_quest: 'First steps · +500 coins',
     st_q_pull: 'Open a pull',
     st_q_shop: 'Buy an item in the shop',

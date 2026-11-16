@@ -325,6 +325,7 @@ export const fr = {
     st_g_cosm: 'Cosmétique',
     st_g_cosm_d: 'Un effet de profil au hasard',
     st_g_got: 'Cadeau reçu : {n}',
+    st_g_title: 'Ton cadeau de départ',
     st_quest: 'Premiers pas · +500 pièces',
     st_q_pull: 'Ouvre un tirage',
     st_q_shop: 'Achète un objet en boutique',

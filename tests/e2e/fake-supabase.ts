@@ -308,6 +308,7 @@ export async function fakeSupabase(
         ],
       });
     if (rpc === 'sandbox_tick') return json(3);
+    if (rpc === 'starter_gift') return json({ state: { ...st }, item: null });
     if (rpc === 'sandbox_player')
       return json({ id: 'p0', pseudo: 'T.Nyx42', coins: 5200, stock: 3, stock_max: 20, regen_s: 140, online: true, hours: 30,
         bot: { act: 0.6, sess: 25, sell: 0.4, buy: 0.2 }, streak: 4, cosmetics: 6, owned: 340, collection: 9,

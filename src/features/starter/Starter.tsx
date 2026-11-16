@@ -1,4 +1,4 @@
-import { useRef } from 'react';
+import { useRef, useState } from 'react';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { errorText, passApi } from '@/api';
 import { sfx } from '@/engines/sound.js';
@@ -8,7 +8,7 @@ import type { Key } from '@/i18n';
 import { useT } from '@/i18n/useT';
 import { Button } from '@/ui/Button';
 import { toast } from '@/ui/toast';
-import { celebrateItem } from '@/ui/rewardFx';
+import { GiftReveal } from './GiftReveal';
 import { useSwingAll } from '@/ui/useSwing';
 import s from './Starter.module.css';
 
@@ -29,6 +29,8 @@ const GIFT_IMG: Record<string, string> = {
 export function Starter() {
   const t = useT();
   const listRef = useRef<HTMLUListElement>(null);
+  // cadeau en cours d'affichage (et l'état du compte à appliquer quand il s'envole : les pièces arrivent à ce moment)
+  const [got, setGot] = useState<{ g: string; st: unknown } | null>(null);
   const lang = useSettings((x) => x.lang);
   const uid = useAuth((x) => x.user?.id);
   const qc = useQueryClient();
@@ -39,6 +41,19 @@ export function Starter() {
   });
   const d = q.data;
   useSwingAll(listRef, 'button', 0.5, d?.pending ? 1 : 0, 70);
+  const reveal = got ? (
+    <GiftReveal
+      gift={got.g}
+      img={GIFT_IMG[got.g] ?? ''}
+      onGone={() => {
+        qc.setQueryData(['me', uid], got.st);
+        void q.refetch();
+        void qc.invalidateQueries({ queryKey: ['inv'] });
+        setGot(null);
+      }}
+    />
+  ) : null;
+  if (got) return reveal;
   if (!d || (!d.pending && (!d.quest || d.quest.done))) return null;
   const after = (st: unknown) => {
     qc.setQueryData(['me', uid], st);
@@ -48,10 +63,7 @@ export function Starter() {
   const pick = async (g: string) => {
     try {
       const r = (await passApi.starterGift(g)) as unknown as { state: unknown };
-      after(r.state);
-      sfx.upgrade();
-      if (g === 'luck' || g === 'pulls') celebrateItem(GIFT_IMG[g] ?? '');
-      toast(t('ui.st_g_got', { n: t(`ui.st_g_${g}` as Key) }));
+      setGot({ g, st: r.state });
     } catch (e) {
       sfx.deny();
       toast(errorText(e, lang), true);
