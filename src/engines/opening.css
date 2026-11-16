@@ -24,7 +24,7 @@
 .op-top { transition: opacity .5s var(--ease), transform .5s var(--ease); }
 .op-tag-hide #op-tag, .opening.hold #op-tag, .opening.revealed .op-top { opacity: 0; transform: translateY(-12px); }
 .op-odds { font-family: var(--font-display); font-weight: 700; font-size: clamp(48px, 9vw, 96px); line-height: 1; font-variant-numeric: tabular-nums;
-  color: rgb(var(--tier)); text-shadow: 0 0 40px rgba(var(--tier), .5); margin: 6px 0 26px; transition: color .3s; }
+  color: rgb(var(--tier)); margin: 6px 0 26px; transition: color .3s; }
 .op-odds.bump { animation: bump .18s ease-out; }
 
 .op-main { --info: 340px; --gap: 56px; display: flex; align-items: center; gap: var(--gap); }
@@ -324,7 +324,7 @@ html.reduce-fx .op-id, html.reduce-fx .op-stats, html.reduce-fx .op-actions { an
   margin-bottom: 4px;
 }
 
-/* logo de la série, centré au-dessus du 1/1 : en grand, avec le doodle, une lueur bleue et un reflet qui passe */
+/* logo de la série, centré au-dessus du 1/1 : en grand, avec le doodle et un reflet qui passe */
 #op-tag {
   display: flex;
   flex-direction: column;
@@ -343,7 +343,7 @@ html.reduce-fx .op-id, html.reduce-fx .op-stats, html.reduce-fx .op-actions { an
   display: block;
   height: clamp(52px, 8vh, 78px);
   width: auto;
-  --df: drop-shadow(0 4px 0 rgb(15 20 60 / 60%)); /* pas de lueur derrière le logo, juste son ombre nette */
+  /* ni lueur ni ombre sous le logo : juste le logo */
 }
 /* reflet qui traverse le logo de temps en temps */
 .op-tag-wrap::after {
@@ -445,3 +445,7 @@ html.lock #root {
 }
 html.q-calm .op-odds { text-shadow: none; }
 html.q-calm .op-bg, html.q-calm .op-main { animation: none; }
+
+/* jeton mystère : plus de lueur ronde derrière lui (une case sobre au fond pixel la remplace), elle revient à la révélation */
+.opening:not(.revealed) .op-glow { opacity: 0; }
+.op-glow { transition: opacity .4s, background .4s, translate .8s var(--ease); }

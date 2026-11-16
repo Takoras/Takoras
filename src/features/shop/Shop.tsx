@@ -76,6 +76,8 @@ export default function Shop() {
   });
   const pageRef = useRef<HTMLElement>(null);
   const revealing = useRef(new Set<number>());
+  // rayon affiché (lu par une révélation en cours : si on a changé de rayon entre-temps, ses effets ne se jouent pas ailleurs)
+  const catRef = useRef('potion');
   const gridRef = useRef<HTMLUListElement>(null);
   const shelvesRef = useRef<HTMLDivElement>(null);
   useStaggerIn(pageRef, `.${s.head}, .${s.hero}, .${s.shelf}, .${s.card}, .${s.ticket}`, !!shop.data);
@@ -146,6 +148,7 @@ export default function Shop() {
         () => g.remove(),
       );
     }
+    catRef.current = k;
     setCat(k);
   };
   useSwingAll(shelvesRef, `.${s.shelf}`, 0.5);
@@ -215,6 +218,7 @@ export default function Shop() {
     revealing.current.add(slot);
     const cover = el.querySelector<HTMLElement>(`.${s.cover}`);
     const fast = reducedFx();
+    const cat0 = catRef.current;
     try {
       sfx.riser(fast ? 0.2 : 1.2);
       // 1) la charge : le cache gonfle à peine, vire au blanc et frémit de plus en plus (lui seul, rien autour)
@@ -248,11 +252,21 @@ export default function Shop() {
       const applyCoins = () => qc.setQueryData(['me', user.id], (old: object | undefined) => ({ ...old, ...r.state }));
       qc.setQueryData(['shop'], { ...r.shop, at: Date.now() });
       await new Promise((ok) => requestAnimationFrame(() => requestAnimationFrame(ok)));
+      // changé de rayon pendant la charge : l'objet est révélé, les pièces arrivent, mais sans effets au mauvais endroit
+      if (catRef.current !== cat0) {
+        cover?.getAnimations().forEach((a) => a.cancel());
+        applyCoins();
+        return;
+      }
       // la case cachée a été remplacée par la vraie case : les effets se jouent sur la nouvelle
-      el =
-        (isHero
-          ? pageRef.current?.querySelector<HTMLElement>(`.${s.top} .${s.hero}`)
-          : gridRef.current?.querySelector<HTMLElement>(`[data-key="${slot}"]`)) ?? el;
+      const found = isHero
+        ? pageRef.current?.querySelector<HTMLElement>(`.${s.top} .${s.hero}`)
+        : gridRef.current?.querySelector<HTMLElement>(`[data-key="${slot}"]`);
+      if (!found) {
+        applyCoins();
+        return;
+      }
+      el = found;
       const it = r.shop.items.find((x) => slotOf(x, 0) === slot);
       const col = it && !isHidden(it) ? `rgb(${glowOf(it)})` : 'rgb(142 170 255)';
       sfx.reveal(it && !isHidden(it) ? oddsOf(it) : 1);

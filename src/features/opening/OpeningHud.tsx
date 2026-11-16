@@ -3,6 +3,8 @@ import { createPortal } from 'react-dom';
 import { useMe } from '@/api/queries';
 import { COIN_PULL } from '@/engines/env';
 import { locale, useSettings } from '@/lib/settings';
+import { PixelBg } from '@/ui/PixelBg';
+import { reducedFx } from '@/lib/settings';
 import { Tween } from '@/ui/Tween';
 import { useSwingAll } from '@/ui/useSwing';
 import { mmss, predictEco } from '../eco/eco';
@@ -55,7 +57,21 @@ export function OpeningHud() {
     };
   }, []);
   if (!host) return null;
-  return createPortal(<Hud on={on} shown={shown} serie={serie} />, host);
+  const col = host.querySelector<HTMLElement>('.op-coin-col');
+  return (
+    <>
+      {createPortal(<Hud on={on} shown={shown} serie={serie} />, host)}
+      {/* derrière le jeton mystère : une case sobre au fond pixel Takoras (deux bandes douces), à la place de la lueur */}
+      {col && on
+        ? createPortal(
+            <div className={`${s.coinBg} ${shown ? s.coinBgOn : ''}`} aria-hidden>
+              <PixelBg className={s.coinBgPx} odds={1} glow="#2c4a9e" still={reducedFx()} />
+            </div>,
+            col,
+          )
+        : null}
+    </>
+  );
 }
 
 function Hud({ on, shown, serie }: { on: boolean; shown: boolean; serie: string }) {

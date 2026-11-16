@@ -173,3 +173,39 @@
     bottom: 12%;
   }
 }
+
+/* fond du jeton mystère : même boîte que la fiche du jeton, avec le fond pixel Takoras le plus simple ;
+   il s'efface quand le jeton est révélé */
+:global(#opening .op-coin-col) {
+  position: relative;
+}
+.coinBg {
+  position: absolute;
+  left: 50%;
+  top: calc(var(--coin, 220px) * -0.1);
+  z-index: -1;
+  width: calc(var(--coin, 220px) * 1.2);
+  aspect-ratio: 1;
+  overflow: hidden;
+  border: 1px solid rgb(255 255 255 / 12%);
+  border-radius: 8px;
+  background: var(--surface-2);
+  translate: -50% 0;
+  rotate: -2deg;
+  opacity: 0;
+  scale: 0.94;
+  pointer-events: none;
+  transition:
+    opacity 0.35s var(--ease-out),
+    scale 0.5s cubic-bezier(0.2, 1.15, 0.3, 1);
+}
+.coinBgOn {
+  opacity: 1;
+  scale: 1;
+}
+.coinBgPx {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+}
