@@ -1,0 +1,3 @@
+-- Appliquée via MCP (achievements_rebalance) : récompenses selon l'effort réel (33 faciles ≤ 500, 37 moyens, 30 durs),
+-- objectifs inatteignables remplacés par des faciles (25 et 200 tirages, 3 jetons rares, 3 cosmétiques, 3 cases révélées),
+-- ord recalculé par catégorie puis récompense.

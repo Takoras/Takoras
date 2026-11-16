@@ -1,0 +1,82 @@
+/* Étiquette de bonus, même forme que l'étiquette bêta ; la liste glisse et apparaît au survol ou au toucher */
+.wrap {
+  position: relative;
+  display: inline-flex;
+}
+.chip {
+  padding: 2px 8px;
+  border-radius: var(--r-pill);
+  border: 1px solid var(--c-line);
+  background: var(--c-bg);
+  color: var(--c-text);
+  font: inherit;
+  font-size: var(--fs-xs);
+  font-weight: 800;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  cursor: default;
+  animation: swing 3.2s ease-in-out infinite;
+  transform-origin: 50% 0;
+}
+.we {
+  --c-line: rgb(242 194 48 / 55%);
+  --c-bg: rgb(242 194 48 / 14%);
+  --c-text: #fde68a;
+}
+.nb {
+  --c-line: rgb(74 222 128 / 50%);
+  --c-bg: rgb(74 222 128 / 12%);
+  --c-text: #86efac;
+}
+@keyframes swing {
+  0%,
+  100% {
+    rotate: -1.5deg;
+  }
+  50% {
+    rotate: 1.5deg;
+  }
+}
+.pop {
+  position: absolute;
+  top: calc(100% + 8px);
+  right: 0;
+  z-index: 40;
+  display: grid;
+  gap: 4px;
+  min-width: 180px;
+  padding: 10px 12px;
+  border-radius: 10px;
+  background: var(--surface-2);
+  box-shadow: 0 10px 24px rgb(0 0 0 / 40%);
+  font-size: var(--fs-sm);
+  opacity: 0;
+  translate: 0 -6px;
+  rotate: -1deg;
+  pointer-events: none;
+  transition:
+    opacity 0.2s var(--ease-out),
+    translate 0.25s var(--ease-out),
+    rotate 0.25s var(--ease-out);
+}
+.pop b {
+  color: var(--c-text);
+}
+.pop small {
+  color: var(--muted);
+  font-size: var(--fs-xs);
+}
+.wrap:hover .pop,
+.wrap:focus-within .pop {
+  opacity: 1;
+  translate: 0 0;
+  rotate: 0deg;
+}
+@media (prefers-reduced-motion: reduce) {
+  .chip {
+    animation: none;
+  }
+}
+:global(html.q-potato) .chip {
+  animation: none;
+}

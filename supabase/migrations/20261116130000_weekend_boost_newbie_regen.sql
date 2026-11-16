@@ -1,0 +1,3 @@
+-- Appliquée via MCP (weekend_boost_newbie_regen) : _weekend() (ven 12 h → dim minuit, Paris), _weekend_left(), _step(profil)
+-- (sablier ÷2, week-end ×0,75, 30 s max les 24 h après la création du compte) utilisé par _regen et eco_state
+-- (+ weekend_left, newbie_left) ; _roll_variant ×2 le week-end ; sell_pulls ×1,2 le week-end ; weekend_state() public.

@@ -28,3 +28,12 @@ test('rareté et revente identiques à l’ancien site', () => {
   }
   expect(vOdds(1000, 'ombre')).toBe(500_000);
 });
+
+import { isWeekend } from './jetons';
+import { test as t2, expect as e2 } from 'vitest';
+t2('week-end : vendredi 12 h → dimanche minuit (Paris)', () => {
+  e2(isWeekend(new Date('2026-11-20T10:59:00Z'))).toBe(false); // ven 11:59 Paris
+  e2(isWeekend(new Date('2026-11-20T11:00:00Z'))).toBe(true); // ven 12:00
+  e2(isWeekend(new Date('2026-11-22T22:59:00Z'))).toBe(true); // dim 23:59
+  e2(isWeekend(new Date('2026-11-22T23:00:00Z'))).toBe(false); // lun 00:00
+});
