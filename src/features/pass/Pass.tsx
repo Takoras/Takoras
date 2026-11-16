@@ -537,7 +537,7 @@ export default function Pass() {
 
   return (
     <section ref={pageRef} className={s.page}>
-      <header className={s.head} data-tour="pass">
+      <header className={s.head} data-depth data-tour="pass">
         <h1>{t('ui.bp_title')}</h1>
         <span className={s.chip}>{t('ui.bp_season', { n: d.season })}</span>
         <span className={s.chip}>
@@ -558,7 +558,7 @@ export default function Pass() {
 
       {tab === 'rewards' ? (
         <>
-          <div className={s.top}>
+          <div className={s.top} data-depth>
             {/* ta progression : grand palier, barre d'XP qui glisse, et ce que tu gagnes au prochain */}
             <div className={s.hero}>
               <PixelBg className={s.heroBg} odds={10} glow="#3966f7" still={reducedFx()} />
@@ -617,7 +617,7 @@ export default function Pass() {
             </button>
           </div>
 
-          <div className={s.board}>
+          <div className={s.board} data-depth>
             <div className={s.rows} aria-hidden>
               <span className={s.rowGold}>{t('ui.bp_prem_short')}</span>
               <span>{t('ui.bp_free')}</span>

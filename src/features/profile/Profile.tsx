@@ -182,7 +182,7 @@ export default function Profile() {
       </div>
 
       {/* la carte du joueur chevauche la bannière : photo, pseudo, bio, actions ; à droite son rang */}
-      <header className={s.head}>
+      <header className={s.head} data-depth>
         <div className={s.pp}>
           <Aura id={p.aura}>
             <Avatar pseudo={p.pseudo} avatar={p.avatar} size={128} />
@@ -235,7 +235,7 @@ export default function Profile() {
         </div>
       </header>
 
-      <div className={s.duo}>
+      <div className={s.duo} data-depth>
         {/* meilleur tirage : le trophée, en grand, sur le fond de sa rareté */}
         {bp ? (
           <button
@@ -438,7 +438,7 @@ function Collection({
   useSwingAll(gridRef, `.${iv.cardBtn}`, 0.35, `${serie}|${q.data?.length ?? 0}`);
   // même style que le bestiaire de l'inventaire : jetons posés librement, « ? » pour ceux pas trouvés
   return (
-    <ul ref={gridRef} className={`${iv.grid} ${s.collGrid}`}>
+    <ul ref={gridRef} className={`${iv.grid} ${s.collGrid}`} data-depth>
       {all.map((j, i) => {
         // pas à lui, ou jamais trouvé par toi : « ??? »
         const c = known(j.name) ? got.get(j.name) : undefined;
@@ -653,7 +653,7 @@ function ShowcasePicker({ p, slot, onClose }: { p: Prof; slot: number; onClose: 
                 </p>
               ) : toks.length ? (
                 // les mêmes cases que le bestiaire de l'inventaire : numéro, nombre, jeton, nom, rareté, 3 tampons
-                <ul key={serie} className={`${iv.grid} ${s.pkTok}`}>
+                <ul key={serie} className={`${iv.grid} ${s.pkTok}`} data-depth>
                   {toks.map((e, i) => {
                     const top = e.vs[0];
                     if (!top) return null;

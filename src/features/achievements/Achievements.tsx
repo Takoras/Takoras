@@ -175,7 +175,7 @@ export default function Achievements() {
 
   return (
     <section ref={pageRef} className={s.page}>
-      <header className={s.head}>
+      <header className={s.head} data-depth>
         <h1>{T.title}</h1>
         <span className={s.total} aria-label={T.of.replace('{a}', String(done)).replace('{b}', String(list.length))}>
           <b>{done}</b>/{list.length || 100}
@@ -203,7 +203,7 @@ export default function Achievements() {
 
       <div className={s.layout}>
         {/* les catégories : les rayons de la boutique */}
-        <div ref={shelvesRef} className={`${sh.shelves} ${s.shelves}`} role="group" aria-label={T.title}>
+        <div ref={shelvesRef} className={`${sh.shelves} ${s.shelves}`} role="group" aria-label={T.title} data-depth>
           {['all', ...CATS].map((c) => {
             const inCat = c === 'all' ? list : list.filter((a) => a.cat === c);
             const nReady = inCat.filter(isReady).length;
@@ -232,7 +232,7 @@ export default function Achievements() {
           })}
         </div>
 
-        <div ref={gridRef}>
+        <div ref={gridRef} className={s.depthGrid} data-depth>
           {!q.data ? (
             <p className="muted" aria-busy>
               …

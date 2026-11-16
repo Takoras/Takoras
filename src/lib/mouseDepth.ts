@@ -9,16 +9,28 @@ const st = { tx: 0, ty: 0, x: 0, y: 0 };
 // s'héritent pas (@property dans global.css) : avant, les écrire sur <html> faisait recalculer les styles de TOUTE la
 // page à chaque image où la souris bougeait (plus de 3 s de calcul pour 3 s de mouvement sur le passe).
 const TARGETS = '[data-depth], #opening .op-id, #opening .op-stats, #opening .op-coin-col';
+// liste des éléments relue au plus toutes les 400 ms (pas à chaque image)
+let targets: HTMLElement[] = [];
+let readAt = 0;
+const list = () => {
+  const now = performance.now();
+  if (now - readAt > 400) {
+    targets = [...document.querySelectorAll<HTMLElement>(TARGETS)];
+    readAt = now;
+  }
+  return targets;
+};
 const write = () => {
   const x = st.x.toFixed(4),
     y = st.y.toFixed(4);
-  document.querySelectorAll<HTMLElement>(TARGETS).forEach((el) => {
+  list().forEach((el) => {
     el.style.setProperty('--mpx', x);
     el.style.setProperty('--mpy', y);
   });
 };
 // À l'apparition d'une page : pas de rattrapage visible (sinon tout glissait un peu en diagonale après le fondu)
 export function snapMouseDepth() {
+  readAt = 0; // nouvelle page : on relit tout de suite la liste des blocs
   st.x = st.tx;
   st.y = st.ty;
   write();

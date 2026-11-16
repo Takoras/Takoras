@@ -49,7 +49,7 @@ export function InvTabs() {
   const ref = useRef<HTMLElement>(null);
   useSwingAll(ref, 'a', 0.5); // les onglets penchent et se balancent au passage de la souris
   return (
-    <nav ref={ref} className={s.tabs} aria-label={t('ui.nav_inv')}>
+    <nav ref={ref} className={s.tabs} data-depth aria-label={t('ui.nav_inv')}>
       <NavLink to="/inventory" end>
         {t('ui.bestiary')}
       </NavLink>
@@ -190,7 +190,7 @@ export default function Bestiary() {
   const oc = open && d ? d.coll.get(cKey(view.serie, open.name)) : undefined;
   return (
     <section ref={pageRef} className={`${s.page} ${selecting ? s.withBar : ''}`}>
-      <header className={s.head} data-tour="inv">
+      <header className={s.head} data-depth data-tour="inv">
         <div>
           <h1>{t('ui.bst_title')}</h1>
         </div>
@@ -200,7 +200,7 @@ export default function Bestiary() {
       </header>
       <InvTabs />
       {/* étagères : une carte par série (pull) + la prochaine série à venir */}
-      <div ref={shelvesRef} className={s.shelves} role="group" aria-label={t('arena.serie')}>
+      <div ref={shelvesRef} className={s.shelves} data-depth role="group" aria-label={t('arena.serie')}>
         {series.map((x) => {
           const js = SERIES[x] ?? [],
             f = d ? js.filter((j) => d.coll.has(cKey(x, j.name))).length : 0;
@@ -239,7 +239,7 @@ export default function Bestiary() {
       </div>
       {/* barres de la collection à la couleur de la série (bleu Takoras, vert Bodako…) */}
       <div
-        className={s.progress}
+        className={s.progress} data-depth
         style={{ '--sc': serieTheme(view.serie).main, '--sc-hi': serieTheme(view.serie).hi } as CSSProperties}
       >
         <div>
@@ -262,7 +262,7 @@ export default function Bestiary() {
           </span>
         </div>
       </div>
-      <div className={s.tools}>
+      <div className={s.tools} data-depth>
         <div ref={chipsRef} className={s.chips} role="group" aria-label={t('ui.sort_rarity')}>
           <button type="button" aria-pressed={view.own} onClick={() => set({ own: !view.own })}>
             ✓ {t('ui.bst_owned_only')}
@@ -298,7 +298,7 @@ export default function Bestiary() {
           …
         </p>
       ) : cards.length ? (
-        <ul ref={grid} className={s.grid}>
+        <ul ref={grid} className={s.grid} data-depth>
           {cards.map((c, k) => (
             <CardView
               key={c.j.name}

@@ -51,7 +51,7 @@ export default function Items() {
   const list = (items.data ?? []).filter((x) => !isCosmetic(x.kind));
   return (
     <section ref={pageRef} className={s.page}>
-      <header className={s.head}>
+      <header className={s.head} data-depth>
         <div>
           <h1>{t('ui.inv_items_title')}</h1>
         </div>

@@ -10,6 +10,19 @@
   max-width: 1560px;
   margin-inline: auto;
 }
+/* profondeur à la souris, comme la boutique et l'inventaire : chaque bloc glisse un tout petit peu à sa profondeur */
+.head,
+.depthGrid,
+.layout > .shelves {
+  will-change: translate;
+  translate: calc(var(--mpx, 0) * -8px * var(--dp, 1)) calc(var(--mpy, 0) * -6px * var(--dp, 1));
+}
+.head {
+  --dp: 0.5;
+}
+.layout > .shelves {
+  --dp: 1.3;
+}
 .head {
   display: flex;
   flex-wrap: wrap;

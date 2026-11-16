@@ -292,6 +292,8 @@ function RainLayer({ serie, out }: { serie: string; out: boolean }) {
     const loop = (now: number) => {
       raf = requestAnimationFrame(loop);
       if (last && now - last < 31) return;
+      // l'écran d'ouverture couvre tout : inutile de dessiner la pluie dessous
+      if (document.getElementById('opening')?.classList.contains('on')) return;
       const dt = last ? Math.min(0.08, (now - last) / 1000) : 1 / 30;
       last = now;
       draw(dt);

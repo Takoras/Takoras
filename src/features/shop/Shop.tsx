@@ -344,7 +344,7 @@ export default function Shop() {
   const featured = fIdx >= 0 ? items[fIdx] : undefined;
   return (
     <section ref={pageRef} className={s.page} aria-busy={!data}>
-      <header className={s.head}>
+      <header className={s.head} data-depth>
         <h1>{t('ui.shop_title')}</h1>
         <span className={s.restock}>
           {t('ui.shop_reset')} <b>{hms(left)}</b>
@@ -355,7 +355,7 @@ export default function Shop() {
       </header>
       {data ? (
         <>
-          <div className={s.top}>
+          <div className={s.top} data-depth>
             <div ref={heroRef} className={s.heroSlot}>
               {featured && fSlot != null ? (
                 isHidden(featured) ? (
@@ -394,7 +394,7 @@ export default function Shop() {
             </div>
           </div>
           <h2 className="visually-hidden">{t(CATS.find((c) => c.k === cat)?.label ?? 'ui.cat_potions')}</h2>
-          <ul ref={gridRef} className={s.grid}>
+          <ul ref={gridRef} className={s.grid} data-depth>
             {list.map((it) => {
               const slot = slotOf(it, items.indexOf(it));
               return isHidden(it) ? (

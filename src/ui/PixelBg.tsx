@@ -374,9 +374,24 @@ export function PixelBg({
     };
 
     let raf = 0,
-      last = 0;
+      last = 0,
+      shown = true;
+    // hors de l'écran (ou page cachée) : on ne dessine rien ; la boucle repart quand il redevient visible
+    const io = new IntersectionObserver(([e]) => {
+      shown = !!e?.isIntersecting;
+    });
+    io.observe(cv);
     const t0 = performance.now();
     const loop = (now: number) => {
+      if (!shown || document.hidden) {
+        raf = 0;
+        return;
+      }
+      // 30 images par seconde suffisent pour ces fonds en gros pixels (deux fois moins de travail, même rendu)
+      if (last && now - last < 31) {
+        raf = requestAnimationFrame(loop);
+        return;
+      }
       // le premier « now » peut précéder t0 : le temps ne doit jamais être négatif ; et une erreur de dessin
       // ne doit jamais arrêter la boucle (sinon le fond reste vide)
       try {
@@ -395,7 +410,7 @@ export function PixelBg({
       const moved =
         target.current.lv !== lvNow || target.current.rgb.some((v, i) => Math.abs(v - (cur[i] ?? v)) >= 0.5);
       const live = !still && !calmFx(); // qualité changée en Haut : la boucle repart
-      if (!raf && (moved || live)) {
+      if (!raf && shown && !document.hidden && (moved || live)) {
         last = 0;
         raf = requestAnimationFrame(loop);
       }
@@ -404,6 +419,7 @@ export function PixelBg({
       cancelAnimationFrame(raf);
       clearInterval(wake);
       ro.disconnect();
+      io.disconnect();
     };
   }, [center, still]);
   return <canvas ref={ref} className={className} aria-hidden style={{ imageRendering: 'pixelated' }} />;

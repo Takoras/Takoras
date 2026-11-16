@@ -62,7 +62,7 @@ export function OpeningHud() {
       {/* fond de la page pendant le jeton mystère : le fond pixel Takoras le plus simple (une bande douce), sobre */}
       {on ? (
         <div className={`${s.pageBg} ${shown ? s.pageBgOn : ''}`} aria-hidden>
-          <PixelBg className={s.pageBgPx} odds={1} glow={serie === 'Bodako' ? '#1f6b3a' : '#2c4a9e'} still={reducedFx()} />
+          <PixelBg className={s.pageBgPx} odds={1} glow={serie === 'Bodako' ? '#1f6b3a' : '#2c4a9e'} still={reducedFx() || !shown} />
         </div>
       ) : null}
       <Hud on={on} shown={shown} serie={serie} />
