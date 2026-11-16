@@ -30,6 +30,7 @@ export type ShopItem = {
 // Fond d'un objet (sa couleur et sa « rareté », en 1 sur X comme les jetons) : le MÊME partout (boutique, passe…)
 const POTION_ODDS: Record<number, number> = {
   1.3: 1,
+  1.5: 1,
   2: 100,
   5: 1000,
   10: 10_000,
@@ -39,6 +40,7 @@ const POTION_ODDS: Record<number, number> = {
 };
 const POTION_GLOW: Record<number, string> = {
   1.3: '134, 239, 172',
+  1.5: '134, 239, 172',
   2: '196, 181, 253',
   5: '242, 194, 48',
   10: '103, 232, 249',

@@ -11,7 +11,7 @@ export const dt = (d: string) =>
 // Objets qu'on peut donner (mêmes libellés que l'ancien panel)
 export const ITEMS: [string, string][] = [
   // (même liste que la boutique : chance × pour N tirages)
-  ['potion1', 'Potion ×1,3 (10 tirages)'],
+  ['potion1', 'Potion ×1,5 (15 tirages)'],
   ['potion2', 'Potion ×2 (6 tirages)'],
   ['potion3', 'Potion ×5 (3 tirages)'],
   ['potion10', 'Potion ×10 (4 tirages)'],

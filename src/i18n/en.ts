@@ -957,7 +957,7 @@ export const en: Dict = {
       ],
       [
         'Potions stack',
-        'Each potion adds its bonus: ×1.3 = +0.3, ×2 = +1, ×5 = +4. So ×2 + ×1.3 = ×2.3, and ×2 + ×1.3 + ×5 = ×6.3. Drinking a potion you already have extends its duration (two ×2 = ×2 for 6 pulls) instead of adding its bonus. Each potion counts its own pulls. Total luck is capped at ×1000.',
+        'Each potion adds its bonus: ×1.5 = +0.5, ×2 = +1, ×5 = +4. So ×2 + ×1.5 = ×2.5, and ×2 + ×1.5 + ×5 = ×6.5. Drinking a potion you already have extends its duration (two ×2 = ×2 for 24 pulls) instead of adding its bonus. Each potion counts its own pulls. Total luck is capped at ×1000.',
       ],
       [
         'Recharge',
@@ -986,7 +986,7 @@ export const en: Dict = {
       ['Promo codes', 'At the bottom of the shop: a code gives coins, pulls or items, once per player.'],
       [
         'Shop',
-        'Stock changes every 5 h (same for everyone, each player can buy up to the stock shown). Always at least 5 ×1.3 potions and 2 ×2; big potions (×10, ×25, ×50, ×100) only show up now and then. Items go to your inventory, use them whenever you want. Cosmetics (banners, animated profile picture) are forever.',
+        'Stock changes every 5 h (same for everyone, each player can buy up to the stock shown). Always around twenty ×1.5 potions, a dozen ×2 and some ×5; ×10 shows up almost every day, ×25 every other day, and the huge ones (×50, ×100, ×250, ×500) stay rare. Items go to your inventory, use them whenever you want. Cosmetics (banners, animated profile picture) are forever.',
       ],
       [
         'Cinematics',

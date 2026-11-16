@@ -1,0 +1,2 @@
+-- Appliquée via MCP (potions_rebalance) : ×1,3 → ×1,5 sur 15 tirages (5/jour), ×2 sur 12 (3/jour), ×5/×10 sur 8 (2/jour),
+-- ×25/×50 sur 8 ; sablier 600 pièces (3/jour). Stock partagé plus généreux (_stock) ; ×100/×250/×500 restent très rares.

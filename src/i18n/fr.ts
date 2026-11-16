@@ -973,7 +973,7 @@ export const fr = {
       ],
       [
         'Les potions se cumulent',
-        'Chaque potion ajoute son bonus : ×1,3 = +0,3, ×2 = +1, ×5 = +4. Donc ×2 + ×1,3 = ×2,3, et ×2 + ×1,3 + ×5 = ×6,3. Boire une potion que tu as déjà rallonge sa durée (deux ×2 = ×2 pendant 6 tirages) au lieu d’ajouter son bonus. Chaque potion compte ses tirages de son côté. La chance totale est plafonnée à ×1000.',
+        'Chaque potion ajoute son bonus : ×1,5 = +0,5, ×2 = +1, ×5 = +4. Donc ×2 + ×1,5 = ×2,5, et ×2 + ×1,5 + ×5 = ×6,5. Boire une potion que tu as déjà rallonge sa durée (deux ×2 = ×2 pendant 24 tirages) au lieu d’ajouter son bonus. Chaque potion compte ses tirages de son côté. La chance totale est plafonnée à ×1000.',
       ],
       [
         'Recharge',
@@ -1005,7 +1005,7 @@ export const fr = {
       ],
       [
         'Boutique',
-        'Le stock change toutes les 5 h (le même pour tout le monde, chacun peut acheter jusqu’au stock affiché). Toujours au moins 5 potions ×1,3 et 2 ×2 ; les grosses potions (×10, ×25, ×50, ×100) n’apparaissent que de temps en temps. Les objets vont dans ton inventaire, tu les utilises quand tu veux. Les cosmétiques (bannières, photo de profil animée) sont à vie.',
+        'Le stock change toutes les 5 h (le même pour tout le monde, chacun peut acheter jusqu’au stock affiché). Toujours une vingtaine de potions ×1,5, une douzaine de ×2 et des ×5 ; les ×10 sont là presque tous les jours, les ×25 un jour sur deux, et les très grosses (×50, ×100, ×250, ×500) restent rares. Les objets vont dans ton inventaire, tu les utilises quand tu veux. Les cosmétiques (bannières, photo de profil animée) sont à vie.',
       ],
       [
         'Cinématiques',
