@@ -277,6 +277,7 @@ export async function fakeSupabase(
         streak_today: true,
         weekend_left: process.env.SC_WE ? 100000 : 0,
         pity_in: 37,
+        pity_s: { Bodako: 64 },
         potions: [],
         luck: 1,
       });
@@ -291,6 +292,12 @@ export async function fakeSupabase(
         lucks: results.map(() => 1),
         ids: results.map((_, i) => i + 1),
       });
+    }
+    if (rpc === 'take_pulls_serie') {
+      const n = (JSON.parse(route.request().postData() ?? '{}') as { n: number }).n;
+      const results = Array.from({ length: n }, () => 'Mousse');
+      st.coins -= 300 * n;
+      return json({ state: { ...st }, results, variants: results.map(() => null), lucks: results.map(() => 1), ids: results.map((_, i) => i + 1) });
     }
     if (rpc === 'refund_pulls') return json({ refunded: 0 });
     if (rpc === 'my_quests')

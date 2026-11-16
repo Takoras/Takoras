@@ -59,19 +59,11 @@
   align-items: start;
   gap: var(--s-6);
 }
-/* les rayons restent à l'écran pendant qu'on fait défiler les succès */
 .layout > .shelves {
-  position: sticky;
-  top: 90px;
+  /* les catégories restent en haut de la page (elles ne suivent pas quand on descend dans les succès) */
   align-content: start;
   gap: 6px;
-  /* toujours à l'écran pendant qu'on descend ; s'il n'y a pas la place, ils défilent eux-mêmes (barre fine visible) */
-  max-height: calc(100dvh - 110px);
-  overflow-y: auto;
-  overscroll-behavior: contain;
   padding: 4px 8px 4px 4px;
-  scrollbar-width: thin;
-  scrollbar-color: var(--surface-3) transparent;
 }
 .layout > .shelves > button {
   position: relative;
@@ -255,9 +247,6 @@
   }
   /* téléphone : les catégories en une bande compacte qu'on fait glisser, les succès juste dessous */
   .layout > .shelves {
-    position: static;
-    max-height: none;
-    overflow-y: visible;
     grid-auto-flow: column;
     grid-auto-columns: max-content;
     overflow-x: auto;

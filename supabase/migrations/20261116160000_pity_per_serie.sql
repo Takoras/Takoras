@@ -1,0 +1,2 @@
+-- Appliquée via MCP (pity_per_serie) : profiles.pity_s (compteur par série payée) ; take_pulls_serie : le 100e tirage
+-- de chaque série a sa chance ×10 (renvoie 'pities') ; eco_state renvoie pity_s { série: tirages avant le ×10 }.
