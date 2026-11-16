@@ -1,10 +1,10 @@
-import { useRef, useState, type CSSProperties } from 'react';
+import { useLayoutEffect, useRef, useState, type CSSProperties } from 'react';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { achApi, errorText } from '@/api';
 import { jetonOf, texOf } from '@/data/jetons';
 import { sfx } from '@/engines/sound.js';
 import { useAuth } from '@/lib/auth';
-import { locale, useSettings } from '@/lib/settings';
+import { locale, reducedFx, useSettings } from '@/lib/settings';
 import { NeedLogin } from '@/app/NeedLogin';
 import { Button } from '@/ui/Button';
 import { Swap } from '@/ui/Swap';
@@ -89,8 +89,6 @@ export default function Achievements() {
   useSwingAll(shelvesRef, `.${sh.shelf}`, 0.5, q.data ? 1 : 0, 70);
   useSwingAll(gridRef, `.${s.card}`, 0.3, `${cat}|${q.data?.length ?? 0}`);
   const fmt = (n: number) => n.toLocaleString(locale(lang));
-
-  if (!user) return <NeedLogin title={T.title} />;
   const list = q.data ?? [];
   const done = list.filter((a) => a.claimed).length;
   const ready = list.filter(isReady);
@@ -99,13 +97,57 @@ export default function Achievements() {
   const order = (a: Ach) => (isReady(a) ? 0 : a.claimed ? 2 : 1);
   const sorted = [...shown].sort((a, b) => order(a) - order(b) || b.value / b.target - a.value / a.target);
 
+  // succès récupéré : il s'efface, les autres glissent à leur nouvelle place, puis il réapparaît en douceur plus bas
+  const [leaving, setLeaving] = useState<string | null>(null);
+  const before = useRef<{ rects: Map<string, DOMRect>; id: string } | null>(null);
+  const orderKey = sorted.map((a) => a.id).join();
+  useLayoutEffect(() => {
+    const snap = before.current;
+    before.current = null;
+    if (!snap || reducedFx()) return;
+    gridRef.current?.querySelectorAll<HTMLElement>('[data-ach]').forEach((el) => {
+      const id = el.dataset.ach ?? '';
+      const a = snap.rects.get(id);
+      if (!a) return;
+      const b = el.getBoundingClientRect();
+      if (id === snap.id) {
+        el.animate([{ opacity: 0, transform: 'scale(.94)' }, { opacity: 1, transform: 'none' }], {
+          duration: 360,
+          delay: 260,
+          easing: 'cubic-bezier(.2,.8,.2,1)',
+          fill: 'backwards',
+        });
+        return;
+      }
+      const dx = a.left - b.left,
+        dy = a.top - b.top;
+      if (dx || dy)
+        el.animate([{ transform: `translate(${dx}px, ${dy}px)` }, { transform: 'none' }], {
+          duration: 460,
+          easing: 'cubic-bezier(.2,.8,.2,1)',
+        });
+    });
+  }, [orderKey]);
+
+  if (!user) return <NeedLogin title={T.title} />;
+
   const claim = async (a: Ach, el: HTMLElement | null) => {
     try {
       const st = await achApi.claim(a.id);
       sfx.upgrade();
       if (el) flyCoins(el.getBoundingClientRect(), Math.min(6, 2 + Math.round(Math.log10(a.coins))), () => undefined);
       qc.setQueryData(['me', user.id], (old: object | undefined) => ({ ...old, ...(st as object) }));
+      if (!reducedFx()) {
+        setLeaving(a.id);
+        await new Promise((ok) => setTimeout(ok, 260));
+      }
+      const rects = new Map<string, DOMRect>();
+      gridRef.current
+        ?.querySelectorAll<HTMLElement>('[data-ach]')
+        .forEach((x) => rects.set(x.dataset.ach ?? '', x.getBoundingClientRect()));
+      before.current = { rects, id: a.id };
       qc.setQueryData(['ach', user.id], (o: Ach[] | undefined) => o?.map((x) => (x.id === a.id ? { ...x, claimed: true } : x)));
+      setLeaving(null);
     } catch (e) {
       sfx.deny();
       toast(errorText(e, lang), true);
@@ -184,7 +226,7 @@ export default function Achievements() {
                     <li
                       key={a.id}
                       data-ach={a.id}
-                      className={`${s.card} ${r ? s.ready : ''} ${a.claimed ? s.done : ''}`}
+                      className={`${s.card} ${r ? s.ready : ''} ${a.claimed ? s.done : ''} ${leaving === a.id ? s.leaving : ''}`}
                       style={{ '--i': Math.min(i, 20) } as CSSProperties}
                     >
                       <span className={s.art}>
