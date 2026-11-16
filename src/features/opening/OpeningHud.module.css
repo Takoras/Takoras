@@ -1,5 +1,6 @@
-/* Infos pendant l'ouverture : des fiches qui flottent autour du jeton (une à gauche, deux à droite), penchées, qui
-   dérivent doucement chacune à son rythme, arrivent des côtés et s'écartent quand le jeton est révélé */
+/* Infos pendant l'ouverture : deux grandes boîtes, les mêmes que la fiche du jeton révélé (bord fin, fond surface,
+   penchées), une de chaque côté du jeton ; elles arrivent des côtés, dérivent doucement, suivent un peu la souris,
+   se balancent au survol et s'écartent quand le jeton est révélé */
 .hud {
   position: absolute !important;
   inset: 0;
@@ -10,89 +11,91 @@
 .box {
   --tilt: -3deg;
   --from: -70px;
-  --bob: 7px;
-  --dur: 5.2s;
+  --bob: 6px;
+  --dur: 6s;
   position: absolute;
-  display: flex;
-  align-items: center;
-  gap: 16px;
-  padding: 20px 26px 20px 22px;
-  /* même boîte que la fiche du jeton à la fin d'une ouverture */
+  top: 50%;
+  display: grid;
+  gap: 14px;
+  width: min(340px, 28vw);
+  padding: 24px 26px;
   border: 1px solid rgb(255 255 255 / 12%);
   border-radius: 8px;
   background: var(--surface-2);
   rotate: calc(var(--tilt) + var(--swing, 0deg));
   transform-origin: 50% 0;
   opacity: 0;
-  translate: var(--from) 0;
+  translate: var(--from) -50%;
   scale: 0.92;
   pointer-events: none;
   transition:
-    opacity 0.3s var(--ease-out) calc(var(--i) * 90ms),
-    scale 0.5s cubic-bezier(0.2, 1.15, 0.3, 1) calc(var(--i) * 90ms),
-    translate 0.5s cubic-bezier(0.2, 1.15, 0.3, 1) calc(var(--i) * 90ms);
+    opacity 0.3s var(--ease-out) calc(var(--i) * 100ms),
+    scale 0.5s cubic-bezier(0.2, 1.15, 0.3, 1) calc(var(--i) * 100ms),
+    translate 0.5s cubic-bezier(0.2, 1.15, 0.3, 1) calc(var(--i) * 100ms);
 }
-/* la dérive : un léger flottement vertical, décalé pour chaque fiche */
+.left {
+  left: clamp(16px, 6vw, 120px);
+}
+.right {
+  --tilt: 2.5deg;
+  --from: 70px;
+  --dur: 7.5s;
+  right: clamp(16px, 6vw, 120px);
+}
+.on .box {
+  opacity: 1;
+  translate: 0 -50%;
+  scale: 1;
+  pointer-events: auto;
+}
+/* la dérive : flotte doucement et suit un peu la souris (--mpx/--mpy écrits par mouseDepth.ts) */
 .box > * {
-  animation: bob var(--dur) ease-in-out calc(var(--i) * -1.7s) infinite;
+  animation: bob var(--dur) ease-in-out calc(var(--i) * -2s) infinite;
 }
-/* flotte doucement ET suit un peu la souris, comme la fiche du jeton (--mpx/--mpy écrits par mouseDepth.ts) */
 @keyframes bob {
   0%,
   100% {
     translate: calc(var(--mpx, 0) * -14px) calc(var(--mpy, 0) * -10px);
   }
   50% {
-    translate: calc(var(--mpx, 0) * -14px) calc(var(--mpy, 0) * -10px + var(--bob));
+    translate: calc(var(--mpx, 0) * -14px) calc(var(--mpy, 0) * -10px - var(--bob));
   }
 }
-.left {
-  left: clamp(16px, 7vw, 140px);
-  top: 30%;
-}
-.right1 {
-  --tilt: 2.5deg;
-  --from: 70px;
-  --dur: 6s;
-  right: clamp(16px, 6vw, 130px);
-  top: 22%;
-}
-.right2 {
-  --tilt: -2deg;
-  --from: 70px;
-  --bob: -6px;
-  --dur: 4.6s;
-  right: clamp(24px, 10vw, 190px);
-  top: 54%;
-}
-.on .box {
-  opacity: 1;
-  translate: 0 0;
-  scale: 1;
-  pointer-events: auto;
-}
-.box img {
-  width: 72px;
-  height: 72px;
+.big {
+  width: 96px;
+  height: 96px;
   object-fit: contain;
   transition: scale var(--t-fast);
 }
-.box:hover img {
-  scale: 1.12;
+.box:hover .big,
+.row:hover img {
+  scale: 1.08;
 }
-.box span {
+.row {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+}
+.row img {
+  width: 64px;
+  height: 64px;
+  object-fit: contain;
+  flex: none;
+  transition: scale var(--t-fast);
+}
+.col {
   display: grid;
-  gap: 1px;
+  gap: 2px;
 }
 .box small {
   color: var(--muted);
   font-size: var(--fs-sm);
   font-weight: 700;
 }
-.box b {
+.num {
   font-family: var(--font-display);
-  font-size: clamp(26px, 2.4vw, 36px);
-  line-height: 1.1;
+  font-size: clamp(28px, 2.8vw, 42px);
+  line-height: 1.05;
   font-variant-numeric: tabular-nums;
 }
 .box em {
@@ -101,15 +104,19 @@
   font-style: normal;
   font-variant-numeric: tabular-nums;
 }
+.sep {
+  margin: 0;
+  border: 0;
+  border-top: 1px solid rgb(255 255 255 / 10%);
+}
 .lucky {
   color: #4ade80;
 }
 .bar {
   display: block;
   width: 100%;
-  min-width: 190px;
-  height: 9px;
-  margin-top: 4px;
+  height: 10px;
+  margin-top: 8px;
   overflow: hidden;
   border-radius: 3px;
   background: var(--surface-3);
@@ -120,12 +127,12 @@
   background: #f2c230;
   transition: width 0.6s var(--ease-out);
 }
-/* le prochain tirage a sa chance ×10 : la fiche le montre en or */
+/* le prochain tirage a sa chance ×10 : la boîte le montre en or */
 .ready {
   outline: 2px solid #f2c230;
   outline-offset: -2px;
 }
-.ready b {
+.ready .num {
   color: #fde68a;
 }
 :global(html.reduce-fx) .box > *,
@@ -137,75 +144,57 @@
     animation: none;
   }
 }
-/* téléphone : les trois fiches au-dessus du jeton, en quinconce */
+/* téléphone : les deux boîtes sous le jeton, côte à côte, plus compactes */
 @media (max-width: 760px) {
   .box {
-    gap: 6px;
-    padding: 6px 10px 6px 8px;
+    top: auto;
+    bottom: 10%;
+    width: calc(50vw - 20px);
+    gap: 8px;
+    padding: 12px 14px;
   }
-  .box img {
-    width: 32px;
-    height: 32px;
-  }
-  .box b {
-    font-size: var(--fs-md);
-  }
-  .box small {
-    font-size: var(--fs-xs);
-  }
-  .box em,
-  .bar {
-    display: none;
+  .on .box {
+    translate: 0 0;
   }
   .left {
     left: 12px;
-    top: auto;
-    bottom: 18%;
   }
-  .right1 {
+  .right {
     right: 12px;
-    top: auto;
-    bottom: 24%;
   }
-  .right2 {
-    right: 28px;
-    top: auto;
-    bottom: 12%;
+  .big {
+    width: 40px;
+    height: 40px;
+  }
+  .row {
+    gap: 8px;
+  }
+  .row img {
+    width: 32px;
+    height: 32px;
+  }
+  .num {
+    font-size: var(--fs-lg);
+  }
+  .box em {
+    display: none;
   }
 }
 
-/* fond du jeton mystère : même boîte que la fiche du jeton, avec le fond pixel Takoras le plus simple ;
-   il s'efface quand le jeton est révélé */
-:global(#opening .op-coin-col) {
-  position: relative;
-}
-.coinBg {
-  position: absolute;
-  left: 50%;
-  top: calc(var(--coin, 220px) * -0.1);
-  z-index: -1;
-  width: calc(var(--coin, 220px) * 1.2);
-  aspect-ratio: 1;
-  overflow: hidden;
-  border: 1px solid rgb(255 255 255 / 12%);
-  border-radius: 8px;
-  background: var(--surface-2);
-  translate: -50% 0;
-  rotate: -2deg;
-  opacity: 0;
-  scale: 0.94;
-  pointer-events: none;
-  transition:
-    opacity 0.35s var(--ease-out),
-    scale 0.5s cubic-bezier(0.2, 1.15, 0.3, 1);
-}
-.coinBgOn {
-  opacity: 1;
-  scale: 1;
-}
-.coinBgPx {
-  position: absolute;
+/* fond de la page pendant le jeton mystère (derrière tout) ; il s'efface quand le jeton est révélé */
+.pageBg {
+  position: absolute !important;
   inset: 0;
+  z-index: -1;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.5s var(--ease-out);
+}
+.pageBgOn {
+  opacity: 0.55;
+}
+.pageBgPx {
   width: 100%;
   height: 100%;
+  display: block;
 }

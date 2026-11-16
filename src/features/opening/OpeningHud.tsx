@@ -11,9 +11,9 @@ import { mmss, predictEco } from '../eco/eco';
 import { openingSerie } from '../eco/openPulls';
 import s from './OpeningHud.module.css';
 
-// Pendant une ouverture, autour du jeton mystère : des fiches qui flottent dans l'espace (une à gauche, deux à droite),
-// chacune penchée et qui dérive doucement : tirages qui restent, chance des potions, prochain tirage ×10 ; pour une série
-// payée en pièces, le solde et combien de tirages il paie encore. Elles arrivent des côtés, se balancent au survol,
+// Pendant une ouverture, autour du jeton mystère : deux grandes boîtes comme la fiche du jeton révélé — à gauche le
+// prochain tirage ×10, à droite les tirages qui restent et la chance des potions ; pour une série payée en pièces,
+// le solde et combien de tirages il paie encore. Elles penchent, dérivent doucement et suivent un peu la souris. Elles arrivent des côtés, se balancent au survol,
 // les nombres défilent quand ils changent, et elles s'écartent quand le jeton est révélé (sa fiche prend la place).
 const TXT = {
   fr: { pulls: 'Tirages', next: '+1 dans {t}', full: 'Stock plein', luck: 'Chance', pity: 'Chance ×10', pityIn: 'dans {n} tirages', pityNow: 'au prochain tirage', coins: 'Pièces', buy: 'Tirages payables', none: 'Aucune potion' },
@@ -57,20 +57,17 @@ export function OpeningHud() {
     };
   }, []);
   if (!host) return null;
-  const col = host.querySelector<HTMLElement>('.op-coin-col');
-  return (
+  return createPortal(
     <>
-      {createPortal(<Hud on={on} shown={shown} serie={serie} />, host)}
-      {/* derrière le jeton mystère : une case sobre au fond pixel Takoras (deux bandes douces), à la place de la lueur */}
-      {col && on
-        ? createPortal(
-            <div className={`${s.coinBg} ${shown ? s.coinBgOn : ''}`} aria-hidden>
-              <PixelBg className={s.coinBgPx} odds={1} glow="#2c4a9e" still={reducedFx()} />
-            </div>,
-            col,
-          )
-        : null}
-    </>
+      {/* fond de la page pendant le jeton mystère : le fond pixel Takoras le plus simple (une bande douce), sobre */}
+      {on ? (
+        <div className={`${s.pageBg} ${shown ? s.pageBgOn : ''}`} aria-hidden>
+          <PixelBg className={s.pageBgPx} odds={1} glow="#2c4a9e" still={reducedFx()} />
+        </div>
+      ) : null}
+      <Hud on={on} shown={shown} serie={serie} />
+    </>,
+    host,
   );
 }
 
@@ -91,51 +88,59 @@ function Hud({ on, shown, serie }: { on: boolean; shown: boolean; serie: string 
   const fmt = (n: number) => Math.round(n).toLocaleString(locale(lang));
   const pityIn = Math.max(1, Number(me.data.pity_in ?? 100));
   const paid = serie !== 'Takoras';
+  const luckTxt = '×' + String(Math.round(e.luck * 100) / 100).replace('.', lang === 'en' ? '.' : ',');
   return (
     <div ref={ref} className={`${s.hud} ${shown ? s.on : ''}`} aria-hidden={!shown}>
       {paid ? (
         <>
           <div className={`${s.box} ${s.left}`} style={{ '--i': 0 } as React.CSSProperties}>
-            <img data-depth className="px" src="/img/piece.png" alt="" />
-            <span data-depth>
+            <img data-depth className={`px ${s.big}`} src="/img/piece.png" alt="" />
+            <span data-depth className={s.col}>
               <small>{T.coins}</small>
-              <b><Tween value={e.coins} ms={900} pow={4} format={fmt} /></b>
+              <b className={s.num}><Tween value={e.coins} ms={900} pow={4} format={fmt} /></b>
             </span>
           </div>
-          <div className={`${s.box} ${s.right1}`} style={{ '--i': 1 } as React.CSSProperties}>
-            <img data-depth className="px" src="/img/jetons/mystere.png" alt="" />
-            <span data-depth>
-              <small>{T.buy}</small>
-              <b><Tween value={Math.floor(e.coins / COIN_PULL.one)} format={fmt} /></b>
+          <div className={`${s.box} ${s.right}`} style={{ '--i': 1 } as React.CSSProperties}>
+            <span data-depth className={s.row}>
+              <img className="px" src="/img/jetons/mystere.png" alt="" />
+              <span className={s.col}>
+                <small>{T.buy}</small>
+                <b className={s.num}><Tween value={Math.floor(e.coins / COIN_PULL.one)} format={fmt} /></b>
+              </span>
             </span>
           </div>
         </>
       ) : (
         <>
-          <div className={`${s.box} ${s.left}`} style={{ '--i': 0 } as React.CSSProperties}>
-            <img data-depth className="px" src="/img/jetons/takoras.png" alt="" />
-            <span data-depth>
-              <small>{T.pulls}</small>
-              <b><Tween value={e.stock} format={fmt} /></b>
-              <em>{e.full ? T.full : T.next.replace('{t}', mmss(e.nextIn))}</em>
-            </span>
-          </div>
-          <div className={`${s.box} ${s.right1}`} style={{ '--i': 1 } as React.CSSProperties}>
-            <img data-depth className="px" src="/img/potions/chance-10.png" alt="" />
-            <span data-depth>
-              <small>{T.luck}</small>
-              <b className={e.luck > 1 ? s.lucky : ''}>×{String(Math.round(e.luck * 100) / 100).replace('.', lang === 'en' ? '.' : ',')}</b>
-              {e.luck <= 1 ? <em>{T.none}</em> : null}
-            </span>
-          </div>
-          <div className={`${s.box} ${s.right2} ${pityIn <= 1 ? s.ready : ''}`} style={{ '--i': 2 } as React.CSSProperties}>
-            <img data-depth className="px" src="/img/potions/chance-100.png" alt="" />
-            <span data-depth>
+          {/* à gauche : le prochain tirage ×10 */}
+          <div className={`${s.box} ${s.left} ${pityIn <= 1 ? s.ready : ''}`} style={{ '--i': 0 } as React.CSSProperties}>
+            <img data-depth className={`px ${s.big}`} src="/img/potions/chance-100.png" alt="" />
+            <span data-depth className={s.col}>
               <small>{T.pity}</small>
-              <b>{pityIn <= 1 ? T.pityNow : T.pityIn.replace('{n}', fmt(pityIn))}</b>
+              <b className={s.num}>{pityIn <= 1 ? T.pityNow : T.pityIn.replace('{n}', fmt(pityIn))}</b>
               <i className={s.bar}>
                 <i style={{ width: `${100 - pityIn}%` }} />
               </i>
+            </span>
+          </div>
+          {/* à droite : tirages qui restent et chance, dans une seule boîte */}
+          <div className={`${s.box} ${s.right}`} style={{ '--i': 1 } as React.CSSProperties}>
+            <span data-depth className={s.row}>
+              <img className="px" src="/img/jetons/takoras.png" alt="" />
+              <span className={s.col}>
+                <small>{T.pulls}</small>
+                <b className={s.num}><Tween value={e.stock} format={fmt} /></b>
+                <em>{e.full ? T.full : T.next.replace('{t}', mmss(e.nextIn))}</em>
+              </span>
+            </span>
+            <hr className={s.sep} />
+            <span data-depth className={s.row}>
+              <img className="px" src="/img/potions/chance-10.png" alt="" />
+              <span className={s.col}>
+                <small>{T.luck}</small>
+                <b className={`${s.num} ${e.luck > 1 ? s.lucky : ''}`}>{luckTxt}</b>
+                {e.luck <= 1 ? <em>{T.none}</em> : null}
+              </span>
             </span>
           </div>
         </>

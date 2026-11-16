@@ -446,6 +446,6 @@ html.lock #root {
 html.q-calm .op-odds { text-shadow: none; }
 html.q-calm .op-bg, html.q-calm .op-main { animation: none; }
 
-/* jeton mystère : plus de lueur ronde derrière lui (une case sobre au fond pixel la remplace), elle revient à la révélation */
-.opening:not(.revealed) .op-glow { opacity: 0; }
+/* jeton mystère : ni lueur ronde ni vignette (le fond pixel sobre de la page les remplace), elles reviennent à la révélation */
+.opening:not(.revealed) .op-glow, .opening:not(.revealed):not(.hold) .op-vignette { opacity: 0; }
 .op-glow { transition: opacity .4s, background .4s, translate .8s var(--ease); }

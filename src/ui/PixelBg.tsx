@@ -7,7 +7,7 @@ import { calmFx } from '@/lib/settings';
 // teinté à la couleur du jeton (jamais d'arc-en-ciel) ; un palier peut changer de style, pas seulement en ajouter.
 //  0  < 1/10        une bande douce
 //  1  1/10          deux bandes qui glissent
-//  2  1/60          bandes en escalier + poussière qui monte
+//  2  1/60          deux bandes + une fine au milieu + poussière qui monte
 //  3  1/250         trame de points + bandes fines + poussière
 //  4  1/1 000       rayons lents + deux larges bandes
 //  5  1/5 000       plus de rayons, reflet qui balaie les bandes, étoiles en croix
@@ -229,9 +229,10 @@ export function PixelBg({
           band(0.82, 0.55, thick, t, 1);
           break;
         case 2:
-          band(0.18, 0.85, thick, t, 0, false, 9);
-          band(0.55, 0.3, thick * 0.6, t, 2, false, 9);
-          band(0.85, 0.85, thick, t, 1, false, 9);
+          // deux bandes nettes et une fine au milieu (plus de bandes en marches, trop brutes)
+          band(0.18, 0.8, thick, t, 0);
+          band(0.5, 0.18, thick * 0.4, t, 2);
+          band(0.84, 0.7, thick, t, 1);
           break;
         case 3:
           dither(0.18, t);
