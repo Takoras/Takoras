@@ -207,11 +207,12 @@ export default function Achievements() {
           {['all', ...CATS].map((c) => {
             const inCat = c === 'all' ? list : list.filter((a) => a.cat === c);
             const nReady = inCat.filter(isReady).length;
+            const complete = inCat.length > 0 && inCat.every((a) => a.claimed);
             return (
               <button
                 key={c}
                 type="button"
-                className={sh.shelf}
+                className={`${sh.shelf} ${complete ? s.complete : ''}`}
                 aria-pressed={cat === c}
                 onClick={() => {
                   sfx.click();

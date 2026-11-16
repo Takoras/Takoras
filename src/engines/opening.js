@@ -220,12 +220,24 @@ async function runTransition() {
 addEventListener('keydown', e => { if (e.key === 'Escape') leave(); });
 // PC : la barre Espace fait comme un clic sur l'écran d'ouverture (monter le compteur, révéler, tirage suivant).
 // La garder enfoncée fait monter le compteur, mais ne relance jamais de nouveaux tirages toute seule.
+let ffwd = 0;
 addEventListener('keydown', e => {
   if (e.code !== 'Space' || !opening.classList.contains('on') || opening.classList.contains('recap')) return;
   if (e.target.closest?.('input, textarea, select, [contenteditable]')) return;
   e.preventDefault();
   if (sess?.auto) return;
-  if (run && !run.done) return tap();
+  // Espace pendant le compteur : il défile tout seul jusqu'au bout (plus besoin de cliquer cliquer) ; la pause et la
+  // révélation se jouent normalement (Espace encore pour révéler). Le clic marche toujours comme avant.
+  if (run && !run.done) {
+    if (run.holding || !run.queue.length) return e.repeat ? undefined : tap();
+    if (ffwd) return;
+    const r = run;
+    ffwd = setInterval(() => {
+      if (run !== r || r.done || r.holding || !r.queue.length) { clearInterval(ffwd); ffwd = 0; return; }
+      tap();
+    }, 45);
+    return;
+  }
   if (e.repeat) return;
   if (run?.done && opening.classList.contains('revealed') && spinning()) { noteTap(); return stopSpin(); }
   if (run?.done && sess && sess.total === 1 && opening.classList.contains('revealed') && !spinning()) { noteTap(); return tryReopen(); }
@@ -1002,7 +1014,7 @@ opening.addEventListener('pointerdown', e => {
   if (run?.done && sess && sess.total === 1 && opening.classList.contains('revealed') && !spinning()) { e.preventDefault(); noteTap(); tryReopen(); }
 });
 addEventListener('keydown', e => {
-  if (!opening.classList.contains('on') || (e.key !== ' ' && e.key !== 'Enter') || e.target.closest?.('select, .debug') || (e.key === 'Enter' && e.target.closest?.('button:not(#op-coin)'))) return;
+  if (!opening.classList.contains('on') || e.key !== 'Enter' || e.target.closest?.('select, .debug') || (e.key === 'Enter' && e.target.closest?.('button:not(#op-coin)'))) return;
   e.preventDefault();
   if (opening.classList.contains('revealed')) { if (!$('op-next').hidden) next(); else if (!$('op-recap').hidden) showRecap(); return; }
   tap();
