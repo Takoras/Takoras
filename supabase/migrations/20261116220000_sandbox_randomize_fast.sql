@@ -1,0 +1,3 @@
+-- Appliquée via MCP (sandbox_randomize_fast) : sandbox_randomize fait tous les tirages en une requête (seuls les jetons
+-- gardés deviennent des lignes, les revendus vont dans les stats), photo de profil par défaut ; sandbox_generate ≤ 10
+-- joueurs par appel (le site enchaîne les lots). 10 joueurs de 80 h ≈ 1 s.
