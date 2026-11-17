@@ -71,4 +71,10 @@ void ready.finally(() =>
       </QueryClientProvider>
     </StrictMode>,
   ),
-);
+).then(() => {
+  // l'écran de chargement s'efface en fondu par-dessus le site déjà affiché, puis disparaît
+  const boot = document.getElementById('boot');
+  if (!boot) return;
+  requestAnimationFrame(() => requestAnimationFrame(() => boot.classList.add('out')));
+  setTimeout(() => boot.remove(), 600);
+});
