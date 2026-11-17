@@ -84,6 +84,7 @@
   max-width: 100%;
   margin-top: 10px; /* les contours rares débordent de la photo : le pseudo reste dégagé */
   overflow: hidden;
+  padding-block: 0.1em; /* les polices à boucles ne sont pas coupées en haut ni en bas */
   font-family: var(--font-display);
   font-size: clamp(24px, 2.4vw, 32px);
   text-overflow: ellipsis;

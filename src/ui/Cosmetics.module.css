@@ -181,6 +181,12 @@
   }
 }
 /* polices du pseudo (hébergées sur le site, chargées à la demande) */
+/* les polices manuscrites et penchées débordent (boucles, italique) : un peu d'air autour pour ne jamais être coupées */
+:is(.nf_silk, .nf_vt, .nf_pixelify, .nf_jersey, .nf_press, .nf_doto, .nf_fredoka, .nf_caveat, .nf_marker, .nf_pacifico, .nf_playfair, .nf_gothic) {
+  display: inline-block;
+  padding: 0.12em 0.14em 0.16em 0.06em;
+  line-height: 1.25;
+}
 .nf_silk {
   font-family: 'Silkscreen', var(--font-display);
 }

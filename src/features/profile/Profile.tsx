@@ -260,13 +260,10 @@ export default function Profile() {
             className={s.best}
             style={glowVars(jetonOf(bp.jeton), bp.variant) as CSSProperties}
             onClick={() =>
-              setJeton({
-                name: bp.jeton,
-                variant: bp.variant ?? '',
-                locked: false,
-                single: true,
-                hidden: !iKnow(bp.jeton),
-              })
+              // un jeton que tu n'as jamais eu ne s'ouvre pas (pas de spoil)
+              iKnow(bp.jeton)
+                ? setJeton({ name: bp.jeton, variant: bp.variant ?? '', locked: false, single: true })
+                : sfx.deny()
             }
           >
             <PixelBg
@@ -276,12 +273,17 @@ export default function Profile() {
               still={reducedFx()}
             />
             <span className={s.bestImg}>
-              <img className={vImg(bp.variant)} src={texOf(jetonOf(bp.jeton))} alt="" />
+              {/* jamais eu par toi : un mystère (on voit seulement à quel point il est rare) */}
+              <img
+                className={iKnow(bp.jeton) ? vImg(bp.variant) : 'px'}
+                src={iKnow(bp.jeton) ? texOf(jetonOf(bp.jeton)) : MYSTERE}
+                alt=""
+              />
             </span>
             <span className={s.bestTxt}>
               <small>{t('ui.st_best')}</small>
               <b>
-                {jn(bp.jeton)} <VTag v={bp.variant} />
+                {iKnow(bp.jeton) ? jn(bp.jeton) : '???'} <VTag v={bp.variant} />
               </b>
               <span className={s.bestOdds}>1/{fmt(bp.eff)}</span>
             </span>
@@ -314,13 +316,19 @@ export default function Profile() {
                     onClick={() =>
                       mine
                         ? setSlot(i)
-                        : setJeton({ name: x.jeton, variant: x.variant ?? '', locked: false, hidden: !iKnow(x.jeton) })
+                        : iKnow(x.jeton)
+                          ? setJeton({ name: x.jeton, variant: x.variant ?? '', locked: false })
+                          : sfx.deny()
                     }
                   >
                     <span className={s.scArt}>
-                      <img className={vImg(x.variant)} src={texOf(j)} alt="" />
+                      <img
+                        className={mine || iKnow(x.jeton) ? vImg(x.variant) : 'px'}
+                        src={mine || iKnow(x.jeton) ? texOf(j) : MYSTERE}
+                        alt=""
+                      />
                     </span>
-                    <b>{jn(x.jeton)}</b>
+                    <b>{mine || iKnow(x.jeton) ? jn(x.jeton) : '???'}</b>
                     <small>
                       {x.variant ? `${t(`ui.v_${x.variant}` as 'ui.v_gold')} · ` : ''}1/
                       {fmt(vOdds(x.odds, (x.variant ?? '') as Variant))}
@@ -342,7 +350,10 @@ export default function Profile() {
             pseudo={p.pseudo}
             serie={serie}
             known={iKnow}
-            onOpen={(name, locked) => setJeton({ name, variant: '', locked, hidden: !iKnow(name) })}
+            onOpen={(name, locked) =>
+              // jamais eu par toi, ou pas à lui : la case ne s'ouvre pas
+              iKnow(name) && !locked ? setJeton({ name, variant: '', locked: false }) : sfx.deny()
+            }
           />
         ) : null}
       </Swap>
