@@ -7,5 +7,8 @@ export const AVATARS: Record<string, string> = {
   dunes: '/img/pp/dunes.png',
   etoile: '/img/pp/etoile.gif',
   oeil: '/img/pp/oeil.png', // passe premium, saison 1
+  eau: '/img/pp/eau.png',
+  tele: '/img/pp/tele.png',
+  dragon: '/img/pp/dragon.png',
 };
 export const FREE_PP = ['bleu', 'rouge', 'vert', 'yeux', 'dunes'];

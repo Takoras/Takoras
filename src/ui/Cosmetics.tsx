@@ -110,7 +110,15 @@ const DEF: Record<string, [string, string, CRar]> = {
   fx_epees: ['Pluie d’épées', 'Sword rain', 'myth'],
   fx_inconnu: ['???', '???', 'secret'],
 };
-const RANK: Record<CRar, number> = { common: 0, rare: 1, epic: 2, legend: 3, myth: 4, secret: 5 };
+export const RANK: Record<CRar, number> = { common: 0, rare: 1, epic: 2, legend: 3, myth: 4, secret: 5 };
+// photos de profil et bannières : leur rareté, et celles qu'on n'a qu'avec le passe (exclusives, jamais en boutique)
+const PP_RAR: Record<string, CRar> = {
+  default: 'common', bleu: 'common', rouge: 'common', vert: 'common', yeux: 'common', dunes: 'common', eau: 'common',
+  tele: 'rare', etoile: 'epic', oeil: 'epic', dragon: 'legend',
+};
+const BANNER_RAR: Record<string, CRar> = { plaine: 'common', eau: 'common', doodle: 'rare', tele: 'rare', yeux: 'epic', dragon: 'legend' };
+export const picRar = (k: 'pp' | 'banner', id: string): CRar => (k === 'pp' ? PP_RAR : BANNER_RAR)[id] ?? 'common';
+export const isExclusive = (k: 'pp' | 'banner', id: string) => (k === 'pp' ? id === 'oeil' : id === 'yeux');
 const ids = (p: string) =>
   Object.keys(DEF)
     .filter((k) => k.startsWith(p))

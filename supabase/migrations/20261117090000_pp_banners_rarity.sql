@@ -1,0 +1,3 @@
+-- Appliquée via MCP (pp_banners_rarity) : nouvelles PP et bannières a_/b_ dragon (légendaire), tele (rare), eau (commun)
+-- en boutique perso ; rareté sur toutes les PP/bannières ; a_oeil et b_yeux = exclusifs du passe (pass_only) ;
+-- _is_cosm inclut les PP (a_) et bannières (b_).

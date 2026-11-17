@@ -539,3 +539,24 @@
   border-radius: 6px;
   object-fit: cover;
 }
+
+/* tri et filtre au-dessus des cases */
+.tools {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px 12px;
+  margin-bottom: 10px;
+}
+/* exclusif du passe : étiquette dorée en haut à gauche de la case */
+.excl {
+  position: absolute;
+  top: 6px;
+  left: 6px;
+  padding: 0 6px;
+  border-radius: var(--r-pill);
+  background: rgb(242 194 48 / 22%);
+  color: #fde68a;
+  font-size: 10px;
+  font-style: normal;
+  font-weight: 800;
+}

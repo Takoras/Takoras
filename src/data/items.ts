@@ -1,13 +1,16 @@
 import type { Key, Lang } from '@/i18n';
 import { translate } from '@/i18n';
 import { AVATARS } from '@/lib/avatars';
-import { cosmName, cosmRar, isCosmetic, RAR_ODDS, type CRar } from '@/ui/Cosmetics';
+import { cosmName, cosmRar, isCosmetic, picRar, RAR_ODDS, type CRar } from '@/ui/Cosmetics';
 
 // Objets de la boutique / de l'inventaire : image et textes (mêmes règles que l'ancien site)
 export const BANNER_IMG: Record<string, string> = {
   plaine: '/img/bannieres/plaine.png',
   doodle: '/img/bannieres/doodle.png',
   yeux: '/img/bannieres/yeux.png', // passe premium, saison 1
+  eau: '/img/bannieres/eau.webp',
+  tele: '/img/bannieres/tele.webp',
+  dragon: '/img/bannieres/dragon.webp',
 };
 const POTION5 = '/img/potions/chance-5.png';
 export const ITEM_IMG: Record<string, { src: string; tint?: string }> = {
@@ -57,15 +60,24 @@ const RAR_GLOW: Record<CRar, string> = {
   myth: '240, 171, 252',
   secret: '248, 113, 113',
 };
+// photo de profil ou bannière : sa rareté (celle du serveur, sinon celle connue du site)
+const picOf = (it: Pick<ShopItem, 'id' | 'kind' | 'data'>): CRar | null =>
+  it.kind === 'avatar' || it.kind === 'banner'
+    ? ((it.data.rar as CRar | undefined) ?? picRar(it.kind === 'avatar' ? 'pp' : 'banner', it.id.slice(2)))
+    : null;
 export const itemOdds = (it: Pick<ShopItem, 'id' | 'kind' | 'data'>) =>
-  it.kind === 'potion'
+  picOf(it)
+    ? RAR_ODDS[picOf(it) ?? 'common']
+    : it.kind === 'potion'
     ? (POTION_ODDS[it.data.mult ?? 0] ?? ((it.data.mult ?? 0) >= 250 ? 1_000_000 : 1))
     : isCosmetic(it.kind)
       ? RAR_ODDS[cosmRar(it.id)]
       : 100;
 /** couleur « r, g, b » */
 export const itemGlow = (it: Pick<ShopItem, 'id' | 'kind' | 'data'>) =>
-  isCosmetic(it.kind)
+  picOf(it)
+    ? RAR_GLOW[picOf(it) ?? 'common']
+    : isCosmetic(it.kind)
     ? RAR_GLOW[cosmRar(it.id)]
     : it.kind === 'potion'
     ? (POTION_GLOW[it.data.mult ?? 0] ?? '61, 107, 255')

@@ -28,11 +28,27 @@ import { locale, reducedFx, useSettings } from '@/lib/settings';
 import { useT } from '@/i18n/useT';
 import { Avatar, setAvatar } from '@/ui/Avatar';
 import { Button } from '@/ui/Button';
+import { Segmented } from '@/ui/Segmented';
 import { confirm } from '@/ui/confirm';
 import { Modal } from '@/ui/Modal';
 import { PixelBg } from '@/ui/PixelBg';
 import { useStaggerIn } from '@/ui/useStaggerIn';
-import { Aura, BannerFx, cosmName, cosmRar, COSMETICS, CosmeticPreview, isSecret, nameCls, rarCol, rarKey } from '@/ui/Cosmetics';
+import {
+  Aura,
+  BannerFx,
+  cosmName,
+  cosmRar,
+  COSMETICS,
+  CosmeticPreview,
+  isSecret,
+  nameCls,
+  rarCol,
+  rarKey,
+  RANK,
+  picRar,
+  isExclusive,
+  type CRar,
+} from '@/ui/Cosmetics';
 import { toast } from '@/ui/toast';
 import { VTag } from '@/ui/VTag';
 import { JetonModal } from '../inventory/JetonModal';
@@ -243,7 +259,13 @@ export default function Profile() {
             className={s.best}
             style={glowVars(jetonOf(bp.jeton), bp.variant) as CSSProperties}
             onClick={() =>
-              setJeton({ name: bp.jeton, variant: bp.variant ?? '', locked: false, single: true, hidden: !iKnow(bp.jeton) })
+              setJeton({
+                name: bp.jeton,
+                variant: bp.variant ?? '',
+                locked: false,
+                single: true,
+                hidden: !iKnow(bp.jeton),
+              })
             }
           >
             <PixelBg
@@ -289,7 +311,9 @@ export default function Profile() {
                   <button
                     type="button"
                     onClick={() =>
-                      mine ? setSlot(i) : setJeton({ name: x.jeton, variant: x.variant ?? '', locked: false, hidden: !iKnow(x.jeton) })
+                      mine
+                        ? setSlot(i)
+                        : setJeton({ name: x.jeton, variant: x.variant ?? '', locked: false, hidden: !iKnow(x.jeton) })
                     }
                   >
                     <span className={s.scArt}>
@@ -779,6 +803,23 @@ function EditProfile({ p, onClose }: { p: Prof; onClose: () => void }) {
   // ---------- le vestiaire : aperçu en direct à gauche, rayons de cases à droite ----------
   type Tab = 'id' | 'pp' | 'banner' | 'name' | 'aura' | 'bfx';
   const [tab, setTab] = useState<Tab>('pp');
+  // tri et filtre des cases (toutes les catégories) : à moi, à débloquer, exclusifs du passe ; par rareté ou par nom
+  const [flt, setFlt] = useState<'all' | 'owned' | 'locked' | 'excl'>('all');
+  const [so, setSo] = useState<'rar' | 'rarup' | 'name'>('rar');
+  const arrange = (
+    list: string[],
+    have: (x: string) => boolean,
+    rarOf: (x: string) => CRar,
+    excl: (x: string) => boolean,
+    nm: (x: string) => string,
+  ) =>
+    list
+      .filter((x) => flt === 'all' || (flt === 'owned' ? have(x) : flt === 'locked' ? !have(x) : excl(x)))
+      .sort((a, b) =>
+        so === 'name'
+          ? nm(a).localeCompare(nm(b))
+          : (RANK[rarOf(a)] - RANK[rarOf(b)]) * (so === 'rar' ? -1 : 1) || nm(a).localeCompare(nm(b)),
+      );
   const shelvesRef = useRef<HTMLDivElement>(null);
   const panelRef = useRef<HTMLDivElement>(null);
   useSwingAll(shelvesRef, `.${lk.tabs} > button`, 0.5);
@@ -1043,80 +1084,131 @@ function EditProfile({ p, onClose }: { p: Prof; onClose: () => void }) {
                 </div>
               </div>
             ) : (
-              <div className={`${lk.grid} ${tab === 'banner' || tab === 'bfx' ? lk.gridWide : ''}`}>
-                {tab === 'pp'
-                  ? pps.map((a) => (
-                      <LockerTile
-                        key={a}
-                        {...tp('pp', a)}
-                        on={avatar === a}
-                        have={ppOwned(a)}
-                        label={a === 'default' ? t('ui.none') : ppName(a)}
-                      >
-                        {a === 'default' ? (
-                          <span className={lk.letter}>{(p.pseudo[0] ?? '?').toUpperCase()}</span>
-                        ) : (
-                          <img className={`px ${lk.round}`} src={AVATARS[a]} alt="" />
-                        )}
+              <>
+                <div className={lk.tools}>
+                  <Segmented
+                    value={flt}
+                    label={t('ui.lk_f_all')}
+                    options={[
+                      ['all', t('ui.lk_f_all')],
+                      ['owned', t('ui.lk_f_owned')],
+                      ['locked', t('ui.lk_f_locked')],
+                      ['excl', t('ui.lk_f_excl')],
+                    ]}
+                    onChange={(v) => (sfx.click(), setFlt(v))}
+                  />
+                  <Segmented
+                    value={so}
+                    label={t('ui.lk_s_rar')}
+                    options={[
+                      ['rar', t('ui.lk_s_rar')],
+                      ['rarup', t('ui.lk_s_rar_up')],
+                      ['name', t('ui.lk_s_name')],
+                    ]}
+                    onChange={(v) => (sfx.click(), setSo(v))}
+                  />
+                </div>
+                <div className={`${lk.grid} ${tab === 'banner' || tab === 'bfx' ? lk.gridWide : ''}`}>
+                  {tab === 'pp'
+                    ? [
+                        // « Aucune » reste toujours la première case
+                        ...(flt === 'all' || flt === 'owned' ? ['default'] : []),
+                        ...arrange(
+                          pps.filter((x) => x !== 'default'),
+                          ppOwned,
+                          (a) => picRar('pp', a),
+                          (a) => isExclusive('pp', a),
+                          ppName,
+                        ),
+                      ].map((a) => (
+                        <LockerTile
+                          key={a}
+                          {...tp('pp', a, isExclusive('pp', a) ? '/pass' : '/shop')}
+                          on={avatar === a}
+                          have={ppOwned(a)}
+                          label={a === 'default' ? t('ui.none') : ppName(a)}
+                          rar={a === 'default' ? undefined : [t(rarKey(picRar('pp', a))), rarCol(picRar('pp', a))]}
+                          excl={isExclusive('pp', a) ? t('ui.lk_excl') : undefined}
+                        >
+                          {a === 'default' ? (
+                            <span className={lk.letter}>{(p.pseudo[0] ?? '?').toUpperCase()}</span>
+                          ) : (
+                            <img className={`px ${lk.round}`} src={AVATARS[a]} alt="" />
+                          )}
+                        </LockerTile>
+                      ))
+                    : null}
+                  {tab === 'banner' ? (
+                    <>
+                      <LockerTile {...tp('banner', '')} on={!banner} have label={t('ui.none')} wide>
+                        <span className={lk.empty} />
                       </LockerTile>
-                    ))
-                  : null}
-                {tab === 'banner' ? (
-                  <>
-                    <LockerTile {...tp('banner', '')} on={!banner} have label={t('ui.none')} wide>
-                      <span className={lk.empty} />
-                    </LockerTile>
-                    <LockerTile {...tp('banner', 'best')} on={banner === 'best'} have label={t('ui.pe_best')} wide>
-                      <PixelBg className={lk.bannerBg} odds={bestOdds} glow={tone} still={reducedFx()} />
-                    </LockerTile>
-                    {allBanners.map((b) => (
-                      <LockerTile
-                        key={b}
-                        {...tp('banner', b, b === 'yeux' ? '/pass' : '/shop')}
-                        on={banner === b}
-                        have={(p.banners ?? []).includes(b)}
-                        label={bannerName(b, lang)}
-                        wide
-                      >
-                        <img className="px" src={BANNER_IMG[b]} alt="" />
+                      <LockerTile {...tp('banner', 'best')} on={banner === 'best'} have label={t('ui.pe_best')} wide>
+                        <PixelBg className={lk.bannerBg} odds={bestOdds} glow={tone} still={reducedFx()} />
                       </LockerTile>
-                    ))}
-                  </>
-                ) : null}
-                {tab === 'name' || tab === 'aura' || tab === 'bfx' ? (
-                  <>
-                    <LockerTile
-                      {...tp(tab, '')}
-                      on={!{ name: nameFx, aura: auraFx, bfx: bannerFx }[tab]}
-                      have
-                      label={t('ui.none')}
-                      wide={tab === 'bfx'}
-                    >
-                      <span className={lk.empty} />
-                    </LockerTile>
-                    {COSMETICS[tab].map((x) => (
+                      {arrange(
+                        allBanners,
+                        (b) => (p.banners ?? []).includes(b),
+                        (b) => picRar('banner', b),
+                        (b) => isExclusive('banner', b),
+                        (b) => bannerName(b, lang),
+                      ).map((b) => (
+                        <LockerTile
+                          key={b}
+                          {...tp('banner', b, isExclusive('banner', b) ? '/pass' : '/shop')}
+                          on={banner === b}
+                          have={(p.banners ?? []).includes(b)}
+                          label={bannerName(b, lang)}
+                          rar={[t(rarKey(picRar('banner', b))), rarCol(picRar('banner', b))]}
+                          excl={isExclusive('banner', b) ? t('ui.lk_excl') : undefined}
+                          wide
+                        >
+                          <img className="px" src={BANNER_IMG[b]} alt="" />
+                        </LockerTile>
+                      ))}
+                    </>
+                  ) : null}
+                  {tab === 'name' || tab === 'aura' || tab === 'bfx' ? (
+                    <>
                       <LockerTile
-                        key={x}
-                        {...tp(tab, x)}
-                        {...(isSecret(x) && !owned.includes(x)
-                          ? { onTry: () => undefined, onLocked: () => sfx.deny(), onUntry: () => undefined }
-                          : {})}
-                        on={{ name: nameFx, aura: auraFx, bfx: bannerFx }[tab] === x}
-                        have={owned.includes(x)}
-                        label={cosmName(x, lang)}
-                        rar={[t(rarKey(cosmRar(x))), rarCol(cosmRar(x))]}
+                        {...tp(tab, '')}
+                        on={!{ name: nameFx, aura: auraFx, bfx: bannerFx }[tab]}
+                        have
+                        label={t('ui.none')}
                         wide={tab === 'bfx'}
                       >
-                        <CosmeticPreview
-                          id={x}
-                          label={(pseudo || p.pseudo).slice(0, 8)}
-                          hidden={isSecret(x) && !owned.includes(x)}
-                        />
+                        <span className={lk.empty} />
                       </LockerTile>
-                    ))}
-                  </>
-                ) : null}
-              </div>
+                      {arrange(
+                        COSMETICS[tab],
+                        (x) => owned.includes(x),
+                        cosmRar,
+                        () => false,
+                        (x) => cosmName(x, lang),
+                      ).map((x) => (
+                        <LockerTile
+                          key={x}
+                          {...tp(tab, x)}
+                          {...(isSecret(x) && !owned.includes(x)
+                            ? { onTry: () => undefined, onLocked: () => sfx.deny(), onUntry: () => undefined }
+                            : {})}
+                          on={{ name: nameFx, aura: auraFx, bfx: bannerFx }[tab] === x}
+                          have={owned.includes(x)}
+                          label={cosmName(x, lang)}
+                          rar={[t(rarKey(cosmRar(x))), rarCol(cosmRar(x))]}
+                          wide={tab === 'bfx'}
+                        >
+                          <CosmeticPreview
+                            id={x}
+                            label={(pseudo || p.pseudo).slice(0, 8)}
+                            hidden={isSecret(x) && !owned.includes(x)}
+                          />
+                        </LockerTile>
+                      ))}
+                    </>
+                  ) : null}
+                </div>
+              </>
             )}
           </div>
 
@@ -1139,6 +1231,7 @@ function LockerTile({
   have,
   label,
   rar,
+  excl,
   wide,
   peeked,
   lockLabel,
@@ -1154,6 +1247,8 @@ function LockerTile({
   label: string;
   /** rareté d'un cosmétique : [nom, couleur] */
   rar?: [string, string];
+  /** exclusif du passe : petite étiquette dorée */
+  excl?: string;
   wide?: boolean;
   /** case verrouillée en cours d'essai sur l'aperçu */
   peeked?: boolean;
@@ -1186,6 +1281,7 @@ function LockerTile({
           {rar[0]}
         </em>
       ) : null}
+      {excl ? <em className={lk.excl}>{excl}</em> : null}
       {on ? <img className={`px ${lk.check}`} src="/img/ui/ok.png" alt="" /> : null}
       {have ? null : (
         <i className={lk.lock} aria-hidden>
