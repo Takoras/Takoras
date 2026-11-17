@@ -585,7 +585,7 @@ export const fr = {
     it_font: 'Police {n}',
     fx_font: 'Police',
     it_aura: 'Contour {n}',
-    it_bfx: 'Bannière {n}',
+    it_bfx: 'Effet de bannière {n}',
     it_cosm_d: 'Pour ton profil, à porter dans « Modifier le profil »',
     it_pp_d: 'Animée · à vie',
     pp_etoile: 'Étoile',
