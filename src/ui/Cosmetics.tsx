@@ -30,6 +30,12 @@ const DEF: Record<string, [string, string, CRar]> = {
   nf_jersey: ['Maillot', 'Jersey', 'rare'],
   nf_press: ['Arcade', 'Arcade', 'epic'],
   nf_doto: ['Points', 'Dots', 'legend'],
+  nf_fredoka: ['Bulle', 'Bubble', 'common'],
+  nf_caveat: ['Plume', 'Quill', 'common'],
+  nf_marker: ['Marqueur', 'Marker', 'rare'],
+  nf_pacifico: ['Vague', 'Wave', 'epic'],
+  nf_playfair: ['Élégance', 'Elegance', 'epic'],
+  nf_gothic: ['Gothique', 'Gothic', 'legend'],
   // contour
   au_blanc: ['Craie', 'Chalk', 'common'],
   au_acier: ['Acier', 'Steel', 'common'],
@@ -163,6 +169,12 @@ const FONT_CSS: Record<string, () => Promise<unknown>> = {
   nf_jersey: () => import('@fontsource/jersey-10/400.css'),
   nf_press: () => import('@fontsource/press-start-2p/400.css'),
   nf_doto: () => import('@fontsource/doto/700.css'),
+  nf_fredoka: () => import('@fontsource/fredoka/600.css'),
+  nf_caveat: () => import('@fontsource/caveat/700.css'),
+  nf_marker: () => import('@fontsource/permanent-marker/400.css'),
+  nf_pacifico: () => import('@fontsource/pacifico/400.css'),
+  nf_playfair: () => import('@fontsource/playfair-display/700-italic.css'),
+  nf_gothic: () => import('@fontsource/unifrakturmaguntia/400.css'),
 };
 const fontsLoaded = new Set<string>();
 const loadFont = (id: string) => {

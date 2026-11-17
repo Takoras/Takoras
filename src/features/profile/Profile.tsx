@@ -977,8 +977,9 @@ function EditProfile({ p, onClose }: { p: Prof; onClose: () => void }) {
                 </span>
               </Aura>
               <b className={lk.name}>
-                <span key={vName + vFont} className={nameCls(vName, vFont)}>
-                  {pseudo || p.pseudo}
+                {/* l'enveloppe fait l'apparition ; dedans, l'effet du pseudo garde sa propre animation */}
+                <span key={vName + vFont}>
+                  <span className={nameCls(vName, vFont)}>{pseudo || p.pseudo}</span>
                 </span>
               </b>
               <small className={lk.bio}>{bio.trim() || '…'}</small>
@@ -1074,160 +1075,169 @@ function EditProfile({ p, onClose }: { p: Prof; onClose: () => void }) {
             ))}
           </div>
 
-          <div key={tab} ref={panelRef} className={lk.panel}>
-            {tab === 'id' ? (
-              <div className={lk.fields}>
-                <div className={s.peField}>
-                  <label htmlFor="pe-pseudo">{t('ui.acc_pseudo')}</label>
-                  <input
-                    id="pe-pseudo"
-                    value={pseudo}
-                    maxLength={16}
-                    disabled={!canRename}
-                    autoComplete="off"
-                    onChange={(e) => setPseudo(e.target.value.trim())}
-                  />
-                  <small>
-                    {p.pseudo_free
-                      ? t('ui.pseudo_free')
-                      : canRename
-                        ? t('ui.pseudo_month')
-                        : t('ui.pseudo_next', { d: new Date(p.pseudo_next ?? '').toLocaleDateString(locale(lang)) })}
-                  </small>
+          {/* changer de rayon : l'ancien contenu s'efface pendant que le nouveau arrive, et la hauteur suit en douceur */}
+          <div ref={panelRef} className={lk.panel}>
+            <Swap k={tab}>
+              {tab === 'id' ? (
+                <div className={lk.fields}>
+                  <div className={s.peField}>
+                    <label htmlFor="pe-pseudo">{t('ui.acc_pseudo')}</label>
+                    <input
+                      id="pe-pseudo"
+                      value={pseudo}
+                      maxLength={16}
+                      disabled={!canRename}
+                      autoComplete="off"
+                      onChange={(e) => setPseudo(e.target.value.trim())}
+                    />
+                    <small>
+                      {p.pseudo_free
+                        ? t('ui.pseudo_free')
+                        : canRename
+                          ? t('ui.pseudo_month')
+                          : t('ui.pseudo_next', { d: new Date(p.pseudo_next ?? '').toLocaleDateString(locale(lang)) })}
+                    </small>
+                  </div>
+                  <div className={s.peField}>
+                    <label htmlFor="pe-bio">{t('ui.pe_bio')}</label>
+                    <textarea
+                      id="pe-bio"
+                      value={bio}
+                      maxLength={120}
+                      rows={3}
+                      onChange={(e) => setBio(e.target.value)}
+                    />
+                    <small className={s.peCount}>{bio.length}/120</small>
+                  </div>
                 </div>
-                <div className={s.peField}>
-                  <label htmlFor="pe-bio">{t('ui.pe_bio')}</label>
-                  <textarea id="pe-bio" value={bio} maxLength={120} rows={3} onChange={(e) => setBio(e.target.value)} />
-                  <small className={s.peCount}>{bio.length}/120</small>
-                </div>
-              </div>
-            ) : (
-              <>
-                <div className={lk.tools}>
-                  <Segmented
-                    value={flt}
-                    label={t('ui.lk_f_all')}
-                    options={[
-                      ['all', t('ui.lk_f_all')],
-                      ['owned', t('ui.lk_f_owned')],
-                      ['locked', t('ui.lk_f_locked')],
-                      ['excl', t('ui.lk_f_excl')],
-                    ]}
-                    onChange={(v) => (sfx.click(), setFlt(v))}
-                  />
-                  <Segmented
-                    value={so}
-                    label={t('ui.lk_s_rar')}
-                    options={[
-                      ['rar', t('ui.lk_s_rar')],
-                      ['rarup', t('ui.lk_s_rar_up')],
-                      ['name', t('ui.lk_s_name')],
-                    ]}
-                    onChange={(v) => (sfx.click(), setSo(v))}
-                  />
-                </div>
-                <div className={`${lk.grid} ${tab === 'banner' || tab === 'bfx' ? lk.gridWide : ''}`}>
-                  {tab === 'pp'
-                    ? [
-                        // « Aucune » reste toujours la première case
-                        ...(flt === 'all' || flt === 'owned' ? ['default'] : []),
-                        ...arrange(
-                          pps.filter((x) => x !== 'default'),
-                          ppOwned,
-                          (a) => picRar('pp', a),
-                          (a) => isExclusive('pp', a),
-                          ppName,
-                        ),
-                      ].map((a) => (
-                        <LockerTile
-                          key={a}
-                          {...tp('pp', a, isExclusive('pp', a) ? '/pass' : '/shop')}
-                          on={avatar === a}
-                          have={ppOwned(a)}
-                          label={a === 'default' ? t('ui.none') : ppName(a)}
-                          rar={a === 'default' ? undefined : [t(rarKey(picRar('pp', a))), rarCol(picRar('pp', a))]}
-                          excl={isExclusive('pp', a) ? t('ui.lk_excl') : undefined}
-                        >
-                          {a === 'default' ? (
-                            <span className={lk.letter}>{(p.pseudo[0] ?? '?').toUpperCase()}</span>
-                          ) : (
-                            <img className={`px ${lk.round}`} src={AVATARS[a]} alt="" />
-                          )}
+              ) : (
+                <>
+                  <div className={lk.tools}>
+                    <Segmented
+                      value={flt}
+                      label={t('ui.lk_f_all')}
+                      options={[
+                        ['all', t('ui.lk_f_all')],
+                        ['owned', t('ui.lk_f_owned')],
+                        ['locked', t('ui.lk_f_locked')],
+                        ['excl', t('ui.lk_f_excl')],
+                      ]}
+                      onChange={(v) => (sfx.click(), setFlt(v))}
+                    />
+                    <Segmented
+                      value={so}
+                      label={t('ui.lk_s_rar')}
+                      options={[
+                        ['rar', t('ui.lk_s_rar')],
+                        ['rarup', t('ui.lk_s_rar_up')],
+                        ['name', t('ui.lk_s_name')],
+                      ]}
+                      onChange={(v) => (sfx.click(), setSo(v))}
+                    />
+                  </div>
+                  <div className={`${lk.grid} ${tab === 'banner' || tab === 'bfx' ? lk.gridWide : ''}`}>
+                    {tab === 'pp'
+                      ? [
+                          // « Aucune » reste toujours la première case
+                          ...(flt === 'all' || flt === 'owned' ? ['default'] : []),
+                          ...arrange(
+                            pps.filter((x) => x !== 'default'),
+                            ppOwned,
+                            (a) => picRar('pp', a),
+                            (a) => isExclusive('pp', a),
+                            ppName,
+                          ),
+                        ].map((a) => (
+                          <LockerTile
+                            key={a}
+                            {...tp('pp', a, isExclusive('pp', a) ? '/pass' : '/shop')}
+                            on={avatar === a}
+                            have={ppOwned(a)}
+                            label={a === 'default' ? t('ui.none') : ppName(a)}
+                            rar={a === 'default' ? undefined : [t(rarKey(picRar('pp', a))), rarCol(picRar('pp', a))]}
+                            excl={isExclusive('pp', a) ? t('ui.lk_excl') : undefined}
+                          >
+                            {a === 'default' ? (
+                              <span className={lk.letter}>{(p.pseudo[0] ?? '?').toUpperCase()}</span>
+                            ) : (
+                              <img className={`px ${lk.round}`} src={AVATARS[a]} alt="" />
+                            )}
+                          </LockerTile>
+                        ))
+                      : null}
+                    {tab === 'banner' ? (
+                      <>
+                        <LockerTile {...tp('banner', '')} on={!banner} have label={t('ui.none')} wide>
+                          <span className={lk.empty} />
                         </LockerTile>
-                      ))
-                    : null}
-                  {tab === 'banner' ? (
-                    <>
-                      <LockerTile {...tp('banner', '')} on={!banner} have label={t('ui.none')} wide>
-                        <span className={lk.empty} />
-                      </LockerTile>
-                      <LockerTile {...tp('banner', 'best')} on={banner === 'best'} have label={t('ui.pe_best')} wide>
-                        <PixelBg className={lk.bannerBg} odds={bestOdds} glow={tone} still={reducedFx()} />
-                      </LockerTile>
-                      {arrange(
-                        allBanners,
-                        (b) => (p.banners ?? []).includes(b),
-                        (b) => picRar('banner', b),
-                        (b) => isExclusive('banner', b),
-                        (b) => bannerName(b, lang),
-                      ).map((b) => (
-                        <LockerTile
-                          key={b}
-                          {...tp('banner', b, isExclusive('banner', b) ? '/pass' : '/shop')}
-                          on={banner === b}
-                          have={(p.banners ?? []).includes(b)}
-                          label={bannerName(b, lang)}
-                          rar={[t(rarKey(picRar('banner', b))), rarCol(picRar('banner', b))]}
-                          excl={isExclusive('banner', b) ? t('ui.lk_excl') : undefined}
-                          wide
-                        >
-                          <img className="px" src={BANNER_IMG[b]} alt="" />
+                        <LockerTile {...tp('banner', 'best')} on={banner === 'best'} have label={t('ui.pe_best')} wide>
+                          <PixelBg className={lk.bannerBg} odds={bestOdds} glow={tone} still={reducedFx()} />
                         </LockerTile>
-                      ))}
-                    </>
-                  ) : null}
-                  {tab === 'name' || tab === 'font' || tab === 'aura' || tab === 'bfx' ? (
-                    <>
-                      <LockerTile
-                        {...tp(tab, '')}
-                        on={!{ name: nameFx, font: nameFont, aura: auraFx, bfx: bannerFx }[tab]}
-                        have
-                        label={t('ui.none')}
-                        wide={tab === 'bfx'}
-                      >
-                        <span className={lk.empty} />
-                      </LockerTile>
-                      {arrange(
-                        COSMETICS[tab],
-                        (x) => owned.includes(x),
-                        cosmRar,
-                        () => false,
-                        (x) => cosmName(x, lang),
-                      ).map((x) => (
+                        {arrange(
+                          allBanners,
+                          (b) => (p.banners ?? []).includes(b),
+                          (b) => picRar('banner', b),
+                          (b) => isExclusive('banner', b),
+                          (b) => bannerName(b, lang),
+                        ).map((b) => (
+                          <LockerTile
+                            key={b}
+                            {...tp('banner', b, isExclusive('banner', b) ? '/pass' : '/shop')}
+                            on={banner === b}
+                            have={(p.banners ?? []).includes(b)}
+                            label={bannerName(b, lang)}
+                            rar={[t(rarKey(picRar('banner', b))), rarCol(picRar('banner', b))]}
+                            excl={isExclusive('banner', b) ? t('ui.lk_excl') : undefined}
+                            wide
+                          >
+                            <img className="px" src={BANNER_IMG[b]} alt="" />
+                          </LockerTile>
+                        ))}
+                      </>
+                    ) : null}
+                    {tab === 'name' || tab === 'font' || tab === 'aura' || tab === 'bfx' ? (
+                      <>
                         <LockerTile
-                          key={x}
-                          {...tp(tab, x)}
-                          {...(isSecret(x) && !owned.includes(x)
-                            ? { onTry: () => undefined, onLocked: () => sfx.deny(), onUntry: () => undefined }
-                            : {})}
-                          on={{ name: nameFx, font: nameFont, aura: auraFx, bfx: bannerFx }[tab] === x}
-                          have={owned.includes(x)}
-                          label={cosmName(x, lang)}
-                          rar={[t(rarKey(cosmRar(x))), rarCol(cosmRar(x))]}
+                          {...tp(tab, '')}
+                          on={!{ name: nameFx, font: nameFont, aura: auraFx, bfx: bannerFx }[tab]}
+                          have
+                          label={t('ui.none')}
                           wide={tab === 'bfx'}
                         >
-                          <CosmeticPreview
-                            id={x}
-                            label={(pseudo || p.pseudo).slice(0, 8)}
-                            hidden={isSecret(x) && !owned.includes(x)}
-                          />
+                          <span className={lk.empty} />
                         </LockerTile>
-                      ))}
-                    </>
-                  ) : null}
-                </div>
-              </>
-            )}
+                        {arrange(
+                          COSMETICS[tab],
+                          (x) => owned.includes(x),
+                          cosmRar,
+                          () => false,
+                          (x) => cosmName(x, lang),
+                        ).map((x) => (
+                          <LockerTile
+                            key={x}
+                            {...tp(tab, x)}
+                            {...(isSecret(x) && !owned.includes(x)
+                              ? { onTry: () => undefined, onLocked: () => sfx.deny(), onUntry: () => undefined }
+                              : {})}
+                            on={{ name: nameFx, font: nameFont, aura: auraFx, bfx: bannerFx }[tab] === x}
+                            have={owned.includes(x)}
+                            label={cosmName(x, lang)}
+                            rar={[t(rarKey(cosmRar(x))), rarCol(cosmRar(x))]}
+                            wide={tab === 'bfx'}
+                          >
+                            <CosmeticPreview
+                              id={x}
+                              label={(pseudo || p.pseudo).slice(0, 8)}
+                              hidden={isSecret(x) && !owned.includes(x)}
+                            />
+                          </LockerTile>
+                        ))}
+                      </>
+                    ) : null}
+                  </div>
+                </>
+              )}
+            </Swap>
           </div>
 
           <div className={lk.actions}>

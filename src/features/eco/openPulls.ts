@@ -101,8 +101,8 @@ export function installOpeningHost() {
     if (!e) return null;
     const lang = useSettings.getState().lang;
     return curSerie === 'Takoras'
-      ? { label: translate(lang, 'ui.op_left'), value: e.stock.toLocaleString(lang) }
-      : { label: translate(lang, 'ui.op_coins'), value: e.coins.toLocaleString(lang) };
+      ? { label: translate(lang, 'ui.op_left'), value: e.stock.toLocaleString(lang), img: '/img/jetons/takoras.png' }
+      : { label: translate(lang, 'ui.op_coins'), value: e.coins.toLocaleString(lang), img: '/img/piece.png' };
   };
   host.accRecordPull = () => {
     void qc.invalidateQueries({ queryKey: ['history'] });

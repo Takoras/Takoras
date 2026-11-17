@@ -203,6 +203,34 @@
   font-family: 'Doto', var(--font-display);
   font-weight: 700;
 }
+.nf_fredoka {
+  font-family: 'Fredoka', var(--font-display);
+  font-weight: 600;
+}
+.nf_caveat {
+  font-family: 'Caveat', var(--font-display);
+  font-weight: 700;
+  font-size: 1.2em;
+}
+.nf_marker {
+  font-family: 'Permanent Marker', var(--font-display);
+  font-weight: 400;
+}
+.nf_pacifico {
+  font-family: 'Pacifico', var(--font-display);
+  font-weight: 400;
+  line-height: 1.25;
+}
+.nf_playfair {
+  font-family: 'Playfair Display', var(--font-display);
+  font-style: italic;
+  font-weight: 700;
+}
+.nf_gothic {
+  font-family: 'UnifrakturMaguntia', var(--font-display);
+  font-weight: 400;
+  font-size: 1.1em;
+}
 /* ---------- contour : cadre en pixels dessiné par-dessus le bord de la photo ---------- */
 .aura {
   position: relative;

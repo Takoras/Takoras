@@ -286,7 +286,7 @@ function draw(list) {
 
 // Valeurs affichées à chaque clic : monte doucement puis accélère. Plus le jeton est rare, plus il faut de clics :
 // ~15 jusqu'à 1/10 000, ~33 vers 1/50 000, ~50 pour 1/200 000, ~65 pour 1/1 000 000 : un très rare se mérite.
-function steps(X) {
+function steps(X, fresh = false) {
   if (X <= 1) return [];
   const lg = Math.log2(X);
   const n = Math.min(X - 1, X >= 10000 ? Math.min(70, Math.round(15 + (lg - 13.3) * 8)) : Math.min(15, Math.round(4 + lg * .9)));
@@ -296,8 +296,9 @@ function steps(X) {
     out.push(Math.min(X, Math.max(v, (out[out.length - 1] || 1) + 1)));
   }
   const kept = out.filter((v, i) => i === out.length - 1 || i === 0 || Math.random() > SKIP);
-  if (SETTINGS.speed === 'instant') return [X];
-  if (SETTINGS.speed === 'rapide') return kept.filter((v, i) => i % 2 === 1 || i === kept.length - 1);
+  // un jeton jamais eu : toujours le vrai compteur (même en instantané), pour ne pas rater un moment cool
+  if (SETTINGS.speed === 'instant' && !fresh) return [X];
+  if (SETTINGS.speed === 'rapide' && !fresh) return kept.filter((v, i) => i % 2 === 1 || i === kept.length - 1);
   return kept;
 }
 
@@ -370,8 +371,10 @@ function startOpening() {
     const result = (sess.plan && findJeton(sess.plan[sess.idx])) || draw(seriesOf());
     // jeton muté (Doré, Céleste, Ombre) : le compteur monte jusqu'à sa vraie chance (Mobu doré → 1/20, pas 1/2)
     const variant = (sess.vars || [])[sess.idx] || '';
-    const queue = steps(variant ? vOdds(result.odds, variant) : result.odds);
-    sess.cur = { name: result.name, variant, queue, n0: queue.length, shown: 1, phase: 'count' };
+    // jamais eu (ce jeton avec cette mutation) : on ne le passe jamais, ni en instantané ni en ouverture auto
+    const fresh = !!host.known && !host.known.has(`${PULLS[sess.pull]?.name || 'Takoras'}|${result.name}|${variant}`);
+    const queue = steps(variant ? vOdds(result.odds, variant) : result.odds, fresh);
+    sess.cur = { name: result.name, variant, queue, n0: queue.length, shown: 1, phase: 'count', fresh };
     save();
   }
   const c = sess.cur, p = PULLS[sess.pull];
@@ -407,12 +410,6 @@ function startOpening() {
   if (c.phase === 'revealed') reveal(true);
   renderAuto();
   if (sess.auto) return autoRun(); // tout de suite : on ne voit jamais le jeton mystère
-  // réglage « animation seulement pour les nouveaux jetons » : un jeton (avec sa mutation) déjà eu se révèle tout de suite
-  if (c.phase === 'count' && SETTINGS.animKnown === false && host.known?.has(`${p.name}|${c.name}|${c.variant || ''}`)) {
-    const r = run;
-    r.done = true;
-    setTimeout(() => { if (run === r) reveal(); }, 60);
-  }
 }
 
 function setTier(v) {
@@ -489,10 +486,13 @@ function fillInfo(j, variant = '') {
   // boîte de droite : la chance totale de ce tirage (potions et ×10 compris) et ce qui reste pour continuer
   const left = host.leftInfo?.();
   const todo = sess.total > 1 ? sess.total - sess.idx - 1 : 0;
+  // même boîte que pendant l'ouverture : une ligne par info, avec son image et un gros chiffre
+  const row = (img, label, value, cls = '') =>
+    `<div class="op-row"><img class="px" src="${img}" alt=""><span><small>${label}</small><b class="${cls}">${value}</b></span></div>`;
   $('op-stats').innerHTML =
-    `<div class="op-st"><span>${t('op_luck')}</span><b class="${lk > 1 ? 'op-st-up' : ''}">×${fmtLuck(Math.max(1, lk))}</b></div>` +
-    (left ? `<div class="op-st"><span>${left.label}</span><b>${left.value}</b></div>` : '') +
-    (todo ? `<div class="op-st"><span>${t('op_todo')}</span><b>${todo.toLocaleString(LOCALE())}</b></div>` : '');
+    (left ? row(left.img, left.label, left.value) : '') +
+    row('/img/potions/chance-10.png', t('op_luck'), '×' + fmtLuck(Math.max(1, lk)), lk > 1 ? 'op-st-up' : '') +
+    (todo ? row('/img/jetons/mystere.png', t('op_todo'), todo.toLocaleString(LOCALE())) : '');
 }
 
 // Pause finale : le haut disparaît, zoom sur le jeton qui tremble, on clique pour révéler
@@ -845,9 +845,9 @@ function autoRun() {
   if (!sess?.auto || !run || !opening.classList.contains('on')) return turbo(false);
   if (sess.recap) { sess.auto = false; turbo(false); return renderAuto(); }
   if (!run.done) {
-    if (isSpecial(run.result, run.variant)) { // on s'arrête : à toi de jouer
+    if (isSpecial(run.result, run.variant) || sess.cur?.fresh) { // on s'arrête : à toi de jouer
       sess.auto = false; sess.autoResume = true; save(); renderAuto(); turbo(false);
-      sfx.hold(); toast('' + t('auto_special'));
+      sfx.hold(); toast('' + t(sess.cur?.fresh ? 'auto_new' : 'auto_special'));
       return;
     }
     turbo(true);
@@ -980,7 +980,8 @@ function tap() {
   // un par un : une fois le jeton révélé, toucher le jeton ouvre le pull suivant (il n'y a plus de bouton « Ouvrir encore »)
   if (run?.done && sess && sess.total === 1 && opening.classList.contains('revealed') && !spinning()) return tryReopen();
   if (!run || run.done) return;
-  if (run.holding) { if (run.canReveal) (run.result.odds >= RARE && SETTINGS.speed !== 'instant' ? cine() : reveal()); return; }
+  // cinématique des jetons 1/1000+ : toujours pour un jeton jamais eu ; pour un déjà eu, seulement si le réglage le veut
+  if (run.holding) { if (run.canReveal) (run.result.odds >= RARE && (sess.cur?.fresh || (SETTINGS.speed !== 'instant' && SETTINGS.animKnown !== false)) ? cine() : reveal()); return; }
   if (!run.queue.length) return; // entre le dernier palier et la pause
   // spam : on saute un palier (ça monte deux fois plus vite) — sauf pour les très rares, qui se méritent
   if (rhythm().fast && run.queue.length > 2 && (run.queue[run.queue.length - 1] ?? 0) < 10000) run.queue.shift();
@@ -998,7 +999,7 @@ function tap() {
   $('op-hint').textContent = '';
   if (!run.queue.length) {
     // En instantané (ou pour les communs), on révèle directement, sans pause ni cinématique
-    if (run.shown < FAST || SETTINGS.speed === 'instant') { run.done = true; setTimeout(reveal, 120); } // chance affichée (mutation comprise) : une vraie pause dès 1/60
+    if (!sess.cur?.fresh && (run.shown < FAST || SETTINGS.speed === 'instant')) { run.done = true; setTimeout(reveal, 120); } // chance affichée (mutation comprise) : une vraie pause dès 1/60
     else setTimeout(hold, 200);
   }
 }

@@ -450,8 +450,13 @@ html.q-calm .op-bg, html.q-calm .op-main { animation: none; }
 .opening:not(.revealed) .op-glow, .opening:not(.revealed):not(.hold) .op-vignette { opacity: 0; }
 .op-glow { transition: opacity .4s, background .4s, translate .8s var(--ease); }
 
-/* fiche du jeton révélé, boîte de droite : chance totale du tirage et ce qui reste (une ligne chacun, chiffre à droite) */
-.op-st { display: flex; align-items: baseline; justify-content: space-between; gap: 16px; }
-.op-st span { color: var(--muted); font-size: 15px; font-weight: 700; }
-.op-st b { font-family: var(--font-display); font-size: clamp(24px, 2.2vw, 32px); font-variant-numeric: tabular-nums; }
-.op-st b.op-st-up { color: #4ade80; }
+/* fiche du jeton révélé, boîte de droite : la même que pendant l'ouverture (image, petit titre, gros chiffre) */
+.op-stats:has(.op-row) { gap: 0; padding: 20px 24px; }
+.op-row { display: flex; align-items: center; gap: 16px; padding: 12px 0; text-align: left; }
+.op-row + .op-row { border-top: 1px solid rgb(255 255 255 / 10%); }
+.op-row img { width: 56px; height: 56px; object-fit: contain; flex: none; image-rendering: pixelated; transition: scale .15s; }
+.op-row:hover img { scale: 1.08; }
+.op-row span { display: grid; gap: 2px; }
+.op-row small { color: var(--muted); font-size: 15px; font-weight: 700; }
+.op-row b { font-family: var(--font-display); font-size: clamp(28px, 2.6vw, 40px); line-height: 1.05; font-variant-numeric: tabular-nums; }
+.op-row b.op-st-up { color: #4ade80; }

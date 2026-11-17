@@ -14,8 +14,10 @@ export type Settings = {
   fx: Fx;
   autoMin: number;
   autoVars: Variant[];
-  /** animation d'ouverture pour tous les jetons (sinon seulement ceux qu'on n'a pas encore : on peut enchaîner) */
+  /** cinématique des jetons 1/1000+ pour tous (sinon seulement ceux qu'on n'a jamais eus) */
   animKnown: boolean;
+  /** version du réglage d'animation (2 = « Nouveaux seulement » par défaut) */
+  animV: number;
 };
 
 const KEY = 'takoras-settings';
@@ -26,7 +28,8 @@ export const DEFAULTS: Settings = {
   fx: 'auto',
   autoMin: 1000,
   autoVars: ['gold', 'celeste', 'ombre'],
-  animKnown: true,
+  animKnown: false,
+  animV: 2,
 };
 
 function load(): Settings {
@@ -42,7 +45,10 @@ function load(): Settings {
     if (old === 'reduced') s.fx = 'low';
     if (!['auto', 'high', 'medium', 'low', 'potato'].includes(s.fx)) s.fx = DEFAULTS.fx;
     s.volume = Math.max(0, Math.min(100, Number(s.volume) || 0));
-    s.animKnown = s.animKnown !== false;
+    // réglage passé à « Nouveaux seulement » par défaut (v2) : les anciens réglages enregistrés repartent de là
+    const raw2 = raw as { animV?: number } | null;
+    s.animKnown = raw2?.animV === 2 ? s.animKnown === true : false;
+    s.animV = 2;
     return s;
   } catch {
     return { ...DEFAULTS };
