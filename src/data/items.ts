@@ -8,9 +8,9 @@ export const BANNER_IMG: Record<string, string> = {
   plaine: '/img/bannieres/plaine.png',
   doodle: '/img/bannieres/doodle.png',
   yeux: '/img/bannieres/yeux.png', // passe premium, saison 1
-  eau: '/img/bannieres/eau.png',
-  tele: '/img/bannieres/tele.png',
-  dragon: '/img/bannieres/dragon.png',
+  eau: '/img/bannieres/eau.webp',
+  tele: '/img/bannieres/tele.webp',
+  dragon: '/img/bannieres/dragon.webp',
 };
 const POTION5 = '/img/potions/chance-5.png';
 export const ITEM_IMG: Record<string, { src: string; tint?: string }> = {
