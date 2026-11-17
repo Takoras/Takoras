@@ -27,8 +27,8 @@ export const accountApi = {
   setPseudo: (p: string) => rpc('set_pseudo', { p }),
   changePseudo: (p: string) => rpc('change_pseudo', { p }),
   // cosmétiques portés (couleur de pseudo, aura, effet de bannière) : null = rien
-  equipCosmetics: (p_name: string | null, p_aura: string | null, p_bfx: string | null) =>
-    rpc('equip_cosmetics', { p_name, p_aura, p_bfx }),
+  equipCosmetics: (p_name: string | null, p_aura: string | null, p_bfx: string | null, p_font: string | null = null) =>
+    rpcLoose('equip_cosmetics', { p_name, p_aura, p_bfx, p_font }),
   updateProfile: (a: { p_avatar: string; p_banner: string | null; p_bio: string; p_showcase: (number | null)[] }) =>
     rpc('update_profile', a),
   // accord aux CGU, téléchargement de ses données, suppression définitive du compte

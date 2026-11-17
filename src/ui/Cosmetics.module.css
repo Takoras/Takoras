@@ -39,46 +39,170 @@
   --c: #a66bff;
   --l: #f3e8ff;
 }
-.n_rose {
-  --c: #ff8fc0;
-  --l: #ffe4f0;
+/* couleurs simples (communes) : unies, sans mouvement */
+.flat {
+  color: var(--c);
 }
-.n_glace {
-  --c: #5ad7f0;
-  --l: #e6fbff;
+.n_rouge {
+  --c: #ff6b6b;
 }
-/* braise : bandes jaune / orange qui montent par crans, comme des flammes */
-.n_braise {
-  background-image: repeating-linear-gradient(180deg, #ffd166 0 0.28em, #ff7a1a 0.28em 0.56em);
-  background-position: 0 0;
-  background-size: 100% 0.56em;
-  animation: ember 0.9s steps(4) infinite;
+.n_menthe {
+  --c: #5eead4;
 }
-@keyframes ember {
-  to {
-    background-position: 0 -0.56em;
+.n_lilas {
+  --c: #c4b5fd;
+}
+.n_ciel {
+  --c: #7dd3fc;
+}
+.n_peche {
+  --c: #fdba74;
+}
+/* contour (rare) : texte blanc cerné d'un trait pixel net de 2 px, comme les logos dessinés */
+.n_contour {
+  --c: #fff;
+  text-shadow:
+    2px 0 0 #2140b8,
+    -2px 0 0 #2140b8,
+    0 2px 0 #2140b8,
+    0 -2px 0 #2140b8,
+    2px 2px 0 #2140b8,
+    -2px 2px 0 #2140b8,
+    2px -2px 0 #2140b8,
+    -2px -2px 0 #2140b8;
+}
+/* relief (épique) : lettres en volume, des marches de pixels dessous, qui sautillent un peu */
+.n_relief {
+  --c: #fde68a;
+  display: inline-block;
+  text-shadow:
+    1px 1px 0 #f59e0b,
+    2px 2px 0 #d97706,
+    3px 3px 0 #b45309,
+    4px 4px 0 #78350f;
+  animation: hop 1.6s steps(2) infinite;
+}
+@keyframes hop {
+  50% {
+    translate: 0 -2px;
+    text-shadow:
+      1px 1px 0 #f59e0b,
+      2px 2px 0 #d97706,
+      3px 3px 0 #b45309,
+      4px 4px 0 #78350f,
+      5px 5px 0 #451a03;
   }
 }
-/* arc-en-ciel : bandes de couleur à bords francs qui défilent par crans */
-.n_arc {
-  background-image: linear-gradient(
-    90deg,
-    #ff6b6b 0 20%,
-    #f2c230 20% 40%,
-    #4ade80 40% 60%,
-    #38bdf8 60% 80%,
-    #a78bfa 80% 100%
+/* glitch (légendaire) : deux copies rouge et cyan qui sautent de place par à-coups */
+.n_glitch {
+  --c: #f8fafc;
+  animation: glitch 2.4s steps(1) infinite;
+}
+@keyframes glitch {
+  0%,
+  100% {
+    text-shadow:
+      -2px 0 0 #ff2a6d,
+      2px 0 0 #05d9e8;
+  }
+  8% {
+    text-shadow:
+      3px -1px 0 #ff2a6d,
+      -3px 1px 0 #05d9e8;
+    translate: 1px 0;
+  }
+  12% {
+    text-shadow:
+      -1px 1px 0 #ff2a6d,
+      1px -1px 0 #05d9e8;
+    translate: -1px 0;
+  }
+  16% {
+    translate: 0 0;
+  }
+  55% {
+    text-shadow:
+      -2px 0 0 #ff2a6d,
+      2px 0 0 #05d9e8;
+  }
+  58% {
+    text-shadow:
+      4px 0 0 #ff2a6d,
+      -4px 0 0 #05d9e8;
+    translate: 0 -1px;
+  }
+  61% {
+    translate: 0 0;
+  }
+}
+/* lave (légendaire) : bandes jaune / orange / rouge qui coulent en diagonale, par crans */
+.n_lave {
+  background-image: repeating-linear-gradient(
+    120deg,
+    #ffe08a 0 0.3em,
+    #ff9a1f 0.3em 0.6em,
+    #e8461b 0.6em 0.9em,
+    #ff9a1f 0.9em 1.2em
   );
   background-position: 0 0;
-  background-size: 5em 100%;
-  animation: rainbow 2.5s steps(20) infinite;
+  background-size: 2.4em 100%;
+  animation: lava 1.4s steps(8) infinite;
 }
-@keyframes rainbow {
+@keyframes lava {
   to {
-    background-position: 5em 0;
+    background-position: 2.4em 0;
   }
 }
-
+/* aurore (mythique) : rubans turquoise, violet, rose qui ondulent, un reflet blanc qui passe, cerné d'un trait net */
+.n_aurore {
+  background-image:
+    linear-gradient(110deg, transparent 0 46%, #fff 46% 50%, transparent 50% 100%),
+    repeating-linear-gradient(
+      100deg,
+      #5eead4 0 0.35em,
+      #818cf8 0.35em 0.7em,
+      #f0abfc 0.7em 1.05em,
+      #818cf8 1.05em 1.4em
+    );
+  background-size:
+    400% 100%,
+    2.8em 100%;
+  background-position:
+    100% 0,
+    0 0;
+  filter: drop-shadow(1px 0 0 #1e1b4b) drop-shadow(-1px 0 0 #1e1b4b) drop-shadow(0 1px 0 #1e1b4b) drop-shadow(0 -1px 0 #1e1b4b);
+  animation: aurora 3s steps(24) infinite;
+}
+@keyframes aurora {
+  to {
+    background-position:
+      0 0,
+      2.8em 0;
+  }
+}
+/* polices du pseudo (hébergées sur le site, chargées à la demande) */
+.nf_silk {
+  font-family: 'Silkscreen', var(--font-display);
+}
+.nf_vt {
+  font-family: 'VT323', var(--font-display);
+  font-size: 1.15em;
+}
+.nf_pixelify {
+  font-family: 'Pixelify Sans', var(--font-display);
+}
+.nf_jersey {
+  font-family: 'Jersey 10', var(--font-display);
+  font-size: 1.1em;
+}
+.nf_press {
+  font-family: 'Press Start 2P', var(--font-display);
+  font-size: 0.72em;
+}
+.nf_doto {
+  font-family: 'Doto', var(--font-display);
+  font-weight: 700;
+}
 /* ---------- contour : cadre en pixels dessiné par-dessus le bord de la photo ---------- */
 .aura {
   position: relative;
@@ -113,6 +237,10 @@
   height: 100%;
   font-family: var(--font-display);
   font-size: 28px;
+}
+.pvFont {
+  font-size: 20px;
+  white-space: nowrap;
 }
 .pvAura {
   display: grid;
@@ -162,7 +290,9 @@
   border-radius: 14px;
 }
 @media (prefers-reduced-motion: reduce) {
-  .name {
+  .name,
+  .n_relief,
+  .n_glitch {
     animation: none;
   }
 }

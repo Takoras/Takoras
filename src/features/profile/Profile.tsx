@@ -86,6 +86,7 @@ export type Prof = {
   collection: number;
   owned: number;
   name_fx?: string | null;
+  name_font?: string | null;
   aura?: string | null;
   banner_fx?: string | null;
   cosmetics?: string[] | null;
@@ -206,7 +207,7 @@ export default function Profile() {
         </div>
         <div className={s.id}>
           <h1>
-            <span className={nameCls(p.name_fx)}>{p.pseudo}</span>{' '}
+            <span className={nameCls(p.name_fx, p.name_font)}>{p.pseudo}</span>{' '}
             <small className={s.num}>#{String(p.num).padStart(6, '0')}</small>
           </h1>
           {p.bio ? <p className={s.bio}>{p.bio}</p> : null}
@@ -768,6 +769,7 @@ function EditProfile({ p, onClose }: { p: Prof; onClose: () => void }) {
   const [banner, setBanner] = useState(p.banner ?? '');
   const [avatar, setAv] = useState(p.avatar || 'default');
   const [nameFx, setNameFx] = useState(p.name_fx ?? '');
+  const [nameFont, setNameFont] = useState(p.name_font ?? '');
   const [auraFx, setAuraFx] = useState(p.aura ?? '');
   const [bannerFx, setBannerFx] = useState(p.banner_fx ?? '');
   const owned = p.cosmetics ?? [];
@@ -785,8 +787,13 @@ function EditProfile({ p, onClose }: { p: Prof; onClose: () => void }) {
         name = pseudo;
       }
       await saveProfile(p, { p_banner: banner || null, p_bio: bio.trim(), p_avatar: avatar });
-      if (nameFx !== (p.name_fx ?? '') || auraFx !== (p.aura ?? '') || bannerFx !== (p.banner_fx ?? ''))
-        await accountApi.equipCosmetics(nameFx || null, auraFx || null, bannerFx || null);
+      if (
+        nameFx !== (p.name_fx ?? '') ||
+        nameFont !== (p.name_font ?? '') ||
+        auraFx !== (p.aura ?? '') ||
+        bannerFx !== (p.banner_fx ?? '')
+      )
+        await accountApi.equipCosmetics(nameFx || null, auraFx || null, bannerFx || null, nameFont || null);
       setAvatar(name, avatar);
       sfx.upgrade();
       onClose();
@@ -801,7 +808,7 @@ function EditProfile({ p, onClose }: { p: Prof; onClose: () => void }) {
     }
   };
   // ---------- le vestiaire : aperçu en direct à gauche, rayons de cases à droite ----------
-  type Tab = 'id' | 'pp' | 'banner' | 'name' | 'aura' | 'bfx';
+  type Tab = 'id' | 'pp' | 'banner' | 'name' | 'font' | 'aura' | 'bfx';
   const [tab, setTab] = useState<Tab>('pp');
   // tri et filtre des cases (toutes les catégories) : à moi, à débloquer, exclusifs du passe ; par rareté ou par nom
   const [flt, setFlt] = useState<'all' | 'owned' | 'locked' | 'excl'>('all');
@@ -837,6 +844,7 @@ function EditProfile({ p, onClose }: { p: Prof; onClose: () => void }) {
   const vAv = show('pp', avatar),
     vBanner = show('banner', banner),
     vName = show('name', nameFx),
+    vFont = show('font', nameFont),
     vAura = show('aura', auraFx),
     vBfx = show('bfx', bannerFx);
   const bestOdds = p.best_pull?.eff ?? 1;
@@ -880,6 +888,15 @@ function EditProfile({ p, onClose }: { p: Prof; onClose: () => void }) {
       COSMETICS.name.length,
     ],
     [
+      'font',
+      <b key="i" className={`${lk.shAa} ${nameCls(null, nameFont || 'nf_pixelify')}`}>
+        Ff
+      </b>,
+      t('ui.fx_font'),
+      COSMETICS.font.filter((x) => owned.includes(x)).length,
+      COSMETICS.font.length,
+    ],
+    [
       'aura',
       <span key="i" className={lk.shAura}>
         <Aura id={auraFx || 'au_or'}>
@@ -904,6 +921,7 @@ function EditProfile({ p, onClose }: { p: Prof; onClose: () => void }) {
     pp: setAv,
     banner: setBanner,
     name: setNameFx,
+    font: setNameFont,
     aura: setAuraFx,
     bfx: setBannerFx,
   };
@@ -959,7 +977,7 @@ function EditProfile({ p, onClose }: { p: Prof; onClose: () => void }) {
                 </span>
               </Aura>
               <b className={lk.name}>
-                <span key={vName} className={nameCls(vName)}>
+                <span key={vName + vFont} className={nameCls(vName, vFont)}>
                   {pseudo || p.pseudo}
                 </span>
               </b>
@@ -974,7 +992,7 @@ function EditProfile({ p, onClose }: { p: Prof; onClose: () => void }) {
                 {/* chaque cosmétique essayé : son petit aperçu, son nom, sa rareté, et de quoi l'enlever */}
                 <ul className={lk.peekList}>
                   {(Object.entries(peek) as [Tab, { v: string; to: string }][]).map(([k, { v }]) => {
-                    const cosm = k === 'name' || k === 'aura' || k === 'bfx';
+                    const cosm = k === 'name' || k === 'font' || k === 'aura' || k === 'bfx';
                     const r = cosm ? cosmRar(v) : null;
                     const name = k === 'pp' ? ppName(v) : k === 'banner' ? bannerName(v, lang) : cosmName(v, lang);
                     return (
@@ -984,8 +1002,8 @@ function EditProfile({ p, onClose }: { p: Prof; onClose: () => void }) {
                             <img className={`px ${lk.shRound}`} src={AVATARS[v]} alt="" />
                           ) : k === 'banner' ? (
                             <img className={`px ${lk.shWide}`} src={BANNER_IMG[v]} alt="" />
-                          ) : k === 'name' ? (
-                            <b className={`${lk.shAa} ${nameCls(v)}`}>Aa</b>
+                          ) : k === 'name' || k === 'font' ? (
+                            <b className={`${lk.shAa} ${k === 'font' ? nameCls(null, v) : nameCls(v)}`}>Aa</b>
                           ) : k === 'aura' ? (
                             <span className={lk.shAura}>
                               <Aura id={v}>
@@ -1168,11 +1186,11 @@ function EditProfile({ p, onClose }: { p: Prof; onClose: () => void }) {
                       ))}
                     </>
                   ) : null}
-                  {tab === 'name' || tab === 'aura' || tab === 'bfx' ? (
+                  {tab === 'name' || tab === 'font' || tab === 'aura' || tab === 'bfx' ? (
                     <>
                       <LockerTile
                         {...tp(tab, '')}
-                        on={!{ name: nameFx, aura: auraFx, bfx: bannerFx }[tab]}
+                        on={!{ name: nameFx, font: nameFont, aura: auraFx, bfx: bannerFx }[tab]}
                         have
                         label={t('ui.none')}
                         wide={tab === 'bfx'}
@@ -1192,7 +1210,7 @@ function EditProfile({ p, onClose }: { p: Prof; onClose: () => void }) {
                           {...(isSecret(x) && !owned.includes(x)
                             ? { onTry: () => undefined, onLocked: () => sfx.deny(), onUntry: () => undefined }
                             : {})}
-                          on={{ name: nameFx, aura: auraFx, bfx: bannerFx }[tab] === x}
+                          on={{ name: nameFx, font: nameFont, aura: auraFx, bfx: bannerFx }[tab] === x}
                           have={owned.includes(x)}
                           label={cosmName(x, lang)}
                           rar={[t(rarKey(cosmRar(x))), rarCol(cosmRar(x))]}

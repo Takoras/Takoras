@@ -127,7 +127,7 @@
 }
 .tabs {
   display: grid;
-  grid-template-columns: repeat(3, minmax(0, 1fr));
+  grid-template-columns: repeat(4, minmax(0, 1fr));
   gap: var(--s-2);
 }
 .tabs > button {
@@ -225,10 +225,8 @@
   line-height: 1.2;
 }
 .shTxt b {
-  overflow: hidden;
   font-size: var(--fs-sm);
-  text-overflow: ellipsis;
-  white-space: nowrap;
+  line-height: 1.15;
 }
 .shTxt small {
   color: var(--text-2);

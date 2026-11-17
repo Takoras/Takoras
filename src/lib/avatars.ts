@@ -11,4 +11,5 @@ export const AVATARS: Record<string, string> = {
   tele: '/img/pp/tele.png',
   dragon: '/img/pp/dragon.png',
 };
-export const FREE_PP = ['bleu', 'rouge', 'vert', 'yeux', 'dunes'];
+// gratuites : seulement les 4 couleurs (les autres s'obtiennent en boutique ou avec le passe)
+export const FREE_PP = ['bleu', 'rouge', 'vert', 'yeux'];

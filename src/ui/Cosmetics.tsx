@@ -9,14 +9,27 @@ import s from './Cosmetics.module.css';
 export type CRar = 'common' | 'rare' | 'epic' | 'legend' | 'myth' | 'secret';
 // id → [nom FR, nom EN, rareté] ; l'ordre est celui des rayons du vestiaire (du plus commun au plus rare)
 const DEF: Record<string, [string, string, CRar]> = {
-  // pseudo
-  n_rose: ['Rose', 'Pink', 'common'],
-  n_glace: ['Glace', 'Ice', 'common'],
+  // pseudo : couleur et effet (des couleurs simples en commun, jusqu'à des effets travaillés en mythique)
+  n_rouge: ['Fraise', 'Strawberry', 'common'],
+  n_menthe: ['Menthe', 'Mint', 'common'],
+  n_lilas: ['Lilas', 'Lilac', 'common'],
+  n_ciel: ['Ciel', 'Sky', 'common'],
+  n_peche: ['Pêche', 'Peach', 'common'],
   n_or: ['Doré', 'Gold', 'rare'],
   n_celeste: ['Céleste', 'Celestial', 'rare'],
-  n_braise: ['Braise', 'Ember', 'epic'],
+  n_contour: ['Contour', 'Outline', 'rare'],
   n_ombre: ['Ombre', 'Shadow', 'epic'],
-  n_arc: ['Arc-en-ciel', 'Rainbow', 'legend'],
+  n_relief: ['Relief', 'Relief', 'epic'],
+  n_glitch: ['Glitch', 'Glitch', 'legend'],
+  n_lave: ['Lave', 'Lava', 'legend'],
+  n_aurore: ['Aurore', 'Aurora', 'myth'],
+  // pseudo : police
+  nf_silk: ['Écran', 'Screen', 'common'],
+  nf_vt: ['Terminal', 'Terminal', 'common'],
+  nf_pixelify: ['Pixel', 'Pixel', 'rare'],
+  nf_jersey: ['Maillot', 'Jersey', 'rare'],
+  nf_press: ['Arcade', 'Arcade', 'epic'],
+  nf_doto: ['Points', 'Dots', 'legend'],
   // contour
   au_blanc: ['Craie', 'Chalk', 'common'],
   au_acier: ['Acier', 'Steel', 'common'],
@@ -123,7 +136,7 @@ const ids = (p: string) =>
   Object.keys(DEF)
     .filter((k) => k.startsWith(p))
     .sort((a, b) => RANK[DEF[a]?.[2] ?? 'common'] - RANK[DEF[b]?.[2] ?? 'common']);
-export const COSMETICS = { name: ids('n_'), aura: ids('au_'), bfx: ids('fx_') };
+export const COSMETICS = { name: ids('n_'), font: ids('nf_'), aura: ids('au_'), bfx: ids('fx_') };
 export const cosmName = (id: string, lang: Lang) => DEF[id]?.[lang === 'en' ? 1 : 0] ?? id;
 export const cosmRar = (id: string): CRar => DEF[id]?.[2] ?? 'common';
 /** rareté → « chance » du fond pixel (même échelle que les jetons : plus c'est rare, plus il est chargé) */
@@ -140,10 +153,31 @@ export const isSecret = (id: string) => cosmRar(id) === 'secret';
 /** rareté → clé de traduction et variable de couleur du site */
 export const rarKey = (r: CRar) => `ui.r_${r}` as const;
 export const rarCol = (r: CRar) => `var(--r-${r})`;
-export const isCosmetic = (kind: string) => kind === 'name' || kind === 'aura' || kind === 'bfx';
+export const isCosmetic = (kind: string) => kind === 'name' || kind === 'font' || kind === 'aura' || kind === 'bfx';
 
-// classe à mettre sur un pseudo (rien si pas d'effet)
-export const nameCls = (id?: string | null) => (id?.startsWith('n_') && s[id] ? `${s.name} ${s[id]}` : '');
+// polices du pseudo : hébergées sur le site, chargées seulement quand quelqu'un en affiche une
+const FONT_CSS: Record<string, () => Promise<unknown>> = {
+  nf_silk: () => import('@fontsource/silkscreen/400.css'),
+  nf_vt: () => import('@fontsource/vt323/400.css'),
+  nf_pixelify: () => import('@fontsource/pixelify-sans/400.css'),
+  nf_jersey: () => import('@fontsource/jersey-10/400.css'),
+  nf_press: () => import('@fontsource/press-start-2p/400.css'),
+  nf_doto: () => import('@fontsource/doto/700.css'),
+};
+const fontsLoaded = new Set<string>();
+const loadFont = (id: string) => {
+  if (fontsLoaded.has(id)) return;
+  fontsLoaded.add(id);
+  void FONT_CSS[id]?.();
+};
+// les couleurs simples (communes) ne bougent pas ; les autres ont leur effet
+const FLAT = new Set(['n_rouge', 'n_menthe', 'n_lilas', 'n_ciel', 'n_peche', 'n_contour', 'n_relief', 'n_glitch']);
+// classes à mettre sur un pseudo : son effet (couleur) et sa police (rien si aucun)
+export const nameCls = (id?: string | null, font?: string | null) => {
+  const fx = id?.startsWith('n_') && s[id] ? `${FLAT.has(id) ? s.flat : s.name} ${s[id]}` : '';
+  if (font?.startsWith('nf_') && s[font]) loadFont(font);
+  return [fx, font?.startsWith('nf_') ? (s[font] ?? '') : ''].filter(Boolean).join(' ');
+};
 
 // ---------- contour : un cadre en pixels autour de la photo ----------
 const G = 48; // grille du dessin (48×48 pixels), agrandie sans lissage autour de la photo (les plus rares débordent)
@@ -379,37 +413,54 @@ const sword = (p: Px, t: number) => {
     }
 };
 // ---------- ??? : l'œil dans le vide ----------
-const voidEye = (p: Px, t: number) => {
-  // anneau de vide qui se déchire (tranches décalées par moments)
-  const tear = Math.floor(t * 8) % 23 < 3;
-  for (const [i, j, a] of ringPx(R, 2)) {
-    const off = tear && ((j >> 2) & 1) ? 1 : 0;
-    p(i + 0.5 + off, j + 0.5, hash(i * 7 + j * 3 + Math.floor(t * 4)) > 0.85 ? '#7f1d1d' : '#0b0b10');
-    void a;
+// ??? : une singularité. Un trou noir derrière la photo : disque de matière qui tourne (plus clair du côté qui vient
+// vers nous), anneau de lumière autour de l'horizon, matière aspirée en spirale, et par moments une onde de choc.
+const singularity = (p: Px, t: number) => {
+  const HOT = ['#ffffff', '#fde68a', '#f97316', '#dc2626', '#7c3aed', '#3b0764'];
+  // étoiles du fond, aspirées vers le centre (leur distance diminue puis elles réapparaissent loin)
+  for (let i = 0; i < 18; i++) {
+    const a0 = hash(i * 31) * TAU,
+      k = (t * (0.05 + hash(i) * 0.06) + hash(i * 7)) % 1;
+    const r = R + 22 - k * 20;
+    const [x, y] = at(a0 + k * 2.2, r);
+    if (r > R + 2) p(x, y, k > 0.8 ? '#c4b5fd' : '#4c1d95');
   }
-  // l'œil en haut : il s'ouvre, regarde autour, se referme
-  const P = 5,
-    ph = t % P;
-  const open = ph < 0.4 ? ph / 0.4 : ph > P - 0.5 ? (P - ph) / 0.5 : 1;
-  const ex = C,
-    ey = C - R - 1;
-  const lid = Math.round(open * 3);
-  for (let dx = -5; dx <= 5; dx++) {
-    const hh = Math.round(Math.sqrt(Math.max(0, 1 - (dx / 5.5) ** 2)) * lid);
-    for (let dy = -hh; dy <= hh; dy++) p(ex + dx - 0.5 + 0.5, ey + dy, Math.abs(dy) === hh ? '#0b0b10' : '#e5e7eb');
+  // disque d'accrétion : une ellipse inclinée, visible seulement hors de la photo (comme passant derrière)
+  for (let i = 0; i < 160; i++) {
+    const a = (i / 160) * TAU;
+    for (let band = 0; band < 3; band++) {
+      const rx = R + 5 + band * 2.2,
+        ry = 3.2 + band * 1.1;
+      const x = C + Math.cos(a) * rx,
+        y = C + Math.sin(a) * ry - Math.cos(a) * 1.5;
+      if (Math.hypot(x - C, y - C) < R + 1) continue;
+      // la matière tourne : des grumeaux plus chauds défilent ; le côté gauche (qui vient vers nous) est plus clair
+      const spin = (a / TAU + t * (0.35 - band * 0.06)) % 1;
+      const lump = Math.sin(spin * TAU * 5 + band) > 0.2 ? 0 : 1;
+      const doppler = Math.cos(a) < 0 ? 0 : 2;
+      p(x, y, HOT[Math.min(HOT.length - 1, band + lump + doppler)] ?? '#3b0764');
+    }
   }
-  if (open > 0.5) {
-    const look = Math.round(Math.sin(t * 1.3) * 2);
-    p(ex + look - 0.5, ey, '#dc2626');
-    p(ex + look + 0.5, ey, '#dc2626');
-    p(ex + look, ey - 0.5, '#7f1d1d');
+  // horizon : un anneau tout noir, et autour l'anneau de lumière qui scintille, plus vif d'un côté
+  for (const [i, j] of ringPx(R, 2)) p(i + 0.5, j + 0.5, '#030307');
+  for (const [i, j] of ringPx(R + 2, 1)) {
+    const a = Math.atan2(j + 0.5 - C, i + 0.5 - C);
+    const lit = 0.5 + 0.5 * Math.cos(a - t * 0.9);
+    const n = hash(Math.floor(a * 9) + Math.floor(t * 6));
+    p(i + 0.5, j + 0.5, lit > 0.75 ? '#ffffff' : lit > 0.4 ? (n > 0.5 ? '#e9d5ff' : '#c4b5fd') : '#6d28d9');
   }
-  // parasites autour
-  for (let i = 0; i < 8; i++) {
-    if (hash(i + Math.floor(t * 5) * 13) > 0.5) continue;
-    const [x, y] = at(hash(i * 3 + Math.floor(t * 5)) * TAU, R + 3 + hash(i * 9) * 4);
-    p(x, y, i % 3 ? '#1f1f2a' : '#991b1b');
+  // matière aspirée : des filaments qui tournent en spirale vers l'horizon
+  for (let i = 0; i < 6; i++) {
+    const k = (t * 0.4 + i / 6) % 1;
+    for (let s2 = 0; s2 < 5; s2++) {
+      const kk = Math.max(0, k - s2 * 0.035);
+      const [x, y] = at(i * 1.05 + kk * 5.5, R + 13 - kk * 10);
+      p(x, y, s2 === 0 ? '#fde68a' : s2 < 3 ? '#f97316' : '#7c2d12');
+    }
   }
+  // onde de choc : toutes les 6 s, un anneau de pixels part de l'horizon et s'efface
+  const w = (t % 6) / 1.2;
+  if (w < 1) for (const [i, j] of ringPx(R + 3 + w * 12, 1)) if (hash(i * 3 + j * 5) > w * 0.9) p(i + 0.5, j + 0.5, w < 0.4 ? '#ffffff' : '#a78bfa');
 };
 
 const AURAS: Record<string, AL[]> = {
@@ -594,8 +645,8 @@ const AURAS: Record<string, AL[]> = {
     { t: 'ring', c: '#475569', w: 2 },
     { t: 'fx', f: (p, t) => sword(p, t) },
   ],
-  // ??? : un œil s'ouvre dans le vide, l'anneau se déchire par moments
-  au_inconnu: [{ t: 'fx', f: (p, t) => voidEye(p, t) }],
+  // ??? : une singularité (trou noir) derrière la photo
+  au_inconnu: [{ t: 'fx', f: (p, t) => singularity(p, t) }],
 };
 const drawLayer = (p: Px, L: AL, t: number) => {
   switch (L.t) {
@@ -866,7 +917,8 @@ type BL = {
     | 'swirl'
     | 'ocean'
     | 'swords'
-    | 'static';
+    | 'static'
+    | 'rift';
   spr?: keyof typeof SP;
   n?: number;
   v?: number;
@@ -1003,8 +1055,11 @@ const BFXS: Record<string, BL[]> = {
     { m: 'swords', n: 0.35, v: 1, c: ['#cbd5e1', '#ffffff', '#f2c230', '#7c4a1e'] },
     { m: 'twinkle', spr: 'star', n: 0.4, c: ['#fde68a', '#ffffff'] },
   ],
-  // ??? : parasites, la bannière se déchire, un œil rouge s'allume par moments
-  fx_inconnu: [{ m: 'static', n: 1, c: ['#0b0b10', '#dc2626', '#1f1f2a'] }],
+  // ??? : une faille dimensionnelle s'ouvre au milieu de la bannière, aspire la lumière et crache des éclats
+  fx_inconnu: [
+    { m: 'twinkle', spr: 'dot', n: 0.7, c: ['#4c1d95', '#c4b5fd'] },
+    { m: 'rift', n: 1.2, c: ['#a855f7', '#ffffff', '#f0abfc', '#22d3ee'] },
+  ],
 };
 type P = { x: number; y: number; v: number; p: number; k: number; c: number };
 export function BannerFx({ id }: { id?: string | null }) {
@@ -1124,6 +1179,51 @@ export function BannerFx({ id }: { id?: string | null }) {
             ] as [number, number, string][]) {
               const top = Math.round(H - H * lvl - Math.sin(i * 0.12 + f * sp) * 2 - Math.sin(i * 0.05 - f * sp * 0.6) * 1.5);
               for (let y = top; y < H; y++) px(i, y, y === top ? c1 : colr);
+            }
+          return;
+        }
+        if (L.m === 'rift') {
+          // ??? : une fissure en zigzag au milieu ; elle s'ouvre et respire, l'intérieur est un ciel profond qui
+          // défile, ses bords crépitent ; des particules sont aspirées dedans ; toutes les 7 s elle s'ouvre en grand
+          // et lâche des éclats
+          const cy = H * 0.5,
+            x0 = W * 0.12,
+            x1 = W * 0.88,
+            beat = (f % 140) / 140;
+          const burst = beat < 0.12 ? 1 - beat / 0.12 : 0;
+          const open = 1.5 + Math.sin(f * 0.05) * 0.8 + burst * 4;
+          const yAt = (i: number) => cy + Math.round(Math.sin(i * 0.31) * 2.2 + Math.sin(i * 0.07 + 1) * 3 + (hash(Math.floor(i / 3)) - 0.5) * 2);
+          for (let i = Math.floor(x0); i < x1; i++) {
+            const e = Math.min(1, (i - x0) / 10, (x1 - i) / 10);
+            const hh = Math.max(0, Math.round(open * e));
+            const y = yAt(i);
+            for (let k = -hh; k <= hh; k++) {
+              // intérieur : ciel violet sombre avec des étoiles qui défilent
+              const star = hash(Math.floor(i + f * 0.6) * 17 + k * 5) > 0.93;
+              px(i, y + k, star ? '#ffffff' : (i + k) % 2 ? '#1e0838' : '#2e1065');
+            }
+            // bords : crépitent entre violet et blanc
+            const crack = hash(i * 13 + Math.floor(f / 3)) > 0.7;
+            px(i, y - hh - 1, crack ? c1 : c0);
+            px(i, y + hh + 1, crack ? c1 : (L.c[2] ?? c0));
+            if (hash(i * 7 + Math.floor(f / 4)) > 0.96) px(i, y - hh - 2 - Math.floor(hash(i + f) * 3), L.c[3] ?? c1);
+          }
+          // particules aspirées vers la fissure
+          ps.forEach((o) => {
+            o.p += 0.02 * o.v;
+            const k = o.p % 1;
+            const tx = x0 + ((o.x / Math.max(1, W)) * (x1 - x0));
+            const ty = yAt(Math.round(tx));
+            const sx = tx + Math.cos(o.k * 2.1 + o.y) * 40 * (1 - k),
+              sy = ty + Math.sin(o.k * 1.7 + o.y) * H * 0.45 * (1 - k);
+            if (k < 0.97) px(sx, sy, k > 0.7 ? c1 : (L.c[o.c] ?? c0));
+          });
+          // ouverture en grand : des éclats partent de la fissure
+          if (burst > 0)
+            for (let n = 0; n < 24; n++) {
+              const tx = x0 + hash(n * 3) * (x1 - x0),
+                d = (1 - burst) * (8 + hash(n) * 22);
+              px(tx + (hash(n * 5) - 0.5) * d * 0.8, yAt(Math.round(tx)) + (n % 2 ? d : -d), n % 3 ? c1 : (L.c[3] ?? c0));
             }
           return;
         }
@@ -1411,6 +1511,12 @@ export function CosmeticPreview({
     return (
       <span className={s.pvName + lg + hd}>
         <b className={nameCls(id)}>{label}</b>
+      </span>
+    );
+  if (id.startsWith('nf_'))
+    return (
+      <span className={s.pvName + ' ' + s.pvFont + lg + hd}>
+        <b className={nameCls(null, id)}>{label}</b>
       </span>
     );
   if (id.startsWith('au_'))

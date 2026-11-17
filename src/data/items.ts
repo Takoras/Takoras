@@ -117,6 +117,7 @@ export function itemText(it: ShopItem, lang: Lang): [string, string] {
   // cosmétiques de profil
   const cn = cosmName(it.id, lang);
   if (it.kind === 'name') return [t('it_name', { n: cn }), t('it_cosm_d')];
+  if (it.kind === 'font') return [t('it_font', { n: cn }), t('it_cosm_d')];
   if (it.kind === 'aura') return [t('it_aura', { n: cn }), t('it_cosm_d')];
   if (it.kind === 'bfx') return [t('it_bfx', { n: cn }), t('it_cosm_d')];
   return [t('it_banner', { n: bannerName(it.id.slice(2), lang) }), t('it_banner_d')];

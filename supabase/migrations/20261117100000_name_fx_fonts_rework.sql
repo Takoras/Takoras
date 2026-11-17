@@ -1,0 +1,7 @@
+-- Appliquées via MCP (name_fx_fonts_rework, free_pp_colors_only) :
+-- kind 'font' autorisé ; profiles.name_font ; equip_cosmetics(p_name, p_aura, p_bfx, p_font) ; profile_public renvoie name_font.
+-- Effets de pseudo retirés (n_rose, n_glace, n_braise, n_arc) : remboursés aux vrais propriétaires puis désactivés.
+-- Nouveaux : n_rouge/menthe/lilas/ciel/peche (commun), n_contour (rare), n_relief (épique), n_glitch/n_lave (légendaire),
+-- n_aurore (mythique) ; polices nf_silk/nf_vt (commun), nf_pixelify/nf_jersey (rare), nf_press (épique), nf_doto (légendaire).
+-- _is_cosm et _shop_group incluent les polices ; _apply_item gère 'font' ; _cosm_today : les rares sortent plus souvent
+-- (poids 34/26/18/10/4/1,5). PP gratuites : bleu, rouge, vert, yeux ; a_dunes, b_plaine, b_doodle en boutique.
