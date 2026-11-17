@@ -170,6 +170,8 @@ export default function Bestiary() {
     setSelecting(!selecting);
   };
   const tap = (c: Card, step?: number) => {
+    // jeton jamais trouvé : il reste un mystère, sa fiche ne s'ouvre pas (sinon on voyait le jeton sans l'avoir eu)
+    if (!(c.total > 0 || c.seen)) return sfx.deny();
     sfx.click();
     const g = c.g;
     if (selecting) {
