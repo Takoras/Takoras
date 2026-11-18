@@ -6,7 +6,6 @@ test('accueil connecté : solde, stock et boutons', async ({ page }) => {
   await page.goto('/');
   await expect(page.getByRole('status').filter({ hasText: '/20' })).toContainText('12');
   await expect(page.getByRole('button', { name: 'Ouvrir 1' })).toBeEnabled();
-  await expect(page.getByRole('button', { name: /Tout ouvrir/ })).toContainText('12');
 });
 
 test('ouvrir 1 pull : transition, révélation au tap, retour', async ({ page }) => {
@@ -16,54 +15,59 @@ test('ouvrir 1 pull : transition, révélation au tap, retour', async ({ page })
   const opening = page.locator('#opening');
   await expect(opening).toHaveClass(/\bon\b/);
   expect(fake.calls).toContain('take_pulls');
-  for (let i = 0; i < 40 && !(await opening.getAttribute('class'))?.includes('revealed'); i++) {
-    await page.locator('#op-coin').dispatchEvent('pointerdown');
-    await page.waitForTimeout(120);
-  }
+  // on tape vite jusqu'à la révélation, puis on ralentit : le « clic de trop » (on voulait s'arrêter) n'ouvre rien de plus.
+  // Tout se joue dans la page : le rythme des clics compte à la milliseconde près.
+  await page.evaluate(
+    () =>
+      new Promise<void>((done) => {
+        const box = document.getElementById('opening') as HTMLElement;
+        const coin = document.getElementById('op-coin') as HTMLElement;
+        const tap = () => coin.dispatchEvent(new PointerEvent('pointerdown', { bubbles: true }));
+        const timer = setInterval(() => {
+          if (!box.classList.contains('revealed')) return tap();
+          clearInterval(timer);
+          setTimeout(() => {
+            tap();
+            setTimeout(done, 200);
+          }, 400);
+        }, 120);
+      }),
+  );
   await expect(opening).toHaveClass(/revealed/);
   await expect(page.locator('#op-name')).toContainText('Pikko');
-  // le « clic de trop » juste après la révélation (on voulait s'arrêter) n'ouvre pas un autre tirage…
-  const n = fake.calls.filter((c) => c === 'take_pulls').length;
-  await page.locator('#op-coin').dispatchEvent('pointerdown');
-  await page.waitForTimeout(150);
-  expect(fake.calls.filter((c) => c === 'take_pulls').length).toBe(n);
   await page.keyboard.press('Escape'); // retour (même effet que le bouton « Retour »)
   await expect(opening).not.toHaveClass(/\bon\b/, { timeout: 5000 });
 });
 
-test('tout ouvrir : le mode auto s’arrête sur un jeton rare, puis récap groupé', async ({ page }) => {
-  test.setTimeout(120_000); // cinématique de Nyx + pause avant révélation : c'est long, exprès
-  // Nyx = 1/5 000 ≥ seuil 1/1 000 par défaut → arrêt
-  await fakeSupabase(page, { stock: 6 }, [['Mobu', 'Mobu', 'Pikko', 'Nyx', 'Mobu', 'Givre']]);
+test('toucher le jeton révélé ouvre le tirage suivant', async ({ page }) => {
+  const fake = await fakeSupabase(page, { stock: 3 }, [['Mobu'], ['Pikko']]);
   await page.goto('/');
-  await page.getByRole('button', { name: /Tout ouvrir/ }).click();
+  await page.getByRole('button', { name: 'Ouvrir 1' }).click();
   const opening = page.locator('#opening');
-  await expect(opening).toHaveClass(/\bon\b/);
-  await page.locator('#op-auto').dispatchEvent('click');
-  // arrêt sur le 4e jeton (Nyx, 1/5 000 ≥ seuil 1/1 000 par défaut) : le joueur l'ouvre lui-même
-  await expect(page.locator('#op-tag')).toContainText('4/6', { timeout: 15_000 });
-  await expect(opening).not.toHaveClass(/turbo/);
-  // on finit à la main jusqu'au récap
-  for (let i = 0; i < 300 && !(await opening.getAttribute('class'))?.includes('recap'); i++) {
-    const cls = (await opening.getAttribute('class')) ?? '';
-    if (await page.locator('.cine').count()) await page.locator('.cine').dispatchEvent('click');
-    else if (!cls.includes('revealed')) await page.locator('#op-coin').dispatchEvent('pointerdown');
-    else if (await page.locator('#op-recap').isVisible()) await page.locator('#op-recap').dispatchEvent('click');
-    else if (await page.locator('#op-next').isVisible()) await page.locator('#op-next').dispatchEvent('click');
-    await page.waitForTimeout(100);
-  }
-  await expect(page.locator('#op-recap-grid .rc')).toHaveCount(4); // Mobu ×3 regroupés + Pikko + Nyx + Givre
-  await expect(page.locator('#op-recap-grid')).toContainText('×3');
+  const reveal = async () => {
+    for (let i = 0; i < 60 && !(await opening.getAttribute('class'))?.includes('revealed'); i++) {
+      await page.locator('#op-coin').dispatchEvent('pointerdown');
+      await page.waitForTimeout(120);
+    }
+    await expect(opening).toHaveClass(/revealed/);
+  };
+  await reveal();
+  await expect(page.locator('#op-name')).toContainText('Mobu');
+  await page.waitForTimeout(800); // un clic posé après la révélation (les clics qui traînent ne comptent pas)
+  await page.locator('#op-coin').dispatchEvent('pointerdown');
+  await expect.poll(() => fake.calls.filter((c) => c === 'take_pulls').length).toBe(2);
+  await expect(opening).not.toHaveClass(/revealed/);
+  await reveal();
+  await expect(page.locator('#op-name')).toContainText('Pikko');
 });
 
 test('une ouverture interrompue reprend après un rechargement de la page', async ({ page }) => {
-  await fakeSupabase(page, { stock: 3 }, [['Mobu', 'Pikko', 'Givre']]);
+  await fakeSupabase(page, { stock: 3 }, [['Mobu']]);
   await page.goto('/');
-  await page.getByRole('button', { name: /Tout ouvrir/ }).click();
-  await expect(page.locator('#op-tag')).toContainText('1/3');
-  await page.reload();
+  await page.getByRole('button', { name: 'Ouvrir 1' }).click();
   await expect(page.locator('#opening')).toHaveClass(/\bon\b/);
-  await expect(page.locator('#op-tag')).toContainText('/3');
+  await page.reload();
+  await expect(page.locator('#opening')).toHaveClass(/\bon\b/, { timeout: 15_000 }); // le moteur se recharge d'abord
 });
 
 test('bonus du jour et quêtes : récupérer met à jour le solde', async ({ page }) => {
@@ -85,24 +89,4 @@ test('« Probas & infos » : la somme des probabilités affichées et le choix d
   await expect(dialog.locator('tbody tr')).toHaveCount(17 + 3);
   await dialog.getByRole('button', { name: '×500' }).click();
   await expect(dialog.getByRole('button', { name: '×500' })).toHaveAttribute('aria-pressed', 'true');
-});
-
-test('après un « Tout ouvrir » en mode rapide, le compteur ×N ne reste pas affiché', async ({ page }) => {
-  test.setTimeout(90_000);
-  await fakeSupabase(page, { stock: 8 }, [['Mobu', 'Mobu', 'Pikko', 'Mobu', 'Givre'], ['Pikko']]);
-  await page.goto('/');
-  await page.getByRole('button', { name: /Tout ouvrir/ }).click();
-  const opening = page.locator('#opening');
-  await page.locator('#op-auto').dispatchEvent('click');
-  for (let i = 0; i < 300 && !(await opening.getAttribute('class'))?.includes('recap'); i++) {
-    const cls = (await opening.getAttribute('class')) ?? '';
-    if (!cls.includes('revealed')) await page.locator('#op-coin').dispatchEvent('pointerdown');
-    else if (await page.locator('#op-recap').isVisible()) await page.locator('#op-recap').dispatchEvent('click');
-    else if (await page.locator('#op-next').isVisible()) await page.locator('#op-next').dispatchEvent('click');
-    await page.waitForTimeout(100);
-  }
-  await page.locator('#op-recap-back').dispatchEvent('click');
-  await page.getByRole('button', { name: 'Ouvrir 1' }).click();
-  await expect(opening).toHaveClass(/\bon\b/);
-  await expect(page.locator('#op-combo')).toBeHidden();
 });

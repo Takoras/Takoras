@@ -52,7 +52,7 @@ test('admin : joueurs, don, ban avec confirmation, remise à zéro générale pr
   await expect(ok).toBeDisabled();
   await page.getByRole('dialog').getByRole('textbox').fill('RESET');
   await ok.click();
-  expect(calls).toContain('admin_reset');
+  await expect.poll(() => calls).toContain('admin_reset');
 });
 
 test('admin : boutique, annonce, code promo, retours, patch notes FR+EN', async ({ page, isMobile }) => {

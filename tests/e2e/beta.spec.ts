@@ -1,18 +1,11 @@
 import { test, expect } from '@playwright/test';
 import { fakeSupabase } from './fake-supabase';
 
-test('visite guidée de la première visite : suivant, passer (une seule fois)', async ({ page }) => {
+test('première visite : pas de visite guidée, seulement la nouveauté', async ({ page }) => {
   await fakeSupabase(page, {}, [], { tuto: true, pnSeen: -1 });
-  // un vrai nouveau joueur n'a encore rien vu
   await page.goto('/');
-  const d = page.getByRole('dialog', { name: 'Ton tirage' });
-  await expect(d).toBeVisible({ timeout: 6000 });
-  await d.getByRole('button', { name: 'Suivant' }).click();
-  const d2 = page.getByRole('dialog', { name: 'Les tirages' });
-  await expect(d2).toBeVisible();
-  await d2.getByRole('button', { name: 'Passer' }).click();
-  await expect(d2).toBeHidden();
-  expect(await page.evaluate(() => localStorage.getItem('takoras-tuto-done'))).toBe('1');
+  await expect(page.getByRole('dialog').getByRole('heading', { name: 'Version 0.13' })).toBeVisible({ timeout: 6000 });
+  await expect(page.getByRole('dialog', { name: 'Ton tirage' })).toHaveCount(0);
 });
 
 test('patch notes : popup de la nouveauté, puis toutes les notes via le menu « … »', async ({ page, isMobile }) => {
@@ -49,13 +42,21 @@ test('donner un avis', async ({ page }) => {
   await expect(page.getByRole('status').getByText(/5 caractères/)).toBeVisible();
   await d.getByRole('textbox').fill('Le bouton vendre ne répond pas');
   await d.getByRole('button', { name: 'Envoyer' }).click();
-  await expect(page.getByRole('status').getByText(/Merci/)).toBeVisible();
+  await expect(d).toBeHidden(); // envoyé : la fenêtre se ferme (plus de message quand tout va bien)
   expect(calls).toContain('send_feedback');
 });
 
-test('plus de menu testeur ni de menu bêta', async ({ page }) => {
+test('menu testeur : la fiole apparaît pour un testeur', async ({ page }) => {
   await fakeSupabase(page, { coins: 100 }, [], { tester: true });
   await page.goto('/');
+  await page.getByRole('button', { name: 'Menu testeur' }).click();
+  await expect(page.getByRole('dialog', { name: 'Menu testeur' })).toBeVisible();
+});
+
+test('menu testeur : absent pour un joueur normal, et plus de menu bêta', async ({ page }) => {
+  await fakeSupabase(page, { coins: 100 });
+  await page.goto('/');
+  await expect(page.getByLabel('Solde')).toContainText('100'); // le compte est chargé : l'absence veut dire quelque chose
   await expect(page.getByRole('button', { name: 'Menu testeur' })).toHaveCount(0);
   await expect(page.getByRole('button', { name: 'bêta' })).toHaveCount(0);
 });
