@@ -212,8 +212,8 @@ export default function Bourse() {
   const d = q.data;
   useBoard(false, !!d && !('locked' in d)); // le classement est prêt avant d'ouvrir l'onglet : rien n'arrive après coup
   useStaggerIn(pageRef, `.${s.bar}, .${s.term} > *`, !!d);
-  // les infos comptent : les blocs ne bougent presque pas au survol
-  useSwingAll(pageRef, `.${s.box}, .${s.bar}`, 0.035, `${tab}|${d ? 1 : 0}`);
+  // seuls les petits blocs bougent, à peine : sur le grand graphique ou le bandeau, le moindre angle se voit trop
+  useSwingAll(pageRef, `.${s.watch}, .${s.pay}, .${s.tape}`, 0.035, `${tab}|${d ? 1 : 0}`);
   if (!uid) return <NeedLogin title={t('ui.nav_bourse')} />;
   if (!d)
     return (
