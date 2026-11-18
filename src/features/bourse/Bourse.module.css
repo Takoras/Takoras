@@ -375,11 +375,16 @@
   cursor: default;
 }
 .submit {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
   height: 44px;
   border: 0;
   border-radius: 6px;
   font: inherit;
   font-weight: 800;
+  line-height: 1.2;
   white-space: nowrap;
   cursor: pointer;
   transition: filter 0.15s;
