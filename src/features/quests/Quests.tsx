@@ -15,6 +15,7 @@ import { toast } from '@/ui/toast';
 import { useNow } from '../eco/eco';
 import s from './Quests.module.css';
 import { Bump } from '@/ui/motion';
+import { useSwingAll } from '@/ui/useSwing';
 
 // Pièces du bouton vers le solde : le même vol que partout (ui/fx.ts), et un objet gagné file vers l'inventaire
 function coinRain(from: HTMLElement, n: number) {
@@ -32,6 +33,8 @@ export function Quests() {
   const done = useRef<Set<string> | null>(null);
   const [just, setJust] = useState(''); // ce qu'on vient de récupérer : il claque
   const data = q.data;
+  const rows = useRef<HTMLUListElement>(null);
+  useSwingAll(rows, 'li', 0.3, data);
   // une quête vient d'être terminée (le serveur l'a comptée) : petite notif
   useEffect(() => {
     if (!data) return;
@@ -107,16 +110,17 @@ export function Quests() {
         <h2 id="q-t">{t('ui.q_title')}</h2>
         <small className="muted">{t('ui.q_reset', { t: hms(left) })}</small>
       </div>
-      <ul className={s.list}>
+      <ul ref={rows} className={s.list}>
         {/* plus de combat : les quêtes de combat ne sont plus affichées */}
         {data.quests
           .filter((x) => x.stat !== 'battles' && x.stat !== 'wins')
-          .map((x) => {
+          .map((x, i) => {
             const ok = x.value >= x.target,
               item = x.item ? ITEM_IMG[x.item] : undefined;
             return (
               <li
                 key={x.id}
+                style={{ '--i': i } as React.CSSProperties}
                 className={`${ok ? s.ok : ''} ${x.claimed ? s.claimed : ''} ${just === x.id ? s.just : ''}`}
               >
                 <div className={s.top}>

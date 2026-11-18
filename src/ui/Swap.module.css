@@ -9,10 +9,12 @@
   min-width: 0;
 }
 .out {
+  align-self: start; /* hauteur naturelle : sinon le bloc garde celle de l'autre contenu puis saute d'un coup */
   pointer-events: none;
   animation: swapOut 0.24s ease-in forwards;
 }
 .in {
+  align-self: start;
   animation: swapIn 0.32s cubic-bezier(0.2, 0.8, 0.2, 1) both;
 }
 @keyframes swapOut {

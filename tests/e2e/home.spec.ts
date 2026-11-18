@@ -29,7 +29,7 @@ test('ouvrir 1 pull : transition, révélation au tap, retour', async ({ page })
           setTimeout(() => {
             tap();
             setTimeout(done, 200);
-          }, 400);
+          }, 300);
         }, 120);
       }),
   );

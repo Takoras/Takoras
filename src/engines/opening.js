@@ -107,70 +107,20 @@ async function onde() {
   return 0;
 }
 
-// Transition « Chute » : le jeton de l'accueil continue de tomber jusqu'au centre de l'écran en se redressant,
-// se retourne sur le « ? », et l'ouverture commence exactement là (le « ? » de l'ouverture prend sa place, sans saut).
+// Entrée dans l'ouverture : le jeton est déjà au centre, l'écran arrive en un fondu court.
 let skipSpawn = false;
-async function chute() {
-  const hero = heroCoin(), img = hero.querySelector('img');
-  if (!img) return onde();
-  // on mesure le jeton droit (#coin), pas l'image penchée : sa boîte tournée est plus grande, d'où un saut de taille
-  const r = hero.getBoundingClientRect();
-  const tumble = img.parentElement ? getComputedStyle(img.parentElement).rotate : 'none';
-  const a0 = tumble && tumble !== 'none' ? parseFloat(tumble) : 0;
-  // l'écran d'ouverture est posé tout de suite mais invisible : on vise la VRAIE place du « ? » (même taille,
-  // même endroit), puis on bascule d'un coup, sans fondu ni changement de taille
+async function fondu() {
   opening.classList.add('op-enter');
   skipSpawn = true;
   showOpening();
-  opening.style.opacity = '0';
-  const real = $('op-coin');
-  real.style.visibility = 'hidden';
-  const tr = (real.querySelector('.spin') || real).getBoundingClientRect();
-  const c = tr.width ? { x: tr.left + tr.width / 2, y: tr.top + tr.height / 2, s: tr.width } : { ...center(), s: Math.min(240, Math.max(180, innerWidth * 0.26)) };
-  const dx = c.x - (r.left + r.width / 2), dy = c.y - (r.top + r.height / 2), k = c.s / r.width;
-  // fond de l'ouverture qui arrive vite derrière
-  const sc = serieTheme((sess && PULLS[sess.pull]?.name) || 'Takoras').main.split(' ').join(',');
-  const dim = el(`inset:0;background:radial-gradient(60% 55% at 50% 45%, rgba(${sc},.22), transparent 70%), #0b0a12;z-index:1`);
-  dim.animate([{ opacity: 0 }, { opacity: 1 }], { duration: 260, easing: 'ease-out', fill: 'forwards' });
-  const d = el(`left:${r.left}px;top:${r.top}px;width:${r.width}px;height:${r.height}px;z-index:3;will-change:transform`,
-    `<img src="${img.src}" alt="" style="width:100%;height:100%;image-rendering:pixelated;display:block">`);
-  hero.style.visibility = 'hidden';
-  const face = d.firstElementChild;
-  face.decode?.().catch(() => {});
-  // le gros de la mise en place est fait : on attend une image pour que l'animation parte sans à-coup
-  await new Promise(r => requestAnimationFrame(() => requestAnimationFrame(r)));
-  // 1. élan : il se tasse
-  await d.animate([
-    { transform: `rotate(${a0}deg) scale(1)` },
-    { transform: `rotate(${a0}deg) scale(.8, .88)` },
-  ], { duration: 90, easing: 'ease-out', fill: 'forwards' }).finished;
-  // 2. il fonce au centre en tournant (petit arc), grossit trop, puis se pose ; il devient « ? » en plein vol
-  const D = 400;
-  const fly = d.animate([
-    { transform: `translate(0,0) rotate(${a0}deg) scale(.82)` },
-    { transform: `translate(${dx * 0.55}px,${dy * 0.55 - 50}px) rotate(${a0 + 200}deg) scale(${k * 0.85})`, offset: 0.45 },
-    { transform: `translate(${dx}px,${dy}px) rotate(${a0 + 360}deg) scale(${k * 1.2})`, offset: 0.78 },
-    { transform: `translate(${dx}px,${dy}px) rotate(${a0 + 360}deg) scale(${k * 0.96})`, offset: 0.9 },
-    { transform: `translate(${dx}px,${dy}px) rotate(${a0 + 360}deg) scale(${k})` },
-  ], { duration: D, easing: 'cubic-bezier(.35,.05,.25,1)', fill: 'forwards' });
-  setTimeout(() => { face.src = MYSTERE; }, D * 0.4);
-  // 3. il se pose : petit coup sourd et une lueur brève
-  setTimeout(() => {
-    sfx.hold();
-    const fl = el('inset:0;z-index:5;background:radial-gradient(circle at 50% 45%, rgba(255,255,255,.3), transparent 55%)');
-    fl.animate([{ opacity: 1 }, { opacity: 0 }], { duration: 260, easing: 'ease-out', fill: 'forwards' });
-  }, D * 0.78);
-  await fly.finished;
-  // bascule sur le vrai écran : même jeton, même place
-  opening.style.opacity = '';
-  real.style.visibility = '';
-  setTimeout(() => opening.classList.remove('op-enter'), 500);
-  return 160; // le fond et les échos s'effacent vite
+  opening.animate([{ opacity: 0 }, { opacity: 1 }], { duration: 130, easing: 'ease-out' });
+  setTimeout(() => opening.classList.remove('op-enter'), 200);
+  return 0;
 }
 
 // [nom, description, fonction, durée max en ms (filet de sécurité)]
 const TRANSITIONS = [
-  ['Chute', 'Le jeton de l\'accueil fonce au centre en tournant et devient le « ? »', chute, 900],
+  ['Fondu', 'Le jeton est au centre, simple fondu rapide', fondu, 200],
   ['Pixels', 'Des bords vers le jeton, puis se désintègre du centre vers les bords', onde, DUR],
 ];
 
@@ -289,7 +239,7 @@ function draw(list) {
 function steps(X, fresh = false) {
   if (X <= 1) return [];
   const lg = Math.log2(X);
-  const n = Math.min(X - 1, X >= 10000 ? Math.min(70, Math.round(15 + (lg - 13.3) * 8)) : Math.min(15, Math.round(4 + lg * .9)));
+  const n = Math.min(X - 1, X >= 10000 ? Math.min(35, Math.round(8 + (lg - 13.3) * 4)) : Math.min(8, Math.round(2 + lg * .5)));
   const out = [];
   for (let i = 1; i <= n; i++) {
     const v = i === n ? X : Math.round(1 + (X - 1) * (i / n) ** 2.2 * (.9 + Math.random() * .2));
@@ -512,7 +462,7 @@ function hold(restored) {
   }
   $('op-hint').textContent = t('click_reveal');
   // évite de révéler par accident ; en plein spam, la pause est courte (on veut aller vite)
-  setTimeout(() => { if (run === r) r.canReveal = true; }, rhythm().fast ? 140 : 450 * Math.max(.5, speed()));
+  setTimeout(() => { if (run === r) r.canReveal = true; }, rhythm().fast ? 80 : 220 * Math.max(.5, speed()));
 }
 
 // Révélation : le jeton tourne en se penchant, la face change à mi-chemin, puis il glisse à gauche et la fiche arrive
@@ -646,7 +596,7 @@ function reveal(restored, quiet = false) {
   const own = restored ? (styleClean(), null) : styleReveal(j, lv, quiet);
   if (own && !quiet) {
     if (!own.noSpin) spin.animate([{ transform: 'rotateY(0) scale(.92)' }, { transform: 'rotateY(1440deg) scale(1)' }], { duration: own.lock || 900, easing: 'cubic-bezier(.1, .8, .15, 1)' });
-    const lock = rhythm().fast && j.odds < RARE ? 200 : Math.min(own.lock || 500, j.odds >= RARE ? 1600 : 700);
+    const lock = rhythm().fast && j.odds < RARE ? 120 : Math.min(own.lock || 300, j.odds >= RARE ? 1000 : 350);
     r.spinEnd = performance.now() + lock;
     opening.classList.add('spinning');
     setTimeout(() => { if (run === r) opening.classList.remove('spinning'); }, lock);
@@ -654,8 +604,8 @@ function reveal(restored, quiet = false) {
   // Le jeton se retourne très vite puis ralentit longtemps (plus il est rare, plus ça dure)
   else if (!restored && !quiet) {
     const turns = j.odds >= GOD ? 10 : j.odds >= MYTHIC ? 8 : j.odds >= RARE ? 6 : j.odds >= FAST ? 4 : 3;
-    // rythme selon la rareté (cahier § 16.2) : commune 0,8 s · rare 1,4 s · épique 2,2 s · légendaire 3,2 s · hyper rare 4,5 s
-    const ms = Math.max(350, (j.odds >= MYTHIC ? 4500 : j.odds >= 10000 ? 3200 : j.odds >= RARE ? 2200 : j.odds >= 100 ? 1400 : 800) * (speed() || .2));
+    // rythme selon la rareté : commune 0,5 s · rare 0,8 s · épique 1,4 s · légendaire 2 s · hyper rare 2,8 s
+    const ms = Math.max(250, (j.odds >= MYTHIC ? 2800 : j.odds >= 10000 ? 2000 : j.odds >= RARE ? 1400 : j.odds >= 100 ? 800 : 500) * (speed() || .2));
     const T = turns * 360;
     spin.animate([
       { transform: 'rotateY(0) scale(.92)' },
@@ -666,9 +616,9 @@ function reveal(restored, quiet = false) {
       if (run !== r) return;
       shake(j.odds >= RARE ? .8 : .35); burst(j.odds >= RARE ? 14 : 8);
     }, ms * .7);
-    // On ne peut pas passer à la suite tout de suite : 0,5 s max pour les jetons communs,
+    // On ne peut pas passer à la suite tout de suite : 0,25 s max pour les jetons communs,
     // toute la rotation pour les vrais rares (1/1000 et plus)
-    const lock = j.odds >= RARE ? ms : rhythm().fast ? 200 : Math.min(ms, 500); // en plein spam : on enchaîne vite
+    const lock = j.odds >= RARE ? ms : rhythm().fast ? 120 : Math.min(ms, 250); // en plein spam : on enchaîne vite
     r.spinEnd = performance.now() + lock;
     opening.classList.add('spinning');
     setTimeout(() => { if (run === r) opening.classList.remove('spinning'); }, lock);
@@ -966,7 +916,7 @@ function rhythm() {
   const avg = prev.length ? prev.reduce((a, b) => a + b, 0) / prev.length : last;
   return { fast: avg < 260 && last < 330, slowing: last > Math.max(280, avg * 1.6) };
 }
-const LET_GO = 650; // après la révélation, un clic « lent » attend ce délai avant de rouvrir
+const LET_GO = 450; // après la révélation, un clic « lent » attend ce délai avant de rouvrir
 let swapping = false;
 function tryReopen() {
   if (swapping) return;
@@ -1004,8 +954,8 @@ function tap() {
   $('op-hint').textContent = '';
   if (!run.queue.length) {
     // En instantané (ou pour les communs), on révèle directement, sans pause ni cinématique
-    if (!sess.cur?.fresh && (run.shown < FAST || SETTINGS.speed === 'instant')) { run.done = true; setTimeout(reveal, 120); } // chance affichée (mutation comprise) : une vraie pause dès 1/60
-    else setTimeout(hold, 200);
+    if (!sess.cur?.fresh && (run.shown < FAST || SETTINGS.speed === 'instant')) { run.done = true; setTimeout(reveal, 50); } // chance affichée (mutation comprise) : une vraie pause dès 1/60
+    else setTimeout(hold, 90);
   }
 }
 
@@ -1032,12 +982,12 @@ function buy(n, plan = null, vars = null, lucks = null, ids = null, pull = 0) {
   // Le jeton qu'on vient d'avoir se retourne sur place, le « ? » revient, le compteur repart à 1/1 — sans coupure.
   const reopen = n === 1 && opening.classList.contains('on') && !opening.classList.contains('recap') && SETTINGS.speed !== 'instant';
   if (reopen) {
-    // pendant le retournement (140 ms), plus aucun clic ne compte : avant, un clic très rapide relançait un 2e tirage
+    // pendant le retournement (80 ms), plus aucun clic ne compte : avant, un clic très rapide relançait un 2e tirage
     // qui remplaçait celui-ci (le compteur montait puis repartait à zéro, et ce tirage n'était jamais montré)
     swapping = true;
     const leaving = [...opening.querySelectorAll('.op-id, .op-stats, .op-actions, .op-note, .op-burst, .v-pop')];
-    const fades = leaving.map(x => x.animate([{ opacity: getComputedStyle(x).opacity }, { opacity: 0 }], { duration: 130, easing: 'ease-out', fill: 'forwards' }));
-    opCoin.animate([{ transform: 'rotateY(0deg)' }, { transform: 'rotateY(90deg)' }], { duration: 140, easing: 'ease-in', fill: 'forwards' }).finished.then(() => {
+    const fades = leaving.map(x => x.animate([{ opacity: getComputedStyle(x).opacity }, { opacity: 0 }], { duration: 80, easing: 'ease-out', fill: 'forwards' }));
+    opCoin.animate([{ transform: 'rotateY(0deg)' }, { transform: 'rotateY(90deg)' }], { duration: 80, easing: 'ease-in', fill: 'forwards' }).finished.then(() => {
       swapping = false;
       // le nouveau tirage repart propre (les infos réapparaîtront normalement à sa révélation)
       requestAnimationFrame(() => fades.forEach(a => a.cancel()));
@@ -1046,12 +996,11 @@ function buy(n, plan = null, vars = null, lucks = null, ids = null, pull = 0) {
       startOpening();
       sfx.spawn();
       opCoin.getAnimations().forEach(a => a.cancel());
-      opCoin.animate([{ transform: 'rotateY(-90deg)' }, { transform: 'rotateY(0deg) scale(1.06)', offset: 0.7 }, { transform: 'rotateY(0deg) scale(1)' }], { duration: 260, easing: 'cubic-bezier(.2,.9,.3,1)' });
+      opCoin.animate([{ transform: 'rotateY(-90deg)' }, { transform: 'rotateY(0deg) scale(1.06)', offset: 0.7 }, { transform: 'rotateY(0deg) scale(1)' }], { duration: 160, easing: 'cubic-bezier(.2,.9,.3,1)' });
     });
     return;
   }
   closeOpening(); startSession(n, plan, vars, lucks, ids);
-  // « Ouvrir 1 » comme « Tout ouvrir » : le jeton de l'accueil tombe au centre et se retourne (transition « Chute »)
   runTransition();
 }
 $('op-next')?.addEventListener('click', next);

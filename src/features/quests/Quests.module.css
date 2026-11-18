@@ -119,9 +119,39 @@
 .list li,
 .daily {
   transition:
+    translate 0.25s var(--ease-out),
     background-color 0.3s,
     border-color 0.3s,
     color 0.3s;
+}
+/* comme les cases du site : un peu penchées, elles se balancent au survol et montent légèrement */
+.list li {
+  --tilt: -0.5deg;
+  rotate: calc(var(--tilt) + var(--swing, 0deg));
+  transform-origin: 50% 0;
+  animation: questIn 0.4s var(--ease-out) calc(var(--i, 0) * 40ms) backwards;
+}
+.list li:nth-child(2n) {
+  --tilt: 0.4deg;
+}
+.list li:hover,
+.daily:hover {
+  translate: 0 -2px;
+  background: var(--surface-2);
+}
+@keyframes questIn {
+  from {
+    opacity: 0;
+    translate: 0 10px;
+  }
+}
+.list li.just {
+  animation:
+    questIn 0.4s var(--ease-out) calc(var(--i, 0) * 40ms) backwards,
+    questJust 0.5s cubic-bezier(0.2, 1.3, 0.4, 1);
+}
+:global(html.reduce-fx) .list li {
+  animation: none;
 }
 .just {
   animation: questJust 0.5s cubic-bezier(0.2, 1.3, 0.4, 1);

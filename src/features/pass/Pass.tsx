@@ -14,6 +14,7 @@ import { Segmented } from '@/ui/Segmented';
 import { Tween } from '@/ui/Tween';
 import { toast } from '@/ui/toast';
 import { flyCoins, flyIcons, shockwave } from '@/ui/fx';
+import { burstAt } from '@/lib/pfx';
 import { useSwingAll } from '@/ui/useSwing';
 import { useStaggerIn } from '@/ui/useStaggerIn';
 import { RewardSheet } from './RewardSheet';
@@ -90,6 +91,7 @@ export default function Pass() {
     enabled: !!user,
     queryFn: async () => (await passApi.state()) as unknown as PassState,
   });
+  useWeekly(); // les missions sont prêtes avant d'ouvrir l'onglet : rien n'arrive après coup
   const d = q.data;
   const tier = d ? Math.min(50, Math.floor(d.xp / XP_TIER)) : 0;
   useStaggerIn(pageRef, `.${s.head}, .${s.hero}, .${s.prem}, .${s.board}, .${s.missions} > *`, !!d);
@@ -761,17 +763,18 @@ function Weekly() {
   const uid = useAuth((x) => x.user?.id);
   const qc = useQueryClient();
   const [just, setJust] = useState('');
-  const q = useQuery({
-    queryKey: ['weekly', uid],
-    enabled: !!uid,
-    queryFn: async () => (await passApi.weekly()) as unknown as Wk,
-  });
+  const q = useWeekly();
+  const rows = useRef<HTMLUListElement>(null);
+  useSwingAll(rows, 'li', 0.18, q.data);
   if (!q.data) return null;
   const n = (v: number) => v.toLocaleString(locale(lang));
-  const claim = async (id: string) => {
+  const claim = async (id: string, el: HTMLElement) => {
     try {
-      qc.setQueryData(['me', uid], await passApi.claimWeekly(id));
+      const st = await passApi.claimWeekly(id);
+      flyCoins(el.getBoundingClientRect(), 3, () => undefined); // avant le nouveau solde : pas de deuxième vol
+      qc.setQueryData(['me', uid], st);
       setJust(id);
+      burstAt(el, '#4ade80');
       sfx.upgrade();
       void q.refetch();
       void qc.invalidateQueries({ queryKey: ['pass'] });
@@ -783,15 +786,16 @@ function Weekly() {
   return (
     <section className={s.weekly} aria-labelledby="wk-t">
       <h2 id="wk-t">{t('ui.wk_title')}</h2>
-      <ul>
+      <ul ref={rows}>
         {/* plus de combat : la mission « gagner des matchs » n'est plus affichée */}
         {q.data.quests
           .filter((x) => x.id !== 'wins')
-          .map((x) => {
+          .map((x, i) => {
             const ok = x.value >= x.target;
             return (
               <li
                 key={x.id}
+                style={{ '--i': i } as CSSProperties}
                 className={`${x.claimed ? s.wkDone : ok ? s.wkReady : ''} ${just === x.id ? s.wkJust : ''}`}
               >
                 <span>
@@ -813,7 +817,7 @@ function Weekly() {
                     ✓
                   </Bump>
                 ) : (
-                  <Button size="sm" variant={ok ? 'primary' : 'ghost'} disabled={!ok} onClick={() => void claim(x.id)}>
+                  <Button size="sm" variant={ok ? 'primary' : 'ghost'} disabled={!ok} onClick={(e) => void claim(x.id, e.currentTarget)}>
                     {ok ? t('ui.bp_claim') : `${x.value}/${x.target}`}
                   </Button>
                 )}
@@ -823,4 +827,13 @@ function Weekly() {
       </ul>
     </section>
   );
+}
+
+function useWeekly() {
+  const uid = useAuth((x) => x.user?.id);
+  return useQuery({
+    queryKey: ['weekly', uid],
+    enabled: !!uid,
+    queryFn: async () => (await passApi.weekly()) as unknown as Wk,
+  });
 }
