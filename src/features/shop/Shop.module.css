@@ -481,7 +481,7 @@
   border-radius: inherit;
   background: #fff;
   opacity: 0;
-  animation: whiten var(--wd, 1.2s) cubic-bezier(0.45, 0.05, 0.7, 0.6) forwards; /* durée selon la rareté */
+  animation: whiten var(--wd, 1.2s) linear forwards; /* durée selon la rareté */
 }
 @keyframes whiten {
   to {

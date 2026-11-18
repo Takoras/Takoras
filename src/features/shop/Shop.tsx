@@ -239,14 +239,25 @@ export default function Shop() {
         cover.classList.add(s.whiten ?? '');
         await cover
           .animate(
+            // la luminosité monte très progressivement (sinon la case paraît blanche dès la moitié)
             [
               { transform: 'scale(1)', filter: 'brightness(1) saturate(1) drop-shadow(0 0 0 rgb(255 255 255 / 0%))' },
+              {
+                offset: 0.5,
+                transform: 'scale(1.02)',
+                filter: 'brightness(1.25) saturate(.8) drop-shadow(0 0 5px rgb(255 255 255 / 20%))',
+              },
+              {
+                offset: 0.8,
+                transform: 'scale(1.035)',
+                filter: 'brightness(1.8) saturate(.45) drop-shadow(0 0 11px rgb(255 255 255 / 50%))',
+              },
               {
                 transform: 'scale(1.05)',
                 filter: 'brightness(6) saturate(0) drop-shadow(0 0 18px rgb(255 255 255 / 80%))',
               },
             ],
-            { duration: charge, easing: 'cubic-bezier(.45,.05,.7,.6)', fill: 'forwards' },
+            { duration: charge, easing: 'linear', fill: 'forwards' },
           )
           .finished.catch(() => undefined);
       }
