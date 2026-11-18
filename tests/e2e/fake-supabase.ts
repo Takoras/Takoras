@@ -128,17 +128,30 @@ export async function fakeSupabase(
     assets: [
       {
         id: 1,
-        name: 'Mobu' as string | null,
-        odds: 2 as number | null,
+        name: 'Mobu',
+        odds: 2,
         price: 10,
         p0: 10,
         shares: 2000,
         k: 4e7,
         share: 0.4,
         own: 0,
+        cost: 0,
         h: [] as number[],
       },
-      { id: 2, name: 'Pikko', odds: 4, price: 10, p0: 10, shares: 2000, k: 4e7, share: 0.35, own: 0, h: [] },
+      {
+        id: 2,
+        name: 'Pikko',
+        odds: 4,
+        price: 10,
+        p0: 10,
+        shares: 2000,
+        k: 4e7,
+        share: 0.35,
+        own: 0,
+        cost: 0,
+        h: [] as number[],
+      },
     ],
   };
   const bourse = () => {
@@ -431,6 +444,7 @@ export async function fakeSupabase(
         const t = a.shares + (body.p_buy ? -q : q);
         const x = body.p_buy ? (a.k / t - a.k / a.shares) * 1.01 : (a.k / a.shares - a.k / t) * 0.99;
         bs.koo += body.p_buy ? -x : x;
+        a.cost = body.p_buy ? a.cost + x : a.cost * (1 - q / a.own);
         a.own += body.p_buy ? q : -q;
         a.shares = t;
         a.h.push(a.k / t / t);

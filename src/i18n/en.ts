@@ -661,6 +661,8 @@ export const en: Dict = {
     shop_title_koo: 'Koo Shop',
     bs_more: '{n} more Koo before spending',
     bs_blocked: '{n} locked',
+    bs_win: 'You gain',
+    bs_lose: 'You lose',
     bs_days: '{n} days left',
     bs_score: 'Score',
     bs_market: 'Market',

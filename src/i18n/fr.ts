@@ -663,6 +663,8 @@ export const fr = {
     shop_title_koo: 'Boutique Koo',
     bs_more: 'Encore {n} Koo avant de dépenser',
     bs_blocked: '{n} bloqués',
+    bs_win: 'Tu gagnes',
+    bs_lose: 'Tu perds',
     bs_days: '{n} j restants',
     bs_score: 'Score',
     bs_market: 'Marché',

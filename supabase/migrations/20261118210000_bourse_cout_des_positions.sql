@@ -1,0 +1,2 @@
+-- Appliquée via MCP (bourse_cout_des_positions). bourse_positions.cost : Koo payés pour la position (frais compris),
+-- repris depuis les ordres de la saison. bourse_trade le tient à jour, bourse_state le renvoie par jeton.

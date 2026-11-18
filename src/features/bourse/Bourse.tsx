@@ -12,7 +12,7 @@ import { burstAt } from '@/lib/pfx';
 import { locale, potatoFx, reducedFx, useSettings } from '@/lib/settings';
 import { Avatar } from '@/ui/Avatar';
 import { Button } from '@/ui/Button';
-import { Skeleton, useFlip } from '@/ui/motion';
+import { Presence, Skeleton, useFlip } from '@/ui/motion';
 import { Segmented } from '@/ui/Segmented';
 import { Swap } from '@/ui/Swap';
 import { toast } from '@/ui/toast';
@@ -31,6 +31,7 @@ type Asset = {
   shares: number;
   k: number;
   own: number;
+  cost: number;
   h: number[];
 };
 // jeton jamais obtenu : à sa place dans la liste, sans nom ni prix
@@ -236,6 +237,12 @@ export default function Bourse() {
   const change = (a: Asset) => (a.price / a.p0 - 1) * 100;
   const label = (a: Asset) => a.name ?? '???';
   const img = (a: Asset) => (a.name ? texOf(jetonOf(a.name, d.season.serie)) : MYSTERE);
+  // ce que rapporterait ou coûterait la position si on vendait tout maintenant (frais compris)
+  const result = (a: Asset) => {
+    const gain = sellGain(a, a.own) - a.cost;
+    return { gain, pct: a.cost > 0 ? (gain / a.cost) * 100 : 0 };
+  };
+  const mine = result(cur);
   const days = Math.max(1, Math.ceil((new Date(d.season.ends_at).getTime() - q.dataUpdatedAt) / 86_400_000));
   const amount = floor3(Number(qty.replace(',', '.')) || 0);
   const bMax = maxBuy(cur, d.me.koo);
@@ -340,7 +347,12 @@ export default function Bourse() {
                       <img className="px" src={img(a)} alt="" width={36} height={36} />
                       <span className={s.tokName}>
                         <b>{label(a)}</b>
-                        {a.own > 0 ? <small>×{a.own.toLocaleString(loc)}</small> : null}
+                        {a.own > 0 ? (
+                          <small>
+                            ×{a.own.toLocaleString(loc)}{' '}
+                            <span className={cl(result(a).gain)}>{pct(result(a).pct)}</span>
+                          </small>
+                        ) : null}
                       </span>
                       <span className={s.tokPrice}>
                         <b>
@@ -365,6 +377,15 @@ export default function Bourse() {
                     <Fade text={cur.odds ? `1/${cur.odds.toLocaleString(loc)}` : ''} />
                   </small>
                 </div>
+                <Presence show={cur.own > 0}>
+                  <div className={`${s.result} ${mine.gain >= 0 ? s.resultUp : s.resultDown}`}>
+                    <Fade text={t(mine.gain >= 0 ? 'ui.bs_win' : 'ui.bs_lose')} />
+                    <b>
+                      <Roll text={n2(Math.abs(mine.gain))} />
+                    </b>
+                    <Koo size={16} />
+                  </div>
+                </Presence>
                 <div className={s.last}>
                   <b>
                     <Roll text={n2(cur.price)} />
