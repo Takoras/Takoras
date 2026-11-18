@@ -1,0 +1,2 @@
+-- Appliquée via MCP (shop_slots_faster) : _shop_slots calcule la boutique perso une seule fois (289 ms → 12 ms ;
+-- shop_today 367 ms → 33 ms), résultat identique vérifié pendant la migration.

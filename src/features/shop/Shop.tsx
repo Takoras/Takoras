@@ -220,46 +220,58 @@ export default function Shop() {
     const fast = reducedFx();
     const cat0 = catRef.current;
     try {
-      // le serveur dit d'abord ce qu'il y a dedans : la durée de la charge dépend de sa rareté
+      // 1) la charge démarre dès le clic : le cache gonfle à peine, blanchit petit à petit et frémit de plus en plus.
+      // On ne connaît pas encore l'objet : elle part au rythme le plus lent, puis s'ajuste à sa rareté dès la réponse
+      // (commun : presque instantané ; légendaire : 3 s ; « ??? » : 5 s, comptés depuis le clic)
+      const SLOWEST = 5000;
+      let main: Animation | null = null;
+      if (!fast && cover) {
+        const fr: Keyframe[] = [];
+        for (let k = 0; k <= 40; k++) {
+          const a = 1.6 * (k / 40) ** 2.2;
+          fr.push({ translate: `${(Math.random() * 2 - 1) * a}px ${(Math.random() * 2 - 1) * a}px` });
+        }
+        cover.animate(fr, { duration: SLOWEST, easing: 'linear', fill: 'forwards' });
+        cover.style.setProperty('--wd', `${SLOWEST}ms`);
+        cover.classList.add(s.whiten ?? '');
+        main = cover.animate(
+          // la luminosité monte très progressivement (sinon la case paraît blanche dès la moitié)
+          [
+            { transform: 'scale(1)', filter: 'brightness(1) saturate(1) drop-shadow(0 0 0 rgb(255 255 255 / 0%))' },
+            {
+              offset: 0.5,
+              transform: 'scale(1.02)',
+              filter: 'brightness(1.25) saturate(.8) drop-shadow(0 0 5px rgb(255 255 255 / 20%))',
+            },
+            {
+              offset: 0.8,
+              transform: 'scale(1.035)',
+              filter: 'brightness(1.8) saturate(.45) drop-shadow(0 0 11px rgb(255 255 255 / 50%))',
+            },
+            {
+              transform: 'scale(1.05)',
+              filter: 'brightness(6) saturate(0) drop-shadow(0 0 18px rgb(255 255 255 / 80%))',
+            },
+          ],
+          { duration: SLOWEST, easing: 'linear', fill: 'forwards' },
+        );
+      }
+      const clickedAt = performance.now();
       const r = (await shopApi.reveal(slot)) as { gain: number; state: object; shop: ShopData };
       const it = r.shop.items.find((x) => slotOf(x, 0) === slot);
       const tier = it && !isHidden(it) ? revealTier(oddsOf(it)) : 0;
-      // 1) la charge : le cache gonfle à peine, devient blanc petit à petit et frémit de plus en plus
-      // (commun : presque instantané ; légendaire : 3 s ; « ??? » : 5 s)
       const charge = fast ? 0 : ([150, 500, 1300, 3000, 4000, 5000][tier] ?? 150);
-      sfx.riser(fast ? 0.2 : Math.max(0.2, charge / 1000));
-      if (!fast && cover) {
-        const fr: Keyframe[] = [];
-        for (let k = 0; k <= 24; k++) {
-          const a = 1.6 * (k / 24) ** 2.2;
-          fr.push({ translate: `${(Math.random() * 2 - 1) * a}px ${(Math.random() * 2 - 1) * a}px` });
-        }
-        cover.animate(fr, { duration: charge, easing: 'linear', fill: 'forwards' });
-        cover.style.setProperty('--wd', `${charge}ms`);
-        cover.classList.add(s.whiten ?? '');
-        await cover
-          .animate(
-            // la luminosité monte très progressivement (sinon la case paraît blanche dès la moitié)
-            [
-              { transform: 'scale(1)', filter: 'brightness(1) saturate(1) drop-shadow(0 0 0 rgb(255 255 255 / 0%))' },
-              {
-                offset: 0.5,
-                transform: 'scale(1.02)',
-                filter: 'brightness(1.25) saturate(.8) drop-shadow(0 0 5px rgb(255 255 255 / 20%))',
-              },
-              {
-                offset: 0.8,
-                transform: 'scale(1.035)',
-                filter: 'brightness(1.8) saturate(.45) drop-shadow(0 0 11px rgb(255 255 255 / 50%))',
-              },
-              {
-                transform: 'scale(1.05)',
-                filter: 'brightness(6) saturate(0) drop-shadow(0 0 18px rgb(255 255 255 / 80%))',
-              },
-            ],
-            { duration: charge, easing: 'linear', fill: 'forwards' },
-          )
-          .finished.catch(() => undefined);
+      const spent = performance.now() - clickedAt;
+      const left = Math.max(120, charge - spent);
+      sfx.riser(fast ? 0.2 : Math.max(0.2, left / 1000));
+      if (main && cover) {
+        // toutes les animations de la charge (cache, tremblement, voile blanc) finissent ensemble au bon moment
+        const rate = Math.max(0.01, (SLOWEST - Math.min(SLOWEST, spent)) / left);
+        cover
+          .getAnimations({ subtree: true })
+          .filter((x) => x.effect?.getComputedTiming().duration === SLOWEST)
+          .forEach((x) => x.updatePlaybackRate(rate));
+        await main.finished.catch(() => undefined);
       }
       const isHero = el.classList.contains(s.hero ?? '');
       const applyCoins = () => qc.setQueryData(['me', user.id], (old: object | undefined) => ({ ...old, ...r.state }));
