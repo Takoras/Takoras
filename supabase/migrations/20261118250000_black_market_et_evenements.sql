@@ -4,3 +4,4 @@
 -- Puis black_market_cases_et_prix_cosmetiques : même format que shop_today (24 cases à révéler, une vedette par rayon,
 -- 6 affaires à -75 %), black_market_reveal donne 1 Market Coin compté comme la paie, table bourse_bm_reveals.
 -- _koo_price(prix, type) : les cosmétiques coûtent 4 fois plus cher en Market Coins.
+-- Ajustement : 16 cases par semaine (8 potions, 1 sablier, 7 cosmétiques).
