@@ -661,7 +661,6 @@ export const fr = {
     bs_coins: 'Pièces',
     bs_spend: 'à dépenser',
     shop_title_koo: 'Boutique Koo',
-    bs_more: 'Encore {n} Koo avant de dépenser',
     bs_blocked: '{n} bloqués',
     bs_win: 'Tu gagnes',
     bs_lose: 'Tu perds',

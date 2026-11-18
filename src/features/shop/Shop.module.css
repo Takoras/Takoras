@@ -548,22 +548,20 @@
 }
 /* la place du solde Koo existe aussi en mode Pièces : la page ne bouge pas quand on change de monnaie */
 .walletSlot {
-  flex: 0 1 300px;
-  margin-left: auto; /* Probas & infos reste tout à droite */
-  height: 50px;
-  min-width: 230px;
+  flex: none;
+  margin-left: auto;
   opacity: 0;
   visibility: hidden;
-  translate: 0 4px;
   transition:
     opacity 0.22s var(--ease-out),
-    translate 0.22s var(--ease-out),
     visibility 0.22s;
+}
+.walletSlot + :last-child {
+  margin-left: 0;
 }
 .walletOn {
   opacity: 1;
   visibility: visible;
-  translate: 0 0;
 }
 .can,
 .poor {
@@ -575,45 +573,27 @@
 .poor {
   opacity: 0.55;
 }
+/* même pastille que « Nouveau stock dans » */
 .wallet {
-  display: grid;
-  gap: 5px;
-  box-sizing: border-box;
-  height: 100%;
-  align-content: center;
-  padding: 8px 12px;
-  border-radius: 8px;
-  background: var(--surface);
-  color: var(--text-2);
-  font-size: var(--fs-sm);
-}
-.walletTop {
-  display: flex;
+  display: inline-flex;
   align-items: center;
   gap: 6px;
-}
-.walletTop small {
-  margin-left: auto;
+  padding: 6px 12px;
+  border-radius: var(--r-pill);
+  background: rgb(255 255 255 / 5%);
   color: var(--muted);
+  font-size: var(--fs-sm);
+  white-space: nowrap;
 }
-.walletFree {
+.wallet b {
+  color: var(--text);
+}
+.wallet .walletFree {
   color: var(--ok);
-  font-size: var(--fs-lg);
 }
-.walletBar {
-  display: flex;
-  height: 7px;
-  overflow: hidden;
-  border-radius: 2px;
-  background: var(--surface-3);
-}
-.walletBar i {
-  background: #6a6a7a;
-  transition: width 0.45s var(--ease-out);
-}
-.walletBar .walletGap {
-  background: none;
-}
-.walletBar .walletGain {
-  background: var(--ok);
+.wallet small {
+  margin-left: 4px;
+  padding-left: 10px;
+  border-left: 1px solid rgb(255 255 255 / 10%);
+  font-size: inherit;
 }

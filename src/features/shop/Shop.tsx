@@ -545,36 +545,22 @@ export default function Shop() {
   );
 }
 
-// Le solde Koo en boutique : la partie bloquée (le capital et la paie) et, au-dessus, ce qu'on peut dépenser
+// Le solde Koo en boutique : ce qu'on peut dépenser, et ce qui reste bloqué
 function Wallet({ w }: { w?: KooWallet }) {
   const t = useT();
   const lang = useSettings((x) => x.lang);
   if (!w) return null;
   const n = (v: number) => Math.floor(v).toLocaleString(locale(lang));
   if (w.locked) return <span className={s.wallet}>{t('ui.bs_need', { n: w.have ?? 0, m: w.need ?? 10 })}</span>;
-  const scale = Math.max(w.koo, w.reserved) || 1;
   return (
-    <div className={s.wallet}>
-      <div className={s.walletTop}>
-        <KooIcon size={18} />
-        {w.spendable > 0 ? (
-          <>
-            <b className={s.walletFree}>
-              <Roll text={n(w.spendable)} />
-            </b>
-            {t('ui.bs_spend')}
-          </>
-        ) : (
-          t('ui.bs_more', { n: n(Math.ceil(w.reserved - w.koo) + 1) })
-        )}
-        <small>{t('ui.bs_blocked', { n: n(w.reserved) })}</small>
-      </div>
-      <div className={s.walletBar} aria-hidden>
-        <i style={{ width: `${(Math.min(w.koo, w.reserved) / scale) * 100}%` }} />
-        <i className={s.walletGap} style={{ width: `${(Math.max(0, w.reserved - w.koo) / scale) * 100}%` }} />
-        <i className={s.walletGain} style={{ width: `${(w.spendable / scale) * 100}%` }} />
-      </div>
-    </div>
+    <span className={s.wallet}>
+      <KooIcon size={16} />
+      <b className={w.spendable > 0 ? s.walletFree : ''}>
+        <Roll text={n(w.spendable)} />
+      </b>
+      {t('ui.bs_spend')}
+      <small>{t('ui.bs_blocked', { n: n(w.reserved) })}</small>
+    </span>
   );
 }
 
