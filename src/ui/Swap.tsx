@@ -1,4 +1,5 @@
 import { useLayoutEffect, useRef, useState, type ReactNode } from 'react';
+import { refreshMouseDepth } from '@/lib/mouseDepth';
 import { reducedFx } from '@/lib/settings';
 import s from './Swap.module.css';
 
@@ -6,7 +7,15 @@ import s from './Swap.module.css';
 // contenu s'efface pendant que le nouveau arrive (fondu croisé + petit glissement), et la hauteur du bloc passe de
 // l'ancienne à la nouvelle en douceur (plus de saut de page). `k` vide/null = rien d'affiché (le bloc se replie).
 const MS = 280;
-export function Swap({ k, children, className }: { k: string | number | null; children: ReactNode; className?: string }) {
+export function Swap({
+  k,
+  children,
+  className,
+}: {
+  k: string | number | null;
+  children: ReactNode;
+  className?: string;
+}) {
   const box = useRef<HTMLDivElement>(null);
   const [cur, setCur] = useState({ k, node: children });
   const [old, setOld] = useState<{ k: string | number | null; node: ReactNode; n: number } | null>(null);
@@ -30,18 +39,24 @@ export function Swap({ k, children, className }: { k: string | number | null; ch
     const el = box.current,
       h0 = lastH.current;
     if (!el) return;
-    const h1 = el.querySelector<HTMLElement>(`.${s.cur}`)?.offsetHeight ?? 0;
+    const h1 = el.querySelector<HTMLElement>(`:scope > .${s.cur}`)?.offsetHeight ?? 0;
     lastH.current = h1;
     if (h0 == null || reducedFx() || Math.abs(h1 - h0) < 2) return;
-    el.style.overflow = 'hidden';
+    // coupe seulement loin des bords : les cases penchées ne sont pas rognées pendant le glissement
+    el.style.overflow = 'clip';
+    el.style.overflowClipMargin = '16px';
     el.animate([{ height: `${h0}px` }, { height: `${h1}px` }], {
       duration: MS + 60,
       easing: 'cubic-bezier(.2,.8,.2,1)',
-    }).onfinish = () => el.style.removeProperty('overflow');
+    }).onfinish = () => {
+      el.style.removeProperty('overflow');
+      el.style.removeProperty('overflow-clip-margin');
+    };
   }, [cur.k]);
   // l'ancien contenu part une fois son fondu fini
   useLayoutEffect(() => {
     if (!old) return;
+    refreshMouseDepth(); // sinon le nouveau bloc saute de quelques pixels au prochain mouvement de souris
     const id = setTimeout(() => setOld(null), reducedFx() ? 0 : MS);
     return () => clearTimeout(id);
   }, [old]);

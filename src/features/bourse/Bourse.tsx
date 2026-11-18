@@ -70,19 +70,9 @@ const TIERS: [Key, number, string][] = [
 ];
 const tierIdx = (elo: number) => TIERS.reduce((b, x, i) => (elo >= x[1] ? i : b), 0);
 
-// La pièce Koo, dessinée en pixels
-const KOO = ['..####..', '.#oooo#.', '#oKooKo#', '#oKoKoo#', '#oKKooo#', '#oKoKoo#', '.#oooo#.', '..####..'];
-const KOO_C: Record<string, string> = { '#': '#1c7f78', o: '#46dcc8', K: '#0d3f3c' };
+// La pièce de la Bourse
 function Koo({ size = 16 }: { size?: number }) {
-  return (
-    <svg className={s.koo} width={size} height={size} viewBox="0 0 8 8" shapeRendering="crispEdges" aria-hidden>
-      {KOO.flatMap((l, y) =>
-        [...l].map((c, x) =>
-          KOO_C[c] ? <rect key={`${x}-${y}`} x={x} y={y} width="1" height="1" fill={KOO_C[c]} /> : null,
-        ),
-      )}
-    </svg>
-  );
+  return <img className={`px ${s.koo}`} src="/img/koo.png" alt="" width={size} height={size} />;
 }
 
 function Chart({ a }: { a: Asset }) {
@@ -125,6 +115,7 @@ export default function Bourse() {
     queryFn: async () => (await bourseApi.state()) as State,
     refetchInterval: potatoFx() ? 15_000 : 5_000,
   });
+  useBoard(false); // le classement est prêt avant d'ouvrir l'onglet : rien n'arrive après coup
   const d = q.data;
   useStaggerIn(pageRef, `.${s.head}, .${s.market} > *`, !!d);
   useSwingAll(pageRef, `.${s.tok}`, 0.4, `${tab}|${d?.assets.length ?? 0}`);
@@ -192,7 +183,7 @@ export default function Bourse() {
           <b>{d.season.serie}</b> · {t('ui.bs_days', { n: days })}
         </span>
         <span className={s.chip}>
-          <Koo />
+          <Koo size={18} />
           <b>
             <Tween value={d.me.koo} ms={350} format={n0} />
           </b>
@@ -255,7 +246,7 @@ export default function Bourse() {
                         <Bump as="b" v={cur.price} kind="pop">
                           <Tween value={cur.price} ms={350} format={n2} />
                         </Bump>
-                        <Koo size={20} />
+                        <Koo size={26} />
                         <span className={cl(change(cur))}>{pct(change(cur))}</span>
                       </div>
                     </div>
@@ -318,7 +309,7 @@ export default function Bourse() {
                 <h2>
                   {t('ui.bs_pay')}{' '}
                   <span className={s.payN}>
-                    +25 <Koo />
+                    +25 <Koo size={18} />
                   </span>
                 </h2>
                 <ul className={s.quests}>
@@ -368,6 +359,16 @@ export default function Bourse() {
   );
 }
 
+function useBoard(live: boolean) {
+  const uid = useAuth((x) => x.user?.id);
+  return useQuery({
+    queryKey: ['bourse-board', uid],
+    enabled: !!uid,
+    queryFn: async () => (await bourseApi.board()) as Row[],
+    refetchInterval: live ? 20_000 : false,
+  });
+}
+
 function Tag({ elo }: { elo: number }) {
   const t = useT();
   const x = TIERS[tierIdx(elo)];
@@ -390,14 +391,8 @@ function Ranks({
   n0: (v: number) => string;
 }) {
   const t = useT();
-  const uid = useAuth((x) => x.user?.id);
   const root = useRef<HTMLDivElement>(null);
-  const q = useQuery({
-    queryKey: ['bourse-board', uid],
-    enabled: !!uid,
-    queryFn: async () => (await bourseApi.board()) as Row[],
-    refetchInterval: 20_000,
-  });
+  const q = useBoard(true);
   const rows = q.data ?? [];
   useFlip(root, rows.map((r) => r.pseudo).join());
   useSwingAll(root, `.${s.pod}`, 0.35, rows.length);

@@ -35,6 +35,11 @@ export function snapMouseDepth() {
   st.y = st.ty;
   write();
 }
+// Du contenu vient d'apparaître (onglet, fondu) : il prend tout de suite le décalage actuel, sans attendre la souris
+export function refreshMouseDepth() {
+  readAt = 0;
+  write();
+}
 export function installMouseDepth() {
   if (calmFx() || matchMedia('(pointer: coarse)').matches) return () => undefined; // téléphone ou qualité réduite : rien
   let raf = 0;
