@@ -719,6 +719,7 @@ function Hero(p: CardProps & { off: number; slot: number }) {
   const { it, left, off } = p;
   const ref = useRef<HTMLDivElement>(null);
   useSwing(ref, 0.12); // il se balance un peu quand la souris passe dessus
+  const { black } = useContext(Pay); // Black Market : trois vedettes côte à côte, aperçus à taille normale
   const art = useRef<HTMLDivElement>(null);
   const [name, desc] = itemText(it, lang),
     img = itemImg(it);
@@ -731,7 +732,7 @@ function Hero(p: CardProps & { off: number; slot: number }) {
       <div ref={art} className={s.heroArt}>
         {isCosmetic(it.kind) ? (
           <span className={s.heroCosm}>
-            <CosmeticPreview id={it.id} big hidden={isSecret(it.id) && !it.owned} />
+            <CosmeticPreview id={it.id} big={!black} hidden={isSecret(it.id) && !it.owned} />
           </span>
         ) : (
           <img
