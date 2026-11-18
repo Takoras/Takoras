@@ -11,7 +11,7 @@ import { moPlay, moSnap } from '@/engines/motion.js';
 import { sfx } from '@/engines/sound.js';
 import { useAuth } from '@/lib/auth';
 import { useJn } from '@/lib/names';
-import { locale, useSettings } from '@/lib/settings';
+import { locale, useSettings, reducedFx } from '@/lib/settings';
 import { useT } from '@/i18n/useT';
 import { Button } from '@/ui/Button';
 import { confirm } from '@/ui/confirm';
@@ -39,6 +39,7 @@ import {
   type View,
 } from './inv';
 import s from './Inventory.module.css';
+import { Presence, Skeleton } from '@/ui/motion';
 
 const SORTS: Sort[] = ['rarity', 'count', 'recent', 'name'];
 const Coin = () => <img className={`px ${s.coin}`} src="/img/piece.png" alt="" width={14} height={14} />;
@@ -50,10 +51,12 @@ export function InvTabs() {
   useSwingAll(ref, 'a', 0.5); // les onglets penchent et se balancent au passage de la souris
   return (
     <nav ref={ref} className={s.tabs} data-depth aria-label={t('ui.nav_inv')}>
-      <NavLink to="/inventory" end>
+      <NavLink to="/inventory" end viewTransition={!reducedFx()}>
         {t('ui.bestiary')}
       </NavLink>
-      <NavLink to="/inventory/items">{t('ui.items')}</NavLink>
+      <NavLink to="/inventory/items" viewTransition={!reducedFx()}>
+        {t('ui.items')}
+      </NavLink>
     </nav>
   );
 }
@@ -241,7 +244,8 @@ export default function Bestiary() {
       </div>
       {/* barres de la collection à la couleur de la série (bleu Takoras, vert Bodako…) */}
       <div
-        className={s.progress} data-depth
+        className={s.progress}
+        data-depth
         style={{ '--sc': serieTheme(view.serie).main, '--sc-hi': serieTheme(view.serie).hi } as CSSProperties}
       >
         <div>
@@ -296,9 +300,7 @@ export default function Bestiary() {
         </div>
       </div>
       {!d ? (
-        <p className="muted" aria-busy>
-          …
-        </p>
+        <Skeleton n={18} h={150} min={118} />
       ) : cards.length ? (
         <ul ref={grid} className={s.grid} data-depth>
           {cards.map((c, k) => (
@@ -320,7 +322,8 @@ export default function Bestiary() {
           </Link>
         </div>
       )}
-      {selecting ? (
+      {/* la barre de vente arrive (son animation) et repart en se tassant */}
+      <Presence show={selecting} enter={false}>
         <div className={s.sellBar} role="region" aria-label={t('ui.sell')}>
           <p>
             <b>{t('ui.sel_n', { n: tot.n })}</b>
@@ -352,7 +355,7 @@ export default function Bestiary() {
             </Button>
           </div>
         </div>
-      ) : null}
+      </Presence>
       {open && d ? (
         <JetonModal
           name={open.name}
@@ -429,17 +432,15 @@ function CardView({
     all = [g, ...Object.values(c.vs)].filter((x): x is Group => !!x);
   // jamais trouvé : mystère total (fond gris neutre, pas de numéro, pas de rareté, pas de nom)
   const known = n > 0 || c.seen;
-  const badge = all.some((x) => x.shown)
-      ? ['', t('ui.in_showcase')]
-      : locked
-        ? ['', t('ui.lock')]
-        : null;
+  const badge = all.some((x) => x.shown) ? ['', t('ui.in_showcase')] : locked ? ['', t('ui.lock')] : null;
   return (
     <li
       data-key={c.j.name}
       data-sig={`${n}|${locked}|${badge?.[1] ?? ''}`}
       style={(known ? glowVars(j) : { '--g': '113, 113, 122' }) as CSSProperties}
-      className={['dd-card', s.card, !n && (c.seen ? s.gone : s.unk), q && s.sel, locked && s.locked].filter(Boolean).join(' ')}
+      className={['dd-card', s.card, !n && (c.seen ? s.gone : s.unk), q && s.sel, locked && s.locked]
+        .filter(Boolean)
+        .join(' ')}
     >
       <button
         type="button"

@@ -30,6 +30,7 @@ export function useSwingAll(
 }
 
 export function attachSwing(el: HTMLElement, strength = 1, kick = 0) {
+  if (reducedFx()) return () => undefined; // qualité basse : aucun écouteur sur les cases
   {
     const st = { a: 0, v: 0, raf: 0, last: 0, lastX: 0, lastT: 0 };
 

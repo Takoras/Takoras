@@ -14,6 +14,7 @@ import { Starter } from '../starter/Starter';
 import { useAuth } from '@/lib/auth';
 import { useMe, useQuests } from '@/api/queries';
 import { useStaggerIn } from '@/ui/useStaggerIn';
+import { reducedFx } from '@/lib/settings';
 import { Landing } from '../landing/Landing';
 import s from './Home.module.css';
 
@@ -55,7 +56,8 @@ export default function Home() {
     return <Landing />;
   return (
     <div ref={homeRef} className={s.homeRoot}>
-      <FallRain serie={pull.name} />
+      {/* la pluie de jetons est le décor le plus lourd : retirée en qualité basse et patate */}
+      {reducedFx() ? null : <FallRain serie={pull.name} />}
       <div ref={stageRef} className={s.stage} onPointerMove={parallax} onPointerLeave={unParallax}>
         <div className={s.center} data-tour="pull">
           <FallCoin img={pull.img} label={pull.name} serie={pull.name} disabled={!!pull.soon && !admin} />

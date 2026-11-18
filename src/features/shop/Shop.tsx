@@ -20,6 +20,7 @@ import { burstPixels, flyCoins, revealTier, screenFlash, shockwave } from '@/ui/
 import { useNow } from '../eco/eco';
 import { openInfo } from '../info/store';
 import s from './Shop.module.css';
+import { AutoHeight, Bump } from '@/ui/motion';
 
 type Item = ShopItem & { price: number; base_price: number | null; stock: number; bought: number; owned: boolean };
 // une case mystère (pas encore révélée) : le serveur ne dit que son rayon
@@ -435,22 +436,24 @@ export default function Shop() {
             </div>
           </div>
           <h2 className="visually-hidden">{t(CATS.find((c) => c.k === cat)?.label ?? 'ui.cat_potions')}</h2>
-          <ul ref={gridRef} className={s.grid} data-depth>
-            {list.map((it) => {
-              const slot = slotOf(it, items.indexOf(it));
-              return isHidden(it) ? (
-                <Mystery
-                  key={slot}
-                  slot={slot}
-                  gain={data.reveal_gain ?? 100}
-                  logged={!!user}
-                  onReveal={(el) => void reveal(slot, el)}
-                />
-              ) : (
-                <Card key={slot} slot={slot} it={it} coins={coins} logged={!!user} left={left} onBuy={buy} />
-              );
-            })}
-          </ul>
+          <AutoHeight k={cat}>
+            <ul ref={gridRef} className={s.grid} data-depth>
+              {list.map((it) => {
+                const slot = slotOf(it, items.indexOf(it));
+                return isHidden(it) ? (
+                  <Mystery
+                    key={slot}
+                    slot={slot}
+                    gain={data.reveal_gain ?? 100}
+                    logged={!!user}
+                    onReveal={(el) => void reveal(slot, el)}
+                  />
+                ) : (
+                  <Card key={slot} slot={slot} it={it} coins={coins} logged={!!user} left={left} onBuy={buy} />
+                );
+              })}
+            </ul>
+          </AutoHeight>
           {user ? (
             <Redeem items={items.filter((x): x is Item => !isHidden(x))} />
           ) : (
@@ -593,9 +596,13 @@ function Card(p: CardProps & { slot: number }) {
       style={{ '--g': glowOf(it) } as CSSProperties}
     >
       <div className={s.box}>
-        <span className={`${s.badge} ${it.owned ? s.ok : stockLeft ? '' : s.none}`}>
+        <Bump
+          v={`${it.owned}|${stockLeft}`}
+          kind={out ? 'stamp' : 'pop'}
+          className={`${s.badge} ${it.owned ? s.ok : stockLeft ? '' : s.none}`}
+        >
           {it.owned ? t('ui.unlocked_b') : stockLeft ? `×${stockLeft}` : t('ui.sold_out')}
-        </span>
+        </Bump>
         <div className={s.art}>
           {isCosmetic(it.kind) ? (
             <CosmeticPreview id={it.id} hidden={isSecret(it.id) && !it.owned} />

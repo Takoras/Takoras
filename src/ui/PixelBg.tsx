@@ -1,6 +1,6 @@
 import { useEffect, useRef, type RefObject } from 'react';
 import { hexRGB } from '@/data/jetons';
-import { calmFx } from '@/lib/settings';
+import { calmFx, potatoFx } from '@/lib/settings';
 
 // Le fond pixel art des jetons et objets (fiche, vitrine, meilleur jeton, boutique, passe…) : un petit canvas
 // agrandi sans lissage. 11 paliers de rareté, du plus simple au plus beau. Chaque palier est un modèle en blanc,
@@ -27,7 +27,12 @@ const STARS = [0, 0, 0, 0, 0, 26, 30, 34, 38, 42, 48];
 const GLIT = [0, 0, 0, 0, 0, 0, 0, 0, 22, 26, 34];
 const rgbOf = (hex: string) => hexRGB(hex).split(', ').map(Number) as [number, number, number];
 
-export function PixelBg({
+// patate : aucun canvas, le fond uni de la case suffit
+export function PixelBg(p: Parameters<typeof PixelCanvas>[0]) {
+  return potatoFx() ? null : <PixelCanvas {...p} />;
+}
+
+function PixelCanvas({
   odds,
   glow,
   center,

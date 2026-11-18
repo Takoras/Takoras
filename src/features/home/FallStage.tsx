@@ -2,7 +2,7 @@ import { useEffect, useRef, useState, type CSSProperties } from 'react';
 import { createPortal } from 'react-dom';
 import { MYSTERE, SERIES, texOf, texScale } from '@/data/jetons';
 import { cKey, useInventory } from '../inventory/inv';
-import { reducedFx, useSettings } from '@/lib/settings';
+import { calmFx, reducedFx, useSettings } from '@/lib/settings';
 import { translate } from '@/i18n';
 import { serieTheme } from '@/engines/env';
 import { openPulls } from '../eco/openPulls';
@@ -132,7 +132,8 @@ function RainLayer({ serie, out }: { serie: string; out: boolean }) {
       buildAmbient();
     };
     resize();
-    const N = W < 700 ? 14 : 24;
+    const calm = calmFx(); // qualité moyenne : moitié moins de jetons et moins d'images par seconde
+    const N = Math.round((W < 700 ? 14 : 24) * (calm ? 0.5 : 1));
     const drops: Drop[] = Array.from({ length: N }, () => ({
       t: pick(),
       known: false,
@@ -142,7 +143,7 @@ function RainLayer({ serie, out }: { serie: string; out: boolean }) {
       spin: Math.random() * 6.28,
       rot: 0,
     }));
-    const streaks: Streak[] = Array.from({ length: W < 700 ? 8 : 14 }, () => ({
+    const streaks: Streak[] = Array.from({ length: Math.round((W < 700 ? 8 : 14) * (calm ? 0.4 : 1)) }, () => ({
       x: Math.random(),
       y: Math.random(),
       z: Math.random(),
@@ -291,7 +292,7 @@ function RainLayer({ serie, out }: { serie: string; out: boolean }) {
     // 30 images par seconde suffisent pour un fond flou : deux fois moins de travail
     const loop = (now: number) => {
       raf = requestAnimationFrame(loop);
-      if (last && now - last < 31) return;
+      if (last && now - last < (calm ? 50 : 31)) return;
       // l'écran d'ouverture couvre tout : inutile de dessiner la pluie dessous
       if (document.getElementById('opening')?.classList.contains('on')) return;
       const dt = last ? Math.min(0.08, (now - last) / 1000) : 1 / 30;

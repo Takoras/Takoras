@@ -12,7 +12,8 @@ import { useQueryClient } from '@tanstack/react-query';
 import { qc } from '@/lib/queryClient';
 import { sfx } from '@/engines/sound.js';
 import { useAuth, signOut } from '@/lib/auth';
-import { locale } from '@/lib/settings';
+import { locale, reducedFx } from '@/lib/settings';
+import { Bump, Presence } from '@/ui/motion';
 import { useT } from '@/i18n/useT';
 import { Avatar } from '@/ui/Avatar';
 import { Button } from '@/ui/Button';
@@ -37,12 +38,14 @@ import { openUI, useUI } from './ui-store';
 import s from './Layout.module.css';
 
 // Pastille rouge (demandes d'ami, messages, annonces non lues)
-const Badge = ({ n }: { n: number }) =>
-  n ? (
-    <i className={s.nbadge} aria-label={`(${n})`}>
+// pastille du menu : elle arrive avec un rebond, saute quand le nombre change et repart en se tassant
+const Badge = ({ n }: { n: number }) => (
+  <Presence show={n > 0}>
+    <Bump as="i" v={n} className={s.nbadge} label={`(${n})`}>
       {n > 9 ? '9+' : n}
-    </i>
-  ) : null;
+    </Bump>
+  </Presence>
+);
 
 // Zoom de chaque page, réglé à l'œil sur PC (100 % = taille normale du site)
 // (relevé pour la lisibilité : les pages étaient réduites à 67-75 %, les textes devenaient trop petits)
@@ -75,7 +78,7 @@ export function Layout() {
   // l'inventaire est préparé en avance (code + collection) : la page s'ouvre déjà remplie, sans saut
   const uid = useAuth((x) => x.user?.id);
   useEffect(() => {
-    if (!uid) return;
+    if (!uid || reducedFx()) return; // qualité basse : on ne charge rien d'avance
     const id = setTimeout(() => {
       void import('@/features/inventory/Bestiary');
       void import('@/features/inventory/inv').then((m) => qc.prefetchQuery(m.invQuery(uid)));
@@ -144,6 +147,7 @@ export function Layout() {
             <NavLink
               key={n.to}
               to={n.to}
+              viewTransition={!reducedFx()}
               data-inv-target={n.to === '/inventory' ? '' : undefined}
               end={n.to === '/'}
               className={({ isActive }) => `${s.railItem} ${isActive ? s.on : ''}`}

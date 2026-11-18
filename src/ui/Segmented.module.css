@@ -1,4 +1,5 @@
 .seg {
+  position: relative;
   border: 1px solid rgb(255 255 255 / 9%);
   border-radius: 8px;
   background: var(--surface);
@@ -8,7 +9,22 @@
   padding: 3px;
 }
 
+.thumb {
+  position: absolute;
+  top: 0;
+  left: 0;
+  border-radius: var(--r-sm);
+  background: var(--surface-3);
+  pointer-events: none;
+  transition:
+    transform 0.28s cubic-bezier(0.3, 1.3, 0.5, 1),
+    width 0.22s ease-out;
+}
+:global(html.reduce-fx) .thumb {
+  transition: none;
+}
 .seg button {
+  position: relative;
   min-height: 36px;
   padding: 0 var(--s-3);
   border-radius: var(--r-sm);

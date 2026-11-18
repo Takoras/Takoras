@@ -524,6 +524,7 @@ function bgLevel(odds) { return odds >= GOD ? 5 : odds >= MYTHIC ? 4 : odds >= 1
 
 function startBg(j, mode = 'reveal') {
   bg.mode = mode;
+  if (SETTINGS.fx === 'potato') return; // patate : pas de fond animé
   if (!bg.canvas) {
     bg.canvas = document.createElement('canvas');
     $('op-bg').appendChild(bg.canvas);
@@ -926,8 +927,12 @@ function showRecap() {
   $('op-recap-tag').textContent = t('recap_tag', { n: sess.total });
   $('op-recap-title').textContent = t('recap_title', { n: sess.total });
   if (typeof ecoDecorate === 'function') ecoDecorate();
-  opening.classList.remove('revealed', 'hold');
-  opening.classList.add('recap');
+  const show = () => { if (!sess?.recap) return; opening.classList.remove('revealed', 'hold'); opening.classList.add('recap'); };
+  // le jeton et sa fiche s'envolent, puis les cartes du récap arrivent
+  const main = opening.querySelector('.op-main');
+  if (reducedFx() || !main) return show();
+  main.animate([{ opacity: 1, transform: 'none' }, { opacity: 0, transform: 'scale(.9) translateY(-14px)' }], { duration: 220, easing: 'ease-in', fill: 'forwards' })
+    .finished.finally(() => { show(); main.getAnimations().forEach(a => a.cancel()); });
 }
 
 // On ne peut quitter qu'à la fin (pour ne pas perdre les pulls achetés)
@@ -981,7 +986,7 @@ function tap() {
   if (run?.done && sess && sess.total === 1 && opening.classList.contains('revealed') && !spinning()) return tryReopen();
   if (!run || run.done) return;
   // cinématique des jetons 1/1000+ : toujours pour un jeton jamais eu ; pour un déjà eu, seulement si le réglage le veut
-  if (run.holding) { if (run.canReveal) (run.result.odds >= RARE && (sess.cur?.fresh || (SETTINGS.speed !== 'instant' && SETTINGS.animKnown !== false)) ? cine() : reveal()); return; }
+  if (run.holding) { if (run.canReveal) (run.result.odds >= RARE && (SETTINGS.fx !== 'potato' && (sess.cur?.fresh || (SETTINGS.speed !== 'instant' && SETTINGS.animKnown !== false))) ? cine() : reveal()); return; }
   if (!run.queue.length) return; // entre le dernier palier et la pause
   // spam : on saute un palier (ça monte deux fois plus vite) — sauf pour les très rares, qui se méritent
   if (rhythm().fast && run.queue.length > 2 && (run.queue[run.queue.length - 1] ?? 0) < 10000) run.queue.shift();

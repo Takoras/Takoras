@@ -18,6 +18,7 @@ import { NeedLogin } from '@/app/NeedLogin';
 import { useFriends, type Friend } from './social';
 import { Swap } from '@/ui/Swap';
 import s from './Friends.module.css';
+import { Skeleton } from '@/ui/motion';
 
 type Tab = 'ok' | 'inc' | 'out';
 
@@ -197,9 +198,7 @@ export default function Friends() {
         </div>
         <Swap k={fr.data ? cur : 'load'}>
           {!fr.data ? (
-            <p className="muted" aria-busy>
-              …
-            </p>
+            <Skeleton n={4} h={72} min={260} />
           ) : cur === 'ok' ? (
             ok.length ? (
               <ul key="ok" className={s.grid}>

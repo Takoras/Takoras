@@ -1,5 +1,5 @@
 import { useLayoutEffect, type RefObject } from 'react';
-import { reducedFx } from '@/lib/settings';
+import { potatoFx, reducedFx } from '@/lib/settings';
 import { snapMouseDepth } from '@/lib/mouseDepth';
 
 // Apparition d'une page, la même partout (accueil, inventaire, combat) : un fondu, bloc après bloc,
@@ -28,7 +28,7 @@ const loaded = (img: HTMLImageElement) =>
       });
 
 function stagger(el: HTMLElement | null, selector: string, ready: boolean) {
-  if (!el || played.has(el)) return;
+  if (!el || played.has(el) || potatoFx()) return; // patate : la page s'affiche tout de suite
   el.classList.add('stg-wait');
   if (!ready || waiting.has(el)) return;
   waiting.add(el);

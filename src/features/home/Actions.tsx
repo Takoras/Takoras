@@ -16,6 +16,8 @@ import { openInfo } from '../info/store';
 import { Effects } from './Effects';
 import { useSwing } from '@/ui/useSwing';
 import s from './Home.module.css';
+import { Bump } from '@/ui/motion';
+import { Tween } from '@/ui/Tween';
 
 const Coin = () => <img className="px" src="/img/piece.png" alt="" width={16} height={16} />;
 
@@ -64,8 +66,12 @@ export function Actions({ serie = 'Takoras' }: { serie?: string } = {}) {
           </div>
         ) : (
           <div className={s.stock} role="status">
-            <b className={s.stockN}>{e.stock}</b>
-            <span className={s.stockMax}>/{e.max}</span>
+            <Bump as="b" v={e.stock} className={s.stockN}>
+              <Tween value={e.stock} ms={350} format={(v) => String(Math.round(v))} />
+            </Bump>
+            <Bump v={e.max} className={s.stockMax}>
+              /{e.max}
+            </Bump>
             <span className="muted">
               {t('ui.pulls_word')} · {e.full ? t('ui.stock_full') : t('ui.plus1_in', { t: mmss(e.nextIn) })}
             </span>
@@ -196,7 +202,7 @@ function Up(p: {
       <img className="px" src={p.icon} alt="" width={40} height={40} />
       <div className={s.upBody}>
         <b>{p.title}</b>
-        <span className={s.upVal}>
+        <Bump v={p.now} className={s.upVal}>
           {p.now}
           {p.next ? (
             <>
@@ -204,7 +210,7 @@ function Up(p: {
               → <em>{p.next}</em>
             </>
           ) : null}
-        </span>
+        </Bump>
         <span className={s.upBar}>
           <i style={{ width: `${Math.max(3, Math.min(100, p.pct * 100))}%` }} />
         </span>

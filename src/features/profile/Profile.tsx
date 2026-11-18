@@ -61,6 +61,7 @@ import iv from '../inventory/Inventory.module.css';
 import { Swap } from '@/ui/Swap';
 import s from './Profile.module.css';
 import lk from './Locker.module.css';
+import { Bump, Skeleton, useFlip } from '@/ui/motion';
 
 type Shown = { id: number; jeton: string; odds: number; variant: string | null } | null;
 export type Prof = {
@@ -135,14 +136,12 @@ export default function Profile() {
     queryFn: async () => (await achApi.of(params.pseudo ?? me.data?.pseudo ?? '')) as { done: number; total: number },
   });
   const myInv = useInventory(); // (avant tout « return » : règle des hooks)
+  // vitrine : un jeton posé ou retiré rebondit dans sa case
+  const showRef = useRef<HTMLUListElement>(null);
+  useFlip(showRef, prof.data?.showcase?.map((x) => x?.id ?? 0).join());
   if (!params.pseudo && !user) return <NeedLogin title={t('app.account')} />;
   if (prof.isError) return <p className="muted">{t('ui.err_generic')}</p>;
-  if (!pseudo || prof.isPending)
-    return (
-      <p className="muted" aria-busy>
-        …
-      </p>
-    );
+  if (!pseudo || prof.isPending) return <Skeleton n={6} h={130} min={150} />;
   const p = prof.data;
   if (!p)
     return (
@@ -188,26 +187,28 @@ export default function Profile() {
           e.currentTarget.style.setProperty('--rx', '0deg');
         }}
       >
-        <div className={s.banner}>
+        <Bump as="div" v={`${p.banner}|${p.banner_fx}`} kind="fade" className={s.banner}>
           {bannerSrc ? (
             <img className="px" src={bannerSrc} alt="" />
           ) : bestBanner ? (
             <PixelBg className={s.bannerBg} odds={bp?.eff ?? 1} glow={tone} still={reducedFx()} />
           ) : null}
           <BannerFx id={p.banner_fx} />
-        </div>
+        </Bump>
       </div>
 
       {/* la carte du joueur chevauche la bannière : photo, pseudo, bio, actions ; à droite son rang */}
       <header className={s.head} data-depth>
-        <div className={s.pp}>
+        <Bump as="div" v={`${p.avatar}|${p.aura}`} className={s.pp}>
           <Aura id={p.aura}>
             <Avatar pseudo={p.pseudo} avatar={p.avatar} size={128} />
           </Aura>
-        </div>
+        </Bump>
         <div className={s.id}>
           <h1>
-            <span className={nameCls(p.name_fx, p.name_font)}>{p.pseudo}</span>{' '}
+            <Bump v={`${p.pseudo}|${p.name_fx}|${p.name_font}`} className={nameCls(p.name_fx, p.name_font)}>
+              {p.pseudo}
+            </Bump>{' '}
             <small className={s.num}>#{String(p.num).padStart(6, '0')}</small>
           </h1>
           {p.bio ? <p className={s.bio}>{p.bio}</p> : null}
@@ -295,12 +296,12 @@ export default function Profile() {
           <h2 id="sc-t" className={s.h2}>
             {t('ui.showcase')}
           </h2>
-          <ul className={s.showcase}>
+          <ul ref={showRef} className={s.showcase}>
             {Array.from({ length: 5 }, (_, i) => {
               const x = show[i];
               if (!x)
                 return (
-                  <li key={`e${i}`} className={s.scEmpty}>
+                  <li key={`e${i}`} data-flip={`e${i}`} className={s.scEmpty}>
                     {mine ? (
                       <button type="button" onClick={() => setSlot(i)} aria-label={t('ui.pick_title', { n: i + 1 })}>
                         +
@@ -310,7 +311,12 @@ export default function Profile() {
                 );
               const j = jetonOf(x.jeton);
               return (
-                <li key={`${i}:${x.id}`} className={s.sc} style={glowVars(j, x.variant) as CSSProperties}>
+                <li
+                  key={`${i}:${x.id}`}
+                  data-flip={`j${x.id}`}
+                  className={s.sc}
+                  style={glowVars(j, x.variant) as CSSProperties}
+                >
                   <button
                     type="button"
                     onClick={() =>
@@ -684,9 +690,7 @@ function ShowcasePicker({ p, slot, onClose }: { p: Prof; slot: number; onClose: 
             </div>
             <div ref={boxRef} className={s.pkBox}>
               {!inv.data ? (
-                <p className="muted" aria-busy>
-                  …
-                </p>
+                <Skeleton n={6} h={130} min={150} />
               ) : toks.length ? (
                 // les mêmes cases que le bestiaire de l'inventaire : numéro, nombre, jeton, nom, rareté, 3 tampons
                 <ul key={serie} className={`${iv.grid} ${s.pkTok}`} data-depth>
@@ -840,6 +844,8 @@ function EditProfile({ p, onClose }: { p: Prof; onClose: () => void }) {
       );
   const shelvesRef = useRef<HTMLDivElement>(null);
   const panelRef = useRef<HTMLDivElement>(null);
+  const lockGrid = useRef<HTMLDivElement>(null);
+  useFlip(lockGrid, `${tab}|${flt}|${so}`); // filtre ou tri : les cases glissent à leur nouvelle place
   useSwingAll(shelvesRef, `.${lk.tabs} > button`, 0.5);
   useSwingAll(panelRef, `.${lk.tile}`, 0.35, tab);
   // survoler une case l'essaie sur l'aperçu (même verrouillée), sans rien changer
@@ -1146,7 +1152,7 @@ function EditProfile({ p, onClose }: { p: Prof; onClose: () => void }) {
                       onChange={(v) => (sfx.click(), setSo(v))}
                     />
                   </div>
-                  <div className={`${lk.grid} ${tab === 'banner' || tab === 'bfx' ? lk.gridWide : ''}`}>
+                  <div ref={lockGrid} className={`${lk.grid} ${tab === 'banner' || tab === 'bfx' ? lk.gridWide : ''}`}>
                     {tab === 'pp'
                       ? [
                           // « Aucune » reste toujours la première case
@@ -1302,6 +1308,7 @@ function LockerTile({
   return (
     <button
       type="button"
+      data-flip={label}
       className={`${lk.tile} ${wide ? lk.wide : ''} ${have ? '' : lk.lockedT} ${peeked ? lk.peeked : ''}`}
       aria-pressed={on || !!peeked}
       onClick={have ? onPick : onLocked}

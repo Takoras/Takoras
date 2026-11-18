@@ -1218,3 +1218,7 @@ ul.collGrid {
 .reportDetail textarea {
   resize: vertical;
 }
+:global(html.reduce-fx) :is(.bannerTilt, .pp, .rankCol, .best),
+:global(html.reduce-fx) .showcase > li {
+  animation: none;
+}

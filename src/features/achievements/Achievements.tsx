@@ -16,6 +16,7 @@ import { flyCoins } from '@/ui/fx';
 import { achText } from './text';
 import sh from '../shop/Shop.module.css';
 import s from './Achievements.module.css';
+import { Bump, Presence, Skeleton } from '@/ui/motion';
 
 // Succès : les rayons de la boutique pour choisir une catégorie (ils penchent et se balancent au survol), et les
 // succès en cases comme l'inventaire. Chaque succès a son image pixel, sa barre de progression et sa récompense ;
@@ -121,12 +122,18 @@ export default function Achievements() {
       if (!a) return;
       const b = el.getBoundingClientRect();
       if (id === snap.id) {
-        el.animate([{ opacity: 0, transform: 'scale(.94)' }, { opacity: 1, transform: 'none' }], {
-          duration: 360,
-          delay: 260,
-          easing: 'cubic-bezier(.2,.8,.2,1)',
-          fill: 'backwards',
-        });
+        el.animate(
+          [
+            { opacity: 0, transform: 'scale(.94)' },
+            { opacity: 1, transform: 'none' },
+          ],
+          {
+            duration: 360,
+            delay: 260,
+            easing: 'cubic-bezier(.2,.8,.2,1)',
+            fill: 'backwards',
+          },
+        );
         return;
       }
       const dx = a.left - b.left,
@@ -156,7 +163,9 @@ export default function Achievements() {
         ?.querySelectorAll<HTMLElement>('[data-ach]')
         .forEach((x) => rects.set(x.dataset.ach ?? '', x.getBoundingClientRect()));
       before.current = { rects, id: a.id };
-      qc.setQueryData(['ach', user.id], (o: Ach[] | undefined) => o?.map((x) => (x.id === a.id ? { ...x, claimed: true } : x)));
+      qc.setQueryData(['ach', user.id], (o: Ach[] | undefined) =>
+        o?.map((x) => (x.id === a.id ? { ...x, claimed: true } : x)),
+      );
       setLeaving(null);
     } catch (e) {
       sfx.deny();
@@ -194,11 +203,11 @@ export default function Achievements() {
             }}
           />
         </span>
-        {ready.length > 1 ? (
+        <Presence show={ready.length > 1}>
           <Button variant="primary" loading={busy} onClick={() => void claimAll()}>
             {T.claimAll.replace('{n}', String(ready.length))}
           </Button>
-        ) : null}
+        </Presence>
       </header>
 
       <div className={s.layout}>
@@ -226,7 +235,11 @@ export default function Achievements() {
                     {inCat.filter((a) => a.claimed).length}/{inCat.length}
                   </small>
                 </span>
-                {nReady ? <i className={s.dot}>{nReady}</i> : null}
+                <Presence show={nReady > 0}>
+                  <Bump as="i" v={nReady} className={s.dot}>
+                    {nReady}
+                  </Bump>
+                </Presence>
               </button>
             );
           })}
@@ -234,9 +247,7 @@ export default function Achievements() {
 
         <div ref={gridRef} className={s.depthGrid} data-depth>
           {!q.data ? (
-            <p className="muted" aria-busy>
-              …
-            </p>
+            <Skeleton n={12} h={210} min={220} />
           ) : (
             <Swap k={`${cat}|${sort}`}>
               <ul className={s.grid}>
@@ -252,10 +263,22 @@ export default function Achievements() {
                       style={{ '--i': Math.min(i, 20) } as CSSProperties}
                     >
                       <span className={s.art}>
-                        <img className={`px ${hidden ? s.hiddenImg : ''}`} src={imgOf(a)} alt="" loading="lazy" decoding="async" width={64} height={64} />
+                        <img
+                          className={`px ${hidden ? s.hiddenImg : ''}`}
+                          src={imgOf(a)}
+                          alt=""
+                          loading="lazy"
+                          decoding="async"
+                          width={64}
+                          height={64}
+                        />
                         {a.claimed ? <img className={`px ${s.check}`} src="/img/ui/ok.png" alt="" /> : null}
                       </span>
-                      <b className={s.name}>{hidden ? T.secret : ((a.target === 1 && T.s1[a.stat]) || T.s[a.stat] || a.stat).replace('{n}', fmt(a.target))}</b>
+                      <b className={s.name}>
+                        {hidden
+                          ? T.secret
+                          : ((a.target === 1 && T.s1[a.stat]) || T.s[a.stat] || a.stat).replace('{n}', fmt(a.target))}
+                      </b>
                       <small className={s.cat}>{hidden ? T.secretHint : T.cats[a.cat]}</small>
                       <span className={s.prog} aria-label={`${fmt(a.value)} / ${fmt(a.target)}`}>
                         <i style={{ width: `${pct}%` }} />

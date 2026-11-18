@@ -30,6 +30,8 @@ export default defineConfig({
     target: 'es2022',
     // pas de cartes du code en ligne : personne ne peut relire le code source mis en forme (sécurité, lot 1)
     sourcemap: false,
+    // les petites polices restent de vrais fichiers : en data: elles seraient bloquées par la CSP (font-src 'self')
+    assetsInlineLimit: (file) => (/\.(woff2?|ttf|otf)$/.test(file) ? false : undefined),
     rolldownOptions: {
       output: {
         // Moins de petits fichiers au premier chargement (chacun coûte un aller-retour réseau) :

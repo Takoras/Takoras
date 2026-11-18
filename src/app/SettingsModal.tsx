@@ -81,7 +81,11 @@ export function SettingsModal() {
           <Segmented<Fx>
             label={t('ui.set_fx')}
             value={st.fx}
-            onChange={(fx) => st.set({ fx })}
+            onChange={(fx) => {
+              if (fx === st.fx) return;
+              st.set({ fx });
+              location.reload(); // la qualité s'applique à tout le site, proprement, dès le démarrage
+            }}
             options={[
               ['auto', t('ui.fx_auto')],
               ['high', t('ui.fx_high')],

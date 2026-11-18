@@ -36,7 +36,7 @@ export function snapMouseDepth() {
   write();
 }
 export function installMouseDepth() {
-  if (matchMedia('(pointer: coarse)').matches) return () => undefined; // téléphone : pas de souris
+  if (calmFx() || matchMedia('(pointer: coarse)').matches) return () => undefined; // téléphone ou qualité réduite : rien
   let raf = 0;
   const step = () => {
     st.x += (st.tx - st.x) * 0.12;

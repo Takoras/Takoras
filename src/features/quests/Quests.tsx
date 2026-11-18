@@ -1,5 +1,5 @@
 import { burstAt } from '@/lib/pfx';
-import { useEffect, useRef } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { useQueryClient } from '@tanstack/react-query';
 import { errorText, questApi } from '@/api';
 import { useQuests } from '@/api/queries';
@@ -14,6 +14,7 @@ import { Button } from '@/ui/Button';
 import { toast } from '@/ui/toast';
 import { useNow } from '../eco/eco';
 import s from './Quests.module.css';
+import { Bump } from '@/ui/motion';
 
 // Pièces du bouton vers le solde : le même vol que partout (ui/fx.ts), et un objet gagné file vers l'inventaire
 function coinRain(from: HTMLElement, n: number) {
@@ -29,6 +30,7 @@ export function Quests() {
   const qc = useQueryClient();
   const now = useNow();
   const done = useRef<Set<string> | null>(null);
+  const [just, setJust] = useState(''); // ce qu'on vient de récupérer : il claque
   const data = q.data;
   // une quête vient d'être terminée (le serveur l'a comptée) : petite notif
   useEffect(() => {
@@ -54,6 +56,7 @@ export function Quests() {
     try {
       const r = (await questApi.claimDaily()) as { amount: number; streak: number; state: unknown };
       coinRain(el, 4); // avant la mise à jour du solde : pas de deuxième vol
+      setJust('daily');
       burstAt(el, '#f5cd52', 1.2);
       sfx.upgrade();
       toast(t('ui.daily_got', { n: n(r.amount), s: r.streak }));
@@ -67,6 +70,7 @@ export function Quests() {
     try {
       const st = await questApi.claimQuest(id);
       coinRain(el, 3);
+      setJust(id);
       if (item && ITEM_IMG[item]) celebrateItem(ITEM_IMG[item].src);
       refresh(st);
       burstAt(el, '#4ade80');
@@ -81,7 +85,7 @@ export function Quests() {
   return (
     <section className={s.box} aria-labelledby="q-t">
       {d ? (
-        <div className={`${s.daily} ${d.available ? s.on : ''}`} id="daily">
+        <div className={`${s.daily} ${d.available ? s.on : ''} ${just === 'daily' ? s.just : ''}`} id="daily">
           <div>
             <b>{t('ui.daily_title')}</b>
             <small className="muted">
@@ -93,9 +97,9 @@ export function Quests() {
               +{n(d.amount)} <img className="px" src="/img/piece.png" alt="" width={14} height={14} />
             </Button>
           ) : (
-            <span className={s.check} aria-label="OK">
+            <Bump v={d.available} kind="stamp" className={s.check} label="OK">
               ✓
-            </span>
+            </Bump>
           )}
         </div>
       ) : null}
@@ -111,7 +115,10 @@ export function Quests() {
             const ok = x.value >= x.target,
               item = x.item ? ITEM_IMG[x.item] : undefined;
             return (
-              <li key={x.id} className={`${ok ? s.ok : ''} ${x.claimed ? s.claimed : ''}`}>
+              <li
+                key={x.id}
+                className={`${ok ? s.ok : ''} ${x.claimed ? s.claimed : ''} ${just === x.id ? s.just : ''}`}
+              >
                 <div className={s.top}>
                   <span>{t(`ui.q_${x.stat}` as Parameters<typeof t>[0], { n: x.target })}</span>
                   <span className={s.rew}>
@@ -147,9 +154,9 @@ export function Quests() {
                   </b>
                 </div>
                 {x.claimed ? (
-                  <span className={s.check} aria-label="OK">
+                  <Bump v={x.claimed} kind="stamp" className={s.check} label="OK">
                     ✓
-                  </span>
+                  </Bump>
                 ) : ok ? (
                   <Button
                     variant="primary"

@@ -397,3 +397,64 @@ p[aria-busy] {
     opacity: 0;
   }
 }
+
+/* Qualité réduite : plus de calques réservés ni de glissement à la souris */
+html.q-calm [data-depth] {
+  will-change: auto !important;
+  translate: none !important;
+}
+/* basse et patate : les cases hors de l'écran ne sont pas dessinées */
+html.reduce-fx .dd-card {
+  content-visibility: auto;
+  contain-intrinsic-size: auto 170px;
+}
+html.q-potato body {
+  background: var(--bg);
+}
+html.q-potato *,
+html.q-potato *::before,
+html.q-potato *::after {
+  box-shadow: none !important;
+  text-shadow: none !important;
+  will-change: auto !important;
+}
+
+/* Changement de page : l'ancienne s'efface vers le haut, la nouvelle arrive ; le menu et le haut ne bougent pas */
+html:not(.reduce-fx) #main {
+  view-transition-name: page;
+}
+::view-transition {
+  pointer-events: none;
+}
+::view-transition-old(root),
+::view-transition-new(root) {
+  animation: none;
+}
+::view-transition-old(page) {
+  animation: vtOut 0.15s ease-in both;
+}
+::view-transition-new(page) {
+  animation: vtIn 0.26s cubic-bezier(0.2, 0.8, 0.2, 1) both;
+}
+@keyframes vtOut {
+  to {
+    opacity: 0;
+    transform: translateY(-10px) scale(0.99);
+  }
+}
+@keyframes vtIn {
+  from {
+    opacity: 0;
+    transform: translateY(14px);
+  }
+}
+::view-transition-group(rail),
+::view-transition-group(hud),
+::view-transition-new(rail),
+::view-transition-new(hud) {
+  animation: none;
+}
+::view-transition-old(rail),
+::view-transition-old(hud) {
+  display: none;
+}

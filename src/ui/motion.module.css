@@ -1,0 +1,52 @@
+/* Animations communes (voir motion.tsx) : uniquement transform et opacity */
+:where(.bump) {
+  display: inline-block;
+}
+.in,
+.out,
+.plain {
+  display: contents;
+}
+.in > * {
+  animation: presIn 0.3s cubic-bezier(0.2, 1.35, 0.4, 1) backwards;
+}
+.out > * {
+  pointer-events: none;
+  animation: presOut 0.2s ease-in forwards !important;
+}
+@keyframes presIn {
+  from {
+    opacity: 0;
+    scale: 0.75;
+  }
+}
+@keyframes presOut {
+  to {
+    opacity: 0;
+    scale: 0.82;
+  }
+}
+.clip {
+  overflow: clip;
+  overflow-clip-margin: 24px;
+}
+.skel {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(var(--min), 1fr));
+  gap: var(--s-3);
+  width: 100%;
+}
+.skel i {
+  height: var(--h);
+  border-radius: 12px;
+  background: var(--surface);
+  animation: skel 1.1s ease-in-out calc(var(--i) * 70ms) infinite alternate;
+}
+@keyframes skel {
+  to {
+    opacity: 0.45;
+  }
+}
+:global(html.reduce-fx) .skel i {
+  animation: none;
+}

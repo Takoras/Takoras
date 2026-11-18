@@ -137,7 +137,7 @@ export const fr = {
     fx_low: 'Bas',
     fx_potato: 'Patate',
     fx_hint:
-      'Moyen : sans le décor qui bouge en continu. Bas : effets allégés. Patate : plus aucune animation, pour les petits appareils',
+      'Moyen : moins de décor animé. Bas : presque plus d’effets. Patate : rien que l’essentiel, pour les petites machines. Le site se recharge.',
     no_banner: 'Pas encore de bannière (bientôt en boutique)',
     showcase_click: 'clique sur une case pour choisir un jeton',
     private_zone: 'Ton compte',

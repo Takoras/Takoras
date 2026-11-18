@@ -777,3 +777,14 @@
     opacity: 0;
   }
 }
+
+/* le menu et le haut restent immobiles pendant le changement de page */
+:global(html:not(.reduce-fx)) .rail {
+  view-transition-name: rail;
+}
+:global(html:not(.reduce-fx)) .hud {
+  view-transition-name: hud;
+}
+.nbadge {
+  transform-origin: 50% 50%;
+}

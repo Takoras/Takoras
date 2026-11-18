@@ -273,7 +273,7 @@ function step() {
 
 // branché une fois au démarrage (Layout) : surveille les images à l'écran
 export function installDoodleFrames() {
-  if (typeof document === 'undefined' || !supported()) return () => undefined;
+  if (typeof document === 'undefined' || reducedFx() || !supported()) return () => undefined;
   document.documentElement.classList.add('dd-js');
   const io = new IntersectionObserver(
     (es) =>

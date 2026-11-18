@@ -1,3 +1,4 @@
+import { useRef } from 'react';
 import { useState } from 'react';
 import { Link, Navigate } from 'react-router';
 import { keepPreviousData, useQuery } from '@tanstack/react-query';
@@ -8,6 +9,7 @@ import { useT } from '@/i18n/useT';
 import { Avatar } from '@/ui/Avatar';
 import { Segmented } from '@/ui/Segmented';
 import s from './Board.module.css';
+import { Bump, Skeleton, useFlip } from '@/ui/motion';
 
 // Classements « tirages ouverts » et « temps de jeu » : podium (top 3) + liste jusqu'au 10e, cette semaine ou depuis toujours.
 // Il n'y a plus de page Classement : l'Elo est dans Combat, les tirages sur l'accueil, le temps de jeu dans l'inventaire.
@@ -60,8 +62,11 @@ export function BoardSection({ kind: id, title }: { kind: 'pulls' | 'time'; titl
     </>
   );
   const rows = q.data ?? [];
+  // changer de période : les joueurs glissent vers leur nouvelle place
+  const root = useRef<HTMLElement>(null);
+  useFlip(root, rows.map((r) => r.pseudo).join());
   return (
-    <section className={s.page} aria-label={title}>
+    <section ref={root} className={s.page} aria-label={title}>
       <header className={s.head}>
         <h2>{title}</h2>
         <Segmented<Period>
@@ -75,9 +80,7 @@ export function BoardSection({ kind: id, title }: { kind: 'pulls' | 'time'; titl
         />
       </header>
       {q.isPending ? (
-        <p className="muted" aria-busy>
-          …
-        </p>
+        <Skeleton n={3} h={150} min={200} />
       ) : rows.length ? (
         <>
           <ol className={s.podium}>
@@ -86,11 +89,11 @@ export function BoardSection({ kind: id, title }: { kind: 'pulls' | 'time'; titl
               return r ? (
                 <li key={i} className={`${s.pod} ${s[`p${i + 1}`]}`}>
                   {/* le joueur flotte à son rythme, la marche au sien */}
-                  <div className={s.podWho}>
+                  <Bump as="div" v={r.pseudo} kind="drop" className={s.podWho}>
                     <Avatar pseudo={r.pseudo} size={i === 0 ? 84 : 64} />
                     <b>{name(r)}</b>
                     <small>{val(r)}</small>
-                  </div>
+                  </Bump>
                   {/* marche dessinée à la main : vraie image pixel art, donc avec le doodle */}
                   {/* le conteneur flotte et penche, l'image garde son doodle (deux animations séparées) */}
                   <span className={s.step}>
@@ -104,7 +107,7 @@ export function BoardSection({ kind: id, title }: { kind: 'pulls' | 'time'; titl
           </ol>
           <ol className={s.list} start={4}>
             {rows.slice(3, 10).map((r, i) => (
-              <li key={r.pseudo} className={mine(r) ? s.me : undefined}>
+              <li key={r.pseudo} data-flip={r.pseudo} className={mine(r) ? s.me : undefined}>
                 <span className={s.rank}>{i + 4}</span>
                 <Avatar pseudo={r.pseudo} size={28} />
                 <span className={s.who}>{name(r)}</span>

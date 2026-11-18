@@ -1010,3 +1010,23 @@ button.tile:focus-visible {
 .tile.got .qty {
   opacity: 0.45;
 }
+.tabBody {
+  display: grid;
+  gap: var(--s-6);
+  min-width: 0;
+}
+.weekly li {
+  transition: opacity 0.35s ease-out;
+}
+.wkJust {
+  animation: wkJust 0.5s cubic-bezier(0.2, 1.3, 0.4, 1);
+}
+@keyframes wkJust {
+  35% {
+    transform: scale(1.025);
+    background: rgb(74 222 128 / 18%);
+  }
+}
+:global(html.reduce-fx) .tile {
+  animation: none;
+}

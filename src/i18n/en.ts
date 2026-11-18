@@ -138,7 +138,7 @@ export const en: Dict = {
     fx_med: 'Medium',
     fx_low: 'Low',
     fx_potato: 'Potato',
-    fx_hint: 'Medium: no constantly moving decor. Low: lighter effects. Potato: no animation at all, for small devices',
+    fx_hint: 'Medium: less moving decor. Low: almost no effects. Potato: just the essentials, for small devices. The site reloads.',
     no_banner: 'No banner yet (coming soon to the shop)',
     showcase_click: 'click a slot to pick a token',
     private_zone: 'Your account',

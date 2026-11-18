@@ -1,3 +1,4 @@
+import { reducedFx } from '@/lib/settings';
 // Le doodle (filtres SVG #dd0..#dd2 dans index.html) ne s'appliquait parfois pas du tout au chargement d'une page
 // (une fois sur deux, réglé par un rechargement). On « relance » les filtres : on remplace le bloc SVG par sa copie
 // (le navigateur les relit) et on redémarre les animations des images pixel art.
@@ -21,7 +22,7 @@ if (typeof document !== 'undefined')
 // d'une piste qui défile…) met son animation en pause. Chaque pas du doodle redessine l'image avec un filtre SVG,
 // c'est ce qui coûte le plus cher à la carte graphique ; en pause, l'image ne coûte plus rien.
 export function installDoodleVisibility() {
-  if (typeof IntersectionObserver === 'undefined') return () => undefined;
+  if (typeof IntersectionObserver === 'undefined' || reducedFx()) return () => undefined;
   const io = new IntersectionObserver(
     (es) => es.forEach((e) => e.target.classList.toggle('dd-off', !e.isIntersecting)),
     { rootMargin: '80px' },

@@ -277,3 +277,12 @@
     font-size: var(--fs-xs);
   }
 }
+.podium,
+.list {
+  animation: boardIn 0.35s ease-out;
+}
+@keyframes boardIn {
+  from {
+    opacity: 0;
+  }
+}

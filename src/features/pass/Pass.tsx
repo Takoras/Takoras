@@ -18,6 +18,8 @@ import { useSwingAll } from '@/ui/useSwing';
 import { useStaggerIn } from '@/ui/useStaggerIn';
 import { RewardSheet } from './RewardSheet';
 import s from './Pass.module.css';
+import { Bump, Presence, Skeleton } from '@/ui/motion';
+import { Swap } from '@/ui/Swap';
 
 type Reward = { coins?: number; item?: string; qty?: number } | null;
 type PassState = {
@@ -241,9 +243,7 @@ export default function Pass() {
   if (!d)
     return (
       <section ref={pageRef} className={s.page}>
-        <p className="muted" aria-busy>
-          …
-        </p>
+        <Skeleton n={8} h={150} min={150} />
       </section>
     );
   const n = (v: number) => v.toLocaleString(locale(lang));
@@ -556,194 +556,197 @@ export default function Pass() {
         </div>
       </header>
 
-      {tab === 'rewards' ? (
-        <>
-          <div className={s.top} data-depth>
-            {/* ta progression : grand palier, barre d'XP qui glisse, et ce que tu gagnes au prochain */}
-            <div className={s.hero}>
-              <PixelBg className={s.heroBg} odds={10} glow="#3966f7" still={reducedFx()} />
-              <div className={s.lvl}>
-                <small>{t('ui.bp_tier')}</small>
-                <b>
-                  <Tween value={tier} ms={900} format={(v) => String(Math.round(v))} />
-                </b>
-                <small>/ 50</small>
-              </div>
-              <div className={s.heroInfo}>
-                <div
-                  className={s.bar}
-                  role="progressbar"
-                  aria-label={t('ui.bp_xp')}
-                  aria-valuemin={0}
-                  aria-valuemax={XP_TIER}
-                  aria-valuenow={into}
-                >
-                  <i style={{ width: `${pct}%` }} />
-                </div>
-                <p className={s.xpTxt}>
+      {/* Récompenses ↔ Missions : fondu croisé, la hauteur suit */}
+      <Swap k={tab}>
+        {tab === 'rewards' ? (
+          <div className={s.tabBody}>
+            <div className={s.top} data-depth>
+              {/* ta progression : grand palier, barre d'XP qui glisse, et ce que tu gagnes au prochain */}
+              <div className={s.hero}>
+                <PixelBg className={s.heroBg} odds={10} glow="#3966f7" still={reducedFx()} />
+                <div className={s.lvl}>
+                  <small>{t('ui.bp_tier')}</small>
                   <b>
-                    <Tween value={into} ms={1200} pow={4} format={(v) => n(Math.round(v))} />
-                  </b>{' '}
-                  / {n(XP_TIER)} XP
-                  <span>{tier >= 50 ? t('ui.bp_done') : t('ui.bp_next', { n: n(XP_TIER - into), t: tier + 1 })}</span>
-                </p>
-                <div className={s.actions}>
-                  {nReady > 0 ? (
-                    <Button variant="primary" onClick={() => void claimAll()} disabled={busy}>
-                      {t('ui.bp_claim_all', { n: nReady })}
-                    </Button>
-                  ) : null}
+                    <Tween value={tier} ms={900} format={(v) => String(Math.round(v))} />
+                  </b>
+                  <small>/ 50</small>
                 </div>
-              </div>
-              {nextT && tier < 50 ? (
-                <div className={s.nexts} aria-label={t('ui.bp_next', { n: n(XP_TIER - into), t: tier + 1 })}>
-                  {peek(nextT.free, false)}
-                  {peek(nextT.prem, true)}
-                </div>
-              ) : null}
-            </div>
-            {/* le premium de la saison : la photo exclusive flotte, la valeur des deux pistes comparée */}
-            <button type="button" className={s.prem} onClick={() => setPremOpen(true)}>
-              <span className={s.ppWrap}>
-                <img className={`px ${s.premPp}`} src="/img/pp/oeil.png" alt="" />
-              </span>
-              <b>{t('ui.bp_prem')}</b>
-              <span className={s.premVal}>
-                <img className="px" src="/img/piece.png" alt="" width={18} height={18} />
-                {n(vPrem)}
-                <em>×{Math.max(1, Math.round(vPrem / Math.max(1, vFree)))}</em>
-              </span>
-              <small>{d.premium ? `✓ ${t('ui.bp_prem_owned')}` : t('ui.pk_soon')}</small>
-            </button>
-          </div>
-
-          <div className={s.board} data-depth>
-            <div className={s.rows} aria-hidden>
-              <span className={s.rowGold}>{t('ui.bp_prem_short')}</span>
-              <span>{t('ui.bp_free')}</span>
-            </div>
-            {/* les 50 paliers : premium en haut, numéro sur la ligne de progression, gratuit en bas */}
-            {/* eslint-disable-next-line jsx-a11y/no-noninteractive-tabindex -- liste qui défile au clavier */}
-            <ol ref={list} className={s.track} data-depth tabIndex={0} aria-label={t('ui.bp_title')}>
-              <svg ref={svgRef} className={s.path} aria-hidden>
-                <defs>
-                  <linearGradient id="bp-path" x1="0" x2="1" y1="0" y2="0">
-                    <stop offset="0" stopColor="#3966f7" />
-                    <stop offset="1" stopColor="#8eaaff" />
-                  </linearGradient>
-                </defs>
-                <path ref={baseRef} className={s.pathBase} />
-                <path ref={fillRef} className={s.pathFill} pathLength={1} />
-                <circle ref={headRef} className={s.pathHead} r={9} />
-              </svg>
-              {d.tiers.map((x) => {
-                // remplissage de la ligne jusqu'à ce palier : plein si atteint, en partie pour le prochain
-                const f = x.t <= tier ? 1 : x.t === tier + 1 ? pct / 100 : 0;
-                return (
-                  <li
-                    key={x.t}
-                    className={x.t <= tier ? s.reached : undefined}
-                    aria-current={x.t === Math.min(50, tier + 1) ? 'step' : undefined}
-                    style={{ '--f': f, '--wy': `${(Math.sin(x.t * 0.9) * 38).toFixed(1)}px` } as CSSProperties}
+                <div className={s.heroInfo}>
+                  <div
+                    className={s.bar}
+                    role="progressbar"
+                    aria-label={t('ui.bp_xp')}
+                    aria-valuemin={0}
+                    aria-valuemax={XP_TIER}
+                    aria-valuenow={into}
                   >
-                    {tile(x.t, x.prem, true)}
-                    <span className={s.num} data-num>
-                      {x.t}
-                    </span>
-                    {tile(x.t, x.free, false)}
-                  </li>
-                );
-              })}
-            </ol>
-          </div>
-
-          {/* fiche d'une récompense : même DA que la fiche d'un jeton */}
-          <RewardSheet
-            info={
-              info && infoR
-                ? {
-                    tier: info.t,
-                    prem: info.prem,
-                    title: label(infoR),
-                    qty: !infoR.coins && (infoR.qty ?? 1) > 1 ? infoR.qty : undefined,
-                    img: icon(infoR),
-                    shape: infoR.item?.startsWith('b_') ? 'wide' : infoR.item?.startsWith('a_') ? 'round' : undefined,
-                    desc: infoDesc,
-                    state: infoState,
-                    got: infoGot,
-                    can: infoCan,
-                    ...rewardLook(infoR, info.prem),
-                  }
-                : null
-            }
-            busy={busy}
-            onClaim={async () => {
-              if (!info || !infoR) return;
-              await claim(info.t, info.prem, infoR);
-              setInfo(null);
-            }}
-            onClose={() => setInfo(null)}
-          />
-
-          <Modal open={premOpen} onClose={() => setPremOpen(false)} title={t('ui.bp_prem')}>
-            <div className={s.premium}>
-              <div className={s.premShow}>
-                <figure>
-                  <img className="px" src="/img/pp/oeil.png" alt="" />
-                  <figcaption>
-                    {t('ui.bp_ex_photo')} <small>{t('ui.bp_ex_tier', { n: 50 })}</small>
-                  </figcaption>
-                </figure>
-                <figure>
-                  <img className={`px ${s.premBan}`} src="/img/bannieres/yeux.png" alt="" />
-                  <figcaption>
-                    {t('ui.bp_ex_banner')} <small>{t('ui.bp_ex_tier', { n: 30 })}</small>
-                  </figcaption>
-                </figure>
+                    <i style={{ width: `${pct}%` }} />
+                  </div>
+                  <p className={s.xpTxt}>
+                    <b>
+                      <Tween value={into} ms={1200} pow={4} format={(v) => n(Math.round(v))} />
+                    </b>{' '}
+                    / {n(XP_TIER)} XP
+                    <span>{tier >= 50 ? t('ui.bp_done') : t('ui.bp_next', { n: n(XP_TIER - into), t: tier + 1 })}</span>
+                  </p>
+                  <div className={s.actions}>
+                    <Presence show={nReady > 0}>
+                      <Button variant="primary" onClick={() => void claimAll()} disabled={busy}>
+                        {t('ui.bp_claim_all', { n: nReady })}
+                      </Button>
+                    </Presence>
+                  </div>
+                </div>
+                {nextT && tier < 50 ? (
+                  <div className={s.nexts} aria-label={t('ui.bp_next', { n: n(XP_TIER - into), t: tier + 1 })}>
+                    {peek(nextT.free, false)}
+                    {peek(nextT.prem, true)}
+                  </div>
+                ) : null}
               </div>
-              <div className={s.compare}>
-                <span>
-                  <small>{t('ui.bp_free')}</small>
-                  <b>
-                    <img className="px" src="/img/piece.png" alt="" width={18} height={18} /> {n(vFree)}
-                  </b>
+              {/* le premium de la saison : la photo exclusive flotte, la valeur des deux pistes comparée */}
+              <button type="button" className={s.prem} onClick={() => setPremOpen(true)}>
+                <span className={s.ppWrap}>
+                  <img className={`px ${s.premPp}`} src="/img/pp/oeil.png" alt="" />
                 </span>
-                <span className={s.vs} aria-hidden>
-                  →
+                <b>{t('ui.bp_prem')}</b>
+                <span className={s.premVal}>
+                  <img className="px" src="/img/piece.png" alt="" width={18} height={18} />
+                  {n(vPrem)}
+                  <em>×{Math.max(1, Math.round(vPrem / Math.max(1, vFree)))}</em>
                 </span>
-                <span className={s.big}>
-                  <small>{t('ui.bp_prem_short')}</small>
-                  <b>
-                    <img className="px" src="/img/piece.png" alt="" width={22} height={22} /> {n(vPrem)}
-                  </b>
-                </span>
-                <span className={s.mult}>×{Math.max(1, Math.round(vPrem / Math.max(1, vFree)))}</span>
-              </div>
-              {d.premium ? (
-                <b className={s.owned}>✓ {t('ui.bp_prem_owned')}</b>
-              ) : (
-                <Button variant="primary" disabled title={t('ui.packs_soon')}>
-                  Débloquer · {t('ui.pk_soon')}
-                </Button>
-              )}
+                <small>{d.premium ? `✓ ${t('ui.bp_prem_owned')}` : t('ui.pk_soon')}</small>
+              </button>
             </div>
-          </Modal>
-        </>
-      ) : (
-        <div className={s.missions} data-depth>
-          <ul className={s.how} aria-label={t('ui.bp_xp_from')}>
-            <li>
-              <b>+15</b>
-              {t('ui.bp_src_pull')} <small>{d.pull_xp}/600</small>
-            </li>
-            <li>
-              <b>+134</b>
-              {t('ui.bp_src_quest')}
-            </li>
-          </ul>
-          <Weekly />
-        </div>
-      )}
+
+            <div className={s.board} data-depth>
+              <div className={s.rows} aria-hidden>
+                <span className={s.rowGold}>{t('ui.bp_prem_short')}</span>
+                <span>{t('ui.bp_free')}</span>
+              </div>
+              {/* les 50 paliers : premium en haut, numéro sur la ligne de progression, gratuit en bas */}
+              {/* eslint-disable-next-line jsx-a11y/no-noninteractive-tabindex -- liste qui défile au clavier */}
+              <ol ref={list} className={s.track} data-depth tabIndex={0} aria-label={t('ui.bp_title')}>
+                <svg ref={svgRef} className={s.path} aria-hidden>
+                  <defs>
+                    <linearGradient id="bp-path" x1="0" x2="1" y1="0" y2="0">
+                      <stop offset="0" stopColor="#3966f7" />
+                      <stop offset="1" stopColor="#8eaaff" />
+                    </linearGradient>
+                  </defs>
+                  <path ref={baseRef} className={s.pathBase} />
+                  <path ref={fillRef} className={s.pathFill} pathLength={1} />
+                  <circle ref={headRef} className={s.pathHead} r={9} />
+                </svg>
+                {d.tiers.map((x) => {
+                  // remplissage de la ligne jusqu'à ce palier : plein si atteint, en partie pour le prochain
+                  const f = x.t <= tier ? 1 : x.t === tier + 1 ? pct / 100 : 0;
+                  return (
+                    <li
+                      key={x.t}
+                      className={x.t <= tier ? s.reached : undefined}
+                      aria-current={x.t === Math.min(50, tier + 1) ? 'step' : undefined}
+                      style={{ '--f': f, '--wy': `${(Math.sin(x.t * 0.9) * 38).toFixed(1)}px` } as CSSProperties}
+                    >
+                      {tile(x.t, x.prem, true)}
+                      <span className={s.num} data-num>
+                        {x.t}
+                      </span>
+                      {tile(x.t, x.free, false)}
+                    </li>
+                  );
+                })}
+              </ol>
+            </div>
+
+            {/* fiche d'une récompense : même DA que la fiche d'un jeton */}
+            <RewardSheet
+              info={
+                info && infoR
+                  ? {
+                      tier: info.t,
+                      prem: info.prem,
+                      title: label(infoR),
+                      qty: !infoR.coins && (infoR.qty ?? 1) > 1 ? infoR.qty : undefined,
+                      img: icon(infoR),
+                      shape: infoR.item?.startsWith('b_') ? 'wide' : infoR.item?.startsWith('a_') ? 'round' : undefined,
+                      desc: infoDesc,
+                      state: infoState,
+                      got: infoGot,
+                      can: infoCan,
+                      ...rewardLook(infoR, info.prem),
+                    }
+                  : null
+              }
+              busy={busy}
+              onClaim={async () => {
+                if (!info || !infoR) return;
+                await claim(info.t, info.prem, infoR);
+                setInfo(null);
+              }}
+              onClose={() => setInfo(null)}
+            />
+
+            <Modal open={premOpen} onClose={() => setPremOpen(false)} title={t('ui.bp_prem')}>
+              <div className={s.premium}>
+                <div className={s.premShow}>
+                  <figure>
+                    <img className="px" src="/img/pp/oeil.png" alt="" />
+                    <figcaption>
+                      {t('ui.bp_ex_photo')} <small>{t('ui.bp_ex_tier', { n: 50 })}</small>
+                    </figcaption>
+                  </figure>
+                  <figure>
+                    <img className={`px ${s.premBan}`} src="/img/bannieres/yeux.png" alt="" />
+                    <figcaption>
+                      {t('ui.bp_ex_banner')} <small>{t('ui.bp_ex_tier', { n: 30 })}</small>
+                    </figcaption>
+                  </figure>
+                </div>
+                <div className={s.compare}>
+                  <span>
+                    <small>{t('ui.bp_free')}</small>
+                    <b>
+                      <img className="px" src="/img/piece.png" alt="" width={18} height={18} /> {n(vFree)}
+                    </b>
+                  </span>
+                  <span className={s.vs} aria-hidden>
+                    →
+                  </span>
+                  <span className={s.big}>
+                    <small>{t('ui.bp_prem_short')}</small>
+                    <b>
+                      <img className="px" src="/img/piece.png" alt="" width={22} height={22} /> {n(vPrem)}
+                    </b>
+                  </span>
+                  <span className={s.mult}>×{Math.max(1, Math.round(vPrem / Math.max(1, vFree)))}</span>
+                </div>
+                {d.premium ? (
+                  <b className={s.owned}>✓ {t('ui.bp_prem_owned')}</b>
+                ) : (
+                  <Button variant="primary" disabled title={t('ui.packs_soon')}>
+                    Débloquer · {t('ui.pk_soon')}
+                  </Button>
+                )}
+              </div>
+            </Modal>
+          </div>
+        ) : (
+          <div className={s.missions} data-depth>
+            <ul className={s.how} aria-label={t('ui.bp_xp_from')}>
+              <li>
+                <b>+15</b>
+                {t('ui.bp_src_pull')} <small>{d.pull_xp}/600</small>
+              </li>
+              <li>
+                <b>+134</b>
+                {t('ui.bp_src_quest')}
+              </li>
+            </ul>
+            <Weekly />
+          </div>
+        )}
+      </Swap>
     </section>
   );
 }
@@ -757,6 +760,7 @@ function Weekly() {
   const lang = useSettings((x) => x.lang);
   const uid = useAuth((x) => x.user?.id);
   const qc = useQueryClient();
+  const [just, setJust] = useState('');
   const q = useQuery({
     queryKey: ['weekly', uid],
     enabled: !!uid,
@@ -767,6 +771,7 @@ function Weekly() {
   const claim = async (id: string) => {
     try {
       qc.setQueryData(['me', uid], await passApi.claimWeekly(id));
+      setJust(id);
       sfx.upgrade();
       void q.refetch();
       void qc.invalidateQueries({ queryKey: ['pass'] });
@@ -785,7 +790,10 @@ function Weekly() {
           .map((x) => {
             const ok = x.value >= x.target;
             return (
-              <li key={x.id} className={x.claimed ? s.wkDone : ok ? s.wkReady : undefined}>
+              <li
+                key={x.id}
+                className={`${x.claimed ? s.wkDone : ok ? s.wkReady : ''} ${just === x.id ? s.wkJust : ''}`}
+              >
                 <span>
                   <b>{t(`ui.wk_${x.id}`, { n: x.target })}</b>
                   <small>{t('ui.wk_reward', { c: n(x.coins) })}</small>
@@ -801,7 +809,9 @@ function Weekly() {
                   <i style={{ width: `${Math.min(100, (x.value / x.target) * 100)}%` }} />
                 </span>
                 {x.claimed ? (
-                  <b className={s.ok}>✓</b>
+                  <Bump as="b" v={x.claimed} kind="stamp" className={s.ok}>
+                    ✓
+                  </Bump>
                 ) : (
                   <Button size="sm" variant={ok ? 'primary' : 'ghost'} disabled={!ok} onClick={() => void claim(x.id)}>
                     {ok ? t('ui.bp_claim') : `${x.value}/${x.target}`}

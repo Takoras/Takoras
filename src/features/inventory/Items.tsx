@@ -17,6 +17,7 @@ import { NeedLogin } from '@/app/NeedLogin';
 import { InvTabs } from './Bestiary';
 import { useSwingAll } from '@/ui/useSwing';
 import s from './Inventory.module.css';
+import { Skeleton } from '@/ui/motion';
 
 // rangés par catégorie : potions de chance, objets utiles (sabliers…)
 const ITEM_CATS = [
@@ -61,9 +62,7 @@ export default function Items() {
       {items.isError ? (
         <p className="muted">{t('ui.err_generic')}</p>
       ) : !items.data ? (
-        <p className="muted" aria-busy>
-          …
-        </p>
+        <Skeleton n={6} h={190} min={170} />
       ) : list.length ? (
         <div ref={box} className={s.itemCats}>
           {ITEM_CATS.map(([k, label]) => {

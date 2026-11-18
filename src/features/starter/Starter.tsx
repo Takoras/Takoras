@@ -11,6 +11,7 @@ import { toast } from '@/ui/toast';
 import { GiftReveal } from './GiftReveal';
 import { useSwingAll } from '@/ui/useSwing';
 import s from './Starter.module.css';
+import { Swap } from '@/ui/Swap';
 
 type StarterData = {
   pending: boolean;
@@ -54,7 +55,9 @@ export function Starter() {
     />
   ) : null;
   if (got) return reveal;
-  if (!d || (!d.pending && (!d.quest || d.quest.done))) return null;
+  if (!d) return null;
+  // cadeau → quête → terminé : un fondu, et la boîte se replie au lieu de disparaître d'un coup
+  const step = d.pending ? 'gift' : d.quest && !d.quest.done ? 'quest' : null;
   const after = (st: unknown) => {
     qc.setQueryData(['me', uid], st);
     void q.refetch();
@@ -79,44 +82,47 @@ export function Starter() {
       toast(errorText(e, lang), true);
     }
   };
-  if (d.pending)
-    return (
-      <section className={s.box} aria-labelledby="st-t">
-        <h2 id="st-t">{t('ui.st_pick')}</h2>
-        <ul ref={listRef} className={s.gifts}>
-          {d.choices.map((g) => (
-            <li key={g}>
-              <button type="button" onClick={() => void pick(g)}>
-                <img className="px" src={GIFT_IMG[g]} alt="" />
-                <b>{t(`ui.st_g_${g}` as Key)}</b>
-                <small>{t(`ui.st_g_${g}_d` as Key)}</small>
-              </button>
-            </li>
-          ))}
-        </ul>
-      </section>
-    );
   const st = d.quest;
-  if (!st) return null;
-  const steps = [
-    ['pull', st.pull],
-    ['shop', st.shop],
-  ] as const;
+  const steps = st
+    ? ([
+        ['pull', st.pull],
+        ['shop', st.shop],
+      ] as const)
+    : [];
   const all = steps.every(([, ok]) => ok);
   return (
-    <section className={s.box} aria-labelledby="stq-t">
-      <h2 id="stq-t">{t('ui.st_quest')}</h2>
-      <ol className={s.steps}>
-        {steps.map(([k, ok]) => (
-          <li key={k} className={ok ? s.ok : undefined}>
-            <span aria-hidden>{ok ? '✓' : ''}</span>
-            {t(`ui.st_q_${k}`)}
-          </li>
-        ))}
-      </ol>
-      <Button variant="primary" size="sm" disabled={!all} onClick={() => void claim()}>
-        {t('ui.st_quest_claim')}
-      </Button>
-    </section>
+    <Swap k={step}>
+      {step === 'gift' ? (
+        <section className={s.box} aria-labelledby="st-t">
+          <h2 id="st-t">{t('ui.st_pick')}</h2>
+          <ul ref={listRef} className={s.gifts}>
+            {d.choices.map((g) => (
+              <li key={g}>
+                <button type="button" onClick={() => void pick(g)}>
+                  <img className="px" src={GIFT_IMG[g]} alt="" />
+                  <b>{t(`ui.st_g_${g}` as Key)}</b>
+                  <small>{t(`ui.st_g_${g}_d` as Key)}</small>
+                </button>
+              </li>
+            ))}
+          </ul>
+        </section>
+      ) : step === 'quest' ? (
+        <section className={s.box} aria-labelledby="stq-t">
+          <h2 id="stq-t">{t('ui.st_quest')}</h2>
+          <ol className={s.steps}>
+            {steps.map(([k, ok]) => (
+              <li key={k} className={ok ? s.ok : undefined}>
+                <span aria-hidden>{ok ? '✓' : ''}</span>
+                {t(`ui.st_q_${k}`)}
+              </li>
+            ))}
+          </ol>
+          <Button variant="primary" size="sm" disabled={!all} onClick={() => void claim()}>
+            {t('ui.st_quest_claim')}
+          </Button>
+        </section>
+      ) : null}
+    </Swap>
   );
 }
