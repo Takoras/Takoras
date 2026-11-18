@@ -656,6 +656,8 @@ export const fr = {
     bs_no_token: 'Aucun jeton de cette série pour l’instant',
     bs_err_locked: 'Il te faut 10 jetons différents',
     bs_err_unknown: 'Tu n’as pas encore ce jeton',
+    bs_pulled: 'tire',
+    bs_shop_sold: 'revend',
     bs_days: '{n} j restants',
     bs_score: 'Score',
     bs_market: 'Marché',

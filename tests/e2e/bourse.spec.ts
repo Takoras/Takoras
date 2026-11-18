@@ -5,10 +5,10 @@ test('bourse : acheter, vendre, paie du jour et classement', async ({ page, isMo
   const { calls } = await fakeSupabase(page);
   await page.goto('/bourse');
   await expect(page.getByRole('heading', { level: 1, name: 'Bourse' })).toBeVisible();
-  await expect(page.getByRole('option')).toHaveCount(2); // seuls les jetons déjà obtenus
+  await expect(page.getByRole('option')).toHaveCount(3);
+  await expect(page.getByRole('option', { name: /\?\?\?/ })).toHaveAttribute('aria-disabled', 'true'); // jeton jamais eu
   await page.getByRole('button', { name: /^Acheter/ }).click();
-  await expect(page.getByRole('cell', { name: /Mobu/ })).toBeVisible(); // arrive dans « Mes positions »
-  await page.getByRole('cell', { name: /Mobu/ }).click(); // passe le ticket en vente
+  await expect(page.getByRole('option', { name: /Mobu/ })).toContainText('×10');
   await page.getByRole('button', { name: /^Vendre/ }).click();
   await expect.poll(() => calls.filter((c) => c === 'bourse_trade').length).toBe(2);
   await page.getByRole('button', { name: 'Récupérer' }).click();

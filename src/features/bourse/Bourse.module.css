@@ -108,15 +108,14 @@
   font-weight: 700;
   white-space: nowrap;
 }
-/* ---------- terminal ---------- */
+/* ---------- marché : liste, graphique, direct ---------- */
 .term {
   display: grid;
-  grid-template-columns: minmax(250px, 300px) minmax(0, 1fr) minmax(270px, 320px);
+  grid-template-columns: minmax(230px, 270px) minmax(0, 1fr) minmax(240px, 290px);
   gap: var(--s-3);
-  height: max(620px, calc(100dvh / var(--z, 1) - 205px));
+  height: max(560px, calc(100dvh / var(--z, 1) - 205px));
 }
 .watch,
-.mid,
 .right,
 .chartBox,
 .tape {
@@ -124,34 +123,18 @@
   flex-direction: column;
   min-height: 0;
 }
-.watchHead,
-.tok {
-  display: grid;
-  grid-template-columns: minmax(0, 1fr) 56px 56px;
-  align-items: center;
-  gap: var(--s-2);
-}
-.watchHead {
-  padding: 8px 10px;
-  border-bottom: 1px solid var(--line);
-  color: var(--muted);
-  font-size: 11px;
-}
-.watchHead span + span,
-.num {
-  text-align: right;
-}
 .watchList {
   flex: 1;
   min-height: 0;
   overflow-y: auto;
 }
 .tok {
-  position: relative;
-  grid-template-columns: minmax(0, 1fr) 56px 56px;
-  grid-template-rows: auto auto;
+  display: grid;
+  grid-template-columns: 36px minmax(0, 1fr) auto;
+  align-items: center;
+  gap: var(--s-2);
   width: 100%;
-  padding: 7px 10px;
+  padding: 8px 10px;
   border: 0;
   border-bottom: 1px solid var(--line);
   background: none;
@@ -172,51 +155,43 @@
   background: var(--surface-2);
   box-shadow: inset 2px 0 var(--accent);
 }
-.tokName {
-  grid-column: 1;
-  grid-row: 1 / 3;
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  min-width: 0;
-}
-.tokName img {
-  flex: none;
+.tok img,
+.quote img {
   object-fit: contain;
 }
-.tokName b {
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
+.tok.hidden {
+  color: var(--muted);
+  cursor: default;
 }
-.spark {
-  grid-column: 2;
-  grid-row: 1 / 3;
-  width: 56px;
-  height: 18px;
+.tok.hidden:hover {
+  padding-left: 10px;
+  background: none;
 }
-.tok .num {
-  grid-column: 3;
+.tok.hidden img {
+  opacity: 0.45;
 }
-.tok .num + .num {
-  font-size: 11px;
+.tokName,
+.tokPrice {
+  display: grid;
 }
-.mid,
+.tokPrice {
+  justify-items: end;
+}
+.tokName small {
+  color: var(--muted);
+}
 .right {
   gap: var(--s-3);
 }
 .chartBox {
-  flex: 1;
-  padding: 10px 12px;
+  gap: 10px;
+  padding: 12px;
 }
 .quote {
   display: flex;
+  flex-wrap: wrap;
   align-items: center;
-  gap: 4px var(--s-2);
-  margin-bottom: 8px;
-}
-.quote img {
-  object-fit: contain;
+  gap: 6px var(--s-3);
 }
 .quoteImg {
   animation: quoteIn 0.22s var(--ease-out);
@@ -227,23 +202,24 @@
     scale: 0.9;
   }
 }
-.quote h2 {
+.quoteName {
+  display: grid;
+}
+.quoteName h2 {
   font-size: var(--fs-lg);
 }
-.quote small {
+.quoteName small {
   color: var(--muted);
 }
 .last {
   display: inline-flex;
   align-items: center;
-  gap: 5px;
-  margin-left: var(--s-3);
-  font-size: 24px;
+  gap: 6px;
+  margin-left: auto;
+  white-space: nowrap;
 }
-.mini {
-  display: flex;
-  gap: var(--s-3);
-  margin: 0 0 0 auto;
+.last b {
+  font-size: 28px;
 }
 .chartSwap {
   flex: 1;
@@ -343,7 +319,6 @@
   right: 0;
   translate: 0 -50%;
   padding-left: 6px;
-  transition: top 0.3s var(--ease-out);
 }
 .lastUp,
 .lastDown {
@@ -357,168 +332,57 @@
 .lastDown {
   background: #f87171;
 }
-.positions {
-  flex: none;
-  height: 148px;
-  overflow-y: auto;
-  padding: 10px 12px;
-}
-.positions table {
-  width: 100%;
-  margin-top: 4px;
-  border-collapse: collapse;
-  font-size: var(--fs-sm);
-}
-.positions th {
-  color: var(--muted);
-  font-size: 11px;
-  font-weight: 500;
-}
-.positions th,
-.positions td {
-  padding: 4px 6px;
-  text-align: right;
-}
-.positions th:first-child,
-.positions td:first-child {
-  text-align: left;
-}
-.positions td {
-  white-space: nowrap;
-}
-.positions td img {
-  display: inline-block;
-  vertical-align: -5px;
-  object-fit: contain;
-}
-.positions tbody tr {
-  cursor: pointer;
-  transition: background-color 0.15s;
-}
-.positions tbody tr:hover {
-  background: var(--surface-2);
-}
-/* ---------- ordre ---------- */
-.ticket {
+/* ---------- ordre : quantité, acheter, vendre ---------- */
+.order {
   display: grid;
+  grid-template-columns: minmax(190px, 1fr) minmax(130px, 1fr) minmax(130px, 1fr);
   gap: var(--s-2);
-  padding: 10px;
 }
-.sides {
+.stepper {
   display: grid;
-  grid-template-columns: 1fr 1fr;
-  padding: 3px;
-  border-radius: 6px;
-  background: var(--surface-2);
+  grid-template-columns: 38px minmax(44px, 1fr) 38px auto;
+  gap: 4px;
 }
-.sides button {
-  height: 32px;
+.stepper button,
+.stepper input {
+  height: 44px;
   border: 0;
-  border-radius: 4px;
-  background: none;
-  color: var(--muted);
-  font: inherit;
-  font-size: var(--fs-sm);
-  font-weight: 800;
-  cursor: pointer;
-  transition:
-    background-color 0.18s,
-    color 0.18s;
-}
-.sides .sideBuy {
-  background: var(--ok);
-  color: #07130b;
-}
-.sides .sideSell {
-  background: #f87171;
-  color: #2a0808;
-}
-.qty {
-  display: grid;
-  gap: 3px;
-  color: var(--muted);
-  font-size: 11px;
-}
-.qty input {
-  width: 100%;
-  height: 36px;
-  padding: 0 10px;
-  border: 1px solid var(--line);
   border-radius: 6px;
   background: var(--surface-2);
   color: var(--text);
   font: inherit;
-  font-size: var(--fs-sm);
-  font-weight: 700;
-  text-align: right;
+  font-weight: 800;
 }
-.presets {
-  display: grid;
-  grid-template-columns: repeat(4, 1fr);
-  gap: 4px;
+.stepper input {
+  width: 100%;
+  min-width: 0;
+  text-align: center;
 }
-.presets button {
-  height: 26px;
-  border: 0;
-  border-radius: 4px;
-  background: var(--surface-2);
-  color: var(--text-2);
-  font: inherit;
-  font-size: 11px;
+.stepper button {
   cursor: pointer;
   transition: background-color 0.15s;
 }
-.presets button:hover:not(:disabled) {
+.stepper button:hover:not(:disabled) {
   background: var(--surface-3);
 }
-.presets button:disabled,
+.stepper .max {
+  padding: 0 10px;
+  font-size: var(--fs-xs);
+}
+.stepper button:disabled,
 .submit:disabled {
   opacity: 0.4;
   cursor: default;
 }
-.rows {
-  display: grid;
-  gap: 3px;
-  margin: 0;
-  font-size: var(--fs-xs);
-}
-.rows div,
-.pay li {
-  display: flex;
-  justify-content: space-between;
-  gap: var(--s-2);
-}
-.rows dt {
-  color: var(--muted);
-}
-.rows dd {
-  margin: 0;
-}
-.totalRow dd {
-  display: inline-flex;
-  align-items: center;
-  gap: 4px;
-  white-space: nowrap;
-}
-.totalRow {
-  padding-top: 4px;
-  border-top: 1px solid var(--line);
-  font-size: var(--fs-sm);
-  font-weight: 800;
-}
 .submit {
-  height: 38px;
-  overflow: hidden;
+  height: 44px;
   border: 0;
   border-radius: 6px;
   font: inherit;
   font-weight: 800;
-  text-overflow: ellipsis;
   white-space: nowrap;
   cursor: pointer;
-  transition:
-    background-color 0.18s,
-    filter 0.15s;
+  transition: filter 0.15s;
 }
 .submit:hover:not(:disabled) {
   filter: brightness(1.08);
@@ -545,11 +409,16 @@
 .pay ul,
 .tape ul {
   display: grid;
-  gap: 3px;
+  gap: 4px;
   margin: 0;
   padding: 0;
   list-style: none;
   font-size: var(--fs-xs);
+}
+.pay li {
+  display: flex;
+  justify-content: space-between;
+  gap: var(--s-2);
 }
 .paid {
   margin: 0;
@@ -570,19 +439,11 @@
   overflow-y: auto;
 }
 .tape li {
-  display: grid;
-  grid-template-columns: 36px minmax(0, 1fr) auto auto;
-  gap: 6px;
-  white-space: nowrap;
   animation: tapeIn 0.25s var(--ease-out);
 }
-.tape time {
-  color: var(--muted);
-}
 .tape a {
-  overflow: hidden;
   color: var(--text);
-  text-overflow: ellipsis;
+  font-weight: 700;
 }
 @keyframes tapeIn {
   from {
@@ -795,25 +656,39 @@
 }
 @media (max-width: 1180px) {
   .term {
-    grid-template-columns: minmax(220px, 260px) minmax(0, 1fr);
+    grid-template-columns: minmax(210px, 250px) minmax(0, 1fr);
     height: auto;
   }
   .chartBox {
-    min-height: 380px;
+    min-height: 460px;
   }
   .right {
     grid-column: 1 / -1;
     display: grid;
-    grid-template-columns: repeat(3, minmax(0, 1fr));
+    grid-template-columns: repeat(2, minmax(0, 1fr));
     align-items: start;
   }
   .tape ul {
     max-height: 220px;
   }
+  .order {
+    grid-template-columns: 1fr 1fr;
+  }
+  .stepper {
+    grid-column: 1 / -1;
+  }
 }
 @media (max-width: 760px) {
-  .quote {
-    flex-wrap: wrap;
+  .order {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+  .stepper {
+    grid-template-columns: 34px minmax(0, 1fr) 34px auto;
+  }
+  .submit {
+    min-width: 0;
+    padding: 0 4px;
+    font-size: var(--fs-sm);
   }
   .term,
   .ranks,
@@ -821,11 +696,7 @@
     grid-template-columns: minmax(0, 1fr);
   }
   .watchList {
-    max-height: 224px;
-  }
-  .mini {
-    width: 100%;
-    margin-left: 0;
+    max-height: 230px;
   }
   .list li {
     grid-template-columns: 24px minmax(0, 1fr) 50px 66px;

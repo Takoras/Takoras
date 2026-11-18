@@ -36,13 +36,9 @@
 }
 .fade {
   display: inline-grid;
-  min-width: 0;
 }
 .fade > * {
   grid-area: 1 / 1;
-  min-width: 0;
-  overflow: hidden;
-  text-overflow: ellipsis;
   white-space: nowrap;
 }
 .in {

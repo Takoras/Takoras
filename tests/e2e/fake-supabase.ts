@@ -157,8 +157,11 @@ export async function fakeSupabase(
         players: 4,
       },
       quests: { pulls: 3, sold: 1, quest: 1, paid: bs.paid > 0 },
-      assets: bs.assets.map((a) => ({ ...a, price: a.k / a.shares / a.shares })),
-      feed: [{ at: '2026-11-18T10:00:00Z', pseudo: 'Kaz', buy: true, shares: 12, jeton: 'Mobu' }],
+      assets: [
+        ...bs.assets.map((a) => ({ ...a, price: a.k / a.shares / a.shares })),
+        { id: 3, name: null, price: null, own: 0, h: [] },
+      ],
+      feed: [{ at: '2026-11-18T10:00:00Z', pseudo: 'Kaz', kind: 'pull', shares: null, jeton: 'Mobu', pct: 0.6 }],
     };
   };
   const prof: { avatar: string; bio: string; banner: string | null; showcase: (number | null)[] } = {

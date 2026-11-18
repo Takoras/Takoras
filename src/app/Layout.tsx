@@ -200,7 +200,6 @@ export function Layout() {
         ) : null}
         {user ? (
           <>
-            <KooBalance className={`${s.bal} ${s.kooBal}`} />
             <span className={s.bal} aria-label={t('app.balance')} data-coin-target>
               <img className="px" src="/img/piece.png" alt="" width={20} height={20} />
               {/* le solde défile vers sa nouvelle valeur (dépense ou gain), au lieu de changer d'un coup */}
@@ -212,6 +211,7 @@ export function Layout() {
                 '…'
               )}
             </span>
+            <KooBalance className={`${s.bal} ${s.kooBal}`} />
             <NavLink to="/profile" className={s.me} aria-label={t('app.account')}>
               <Avatar pseudo={me.data?.pseudo ?? '?'} size={40} />
             </NavLink>

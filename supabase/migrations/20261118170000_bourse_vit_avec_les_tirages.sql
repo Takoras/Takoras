@@ -1,0 +1,4 @@
+-- Appliquée via MCP (bourse_vit_avec_les_tirages). Table bourse_ticks, curseurs last_pull/last_sold/tick_at sur
+-- bourse_seasons, fonction _bourse_tick : un tirage de la série fait monter son jeton (0,3 % à 12 % selon la rareté)
+-- et baisser un peu les autres, une revente au shop le fait baisser. 50 évènements par joueur et par jour.
+-- bourse_state renvoie tous les jetons de la série : ceux jamais obtenus sans nom ni prix.
