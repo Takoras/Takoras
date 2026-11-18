@@ -648,6 +648,7 @@ export const en: Dict = {
     bs_weight: 'Weight',
     bs_trades: 'Trades',
     bs_ends: 'Ends',
+    bs_koo: 'Koo',
     bs_days: '{n} days left',
     bs_score: 'Score',
     bs_market: 'Market',

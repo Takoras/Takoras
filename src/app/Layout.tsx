@@ -34,6 +34,7 @@ import { useOnlinePresence } from '@/lib/online';
 import { Icon } from './Icon';
 import { setPreview, usePreview } from '@/lib/preview';
 import { NAV } from './nav';
+import { KooBalance } from '@/features/bourse/KooBalance';
 import { openUI, useUI } from './ui-store';
 import s from './Layout.module.css';
 
@@ -199,6 +200,7 @@ export function Layout() {
         ) : null}
         {user ? (
           <>
+            <KooBalance className={`${s.bal} ${s.kooBal}`} />
             <span className={s.bal} aria-label={t('app.balance')} data-coin-target>
               <img className="px" src="/img/piece.png" alt="" width={20} height={20} />
               {/* le solde défile vers sa nouvelle valeur (dépense ou gain), au lieu de changer d'un coup */}

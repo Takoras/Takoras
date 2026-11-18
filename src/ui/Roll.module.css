@@ -1,0 +1,65 @@
+.roll {
+  display: inline-block;
+  vertical-align: bottom;
+  line-height: 1.2;
+  font-variant-numeric: tabular-nums;
+}
+.row {
+  display: inline-flex;
+  height: 1.2em;
+  white-space: pre;
+}
+.sr {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip-path: inset(50%);
+  white-space: nowrap;
+}
+.cell {
+  display: inline-block;
+  width: 1ch;
+  height: 1.2em;
+  overflow: hidden;
+  line-height: 1.2;
+  text-align: center;
+}
+.reel {
+  display: block;
+  will-change: translate;
+}
+.reel i {
+  display: block;
+  height: 1.2em;
+  font-style: normal;
+}
+.fade {
+  display: inline-grid;
+  min-width: 0;
+}
+.fade > * {
+  grid-area: 1 / 1;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.in {
+  animation: fadeIn 0.22s var(--ease-out);
+}
+.out {
+  animation: fadeOut 0.18s ease-in forwards;
+}
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    translate: 0 5px;
+  }
+}
+@keyframes fadeOut {
+  to {
+    opacity: 0;
+    translate: 0 -5px;
+  }
+}

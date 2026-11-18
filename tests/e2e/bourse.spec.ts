@@ -20,6 +20,6 @@ test('bourse : acheter, vendre, paie du jour et classement', async ({ page, isMo
     .first()
     .click();
   await expect(page.getByRole('link', { name: /Kaz/ }).first()).toBeVisible();
-  await expect(page.getByText('60 Elo avant Argent')).toBeVisible();
+  await expect(page.getByText('70 Elo avant Argent I')).toBeVisible();
   if (isMobile) expect(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth)).toBe(true);
 });

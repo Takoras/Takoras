@@ -650,6 +650,7 @@ export const fr = {
     bs_weight: 'Poids',
     bs_trades: 'Transactions',
     bs_ends: 'Fin',
+    bs_koo: 'Koo',
     bs_days: '{n} j restants',
     bs_score: 'Score',
     bs_market: 'Marché',
