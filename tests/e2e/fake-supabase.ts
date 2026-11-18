@@ -120,6 +120,47 @@ export async function fakeSupabase(
     { id: 1, mine: false, body: 'Salut, tu as eu Nyx ?', created_at: '2026-10-20T10:00:00Z' },
     { id: 2, mine: false, body: 'Moi oui !', created_at: '2026-10-20T10:01:00Z' },
   ];
+  // Bourse simulée
+  const bs = {
+    koo: 1000,
+    paid: 0,
+    assets: [
+      {
+        id: 1,
+        name: 'Mobu' as string | null,
+        odds: 2 as number | null,
+        price: 10,
+        p0: 10,
+        shares: 2000,
+        k: 4e7,
+        share: 0.4,
+        own: 0,
+        h: [] as number[],
+      },
+      { id: 2, name: 'Pikko', odds: 4, price: 10, p0: 10, shares: 2000, k: 4e7, share: 0.35, own: 0, h: [] },
+      { id: 3, name: null, odds: null, price: 10, p0: 10, shares: 400, k: 1.6e6, share: 0.25, own: 0, h: [] },
+    ],
+  };
+  const bourse = () => {
+    const value =
+      bs.koo + bs.assets.reduce((v, a) => v + (a.own ? (a.k / a.shares - a.k / (a.shares + a.own)) * 0.99 : 0), 0);
+    return {
+      season: { id: 1, serie: 'Takoras', ends_at: new Date(Date.now() + 9 * 864e5).toISOString() },
+      me: {
+        koo: bs.koo,
+        paid: bs.paid,
+        divs: 0,
+        value,
+        score: (value - bs.paid - 1000) / 10,
+        rank: 4,
+        elo: 940,
+        players: 4,
+      },
+      quests: { pulls: 3, sold: 1, quest: 1, paid: bs.paid > 0 },
+      assets: bs.assets.map((a) => ({ ...a, price: a.k / a.shares / a.shares })),
+      feed: [{ at: '2026-11-18T10:00:00Z', pseudo: 'Kaz', buy: true, shares: 12, jeton: 'Mobu' }],
+    };
+  };
   const prof: { avatar: string; bio: string; banner: string | null; showcase: (number | null)[] } = {
     avatar: 'default',
     bio: '',
@@ -297,7 +338,13 @@ export async function fakeSupabase(
       const n = (JSON.parse(route.request().postData() ?? '{}') as { n: number }).n;
       const results = Array.from({ length: n }, () => 'Mousse');
       st.coins -= 300 * n;
-      return json({ state: { ...st }, results, variants: results.map(() => null), lucks: results.map(() => 1), ids: results.map((_, i) => i + 1) });
+      return json({
+        state: { ...st },
+        results,
+        variants: results.map(() => null),
+        lucks: results.map(() => 1),
+        ids: results.map((_, i) => i + 1),
+      });
     }
     if (rpc === 'sandbox_list')
       return json({
@@ -310,17 +357,48 @@ export async function fakeSupabase(
     if (rpc === 'sandbox_tick') return json(3);
     if (rpc === 'starter_gift') return json({ state: { ...st }, item: null });
     if (rpc === 'sandbox_player')
-      return json({ id: 'p0', pseudo: 'T.Nyx42', coins: 5200, stock: 3, stock_max: 20, regen_s: 140, online: true, hours: 30,
-        bot: { act: 0.6, sess: 25, sell: 0.4, buy: 0.2 }, streak: 4, cosmetics: 6, owned: 340, collection: 9,
-        best: { jeton: 'Vyolis', odds: 1000, variant: 'gold' }, friends: ['T.Kaz', 'T.Mira7'],
-        log: [{ at: new Date().toISOString(), msg: 'ouvre 6 tirages : Azura Doré 1/150' }, { at: new Date().toISOString(), msg: 'se connecte' }] });
-    if (rpc === 'starter_choices' && process.env.SC_ST) return json({ pending: true, choices: ['luck', 'pulls', 'coins', 'cosm'], quest: null });
+      return json({
+        id: 'p0',
+        pseudo: 'T.Nyx42',
+        coins: 5200,
+        stock: 3,
+        stock_max: 20,
+        regen_s: 140,
+        online: true,
+        hours: 30,
+        bot: { act: 0.6, sess: 25, sell: 0.4, buy: 0.2 },
+        streak: 4,
+        cosmetics: 6,
+        owned: 340,
+        collection: 9,
+        best: { jeton: 'Vyolis', odds: 1000, variant: 'gold' },
+        friends: ['T.Kaz', 'T.Mira7'],
+        log: [
+          { at: new Date().toISOString(), msg: 'ouvre 6 tirages : Azura Doré 1/150' },
+          { at: new Date().toISOString(), msg: 'se connecte' },
+        ],
+      });
+    if (rpc === 'starter_choices' && process.env.SC_ST)
+      return json({ pending: true, choices: ['luck', 'pulls', 'coins', 'cosm'], quest: null });
     if (rpc === 'sandbox_detail')
       return json({
-        id: 1, name: 'Équilibrage', weekend: 'on', me: null, online: 7,
+        id: 1,
+        name: 'Équilibrage',
+        weekend: 'on',
+        me: null,
+        online: 7,
         players: Array.from({ length: 12 }, (_, i) => ({
-          id: 'p' + i, pseudo: (['T.Nyx42', 'T.Kaz', 'T.Lumi_tk', 'T.Zedgg', 'T.Mira7', 'T.Pixel'][i % 6] ?? 'T.x') + (i > 5 ? i : ''),
-          coins: 1200 * (i + 1), bot: true, mine: false, online: i % 3 === 0, hours: 5 + i * 7, pulls: 100 + i * 140, best: 1000, friends: i % 5,
+          id: 'p' + i,
+          pseudo:
+            (['T.Nyx42', 'T.Kaz', 'T.Lumi_tk', 'T.Zedgg', 'T.Mira7', 'T.Pixel'][i % 6] ?? 'T.x') + (i > 5 ? i : ''),
+          coins: 1200 * (i + 1),
+          bot: true,
+          mine: false,
+          online: i % 3 === 0,
+          hours: 5 + i * 7,
+          pulls: 100 + i * 140,
+          best: 1000,
+          friends: i % 5,
         })),
         log: [
           { id: 9, at: new Date().toISOString(), msg: 'ouvre 6 tirages : Azura Doré 1/150', pseudo: 'T.Nyx42' },
@@ -332,6 +410,42 @@ export async function fakeSupabase(
       });
     if (rpc === 'my_view') return json(process.env.SC_VIEW ? { pseudo: 'T.Bob', server: 'Essai équilibrage' } : null);
     if (rpc === 'refund_pulls') return json({ refunded: 0 });
+    if (rpc === 'bourse_state') return json(bourse());
+    if (rpc === 'bourse_trade') {
+      const body = JSON.parse(route.request().postData() ?? '{}') as {
+        p_asset: number;
+        p_buy: boolean;
+        p_shares: number;
+      };
+      const a = bs.assets.find((x) => x.id === body.p_asset);
+      const q = Number(body.p_shares);
+      if (a) {
+        const t = a.shares + (body.p_buy ? -q : q);
+        const x = body.p_buy ? (a.k / t - a.k / a.shares) * 1.01 : (a.k / a.shares - a.k / t) * 0.99;
+        bs.koo += body.p_buy ? -x : x;
+        a.own += body.p_buy ? q : -q;
+        a.shares = t;
+        a.h.push(a.k / t / t);
+      }
+      return json(bourse());
+    }
+    if (rpc === 'bourse_claim_pay') {
+      bs.koo += 25;
+      bs.paid = 25;
+      return json(bourse());
+    }
+    if (rpc === 'bourse_board')
+      return json(
+        ['Kaz', 'Mira', 'Lumi', 'Testeur'].map((pseudo, i) => ({
+          pseudo,
+          rank: i + 1,
+          score: 6 - i * 2,
+          value: 1060 - i * 20,
+          elo: 1840 - i * 300,
+          delta: 100 - i * 66,
+          me: pseudo === 'Testeur',
+        })),
+      );
     if (rpc === 'my_quests')
       return json({
         reset_in: 3600,
@@ -399,18 +513,39 @@ export async function fakeSupabase(
     // succès : quelques-uns par catégorie, certains prêts, d'autres obtenus, un secret
     if (rpc === 'my_achievements') {
       const L = [
-        ['pull', 'pulls', 1, 50, false, 1], ['pull', 'pulls', 100, 400, false, 120], ['pull', 'pulls', 1000, 3000, false, 120],
-        ['coll', 'takoras', 3, 150, false, 3], ['coll', 'takoras', 8, 1000, false, 3], ['coll', 'bodako', 1, 100, false, 0],
-        ['rare', 'r1000', 1, 1000, false, 1], ['rare', 'r1000000', 1, 100000, false, 0], ['rare', 'nopot1000', 1, 3000, true, 0],
-        ['mut', 'gold', 1, 500, false, 1], ['mut', 'ombre', 1, 4000, false, 1], ['mut', 'takoras_ombre', 1, 250000, true, 0],
-        ['eco', 'sold', 10, 100, false, 4], ['eco', 'coins', 10000, 500, false, 5000], ['shop', 'bought', 1, 100, false, 1],
-        ['shop', 'reveals', 10, 300, false, 2], ['pass', 'tier', 5, 500, false, 3], ['quest', 'streak', 3, 300, false, 3],
-        ['social', 'friends', 1, 200, false, 1], ['social', 'bio', 1, 100, false, 0], ['cosm', 'cosmetics', 5, 1500, false, 14],
-        ['cosm', 'c_myth', 1, 40000, false, 0], ['time', 'hours', 1, 200, false, 0],
+        ['pull', 'pulls', 1, 50, false, 1],
+        ['pull', 'pulls', 100, 400, false, 120],
+        ['pull', 'pulls', 1000, 3000, false, 120],
+        ['coll', 'takoras', 3, 150, false, 3],
+        ['coll', 'takoras', 8, 1000, false, 3],
+        ['coll', 'bodako', 1, 100, false, 0],
+        ['rare', 'r1000', 1, 1000, false, 1],
+        ['rare', 'r1000000', 1, 100000, false, 0],
+        ['rare', 'nopot1000', 1, 3000, true, 0],
+        ['mut', 'gold', 1, 500, false, 1],
+        ['mut', 'ombre', 1, 4000, false, 1],
+        ['mut', 'takoras_ombre', 1, 250000, true, 0],
+        ['eco', 'sold', 10, 100, false, 4],
+        ['eco', 'coins', 10000, 500, false, 5000],
+        ['shop', 'bought', 1, 100, false, 1],
+        ['shop', 'reveals', 10, 300, false, 2],
+        ['pass', 'tier', 5, 500, false, 3],
+        ['quest', 'streak', 3, 300, false, 3],
+        ['social', 'friends', 1, 200, false, 1],
+        ['social', 'bio', 1, 100, false, 0],
+        ['cosm', 'cosmetics', 5, 1500, false, 14],
+        ['cosm', 'c_myth', 1, 40000, false, 0],
+        ['time', 'hours', 1, 200, false, 0],
       ];
       return json({
         list: L.map(([cat, stat, target, coins, secret, value], i) => ({
-          id: `${cat}_${stat}_${target}`, cat, stat, target, coins, secret, value: Math.min(Number(value), Number(target)),
+          id: `${cat}_${stat}_${target}`,
+          cat,
+          stat,
+          target,
+          coins,
+          secret,
+          value: Math.min(Number(value), Number(target)),
           claimed: i % 5 === 0 && Number(value) >= Number(target),
         })),
       });
@@ -509,7 +644,12 @@ export async function fakeSupabase(
         pulls: 120,
         collection: 3,
         owned: 6,
-        best_pull: { jeton: process.env.BEST_OMBRE ? 'Takoras' : 'Vyolis', odds: process.env.BEST_OMBRE ? 1000000 : 1000, variant: process.env.BEST_OMBRE ? 'ombre' : null, eff: process.env.BEST_OMBRE ? 500000000 : 1000 },
+        best_pull: {
+          jeton: process.env.BEST_OMBRE ? 'Takoras' : 'Vyolis',
+          odds: process.env.BEST_OMBRE ? 1000000 : 1000,
+          variant: process.env.BEST_OMBRE ? 'ombre' : null,
+          eff: process.env.BEST_OMBRE ? 500000000 : 1000,
+        },
       };
       if (who.toLowerCase() === st.pseudo.toLowerCase())
         return json({

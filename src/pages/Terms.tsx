@@ -4,7 +4,7 @@ import { LegalDoc, type Doc } from './LegalDoc';
 // propres conditions générales de vente (CGV), avec le droit de rétractation et la médiation de la consommation.
 const FR: Doc = {
   title: 'Conditions générales d’utilisation',
-  updated: 'Dernière mise à jour : 10 novembre 2026',
+  updated: 'Dernière mise à jour : 18 novembre 2026',
   intro:
     'Les présentes conditions générales d’utilisation (ci-après les « CGU ») encadrent l’accès et l’utilisation du site et du jeu Takoras (ci-après le « Service »), édité par l’éditeur désigné dans les mentions légales (ci-après « l’Éditeur »). Créer un compte ou utiliser le Service implique l’acceptation pleine et entière des présentes CGU et de la politique de confidentialité.',
   blocks: [
@@ -91,6 +91,13 @@ const FR: Doc = {
       '13. Droit applicable et litiges',
       [
         'Les présentes CGU sont soumises au droit français. En cas de litige, l’utilisateur est invité à contacter d’abord l’Éditeur afin de rechercher une solution amiable. À défaut, les tribunaux français compétents pourront être saisis, sous réserve des règles protectrices dont bénéficie le consommateur.',
+      ],
+    ],
+    [
+      '14. Bourse de saison',
+      [
+        'La Bourse est un jeu de simulation entièrement fictif, organisé par saisons mensuelles sur une série de jetons tirée au sort. Les Koo et les actions n’existent que dans le jeu : ils n’ont aucune valeur monétaire, ne peuvent être ni achetés, ni retirés, ni échangés contre de l’argent, ni transférés à un autre joueur, et sont remis à zéro à chaque saison.',
+        'Les prix dépendent uniquement de l’activité des joueurs sur le Service. Ils ne représentent aucun instrument financier, titre ou crypto-actif. La Bourse n’est ni un placement, ni un service financier, ni un conseil en investissement. L’Éditeur peut ajuster ses paramètres et annuler des résultats en cas d’erreur ou de triche.',
       ],
     ],
   ],
@@ -185,6 +192,13 @@ const EN: Doc = {
       '13. Governing law and disputes',
       [
         'These Terms are governed by French law. In case of a dispute, users are invited to contact the Publisher first to seek an amicable solution. Failing that, the competent French courts may be seized, subject to the protective rules that consumers benefit from.',
+      ],
+    ],
+    [
+      '14. Market',
+      [
+        'The Market is an entirely fictional simulation game, run in monthly seasons on a randomly drawn token series. Koo and shares exist only in the game: they have no monetary value, cannot be bought, withdrawn, exchanged for money or transferred to another player, and are reset every season.',
+        'Prices depend only on player activity on the Service. They do not represent any financial instrument, security or crypto-asset. The Market is not an investment, a financial service or investment advice. The Publisher may adjust its settings and cancel results in case of error or cheating.',
       ],
     ],
   ],

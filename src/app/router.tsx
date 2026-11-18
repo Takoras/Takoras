@@ -47,6 +47,7 @@ export const router = createBrowserRouter([
       { path: '/combat', element: <Navigate to="/" replace /> },
       { path: '/friends', lazy: page(() => import('@/features/social/Friends')) },
       { path: '/pass', lazy: page(() => import('@/features/pass/Pass')) },
+      { path: '/bourse', lazy: page(() => import('@/features/bourse/Bourse')) },
       { path: '/achievements', lazy: page(() => import('@/features/achievements/Achievements')) },
       { path: '/profile', lazy: profile },
       { path: '/profile/:pseudo', lazy: profile },

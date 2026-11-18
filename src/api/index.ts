@@ -123,6 +123,14 @@ export const betaApi = {
 // fonctions serveur pas encore dans les types générés (migration à appliquer) : appel non typé
 const rpcLoose = rpc as unknown as (name: string, args?: Record<string, unknown>) => Promise<unknown>;
 
+// Bourse de saison : tout est calculé par le serveur
+export const bourseApi = {
+  state: () => rpcLoose('bourse_state'),
+  board: () => rpcLoose('bourse_board'),
+  trade: (p_asset: number, p_buy: boolean, p_shares: number) => rpcLoose('bourse_trade', { p_asset, p_buy, p_shares }),
+  claimPay: () => rpcLoose('bourse_claim_pay'),
+};
+
 // Succès (fonctions serveur : my_achievements, claim_achievement, achievements_of)
 export const achApi = {
   mine: () => rpcLoose('my_achievements'),
