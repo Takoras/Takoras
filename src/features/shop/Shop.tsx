@@ -148,8 +148,19 @@ export default function Shop() {
   );
   // changer de rayon : les cases du nouveau rayon apparaissent en fondu, l'une après l'autre (comme à l'arrivée)
   const switched = useRef(false);
+  const heroRef = useRef<HTMLDivElement>(null);
+  const ghostRef = useRef<HTMLDivElement>(null);
+  const dirRef = useRef(1);
   useLayoutEffect(() => {
     if (!switched.current || reducedFx()) return;
+    // le nouvel objet à la une arrive du côté du rayon choisi
+    heroRef.current?.querySelector<HTMLElement>(`.${s.hero}`)?.animate(
+      [
+        { opacity: 0, transform: `translateX(${dirRef.current * 48}px) scale(.96)` },
+        { opacity: 1, transform: 'translateX(0) scale(1)' },
+      ],
+      { duration: 460, delay: 70, easing: 'cubic-bezier(.2,.8,.2,1)', fill: 'backwards' },
+    );
     if (!gridRef.current) return;
     [...gridRef.current.children].forEach((c, i) =>
       (c as HTMLElement).animate([{ opacity: 0 }, { opacity: 1 }], {
@@ -160,10 +171,42 @@ export default function Shop() {
       }),
     );
   }, [cat]);
+  // changer de rayon : l'objet à la une ne saute pas, il glisse. Une copie de l'ancien (fond pixel compris)
+  // part du côté opposé en s'effaçant pendant que le nouveau arrive du côté du rayon choisi.
   const pick = (k: string) => {
     if (k === cat) return;
     switched.current = true;
     sfx.click();
+    const ix = (x: string) => CATS.findIndex((c) => c.k === x);
+    dirRef.current = ix(k) > ix(cat) ? 1 : -1;
+    const cur = heroRef.current?.querySelector<HTMLElement>(`.${s.hero}`);
+    const layer = ghostRef.current;
+    if (cur && layer && !reducedFx()) {
+      const g = cur.cloneNode(true) as HTMLElement;
+      // les canvas copiés sont vides : on y recopie l'image actuelle
+      const src = cur.querySelectorAll('canvas'),
+        dst = g.querySelectorAll('canvas');
+      dst.forEach((c, i) => {
+        const o = src[i];
+        if (!o) return;
+        c.width = o.width;
+        c.height = o.height;
+        c.getContext('2d')?.drawImage(o, 0, 0);
+      });
+      g.style.cssText += ';position:absolute;inset:0;margin:0;pointer-events:none;animation:none';
+      layer.replaceChildren(g);
+      const d = dirRef.current;
+      g.animate(
+        [
+          { opacity: 1, transform: 'translateX(0) scale(1)' },
+          { opacity: 0, transform: `translateX(${-d * 40}px) scale(.96)` },
+        ],
+        { duration: 300, easing: 'cubic-bezier(.4,0,.8,.4)', fill: 'forwards' },
+      ).finished.then(
+        () => g.remove(),
+        () => g.remove(),
+      );
+    }
     catRef.current = k;
     setCat(k);
   };
@@ -350,7 +393,7 @@ export default function Shop() {
       );
       await new Promise((ok) => requestAnimationFrame(() => requestAnimationFrame(ok)));
       // changé de rayon pendant la charge : l'objet est révélé, les pièces arrivent, mais sans effets au mauvais endroit
-      if ((!isHero && catRef.current !== cat0) || modeRef.current !== mode0) {
+      if ((catRef.current !== cat0 && !(isHero && black0)) || modeRef.current !== mode0) {
         cover?.getAnimations().forEach((a) => a.cancel());
         applyCoins();
         return;
@@ -453,15 +496,49 @@ export default function Shop() {
   const items = (data?.items ?? []).map((x, i): Slot =>
     charging.has(slotOf(x, i)) && !isHidden(x) ? { slot: slotOf(x, i), hidden: true, group: catOf(x) } : x,
   );
-  // un objet à la une par rayon : les trois sont en haut, et retirés des grilles du bas
+  // un objet à la une par rayon. Boutique : celui du rayon choisi, en grand. Black Market : les trois en haut.
   const rank = (g: string) => CATS.findIndex((c) => c.k === g);
-  const feats = data?.feats
+  const allFeats = data?.feats
     ? [...data.feats].sort((a, b) => rank(a.group) - rank(b.group))
     : data?.featured_slot != null
-      ? [{ group: '', slot: data.featured_slot, off: data.off ?? 0, item: null }]
+      ? [{ group: cat, slot: data.featured_slot, off: data.off ?? 0, item: null }]
       : [];
+  const feats = inBlack ? allFeats : allFeats.filter((f) => f.group === cat);
   const featSlots = new Set(feats.map((f) => f.slot));
   const list = items.filter((it, i) => catOf(it) === cat && !featSlots.has(slotOf(it, i)));
+  const heroOf = (f: (typeof feats)[number]) => {
+    const x = items.find((it, i) => slotOf(it, i) === f.slot);
+    if (!x || !data) return null;
+    return isHidden(x) ? (
+      <MysteryHero
+        key={f.slot}
+        slot={f.slot}
+        off={f.off}
+        gain={data.reveal_gain ?? 100}
+        logged={!!user}
+        onReveal={(el) => void reveal(f.slot, el)}
+      />
+    ) : (
+      <Hero key={f.slot} slot={f.slot} it={x} off={f.off} coins={coins} logged={!!user} left={left} onBuy={buy} />
+    );
+  };
+  const shelves = (
+    <div ref={shelvesRef} className={s.shelves} role="group" aria-label={t('ui.shop_title')}>
+      {CATS.map((c) => {
+        // les rayons restent toujours accessibles, même vides aujourd'hui
+        const inCat = items.filter((it) => catOf(it) === c.k);
+        return (
+          <button key={c.k} type="button" className={s.shelf} aria-pressed={cat === c.k} onClick={() => pick(c.k)}>
+            <img className="px" src={c.icon} alt="" />
+            <span>
+              <b>{t(c.label)}</b>
+              <small>{t('ui.shop_n', { n: inCat.length })}</small>
+            </span>
+          </button>
+        );
+      })}
+    </div>
+  );
   return (
     <Pay.Provider value={{ koo: inKoo || inBlack, black: inBlack, spend }}>
       <section ref={pageRef} className={s.page} aria-busy={!data}>
@@ -500,56 +577,24 @@ export default function Shop() {
             </div>
           ) : data ? (
             <div className={`${s.coinView} ${inBlack ? s.bm : ''}`}>
-              <div className={s.top} data-depth>
-                {feats.map((f) => {
-                  const x = items.find((it, i) => slotOf(it, i) === f.slot);
-                  if (!x) return null;
-                  return isHidden(x) ? (
-                    <MysteryHero
-                      key={f.slot}
-                      slot={f.slot}
-                      off={f.off}
-                      gain={data.reveal_gain ?? 100}
-                      logged={!!user}
-                      onReveal={(el) => void reveal(f.slot, el)}
-                    />
-                  ) : (
-                    <Hero
-                      key={f.slot}
-                      slot={f.slot}
-                      it={x}
-                      off={f.off}
-                      coins={coins}
-                      logged={!!user}
-                      left={left}
-                      onBuy={buy}
-                    />
-                  );
-                })}
-              </div>
-              <div>
-                <div ref={shelvesRef} className={s.shelves} data-depth role="group" aria-label={t('ui.shop_title')}>
-                  {CATS.map((c) => {
-                    // les rayons restent toujours accessibles, même vides aujourd'hui
-                    const inCat = items.filter((it) => catOf(it) === c.k);
-                    return (
-                      <button
-                        key={c.k}
-                        type="button"
-                        className={s.shelf}
-                        aria-pressed={cat === c.k}
-                        onClick={() => pick(c.k)}
-                      >
-                        <img className="px" src={c.icon} alt="" />
-                        <span>
-                          <b>{t(c.label)}</b>
-                          <small>{t('ui.shop_n', { n: inCat.length })}</small>
-                        </span>
-                      </button>
-                    );
-                  })}
+              {inBlack ? (
+                <>
+                  <div className={s.top} data-depth>
+                    {feats.map(heroOf)}
+                  </div>
+                  <div data-depth className={s.bmShelves}>
+                    {shelves}
+                  </div>
+                </>
+              ) : (
+                <div className={s.top} data-depth>
+                  <div ref={heroRef} className={s.heroSlot}>
+                    {feats.map(heroOf)}
+                    <div ref={ghostRef} className={s.heroGhost} aria-hidden />
+                  </div>
+                  {shelves}
                 </div>
-              </div>
+              )}
               <h2 className="visually-hidden">{t(CATS.find((c) => c.k === cat)?.label ?? 'ui.cat_potions')}</h2>
               <AutoHeight k={cat}>
                 <ul ref={gridRef} className={s.grid} data-depth>
