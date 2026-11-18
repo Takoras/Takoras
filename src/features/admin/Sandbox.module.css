@@ -103,7 +103,6 @@
   gap: 4px;
   max-height: 420px;
   overflow-y: auto;
-  scrollbar-width: thin;
 }
 .pl {
   display: grid;
@@ -158,7 +157,6 @@
   overflow-y: auto;
   list-style: none;
   font-size: var(--fs-sm);
-  scrollbar-width: thin;
 }
 .log li {
   animation: logIn 0.35s var(--ease-out) both;
@@ -337,7 +335,6 @@
 .tableWrap {
   max-height: 440px;
   overflow: auto;
-  scrollbar-width: thin;
 }
 .ptable th {
   position: sticky;

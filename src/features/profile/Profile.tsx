@@ -1257,12 +1257,14 @@ function EditProfile({ p, onClose }: { p: Prof; onClose: () => void }) {
             </Swap>
           </div>
 
-          <div className={lk.actions}>
-            <Button onClick={onClose}>{t('ui.cancel')}</Button>
-            <Button type="submit" variant="primary" loading={busy}>
-              {t('ui.save')}
-            </Button>
-          </div>
+        </div>
+
+        {/* directement dans le formulaire : collés en bas de la fenêtre, quelle que soit la hauteur de l'écran */}
+        <div className={lk.actions}>
+          <Button onClick={onClose}>{t('ui.cancel')}</Button>
+          <Button type="submit" variant="primary" loading={busy}>
+            {t('ui.save')}
+          </Button>
         </div>
       </form>
     </Modal>

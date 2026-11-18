@@ -1,4 +1,4 @@
-import { useMemo, useRef, useState, type CSSProperties } from 'react';
+import { useMemo, useRef, useState, type CSSProperties, type PointerEvent } from 'react';
 import { Link } from 'react-router';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { bourseApi, errorText } from '@/api';
@@ -12,13 +12,12 @@ import { burstAt } from '@/lib/pfx';
 import { locale, potatoFx, useSettings } from '@/lib/settings';
 import { Avatar } from '@/ui/Avatar';
 import { Button } from '@/ui/Button';
-import { Bump, Skeleton, useFlip } from '@/ui/motion';
+import { Skeleton, useFlip } from '@/ui/motion';
 import { Segmented } from '@/ui/Segmented';
 import { Swap } from '@/ui/Swap';
 import { toast } from '@/ui/toast';
 import { Tween } from '@/ui/Tween';
 import { useStaggerIn } from '@/ui/useStaggerIn';
-import { useSwingAll } from '@/ui/useSwing';
 import s from './Bourse.module.css';
 
 type Asset = {
@@ -75,26 +74,69 @@ function Koo({ size = 16 }: { size?: number }) {
   return <img className={`px ${s.koo}`} src="/img/koo.png" alt="" width={size} height={size} />;
 }
 
-function Chart({ a }: { a: Asset }) {
+function Spark({ a }: { a: Asset }) {
+  const pts = [a.p0, ...a.h.slice(-14), a.price];
+  const lo = Math.min(...pts, a.p0 * 0.98),
+    hi = Math.max(...pts, a.p0 * 1.02);
+  const d = pts
+    .map((p, i) => `${(i / Math.max(1, pts.length - 1)) * 56},${17 - ((p - lo) / (hi - lo)) * 16}`)
+    .join(' ');
+  return (
+    <svg className={s.spark} viewBox="0 0 56 18" aria-hidden>
+      <polyline points={d} className={a.price >= a.p0 ? s.lineUp : s.lineDown} />
+    </svg>
+  );
+}
+
+// Graphique : axe des prix à droite, dernier prix marqué, réticule sous la souris
+function Chart({ a, fmt }: { a: Asset; fmt: (v: number) => string }) {
+  const box = useRef<HTMLDivElement>(null);
+  const tip = useRef<HTMLElement>(null);
   const pts = [a.p0, ...a.h, a.price];
-  // échelle d'au moins ±3 % : un petit ordre ne ressemble pas à une explosion
-  const min = Math.min(...pts, a.p0 * 0.97),
-    max = Math.max(...pts, a.p0 * 1.03),
-    r = max - min;
+  const lo = Math.min(...pts, a.p0 * 0.97),
+    hi = Math.max(...pts, a.p0 * 1.03);
   const X = (i: number) => (i / Math.max(1, pts.length - 1)) * 300;
-  const Y = (p: number) => 110 - ((p - min) / r) * 100;
-  // courbe en marches : le prix ne change qu'à un ordre, et ça reste dans l'esprit pixel
+  const Y = (p: number) => 6 + ((hi - p) / (hi - lo)) * 108;
   const line = pts.reduce(
     (d, p, i) => (i ? `${d}H${X(i).toFixed(1)}V${Y(p).toFixed(1)}` : `M0 ${Y(p).toFixed(1)}`),
     '',
   );
   const up = a.price >= a.p0;
+  const ticks = [0, 1, 2, 3, 4].map((i) => hi - ((hi - lo) * i) / 4);
+  const move = (e: PointerEvent<HTMLDivElement>) => {
+    const el = box.current;
+    if (!el) return;
+    const r = el.getBoundingClientRect(),
+      y = e.clientY - r.top;
+    el.style.setProperty('--cx', `${e.clientX - r.left}px`);
+    el.style.setProperty('--cy', `${y}px`);
+    if (tip.current) tip.current.textContent = fmt(hi - (((y / r.height) * 120 - 6) / 108) * (hi - lo));
+  };
   return (
-    <svg className={s.chart} viewBox="0 0 300 120" preserveAspectRatio="none" role="img" aria-hidden>
-      <line x1="0" x2="300" y1={Y(a.p0)} y2={Y(a.p0)} className={s.base} />
-      <path d={`${line}V120H0Z`} className={up ? s.areaUp : s.areaDown} />
-      <path d={line} className={up ? s.lineUp : s.lineDown} />
-    </svg>
+    <div className={s.plot}>
+      <div className={s.plotArea} ref={box} onPointerMove={move}>
+        <svg viewBox="0 0 300 120" preserveAspectRatio="none" aria-hidden>
+          {ticks.map((p) => (
+            <line key={p} x1="0" x2="300" y1={Y(p)} y2={Y(p)} className={s.grid} />
+          ))}
+          <path d={`${line}V120H0Z`} className={up ? s.areaUp : s.areaDown} />
+          <path d={line} className={up ? s.lineUp : s.lineDown} />
+        </svg>
+        <i className={s.crossX} />
+        <i className={s.crossY} />
+        <b className={s.crossTip} ref={tip} />
+      </div>
+      <div className={s.axis} aria-hidden>
+        {ticks.map((p) => (
+          <span key={p} style={{ top: `${(Y(p) / 120) * 100}%` }}>
+            {fmt(p)}
+          </span>
+        ))}
+        <b className={up ? s.lastUp : s.lastDown} style={{ top: `${(Y(a.price) / 120) * 100}%` }}>
+          {fmt(a.price)}
+        </b>
+      </div>
+    </div>
   );
 }
 
@@ -106,6 +148,7 @@ export default function Bourse() {
   const pageRef = useRef<HTMLElement>(null);
   const [tab, setTab] = useState<'market' | 'ranks'>('market');
   const [sel, setSel] = useState<number | null>(null);
+  const [side, setSide] = useState<'buy' | 'sell'>('buy');
   const [qty, setQty] = useState('10');
   const [busy, setBusy] = useState(false);
   const key = useMemo(() => ['bourse', uid], [uid]);
@@ -117,9 +160,7 @@ export default function Bourse() {
   });
   useBoard(false); // le classement est prêt avant d'ouvrir l'onglet : rien n'arrive après coup
   const d = q.data;
-  useStaggerIn(pageRef, `.${s.head}, .${s.market} > *`, !!d);
-  useSwingAll(pageRef, `.${s.tok}`, 0.4, `${tab}|${d?.assets.length ?? 0}`);
-  useSwingAll(pageRef, `.${s.panel}`, 0.14, `${tab}|${d ? 1 : 0}`);
+  useStaggerIn(pageRef, `.${s.bar}, .${s.term} > *`, !!d);
   if (!uid) return <NeedLogin title={t('ui.nav_bourse')} />;
   if (!d)
     return (
@@ -131,7 +172,8 @@ export default function Bourse() {
   const loc = locale(lang);
   const n0 = (v: number) => Math.round(v).toLocaleString(loc);
   const n2 = (v: number) => v.toLocaleString(loc, { minimumFractionDigits: 2, maximumFractionDigits: 2 });
-  const pct = (v: number) => `${v >= 0 ? '+' : ''}${v.toLocaleString(loc, { maximumFractionDigits: 1 })} %`;
+  const pct = (v: number) =>
+    `${v >= 0 ? '+' : ''}${v.toLocaleString(loc, { minimumFractionDigits: 1, maximumFractionDigits: 1 })} %`;
   const cl = (v: number) => (v >= 0 ? s.up : s.down);
   const change = (a: Asset) => (a.price / a.p0 - 1) * 100;
   const label = (a: Asset) => a.name ?? '???';
@@ -139,16 +181,22 @@ export default function Bourse() {
   const cur = d.assets.find((a) => a.id === sel) ?? d.assets[0];
   if (!cur) return null;
   const days = Math.max(1, Math.ceil((new Date(d.season.ends_at).getTime() - q.dataUpdatedAt) / 86_400_000));
+  const buying = side === 'buy';
   const amount = floor3(Number(qty.replace(',', '.')) || 0);
-  const bMax = maxBuy(cur, d.me.koo),
-    sMax = maxSell(cur);
-  const cost = amount > 0 && amount < cur.shares ? buyCost(cur, amount) : 0,
-    gain = amount > 0 ? sellGain(cur, amount) : 0;
-  const trade = async (buy: boolean, el: HTMLElement) => {
+  const limit = buying ? maxBuy(cur, d.me.koo) : maxSell(cur);
+  const valid = amount > 0 && amount <= limit;
+  const total = amount > 0 && amount < cur.shares ? (buying ? buyCost(cur, amount) : sellGain(cur, amount)) : 0;
+  const t1 = cur.shares + (buying ? -amount : amount);
+  const impact = valid ? (cur.k / t1 / t1 / cur.price - 1) * 100 : 0;
+  const pts = [cur.p0, ...cur.h, cur.price];
+  const pnl = d.me.value - d.me.paid - 1000;
+  const held = d.assets.filter((a) => a.own > 0);
+  const heldValue = held.reduce((v, a) => v + sellGain(a, a.own), 0);
+  const trade = async (el: HTMLElement) => {
     setBusy(true);
     try {
-      qc.setQueryData(key, await bourseApi.trade(cur.id, buy, amount));
-      burstAt(el, buy ? '#4ade80' : '#f87171', 0.7);
+      qc.setQueryData(key, await bourseApi.trade(cur.id, buying, amount));
+      burstAt(el, buying ? '#4ade80' : '#f87171', 0.5);
       sfx.upgrade();
       void qc.invalidateQueries({ queryKey: ['bourse-board'] });
     } catch (e) {
@@ -161,7 +209,7 @@ export default function Bourse() {
   const claimPay = async (el: HTMLElement) => {
     try {
       qc.setQueryData(key, await bourseApi.claimPay());
-      burstAt(el, '#46dcc8');
+      burstAt(el, '#2fa66f', 0.6);
       sfx.upgrade();
     } catch (e) {
       sfx.deny();
@@ -174,178 +222,259 @@ export default function Bourse() {
     [t('ui.bs_q_quest'), d.quests.quest, 1],
   ];
   const ready = missions.every(([, v, m]) => v >= m);
+  const stats: [string, React.ReactNode, string?][] = [
+    [t('ui.bs_wallet'), <Tween key="v" value={d.me.value} ms={350} format={n2} />],
+    [t('ui.bs_pnl'), `${pnl >= 0 ? '+' : ''}${n2(pnl)} (${pct(d.me.score)})`, cl(pnl)],
+    [t('ui.bs_avail'), <Tween key="k" value={d.me.koo} ms={350} format={n2} />],
+    [t('ui.bs_divs'), n2(d.me.divs)],
+    [t('ui.bs_place'), d.me.rank ? `#${d.me.rank}` : '-'],
+    [t('ui.bs_ends'), t('ui.bs_days', { n: days })],
+  ];
 
   return (
     <section ref={pageRef} className={s.page}>
-      <header className={s.head} data-depth>
-        <h1>{t('ui.nav_bourse')}</h1>
-        <span className={s.chip}>
-          <b>{d.season.serie}</b> · {t('ui.bs_days', { n: days })}
-        </span>
-        <span className={s.chip}>
-          <Koo size={18} />
-          <b>
-            <Tween value={d.me.koo} ms={350} format={n0} />
-          </b>
-        </span>
-        <span className={s.chip}>
-          {t('ui.bs_score')} <b className={cl(d.me.score)}>{pct(d.me.score)}</b>
-        </span>
-        <div className={s.tabs}>
-          <Segmented
-            value={tab}
-            onChange={setTab}
-            label={t('ui.nav_bourse')}
-            options={[
-              ['market', t('ui.bs_market')],
-              ['ranks', t('ui.bs_ranks')],
-            ]}
-          />
+      <header className={s.bar}>
+        <div className={s.brand}>
+          <h1>{t('ui.nav_bourse')}</h1>
+          <span>{d.season.serie}</span>
         </div>
+        <dl className={s.strip}>
+          {stats.map(([l, v, c]) => (
+            <div key={l}>
+              <dt>{l}</dt>
+              <dd className={c}>{v}</dd>
+            </div>
+          ))}
+        </dl>
+        <Segmented
+          value={tab}
+          onChange={setTab}
+          label={t('ui.nav_bourse')}
+          options={[
+            ['market', t('ui.bs_market')],
+            ['ranks', t('ui.bs_ranks')],
+          ]}
+        />
       </header>
 
       <Swap k={tab}>
         {tab === 'market' ? (
-          <div className={s.market} data-depth>
-            <div className={s.tokens} role="listbox" aria-label={t('ui.bs_market')}>
-              {d.assets.map((a) => (
-                <button
-                  key={a.id}
-                  type="button"
-                  role="option"
-                  aria-selected={a.id === cur.id}
-                  className={`${s.tok} ${a.id === cur.id ? s.on : ''}`}
-                  onClick={() => (sfx.click(), setSel(a.id))}
-                >
-                  <img className="px" src={img(a)} alt="" width={44} height={44} />
-                  <span className={s.tokName}>
-                    <b>{label(a)}</b>
-                    {a.own > 0 ? <small>{t('ui.bs_owned', { n: a.own.toLocaleString(loc) })}</small> : null}
-                  </span>
-                  <span className={s.tokPrice}>
-                    <b>
+          <div className={s.term}>
+            <section className={`${s.box} ${s.watch}`}>
+              <div className={s.watchHead}>
+                <span>{t('ui.bs_token')}</span>
+                <span>{t('ui.bs_price')}</span>
+                <span>{t('ui.bs_change')}</span>
+              </div>
+              <div className={s.watchList} role="listbox" aria-label={t('ui.bs_market')}>
+                {d.assets.map((a) => (
+                  <button
+                    key={a.id}
+                    type="button"
+                    role="option"
+                    aria-selected={a.id === cur.id}
+                    className={`${s.tok} ${a.id === cur.id ? s.on : ''}`}
+                    onClick={() => (sfx.click(), setSel(a.id))}
+                  >
+                    <span className={s.tokName}>
+                      <img className="px" src={img(a)} alt="" width={28} height={28} />
+                      <b>{label(a)}</b>
+                    </span>
+                    <Spark a={a} />
+                    <span className={s.num}>
                       <Tween value={a.price} ms={350} format={n2} />
-                    </b>
-                    <small className={cl(change(a))}>{pct(change(a))}</small>
-                  </span>
-                </button>
-              ))}
+                    </span>
+                    <span className={`${s.num} ${cl(change(a))}`}>{pct(change(a))}</span>
+                  </button>
+                ))}
+              </div>
+            </section>
+
+            <div className={s.mid}>
+              <section className={`${s.box} ${s.chartBox}`}>
+                <div className={s.quote}>
+                  <img className="px" src={img(cur)} alt="" width={36} height={36} />
+                  <h2>{label(cur)}</h2>
+                  {cur.odds ? <small>1/{cur.odds.toLocaleString(loc)}</small> : null}
+                  <b className={s.last}>
+                    <Tween value={cur.price} ms={350} format={n2} />
+                    <Koo size={20} />
+                  </b>
+                  <span className={cl(change(cur))}>{pct(change(cur))}</span>
+                  <dl className={s.mini}>
+                    <div>
+                      <dt>{t('ui.bs_high')}</dt>
+                      <dd>{n2(Math.max(...pts))}</dd>
+                    </div>
+                    <div>
+                      <dt>{t('ui.bs_low')}</dt>
+                      <dd>{n2(Math.min(...pts))}</dd>
+                    </div>
+                    <div>
+                      <dt>{t('ui.bs_activity')}</dt>
+                      <dd>{Math.round(cur.share * 100)} %</dd>
+                    </div>
+                  </dl>
+                </div>
+                <Swap k={cur.id} className={s.chartSwap}>
+                  <Chart a={cur} fmt={n2} />
+                </Swap>
+              </section>
+              <section className={`${s.box} ${s.positions}`}>
+                <h2>{t('ui.bs_positions')}</h2>
+                {held.length ? (
+                  <table>
+                    <thead>
+                      <tr>
+                        <th>{t('ui.bs_token')}</th>
+                        <th>{t('ui.bs_qty')}</th>
+                        <th>{t('ui.bs_price')}</th>
+                        <th>{t('ui.bs_value')}</th>
+                        <th>{t('ui.bs_weight')}</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {held.map((a) => {
+                        const v = sellGain(a, a.own);
+                        return (
+                          <tr
+                            key={a.id}
+                            onClick={() => {
+                              setSel(a.id);
+                              setSide('sell');
+                            }}
+                          >
+                            <td>
+                              <img className="px" src={img(a)} alt="" width={20} height={20} /> {label(a)}
+                            </td>
+                            <td>{a.own.toLocaleString(loc)}</td>
+                            <td>{n2(a.price)}</td>
+                            <td>{n2(v)}</td>
+                            <td>{Math.round((v / heldValue) * 100)} %</td>
+                          </tr>
+                        );
+                      })}
+                    </tbody>
+                  </table>
+                ) : (
+                  <p className={s.none}>{t('ui.bs_no_pos')}</p>
+                )}
+              </section>
             </div>
 
-            <div className={s.center}>
-              <article className={s.panel}>
-                <Swap k={cur.id}>
-                  <div className={s.detail}>
-                    <div className={s.title}>
-                      <img className="px" src={img(cur)} alt="" width={64} height={64} />
-                      <div>
-                        <h2>{label(cur)}</h2>
-                        {cur.odds ? <small className="muted">1/{cur.odds.toLocaleString(loc)}</small> : null}
-                      </div>
-                      <div className={s.bigPrice}>
-                        <Bump as="b" v={cur.price} kind="pop">
-                          <Tween value={cur.price} ms={350} format={n2} />
-                        </Bump>
-                        <Koo size={26} />
-                        <span className={cl(change(cur))}>{pct(change(cur))}</span>
-                      </div>
-                    </div>
-                    <Chart a={cur} />
-                  </div>
-                </Swap>
-                <dl className={s.stats}>
+            <aside className={s.right}>
+              <section className={`${s.box} ${s.ticket}`}>
+                <div className={s.sides} role="group" aria-label={t('ui.bs_order')}>
+                  <button
+                    type="button"
+                    aria-pressed={buying}
+                    className={buying ? s.sideBuy : ''}
+                    onClick={() => setSide('buy')}
+                  >
+                    {t('ui.bs_buy_tab')}
+                  </button>
+                  <button
+                    type="button"
+                    aria-pressed={!buying}
+                    className={buying ? '' : s.sideSell}
+                    onClick={() => setSide('sell')}
+                  >
+                    {t('ui.bs_sell_tab')}
+                  </button>
+                </div>
+                <label className={s.qty}>
+                  <span>{t('ui.bs_qty')}</span>
+                  <input inputMode="decimal" value={qty} onChange={(e) => setQty(e.target.value)} />
+                </label>
+                <div className={s.presets}>
+                  {[25, 50, 75, 100].map((p) => (
+                    <button
+                      key={p}
+                      type="button"
+                      disabled={!limit}
+                      onClick={() => setQty(String(floor3((limit * p) / 100)))}
+                    >
+                      {p} %
+                    </button>
+                  ))}
+                </div>
+                <dl className={s.rows}>
                   <div>
-                    <dt>{t('ui.bs_own')}</dt>
-                    <dd>{cur.own.toLocaleString(loc)}</dd>
+                    <dt>{t('ui.bs_avg')}</dt>
+                    <dd>{valid ? n2(total / amount) : '-'}</dd>
                   </div>
                   <div>
-                    <dt>{t('ui.bs_activity')}</dt>
-                    <dd>{Math.round(cur.share * 100)} %</dd>
+                    <dt>{t('ui.bs_impact')}</dt>
+                    <dd className={valid ? cl(impact) : ''}>{valid ? pct(impact) : '-'}</dd>
                   </div>
                   <div>
-                    <dt>{t('ui.bs_divs')}</dt>
-                    <dd>{n2(d.me.divs)}</dd>
+                    <dt>{t('ui.bs_fee')}</dt>
+                    <dd>1 %</dd>
+                  </div>
+                  <div className={s.totalRow}>
+                    <dt>{t('ui.bs_total')}</dt>
+                    <dd>
+                      {n2(total)} <Koo size={14} />
+                    </dd>
                   </div>
                 </dl>
-                <div className={s.order}>
-                  <label className={s.qty}>
-                    <span>{t('ui.bs_qty')}</span>
-                    <input inputMode="decimal" value={qty} onChange={(e) => setQty(e.target.value)} />
-                  </label>
-                  <div className={s.presets}>
-                    {[10, 50].map((v) => (
-                      <button key={v} type="button" onClick={() => setQty(String(v))}>
-                        {v}
-                      </button>
-                    ))}
-                    <button type="button" disabled={!bMax} onClick={() => setQty(String(bMax))}>
-                      {t('ui.bs_max')}
-                    </button>
-                    <button type="button" disabled={!sMax} onClick={() => setQty(String(sMax))}>
-                      {t('ui.bs_all')}
-                    </button>
-                  </div>
-                  <Button
-                    variant="primary"
-                    className={s.buy}
-                    disabled={busy || amount <= 0 || amount > bMax}
-                    onClick={(e) => void trade(true, e.currentTarget)}
-                  >
-                    {t('ui.bs_buy')} · {n2(cost)}
-                  </Button>
-                  <Button
-                    variant="danger"
-                    disabled={busy || amount <= 0 || amount > sMax}
-                    onClick={(e) => void trade(false, e.currentTarget)}
-                  >
-                    {t('ui.bs_sell')} · {n2(gain)}
-                  </Button>
-                </div>
-              </article>
-            </div>
-
-            <aside className={s.side}>
-              <article className={s.panel}>
+                <button
+                  type="button"
+                  className={`${s.submit} ${buying ? s.submitBuy : s.submitSell}`}
+                  disabled={busy || !valid}
+                  onClick={(e) => void trade(e.currentTarget)}
+                >
+                  {t(buying ? 'ui.bs_buy' : 'ui.bs_sell')} {label(cur)}
+                </button>
+              </section>
+              <section className={`${s.box} ${s.pay}`}>
                 <h2>
-                  {t('ui.bs_pay')}{' '}
-                  <span className={s.payN}>
-                    +25 <Koo size={18} />
+                  {t('ui.bs_pay')}
+                  <span>
+                    +25 <Koo size={14} />
                   </span>
                 </h2>
-                <ul className={s.quests}>
+                <ul>
                   {missions.map(([l, v, m]) => (
-                    <li key={l} className={v >= m ? s.qDone : ''}>
+                    <li key={l} className={v >= m ? s.up : ''}>
                       <span>{l}</span>
                       <b>{v >= m ? '✓' : `${v}/${m}`}</b>
                     </li>
                   ))}
                 </ul>
                 {d.quests.paid ? (
-                  <Bump as="p" v={d.quests.paid} kind="stamp" className={s.paid}>
-                    {t('ui.bs_paid')}
-                  </Bump>
+                  <p className={s.paid}>{t('ui.bs_paid')}</p>
                 ) : (
-                  <Button variant="gold" block disabled={!ready} onClick={(e) => void claimPay(e.currentTarget)}>
+                  <Button
+                    variant="gold"
+                    size="sm"
+                    block
+                    disabled={!ready}
+                    onClick={(e) => void claimPay(e.currentTarget)}
+                  >
                     {t('ui.q_claim')}
                   </Button>
                 )}
-              </article>
-              <article className={s.panel}>
-                <h2>{t('ui.bs_live')}</h2>
+              </section>
+              <section className={`${s.box} ${s.tape}`}>
+                <h2>{t('ui.bs_trades')}</h2>
                 {d.feed.length ? (
-                  <ul className={s.feed}>
+                  <ul>
                     {d.feed.map((f) => (
-                      <li key={`${f.at}${f.pseudo}`}>
-                        <Link to={`/profile/${encodeURIComponent(f.pseudo)}`}>{f.pseudo}</Link>{' '}
-                        <span className={f.buy ? s.up : s.down}>{t(f.buy ? 'ui.bs_bought' : 'ui.bs_sold')}</span>{' '}
-                        {f.shares.toLocaleString(loc)} {f.jeton ?? '???'}
+                      <li key={`${f.at}${f.pseudo}${f.shares}`}>
+                        <time>{new Date(f.at).toLocaleTimeString(loc, { hour: '2-digit', minute: '2-digit' })}</time>
+                        <Link to={`/profile/${encodeURIComponent(f.pseudo)}`}>{f.pseudo}</Link>
+                        <span className={f.buy ? s.up : s.down}>{t(f.buy ? 'ui.bs_bought' : 'ui.bs_sold')}</span>
+                        <span>
+                          {f.shares.toLocaleString(loc)} {f.jeton ?? '???'}
+                        </span>
                       </li>
                     ))}
                   </ul>
                 ) : (
-                  <p className="muted">{t('ui.bs_quiet')}</p>
+                  <p className={s.none}>{t('ui.bs_quiet')}</p>
                 )}
-              </article>
+              </section>
             </aside>
           </div>
         ) : (
@@ -395,15 +524,14 @@ function Ranks({
   const q = useBoard(true);
   const rows = q.data ?? [];
   useFlip(root, rows.map((r) => r.pseudo).join());
-  useSwingAll(root, `.${s.pod}`, 0.35, rows.length);
   const mine = rows.find((r) => r.me);
   const ti = tierIdx(me.elo),
     tier = TIERS[ti],
     next = TIERS[ti + 1];
   const delta = (v: number) => `${v >= 0 ? '+' : ''}${v}`;
   return (
-    <div className={s.ranks} ref={root} data-depth>
-      <aside className={`${s.panel} ${s.meCard}`}>
+    <div className={s.ranks} ref={root}>
+      <aside className={`${s.box} ${s.meCard}`}>
         <Tag elo={me.elo} />
         <div className={s.elo}>
           <b>{n0(me.elo)}</b> Elo
@@ -412,7 +540,7 @@ function Ranks({
           <i style={{ width: `${tier && next ? ((me.elo - tier[1]) / (next[1] - tier[1])) * 100 : 100}%` }} />
         </div>
         {next ? <small className="muted">{t('ui.bs_next', { n: next[1] - me.elo, r: t(next[0]) })}</small> : null}
-        <dl className={s.stats}>
+        <dl className={s.meStats}>
           <div>
             <dt>{t('ui.bs_place')}</dt>
             <dd>{me.rank ? `#${me.rank}` : '-'}</dd>

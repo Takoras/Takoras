@@ -586,7 +586,6 @@
 .scroll .pBody {
   max-height: 250px;
   overflow-y: auto;
-  scrollbar-width: thin;
 }
 .trendHead {
   display: flex !important;

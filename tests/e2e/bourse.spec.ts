@@ -7,7 +7,8 @@ test('bourse : acheter, vendre, paie du jour et classement', async ({ page, isMo
   await expect(page.getByRole('heading', { level: 1, name: 'Bourse' })).toBeVisible();
   await expect(page.getByRole('option', { name: /\?\?\?/ })).toBeVisible(); // jeton jamais eu : pas dévoilé
   await page.getByRole('button', { name: /^Acheter/ }).click();
-  await expect(page.getByRole('option', { name: /Mobu/ })).toContainText('10 en main');
+  await expect(page.getByRole('cell', { name: /Mobu/ })).toBeVisible(); // arrive dans « Mes positions »
+  await page.getByRole('cell', { name: /Mobu/ }).click(); // passe le ticket en vente
   await page.getByRole('button', { name: /^Vendre/ }).click();
   await expect.poll(() => calls.filter((c) => c === 'bourse_trade').length).toBe(2);
   await page.getByRole('button', { name: 'Récupérer' }).click();
