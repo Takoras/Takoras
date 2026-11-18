@@ -47,9 +47,10 @@ type State = {
     players: number;
   };
   quests: { pulls: number; sold: number; quest: number; paid: boolean };
-  assets: Asset[];
+  assets: Asset[] | null;
   feed: { at: string; pseudo: string; buy: boolean; shares: number; jeton: string | null }[];
 };
+type Locked = { locked: true; have: number; need: number; season: State['season'] };
 type Row = { pseudo: string; rank: number; score: number; value: number; elo: number; delta: number; me: boolean };
 
 const FEE = 0.01;
@@ -212,11 +213,11 @@ export default function Bourse() {
   const q = useQuery({
     queryKey: key,
     enabled: !!uid,
-    queryFn: async () => (await bourseApi.state()) as State,
+    queryFn: async () => (await bourseApi.state()) as State | Locked,
     refetchInterval: potatoFx() ? 15_000 : 5_000,
   });
-  useBoard(false); // le classement est prêt avant d'ouvrir l'onglet : rien n'arrive après coup
   const d = q.data;
+  useBoard(false, !!d && !('locked' in d)); // le classement est prêt avant d'ouvrir l'onglet : rien n'arrive après coup
   useStaggerIn(pageRef, `.${s.bar}, .${s.term} > *`, !!d);
   // les infos comptent : les blocs ne bougent presque pas au survol
   useSwingAll(pageRef, `.${s.box}, .${s.bar}`, 0.035, `${tab}|${d ? 1 : 0}`);
@@ -228,6 +229,10 @@ export default function Bourse() {
       </section>
     );
 
+  if ('locked' in d) return <Gate serie={d.season.serie} have={d.have} need={d.need} />;
+  const assets = d.assets ?? [];
+  if (!assets.length) return <Gate serie={d.season.serie} />;
+
   const loc = locale(lang);
   const n0 = (v: number) => Math.round(v).toLocaleString(loc);
   const n2 = (v: number) => v.toLocaleString(loc, { minimumFractionDigits: 2, maximumFractionDigits: 2 });
@@ -237,7 +242,7 @@ export default function Bourse() {
   const change = (a: Asset) => (a.price / a.p0 - 1) * 100;
   const label = (a: Asset) => a.name ?? '???';
   const img = (a: Asset) => (a.name ? texOf(jetonOf(a.name, d.season.serie)) : MYSTERE);
-  const cur = d.assets.find((a) => a.id === sel) ?? d.assets[0];
+  const cur = assets.find((a) => a.id === sel) ?? assets[0];
   if (!cur) return null;
   const days = Math.max(1, Math.ceil((new Date(d.season.ends_at).getTime() - q.dataUpdatedAt) / 86_400_000));
   const buying = side === 'buy';
@@ -249,7 +254,7 @@ export default function Bourse() {
   const impact = valid ? (cur.k / t1 / t1 / cur.price - 1) * 100 : 0;
   const pts = [cur.p0, ...cur.h, cur.price];
   const pnl = d.me.value - d.me.paid - 1000;
-  const held = d.assets.filter((a) => a.own > 0);
+  const held = assets.filter((a) => a.own > 0);
   const heldValue = held.reduce((v, a) => v + sellGain(a, a.own), 0);
   const trade = async (el: HTMLElement) => {
     setBusy(true);
@@ -326,7 +331,7 @@ export default function Bourse() {
                 <span>{t('ui.bs_change')}</span>
               </div>
               <div className={s.watchList} role="listbox" aria-label={t('ui.bs_market')}>
-                {d.assets.map((a) => (
+                {assets.map((a) => (
                   <button
                     key={a.id}
                     type="button"
@@ -561,14 +566,44 @@ export default function Bourse() {
   );
 }
 
-function useBoard(live: boolean) {
+function useBoard(live: boolean, ready = true) {
   const uid = useAuth((x) => x.user?.id);
   return useQuery({
     queryKey: ['bourse-board', uid],
-    enabled: !!uid,
+    enabled: !!uid && ready,
     queryFn: async () => (await bourseApi.board()) as Row[],
     refetchInterval: live ? 20_000 : false,
   });
+}
+
+// Bourse fermée : pas encore 10 jetons différents, ou aucun jeton de la série du mois
+function Gate({ serie, have, need }: { serie: string; have?: number; need?: number }) {
+  const t = useT();
+  const logo = SERIE_LOGO[serie];
+  return (
+    <section className={s.page}>
+      <div className={`${s.box} ${s.gate}`}>
+        <img className="px" src="/img/koo.png" alt="" width={72} height={72} />
+        <h1>{t('ui.nav_bourse')}</h1>
+        {logo ? <img className={`px ${s.serie}`} src={logo} alt={serie} /> : <b>{serie}</b>}
+        {need ? (
+          <>
+            <div className={s.blocks} role="img" aria-label={`${have ?? 0}/${need}`}>
+              {Array.from({ length: need }, (_, i) => (
+                <i key={i} className={i < (have ?? 0) ? s.blockOn : ''} />
+              ))}
+            </div>
+            <p>{t('ui.bs_need', { n: have ?? 0, m: need })}</p>
+            <Link className={s.gateGo} to="/">
+              {t('ui.bs_go_pull')}
+            </Link>
+          </>
+        ) : (
+          <p>{t('ui.bs_no_token')}</p>
+        )}
+      </div>
+    </section>
+  );
 }
 
 function RankBadge({ elo, size }: { elo: number; size: number }) {

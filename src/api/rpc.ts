@@ -54,6 +54,8 @@ const ERR: Record<string, Key> = {
   deck_incomplete: 'ui.err_deck',
   quest_not_done: 'ui.err_quest',
   quest_claimed: 'ui.bs_err_paid',
+  bourse_locked: 'ui.bs_err_locked',
+  bourse_unknown: 'ui.bs_err_unknown',
   bourse_no_koo: 'ui.bs_err_koo',
   bourse_no_shares: 'ui.bs_err_shares',
   bourse_too_big: 'ui.bs_err_big',

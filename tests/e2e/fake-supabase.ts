@@ -36,6 +36,7 @@ export async function fakeSupabase(
   opts: {
     ann?: FakeAnn[];
     tuto?: boolean;
+    bourseHave?: number;
     pnSeen?: number;
     tester?: boolean;
     deck?: number[];
@@ -138,7 +139,6 @@ export async function fakeSupabase(
         h: [] as number[],
       },
       { id: 2, name: 'Pikko', odds: 4, price: 10, p0: 10, shares: 2000, k: 4e7, share: 0.35, own: 0, h: [] },
-      { id: 3, name: null, odds: null, price: 10, p0: 10, shares: 400, k: 1.6e6, share: 0.25, own: 0, h: [] },
     ],
   };
   const bourse = () => {
@@ -410,7 +410,12 @@ export async function fakeSupabase(
       });
     if (rpc === 'my_view') return json(process.env.SC_VIEW ? { pseudo: 'T.Bob', server: 'Essai équilibrage' } : null);
     if (rpc === 'refund_pulls') return json({ refunded: 0 });
-    if (rpc === 'bourse_state') return json(bourse());
+    if (rpc === 'bourse_state')
+      return json(
+        opts.bourseHave !== undefined
+          ? { locked: true, have: opts.bourseHave, need: 10, season: bourse().season }
+          : bourse(),
+      );
     if (rpc === 'bourse_trade') {
       const body = JSON.parse(route.request().postData() ?? '{}') as {
         p_asset: number;

@@ -14,11 +14,11 @@ export function KooBalance({ className }: { className?: string }) {
   const q = useQuery({
     queryKey: ['bourse', uid],
     enabled: !!uid,
-    queryFn: async () => (await bourseApi.state()) as { me: { koo: number } },
+    queryFn: async () => (await bourseApi.state()) as { me?: { koo: number } },
     staleTime: 60_000,
     refetchOnWindowFocus: false,
   });
-  if (!q.data) return null;
+  if (!q.data?.me) return null; // Bourse pas encore débloquée
   return (
     <NavLink to="/bourse" className={className}>
       <img className="px" src="/img/koo.png" alt={t('ui.bs_koo')} width={20} height={20} />

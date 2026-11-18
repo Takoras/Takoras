@@ -5,7 +5,7 @@ test('bourse : acheter, vendre, paie du jour et classement', async ({ page, isMo
   const { calls } = await fakeSupabase(page);
   await page.goto('/bourse');
   await expect(page.getByRole('heading', { level: 1, name: 'Bourse' })).toBeVisible();
-  await expect(page.getByRole('option', { name: /\?\?\?/ })).toBeVisible(); // jeton jamais eu : pas dévoilé
+  await expect(page.getByRole('option')).toHaveCount(2); // seuls les jetons déjà obtenus
   await page.getByRole('button', { name: /^Acheter/ }).click();
   await expect(page.getByRole('cell', { name: /Mobu/ })).toBeVisible(); // arrive dans « Mes positions »
   await page.getByRole('cell', { name: /Mobu/ }).click(); // passe le ticket en vente
@@ -22,4 +22,12 @@ test('bourse : acheter, vendre, paie du jour et classement', async ({ page, isMo
   await expect(page.getByRole('link', { name: /Kaz/ }).first()).toBeVisible();
   await expect(page.getByText('70 Elo avant Argent I')).toBeVisible();
   if (isMobile) expect(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth)).toBe(true);
+});
+
+test('bourse verrouillée sous 10 jetons différents', async ({ page }) => {
+  const { calls } = await fakeSupabase(page, {}, [], { bourseHave: 6 });
+  await page.goto('/bourse');
+  await expect(page.getByText('6/10 jetons différents')).toBeVisible();
+  await expect(page.getByRole('option')).toHaveCount(0);
+  expect(calls).not.toContain('bourse_board');
 });
