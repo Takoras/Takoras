@@ -6,7 +6,7 @@ type Doc = { title: string; updated: string; intro: string; blocks: [string, str
 
 const FR: Doc = {
   title: 'Politique de confidentialité',
-  updated: 'Dernière mise à jour : 4 novembre 2026',
+  updated: 'Dernière mise à jour : 18 novembre 2026',
   intro:
     'La présente politique de confidentialité (ci-après la « Politique ») a pour objet d’informer toute personne utilisant le site et le jeu Takoras (ci-après le « Service ») de la manière dont ses données à caractère personnel sont collectées, utilisées, conservées et protégées, conformément au Règlement (UE) 2016/679 du 27 avril 2016 relatif à la protection des personnes physiques à l’égard du traitement des données à caractère personnel (ci-après le « RGPD ») et à la loi n° 78-17 du 6 janvier 1978 modifiée relative à l’informatique, aux fichiers et aux libertés (ci-après la « loi Informatique et Libertés »). En utilisant le Service, l’utilisateur reconnaît avoir pris connaissance de la présente Politique.',
   blocks: [
@@ -25,6 +25,7 @@ const FR: Doc = {
         '2.4. Données techniques : données strictement nécessaires au fonctionnement et à la sécurité du Service, notamment journaux techniques des serveurs, horodatages des actions de jeu et informations limitées sur le navigateur, conservées pour une durée limitée.',
         '2.5. Avis et signalements : contenu des messages envoyés volontairement par l’utilisateur au moyen du bouton « Donner un avis ».',
         '2.6. Le Service ne collecte aucune donnée dite « sensible » au sens de l’article 9 du RGPD, ni aucune donnée bancaire. Aucun paiement n’est ouvert à la date de la présente Politique.',
+        '2.7. Données du Market : ordres d’achat et de vente, actions détenues, solde de Market Coins, paie du jour, achats au Market Shop, score et rang de la saison.',
       ],
     ],
     [
@@ -40,6 +41,7 @@ const FR: Doc = {
       '4. Données rendues publiques',
       [
         'Certaines données sont visibles par les autres utilisateurs et, le cas échéant, par toute personne consultant le Service : pseudonyme, photo de profil, bannière, biographie, vitrine, statistiques de collection, nombre de tirages, rang et Elo du mode classé, et position dans les classements. L’adresse électronique et l’identifiant de connexion ne sont jamais rendus publics.',
+        'Dans le Market, le pseudonyme, le score, le rang et l’Elo apparaissent au classement ; les ordres, ainsi que les tirages et reventes qui font bouger les prix, peuvent apparaître dans le fil « En direct ». Les ordres et positions sont supprimés à la fin de chaque saison.',
       ],
     ],
     [
@@ -97,7 +99,7 @@ const FR: Doc = {
 
 const EN: Doc = {
   title: 'Privacy policy',
-  updated: 'Last updated: 4 November 2026',
+  updated: 'Last updated: 18 November 2026',
   intro:
     'This privacy policy (the “Policy”) explains to anyone using the Takoras website and game (the “Service”) how their personal data is collected, used, stored and protected, in accordance with Regulation (EU) 2016/679 of 27 April 2016 (the “GDPR”) and the French Data Protection Act no. 78-17 of 6 January 1978 as amended. By using the Service, the user acknowledges having read this Policy.',
   blocks: [
@@ -116,6 +118,7 @@ const EN: Doc = {
         '2.4. Technical data: data strictly necessary for the operation and security of the Service, including server logs, timestamps of game actions and limited browser information, kept for a limited time.',
         '2.5. Feedback and reports: content of messages voluntarily sent by the user with the “Feedback” button.',
         '2.6. The Service does not collect any “special category” data within the meaning of Article 9 GDPR, nor any banking data. No payments are open as of the date of this Policy.',
+        '2.7. Market data: buy and sell orders, shares held, Market Coin balance, daily pay, Market Shop purchases, season score and rank.',
       ],
     ],
     [
@@ -131,6 +134,7 @@ const EN: Doc = {
       '4. Public data',
       [
         'Some data is visible to other users and, where applicable, to anyone visiting the Service: username, profile picture, banner, bio, showcase, collection statistics, number of pulls, ranked rank and Elo, and leaderboard positions. The e-mail address and login identifier are never made public.',
+        'In the Market, username, score, rank and Elo appear in the ranking; orders, as well as the pulls and resales that move prices, may appear in the Live feed. Orders and positions are deleted at the end of each season.',
       ],
     ],
     [
