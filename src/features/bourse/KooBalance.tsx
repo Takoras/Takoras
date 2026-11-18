@@ -20,7 +20,7 @@ export function KooBalance({ className }: { className?: string }) {
   });
   if (!q.data?.me) return null; // Bourse pas encore débloquée
   return (
-    <NavLink to="/bourse" className={className}>
+    <NavLink to="/market" className={className}>
       <img className="px" src="/img/koo.png" alt={t('ui.bs_koo')} width={20} height={20} />
       <Tween value={q.data.me.koo} ms={900} pow={5} format={(n) => Math.round(n).toLocaleString(locale(lang))} />
     </NavLink>

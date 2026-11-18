@@ -13,7 +13,6 @@ const profile = page(() => import('@/features/profile/Profile'));
 
 // Combat : chargé seulement quand on ouvre la page (le Ring, lui, au lancement d'une partie)
 
-
 // Anciennes adresses en français (liens déjà partagés) → nouvelle adresse en anglais, même suite (/profil/Pseudo → /profile/Pseudo)
 const OLD: [string, string][] = [
   ['/inventaire/objets', '/inventory/items'],
@@ -47,13 +46,14 @@ export const router = createBrowserRouter([
       { path: '/combat', element: <Navigate to="/" replace /> },
       { path: '/friends', lazy: page(() => import('@/features/social/Friends')) },
       { path: '/pass', lazy: page(() => import('@/features/pass/Pass')) },
-      { path: '/bourse', lazy: page(() => import('@/features/bourse/Bourse')) },
+      { path: '/market', lazy: page(() => import('@/features/bourse/Bourse')) },
       { path: '/achievements', lazy: page(() => import('@/features/achievements/Achievements')) },
       { path: '/profile', lazy: profile },
       { path: '/profile/:pseudo', lazy: profile },
       { path: '/privacy', lazy: page(() => import('@/pages/Privacy')) },
       { path: '/legal', lazy: page(() => import('@/pages/Legal')) },
       { path: '/terms', lazy: page(() => import('@/pages/Terms')) },
+      { path: '/bourse', element: <Navigate to="/market" replace /> },
       { path: '/admin', element: <AdminGate /> },
       ...OLD.flatMap(([from, to]) => [
         { path: from, element: <OldPath from={from} to={to} /> },

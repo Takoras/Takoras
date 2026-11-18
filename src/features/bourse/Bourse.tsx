@@ -634,6 +634,10 @@ function Ranks({
         </dl>
       </aside>
       <div className={s.boardCol}>
+        <div className={`${s.box} ${s.reward}`}>
+          <img className="px" src="/img/pp/etoile.gif" alt="" width={36} height={36} />
+          <b>{t('ui.bs_reward')}</b>
+        </div>
         {q.isLoading ? <Skeleton n={3} h={140} min={160} /> : null}
         {rows.length >= 3 ? (
           <div className={s.podium}>

@@ -630,6 +630,16 @@
   width: 100%;
   margin: 0;
 }
+.reward {
+  display: flex;
+  align-items: center;
+  gap: var(--s-2);
+  padding: 8px 12px;
+  font-size: var(--fs-sm);
+}
+.reward img {
+  border-radius: 50%;
+}
 .boardCol {
   display: grid;
   gap: var(--s-3);

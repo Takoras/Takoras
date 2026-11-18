@@ -3,8 +3,8 @@ import { fakeSupabase } from './fake-supabase';
 
 test('bourse : acheter, vendre, paie du jour et classement', async ({ page, isMobile }) => {
   const { calls } = await fakeSupabase(page);
-  await page.goto('/bourse');
-  await expect(page.getByRole('heading', { level: 1, name: 'Bourse' })).toBeVisible();
+  await page.goto('/market');
+  await expect(page.getByRole('heading', { level: 1, name: 'Market' })).toBeVisible();
   await expect(page.getByRole('option')).toHaveCount(3);
   await expect(page.getByRole('option', { name: /\?\?\?/ })).toHaveAttribute('aria-disabled', 'true'); // jeton jamais eu
   await page.getByRole('button', { name: /^Acheter/ }).click();
@@ -27,14 +27,14 @@ test('bourse : acheter, vendre, paie du jour et classement', async ({ page, isMo
 
 test('bourse : la fenêtre explique le marché', async ({ page }) => {
   await fakeSupabase(page);
-  await page.goto('/bourse');
+  await page.goto('/market');
   await page.getByRole('button', { name: /Comment ça marche/ }).click();
-  await expect(page.getByRole('dialog', { name: 'Comment marche la Bourse' })).toContainText('Les tirages');
+  await expect(page.getByRole('dialog', { name: 'Comment marche le Market' })).toContainText('Les tirages');
 });
 
 test('bourse verrouillée sous 10 jetons différents', async ({ page }) => {
   const { calls } = await fakeSupabase(page, {}, [], { bourseHave: 6 });
-  await page.goto('/bourse');
+  await page.goto('/market');
   await expect(page.getByText('6/10 jetons différents')).toBeVisible();
   await expect(page.getByRole('option')).toHaveCount(0);
   expect(calls).not.toContain('bourse_board');
@@ -47,12 +47,12 @@ test('boutique en Koo : même page, prix et nom qui changent', async ({ page }) 
   await buy.waitFor();
   const cards = await page.getByRole('button', { name: /^Acheter ·/ }).count();
   await page
-    .getByRole('radio', { name: 'Koo' })
-    .or(page.getByRole('tab', { name: 'Koo' }))
-    .or(page.getByRole('button', { name: 'Koo', exact: true }))
+    .getByRole('radio', { name: 'Market Coin' })
+    .or(page.getByRole('tab', { name: 'Market Coin' }))
+    .or(page.getByRole('button', { name: 'Market Coin', exact: true }))
     .first()
     .click();
-  await expect(page.getByRole('heading', { level: 1, name: 'Boutique Koo' })).toBeVisible();
+  await expect(page.getByRole('heading', { level: 1, name: 'Market Shop' })).toBeVisible();
   await expect(page.getByText('à dépenser')).toBeVisible();
   await expect(page.getByRole('button', { name: /^Acheter ·/ })).toHaveCount(cards);
   await buy.click();

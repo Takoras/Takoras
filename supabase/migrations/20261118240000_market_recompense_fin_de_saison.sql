@@ -1,0 +1,2 @@
+-- Appliquée via MCP (market_recompense_fin_de_saison). _bourse_close donne la photo Étoile (a_etoile) au top 3
+-- d'une saison à 3 participants ou plus. Patch notes 32 et 34 renommées : Market, Market Coins.

@@ -55,7 +55,7 @@ for (const path of [
   '/profile/Ami',
   '/friends',
   '/pass',
-  '/bourse',
+  '/market',
   '/shop',
 ]) {
   test(`${path} (connecté) : accessibilité`, async ({ page }) => {
