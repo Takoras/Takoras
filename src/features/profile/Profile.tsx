@@ -1256,7 +1256,6 @@ function EditProfile({ p, onClose }: { p: Prof; onClose: () => void }) {
               )}
             </Swap>
           </div>
-
         </div>
 
         {/* directement dans le formulaire : collés en bas de la fenêtre, quelle que soit la hauteur de l'écran */}
