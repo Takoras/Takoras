@@ -679,6 +679,8 @@ export const fr = {
     bs_reward: 'Récompense du top 3',
     bs_bm: 'Black Market',
     bs_bm_ends: 'Ferme dans',
+    bs_in_shares: 'En actions',
+    bs_spendable: 'Dépensable',
     bs_days: '{n} j restants',
     bs_score: 'Score',
     bs_market: 'Marché',

@@ -148,19 +148,8 @@ export default function Shop() {
   );
   // changer de rayon : les cases du nouveau rayon apparaissent en fondu, l'une après l'autre (comme à l'arrivée)
   const switched = useRef(false);
-  const heroRef = useRef<HTMLDivElement>(null);
-  const ghostRef = useRef<HTMLDivElement>(null);
-  const dirRef = useRef(1);
   useLayoutEffect(() => {
     if (!switched.current || reducedFx()) return;
-    // le nouvel objet à la une arrive du côté du rayon choisi
-    heroRef.current?.querySelector<HTMLElement>(`.${s.hero}`)?.animate(
-      [
-        { opacity: 0, transform: `translateX(${dirRef.current * 48}px) scale(.96)` },
-        { opacity: 1, transform: 'translateX(0) scale(1)' },
-      ],
-      { duration: 460, delay: 70, easing: 'cubic-bezier(.2,.8,.2,1)', fill: 'backwards' },
-    );
     if (!gridRef.current) return;
     [...gridRef.current.children].forEach((c, i) =>
       (c as HTMLElement).animate([{ opacity: 0 }, { opacity: 1 }], {
@@ -171,42 +160,10 @@ export default function Shop() {
       }),
     );
   }, [cat]);
-  // changer de rayon : l'objet à la une ne saute pas, il glisse. Une copie de l'ancien (fond pixel compris)
-  // part du côté opposé en s'effaçant pendant que le nouveau arrive du côté du rayon choisi.
   const pick = (k: string) => {
     if (k === cat) return;
     switched.current = true;
     sfx.click();
-    const ix = (x: string) => CATS.findIndex((c) => c.k === x);
-    dirRef.current = ix(k) > ix(cat) ? 1 : -1;
-    const cur = heroRef.current?.querySelector<HTMLElement>(`.${s.hero}`);
-    const layer = ghostRef.current;
-    if (cur && layer && !reducedFx()) {
-      const g = cur.cloneNode(true) as HTMLElement;
-      // les canvas copiés sont vides : on y recopie l'image actuelle
-      const src = cur.querySelectorAll('canvas'),
-        dst = g.querySelectorAll('canvas');
-      dst.forEach((c, i) => {
-        const o = src[i];
-        if (!o) return;
-        c.width = o.width;
-        c.height = o.height;
-        c.getContext('2d')?.drawImage(o, 0, 0);
-      });
-      g.style.cssText += ';position:absolute;inset:0;margin:0;pointer-events:none;animation:none';
-      layer.replaceChildren(g);
-      const d = dirRef.current;
-      g.animate(
-        [
-          { opacity: 1, transform: 'translateX(0) scale(1)' },
-          { opacity: 0, transform: `translateX(${-d * 40}px) scale(.96)` },
-        ],
-        { duration: 300, easing: 'cubic-bezier(.4,0,.8,.4)', fill: 'forwards' },
-      ).finished.then(
-        () => g.remove(),
-        () => g.remove(),
-      );
-    }
     catRef.current = k;
     setCat(k);
   };
@@ -393,14 +350,14 @@ export default function Shop() {
       );
       await new Promise((ok) => requestAnimationFrame(() => requestAnimationFrame(ok)));
       // changé de rayon pendant la charge : l'objet est révélé, les pièces arrivent, mais sans effets au mauvais endroit
-      if (catRef.current !== cat0 || modeRef.current !== mode0) {
+      if ((!isHero && catRef.current !== cat0) || modeRef.current !== mode0) {
         cover?.getAnimations().forEach((a) => a.cancel());
         applyCoins();
         return;
       }
       // la case cachée a été remplacée par la vraie case : les effets se jouent sur la nouvelle
       const found = isHero
-        ? pageRef.current?.querySelector<HTMLElement>(`.${s.top} .${s.hero}`)
+        ? pageRef.current?.querySelector<HTMLElement>(`.${s.top} [data-slot="${slot}"]`)
         : gridRef.current?.querySelector<HTMLElement>(`[data-key="${slot}"]`);
       if (!found) {
         applyCoins();
@@ -496,13 +453,15 @@ export default function Shop() {
   const items = (data?.items ?? []).map((x, i): Slot =>
     charging.has(slotOf(x, i)) && !isHidden(x) ? { slot: slotOf(x, i), hidden: true, group: catOf(x) } : x,
   );
-  // un objet à la une par rayon : celui du rayon choisi est en grand en haut (et retiré de la grille du bas)
-  const feat = data?.feats ? data.feats.find((f) => f.group === cat) : undefined;
-  const fSlot = data?.feats ? (feat?.slot ?? null) : (data?.featured_slot ?? null);
-  const fOff = data?.feats ? (feat?.off ?? 0) : (data?.off ?? 0);
-  const list = items.filter((it, i) => catOf(it) === cat && slotOf(it, i) !== fSlot);
-  const fIdx = fSlot == null ? -1 : items.findIndex((x, i) => slotOf(x, i) === fSlot);
-  const featured = fIdx >= 0 ? items[fIdx] : undefined;
+  // un objet à la une par rayon : les trois sont en haut, et retirés des grilles du bas
+  const rank = (g: string) => CATS.findIndex((c) => c.k === g);
+  const feats = data?.feats
+    ? [...data.feats].sort((a, b) => rank(a.group) - rank(b.group))
+    : data?.featured_slot != null
+      ? [{ group: '', slot: data.featured_slot, off: data.off ?? 0, item: null }]
+      : [];
+  const featSlots = new Set(feats.map((f) => f.slot));
+  const list = items.filter((it, i) => catOf(it) === cat && !featSlots.has(slotOf(it, i)));
   return (
     <Pay.Provider value={{ koo: inKoo || inBlack, black: inBlack, spend }}>
       <section ref={pageRef} className={s.page} aria-busy={!data}>
@@ -542,30 +501,34 @@ export default function Shop() {
           ) : data ? (
             <div className={`${s.coinView} ${inBlack ? s.bm : ''}`}>
               <div className={s.top} data-depth>
-                <div ref={heroRef} className={s.heroSlot}>
-                  {featured && fSlot != null ? (
-                    isHidden(featured) ? (
-                      <MysteryHero
-                        off={fOff}
-                        gain={data.reveal_gain ?? 100}
-                        logged={!!user}
-                        onReveal={(el) => void reveal(fSlot, el)}
-                      />
-                    ) : (
-                      <Hero
-                        key={fSlot}
-                        it={featured}
-                        off={fOff}
-                        coins={coins}
-                        logged={!!user}
-                        left={left}
-                        onBuy={buy}
-                      />
-                    )
-                  ) : null}
-                  <div ref={ghostRef} className={s.heroGhost} aria-hidden />
-                </div>
-                <div ref={shelvesRef} className={s.shelves} role="group" aria-label={t('ui.shop_title')}>
+                {feats.map((f) => {
+                  const x = items.find((it, i) => slotOf(it, i) === f.slot);
+                  if (!x) return null;
+                  return isHidden(x) ? (
+                    <MysteryHero
+                      key={f.slot}
+                      slot={f.slot}
+                      off={f.off}
+                      gain={data.reveal_gain ?? 100}
+                      logged={!!user}
+                      onReveal={(el) => void reveal(f.slot, el)}
+                    />
+                  ) : (
+                    <Hero
+                      key={f.slot}
+                      slot={f.slot}
+                      it={x}
+                      off={f.off}
+                      coins={coins}
+                      logged={!!user}
+                      left={left}
+                      onBuy={buy}
+                    />
+                  );
+                })}
+              </div>
+              <div>
+                <div ref={shelvesRef} className={s.shelves} data-depth role="group" aria-label={t('ui.shop_title')}>
                   {CATS.map((c) => {
                     // les rayons restent toujours accessibles, même vides aujourd'hui
                     const inCat = items.filter((it) => catOf(it) === c.k);
@@ -705,7 +668,7 @@ function Buy({
 }
 
 // L'objet vedette : grand, il flotte sur le fond pixel animé de la fiche d'un jeton
-function Hero(p: CardProps & { off: number }) {
+function Hero(p: CardProps & { off: number; slot: number }) {
   const t = useT();
   const lang = useSettings((x) => x.lang);
   const { it, left, off } = p;
@@ -717,7 +680,7 @@ function Hero(p: CardProps & { off: number }) {
   const stockLeft = Math.max(0, it.stock - it.bought);
   const glow = glowOf(it);
   return (
-    <div ref={ref} className={s.hero} style={{ '--g': glow } as CSSProperties}>
+    <div ref={ref} className={s.hero} data-slot={p.slot} style={{ '--g': glow } as CSSProperties}>
       {/* fond selon la rareté de l'objet (comme les jetons), à sa couleur */}
       <PixelBg className={s.heroBg} odds={oddsOf(it)} glow={hexOf(glow)} center={art} still={reducedFx()} />
       <div ref={art} className={s.heroArt}>
@@ -851,11 +814,13 @@ function Mystery({
 
 // La vedette tant qu'elle n'est pas révélée : toute la case est cachée, on ne voit que « À la une » et sa réduction
 function MysteryHero({
+  slot,
   off,
   gain,
   logged,
   onReveal,
 }: {
+  slot: number;
   off: number;
   gain: number;
   logged: boolean;
@@ -865,7 +830,7 @@ function MysteryHero({
   const ref = useRef<HTMLDivElement>(null);
   useSwing(ref, 0.12);
   return (
-    <div ref={ref} className={`${s.hero} ${s.myst}`}>
+    <div ref={ref} className={`${s.hero} ${s.myst}`} data-slot={slot}>
       <button type="button" className={s.cover} disabled={!logged} onClick={() => ref.current && onReveal(ref.current)}>
         <span className="visually-hidden">{t('ui.shop_reveal')}</span>
         <span className={s.featRow}>

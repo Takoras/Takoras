@@ -306,6 +306,12 @@ export default function Bourse() {
         </div>
         <dl className={s.strip}>
           <div>
+            <dt>{t('ui.bs_avail')}</dt>
+            <dd>
+              <Roll text={n2(d.me.koo)} />
+            </dd>
+          </div>
+          <div>
             <dt>{t('ui.bs_pnl')}</dt>
             <dd>
               <Roll text={`${pnl >= 0 ? '+' : ''}${n2(pnl)}`} className={cl(pnl)} />

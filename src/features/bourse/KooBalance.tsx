@@ -5,8 +5,11 @@ import { useT } from '@/i18n/useT';
 import { useAuth } from '@/lib/auth';
 import { locale, useSettings } from '@/lib/settings';
 import { Tween } from '@/ui/Tween';
+import s from './KooBalance.module.css';
 
-// Solde de la Bourse, à côté des pièces du jeu : c'est une monnaie à part
+type Me = { koo: number; value: number; paid: number };
+
+// Solde du Market à côté des pièces : tout ce que le joueur possède, avec le détail au survol
 export function KooBalance({ className }: { className?: string }) {
   const t = useT();
   const lang = useSettings((x) => x.lang);
@@ -14,15 +17,32 @@ export function KooBalance({ className }: { className?: string }) {
   const q = useQuery({
     queryKey: ['bourse', uid],
     enabled: !!uid,
-    queryFn: async () => (await bourseApi.state()) as { me?: { koo: number } },
+    queryFn: async () => (await bourseApi.state()) as { me?: Me },
     staleTime: 60_000,
     refetchOnWindowFocus: false,
   });
-  if (!q.data?.me) return null; // Bourse pas encore débloquée
+  const me = q.data?.me;
+  if (!me) return null; // Market pas encore débloqué
+  const n = (v: number) => Math.round(v).toLocaleString(locale(lang));
+  const rows: [string, number][] = [
+    [t('ui.bs_avail'), me.koo],
+    [t('ui.bs_in_shares'), Math.max(0, me.value - me.koo)],
+    [t('ui.bs_spendable'), Math.max(0, me.koo - 1000 - me.paid)],
+  ];
   return (
-    <NavLink to="/market" className={className} data-koo-target>
-      <img className="px" src="/img/koo.png" alt={t('ui.bs_koo')} width={20} height={20} />
-      <Tween value={q.data.me.koo} ms={900} pow={5} format={(n) => Math.round(n).toLocaleString(locale(lang))} />
-    </NavLink>
+    <span className={s.wrap}>
+      <NavLink to="/market" className={className} data-koo-target>
+        <img className="px" src="/img/koo.png" alt={t('ui.bs_koo')} width={20} height={20} />
+        <Tween value={me.value} ms={900} pow={5} format={n} />
+      </NavLink>
+      <dl className={s.panel}>
+        {rows.map(([label, v]) => (
+          <div key={label}>
+            <dt>{label}</dt>
+            <dd>{n(v)}</dd>
+          </div>
+        ))}
+      </dl>
+    </span>
   );
 }
