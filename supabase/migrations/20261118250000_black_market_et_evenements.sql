@@ -6,3 +6,4 @@
 -- _koo_price(prix, type) : les cosmétiques coûtent 4 fois plus cher en Market Coins.
 -- Ajustement : 16 cases par semaine (8 potions, 1 sablier, 7 cosmétiques).
 -- Ajustement final : 13 cases par semaine (4 potions courantes, 1 grosse potion jamais en affaire, 1 sablier, 7 cosmétiques), 5 affaires.
+-- Stock par joueur : potions 20, sablier, grosses potions et affaires consommables 10, cosmétiques 1.
