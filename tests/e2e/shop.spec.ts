@@ -28,3 +28,41 @@ test('boutique : catégories, stock, achat, prix modifié, code promo', async ({
   await page.getByRole('button', { name: 'Utiliser' }).click();
   await expect(page.getByLabel('Solde')).toContainText('5 800');
 });
+
+test('ouvrir plusieurs cases à la fois : aucune ne se referme', async ({ page }) => {
+  await fakeSupabase(page);
+  const item = (slot: number) => ({
+    slot,
+    id: `potion${slot}`,
+    kind: 'potion',
+    data: { mult: 2, rolls: 5 },
+    price: 300,
+    base_price: 300,
+    stock: 1,
+    bought: 0,
+    owned: false,
+  });
+  const hidden = (slot: number) => ({ slot, hidden: true, group: 'potion' });
+  const shop = (items: object[]) => ({ reset_in: 7200, reveal_gain: 100, items });
+  await page.route('**/rpc/shop_today', (r) =>
+    r.fulfill({ contentType: 'application/json', body: JSON.stringify(shop([hidden(1), hidden(2)])) }),
+  );
+  await page.route('**/rpc/reveal_slot', async (r) => {
+    const { p_slot: slot } = JSON.parse(r.request().postData() ?? '{}') as { p_slot: number };
+    // la case 1 répond en retard, avec une photo où la case 2 est encore cachée
+    if (slot === 1) await new Promise((ok) => setTimeout(ok, 500));
+    const items = slot === 1 ? [item(1), hidden(2)] : [hidden(1), item(2)];
+    await r.fulfill({
+      contentType: 'application/json',
+      body: JSON.stringify({ gain: 100, state: { coins: 5000 + slot * 100 }, shop: shop(items) }),
+    });
+  });
+  await page.goto('/shop');
+  const covers = page.locator('[data-key] button[class*="cover"]');
+  await expect(covers).toHaveCount(2);
+  await covers.nth(0).click();
+  await covers.nth(1).click();
+  await expect(page.getByRole('button', { name: /^Acheter ·/ })).toHaveCount(2);
+  await page.waitForTimeout(300);
+  await expect(page.getByRole('button', { name: /^Acheter ·/ })).toHaveCount(2);
+});

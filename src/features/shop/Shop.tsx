@@ -102,6 +102,8 @@ export default function Shop() {
   const spend = wallet.data?.spendable ?? 0;
   const pageRef = useRef<HTMLElement>(null);
   const revealing = useRef(new Set<number>());
+  // cases en train de charger : elles restent cachées jusqu'à leur explosion, même si le serveur les dit déjà ouvertes
+  const [charging, setCharging] = useState<ReadonlySet<number>>(() => new Set());
   // rayon affiché (lu par une révélation en cours : si on a changé de rayon entre-temps, ses effets ne se jouent pas ailleurs)
   const catRef = useRef('potion');
   const gridRef = useRef<HTMLUListElement>(null);
@@ -225,14 +227,18 @@ export default function Shop() {
           { duration: 1100, easing: 'cubic-bezier(.4,0,.2,1)' },
         );
       }
-      qc.setQueryData(['shop'], {
-        ...data,
-        items: data.items.map((x) =>
-          !isHidden(x) && x.id === it.id
-            ? { ...x, bought: x.bought + 1, owned: x.owned || x.kind === 'banner' || x.kind === 'avatar' }
-            : x,
-        ),
-      });
+      qc.setQueryData<ShopData>(
+        ['shop'],
+        (old) =>
+          old && {
+            ...old,
+            items: old.items.map((x) =>
+              !isHidden(x) && x.id === it.id
+                ? { ...x, bought: x.bought + 1, owned: x.owned || x.kind === 'banner' || x.kind === 'avatar' }
+                : x,
+            ),
+          },
+      );
       void qc.invalidateQueries({ queryKey: ['items'] });
     } catch (e) {
       sfx.deny();
@@ -247,6 +253,14 @@ export default function Shop() {
     if (!data || !user) return;
     if (revealing.current.has(slot)) return;
     revealing.current.add(slot);
+    const setCharge = (on: boolean) =>
+      setCharging((old) => {
+        const next = new Set(old);
+        if (on) next.add(slot);
+        else next.delete(slot);
+        return next;
+      });
+    setCharge(true);
     const cover = el.querySelector<HTMLElement>(`.${s.cover}`);
     const fast = reducedFx();
     const cat0 = catRef.current;
@@ -305,8 +319,23 @@ export default function Shop() {
         await main.finished.catch(() => undefined);
       }
       const isHero = el.classList.contains(s.hero ?? '');
-      const applyCoins = () => qc.setQueryData(['me', user.id], (old: object | undefined) => ({ ...old, ...r.state }));
-      qc.setQueryData(['shop'], { ...r.shop, at: Date.now() });
+      // plusieurs cases peuvent s'ouvrir en même temps et finir dans le désordre : le solde ne recule jamais
+      const applyCoins = () =>
+        qc.setQueryData(['me', user.id], (old: { coins?: number } | undefined) => {
+          const next = r.state as { coins?: number };
+          return { ...old, ...next, coins: Math.max(old?.coins ?? 0, next.coins ?? 0) };
+        });
+      // seule CETTE case change : la réponse du serveur est une photo de toute la boutique, parfois déjà dépassée
+      setCharge(false);
+      qc.setQueryData<ShopData & { at: number }>(['shop'], (old) =>
+        old
+          ? {
+              ...old,
+              items: old.items.map((x, i) => (slotOf(x, i) === slot && it ? it : x)),
+              feats: old.feats?.map((f) => (f.slot === slot ? (r.shop.feats?.find((n) => n.slot === slot) ?? f) : f)),
+            }
+          : { ...r.shop, at: Date.now() },
+      );
       await new Promise((ok) => requestAnimationFrame(() => requestAnimationFrame(ok)));
       // changé de rayon pendant la charge : l'objet est révélé, les pièces arrivent, mais sans effets au mauvais endroit
       if (catRef.current !== cat0) {
@@ -396,6 +425,7 @@ export default function Shop() {
       } else applyCoins();
     } catch (e) {
       sfx.deny();
+      setCharge(false);
       cover?.getAnimations().forEach((a) => a.cancel());
       cover?.classList.remove(s.whiten ?? '');
       toast(errorText(e, lang), true);
@@ -406,7 +436,9 @@ export default function Shop() {
 
   // pas connecté : la boutique demande de se connecter (comme l'inventaire, le passe…)
   if (!user) return <NeedLogin title={t('ui.nav_shop')} />;
-  const items = data?.items ?? [];
+  const items = (data?.items ?? []).map((x, i): Slot =>
+    charging.has(slotOf(x, i)) && !isHidden(x) ? { slot: slotOf(x, i), hidden: true, group: catOf(x) } : x,
+  );
   // un objet à la une par rayon : celui du rayon choisi est en grand en haut (et retiré de la grille du bas)
   const feat = data?.feats ? data.feats.find((f) => f.group === cat) : undefined;
   const fSlot = data?.feats ? (feat?.slot ?? null) : (data?.featured_slot ?? null);
