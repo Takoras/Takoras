@@ -132,6 +132,7 @@ export const bourseApi = {
   shop: () => rpcLoose('bourse_shop'),
   shopBuy: (p_item: string) => rpcLoose('bourse_shop_buy', { p_item }),
   blackMarket: () => rpcLoose('black_market'),
+  bmReveal: (p_slot: number) => rpcLoose('black_market_reveal', { p_slot }),
   bmBuy: (p_item: string) => rpcLoose('black_market_buy', { p_item }),
   events: () => rpcLoose('admin_events'),
   setEvent: (p_event: string, p_mode: string) => rpcLoose('admin_set_event', { p_event, p_mode }),

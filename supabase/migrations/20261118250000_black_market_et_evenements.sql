@@ -1,3 +1,6 @@
 -- Appliquée via MCP (black_market_et_evenements). Black Market : samedi et dimanche (ou forcé par l'admin), 24 objets par
 -- semaine payés avec les bénéfices en Market Coins, -40 %, dont 3 affaires à -75 %. Fonctions black_market, black_market_buy,
 -- _bm_items, table bourse_bm_buys. Événements pilotés par admin_events et admin_set_event (auto, on, off) dans site_settings.
+-- Puis black_market_cases_et_prix_cosmetiques : même format que shop_today (24 cases à révéler, une vedette par rayon,
+-- 6 affaires à -75 %), black_market_reveal donne 1 Market Coin compté comme la paie, table bourse_bm_reveals.
+-- _koo_price(prix, type) : les cosmétiques coûtent 4 fois plus cher en Market Coins.

@@ -24,7 +24,7 @@ import { useSwing, useSwingAll } from '@/ui/useSwing';
 import { useStaggerIn } from '@/ui/useStaggerIn';
 import { CosmeticPreview, cosmRar, isCosmetic, isSecret, rarCol, rarKey } from '@/ui/Cosmetics';
 import { NeedLogin } from '@/app/NeedLogin';
-import { burstPixels, flyCoins, revealTier, screenFlash, shockwave } from '@/ui/fx';
+import { burstPixels, flyCoins, flyIcons, revealTier, screenFlash, shockwave } from '@/ui/fx';
 import { useNow } from '../eco/eco';
 import { openInfo } from '../info/store';
 import s from './Shop.module.css';
@@ -32,9 +32,15 @@ import { AutoHeight, Bump } from '@/ui/motion';
 import { Fade, Roll } from '@/ui/Roll';
 import { Segmented } from '@/ui/Segmented';
 import { Swap } from '@/ui/Swap';
-import { BlackMarket, type BmData } from './BlackMarket';
 
-type Item = ShopItem & { price: number; base_price: number | null; stock: number; bought: number; owned: boolean };
+type Item = ShopItem & {
+  deal?: boolean;
+  price: number;
+  base_price: number | null;
+  stock: number;
+  bought: number;
+  owned: boolean;
+};
 // une case mystère (pas encore révélée) : le serveur ne dit que son rayon
 type Hidden = { slot: number; hidden: true; group: string };
 type Slot = (Item & { slot?: number; hidden?: false }) | Hidden;
@@ -48,6 +54,7 @@ type ShopData = {
   feats?: { group: string; slot: number; off: number; item: string | null }[];
   reveal_gain?: number;
 };
+type BmData = ShopData & { open: boolean; locked?: boolean; have?: number; need?: number; ends_in?: number };
 const isHidden = (x: Slot): x is Hidden => !!(x as Hidden).hidden;
 const slotOf = (x: Slot, i: number) => x.slot ?? i + 1;
 // rayons de la boutique (l'icône est un objet du rayon)
@@ -70,11 +77,17 @@ const glowOf = (it: Item) => itemGlow(it);
 const hexOf = rgbHex;
 type KooWallet = { spendable: number; koo: number; reserved: number; locked?: boolean; have?: number; need?: number };
 // même règle que le serveur : les prix en Koo sont bien plus bas que les prix en pièces
-const kooPrice = (p: number) => Math.max(5, Math.ceil(Math.sqrt(p) / 5) * 5);
-const Pay = createContext({ koo: false, spend: 0 });
+const kooPrice = (p: number, kind: string) =>
+  Math.max(5, Math.ceil((Math.sqrt(p) * (kind === 'banner' || kind === 'avatar' || isCosmetic(kind) ? 4 : 1)) / 5) * 5);
+const Pay = createContext({ koo: false, black: false, spend: 0 });
 const KooIcon = ({ size = 14 }: { size?: number }) => (
   <img className="px" src="/img/koo.png" alt="" width={size} height={size} />
 );
+// la pièce gagnée en ouvrant une case : pièce du jeu, ou Market Coin au Black Market
+const RevealCoin = ({ size }: { size: number }) => {
+  const { black } = useContext(Pay);
+  return black ? <KooIcon size={size} /> : <Coin size={size} />;
+};
 const Coin = ({ size = 14 }: { size?: number }) => (
   <img className="px" src="/img/piece.png" alt="" width={size} height={size} />
 );
@@ -109,6 +122,12 @@ export default function Shop() {
   const bmOpen = !!bm.data?.open;
   const inBlack = money === 'black' && bmOpen; // fermé pendant qu'on regarde : retour à la boutique
   const inKoo = money === 'koo';
+  const shopKey = inBlack ? ['black-market', user?.id] : ['shop'];
+  const modeRef = useRef(money);
+  const pickMoney = (m: typeof money) => {
+    modeRef.current = m;
+    setMoney(m);
+  };
   const spend = wallet.data?.spendable ?? 0;
   const pageRef = useRef<HTMLElement>(null);
   const revealing = useRef(new Set<number>());
@@ -123,7 +142,9 @@ export default function Shop() {
     gridRef,
     `.${s.box}`,
     0.35,
-    String(money === 'black') + cat + (shop.data?.items.map((x) => (isHidden(x) ? 'h' : 'r')).join('') ?? ''),
+    String(inBlack) +
+      cat +
+      ((inBlack ? bm.data?.items : shop.data?.items)?.map((x) => (isHidden(x) ? 'h' : 'r')).join('') ?? ''),
   );
   // changer de rayon : les cases du nouveau rayon apparaissent en fondu, l'une après l'autre (comme à l'arrivée)
   const switched = useRef(false);
@@ -189,16 +210,20 @@ export default function Shop() {
     catRef.current = k;
     setCat(k);
   };
-  useSwingAll(shelvesRef, `.${s.shelf}`, 0.5, money === 'black');
+  useSwingAll(shelvesRef, `.${s.shelf}`, 0.5, inBlack);
   const coins = me.data?.coins ?? 0;
   if (shop.isError) return <p className="muted">{t('ui.err_generic')}</p>;
-  const data = shop.data;
-  const left = data ? Math.max(0, data.reset_in - Math.round((now - data.at) / 1000)) : 0;
-  if (data && left === 0 && !shop.isFetching) void shop.refetch();
+  const shopData = shop.data;
+  const shopLeft = shopData ? Math.max(0, shopData.reset_in - Math.round((now - shopData.at) / 1000)) : 0;
+  if (shopData && shopLeft === 0 && !shop.isFetching) void shop.refetch();
+  const bmLeft = Math.max(0, (bm.data?.ends_in ?? 0) - Math.floor((now - bm.dataUpdatedAt) / 1000));
+  const left = inBlack ? bmLeft : shopLeft;
+  // Black Market : la même page, avec ses propres cases
+  const data = inBlack ? (bm.data as (BmData & { at: number }) | undefined) : shopData;
 
   const buy = async (it: Item, card: HTMLElement) => {
     if (!data) return;
-    const short = inKoo ? spend < kooPrice(it.price) : coins < it.price;
+    const short = inBlack ? spend < it.price : inKoo ? spend < kooPrice(it.price, it.kind) : coins < it.price;
     if (short) {
       sfx.deny();
       card.animate(
@@ -210,11 +235,18 @@ export default function Shop() {
         ],
         { duration: 260 },
       );
-      return toast(t(inKoo ? (wallet.data?.locked ? 'ui.bs_err_locked' : 'ui.bs_err_koo') : 'ui.err_coins'), true);
+      return toast(
+        t(inKoo || inBlack ? (wallet.data?.locked ? 'ui.bs_err_locked' : 'ui.bs_err_koo') : 'ui.err_coins'),
+        true,
+      );
     }
     try {
-      const st = inKoo ? ((await bourseApi.shopBuy(it.id)) as { state: object }).state : await shopApi.buy(it.id);
-      if (inKoo) {
+      const st = inBlack
+        ? (await bourseApi.bmBuy(it.id), {})
+        : inKoo
+          ? ((await bourseApi.shopBuy(it.id)) as { state: object }).state
+          : await shopApi.buy(it.id);
+      if (inKoo || inBlack) {
         void wallet.refetch();
         void qc.invalidateQueries({ queryKey: ['bourse'] });
       }
@@ -238,7 +270,7 @@ export default function Shop() {
         );
       }
       qc.setQueryData<ShopData>(
-        ['shop'],
+        shopKey,
         (old) =>
           old && {
             ...old,
@@ -274,6 +306,9 @@ export default function Shop() {
     const cover = el.querySelector<HTMLElement>(`.${s.cover}`);
     const fast = reducedFx();
     const cat0 = catRef.current;
+    const black0 = inBlack;
+    const mode0 = modeRef.current;
+    const key0 = shopKey;
     try {
       // 1) la charge démarre dès le clic : le cache gonfle à peine, blanchit petit à petit et frémit de plus en plus.
       // On ne connaît pas encore l'objet : elle part au rythme le plus lent, puis s'ajuste à sa rareté dès la réponse
@@ -312,7 +347,11 @@ export default function Shop() {
         );
       }
       const clickedAt = performance.now();
-      const r = (await shopApi.reveal(slot)) as { gain: number; state: object; shop: ShopData };
+      const r = (await (black0 ? bourseApi.bmReveal(slot) : shopApi.reveal(slot))) as {
+        gain: number;
+        state: object;
+        shop: ShopData;
+      };
       const it = r.shop.items.find((x) => slotOf(x, 0) === slot);
       const tier = it && !isHidden(it) ? revealTier(oddsOf(it)) : 0;
       const charge = fast ? 0 : ([150, 500, 1300, 3000, 4000, 5000][tier] ?? 150);
@@ -330,14 +369,20 @@ export default function Shop() {
       }
       const isHero = el.classList.contains(s.hero ?? '');
       // plusieurs cases peuvent s'ouvrir en même temps et finir dans le désordre : le solde ne recule jamais
-      const applyCoins = () =>
+      const applyCoins = () => {
+        if (black0) {
+          void wallet.refetch();
+          void qc.invalidateQueries({ queryKey: ['bourse'] });
+          return;
+        }
         qc.setQueryData(['me', user.id], (old: { coins?: number } | undefined) => {
           const next = r.state as { coins?: number };
           return { ...old, ...next, coins: Math.max(old?.coins ?? 0, next.coins ?? 0) };
         });
+      };
       // seule CETTE case change : la réponse du serveur est une photo de toute la boutique, parfois déjà dépassée
       setCharge(false);
-      qc.setQueryData<ShopData & { at: number }>(['shop'], (old) =>
+      qc.setQueryData<ShopData & { at: number }>(key0, (old) =>
         old
           ? {
               ...old,
@@ -348,7 +393,7 @@ export default function Shop() {
       );
       await new Promise((ok) => requestAnimationFrame(() => requestAnimationFrame(ok)));
       // changé de rayon pendant la charge : l'objet est révélé, les pièces arrivent, mais sans effets au mauvais endroit
-      if (catRef.current !== cat0) {
+      if (catRef.current !== cat0 || modeRef.current !== mode0) {
         cover?.getAnimations().forEach((a) => a.cancel());
         applyCoins();
         return;
@@ -423,7 +468,9 @@ export default function Shop() {
         }, 2500);
         setTimeout(
           () =>
-            flyCoins(rect, 3, () => {
+            (black0
+              ? (land: () => void) => flyIcons(rect, '/img/koo.png', 1, '[data-koo-target]', land)
+              : (land: () => void) => flyCoins(rect, 3, land))(() => {
               sfx.pop();
               if (landed) return;
               landed = true;
@@ -456,14 +503,13 @@ export default function Shop() {
   const list = items.filter((it, i) => catOf(it) === cat && slotOf(it, i) !== fSlot);
   const fIdx = fSlot == null ? -1 : items.findIndex((x, i) => slotOf(x, i) === fSlot);
   const featured = fIdx >= 0 ? items[fIdx] : undefined;
-  const bmLeft = Math.max(0, (bm.data?.ends_in ?? 0) - Math.floor((now - bm.dataUpdatedAt) / 1000));
   return (
-    <Pay.Provider value={{ koo: inKoo, spend }}>
+    <Pay.Provider value={{ koo: inKoo || inBlack, black: inBlack, spend }}>
       <section ref={pageRef} className={s.page} aria-busy={!data}>
         <header className={s.head} data-depth>
           <Segmented
             value={money === 'black' && !bmOpen ? 'coins' : money}
-            onChange={setMoney}
+            onChange={pickMoney}
             label={t('ui.shop_title')}
             options={[
               ['coins', t('ui.bs_coins')],
@@ -488,10 +534,13 @@ export default function Shop() {
           </Button>
         </header>
         <Swap k={inBlack ? 'black' : 'shop'}>
-          {inBlack && bm.data ? (
-            <BlackMarket data={bm.data} spend={spend} />
+          {inBlack && bm.data?.locked ? (
+            <div className={s.bmLocked}>
+              <KooIcon size={56} />
+              <p>{t('ui.bs_need', { n: bm.data.have ?? 0, m: bm.data.need ?? 10 })}</p>
+            </div>
           ) : data ? (
-            <div className={s.coinView}>
+            <div className={`${s.coinView} ${inBlack ? s.bm : ''}`}>
               <div className={s.top} data-depth>
                 <div ref={heroRef} className={s.heroSlot}>
                   {featured && fSlot != null ? (
@@ -557,7 +606,7 @@ export default function Shop() {
                   })}
                 </ul>
               </AutoHeight>
-              {user ? (
+              {inBlack ? null : user ? (
                 <Redeem items={items.filter((x): x is Item => !isHidden(x))} />
               ) : (
                 <p className="muted">{t('ui.acc_need')}</p>
@@ -615,7 +664,7 @@ function Buy({
   const name = itemText(it, lang)[0];
   const stockLeft = Math.max(0, it.stock - it.bought);
   const pay = useContext(Pay);
-  const shown = (v: number) => (pay.koo ? kooPrice(v) : v);
+  const shown = (v: number) => (pay.black ? v : pay.koo ? kooPrice(v, it.kind) : v);
   const price = shown(it.price);
   const can = pay.koo ? pay.spend >= price : coins >= it.price;
   const changed = it.base_price != null && it.price !== it.base_price,
@@ -723,7 +772,7 @@ function Card(p: CardProps & { slot: number }) {
   return (
     <li
       ref={ref}
-      className={`${s.card} ${out ? s.out : ''}`}
+      className={`${s.card} ${out ? s.out : ''} ${it.deal ? s.bmDeal : ''}`}
       data-key={slot}
       style={{ '--g': glowOf(it) } as CSSProperties}
     >
@@ -793,7 +842,7 @@ function Mystery({
       <button type="button" className={s.cover} disabled={!logged} onClick={() => ref.current && onReveal(ref.current)}>
         <span className="visually-hidden">{t('ui.shop_reveal')}</span>
         <span className={s.gainTag}>
-          +{gain} <Coin size={16} />
+          +{gain} <RevealCoin size={16} />
         </span>
       </button>
     </li>
@@ -824,7 +873,7 @@ function MysteryHero({
           {off > 0 ? <b className={s.off}>−{off}%</b> : null}
         </span>
         <span className={`${s.gainTag} ${s.gainBig}`}>
-          +{gain} <Coin size={18} />
+          +{gain} <RevealCoin size={18} />
         </span>
       </button>
     </div>

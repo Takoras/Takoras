@@ -677,7 +677,6 @@ export const en: Dict = {
     bs_reward: 'Top 3 reward',
     bs_bm: 'Black Market',
     bs_bm_ends: 'Closes in',
-    bs_bm_deals: 'Golden deals',
     bs_days: '{n} days left',
     bs_score: 'Score',
     bs_market: 'Market',

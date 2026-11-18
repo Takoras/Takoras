@@ -126,6 +126,7 @@ export async function fakeSupabase(
     koo: 1000,
     paid: 0,
     bmBought: 0,
+    bmSeen: false,
     assets: [
       {
         id: 1,
@@ -459,36 +460,43 @@ export async function fakeSupabase(
     }
     if (rpc === 'bourse_shop') return json({ spendable: 5000, koo: 6000, reserved: 1000 });
     if (rpc === 'bourse_shop_buy') return json({ spendable: 4900, state: {} });
-    if (rpc === 'black_market' || rpc === 'black_market_buy') {
+    if (rpc === 'black_market' || rpc === 'black_market_buy' || rpc === 'black_market_reveal') {
       if (rpc === 'black_market_buy') bs.bmBought = 1;
-      return json({
+      if (rpc === 'black_market_reveal') bs.bmSeen = true;
+      const deal = {
+        slot: 1,
+        id: 'potion1',
+        kind: 'potion',
+        data: { mult: 1.5, rolls: 15 },
+        price: 5,
+        base_price: 15,
+        deal: true,
+        stock: 1,
+        bought: bs.bmBought,
+        owned: false,
+      };
+      const shop = {
         open: true,
         ends_in: 3600,
+        reset_in: 3600,
+        reveal_gain: 1,
+        feats: [],
         items: [
+          bs.bmSeen ? deal : { slot: 1, hidden: true, group: 'potion' },
           {
-            id: 'potion1',
-            kind: 'potion',
-            data: { mult: 1.5, rolls: 15 },
-            base: 15,
-            koo: 5,
-            deal: true,
-            stock: 1,
-            bought: bs.bmBought,
-            owned: false,
-          },
-          {
+            slot: 2,
             id: 'potion2',
             kind: 'potion',
             data: { mult: 2, rolls: 12 },
-            base: 20,
-            koo: 15,
-            deal: false,
+            price: 15,
+            base_price: 20,
             stock: 5,
             bought: 0,
             owned: false,
           },
         ],
-      });
+      };
+      return json(rpc === 'black_market_reveal' ? { gain: 1, state: {}, shop } : shop);
     }
     if (rpc === 'admin_events' || rpc === 'admin_set_event')
       return json({ weekend: { mode: 'auto', on: false }, blackmarket: { mode: 'on', on: true } });

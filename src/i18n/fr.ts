@@ -679,7 +679,6 @@ export const fr = {
     bs_reward: 'Récompense du top 3',
     bs_bm: 'Black Market',
     bs_bm_ends: 'Ferme dans',
-    bs_bm_deals: 'Affaires en or',
     bs_days: '{n} j restants',
     bs_score: 'Score',
     bs_market: 'Marché',

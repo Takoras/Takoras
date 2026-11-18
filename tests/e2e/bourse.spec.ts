@@ -60,7 +60,7 @@ test('boutique en Koo : même page, prix et nom qui changent', async ({ page }) 
   expect(calls).not.toContain('buy_item');
 });
 
-test('Black Market : boutique à part avec ses affaires', async ({ page }) => {
+test('Black Market : même boutique, cases à ouvrir', async ({ page }) => {
   const { calls } = await fakeSupabase(page);
   await page.goto('/shop');
   await page
@@ -69,7 +69,9 @@ test('Black Market : boutique à part avec ses affaires', async ({ page }) => {
     .or(page.getByRole('button', { name: 'Black Market', exact: true }))
     .first()
     .click();
-  await expect(page.getByRole('heading', { name: 'Affaires en or' })).toBeVisible();
+  await expect(page.getByRole('heading', { level: 1, name: 'Black Market' })).toBeVisible();
+  await page.locator('[data-key="1"] button[class*="cover"]').click();
+  await expect.poll(() => calls).toContain('black_market_reveal');
   await page.getByRole('button', { name: /^Acheter · Potion de chance ×1,5/ }).click();
   await expect.poll(() => calls).toContain('black_market_buy');
 });
