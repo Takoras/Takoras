@@ -125,7 +125,6 @@ export async function fakeSupabase(
   const bs = {
     koo: 1000,
     paid: 0,
-    koShop: false,
     assets: [
       {
         id: 1,
@@ -443,15 +442,8 @@ export async function fakeSupabase(
       bs.paid = 25;
       return json(bourse());
     }
-    if (rpc === 'bourse_shop' || rpc === 'bourse_shop_buy') {
-      if (rpc === 'bourse_shop_buy') bs.koShop = true;
-      return json({
-        spendable: bs.koShop ? 35 : 50,
-        items: [
-          { id: 'potion1', kind: 'potion', data: { mult: 1.5, rolls: 15 }, koo: 15, bought: bs.koShop, owned: false },
-        ],
-      });
-    }
+    if (rpc === 'bourse_shop') return json({ spendable: 5000, koo: 6000, reserved: 1000 });
+    if (rpc === 'bourse_shop_buy') return json({ spendable: 4900, state: {} });
     if (rpc === 'bourse_board')
       return json(
         ['Kaz', 'Mira', 'Lumi', 'Testeur'].map((pseudo, i) => ({

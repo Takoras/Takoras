@@ -1,6 +1,14 @@
-import { useLayoutEffect, useRef, useState, type CSSProperties, type FormEvent } from 'react';
+import {
+  createContext,
+  useContext,
+  useLayoutEffect,
+  useRef,
+  useState,
+  type CSSProperties,
+  type FormEvent,
+} from 'react';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
-import { errorText, publicApi, shopApi } from '@/api';
+import { bourseApi, errorText, publicApi, shopApi } from '@/api';
 import { useMe } from '@/api/queries';
 import { bannerName, hms, itemImg, itemText, type ShopItem, itemGlow, itemOdds, rgbHex } from '@/data/items';
 import { useAuth } from '@/lib/auth';
@@ -20,10 +28,9 @@ import { burstPixels, flyCoins, revealTier, screenFlash, shockwave } from '@/ui/
 import { useNow } from '../eco/eco';
 import { openInfo } from '../info/store';
 import s from './Shop.module.css';
-import { AutoHeight, Bump } from '@/ui/motion';
+import { AutoHeight, Bump, Presence } from '@/ui/motion';
+import { Fade, Roll } from '@/ui/Roll';
 import { Segmented } from '@/ui/Segmented';
-import { Swap } from '@/ui/Swap';
-import { KooShop } from './KooShop';
 
 type Item = ShopItem & { price: number; base_price: number | null; stock: number; bought: number; owned: boolean };
 // une case mystère (pas encore révélée) : le serveur ne dit que son rayon
@@ -59,6 +66,13 @@ const catOf = (it: Slot) =>
 const oddsOf = (it: Item) => itemOdds(it);
 const glowOf = (it: Item) => itemGlow(it);
 const hexOf = rgbHex;
+type KooWallet = { spendable: number; koo: number; reserved: number; locked?: boolean; have?: number; need?: number };
+// même règle que le serveur : les prix en Koo sont bien plus bas que les prix en pièces
+const kooPrice = (p: number) => Math.max(5, Math.ceil(Math.sqrt(p) / 5) * 5);
+const Pay = createContext({ koo: false, spend: 0 });
+const KooIcon = ({ size = 14 }: { size?: number }) => (
+  <img className="px" src="/img/koo.png" alt="" width={size} height={size} />
+);
 const Coin = ({ size = 14 }: { size?: number }) => (
   <img className="px" src="/img/piece.png" alt="" width={size} height={size} />
 );
@@ -79,6 +93,13 @@ export default function Shop() {
     queryKey: ['shop'],
     queryFn: async () => ({ ...((await publicApi.shopToday()) as unknown as ShopData), at: Date.now() }),
   });
+  const wallet = useQuery({
+    queryKey: ['bourse-shop', user?.id],
+    enabled: !!user,
+    queryFn: async () => (await bourseApi.shop()) as KooWallet,
+  });
+  const inKoo = money === 'koo';
+  const spend = wallet.data?.spendable ?? 0;
   const pageRef = useRef<HTMLElement>(null);
   const revealing = useRef(new Set<number>());
   // rayon affiché (lu par une révélation en cours : si on a changé de rayon entre-temps, ses effets ne se jouent pas ailleurs)
@@ -90,7 +111,7 @@ export default function Shop() {
     gridRef,
     `.${s.box}`,
     0.35,
-    money + cat + (shop.data?.items.map((x) => (isHidden(x) ? 'h' : 'r')).join('') ?? ''),
+    cat + (shop.data?.items.map((x) => (isHidden(x) ? 'h' : 'r')).join('') ?? ''),
   );
   // changer de rayon : les cases du nouveau rayon apparaissent en fondu, l'une après l'autre (comme à l'arrivée)
   const switched = useRef(false);
@@ -156,7 +177,7 @@ export default function Shop() {
     catRef.current = k;
     setCat(k);
   };
-  useSwingAll(shelvesRef, `.${s.shelf}`, 0.5, money);
+  useSwingAll(shelvesRef, `.${s.shelf}`, 0.5);
   const coins = me.data?.coins ?? 0;
   if (shop.isError) return <p className="muted">{t('ui.err_generic')}</p>;
   const data = shop.data;
@@ -165,7 +186,8 @@ export default function Shop() {
 
   const buy = async (it: Item, card: HTMLElement) => {
     if (!data) return;
-    if (coins < it.price) {
+    const short = inKoo ? spend < kooPrice(it.price) : coins < it.price;
+    if (short) {
       sfx.deny();
       card.animate(
         [
@@ -176,10 +198,14 @@ export default function Shop() {
         ],
         { duration: 260 },
       );
-      return toast(t('ui.err_coins'), true);
+      return toast(t(inKoo ? (wallet.data?.locked ? 'ui.bs_err_locked' : 'ui.bs_err_koo') : 'ui.err_coins'), true);
     }
     try {
-      const st = await shopApi.buy(it.id);
+      const st = inKoo ? ((await bourseApi.shopBuy(it.id)) as { state: object }).state : await shopApi.buy(it.id);
+      if (inKoo) {
+        void wallet.refetch();
+        void qc.invalidateQueries({ queryKey: ['bourse'] });
+      }
       qc.setQueryData(['me', user?.id], (old: object | undefined) => ({ ...old, ...(st as object) }));
       sfx.upgrade();
       // pas de notification : l'animation de la case et le solde qui baisse suffisent
@@ -389,29 +415,32 @@ export default function Shop() {
   const fIdx = fSlot == null ? -1 : items.findIndex((x, i) => slotOf(x, i) === fSlot);
   const featured = fIdx >= 0 ? items[fIdx] : undefined;
   return (
-    <section ref={pageRef} className={s.page} aria-busy={!data}>
-      <header className={s.head} data-depth>
-        <Segmented
-          value={money}
-          onChange={setMoney}
-          label={t('ui.shop_title')}
-          options={[
-            ['coins', t('ui.bs_coins')],
-            ['koo', t('ui.bs_koo')],
-          ]}
-        />
-        <h1>{t('ui.shop_title')}</h1>
-        <span className={s.restock}>
-          {t('ui.shop_reset')} <b>{hms(left)}</b>
-        </span>
-        <Button size="sm" variant="ghost" onClick={openInfo}>
-          {t('ui.odds_info')}
-        </Button>
-      </header>
-      <Swap k={money}>
-        {money === 'koo' ? (
-          <KooShop />
-        ) : data ? (
+    <Pay.Provider value={{ koo: inKoo, spend }}>
+      <section ref={pageRef} className={s.page} aria-busy={!data}>
+        <header className={s.head} data-depth>
+          <Segmented
+            value={money}
+            onChange={setMoney}
+            label={t('ui.shop_title')}
+            options={[
+              ['coins', t('ui.bs_coins')],
+              ['koo', t('ui.bs_koo')],
+            ]}
+          />
+          <h1>
+            <Fade text={t(inKoo ? 'ui.shop_title_koo' : 'ui.shop_title')} />
+          </h1>
+          <span className={s.restock}>
+            {t('ui.shop_reset')} <b>{hms(left)}</b>
+          </span>
+          <Button size="sm" variant="ghost" onClick={openInfo}>
+            {t('ui.odds_info')}
+          </Button>
+          <Presence show={inKoo}>
+            <Wallet w={wallet.data} />
+          </Presence>
+        </header>
+        {data ? (
           <div className={s.coinView}>
             <div className={s.top} data-depth>
               <div ref={heroRef} className={s.heroSlot}>
@@ -476,11 +505,42 @@ export default function Shop() {
               <p className="muted">{t('ui.acc_need')}</p>
             )}
           </div>
+        ) : null}
+      </section>
+    </Pay.Provider>
+  );
+}
+
+// Le solde Koo en boutique : la partie bloquée (le capital et la paie) et, au-dessus, ce qu'on peut dépenser
+function Wallet({ w }: { w?: KooWallet }) {
+  const t = useT();
+  const lang = useSettings((x) => x.lang);
+  if (!w) return null;
+  const n = (v: number) => Math.floor(v).toLocaleString(locale(lang));
+  if (w.locked) return <span className={s.wallet}>{t('ui.bs_need', { n: w.have ?? 0, m: w.need ?? 10 })}</span>;
+  const scale = Math.max(w.koo, w.reserved) || 1;
+  return (
+    <div className={s.wallet}>
+      <div className={s.walletTop}>
+        <KooIcon size={18} />
+        {w.spendable > 0 ? (
+          <>
+            <b className={s.walletFree}>
+              <Roll text={n(w.spendable)} />
+            </b>
+            {t('ui.bs_spend')}
+          </>
         ) : (
-          <span />
+          t('ui.bs_more', { n: n(Math.ceil(w.reserved - w.koo) + 1) })
         )}
-      </Swap>
-    </section>
+        <small>{t('ui.bs_blocked', { n: n(w.reserved) })}</small>
+      </div>
+      <div className={s.walletBar} aria-hidden>
+        <i style={{ width: `${(Math.min(w.koo, w.reserved) / scale) * 100}%` }} />
+        <i className={s.walletGap} style={{ width: `${(Math.max(0, w.reserved - w.koo) / scale) * 100}%` }} />
+        <i className={s.walletGain} style={{ width: `${(w.spendable / scale) * 100}%` }} />
+      </div>
+    </div>
   );
 }
 
@@ -507,13 +567,18 @@ function Buy({
   const n = (v: number) => v.toLocaleString(locale(lang));
   const name = itemText(it, lang)[0];
   const stockLeft = Math.max(0, it.stock - it.bought);
+  const pay = useContext(Pay);
+  const shown = (v: number) => (pay.koo ? kooPrice(v) : v);
+  const price = shown(it.price);
+  const can = pay.koo ? pay.spend >= price : coins >= it.price;
   const changed = it.base_price != null && it.price !== it.base_price,
     pct = changed && it.base_price ? Math.round((it.price / it.base_price - 1) * 100) : 0;
+  const Money = pay.koo ? KooIcon : Coin;
   return (
     <div className={s.buy}>
       <b className={s.price}>
-        {changed && it.base_price ? <s>{n(it.base_price)}</s> : null}
-        {n(it.price)} <Coin size={big ? 18 : 14} />
+        {changed && it.base_price ? <s>{n(shown(it.base_price))}</s> : null}
+        <Roll text={n(price)} /> <Money key={String(pay.koo)} size={big ? 18 : 14} />
         {changed ? <span className={`${s.deal} ${pct > 0 ? s.up : ''}`}>{`${pct > 0 ? '+' : ''}${pct}%`}</span> : null}
       </b>
       {it.owned ? (
@@ -527,9 +592,9 @@ function Buy({
       ) : (
         <Button
           size={big ? 'md' : 'sm'}
-          variant={coins >= it.price ? 'primary' : 'ghost'}
+          variant={can ? 'primary' : 'ghost'}
           disabled={!logged}
-          aria-label={`${t('ui.buy')} · ${name} · ${n(it.price)}`}
+          aria-label={`${t('ui.buy')} · ${name} · ${n(price)}`}
           onClick={() => {
             const c = card();
             if (c) onBuy(it, c);

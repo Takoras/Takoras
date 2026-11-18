@@ -531,35 +531,50 @@
   text-transform: uppercase;
 }
 
-/* ---------- choix de la monnaie ---------- */
-.coinView,
-.kooView {
+/* ---------- boutique en pièces ou en Koo : même page ---------- */
+.coinView {
   display: grid;
   gap: var(--s-8);
   min-width: 0;
 }
-.kooSpend {
-  display: inline-flex;
-  align-items: center;
-  justify-self: start;
-  gap: 8px;
-  margin: 0;
-  padding: 8px 14px;
+.wallet {
+  display: grid;
+  gap: 5px;
+  flex-basis: 100%;
+  max-width: 420px;
+  padding: 8px 12px;
   border-radius: 8px;
   background: var(--surface);
   color: var(--text-2);
+  font-size: var(--fs-sm);
 }
-.kooSpend b {
-  color: var(--text);
+.walletTop {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+.walletTop small {
+  margin-left: auto;
+  color: var(--muted);
+}
+.walletFree {
+  color: var(--ok);
   font-size: var(--fs-lg);
 }
-.kooLocked {
-  display: grid;
-  justify-items: center;
-  gap: var(--s-3);
-  padding: var(--s-8, 48px) 0;
-  text-align: center;
+.walletBar {
+  display: flex;
+  height: 7px;
+  overflow: hidden;
+  border-radius: 2px;
+  background: var(--surface-3);
 }
-.kooLocked p {
-  margin: 0;
+.walletBar i {
+  background: #6a6a7a;
+  transition: width 0.45s var(--ease-out);
+}
+.walletBar .walletGap {
+  background: none;
+}
+.walletBar .walletGain {
+  background: var(--ok);
 }

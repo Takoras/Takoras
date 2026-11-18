@@ -1,0 +1,3 @@
+-- Appliquée via MCP (boutique_meme_page_en_koo). La boutique Koo reprend les objets, stocks et révélations de la boutique
+-- en pièces : bourse_shop_buy suit les contrôles de buy_item, au prix _koo_price(_price_u). bourse_shop renvoie
+-- spendable, koo et reserved (1000 + paie). _koo_shop_ids est supprimée.

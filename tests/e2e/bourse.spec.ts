@@ -32,16 +32,22 @@ test('bourse verrouillée sous 10 jetons différents', async ({ page }) => {
   expect(calls).not.toContain('bourse_board');
 });
 
-test('boutique en Koo : choix de la monnaie et achat', async ({ page }) => {
+test('boutique en Koo : même page, prix et nom qui changent', async ({ page }) => {
   const { calls } = await fakeSupabase(page);
   await page.goto('/shop');
+  const buy = page.getByRole('button', { name: /^Acheter ·/ }).first();
+  await buy.waitFor();
+  const cards = await page.getByRole('button', { name: /^Acheter ·/ }).count();
   await page
     .getByRole('radio', { name: 'Koo' })
     .or(page.getByRole('tab', { name: 'Koo' }))
     .or(page.getByRole('button', { name: 'Koo', exact: true }))
     .first()
     .click();
-  await page.getByRole('button', { name: 'Acheter' }).click();
+  await expect(page.getByRole('heading', { level: 1, name: 'Boutique Koo' })).toBeVisible();
+  await expect(page.getByText('à dépenser')).toBeVisible();
+  await expect(page.getByRole('button', { name: /^Acheter ·/ })).toHaveCount(cards);
+  await buy.click();
   await expect.poll(() => calls).toContain('bourse_shop_buy');
-  await expect(page.getByRole('button', { name: 'Acheter' })).toBeDisabled();
+  expect(calls).not.toContain('buy_item');
 });
