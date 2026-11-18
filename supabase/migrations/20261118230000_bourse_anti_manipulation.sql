@@ -1,0 +1,4 @@
+-- Appliquée via MCP (bourse_anti_manipulation). bourse_assets.hype : la hausse ou baisse due aux tirages et reventes
+-- retombe de moitié toutes les 6 h. Tirage : +0,1 % (commun) à +30 % (très rare) selon la rareté. Chaque tirage retire
+-- 0,01 Koo, durablement, aux jetons qui ne sortent pas. Un joueur ne peut pas pousser un jeton commun qu'il détient,
+-- ni faire baisser un jeton par ses reventes, de plus de 1,5 % par jeton et par jour.
