@@ -7,10 +7,16 @@ test('boutique : catégories, stock, achat, prix modifié, code promo', async ({
   await expect(page.getByRole('heading', { level: 1 })).toBeVisible();
   await expect(page.getByText('+20%').first()).toBeVisible(); // potion ×10 plus chère que d'habitude
   // achat d'une potion ×1,3 (rayon Potions, ouvert par défaut)
-  await page.getByRole('button', { name: /Acheter · .* · 300$/ }).first().click();
+  await page
+    .getByRole('button', { name: /Acheter · .* · 300$/ })
+    .first()
+    .click();
   await expect(page.getByLabel('Solde')).toContainText('4 700');
   // la vedette est une case mystère : la révéler rapporte 100 pièces et montre l'objet (Potion ×2 à -40 %)
-  await page.getByRole('button', { name: /Révéler la case/ }).first().click();
+  await page
+    .getByRole('button', { name: /Révéler la case/ })
+    .first()
+    .click();
   await expect(page.getByLabel('Solde')).toContainText('4 800');
   await expect(page.getByRole('heading', { name: /Potion de chance ×2/ }).first()).toBeVisible();
   // rayon « Tirages » : le sablier est épuisé (2/2 achetés)
