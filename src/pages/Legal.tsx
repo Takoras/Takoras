@@ -15,7 +15,7 @@ const FR: Doc = {
       '1. Éditeur',
       pending
         ? [
-            'Le Service est édité par une entreprise individuelle (régime de la micro-entreprise) en cours d’immatriculation. Ses coordonnées complètes (nom, numéro SIRET, adresse, téléphone et adresse électronique) figureront sur cette page dès son immatriculation.',
+            'Le Service est édité par un particulier, à titre non professionnel. Aucune vente n’y est proposée. Si une activité commerciale est ouverte, les coordonnées complètes de l’éditeur figureront sur cette page.',
             'En attendant, l’éditeur peut être contacté au moyen du bouton « Donner un avis » présent sur chaque page du Service.',
           ]
         : [
@@ -60,7 +60,7 @@ const EN: Doc = {
       '1. Publisher',
       pending
         ? [
-            'The Service is published by a sole proprietorship (French micro-entreprise) currently being registered. Its full details (name, SIRET number, address, phone number and email address) will appear on this page once registered.',
+            'The Service is published by a private individual on a non-professional basis. Nothing is sold on it. If a commercial activity opens, the publisher’s full details will appear on this page.',
             'In the meantime, the publisher can be contacted using the “Feedback” button available on every page of the Service.',
           ]
         : [

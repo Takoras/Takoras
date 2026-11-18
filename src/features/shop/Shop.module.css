@@ -546,6 +546,12 @@
 .title > [aria-hidden] {
   visibility: hidden;
 }
+.title {
+  transition: color 0.25s;
+}
+.titleBlack {
+  color: #c9a6ff;
+}
 /* la place du solde Koo existe aussi en mode Pièces : la page ne bouge pas quand on change de monnaie */
 .walletSlot {
   flex: none;
@@ -596,4 +602,81 @@
   padding-left: 10px;
   border-left: 1px solid rgb(255 255 255 / 10%);
   font-size: inherit;
+}
+
+/* ---------- Black Market : une autre boutique, violette et plus sombre ---------- */
+.bm {
+  --bm: #a66bff;
+  display: grid;
+  gap: var(--s-6);
+  min-width: 0;
+  padding: var(--s-5);
+  border-radius: 14px;
+  background: #140c22;
+}
+.bm .box {
+  position: relative;
+  background: #21143a;
+}
+.bm .price s {
+  margin-right: 4px;
+  color: #8f7ab0;
+  font-weight: 500;
+}
+.bmHero {
+  position: relative;
+  display: grid;
+  gap: var(--s-4);
+  overflow: hidden;
+  padding: var(--s-5);
+  border-radius: 12px;
+  background: #1b0f31;
+}
+.bmBg {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  opacity: 0.45;
+}
+.bmHero > h2,
+.bmHero > ul {
+  position: relative;
+}
+.bmHero > h2 {
+  margin: 0;
+  color: #e3d2ff;
+  font-family: var(--font-display);
+  font-size: clamp(22px, 2.2vw, 30px);
+}
+.bmDeal .box {
+  outline: 2px solid var(--gold);
+  outline-offset: -2px;
+}
+.bmOff {
+  position: absolute;
+  top: 8px;
+  left: 8px;
+  z-index: 1;
+  padding: 2px 7px;
+  border-radius: 5px;
+  background: var(--bm);
+  color: #160a2a;
+  font-size: var(--fs-xs);
+  font-weight: 800;
+}
+.bmDeal .bmOff {
+  background: var(--gold);
+  color: #241a02;
+}
+:root .bmBuy {
+  background: #7b3df0;
+  color: #fff;
+}
+.bmLocked {
+  justify-items: center;
+  text-align: center;
+}
+.bmLocked p {
+  margin: 0;
 }

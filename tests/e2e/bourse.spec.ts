@@ -59,3 +59,17 @@ test('boutique en Koo : même page, prix et nom qui changent', async ({ page }) 
   await expect.poll(() => calls).toContain('bourse_shop_buy');
   expect(calls).not.toContain('buy_item');
 });
+
+test('Black Market : boutique à part avec ses affaires', async ({ page }) => {
+  const { calls } = await fakeSupabase(page);
+  await page.goto('/shop');
+  await page
+    .getByRole('radio', { name: 'Black Market' })
+    .or(page.getByRole('tab', { name: 'Black Market' }))
+    .or(page.getByRole('button', { name: 'Black Market', exact: true }))
+    .first()
+    .click();
+  await expect(page.getByRole('heading', { name: 'Affaires en or' })).toBeVisible();
+  await page.getByRole('button', { name: /^Acheter · Potion de chance ×1,5/ }).click();
+  await expect.poll(() => calls).toContain('black_market_buy');
+});

@@ -31,6 +31,8 @@ import s from './Shop.module.css';
 import { AutoHeight, Bump } from '@/ui/motion';
 import { Fade, Roll } from '@/ui/Roll';
 import { Segmented } from '@/ui/Segmented';
+import { Swap } from '@/ui/Swap';
+import { BlackMarket, type BmData } from './BlackMarket';
 
 type Item = ShopItem & { price: number; base_price: number | null; stock: number; bought: number; owned: boolean };
 // une case mystère (pas encore révélée) : le serveur ne dit que son rayon
@@ -88,7 +90,7 @@ export default function Shop() {
   const qc = useQueryClient();
   const now = useNow();
   const [cat, setCat] = useState('potion');
-  const [money, setMoney] = useState<'coins' | 'koo'>('coins');
+  const [money, setMoney] = useState<'coins' | 'koo' | 'black'>('coins');
   const shop = useQuery({
     queryKey: ['shop'],
     queryFn: async () => ({ ...((await publicApi.shopToday()) as unknown as ShopData), at: Date.now() }),
@@ -98,6 +100,14 @@ export default function Shop() {
     enabled: !!user,
     queryFn: async () => (await bourseApi.shop()) as KooWallet,
   });
+  const bm = useQuery({
+    queryKey: ['black-market', user?.id],
+    enabled: !!user,
+    queryFn: async () => (await bourseApi.blackMarket()) as BmData,
+    refetchInterval: 60_000,
+  });
+  const bmOpen = !!bm.data?.open;
+  const inBlack = money === 'black' && bmOpen; // fermé pendant qu'on regarde : retour à la boutique
   const inKoo = money === 'koo';
   const spend = wallet.data?.spendable ?? 0;
   const pageRef = useRef<HTMLElement>(null);
@@ -113,7 +123,7 @@ export default function Shop() {
     gridRef,
     `.${s.box}`,
     0.35,
-    cat + (shop.data?.items.map((x) => (isHidden(x) ? 'h' : 'r')).join('') ?? ''),
+    String(money === 'black') + cat + (shop.data?.items.map((x) => (isHidden(x) ? 'h' : 'r')).join('') ?? ''),
   );
   // changer de rayon : les cases du nouveau rayon apparaissent en fondu, l'une après l'autre (comme à l'arrivée)
   const switched = useRef(false);
@@ -179,7 +189,7 @@ export default function Shop() {
     catRef.current = k;
     setCat(k);
   };
-  useSwingAll(shelvesRef, `.${s.shelf}`, 0.5);
+  useSwingAll(shelvesRef, `.${s.shelf}`, 0.5, money === 'black');
   const coins = me.data?.coins ?? 0;
   if (shop.isError) return <p className="muted">{t('ui.err_generic')}</p>;
   const data = shop.data;
@@ -446,100 +456,117 @@ export default function Shop() {
   const list = items.filter((it, i) => catOf(it) === cat && slotOf(it, i) !== fSlot);
   const fIdx = fSlot == null ? -1 : items.findIndex((x, i) => slotOf(x, i) === fSlot);
   const featured = fIdx >= 0 ? items[fIdx] : undefined;
+  const bmLeft = Math.max(0, (bm.data?.ends_in ?? 0) - Math.floor((now - bm.dataUpdatedAt) / 1000));
   return (
     <Pay.Provider value={{ koo: inKoo, spend }}>
       <section ref={pageRef} className={s.page} aria-busy={!data}>
         <header className={s.head} data-depth>
           <Segmented
-            value={money}
+            value={money === 'black' && !bmOpen ? 'coins' : money}
             onChange={setMoney}
             label={t('ui.shop_title')}
             options={[
               ['coins', t('ui.bs_coins')],
               ['koo', t('ui.bs_koo')],
+              ...(bmOpen ? ([['black', t('ui.bs_bm')]] as const) : []),
             ]}
           />
-          <h1 className={s.title}>
+          <h1 className={`${s.title} ${inBlack ? s.titleBlack : ''}`}>
             {/* la place du titre le plus long est gardée : rien ne bouge à côté quand il change */}
             <span aria-hidden>{t('ui.shop_title_koo')}</span>
-            <Fade text={t(inKoo ? 'ui.shop_title_koo' : 'ui.shop_title')} />
+            <span aria-hidden>{t('ui.bs_bm')}</span>
+            <Fade text={t(inBlack ? 'ui.bs_bm' : inKoo ? 'ui.shop_title_koo' : 'ui.shop_title')} />
           </h1>
           <span className={s.restock}>
-            {t('ui.shop_reset')} <b>{hms(left)}</b>
+            <Fade text={t(inBlack ? 'ui.bs_bm_ends' : 'ui.shop_reset')} /> <b>{hms(inBlack ? bmLeft : left)}</b>
           </span>
-          <div className={`${s.walletSlot} ${inKoo ? s.walletOn : ''}`} aria-hidden={!inKoo}>
+          <div className={`${s.walletSlot} ${inKoo || inBlack ? s.walletOn : ''}`} aria-hidden={!inKoo && !inBlack}>
             <Wallet w={wallet.data} />
           </div>
           <Button size="sm" variant="ghost" onClick={openInfo}>
             {t('ui.odds_info')}
           </Button>
         </header>
-        {data ? (
-          <div className={s.coinView}>
-            <div className={s.top} data-depth>
-              <div ref={heroRef} className={s.heroSlot}>
-                {featured && fSlot != null ? (
-                  isHidden(featured) ? (
-                    <MysteryHero
-                      off={fOff}
-                      gain={data.reveal_gain ?? 100}
-                      logged={!!user}
-                      onReveal={(el) => void reveal(fSlot, el)}
-                    />
-                  ) : (
-                    <Hero key={fSlot} it={featured} off={fOff} coins={coins} logged={!!user} left={left} onBuy={buy} />
-                  )
-                ) : null}
-                <div ref={ghostRef} className={s.heroGhost} aria-hidden />
+        <Swap k={inBlack ? 'black' : 'shop'}>
+          {inBlack && bm.data ? (
+            <BlackMarket data={bm.data} spend={spend} />
+          ) : data ? (
+            <div className={s.coinView}>
+              <div className={s.top} data-depth>
+                <div ref={heroRef} className={s.heroSlot}>
+                  {featured && fSlot != null ? (
+                    isHidden(featured) ? (
+                      <MysteryHero
+                        off={fOff}
+                        gain={data.reveal_gain ?? 100}
+                        logged={!!user}
+                        onReveal={(el) => void reveal(fSlot, el)}
+                      />
+                    ) : (
+                      <Hero
+                        key={fSlot}
+                        it={featured}
+                        off={fOff}
+                        coins={coins}
+                        logged={!!user}
+                        left={left}
+                        onBuy={buy}
+                      />
+                    )
+                  ) : null}
+                  <div ref={ghostRef} className={s.heroGhost} aria-hidden />
+                </div>
+                <div ref={shelvesRef} className={s.shelves} role="group" aria-label={t('ui.shop_title')}>
+                  {CATS.map((c) => {
+                    // les rayons restent toujours accessibles, même vides aujourd'hui
+                    const inCat = items.filter((it) => catOf(it) === c.k);
+                    return (
+                      <button
+                        key={c.k}
+                        type="button"
+                        className={s.shelf}
+                        aria-pressed={cat === c.k}
+                        onClick={() => pick(c.k)}
+                      >
+                        <img className="px" src={c.icon} alt="" />
+                        <span>
+                          <b>{t(c.label)}</b>
+                          <small>{t('ui.shop_n', { n: inCat.length })}</small>
+                        </span>
+                      </button>
+                    );
+                  })}
+                </div>
               </div>
-              <div ref={shelvesRef} className={s.shelves} role="group" aria-label={t('ui.shop_title')}>
-                {CATS.map((c) => {
-                  // les rayons restent toujours accessibles, même vides aujourd'hui
-                  const inCat = items.filter((it) => catOf(it) === c.k);
-                  return (
-                    <button
-                      key={c.k}
-                      type="button"
-                      className={s.shelf}
-                      aria-pressed={cat === c.k}
-                      onClick={() => pick(c.k)}
-                    >
-                      <img className="px" src={c.icon} alt="" />
-                      <span>
-                        <b>{t(c.label)}</b>
-                        <small>{t('ui.shop_n', { n: inCat.length })}</small>
-                      </span>
-                    </button>
-                  );
-                })}
-              </div>
+              <h2 className="visually-hidden">{t(CATS.find((c) => c.k === cat)?.label ?? 'ui.cat_potions')}</h2>
+              <AutoHeight k={cat}>
+                <ul ref={gridRef} className={s.grid} data-depth>
+                  {list.map((it) => {
+                    const slot = slotOf(it, items.indexOf(it));
+                    return isHidden(it) ? (
+                      <Mystery
+                        key={slot}
+                        slot={slot}
+                        gain={data.reveal_gain ?? 100}
+                        logged={!!user}
+                        onReveal={(el) => void reveal(slot, el)}
+                      />
+                    ) : (
+                      <Card key={slot} slot={slot} it={it} coins={coins} logged={!!user} left={left} onBuy={buy} />
+                    );
+                  })}
+                </ul>
+              </AutoHeight>
+              {user ? (
+                <Redeem items={items.filter((x): x is Item => !isHidden(x))} />
+              ) : (
+                <p className="muted">{t('ui.acc_need')}</p>
+              )}
             </div>
-            <h2 className="visually-hidden">{t(CATS.find((c) => c.k === cat)?.label ?? 'ui.cat_potions')}</h2>
-            <AutoHeight k={cat}>
-              <ul ref={gridRef} className={s.grid} data-depth>
-                {list.map((it) => {
-                  const slot = slotOf(it, items.indexOf(it));
-                  return isHidden(it) ? (
-                    <Mystery
-                      key={slot}
-                      slot={slot}
-                      gain={data.reveal_gain ?? 100}
-                      logged={!!user}
-                      onReveal={(el) => void reveal(slot, el)}
-                    />
-                  ) : (
-                    <Card key={slot} slot={slot} it={it} coins={coins} logged={!!user} left={left} onBuy={buy} />
-                  );
-                })}
-              </ul>
-            </AutoHeight>
-            {user ? (
-              <Redeem items={items.filter((x): x is Item => !isHidden(x))} />
-            ) : (
-              <p className="muted">{t('ui.acc_need')}</p>
-            )}
-          </div>
-        ) : null}
+          ) : (
+            <span />
+          )}
+        </Swap>
       </section>
     </Pay.Provider>
   );

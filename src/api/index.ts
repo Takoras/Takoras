@@ -131,6 +131,10 @@ export const bourseApi = {
   claimPay: () => rpcLoose('bourse_claim_pay'),
   shop: () => rpcLoose('bourse_shop'),
   shopBuy: (p_item: string) => rpcLoose('bourse_shop_buy', { p_item }),
+  blackMarket: () => rpcLoose('black_market'),
+  bmBuy: (p_item: string) => rpcLoose('black_market_buy', { p_item }),
+  events: () => rpcLoose('admin_events'),
+  setEvent: (p_event: string, p_mode: string) => rpcLoose('admin_set_event', { p_event, p_mode }),
 };
 
 // Succès (fonctions serveur : my_achievements, claim_achievement, achievements_of)
