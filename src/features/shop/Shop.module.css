@@ -494,10 +494,10 @@
   inset: -6px;
   z-index: 3;
   border-radius: 18px;
-  background: #fff;
+  background: var(--fc, #fff);
   pointer-events: none;
-  /* une petite lueur blanche au moment où ça « explose » (filtre : les ombres sont coupées sur le site) */
-  filter: drop-shadow(0 0 14px rgb(255 255 255 / 70%));
+  /* une lueur de la couleur de la rareté au moment où ça « explose » (filtre : les ombres sont coupées sur le site) */
+  filter: drop-shadow(0 0 14px var(--fc, #fff));
 }
 .gainTag {
   display: inline-flex;

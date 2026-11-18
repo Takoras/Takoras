@@ -16,7 +16,7 @@ import { useSwing, useSwingAll } from '@/ui/useSwing';
 import { useStaggerIn } from '@/ui/useStaggerIn';
 import { CosmeticPreview, cosmRar, isCosmetic, isSecret, rarCol, rarKey } from '@/ui/Cosmetics';
 import { NeedLogin } from '@/app/NeedLogin';
-import { flyCoins, shockwave } from '@/ui/fx';
+import { burstPixels, flyCoins, revealTier, screenFlash, shockwave } from '@/ui/fx';
 import { useNow } from '../eco/eco';
 import { openInfo } from '../info/store';
 import s from './Shop.module.css';
@@ -270,16 +270,24 @@ export default function Shop() {
       const it = r.shop.items.find((x) => slotOf(x, 0) === slot);
       const col = it && !isHidden(it) ? `rgb(${glowOf(it)})` : 'rgb(142 170 255)';
       sfx.reveal(it && !isHidden(it) ? oddsOf(it) : 1);
-      // 2) l'éclat : flash blanc qui s'efface, deux ondes de choc (blanche puis couleur de la rareté)
+      // 2) l'éclat, à la couleur de la rareté : plus l'objet est rare, plus il dure et plus ça explose
+      const tier = it && !isHidden(it) ? revealTier(oddsOf(it)) : 0;
       const flash = document.createElement('div');
       flash.className = s.flash ?? '';
+      flash.style.setProperty('--fc', col);
       el.appendChild(flash);
       flash
-        .animate([{ opacity: 1 }, { opacity: 0 }], {
-          duration: fast ? 120 : 550,
-          easing: 'cubic-bezier(.3,0,.2,1)',
-          fill: 'forwards',
-        })
+        .animate(
+          // à partir de légendaire, l'éclat revient une fois avant de s'éteindre
+          tier >= 3 && !fast
+            ? [{ opacity: 1 }, { opacity: 0.35, offset: 0.35 }, { opacity: 0.9, offset: 0.5 }, { opacity: 0 }]
+            : [{ opacity: 1 }, { opacity: 0 }],
+          {
+            duration: fast ? 120 : 550 + tier * 350,
+            easing: 'cubic-bezier(.3,0,.2,1)',
+            fill: 'forwards',
+          },
+        )
         .finished.then(
           () => flash.remove(),
           () => flash.remove(),
@@ -288,21 +296,31 @@ export default function Shop() {
       const rect = box.getBoundingClientRect();
       if (!fast) {
         const rad = isHero ? 16 : 14;
-        shockwave(rect, 'rgb(255 255 255)', rad, 0, isHero ? 34 : 26);
-        shockwave(rect, col, rad, 110, isHero ? 60 : 44);
+        const reach = isHero ? 60 : 44;
+        shockwave(rect, col, rad, 0, isHero ? 34 : 26);
+        // une onde de plus par niveau de rareté, chacune plus loin que la précédente
+        for (let w = 0; w <= tier; w++) shockwave(rect, col, rad, 110 + w * 130, reach * (1 + w * 0.55));
+        burstPixels(rect, [col, col, '#fff'], 12 + tier * 14, 70 + tier * 45, 650 + tier * 170);
+        if (tier >= 2) screenFlash(col, 0.1 + (tier - 2) * 0.05, 350 + tier * 120);
+        // à partir de légendaire, toute la page encaisse le choc
+        if (tier >= 3)
+          pageRef.current?.animate(
+            [0, 6, -5, 4, -3, 2, 0].map((d, i) => ({ transform: `translate(${d}px, ${i % 2 ? -d / 2 : d / 2}px)` })),
+            { duration: 380 + (tier - 3) * 120, easing: 'ease-out' },
+          );
         // 3) l'objet sort de la lumière : flou et surexposé, il devient net en se posant (sans rebond)
         el.animate(
           [
-            { scale: '1.05', filter: 'blur(8px) brightness(2.6) saturate(.4)' },
+            { scale: String(1.05 + tier * 0.03), filter: 'blur(8px) brightness(2.6) saturate(.4)' },
             { scale: '1', filter: 'blur(0) brightness(1) saturate(1)' },
           ],
-          { duration: 700, easing: 'cubic-bezier(.16,1,.3,1)' },
+          { duration: 700 + tier * 160, easing: 'cubic-bezier(.16,1,.3,1)' },
         );
         // sous le choc, la case se balance ~1 s (comme quand la souris la pousse), accrochée par le haut
-        const a = box === el ? 2.5 : 5;
+        const a = (box === el ? 2.5 : 5) * (1 + tier * 0.25);
         box.animate(
           [0, a, -a * 0.75, a * 0.5, -a * 0.3, a * 0.15, 0].map((d) => ({ rotate: `${d}deg` })),
-          { duration: 1000, easing: 'ease-out' },
+          { duration: 1000 + tier * 150, easing: 'ease-out' },
         );
         // 4) les pièces gagnées jaillissent et filent vers le solde ; le compteur monte quand la 1re arrive
         let landed = false;

@@ -43,6 +43,58 @@ export function shockwave(r: DOMRect, color: string, radius = 16, delay = 0, gro
     .finished.finally(() => svg.remove());
 }
 
+// Niveau d'une révélation selon la rareté (échelle « 1 sur X » des objets) : 0 commun → 5 « ??? »
+export const revealTier = (odds: number) =>
+  odds >= 1e8 ? 5 : odds >= 1e7 ? 4 : odds >= 1e6 ? 3 : odds >= 5e4 ? 2 : odds >= 1000 ? 1 : 0;
+
+// Explosion de carrés pixel depuis une case : ils partent dans tous les sens, ralentissent et s'éteignent.
+export function burstPixels(r: DOMRect, colors: string[], n: number, dist: number, ms: number) {
+  const cx = r.left + r.width / 2,
+    cy = r.top + r.height / 2;
+  for (let i = 0; i < n; i++) {
+    const d = document.createElement('i');
+    const size = 4 + Math.floor(Math.random() * 3) * 2;
+    Object.assign(d.style, {
+      position: 'fixed',
+      left: `${cx - size / 2}px`,
+      top: `${cy - size / 2}px`,
+      width: `${size}px`,
+      height: `${size}px`,
+      background: colors[i % colors.length] ?? '#fff',
+      pointerEvents: 'none',
+      zIndex: '60',
+    });
+    d.dataset.burst = '';
+    document.body.appendChild(d);
+    const a = (i / n) * Math.PI * 2 + Math.random() * 0.5;
+    // ils partent du bord de la case, pas de son centre
+    const x0 = Math.cos(a) * r.width * 0.4,
+      y0 = Math.sin(a) * r.height * 0.4;
+    const far = dist * (0.55 + Math.random() * 0.45);
+    d.animate(
+      [
+        { transform: `translate(${x0}px, ${y0}px) rotate(0deg)`, opacity: 1 },
+        { opacity: 1, offset: 0.65 },
+        {
+          transform: `translate(${x0 + Math.cos(a) * far}px, ${y0 + Math.sin(a) * far + 18}px) rotate(${Math.round(Math.random() * 180)}deg) scale(.4)`,
+          opacity: 0,
+        },
+      ],
+      { duration: ms * (0.75 + Math.random() * 0.25), easing: 'cubic-bezier(.12,.8,.25,1)', fill: 'both' },
+    ).finished.finally(() => d.remove());
+  }
+}
+
+// Voile de couleur sur tout l'écran, très bref (grosses révélations)
+export function screenFlash(color: string, power: number, ms: number) {
+  const d = document.createElement('div');
+  Object.assign(d.style, { position: 'fixed', inset: '0', background: color, pointerEvents: 'none', zIndex: '59' });
+  document.body.appendChild(d);
+  d.animate([{ opacity: power }, { opacity: 0 }], { duration: ms, easing: 'ease-out', fill: 'both' }).finished.finally(() =>
+    d.remove(),
+  );
+}
+
 // Pièces qui jaillissent de la case et s'envolent vers le solde (en haut à droite), en ralentissant à l'arrivée.
 export function flyCoins(from: DOMRect, n: number, onLand: (i: number) => void) {
   flyIcons(from, '/img/piece.png', n, '[data-coin-target]', onLand);
