@@ -565,7 +565,7 @@
 }
 .meStats {
   display: grid;
-  grid-template-columns: repeat(3, 1fr);
+  grid-template-columns: repeat(2, 1fr);
   gap: var(--s-2);
   width: 100%;
   margin: 0;
@@ -626,7 +626,7 @@
 }
 .list li {
   display: grid;
-  grid-template-columns: 30px minmax(90px, 1fr) 34px 56px 48px 72px;
+  grid-template-columns: 30px minmax(90px, 1fr) 34px 56px 72px;
   align-items: center;
   gap: var(--s-2);
   padding: 6px 10px;
@@ -706,8 +706,7 @@
   .list li {
     grid-template-columns: 24px minmax(0, 1fr) 50px 66px;
   }
-  .list li > :nth-child(3),
-  .list li > :nth-child(5) {
+  .list li > :nth-child(3) {
     display: none;
   }
 }

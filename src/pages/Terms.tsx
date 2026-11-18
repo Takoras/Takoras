@@ -96,7 +96,7 @@ const FR: Doc = {
     [
       '14. Bourse de saison',
       [
-        'La Bourse est un jeu de simulation entièrement fictif, organisé par saisons mensuelles sur une série de jetons tirée au sort. Les Koo et les actions n’existent que dans le jeu : ils n’ont aucune valeur monétaire, ne peuvent être ni achetés, ni retirés, ni échangés contre de l’argent, ni transférés à un autre joueur, et sont remis à zéro à chaque saison.',
+        'La Bourse est un jeu de simulation entièrement fictif, organisé par saisons mensuelles sur une série de jetons tirée au sort. Les Koo et les actions n’existent que dans le jeu : ils n’ont aucune valeur monétaire, ne peuvent être ni achetés, ni retirés, ni échangés contre de l’argent, ni transférés à un autre joueur, et sont remis à zéro à chaque saison, comme l’Elo. Seuls les bénéfices en Koo peuvent être dépensés, uniquement contre des objets du jeu.',
         'Les prix dépendent uniquement de l’activité des joueurs sur le Service. Ils ne représentent aucun instrument financier, titre ou crypto-actif. La Bourse n’est ni un placement, ni un service financier, ni un conseil en investissement. L’Éditeur peut ajuster ses paramètres et annuler des résultats en cas d’erreur ou de triche.',
       ],
     ],
@@ -197,7 +197,7 @@ const EN: Doc = {
     [
       '14. Market',
       [
-        'The Market is an entirely fictional simulation game, run in monthly seasons on a randomly drawn token series. Koo and shares exist only in the game: they have no monetary value, cannot be bought, withdrawn, exchanged for money or transferred to another player, and are reset every season.',
+        'The Market is an entirely fictional simulation game, run in monthly seasons on a randomly drawn token series. Koo and shares exist only in the game: they have no monetary value, cannot be bought, withdrawn, exchanged for money or transferred to another player, and are reset every season, like Elo. Only Koo profits can be spent, and only on in-game items.',
         'Prices depend only on player activity on the Service. They do not represent any financial instrument, security or crypto-asset. The Market is not an investment, a financial service or investment advice. The Publisher may adjust its settings and cancel results in case of error or cheating.',
       ],
     ],

@@ -658,6 +658,8 @@ export const fr = {
     bs_err_unknown: 'Tu n’as pas encore ce jeton',
     bs_pulled: 'tire',
     bs_shop_sold: 'revend',
+    bs_coins: 'Pièces',
+    bs_spend: 'Bénéfices à dépenser',
     bs_days: '{n} j restants',
     bs_score: 'Score',
     bs_market: 'Marché',

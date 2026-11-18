@@ -1,0 +1,3 @@
+-- Appliquée via MCP (bourse_saison_elo_et_boutique_koo). L'Elo vit pendant la saison (800 + 10 par % de score) et
+-- repart de la base à la suivante. Boutique Koo : bourse_shop, bourse_shop_buy, table bourse_shop_buys, 12 objets par
+-- jour, prix en Koo = racine du prix en pièces arrondie à 5. Seuls les bénéfices (koo - 1000 - paie) se dépensent.

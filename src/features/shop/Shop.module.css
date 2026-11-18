@@ -530,3 +530,36 @@
   letter-spacing: var(--tracking-caps);
   text-transform: uppercase;
 }
+
+/* ---------- choix de la monnaie ---------- */
+.coinView,
+.kooView {
+  display: grid;
+  gap: var(--s-8);
+  min-width: 0;
+}
+.kooSpend {
+  display: inline-flex;
+  align-items: center;
+  justify-self: start;
+  gap: 8px;
+  margin: 0;
+  padding: 8px 14px;
+  border-radius: 8px;
+  background: var(--surface);
+  color: var(--text-2);
+}
+.kooSpend b {
+  color: var(--text);
+  font-size: var(--fs-lg);
+}
+.kooLocked {
+  display: grid;
+  justify-items: center;
+  gap: var(--s-3);
+  padding: var(--s-8, 48px) 0;
+  text-align: center;
+}
+.kooLocked p {
+  margin: 0;
+}

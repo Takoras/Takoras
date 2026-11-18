@@ -59,7 +59,7 @@ type State = {
   }[];
 };
 type Locked = { locked: true; have: number; need: number; season: State['season'] };
-type Row = { pseudo: string; rank: number; score: number; value: number; elo: number; delta: number; me: boolean };
+type Row = { pseudo: string; rank: number; score: number; value: number; elo: number; me: boolean };
 
 const FEE = 0.01;
 const MAX_ORDER = 0.1; // part de la réserve par ordre (le serveur vérifie aussi)
@@ -539,13 +539,11 @@ function Ranks({
   const rows = q.data ?? [];
   useFlip(root, rows.map((r) => r.pseudo).join());
   useSwingAll(root, `.${s.box}, .${s.pod}`, 0.05, rows.length);
-  const mine = rows.find((r) => r.me);
   const k = rankOf(me.elo);
   const name = (r: number) => `${t(TIERS[Math.floor(r / 3)] ?? 'ui.bs_t_bronze')} ${'I'.repeat((r % 3) + 1)}`;
   const floorElo = ELO_0 + k.r * ELO_STEP;
   const top = k.r === 17;
   const filled = top ? 10 : Math.max(0, Math.floor(((me.elo - floorElo) / ELO_STEP) * 10));
-  const delta = (v: number) => `${v >= 0 ? '+' : ''}${v}`;
   return (
     <div className={s.ranks} ref={root} data-depth>
       <aside className={`${s.box} ${s.meCard}`}>
@@ -590,10 +588,6 @@ function Ranks({
             <dt>{t('ui.bs_score')}</dt>
             <dd className={cl(me.score)}>{pct(me.score)}</dd>
           </div>
-          <div>
-            <dt>{t('ui.bs_end')}</dt>
-            <dd>{mine ? `${delta(mine.delta)} Elo` : '-'}</dd>
-          </div>
         </dl>
       </aside>
       <div className={s.boardCol}>
@@ -630,7 +624,6 @@ function Ranks({
               </Link>
               <RankBadge elo={r.elo} size={28} />
               <span>{n0(r.elo)}</span>
-              <small>{delta(r.delta)}</small>
               <b className={cl(r.score)}>{pct(r.score)}</b>
             </li>
           ))}

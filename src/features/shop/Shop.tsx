@@ -21,6 +21,9 @@ import { useNow } from '../eco/eco';
 import { openInfo } from '../info/store';
 import s from './Shop.module.css';
 import { AutoHeight, Bump } from '@/ui/motion';
+import { Segmented } from '@/ui/Segmented';
+import { Swap } from '@/ui/Swap';
+import { KooShop } from './KooShop';
 
 type Item = ShopItem & { price: number; base_price: number | null; stock: number; bought: number; owned: boolean };
 // une case mystère (pas encore révélée) : le serveur ne dit que son rayon
@@ -71,6 +74,7 @@ export default function Shop() {
   const qc = useQueryClient();
   const now = useNow();
   const [cat, setCat] = useState('potion');
+  const [money, setMoney] = useState<'coins' | 'koo'>('coins');
   const shop = useQuery({
     queryKey: ['shop'],
     queryFn: async () => ({ ...((await publicApi.shopToday()) as unknown as ShopData), at: Date.now() }),
@@ -86,7 +90,7 @@ export default function Shop() {
     gridRef,
     `.${s.box}`,
     0.35,
-    cat + (shop.data?.items.map((x) => (isHidden(x) ? 'h' : 'r')).join('') ?? ''),
+    money + cat + (shop.data?.items.map((x) => (isHidden(x) ? 'h' : 'r')).join('') ?? ''),
   );
   // changer de rayon : les cases du nouveau rayon apparaissent en fondu, l'une après l'autre (comme à l'arrivée)
   const switched = useRef(false);
@@ -152,7 +156,7 @@ export default function Shop() {
     catRef.current = k;
     setCat(k);
   };
-  useSwingAll(shelvesRef, `.${s.shelf}`, 0.5);
+  useSwingAll(shelvesRef, `.${s.shelf}`, 0.5, money);
   const coins = me.data?.coins ?? 0;
   if (shop.isError) return <p className="muted">{t('ui.err_generic')}</p>;
   const data = shop.data;
@@ -387,6 +391,15 @@ export default function Shop() {
   return (
     <section ref={pageRef} className={s.page} aria-busy={!data}>
       <header className={s.head} data-depth>
+        <Segmented
+          value={money}
+          onChange={setMoney}
+          label={t('ui.shop_title')}
+          options={[
+            ['coins', t('ui.bs_coins')],
+            ['koo', t('ui.bs_koo')],
+          ]}
+        />
         <h1>{t('ui.shop_title')}</h1>
         <span className={s.restock}>
           {t('ui.shop_reset')} <b>{hms(left)}</b>
@@ -395,72 +408,78 @@ export default function Shop() {
           {t('ui.odds_info')}
         </Button>
       </header>
-      {data ? (
-        <>
-          <div className={s.top} data-depth>
-            <div ref={heroRef} className={s.heroSlot}>
-              {featured && fSlot != null ? (
-                isHidden(featured) ? (
-                  <MysteryHero
-                    off={fOff}
-                    gain={data.reveal_gain ?? 100}
-                    logged={!!user}
-                    onReveal={(el) => void reveal(fSlot, el)}
-                  />
-                ) : (
-                  <Hero key={fSlot} it={featured} off={fOff} coins={coins} logged={!!user} left={left} onBuy={buy} />
-                )
-              ) : null}
-              <div ref={ghostRef} className={s.heroGhost} aria-hidden />
+      <Swap k={money}>
+        {money === 'koo' ? (
+          <KooShop />
+        ) : data ? (
+          <div className={s.coinView}>
+            <div className={s.top} data-depth>
+              <div ref={heroRef} className={s.heroSlot}>
+                {featured && fSlot != null ? (
+                  isHidden(featured) ? (
+                    <MysteryHero
+                      off={fOff}
+                      gain={data.reveal_gain ?? 100}
+                      logged={!!user}
+                      onReveal={(el) => void reveal(fSlot, el)}
+                    />
+                  ) : (
+                    <Hero key={fSlot} it={featured} off={fOff} coins={coins} logged={!!user} left={left} onBuy={buy} />
+                  )
+                ) : null}
+                <div ref={ghostRef} className={s.heroGhost} aria-hidden />
+              </div>
+              <div ref={shelvesRef} className={s.shelves} role="group" aria-label={t('ui.shop_title')}>
+                {CATS.map((c) => {
+                  // les rayons restent toujours accessibles, même vides aujourd'hui
+                  const inCat = items.filter((it) => catOf(it) === c.k);
+                  return (
+                    <button
+                      key={c.k}
+                      type="button"
+                      className={s.shelf}
+                      aria-pressed={cat === c.k}
+                      onClick={() => pick(c.k)}
+                    >
+                      <img className="px" src={c.icon} alt="" />
+                      <span>
+                        <b>{t(c.label)}</b>
+                        <small>{t('ui.shop_n', { n: inCat.length })}</small>
+                      </span>
+                    </button>
+                  );
+                })}
+              </div>
             </div>
-            <div ref={shelvesRef} className={s.shelves} role="group" aria-label={t('ui.shop_title')}>
-              {CATS.map((c) => {
-                // les rayons restent toujours accessibles, même vides aujourd'hui
-                const inCat = items.filter((it) => catOf(it) === c.k);
-                return (
-                  <button
-                    key={c.k}
-                    type="button"
-                    className={s.shelf}
-                    aria-pressed={cat === c.k}
-                    onClick={() => pick(c.k)}
-                  >
-                    <img className="px" src={c.icon} alt="" />
-                    <span>
-                      <b>{t(c.label)}</b>
-                      <small>{t('ui.shop_n', { n: inCat.length })}</small>
-                    </span>
-                  </button>
-                );
-              })}
-            </div>
+            <h2 className="visually-hidden">{t(CATS.find((c) => c.k === cat)?.label ?? 'ui.cat_potions')}</h2>
+            <AutoHeight k={cat}>
+              <ul ref={gridRef} className={s.grid} data-depth>
+                {list.map((it) => {
+                  const slot = slotOf(it, items.indexOf(it));
+                  return isHidden(it) ? (
+                    <Mystery
+                      key={slot}
+                      slot={slot}
+                      gain={data.reveal_gain ?? 100}
+                      logged={!!user}
+                      onReveal={(el) => void reveal(slot, el)}
+                    />
+                  ) : (
+                    <Card key={slot} slot={slot} it={it} coins={coins} logged={!!user} left={left} onBuy={buy} />
+                  );
+                })}
+              </ul>
+            </AutoHeight>
+            {user ? (
+              <Redeem items={items.filter((x): x is Item => !isHidden(x))} />
+            ) : (
+              <p className="muted">{t('ui.acc_need')}</p>
+            )}
           </div>
-          <h2 className="visually-hidden">{t(CATS.find((c) => c.k === cat)?.label ?? 'ui.cat_potions')}</h2>
-          <AutoHeight k={cat}>
-            <ul ref={gridRef} className={s.grid} data-depth>
-              {list.map((it) => {
-                const slot = slotOf(it, items.indexOf(it));
-                return isHidden(it) ? (
-                  <Mystery
-                    key={slot}
-                    slot={slot}
-                    gain={data.reveal_gain ?? 100}
-                    logged={!!user}
-                    onReveal={(el) => void reveal(slot, el)}
-                  />
-                ) : (
-                  <Card key={slot} slot={slot} it={it} coins={coins} logged={!!user} left={left} onBuy={buy} />
-                );
-              })}
-            </ul>
-          </AutoHeight>
-          {user ? (
-            <Redeem items={items.filter((x): x is Item => !isHidden(x))} />
-          ) : (
-            <p className="muted">{t('ui.acc_need')}</p>
-          )}
-        </>
-      ) : null}
+        ) : (
+          <span />
+        )}
+      </Swap>
     </section>
   );
 }

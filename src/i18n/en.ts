@@ -656,6 +656,8 @@ export const en: Dict = {
     bs_err_unknown: 'You don’t have this token yet',
     bs_pulled: 'pulls',
     bs_shop_sold: 'resells',
+    bs_coins: 'Coins',
+    bs_spend: 'Profits to spend',
     bs_days: '{n} days left',
     bs_score: 'Score',
     bs_market: 'Market',

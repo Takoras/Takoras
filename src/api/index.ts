@@ -129,6 +129,8 @@ export const bourseApi = {
   board: () => rpcLoose('bourse_board'),
   trade: (p_asset: number, p_buy: boolean, p_shares: number) => rpcLoose('bourse_trade', { p_asset, p_buy, p_shares }),
   claimPay: () => rpcLoose('bourse_claim_pay'),
+  shop: () => rpcLoose('bourse_shop'),
+  shopBuy: (p_item: string) => rpcLoose('bourse_shop_buy', { p_item }),
 };
 
 // Succès (fonctions serveur : my_achievements, claim_achievement, achievements_of)

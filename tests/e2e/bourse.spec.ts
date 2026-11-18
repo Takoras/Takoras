@@ -31,3 +31,17 @@ test('bourse verrouillée sous 10 jetons différents', async ({ page }) => {
   await expect(page.getByRole('option')).toHaveCount(0);
   expect(calls).not.toContain('bourse_board');
 });
+
+test('boutique en Koo : choix de la monnaie et achat', async ({ page }) => {
+  const { calls } = await fakeSupabase(page);
+  await page.goto('/shop');
+  await page
+    .getByRole('radio', { name: 'Koo' })
+    .or(page.getByRole('tab', { name: 'Koo' }))
+    .or(page.getByRole('button', { name: 'Koo', exact: true }))
+    .first()
+    .click();
+  await page.getByRole('button', { name: 'Acheter' }).click();
+  await expect.poll(() => calls).toContain('bourse_shop_buy');
+  await expect(page.getByRole('button', { name: 'Acheter' })).toBeDisabled();
+});
