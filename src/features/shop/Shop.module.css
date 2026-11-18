@@ -537,11 +537,50 @@
   gap: var(--s-8);
   min-width: 0;
 }
+.title {
+  display: inline-grid;
+}
+.title > * {
+  grid-area: 1 / 1;
+}
+.title > [aria-hidden] {
+  visibility: hidden;
+}
+/* la place du solde Koo existe aussi en mode Pièces : la page ne bouge pas quand on change de monnaie */
+.walletSlot {
+  flex: 0 1 300px;
+  margin-left: auto; /* Probas & infos reste tout à droite */
+  height: 50px;
+  min-width: 230px;
+  opacity: 0;
+  visibility: hidden;
+  translate: 0 4px;
+  transition:
+    opacity 0.22s var(--ease-out),
+    translate 0.22s var(--ease-out),
+    visibility 0.22s;
+}
+.walletOn {
+  opacity: 1;
+  visibility: visible;
+  translate: 0 0;
+}
+.can,
+.poor {
+  transition:
+    opacity 0.25s,
+    filter 0.15s,
+    translate 0.1s;
+}
+.poor {
+  opacity: 0.55;
+}
 .wallet {
   display: grid;
   gap: 5px;
-  flex-basis: 100%;
-  max-width: 420px;
+  box-sizing: border-box;
+  height: 100%;
+  align-content: center;
   padding: 8px 12px;
   border-radius: 8px;
   background: var(--surface);

@@ -28,7 +28,7 @@ import { burstPixels, flyCoins, revealTier, screenFlash, shockwave } from '@/ui/
 import { useNow } from '../eco/eco';
 import { openInfo } from '../info/store';
 import s from './Shop.module.css';
-import { AutoHeight, Bump, Presence } from '@/ui/motion';
+import { AutoHeight, Bump } from '@/ui/motion';
 import { Fade, Roll } from '@/ui/Roll';
 import { Segmented } from '@/ui/Segmented';
 
@@ -427,18 +427,20 @@ export default function Shop() {
               ['koo', t('ui.bs_koo')],
             ]}
           />
-          <h1>
+          <h1 className={s.title}>
+            {/* la place du titre le plus long est gardée : rien ne bouge à côté quand il change */}
+            <span aria-hidden>{t('ui.shop_title_koo')}</span>
             <Fade text={t(inKoo ? 'ui.shop_title_koo' : 'ui.shop_title')} />
           </h1>
           <span className={s.restock}>
             {t('ui.shop_reset')} <b>{hms(left)}</b>
           </span>
+          <div className={`${s.walletSlot} ${inKoo ? s.walletOn : ''}`} aria-hidden={!inKoo}>
+            <Wallet w={wallet.data} />
+          </div>
           <Button size="sm" variant="ghost" onClick={openInfo}>
             {t('ui.odds_info')}
           </Button>
-          <Presence show={inKoo}>
-            <Wallet w={wallet.data} />
-          </Presence>
         </header>
         {data ? (
           <div className={s.coinView}>
@@ -592,7 +594,8 @@ function Buy({
       ) : (
         <Button
           size={big ? 'md' : 'sm'}
-          variant={can ? 'primary' : 'ghost'}
+          variant="primary"
+          className={can ? s.can : s.poor}
           disabled={!logged}
           aria-label={`${t('ui.buy')} · ${name} · ${n(price)}`}
           onClick={() => {
