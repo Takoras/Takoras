@@ -220,34 +220,36 @@ export default function Shop() {
     const fast = reducedFx();
     const cat0 = catRef.current;
     try {
-      sfx.riser(fast ? 0.2 : 1.2);
-      // 1) la charge : le cache gonfle à peine, vire au blanc et frémit de plus en plus (lui seul, rien autour)
-      const swell =
-        fast || !cover
-          ? Promise.resolve()
-          : cover.animate(
-              [
-                { transform: 'scale(1)', filter: 'brightness(1) saturate(1) drop-shadow(0 0 0 rgb(255 255 255 / 0%))' },
-                {
-                  transform: 'scale(1.05)',
-                  filter: 'brightness(6) saturate(0) drop-shadow(0 0 18px rgb(255 255 255 / 80%))',
-                },
-              ],
-              { duration: 1200, easing: 'cubic-bezier(.5,0,.75,.4)', fill: 'forwards' },
-            ).finished;
+      // le serveur dit d'abord ce qu'il y a dedans : la durée de la charge dépend de sa rareté
+      const r = (await shopApi.reveal(slot)) as { gain: number; state: object; shop: ShopData };
+      const it = r.shop.items.find((x) => slotOf(x, 0) === slot);
+      const tier = it && !isHidden(it) ? revealTier(oddsOf(it)) : 0;
+      // 1) la charge : le cache gonfle à peine, devient blanc petit à petit et frémit de plus en plus
+      // (commun : presque instantané ; légendaire : 3 s ; « ??? » : 5 s)
+      const charge = fast ? 0 : ([150, 500, 1300, 3000, 4000, 5000][tier] ?? 150);
+      sfx.riser(fast ? 0.2 : Math.max(0.2, charge / 1000));
       if (!fast && cover) {
         const fr: Keyframe[] = [];
         for (let k = 0; k <= 24; k++) {
           const a = 1.6 * (k / 24) ** 2.2;
           fr.push({ translate: `${(Math.random() * 2 - 1) * a}px ${(Math.random() * 2 - 1) * a}px` });
         }
-        cover.animate(fr, { duration: 1200, easing: 'linear', fill: 'forwards' });
+        cover.animate(fr, { duration: charge, easing: 'linear', fill: 'forwards' });
+        cover.style.setProperty('--wd', `${charge}ms`);
+        cover.classList.add(s.whiten ?? '');
+        await cover
+          .animate(
+            [
+              { transform: 'scale(1)', filter: 'brightness(1) saturate(1) drop-shadow(0 0 0 rgb(255 255 255 / 0%))' },
+              {
+                transform: 'scale(1.05)',
+                filter: 'brightness(6) saturate(0) drop-shadow(0 0 18px rgb(255 255 255 / 80%))',
+              },
+            ],
+            { duration: charge, easing: 'cubic-bezier(.45,.05,.7,.6)', fill: 'forwards' },
+          )
+          .finished.catch(() => undefined);
       }
-      cover?.classList.add(s.whiten ?? '');
-      const [r] = (await Promise.all([shopApi.reveal(slot), swell])) as [
-        { gain: number; state: object; shop: ShopData },
-        unknown,
-      ];
       const isHero = el.classList.contains(s.hero ?? '');
       const applyCoins = () => qc.setQueryData(['me', user.id], (old: object | undefined) => ({ ...old, ...r.state }));
       qc.setQueryData(['shop'], { ...r.shop, at: Date.now() });
@@ -267,42 +269,12 @@ export default function Shop() {
         return;
       }
       el = found;
-      const it = r.shop.items.find((x) => slotOf(x, 0) === slot);
       const col = it && !isHidden(it) ? `rgb(${glowOf(it)})` : 'rgb(142 170 255)';
-      // 2) la montée : la case reste toute blanche (l'objet est caché) et se remplit lentement de la couleur de la
-      // rareté, en tremblant de plus en plus ; plus l'objet est rare, plus l'attente est longue
-      const tier = it && !isHidden(it) ? revealTier(oddsOf(it)) : 0;
       const flash = document.createElement('div');
       flash.className = s.flash ?? '';
       flash.style.setProperty('--fc', col);
       el.appendChild(flash);
-      if (!fast) {
-        const charge = [150, 450, 800, 1200, 1600, 2000][tier] ?? 150;
-        if (tier) {
-          const fr: Keyframe[] = [];
-          for (let k = 0; k <= 30; k++) {
-            const a = (1 + tier * 0.7) * (k / 30) ** 2;
-            fr.push({ translate: `${(Math.random() * 2 - 1) * a}px ${(Math.random() * 2 - 1) * a}px` });
-          }
-          flash.animate(fr, { duration: charge, easing: 'linear' });
-        }
-        await flash
-          .animate(
-            [
-              { backgroundColor: '#fff', scale: '1' },
-              { backgroundColor: col, scale: String(1.015 + tier * 0.008) },
-            ],
-            { duration: charge, easing: 'cubic-bezier(.5,0,.8,.5)', fill: 'forwards' },
-          )
-          .finished.catch(() => undefined);
-        // parti ailleurs pendant la montée : pas d'explosion au mauvais endroit
-        if (catRef.current !== cat0 || !el.isConnected) {
-          flash.remove();
-          applyCoins();
-          return;
-        }
-      }
-      // 3) l'explosion, à la couleur de la rareté : plus l'objet est rare, plus elle dure et plus elle est forte
+      // 2) l'explosion, à la couleur de la rareté : plus l'objet est rare, plus elle dure et plus elle est forte
       sfx.reveal(it && !isHidden(it) ? oddsOf(it) : 1);
       flash
         .animate(
@@ -336,7 +308,7 @@ export default function Shop() {
             [0, 6, -5, 4, -3, 2, 0].map((d, i) => ({ transform: `translate(${d}px, ${i % 2 ? -d / 2 : d / 2}px)` })),
             { duration: 380 + (tier - 3) * 120, easing: 'ease-out' },
           );
-        // 4) l'objet sort de la lumière : flou et surexposé, il devient net en se posant (sans rebond)
+        // 3) l'objet sort de la lumière : flou et surexposé, il devient net en se posant (sans rebond)
         el.animate(
           [
             { scale: String(1.05 + tier * 0.03), filter: 'blur(8px) brightness(2.6) saturate(.4)' },
@@ -350,7 +322,7 @@ export default function Shop() {
           [0, a, -a * 0.75, a * 0.5, -a * 0.3, a * 0.15, 0].map((d) => ({ rotate: `${d}deg` })),
           { duration: 1000 + tier * 150, easing: 'ease-out' },
         );
-        // 5) les pièces gagnées jaillissent et filent vers le solde ; le compteur monte quand la 1re arrive
+        // 4) les pièces gagnées jaillissent et filent vers le solde ; le compteur monte quand la 1re arrive
         let landed = false;
         const safety = setTimeout(() => {
           if (!landed) applyCoins();
