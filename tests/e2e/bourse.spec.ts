@@ -25,6 +25,13 @@ test('bourse : acheter, vendre, paie du jour et classement', async ({ page, isMo
   if (isMobile) expect(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth)).toBe(true);
 });
 
+test('bourse : la fenêtre explique le marché', async ({ page }) => {
+  await fakeSupabase(page);
+  await page.goto('/bourse');
+  await page.getByRole('button', { name: /Comment ça marche/ }).click();
+  await expect(page.getByRole('dialog', { name: 'Comment marche la Bourse' })).toContainText('Les tirages');
+});
+
 test('bourse verrouillée sous 10 jetons différents', async ({ page }) => {
   const { calls } = await fakeSupabase(page, {}, [], { bourseHave: 6 });
   await page.goto('/bourse');

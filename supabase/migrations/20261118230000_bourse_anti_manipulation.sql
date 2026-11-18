@@ -2,3 +2,6 @@
 -- retombe de moitié toutes les 6 h. Tirage : +0,1 % (commun) à +30 % (très rare) selon la rareté. Chaque tirage retire
 -- 0,01 Koo, durablement, aux jetons qui ne sortent pas. Un joueur ne peut pas pousser un jeton commun qu'il détient,
 -- ni faire baisser un jeton par ses reventes, de plus de 1,5 % par jeton et par jour.
+-- Équilibrage (simulé sur 30 jours, 3 à 200 tirages par heure : prix moyen proche de 10) : les jetons absents perdent 0,1 %
+-- temporaire au lieu de 0,01 Koo définitif, les petits effets sont divisés quand il y a plus de 6 tirages par heure,
+-- et l'effet des tirages reste entre ×0,5 et ×2,5.

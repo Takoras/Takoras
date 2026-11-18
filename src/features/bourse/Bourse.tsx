@@ -12,6 +12,7 @@ import { burstAt } from '@/lib/pfx';
 import { locale, potatoFx, reducedFx, useSettings } from '@/lib/settings';
 import { Avatar } from '@/ui/Avatar';
 import { Button } from '@/ui/Button';
+import { Modal } from '@/ui/Modal';
 import { Presence, Skeleton, useFlip } from '@/ui/motion';
 import { Segmented } from '@/ui/Segmented';
 import { Swap } from '@/ui/Swap';
@@ -86,6 +87,13 @@ const rankOf = (elo: number) => {
   const r = Math.max(0, Math.min(17, Math.floor((elo - ELO_0) / ELO_STEP)));
   return { r, tier: Math.floor(r / 3), div: (r % 3) + 1, img: `/img/ranks/rank${r + 1}.png` };
 };
+const HOW: [Key, Key][] = [
+  ['ui.bs_how_t1', 'ui.bs_how_p1'],
+  ['ui.bs_how_t2', 'ui.bs_how_p2'],
+  ['ui.bs_how_t3', 'ui.bs_how_p3'],
+  ['ui.bs_how_t4', 'ui.bs_how_p4'],
+  ['ui.bs_how_t5', 'ui.bs_how_p5'],
+];
 const SERIE_LOGO: Record<string, string> = { Takoras: '/img/logo-takoras.png?v=2', Bodako: '/img/logo-bodako.png?v=2' };
 
 // La pièce de la Bourse
@@ -203,6 +211,7 @@ export default function Bourse() {
   const [sel, setSel] = useState<number | null>(null);
   const [qty, setQty] = useState('10');
   const [busy, setBusy] = useState(false);
+  const [help, setHelp] = useState(false);
   const key = useMemo(() => ['bourse', uid], [uid]);
   const q = useQuery({
     queryKey: key,
@@ -482,9 +491,22 @@ export default function Bourse() {
           <Ranks me={d.me} pct={pct} cl={cl} n0={n0} />
         )}
       </Swap>
-      <Link className={s.legal} to="/terms">
+      <button type="button" className={s.legal} onClick={() => (sfx.click(), setHelp(true))}>
         {t('ui.bs_legal')}
-      </Link>
+      </button>
+      <Modal open={help} onClose={() => setHelp(false)} title={t('ui.bs_how')} wide>
+        <div className={s.how}>
+          {HOW.map(([title, text]) => (
+            <section key={title}>
+              <h3>{t(title)}</h3>
+              <p>{t(text)}</p>
+            </section>
+          ))}
+          <p className={s.howLegal}>
+            {t('ui.bs_how_legal')} <Link to="/terms">{t('ui.terms')}</Link>
+          </p>
+        </div>
+      </Modal>
     </section>
   );
 }
