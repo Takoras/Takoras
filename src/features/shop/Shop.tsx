@@ -269,13 +269,41 @@ export default function Shop() {
       el = found;
       const it = r.shop.items.find((x) => slotOf(x, 0) === slot);
       const col = it && !isHidden(it) ? `rgb(${glowOf(it)})` : 'rgb(142 170 255)';
-      sfx.reveal(it && !isHidden(it) ? oddsOf(it) : 1);
-      // 2) l'éclat, à la couleur de la rareté : plus l'objet est rare, plus il dure et plus ça explose
+      // 2) la montée : la case reste toute blanche (l'objet est caché) et se remplit lentement de la couleur de la
+      // rareté, en tremblant de plus en plus ; plus l'objet est rare, plus l'attente est longue
       const tier = it && !isHidden(it) ? revealTier(oddsOf(it)) : 0;
       const flash = document.createElement('div');
       flash.className = s.flash ?? '';
       flash.style.setProperty('--fc', col);
       el.appendChild(flash);
+      if (!fast) {
+        const charge = [150, 450, 800, 1200, 1600, 2000][tier] ?? 150;
+        if (tier) {
+          const fr: Keyframe[] = [];
+          for (let k = 0; k <= 30; k++) {
+            const a = (1 + tier * 0.7) * (k / 30) ** 2;
+            fr.push({ translate: `${(Math.random() * 2 - 1) * a}px ${(Math.random() * 2 - 1) * a}px` });
+          }
+          flash.animate(fr, { duration: charge, easing: 'linear' });
+        }
+        await flash
+          .animate(
+            [
+              { backgroundColor: '#fff', scale: '1' },
+              { backgroundColor: col, scale: String(1.015 + tier * 0.008) },
+            ],
+            { duration: charge, easing: 'cubic-bezier(.5,0,.8,.5)', fill: 'forwards' },
+          )
+          .finished.catch(() => undefined);
+        // parti ailleurs pendant la montée : pas d'explosion au mauvais endroit
+        if (catRef.current !== cat0 || !el.isConnected) {
+          flash.remove();
+          applyCoins();
+          return;
+        }
+      }
+      // 3) l'explosion, à la couleur de la rareté : plus l'objet est rare, plus elle dure et plus elle est forte
+      sfx.reveal(it && !isHidden(it) ? oddsOf(it) : 1);
       flash
         .animate(
           // à partir de légendaire, l'éclat revient une fois avant de s'éteindre
@@ -308,7 +336,7 @@ export default function Shop() {
             [0, 6, -5, 4, -3, 2, 0].map((d, i) => ({ transform: `translate(${d}px, ${i % 2 ? -d / 2 : d / 2}px)` })),
             { duration: 380 + (tier - 3) * 120, easing: 'ease-out' },
           );
-        // 3) l'objet sort de la lumière : flou et surexposé, il devient net en se posant (sans rebond)
+        // 4) l'objet sort de la lumière : flou et surexposé, il devient net en se posant (sans rebond)
         el.animate(
           [
             { scale: String(1.05 + tier * 0.03), filter: 'blur(8px) brightness(2.6) saturate(.4)' },
@@ -322,7 +350,7 @@ export default function Shop() {
           [0, a, -a * 0.75, a * 0.5, -a * 0.3, a * 0.15, 0].map((d) => ({ rotate: `${d}deg` })),
           { duration: 1000 + tier * 150, easing: 'ease-out' },
         );
-        // 4) les pièces gagnées jaillissent et filent vers le solde ; le compteur monte quand la 1re arrive
+        // 5) les pièces gagnées jaillissent et filent vers le solde ; le compteur monte quand la 1re arrive
         let landed = false;
         const safety = setTimeout(() => {
           if (!landed) applyCoins();

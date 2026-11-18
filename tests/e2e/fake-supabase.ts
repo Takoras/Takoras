@@ -424,7 +424,10 @@ export async function fakeSupabase(
       const gain = revealed ? 0 : 100;
       revealed = true;
       st.coins += gain;
-      return json({ gain, item: 'potion2', state: { ...st }, shop: shopNow() });
+      const shop = shopNow() as { items: { id?: string; data?: object }[] };
+      // SC_RV : l'objet révélé devient une potion très rare (pour voir la grosse révélation)
+      if (process.env.SC_RV) shop.items.forEach((x) => x.id === 'potion2' && (x.data = { ...x.data, mult: 500 }));
+      return json({ gain, item: 'potion2', state: { ...st }, shop });
     }
     if (rpc === 'buy_item') {
       st.coins -= 300;
