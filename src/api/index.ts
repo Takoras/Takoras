@@ -130,7 +130,6 @@ export const bourseApi = {
   trade: (p_asset: number, p_buy: boolean, p_shares: number) => rpcLoose('bourse_trade', { p_asset, p_buy, p_shares }),
   claimPay: () => rpcLoose('bourse_claim_pay'),
   shop: () => rpcLoose('bourse_shop'),
-  shopBuy: (p_item: string) => rpcLoose('bourse_shop_buy', { p_item }),
   blackMarket: () => rpcLoose('black_market'),
   bmReveal: (p_slot: number) => rpcLoose('black_market_reveal', { p_slot }),
   bmBuy: (p_item: string) => rpcLoose('black_market_buy', { p_item }),

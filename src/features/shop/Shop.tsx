@@ -257,11 +257,7 @@ export default function Shop() {
       );
     }
     try {
-      const st = inBlack
-        ? (await bourseApi.bmBuy(it.id), {})
-        : inKoo
-          ? ((await bourseApi.shopBuy(it.id)) as { state: object }).state
-          : await shopApi.buy(it.id);
+      const st = inBlack ? (await bourseApi.bmBuy(it.id), {}) : await shopApi.buy(it.id);
       if (inKoo || inBlack) {
         void wallet.refetch();
         void qc.invalidateQueries({ queryKey: ['bourse'] });
@@ -563,15 +559,10 @@ export default function Shop() {
             value={money === 'black' && !bmOpen ? 'coins' : money}
             onChange={pickMoney}
             label={t('ui.shop_title')}
-            options={[
-              ['coins', t('ui.bs_coins')],
-              ['koo', t('ui.bs_koo')],
-              ...(bmOpen ? ([['black', t('ui.bs_bm')]] as const) : []),
-            ]}
+            options={[['coins', t('ui.bs_coins')], ...(bmOpen ? ([['black', t('ui.bs_bm')]] as const) : [])]}
           />
           <h1 className={`${s.title} ${inBlack ? s.titleBlack : ''}`}>
             {/* la place du titre le plus long est gardée : rien ne bouge à côté quand il change */}
-            <span aria-hidden>{t('ui.shop_title_koo')}</span>
             <span aria-hidden>{t('ui.bs_bm')}</span>
             <Fade text={t(inBlack ? 'ui.bs_bm' : inKoo ? 'ui.shop_title_koo' : 'ui.shop_title')} />
           </h1>

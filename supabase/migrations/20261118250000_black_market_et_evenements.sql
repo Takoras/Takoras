@@ -9,3 +9,5 @@
 -- Stock par joueur : potions 20, sablier, grosses potions et affaires consommables 10, cosmétiques 1.
 -- Stock par joueur : potions et sablier entre 10 et 25 selon l'objet et la semaine, cosmétiques 1.
 -- Affaires : jusqu'à 3 par rayon, toutes à la une de leur rayon (la grosse potion n'en est jamais une).
+-- 2026-11-19 : Black Market ouvert tous les jours (sauf Coupé dans l'admin), renouvelé à minuit ; le Market Shop
+-- (bourse_shop_buy) est supprimé, le Black Market est le seul endroit où dépenser ses Market Coins.
