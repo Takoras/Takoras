@@ -17,6 +17,9 @@ import s from './Quests.module.css';
 import { Bump } from '@/ui/motion';
 import { useSwingAll } from '@/ui/useSwing';
 
+// quêtes dont le texte change au singulier (« Vends un jeton », pas « Vends 1 jetons »)
+const ONE = new Set(['pulls', 'rares', 'sold', 'bought']);
+
 // Pièces du bouton vers le solde : le même vol que partout (ui/fx.ts), et un objet gagné file vers l'inventaire
 function coinRain(from: HTMLElement, n: number) {
   flyCoins(from.getBoundingClientRect(), n, () => undefined);
@@ -124,24 +127,31 @@ export function Quests() {
                 className={`${ok ? s.ok : ''} ${x.claimed ? s.claimed : ''} ${just === x.id ? s.just : ''}`}
               >
                 <div className={s.top}>
-                  <span>{t(`ui.q_${x.stat}` as Parameters<typeof t>[0], { n: x.target })}</span>
+                  <span>
+                    {t(`ui.q_${x.stat}${x.target === 1 && ONE.has(x.stat) ? '_1' : ''}` as Parameters<typeof t>[0], {
+                      n: x.target,
+                    })}
+                  </span>
                   <span className={s.rew}>
                     {x.coins ? (
                       <>
-                        {n(x.coins)} <img className="px" src="/img/coin.png" alt="" width={12} height={12} />
+                        {n(x.coins)} <img className="px" src="/img/coin.png" alt="" width={16} height={16} />
                       </>
                     ) : null}
+                    {/* objet : même écriture que les pièces (le nombre, puis l'image) */}
                     {item ? (
-                      <img
-                        className="px"
-                        src={item.src}
-                        alt={x.item ?? ''}
-                        width={18}
-                        height={18}
-                        style={item.tint ? ({ '--df': item.tint } as React.CSSProperties) : undefined}
-                      />
+                      <>
+                        ×{x.qty || 1}{' '}
+                        <img
+                          className="px"
+                          src={item.src}
+                          alt={x.item ?? ''}
+                          width={16}
+                          height={16}
+                          style={item.tint ? ({ '--df': item.tint } as React.CSSProperties) : undefined}
+                        />
+                      </>
                     ) : null}
-                    {x.qty > 1 ? `×${x.qty}` : ''}
                   </span>
                 </div>
                 <div

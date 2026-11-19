@@ -6,7 +6,7 @@ type Doc = { title: string; updated: string; intro: string; blocks: [string, str
 
 const FR: Doc = {
   title: 'Politique de confidentialité',
-  updated: 'Dernière mise à jour : 18 novembre 2026',
+  updated: 'Dernière mise à jour : 19 novembre 2026',
   intro:
     'La présente politique de confidentialité (ci-après la « Politique ») a pour objet d’informer toute personne utilisant le site et le jeu Takoras (ci-après le « Service ») de la manière dont ses données à caractère personnel sont collectées, utilisées, conservées et protégées, conformément au Règlement (UE) 2016/679 du 27 avril 2016 relatif à la protection des personnes physiques à l’égard du traitement des données à caractère personnel (ci-après le « RGPD ») et à la loi n° 78-17 du 6 janvier 1978 modifiée relative à l’informatique, aux fichiers et aux libertés (ci-après la « loi Informatique et Libertés »). En utilisant le Service, l’utilisateur reconnaît avoir pris connaissance de la présente Politique.',
   blocks: [
@@ -21,7 +21,7 @@ const FR: Doc = {
       [
         '2.1. Données d’identification et de connexion : identifiant technique du compte, adresse électronique ou identifiant du compte Discord utilisé pour la connexion, selon le mode de connexion choisi par l’utilisateur, ainsi que la date de création du compte.',
         '2.2. Données de profil : pseudonyme, photo de profil et bannière choisies parmi celles proposées par le Service, biographie facultative rédigée par l’utilisateur, vitrine de jetons.',
-        '2.3. Données de jeu : jetons obtenus et leurs variantes, pièces, objets, potions, quêtes, progression du passe de combat, équipe, résultats et classement Elo des matchs classés, statistiques de jeu (nombre de tirages ouverts, temps de jeu), liste d’amis et demandes d’amitié.',
+        '2.3. Données de jeu : jetons obtenus et leurs variantes, pièces, objets, potions, quêtes, progression du passe de combat, données du Market (Market Coins, actions, score et Elo de saison), statistiques de jeu (nombre de tirages ouverts, temps de jeu), liste d’amis et demandes d’amitié.',
         '2.4. Données techniques : données strictement nécessaires au fonctionnement et à la sécurité du Service, notamment journaux techniques des serveurs, horodatages des actions de jeu et informations limitées sur le navigateur, conservées pour une durée limitée.',
         '2.5. Avis et signalements : contenu des messages envoyés volontairement par l’utilisateur au moyen du bouton « Donner un avis ».',
         '2.6. Le Service ne collecte aucune donnée dite « sensible » au sens de l’article 9 du RGPD, ni aucune donnée bancaire. Aucun paiement n’est ouvert à la date de la présente Politique.',
@@ -31,7 +31,7 @@ const FR: Doc = {
     [
       '3. Finalités et bases légales',
       [
-        '3.1. Fourniture du Service (création et gestion du compte, sauvegarde de la progression, matchs en ligne, classements, profil public, fonctionnalités d’amis) : exécution du contrat conclu entre l’utilisateur et l’Éditeur lors de l’inscription (article 6.1.b du RGPD).',
+        '3.1. Fourniture du Service (création et gestion du compte, sauvegarde de la progression, Market, classements, profil public, fonctionnalités d’amis) : exécution du contrat conclu entre l’utilisateur et l’Éditeur lors de l’inscription (article 6.1.b du RGPD).',
         '3.2. Sécurité du Service, prévention de la triche, des abus et de la fraude, modération : intérêt légitime de l’Éditeur à garantir un jeu équitable et sûr (article 6.1.f du RGPD).',
         '3.3. Amélioration du Service à partir des avis envoyés volontairement et de statistiques globales de fréquentation : intérêt légitime de l’Éditeur (article 6.1.f du RGPD).',
         '3.4. Respect d’obligations légales, le cas échéant, notamment en cas de réquisition d’une autorité compétente : obligation légale (article 6.1.c du RGPD).',
@@ -99,7 +99,7 @@ const FR: Doc = {
 
 const EN: Doc = {
   title: 'Privacy policy',
-  updated: 'Last updated: 18 November 2026',
+  updated: 'Last updated: 19 November 2026',
   intro:
     'This privacy policy (the “Policy”) explains to anyone using the Takoras website and game (the “Service”) how their personal data is collected, used, stored and protected, in accordance with Regulation (EU) 2016/679 of 27 April 2016 (the “GDPR”) and the French Data Protection Act no. 78-17 of 6 January 1978 as amended. By using the Service, the user acknowledges having read this Policy.',
   blocks: [
@@ -114,7 +114,7 @@ const EN: Doc = {
       [
         '2.1. Identification and login data: technical account identifier, e-mail address or Discord account identifier used to log in, depending on the login method chosen, and the account creation date.',
         '2.2. Profile data: username, profile picture and banner chosen among those offered by the Service, optional bio written by the user, token showcase.',
-        '2.3. Game data: tokens obtained and their variants, coins, items, potions, quests, battle pass progress, team, results and Elo of ranked matches, game statistics (pulls opened, play time), friends list and friend requests.',
+        '2.3. Game data: tokens obtained and their variants, coins, items, potions, quests, battle pass progress, Market data (Market Coins, shares, season score and Elo), game statistics (pulls opened, play time), friends list and friend requests.',
         '2.4. Technical data: data strictly necessary for the operation and security of the Service, including server logs, timestamps of game actions and limited browser information, kept for a limited time.',
         '2.5. Feedback and reports: content of messages voluntarily sent by the user with the “Feedback” button.',
         '2.6. The Service does not collect any “special category” data within the meaning of Article 9 GDPR, nor any banking data. No payments are open as of the date of this Policy.',
@@ -124,7 +124,7 @@ const EN: Doc = {
     [
       '3. Purposes and legal bases',
       [
-        '3.1. Providing the Service (account creation and management, saving progress, online matches, leaderboards, public profile, friends features): performance of the contract entered into at sign-up (Article 6(1)(b) GDPR).',
+        '3.1. Providing the Service (account creation and management, saving progress, Market, leaderboards, public profile, friends features): performance of the contract entered into at sign-up (Article 6(1)(b) GDPR).',
         '3.2. Security of the Service, prevention of cheating, abuse and fraud, moderation: the Publisher’s legitimate interest in a fair and safe game (Article 6(1)(f) GDPR).',
         '3.3. Improving the Service using voluntarily sent feedback and aggregate usage statistics: the Publisher’s legitimate interest (Article 6(1)(f) GDPR).',
         '3.4. Compliance with legal obligations where applicable, in particular upon request of a competent authority (Article 6(1)(c) GDPR).',

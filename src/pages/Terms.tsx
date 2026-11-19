@@ -4,14 +4,14 @@ import { LegalDoc, type Doc } from './LegalDoc';
 // propres conditions générales de vente (CGV), avec le droit de rétractation et la médiation de la consommation.
 const FR: Doc = {
   title: 'Conditions générales d’utilisation',
-  updated: 'Dernière mise à jour : 18 novembre 2026',
+  updated: 'Dernière mise à jour : 19 novembre 2026',
   intro:
     'Les présentes conditions générales d’utilisation (ci-après les « CGU ») encadrent l’accès et l’utilisation du site et du jeu Takoras (ci-après le « Service »), édité par l’éditeur désigné dans les mentions légales (ci-après « l’Éditeur »). Créer un compte ou utiliser le Service implique l’acceptation pleine et entière des présentes CGU et de la politique de confidentialité.',
   blocks: [
     [
       '1. Objet du Service',
       [
-        'Takoras est un jeu de collection de jetons accessible gratuitement dans un navigateur : le joueur ouvre des tirages pour obtenir des jetons de différentes raretés, complète sa collection, les fait combattre dans le Ring et apparaît dans des classements.',
+        'Takoras est un jeu de collection de jetons accessible gratuitement dans un navigateur : le joueur ouvre des tirages pour obtenir des jetons de différentes raretés, complète sa collection, joue au Market et apparaît dans des classements.',
       ],
     ],
     [
@@ -105,14 +105,14 @@ const FR: Doc = {
 
 const EN: Doc = {
   title: 'Terms of use',
-  updated: 'Last updated: 10 November 2026',
+  updated: 'Last updated: 19 November 2026',
   intro:
     'These terms of use (the “Terms”) govern access to and use of the Takoras website and game (the “Service”), published by the publisher named in the legal notice (the “Publisher”). Creating an account or using the Service means fully accepting these Terms and the privacy policy.',
   blocks: [
     [
       '1. The Service',
       [
-        'Takoras is a free browser game about collecting tokens: players open pulls to get tokens of various rarities, complete their collection, make them fight in the Ring and appear in leaderboards.',
+        'Takoras is a free browser game about collecting tokens: players open pulls to get tokens of various rarities, complete their collection, play the Market and appear in leaderboards.',
       ],
     ],
     [

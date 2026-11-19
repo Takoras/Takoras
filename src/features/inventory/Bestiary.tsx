@@ -148,7 +148,7 @@ export default function Bestiary() {
       const r = (await invApi.sell(ids)) as { sold: number; coins: number; state: unknown };
       qc.setQueryData(['me', user.id], r.state);
       sfx.upgrade();
-      toast(`${t('ui.sold', { n: r.sold })} · +${fmt(r.coins)}`);
+      toast(`${t(r.sold === 1 ? 'ui.sold_1' : 'ui.sold', { n: r.sold })} · +${fmt(r.coins)}`);
       void qc.invalidateQueries({ queryKey: ['history'] });
       return true;
     } catch (e) {

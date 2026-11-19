@@ -31,9 +31,9 @@ const TXT = {
       'Chaque série a ses jetons, du plus commun au 1 sur 1 000 000. Et chacun peut sortir en Doré, Céleste ou Ombre.',
     ],
     fight: [
-      'Combat',
-      'Monte au classement',
-      'Choisis 3 jetons, chacun avec son pouvoir, et grimpe de Bois jusqu’au rang Takoras.',
+      'Market',
+      'Joue en bourse sur tes jetons',
+      'Chaque mois, une série entre en bourse. Achète et revends les jetons que tu as déjà obtenus, monte de rang et vise le top 3 de la saison.',
     ],
     shop: [
       'Boutique',
@@ -65,9 +65,9 @@ const TXT = {
       'Each series has its tokens, from the most common to 1 in 1,000,000. And each one can come out Gold, Celestial or Shadow.',
     ],
     fight: [
-      'Battle',
-      'Climb the ladder',
-      'Pick 3 tokens, each with its own power, and climb from Wood up to the Takoras rank.',
+      'Market',
+      'Trade your tokens',
+      'Each month, one series goes on the market. Buy and sell the tokens you have already pulled, climb the ranks and aim for the season top 3.',
     ],
     shop: [
       'Shop',
@@ -203,7 +203,7 @@ export function Landing() {
         </ul>
       </Sec>
 
-      {/* ---------- combat ---------- */}
+      {/* ---------- Market ---------- */}
       <Sec k="fight">
         <div className={s.fight}>
           <div className={s.team}>
