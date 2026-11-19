@@ -62,19 +62,17 @@ const OFFERS: Offer[] = [
   { id: 'tv', cat: 'cosm', name: ['Set Télé', 'TV set'], price: 2.99, lines: [k('a_tv'), k('b_tv')] },
   { id: 'lava', cat: 'cosm', name: ['Set Lave', 'Lava set'], price: 3.99, lines: [k('n_lava'), k('au_lava')] },
   { id: 'sun', cat: 'cosm', name: ['Soleil', 'Sun'], price: 3.49, lines: [k('au_sun')] },
-  { id: 'glitch', cat: 'cosm', name: ['Glitch', 'Glitch'], price: 2.99, lines: [k('n_glitch')] },
-  { id: 'gothic', cat: 'cosm', name: ['Gothique', 'Gothic'], price: 2.99, lines: [k('nf_gothic')] },
   { id: 'doodle', cat: 'cosm', name: ['Gribouillis', 'Doodle'], price: 2.99, lines: [k('b_doodle')] },
-  { id: 'pot25', cat: 'potion', name: ['Fioles', 'Vials'], price: 3.99, lines: [p(25, 5)] },
-  { id: 'pot50', cat: 'potion', name: ['Flacons', 'Flasks'], price: 4.99, lines: [p(50, 4)] },
-  { id: 'pot250', cat: 'potion', name: ['Grands élixirs', 'Great elixirs'], price: 9.99, lines: [p(250, 2)] },
-  { id: 'pot100', cat: 'potion', name: ['Élixirs', 'Elixirs'], price: 7.99, lines: [p(100, 3)], tag: 'hot' },
+  { id: 'pot25', cat: 'potion', name: ['Fioles', 'Vials'], price: 3.99, lines: [p(25, 8)] },
+  { id: 'pot50', cat: 'potion', name: ['Flacons', 'Flasks'], price: 4.99, lines: [p(50, 7)] },
+  { id: 'pot250', cat: 'potion', name: ['Grands élixirs', 'Great elixirs'], price: 9.99, lines: [p(250, 4)] },
+  { id: 'pot100', cat: 'potion', name: ['Élixirs', 'Elixirs'], price: 7.99, lines: [p(100, 6)], tag: 'hot' },
   {
     id: 'pot500',
     cat: 'potion',
     name: ['Potions légendaires', 'Legendary potions'],
     price: 14.99,
-    lines: [p(500, 2), p(250, 1)],
+    lines: [p(500, 4), p(250, 2)],
   },
   { id: 'c1', cat: 'coins', name: ['Bourse de pièces', 'Coin purse'], price: 2.99, lines: [c(15000)] },
   { id: 'c15', cat: 'coins', name: ['Poche de pièces', 'Coin pocket'], price: 4.99, lines: [c(30000)] },
@@ -88,14 +86,14 @@ const OFFERS: Offer[] = [
     lines: [c(160000)],
     tag: 'best',
   },
-  { id: 'p1', cat: 'pack', name: ['Sachet', 'Pouch'], price: 2.99, lines: [c(8000), p(25, 2), p(50, 1), h(1)] },
-  { id: 'p2', cat: 'pack', name: ['Sac', 'Bag'], price: 4.99, lines: [c(20000), p(50, 2), p(100, 1), h(2)] },
+  { id: 'p1', cat: 'pack', name: ['Sachet', 'Pouch'], price: 2.99, lines: [c(8000), p(25, 4), p(50, 2), h(1)] },
+  { id: 'p2', cat: 'pack', name: ['Sac', 'Bag'], price: 4.99, lines: [c(20000), p(50, 4), p(100, 2), h(2)] },
   {
     id: 'p3',
     cat: 'pack',
     name: ['Coffre', 'Chest'],
     price: 9.99,
-    lines: [c(50000), p(100, 2), p(250, 1), h(3)],
+    lines: [c(50000), p(100, 4), p(250, 2), h(3)],
     tag: 'hot',
   },
   {
@@ -103,25 +101,54 @@ const OFFERS: Offer[] = [
     cat: 'pack',
     name: ['Malle', 'Trunk'],
     price: 14.99,
-    lines: [c(110000), p(250, 1), p(500, 1), h(4)],
+    lines: [c(110000), p(250, 3), p(500, 2), h(4)],
   },
   {
     id: 'p4',
     cat: 'pack',
     name: ['Trésor', 'Treasure'],
     price: 19.99,
-    lines: [c(200000), p(250, 2), p(500, 1), h(5)],
+    lines: [c(200000), p(250, 4), p(500, 3), h(5)],
+    tag: 'hot',
+  },
+  {
+    id: 'b_lava',
+    cat: 'pack',
+    name: ['Bundle Lave', 'Lava bundle'],
+    price: 14.99,
+    lines: [k('n_lava'), k('au_lava'), c(80000), p(100, 6), h(5)],
+  },
+  {
+    id: 'b_galaxy',
+    cat: 'pack',
+    name: ['Bundle Galaxie', 'Galaxy bundle'],
+    price: 17.99,
+    lines: [k('au_galaxy'), k('fx_galaxy'), c(120000), p(250, 5), h(6)],
+  },
+  {
+    id: 'b_dragon',
+    cat: 'pack',
+    name: ['Bundle Dragon', 'Dragon bundle'],
+    price: 19.99,
+    lines: [k('a_dragon'), k('b_dragon'), c(150000), p(500, 4), h(8)],
     tag: 'best',
+  },
+  {
+    id: 'b_aurora',
+    cat: 'pack',
+    name: ['Bundle Aurore', 'Aurora bundle'],
+    price: 19.99,
+    lines: [k('n_aurora'), k('fx_aurora'), c(200000), p(500, 3), p(250, 3), h(8)],
   },
   { id: 'h1', cat: 'other', name: ['Sabliers', 'Hourglasses'], price: 2.99, lines: [h(5)] },
   { id: 'h2', cat: 'other', name: ['Caisse de sabliers', 'Hourglass crate'], price: 6.99, lines: [h(15)], tag: 'best' },
   { id: 'h3', cat: 'other', name: ['Réserve de sabliers', 'Hourglass stock'], price: 12.99, lines: [h(30)] },
 ];
 const CATS: [Cat, Key][] = [
+  ['pack', 'ui.pay_title'],
   ['cosm', 'ui.cat_cosm'],
   ['potion', 'ui.cat_potions'],
   ['coins', 'ui.pay_coins'],
-  ['pack', 'ui.pay_title'],
   ['other', 'ui.pay_other'],
 ];
 
@@ -177,7 +204,7 @@ function Art({ l }: { l: Line }) {
 const isCosmOffer = (o: Offer) => o.lines.some((l) => l.kind === 'cosm');
 
 // un set cosmétique porté : bannière, photo avec son aura, pseudo du joueur avec son style (comme sur le profil)
-function SetCard({ o, pseudo, lg }: { o: Offer; pseudo: string; lg?: boolean }) {
+function SetCard({ o, pseudo, av: mine, lg }: { o: Offer; pseudo: string; av: string; lg?: boolean }) {
   const ids = o.lines.flatMap((l) => (l.kind === 'cosm' ? [l.id] : []));
   const pick = (p: string) => ids.find((i) => i.startsWith(p));
   const av = pick('a_')?.slice(2);
@@ -192,7 +219,7 @@ function SetCard({ o, pseudo, lg }: { o: Offer; pseudo: string; lg?: boolean }) 
       <span className={s.setId}>
         <span className={s.setPp}>
           <Aura id={pick('au_')}>
-            <Avatar pseudo={pseudo} avatar={av ?? (pseudo ? undefined : 'blue')} size={lg ? 88 : 40} />
+            <Avatar pseudo={pseudo} avatar={av ?? mine} size={lg ? 88 : 40} />
           </Aura>
         </span>
         <b className={nameCls(pick('n_'), pick('nf_'))}>{pseudo || 'Takoras'}</b>
@@ -208,9 +235,11 @@ export function Packs() {
   const t = useT();
   const lang = useSettings((x) => x.lang);
   const root = useRef<HTMLDivElement>(null);
-  const [cat, setCat] = useState<Cat>('cosm');
+  const [cat, setCat] = useState<Cat>('pack');
   const [open, setOpen] = useState<Offer | null>(null);
-  const pseudo = useMe().data?.pseudo ?? '';
+  const me = useMe().data;
+  const pseudo = me?.pseudo ?? '';
+  const myAv = typeof me?.avatar === 'string' ? me.avatar : 'blue';
   useSwingAll(root, `.${s.box}`, 0.35, cat);
   const loc = locale(lang);
   const n = (v: number) => v.toLocaleString(loc);
@@ -221,7 +250,7 @@ export function Packs() {
     const one = single(o);
     return one ? itemName(one) : o.name[lang === 'en' ? 1 : 0];
   };
-  const label = (l: Line) => (l.kind === 'potion' || l.kind === 'hourglass' ? `${l.n} × ${itemName(l)}` : itemName(l));
+  const many = (l: Line) => (l.kind === 'potion' || l.kind === 'hourglass' ? l.n : 0);
   const list = OFFERS.filter((o) => o.cat === cat);
   // la grosse promo : la meilleure offre du rayon, sinon la plus populaire
   const promo = list.find((o) => o.tag === 'best') ?? list.find((o) => o.tag === 'hot') ?? list[0];
@@ -248,7 +277,12 @@ export function Packs() {
               <li>{itemText(itemOf(one), lang)[1]}</li>
             ) : null
           ) : (
-            o.lines.map((l, i) => <li key={i}>{label(l)}</li>)
+            o.lines.map((l, i) => (
+              <li key={i}>
+                {itemName(l)}
+                {many(l) ? <span className={s.badgeIn}>×{many(l)}</span> : null}
+              </li>
+            ))
           )}
           {w && (!one || one.kind !== 'coins') ? (
             <li className={s.offerWorth}>{t('ui.pay_value', { n: n(w) })}</li>
@@ -275,13 +309,13 @@ export function Packs() {
             ? '\u00a0'
             : itemText(itemOf(one), lang)[1]
           : head
-            ? `${label(head)} +${o.lines.length - 1}`
+            ? t('ui.pay_worth', { n: n(worth(o)) })
             : '\u00a0'}
       </p>
     );
   };
   const visual = (o: Offer, lg?: boolean) => {
-    if (isCosmOffer(o)) return <SetCard o={o} pseudo={pseudo} lg={lg} />;
+    if (isCosmOffer(o)) return <SetCard o={o} pseudo={pseudo} av={myAv} lg={lg} />;
     const one = single(o);
     if (one) return <Art l={one} />;
     return (
@@ -331,7 +365,7 @@ export function Packs() {
               </div>
             </div>
           ) : null}
-          <ul className={s.grid}>
+          <ul className={`${s.grid} ${s.offerCards}`}>
             {rest.map((o) => (
               <li key={o.id} className={`${s.card} ${o.tag === 'best' ? s.bmDeal : ''}`}>
                 <div className={s.box} style={{ '--rc': rc(o) } as CSSProperties}>
@@ -359,7 +393,7 @@ export function Packs() {
           <div className={s.packView}>
             {isCosmOffer(open) ? (
               <div className={s.packViewSet} style={{ '--rc': rc(open) } as CSSProperties}>
-                <SetCard o={open} pseudo={pseudo} lg />
+                <SetCard o={open} pseudo={pseudo} av={myAv} lg />
               </div>
             ) : null}
             <ul>
@@ -372,7 +406,8 @@ export function Packs() {
                         <Art l={l} />
                       </span>
                     ) : null}
-                    <b>{label(l)}</b>
+                    {many(l) ? <span className={s.badge}>×{many(l)}</span> : null}
+                    <b>{itemName(l)}</b>
                     {rr ? <small style={{ color: rarCol(rr) }}>{t(rarKey(rr))}</small> : null}
                     {l.kind !== 'coins' ? <small>{itemText(itemOf(l), lang)[1]}</small> : null}
                   </li>

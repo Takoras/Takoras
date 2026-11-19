@@ -8,7 +8,8 @@ import s from './Modal.module.css';
 // Fenêtre modale sur <dialog> natif : le focus reste dedans, Échap ferme, le fond est inerte.
 // `locked` : impossible de fermer (ex. choix du pseudo obligatoire).
 // Toutes les fenêtres s'ouvrent comme la fiche d'un jeton : la carte se déplie depuis son centre avec un petit
-// rebond (ressort 520 / 24), le contenu arrive juste après ; en la fermant (croix, à côté, Échap) elle rétrécit un
+// rebond (ressort 520 / 24), sans zoom (un zoom faisait redessiner les sprites en plus petit, qui sautaient à leur
+// vraie taille à la fin), le contenu arrive juste après ; en la fermant (croix, à côté, Échap) elle rétrécit un
 // peu en s'effaçant complètement, puis se ferme.
 export function Modal({
   open,
@@ -61,7 +62,6 @@ export function Modal({
     const paint = (v: number) => {
       const k = Math.max(0, v);
       el.style.clipPath = `inset(${((1 - k) * 42).toFixed(2)}% ${((1 - k) * 38).toFixed(2)}% round 12px)`;
-      el.style.transform = `scale(${(0.9 + 0.1 * v).toFixed(4)})`;
       el.style.opacity = String(Math.min(1, k * 1.8));
     };
     if (reducedFx()) return;
