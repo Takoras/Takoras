@@ -683,7 +683,6 @@ export const en: Dict = {
     pay_best: 'Best value',
     pay_value: 'Shop value: {n} coins',
     pay_shop: 'Offers',
-    pay_all: 'All',
     pay_coins: 'Coins',
     pay_other: 'Other',
     pay_hot: 'Popular',

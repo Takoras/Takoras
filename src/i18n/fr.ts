@@ -685,7 +685,6 @@ export const fr = {
     pay_best: 'Meilleure offre',
     pay_value: 'Valeur en boutique : {n} pièces',
     pay_shop: 'Offres',
-    pay_all: 'Tout',
     pay_coins: 'Pièces',
     pay_other: 'Autres',
     pay_hot: 'Populaire',
