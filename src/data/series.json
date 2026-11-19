@@ -111,6 +111,18 @@
       "img": "/img/tokens/series-bodako/mousse.png?g=80"
     },
     {
+      "name": "Écorce",
+      "odds": 15,
+      "glow": "#a08478",
+      "img": "/img/tokens/series-bodako/ecorce.png?g=80"
+    },
+    {
+      "name": "Belladone",
+      "odds": 500,
+      "glow": "#4f6fd8",
+      "img": "/img/tokens/series-bodako/belladone.gif?g=80"
+    },
+    {
       "name": "Ronce",
       "odds": 5000,
       "glow": "#5fae7e",
@@ -121,6 +133,12 @@
       "odds": 10000,
       "glow": "#f2c4b6",
       "img": "/img/tokens/series-bodako/coton.gif?g=80"
+    },
+    {
+      "name": "Mandragore",
+      "odds": 750000,
+      "glow": "#8fc46a",
+      "img": "/img/tokens/series-bodako/mandragore.png?g=80"
     }
   ]
 }

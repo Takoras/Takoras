@@ -1200,6 +1200,9 @@ export const en: Dict = {
     Mousse: 'Moss',
     Ronce: 'Bramble',
     Coton: 'Cotton',
+    Écorce: 'Bark',
+    Belladone: 'Belladonna',
+    Mandragore: 'Mandrake',
   },
   app: {
     soon_t: 'Coming soon',

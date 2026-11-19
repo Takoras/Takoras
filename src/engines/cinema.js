@@ -242,6 +242,66 @@ const CINE = (() => {
         vignette(x, w, h, bg, .78);
       },
     },
+    // ---------------------------------------------------------------- Mandragore (Bodako, 1/750 000) : la racine qui se réveille.
+    // Le sol s'ouvre sous le jeton, des racines crème s'enroulent vers lui comme des serpents, des améthystes tournent
+    // autour et se resserrent ; chœur grave et koto, les racines serrent, puis un éclat vert pâle (pas d'écran blanc).
+    Mandragore: {
+      R: 7.4, c: ['#050c07', '#1d3a22', '#d6ebae', '#fffbe6'],
+      init(c) {
+        c.st.roots = Array.from({ length: 6 }, (_, i) => ({ a: i / 6 * TAU + rnd(-.25, .25), ph: rnd(0, 9), d: rnd(0, .5) }));
+        c.st.gems = Array.from({ length: 7 }, (_, i) => ({ a: i / 7 * TAU, r: rnd(.75, 1.05), s: rnd(3, 5) }));
+        c.st.spores = Array.from({ length: 50 }, () => ({ x: rnd(0, c.w), y: rnd(0, c.h), v: rnd(2, 6), p: rnd(0, 9) }));
+      },
+      music(m, R) {
+        const r = 146.8, pent = [0, 2, 3, 7, 8], n = i => pent[((i % 5) + 5) % 5] + 12 * Math.floor(i / 5);
+        // la terre qui gronde, puis le chœur qui s'éveille
+        m.I.sub(m.hz(r, -12), m.T(.1), 3.4, .12);
+        m.I.choir(chordHz(m, r, [0, 7, 12]), m.T(.6), 3.4, .035);
+        [0, 3, 2, 4, 3, 6, 5, 8].forEach((d, i) => m.I.koto(m.hz(r, n(d)), m.T(.4 + i * .42), .065));
+        // les racines serrent : tambours de plus en plus rapprochés
+        for (let s = 3.6, i = 0; s < R - .3; s += lerp(.36, .14, (s - 3.6) / (R - 3.9)), i++) {
+          m.I.taiko(m.T(s), .26 + i * .015);
+          if (i % 2) m.I.koto(m.hz(r, n(5 + (i % 6))), m.T(s), .05);
+        }
+        m.I.strings(chordHz(m, r, [0, 3, 7, 10, 15]), m.T(3.8), 3, .03);
+        m.I.whoosh(m.T(R - .9), .8, .14); m.I.swell(m.T(R - 1.4), 1.3, .12);
+        revealHit(m, R, r, [0, 3, 7, 12, 15], 'koto');
+      },
+      scene(c) {
+        const { x, w, h, cx, cy, M, t, st, dt } = c, [bg, dk, ac, li] = this.c, R = this.R, gem = '#8a3fb6', gemLi = '#c58be0';
+        const k = seg(t, 0, R), grow = E.io(seg(t, 1, R - .5)), squeeze = E.in(seg(t, 4, R), 2);
+        x.fillStyle = bg; x.fillRect(0, 0, w, h);
+        glow(x, cx, cy, M * (.55 + .35 * k), dk, .45 + .35 * k);
+        // spores qui montent doucement
+        st.spores.forEach(p => { p.y -= p.v * dt * (1 + k * 1.5); p.x += Math.sin(t * 1.3 + p.p) * dt * 6; if (p.y < 0) { p.y = h; p.x = rnd(0, w); } P(x, p.x, p.y, 1, rgba(ac, .15 + .3 * Math.sin(t * 2 + p.p))); });
+        // les racines : elles partent du bord, ondulent comme des serpents et s'enroulent vers le jeton
+        st.roots.forEach(rt => {
+          const g = clamp(grow * 1.2 - rt.d * .35), L = M * .7 * g;
+          if (L <= 1) return;
+          for (let s = 0; s < L; s += 1.5) {
+            const u = s / (M * .7), rr = M * .7 - s + M * .1, coil = u * (2.2 + squeeze * 1.6);
+            const a = rt.a + coil + Math.sin(u * 7 + t * 2.4 + rt.ph) * .12;
+            const X = cx + Math.cos(a) * rr, Y = cy + Math.sin(a) * rr * .9;
+            P(x, X, Y, 4, s % 12 < 3 ? li : ac);
+            P(x, X + 1, Y + 4, 2, dk); // le dessous de la racine, plus sombre
+          }
+        });
+        // les améthystes en orbite, qui se resserrent avec les racines
+        st.gspin = (st.gspin || 0) + dt * lerp(.25, 2.6, E.in(k, 2));
+        st.gems.forEach((g, i) => {
+          const a = g.a + st.gspin, rr = M * g.r * lerp(.62, .38, squeeze);
+          const X = cx + Math.cos(a) * rr, Y = cy + Math.sin(a) * rr * .85, s = g.s * (1 + grow * .4);
+          P(x, X - s, Y - s, s * 2, gem); P(x, X - s + 1, Y - s + 1, Math.max(1, s * .7), gemLi);
+          if (i % 2 === 0 && Math.sin(t * 6 + i) > .7) P(x, X + s, Y - s - 2, 1, li); // petit éclat
+        });
+        // le jeton mystère, pris dans les racines, qui tremble de plus en plus
+        coin(x, c.mys, cx + Math.sin(t * 38) * squeeze * 2.2, cy + Math.sin(t * 1.2) * 2, M * .27, { tint: ac, tintA: grow * .4, ang: Math.sin(t * .7) * .35 });
+        glow(x, cx, cy, M * (.2 + grow * .25), ac, .25 + grow * .35);
+        c.fx.shake(squeeze * 3.4);
+        if (t > R - .18) c.fx.flash(ac, .85);
+        vignette(x, w, h, bg, .8);
+      },
+    },
     // ---------------------------------------------------------------- Coton (Bodako, 1/10 000) : un jardin de coton la nuit.
     // Des feuilles poussent du bas, des boules de coton roses tourbillonnent doucement et se resserrent autour du jeton,
     // une petite boîte à musique ; à la fin, un éclat rose tout doux (pas d'écran blanc).

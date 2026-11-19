@@ -1,0 +1,2 @@
+-- Appliquée via MCP (apply_migration « bodako_ecorce_belladone_mandragore ») :
+-- jetons Bodako Écorce 1/15, Belladone 1/500, Mandragore 1/750 000, et leurs actions dans la saison Market Bodako en cours (prix de départ 10).
