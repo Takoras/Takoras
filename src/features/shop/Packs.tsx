@@ -237,9 +237,11 @@ export function Packs() {
     const w = worth(o);
     return (
       <>
-        <p className={s.rar} style={r ? { color: rarCol(r) } : undefined}>
-          {r ? t(rarKey(r)) : '\u00a0'}
-        </p>
+        {r ? (
+          <p className={s.rar} style={{ color: rarCol(r) }}>
+            {t(rarKey(r))}
+          </p>
+        ) : null}
         <ul className={s.offerLines}>
           {one ? (
             one.kind !== 'coins' ? (
@@ -253,6 +255,29 @@ export function Packs() {
           ) : null}
         </ul>
       </>
+    );
+  };
+  // petite case : une seule ligne (rareté, effet, ou le gros du contenu)
+  const short = (o: Offer) => {
+    const r = bestRar(o);
+    if (r)
+      return (
+        <p className={s.rar} style={{ color: rarCol(r) }}>
+          {t(rarKey(r))}
+        </p>
+      );
+    const one = single(o);
+    const head = o.lines[0];
+    return (
+      <p className={s.offerShort}>
+        {one
+          ? one.kind === 'coins'
+            ? '\u00a0'
+            : itemText(itemOf(one), lang)[1]
+          : head
+            ? `${label(head)} +${o.lines.length - 1}`
+            : '\u00a0'}
+      </p>
     );
   };
   const visual = (o: Offer, lg?: boolean) => {
@@ -316,7 +341,7 @@ export function Packs() {
                   ) : null}
                   <div className={s.art}>{visual(o)}</div>
                   <h3>{name(o)}</h3>
-                  {info(o)}
+                  {short(o)}
                   <div className={s.buy}>
                     <b className={`${s.price} ${s.eur}`}>{eur(o.price)}</b>
                     <Button size="sm" variant="gold" onClick={() => see(o)}>
