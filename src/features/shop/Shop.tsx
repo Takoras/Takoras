@@ -32,6 +32,7 @@ import { AutoHeight, Bump } from '@/ui/motion';
 import { Fade, Roll } from '@/ui/Roll';
 import { Segmented } from '@/ui/Segmented';
 import { Swap } from '@/ui/Swap';
+import { Packs } from './Packs';
 
 type Item = ShopItem & {
   deal?: boolean;
@@ -626,6 +627,7 @@ export default function Shop() {
               ) : (
                 <p className="muted">{t('ui.acc_need')}</p>
               )}
+              {inBlack ? null : <Packs />}
             </div>
           ) : (
             <span />
