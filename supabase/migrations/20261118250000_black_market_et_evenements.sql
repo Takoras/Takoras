@@ -8,3 +8,4 @@
 -- Ajustement final : 13 cases par semaine (4 potions courantes, 1 grosse potion jamais en affaire, 1 sablier, 7 cosmétiques), 5 affaires.
 -- Stock par joueur : potions 20, sablier, grosses potions et affaires consommables 10, cosmétiques 1.
 -- Stock par joueur : potions et sablier entre 10 et 25 selon l'objet et la semaine, cosmétiques 1.
+-- Affaires : jusqu'à 3 par rayon, toutes à la une de leur rayon (la grosse potion n'en est jamais une).

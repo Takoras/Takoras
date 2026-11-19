@@ -136,6 +136,7 @@ export default function Shop() {
   // rayon affiché (lu par une révélation en cours : si on a changé de rayon entre-temps, ses effets ne se jouent pas ailleurs)
   const catRef = useRef('potion');
   const gridRef = useRef<HTMLUListElement>(null);
+  const bmTopRef = useRef<HTMLDivElement>(null);
   const shelvesRef = useRef<HTMLDivElement>(null);
   useStaggerIn(pageRef, `.${s.head}, .${s.hero}, .${s.shelf}, .${s.card}, .${s.ticket}`, !!shop.data);
   useSwingAll(
@@ -160,6 +161,21 @@ export default function Shop() {
         { opacity: 1, transform: 'translateX(0) scale(1)' },
       ],
       { duration: 460, delay: 70, easing: 'cubic-bezier(.2,.8,.2,1)', fill: 'backwards' },
+    );
+    // Black Market : les affaires du nouveau rayon arrivent en fondu, l'une après l'autre
+    [...(bmTopRef.current?.children ?? [])].forEach((c, i) =>
+      (c as HTMLElement).animate(
+        [
+          { opacity: 0, translate: '0 8px' },
+          { opacity: 1, translate: '0 0' },
+        ],
+        {
+          duration: 360,
+          delay: i * 60,
+          easing: 'cubic-bezier(.2,.8,.2,1)',
+          fill: 'backwards',
+        },
+      ),
     );
     if (!gridRef.current) return;
     [...gridRef.current.children].forEach((c, i) =>
@@ -503,7 +519,7 @@ export default function Shop() {
     : data?.featured_slot != null
       ? [{ group: cat, slot: data.featured_slot, off: data.off ?? 0, item: null }]
       : [];
-  const feats = inBlack ? allFeats : allFeats.filter((f) => f.group === cat);
+  const feats = allFeats.filter((f) => f.group === cat || !f.group); // Black Market : jusqu'à 3 affaires par rayon
   const featSlots = new Set(feats.map((f) => f.slot));
   const list = items.filter((it, i) => catOf(it) === cat && !featSlots.has(slotOf(it, i)));
   const heroOf = (f: (typeof feats)[number]) => {
@@ -579,7 +595,7 @@ export default function Shop() {
             <div className={`${s.coinView} ${inBlack ? s.bm : ''}`}>
               {inBlack ? (
                 <>
-                  <div className={s.top} data-depth>
+                  <div ref={bmTopRef} className={s.top} data-depth>
                     {feats.map(heroOf)}
                   </div>
                   <div data-depth className={s.bmShelves}>

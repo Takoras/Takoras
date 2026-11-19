@@ -480,7 +480,10 @@ export async function fakeSupabase(
         ends_in: 3600,
         reset_in: 3600,
         reveal_gain: 1,
-        feats: [{ group: 'potion', slot: 2, off: 25, item: 'potion2' }],
+        feats: [
+          { group: 'potion', slot: 2, off: 25, item: 'potion2' },
+          { group: 'potion', slot: 1, off: 67, item: bs.bmSeen ? 'potion1' : null },
+        ],
         items: [
           bs.bmSeen ? deal : { slot: 1, hidden: true, group: 'potion' },
           {

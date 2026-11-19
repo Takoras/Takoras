@@ -70,7 +70,7 @@ test('Black Market : même boutique, cases à ouvrir', async ({ page }) => {
     .first()
     .click();
   await expect(page.getByRole('heading', { level: 1, name: 'Black Market' })).toBeVisible();
-  await page.locator('[data-key="1"] button[class*="cover"]').click();
+  await page.locator('[data-slot="1"] button[class*="cover"]').click();
   await expect.poll(() => calls).toContain('black_market_reveal');
   await page.getByRole('button', { name: /^Acheter · Potion de chance ×1,5/ }).click();
   await expect.poll(() => calls).toContain('black_market_buy');
