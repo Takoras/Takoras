@@ -17,7 +17,7 @@ import { NeedLogin } from '@/app/NeedLogin';
 import { InvTabs } from './Bestiary';
 import { useSwingAll } from '@/ui/useSwing';
 import s from './Inventory.module.css';
-import { Skeleton } from '@/ui/motion';
+import { AutoHeight, Skeleton } from '@/ui/motion';
 
 // rangés par catégorie : potions de chance, objets utiles (sabliers…)
 const ITEM_CATS = [
@@ -64,28 +64,31 @@ export default function Items() {
       ) : !items.data ? (
         <Skeleton n={6} h={190} min={170} />
       ) : list.length ? (
-        <div ref={box} className={s.itemCats}>
-          {ITEM_CATS.map(([k, label]) => {
-            const part = list.filter((x) => itemCat(x.kind) === k);
-            return part.length ? (
-              <section key={k} aria-label={t(label)}>
-                <h2 className={s.itemCatTitle}>{t(label)}</h2>
-                <ul className={s.items} data-depth>
-                  {part.map((it, i) => (
-                    <ItemCard
-                      key={it.item}
-                      i={i}
-                      it={it}
-                      before={() => {
-                        if (box.current) snap.current = moSnap(box.current, '[data-key]');
-                      }}
-                    />
-                  ))}
-                </ul>
-              </section>
-            ) : null;
-          })}
-        </div>
+        // un objet épuisé (dernier exemplaire utilisé) quitte la liste : la hauteur suit en douceur
+        <AutoHeight k={list.map((x) => x.item).join()}>
+          <div ref={box} className={s.itemCats}>
+            {ITEM_CATS.map(([k, label]) => {
+              const part = list.filter((x) => itemCat(x.kind) === k);
+              return part.length ? (
+                <section key={k} aria-label={t(label)}>
+                  <h2 className={s.itemCatTitle}>{t(label)}</h2>
+                  <ul className={s.items} data-depth>
+                    {part.map((it, i) => (
+                      <ItemCard
+                        key={it.item}
+                        i={i}
+                        it={it}
+                        before={() => {
+                          if (box.current) snap.current = moSnap(box.current, '[data-key]');
+                        }}
+                      />
+                    ))}
+                  </ul>
+                </section>
+              ) : null;
+            })}
+          </div>
+        </AutoHeight>
       ) : (
         <div className={s.empty}>
           <p className="muted">{t('ui.inv_items_empty')}</p>

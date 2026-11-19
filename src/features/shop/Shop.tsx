@@ -587,9 +587,12 @@ export default function Shop() {
             <div className={`${s.coinView} ${inBlack ? s.bm : ''}`}>
               {inBlack ? (
                 <>
-                  <div ref={bmTopRef} className={s.top} data-depth>
-                    {feats.map(heroOf)}
-                  </div>
+                  {/* les affaires du rayon : leur nombre change d'un rayon à l'autre, la hauteur suit en douceur */}
+                  <AutoHeight k={cat}>
+                    <div ref={bmTopRef} className={s.top} data-depth>
+                      {feats.map(heroOf)}
+                    </div>
+                  </AutoHeight>
                   <div data-depth className={s.bmShelves}>
                     {shelves}
                   </div>
