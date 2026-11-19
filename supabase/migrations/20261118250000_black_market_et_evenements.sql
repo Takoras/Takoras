@@ -11,3 +11,4 @@
 -- Affaires : jusqu'à 3 par rayon, toutes à la une de leur rayon (la grosse potion n'en est jamais une).
 -- 2026-11-19 : Black Market ouvert tous les jours (sauf Coupé dans l'admin), renouvelé à minuit ; le Market Shop
 -- (bourse_shop_buy) est supprimé, le Black Market est le seul endroit où dépenser ses Market Coins.
+-- 11 cases par jour (3 potions courantes, 1 grosse, 1 sablier, 6 cosmétiques), stock des consommables entre 5 et 15.
