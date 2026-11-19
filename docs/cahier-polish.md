@@ -30,11 +30,15 @@ Règles permanentes : skill `takoras-da` (à relire avant chaque changement visi
 | 10 | Quêtes | Récompense en objet : petite image seule ; les pièces : nombre + icône | ✅ même écriture (×N + image) |
 | 11 | 404 | Page brute (lien souligné, rien du site) | ✅ jeton mystère + bouton |
 | 12 | Boutique, offres | Aperçus de cosmétiques cassés, cases différentes du shop, quantité invisible | ✅ refaites |
-| 13 | Ouverture (téléphone) | Les deux boîtes du bas disparaissent à la révélation et une autre boîte arrive sous la fiche | à faire |
+| 13 | Ouverture (téléphone) | Le téléphone se joue en paysage : même mise en page que l'ordinateur, la boîte reste en place | ✅ vérifié en capture |
 | 14 | Ouverture | Nom du jeton mythique en texte dégradé animé (`namefx`) | ✅ retiré |
 | 15 | Cinématique | Titre du jeton en texte dégradé, lettres qui arrivent floues | ✅ texte blanc, sans flou |
-| 16 | Tout le site | 73 dégradés et ~90 lueurs dans le CSS : trier ce qui est un vrai rendu pixel (garder) et ce qui est décoratif (retirer) | à faire |
-| 17 | Profil | Bannière vide : grand rectangle gris uni | à faire |
+| 16 | Tout le site | Retirés : reflets qui balaient (nom des jetons rares, logo, jeton mythique), halos pulsés, reflet holographique, lueurs de fond de page, du titre et des épingles, barres et chemin du passe en dégradé. Gardés : palettes des mutations, rayons pixel de l'ouverture, traînée du jeton qui tombe, cosmétiques | ✅ |
+| 17 | Profil | Bannière vide : grand rectangle gris uni | ✅ fond pixel à la couleur du meilleur jeton |
 | 18 | Tout le site | Traductions du combat encore présentes dans les fichiers de langue (non affichées) | à nettoyer |
-| 19 | Performances | Mesurer le chargement de chaque page, précharger les données des onglets, tailles d'images | à faire |
-| 20 | Animations | Revue des entrées décalées, rebonds et balancements page par page (fluidité, aucune saccade) | à faire |
+| 19 | Performances | Code de toutes les pages préchargé pendant les temps morts ; données de la boutique, du passe et des succès aussi : ouverture en ~150 ms, déjà remplie | ✅ |
+| 20 | Animations | Mesure automatique des sauts de mise en page sur 10 pages en cliquant chaque bouton (ordi + téléphone), puis suivi image par image. Sauts réels corrigés : affaires du Black Market (340 px d'un coup), liste des objets (250 px d'un coup). Les changements d'onglet suivent déjà en douceur | ✅ |
+| 21 | Offres | Packs et cosmétiques mélangés ; packs dans le désordre | ✅ Packs = pièces, potions, sabliers (9, du moins cher au plus cher) |
+| 22 | Photos de profil | Zoom de 108 % : le bord du dessin (Dragon) était coupé | ✅ taille réelle partout |
+| 23 | Accessibilité | Textes trop pâles : chance des jetons sombres sur l'accueil, « Bientôt » du passe, « Acheter » sans assez de pièces | ✅ lisibles |
+| 24 | Fenêtres | PP « Animée » écrite pour toutes les photos alors que seule l'Étoile est un GIF | à vérifier avec toi |
