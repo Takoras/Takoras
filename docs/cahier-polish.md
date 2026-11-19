@@ -41,4 +41,3 @@ Règles permanentes : skill `takoras-da` (à relire avant chaque changement visi
 | 21 | Offres | Packs et cosmétiques mélangés ; packs dans le désordre | ✅ Packs = pièces, potions, sabliers (9, du moins cher au plus cher) |
 | 22 | Photos de profil | Zoom de 108 % : le bord du dessin (Dragon) était coupé | ✅ taille réelle partout |
 | 23 | Accessibilité | Textes trop pâles : chance des jetons sombres sur l'accueil, « Bientôt » du passe, « Acheter » sans assez de pièces | ✅ lisibles |
-| 24 | Fenêtres | PP « Animée » écrite pour toutes les photos alors que seule l'Étoile est un GIF | à vérifier avec toi |
