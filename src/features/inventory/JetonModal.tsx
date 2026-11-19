@@ -1,13 +1,14 @@
 import { useEffect, useRef, useState, type CSSProperties, type PointerEvent, type ReactNode } from 'react';
 import { hexRGB, jetonOf, MYSTERE, texOf, texScale, vImg, vOdds, glowVars, type Variant } from '@/data/jetons';
 import { useJn } from '@/lib/names';
-import { reducedFx } from '@/lib/settings';
 import { useT } from '@/i18n/useT';
 import { Modal } from '@/ui/Modal';
 import { spring } from '@/ui/spring';
 import { PixelBg } from '@/ui/PixelBg';
 import { useSwing } from '@/ui/useSwing';
-import { TokenId } from '@/ui/TokenCards';
+import { TokenId, TokenLore } from '@/ui/TokenCards';
+import { LORE } from '@/data/lore';
+import { reducedFx, useSettings } from '@/lib/settings';
 import s from './JetonSheet.module.css';
 
 const VS = ['gold', 'celeste', 'ombre'] as const;
@@ -52,6 +53,7 @@ export function JetonModal({
   children?: ReactNode;
 }) {
   const t = useT();
+  const lang = useSettings((x) => x.lang);
   const jn = useJn();
   const coin = useRef<HTMLDivElement>(null);
   const card = useRef<HTMLDivElement>(null);
@@ -146,6 +148,7 @@ export function JetonModal({
   const pv = over && over.n === name ? over.v : variant;
   const setPv = (v: string) => setOver({ n: name, v });
   const j = jetonOf(name ?? '', serie);
+  const lore = LORE[j.name]?.[lang === 'en' ? 1 : 0];
   const tilt = (e: PointerEvent) => {
     const c = coin.current;
     if (!c || reducedFx()) return;
@@ -219,7 +222,11 @@ export function JetonModal({
                   onPointerLeave={untilt}
                   style={!mystery && texScale(j) !== 1 ? { scale: String(texScale(j)) } : undefined}
                 >
-                  <Face cls={locked ? 'px' : vImg(pv)} src={mystery ? MYSTERE : texOf(j)} alt={mystery ? '???' : jn(j.name)} />
+                  <Face
+                    cls={locked ? 'px' : vImg(pv)}
+                    src={mystery ? MYSTERE : texOf(j)}
+                    alt={mystery ? '???' : jn(j.name)}
+                  />
                   {locked ? null : (
                     <i
                       className={s.glare}
@@ -271,6 +278,12 @@ export function JetonModal({
                 </div>
               )}
             </div>
+            {/* à droite : la description du jeton (jamais pour un jeton pas encore trouvé) */}
+            {!mystery && !locked && lore ? (
+              <div className={s.power}>
+                <TokenLore className={`${s.box} ${s.lore}`} text={lore} />
+              </div>
+            ) : null}
           </div>
           {children ? <div className={s.actions}>{children}</div> : null}
         </div>

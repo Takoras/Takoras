@@ -242,11 +242,11 @@ const CINE = (() => {
         vignette(x, w, h, bg, .78);
       },
     },
-    // ---------------------------------------------------------------- Mandragore (Bodako, 1/750 000) : la racine qui se réveille.
-    // Le sol s'ouvre sous le jeton, des racines crème s'enroulent vers lui comme des serpents, des améthystes tournent
-    // autour et se resserrent ; chœur grave et koto, les racines serrent, puis un éclat vert pâle (pas d'écran blanc).
-    Mandragore: {
-      R: 7.4, c: ['#050c07', '#1d3a22', '#d6ebae', '#fffbe6'],
+    // ---------------------------------------------------------------- Belladone (Bodako, 1/750 000) : la fleur de nuit.
+    // Des tiges bordées de bleu s'enroulent vers le jeton comme les pétales qui se referment, des épines rouge sombre
+    // tournent autour et se resserrent ; chœur grave et koto, la fleur serre, puis un éclat bleu pâle (pas d'écran blanc).
+    Belladone: {
+      R: 7.4, c: ['#06050d', '#241a46', '#5a8ff0', '#cfe0ff'],
       init(c) {
         c.st.roots = Array.from({ length: 6 }, (_, i) => ({ a: i / 6 * TAU + rnd(-.25, .25), ph: rnd(0, 9), d: rnd(0, .5) }));
         c.st.gems = Array.from({ length: 7 }, (_, i) => ({ a: i / 7 * TAU, r: rnd(.75, 1.05), s: rnd(3, 5) }));
@@ -268,13 +268,13 @@ const CINE = (() => {
         revealHit(m, R, r, [0, 3, 7, 12, 15], 'koto');
       },
       scene(c) {
-        const { x, w, h, cx, cy, M, t, st, dt } = c, [bg, dk, ac, li] = this.c, R = this.R, gem = '#8a3fb6', gemLi = '#c58be0';
+        const { x, w, h, cx, cy, M, t, st, dt } = c, [bg, dk, ac, li] = this.c, R = this.R, gem = '#5e1f3a', gemLi = '#9a3c5c';
         const k = seg(t, 0, R), grow = E.io(seg(t, 1, R - .5)), squeeze = E.in(seg(t, 4, R), 2);
         x.fillStyle = bg; x.fillRect(0, 0, w, h);
         glow(x, cx, cy, M * (.55 + .35 * k), dk, .45 + .35 * k);
-        // spores qui montent doucement
+        // pollen de nuit qui monte doucement
         st.spores.forEach(p => { p.y -= p.v * dt * (1 + k * 1.5); p.x += Math.sin(t * 1.3 + p.p) * dt * 6; if (p.y < 0) { p.y = h; p.x = rnd(0, w); } P(x, p.x, p.y, 1, rgba(ac, .15 + .3 * Math.sin(t * 2 + p.p))); });
-        // les racines : elles partent du bord, ondulent comme des serpents et s'enroulent vers le jeton
+        // les tiges : elles partent du bord, ondulent et s'enroulent vers le jeton comme des pétales qui se ferment
         st.roots.forEach(rt => {
           const g = clamp(grow * 1.2 - rt.d * .35), L = M * .7 * g;
           if (L <= 1) return;
@@ -283,10 +283,10 @@ const CINE = (() => {
             const a = rt.a + coil + Math.sin(u * 7 + t * 2.4 + rt.ph) * .12;
             const X = cx + Math.cos(a) * rr, Y = cy + Math.sin(a) * rr * .9;
             P(x, X, Y, 4, s % 12 < 3 ? li : ac);
-            P(x, X + 1, Y + 4, 2, dk); // le dessous de la racine, plus sombre
+            P(x, X + 1, Y + 4, 2, dk); // le dessous de la tige, plus sombre
           }
         });
-        // les améthystes en orbite, qui se resserrent avec les racines
+        // les épines rouge sombre en orbite, qui se resserrent avec la fleur
         st.gspin = (st.gspin || 0) + dt * lerp(.25, 2.6, E.in(k, 2));
         st.gems.forEach((g, i) => {
           const a = g.a + st.gspin, rr = M * g.r * lerp(.62, .38, squeeze);
@@ -294,7 +294,7 @@ const CINE = (() => {
           P(x, X - s, Y - s, s * 2, gem); P(x, X - s + 1, Y - s + 1, Math.max(1, s * .7), gemLi);
           if (i % 2 === 0 && Math.sin(t * 6 + i) > .7) P(x, X + s, Y - s - 2, 1, li); // petit éclat
         });
-        // le jeton mystère, pris dans les racines, qui tremble de plus en plus
+        // le jeton mystère, pris dans la fleur, qui tremble de plus en plus
         coin(x, c.mys, cx + Math.sin(t * 38) * squeeze * 2.2, cy + Math.sin(t * 1.2) * 2, M * .27, { tint: ac, tintA: grow * .4, ang: Math.sin(t * .7) * .35 });
         glow(x, cx, cy, M * (.2 + grow * .25), ac, .25 + grow * .35);
         c.fx.shake(squeeze * 3.4);

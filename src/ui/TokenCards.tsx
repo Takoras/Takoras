@@ -8,6 +8,15 @@ import s from './TokenCards.module.css';
 // montré en grand (ouverture, inventaire, profil, combat), c'est le même rendu.
 // Couleur : --tc (la couleur du jeton) ; à défaut rgb(var(--g)).
 
+/** Description du jeton : la même boîte que la fiche d'identité, à droite du jeton (inventaire) */
+export function TokenLore({ text, className }: { text: string; className?: string }) {
+  return (
+    <div className={`${s.card} ${s.lore} ${className ?? ''}`}>
+      <p>{text}</p>
+    </div>
+  );
+}
+
 /** Fiche d'identité : logo de la série, nom, chance en pastille, puis ce qu'on veut dessous (« Tu en as 4 »…) */
 export const TokenId = forwardRef<
   HTMLDivElement,
@@ -22,7 +31,6 @@ export const TokenId = forwardRef<
           <SerieName name={serie} h="2.2em" />
         </span>
       ) : null}
-      {/* jeton rare : un reflet à sa couleur balaie le nom (comme à la révélation du tirage) */}
       <h2 className={`${s.name} ${odds != null && odds >= 1000 ? s.shine : ''}`}>{name}</h2>
       {/* la chance défile jusqu'à sa nouvelle valeur (changement de mutation) */}
       <span className={s.rarity}>

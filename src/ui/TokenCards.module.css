@@ -129,3 +129,14 @@
     padding: 14px 18px;
   }
 }
+
+/* ---------- description (fiche de l'inventaire) ---------- */
+.lore {
+  padding: var(--s-5) var(--s-6);
+}
+.lore p {
+  margin: 0;
+  color: var(--text-2);
+  font-size: var(--fs-md);
+  line-height: 1.55;
+}

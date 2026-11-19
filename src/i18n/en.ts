@@ -1202,7 +1202,6 @@ export const en: Dict = {
     Coton: 'Cotton',
     Écorce: 'Bark',
     Belladone: 'Belladonna',
-    Mandragore: 'Mandrake',
   },
   app: {
     soon_t: 'Coming soon',

@@ -192,6 +192,11 @@
     boxIn 0.5s ease-out var(--d, 0.29s) both,
     drift var(--fl) ease-in-out 0.9s infinite;
 }
+.sheet .power > .lore {
+  --tilt: 3deg;
+  --fl: 7.5s;
+  max-width: 340px;
+}
 .sheet .power > .rs {
   --tilt: 3deg;
   --fl: 7.5s;

@@ -1,0 +1,2 @@
+-- Appliquée via MCP (apply_migration « bodako_virus_belladone_fix ») :
+-- Belladone passe à 1/750 000, Mandragore devient Virus (1/500) ; mêmes changements sur leurs actions du Market Bodako en cours.
