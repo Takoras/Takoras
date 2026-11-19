@@ -690,6 +690,7 @@ export const fr = {
     pay_p2: 'Sac',
     pay_p3: 'Coffre',
     pay_p4: 'Trésor',
+    pay_cosm: 'Cosmétique exclusif',
     bs_days: '{n} j restants',
     bs_score: 'Score',
     bs_market: 'Marché',

@@ -6,19 +6,25 @@ import { useSwingAll } from '@/ui/useSwing';
 import s from './Shop.module.css';
 
 // Packs en euros (aperçu : les paiements ne sont pas encore ouverts). Plus le pack est gros, plus il est avantageux.
-type Line = { img: string; n: number; key: Key; m?: number };
-const POTION_PRICE: Record<number, number> = { 2: 300, 10: 1500, 25: 4500, 50: 10000, 100: 30000 };
-const HOURGLASS = 600;
-const pot = (m: number, n: number): Line => ({ img: `/img/potions/chance-${m}.png`, n, key: 'ui.pay_potion', m });
-const glass = (n: number): Line => ({ img: '/img/objets/sablier.png', n, key: 'ui.pay_glass' });
+type Line = { img: string; n: number; key: Key; m?: number; worth: number };
+const POTION_PRICE: Record<number, number> = { 25: 4500, 50: 10000, 100: 30000, 250: 60000, 500: 65000 };
+const pot = (m: number, n: number): Line => ({
+  img: `/img/potions/chance-${m}.png`,
+  n,
+  key: 'ui.pay_potion',
+  m,
+  worth: POTION_PRICE[m] ?? 0,
+});
+const glass = (n: number): Line => ({ img: '/img/objets/sablier.png', n, key: 'ui.pay_glass', worth: 600 });
+// cosmétique propre aux packs : dessin à venir, il ne compte pas dans la valeur affichée
+const cosm: Line = { img: '/img/jetons/mystere.png', n: 1, key: 'ui.pay_cosm', worth: 0 };
 const PACKS: { name: Key; price: number; coins: number; lines: Line[]; best?: boolean }[] = [
-  { name: 'ui.pay_p1', price: 2.99, coins: 5000, lines: [pot(2, 3), pot(10, 1), glass(1)] },
-  { name: 'ui.pay_p2', price: 4.99, coins: 12000, lines: [pot(10, 3), pot(25, 1), glass(2)] },
-  { name: 'ui.pay_p3', price: 9.99, coins: 30000, lines: [pot(25, 2), pot(50, 1), glass(3)] },
-  { name: 'ui.pay_p4', price: 19.99, coins: 75000, lines: [pot(50, 2), pot(100, 1), glass(5)], best: true },
+  { name: 'ui.pay_p1', price: 2.99, coins: 8000, lines: [pot(25, 2), pot(50, 1), glass(1)] },
+  { name: 'ui.pay_p2', price: 4.99, coins: 20000, lines: [pot(50, 2), pot(100, 1), glass(2)] },
+  { name: 'ui.pay_p3', price: 9.99, coins: 50000, lines: [pot(100, 2), pot(250, 1), glass(3), cosm] },
+  { name: 'ui.pay_p4', price: 19.99, coins: 200000, lines: [pot(250, 2), pot(500, 1), glass(5), cosm], best: true },
 ];
-const valueOf = (p: (typeof PACKS)[number]) =>
-  p.coins + p.lines.reduce((v, l) => v + l.n * (l.m ? (POTION_PRICE[l.m] ?? 0) : HOURGLASS), 0);
+const valueOf = (p: (typeof PACKS)[number]) => p.coins + p.lines.reduce((v, l) => v + l.n * l.worth, 0);
 
 export function Packs() {
   const t = useT();

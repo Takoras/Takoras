@@ -688,6 +688,7 @@ export const en: Dict = {
     pay_p2: 'Bag',
     pay_p3: 'Chest',
     pay_p4: 'Treasure',
+    pay_cosm: 'Exclusive cosmetic',
     bs_days: '{n} days left',
     bs_score: 'Score',
     bs_market: 'Market',
