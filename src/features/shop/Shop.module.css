@@ -710,32 +710,46 @@
   }
 }
 
-/* ---------- packs en euros, tout en bas de la boutique ---------- */
+/* ---------- offres en euros, tout en bas de la boutique ---------- */
 .packs {
   display: grid;
   gap: var(--s-4);
   padding-top: var(--s-6);
   border-top: 1px solid rgb(255 255 255 / 7%);
 }
-.packs > h2 {
+.packHead {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--s-3);
+}
+.packHead h2 {
   margin: 0;
   font-family: var(--font-display);
   font-size: clamp(24px, 2.4vw, 32px);
 }
 .packGrid {
   display: grid;
-  grid-template-columns: repeat(4, minmax(0, 1fr));
+  grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
   gap: var(--s-4);
+  padding-top: 10px;
 }
 .pack {
   --tilt: -0.6deg;
   position: relative;
   display: grid;
+  justify-items: center;
   align-content: start;
-  gap: var(--s-3);
-  padding: var(--s-5) var(--s-4) var(--s-4);
+  gap: 6px;
+  padding: var(--s-4);
+  border: 0;
   border-radius: 14px;
   background: var(--surface);
+  color: inherit;
+  font: inherit;
+  text-align: center;
+  cursor: pointer;
   rotate: calc(var(--tilt) + var(--swing, 0deg));
   transform-origin: 50% 0;
   transition:
@@ -758,6 +772,7 @@
   top: -10px;
   left: 50%;
   translate: -50% 0;
+  z-index: 1;
   padding: 2px 10px;
   border-radius: var(--r-pill);
   background: var(--gold);
@@ -766,40 +781,93 @@
   font-weight: 800;
   white-space: nowrap;
 }
-.pack h3 {
-  margin: 0;
+.packArt {
+  position: relative;
+  display: grid;
+  place-items: center;
+  width: 100%;
+  height: 110px;
+  border-radius: 10px;
+  background: color-mix(in srgb, var(--rc) 12%, transparent);
+}
+.packArt img {
+  max-width: 88px;
+  max-height: 88px;
+  object-fit: contain;
+}
+.packArt img.wide {
+  max-width: 90%;
+  max-height: 70px;
+}
+.packMore {
+  position: absolute;
+  right: 8px;
+  bottom: 6px;
+  padding: 1px 7px;
+  border-radius: var(--r-pill);
+  background: var(--surface-3);
+  font-size: var(--fs-xs);
+}
+.packName {
   font-family: var(--font-display);
   font-size: var(--fs-lg);
-  text-align: center;
 }
-.packCoins {
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  gap: 6px;
-  margin: 0;
-  color: var(--gold-hi);
-  font-family: var(--font-display);
-  font-size: 24px;
+.pack small {
+  min-height: 1.3em;
+  color: var(--muted);
+  font-size: var(--fs-xs);
   font-weight: 800;
 }
-.pack ul {
+.packPrice {
+  margin-top: 4px;
+  padding: 5px 14px;
+  border-radius: var(--r-pill);
+  background: var(--accent);
+  color: #fff;
+  font-weight: 800;
+}
+.packView {
   display: grid;
-  gap: 6px;
+  gap: var(--s-4);
+}
+.packView ul {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+  gap: var(--s-3);
   margin: 0;
   padding: 0;
   list-style: none;
 }
-.pack li {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  font-size: var(--fs-sm);
+.packView li {
+  display: grid;
+  justify-items: center;
+  gap: 4px;
+  padding: var(--s-3);
+  border-radius: 12px;
+  background: color-mix(in srgb, var(--rc) 10%, var(--surface));
+  text-align: center;
 }
-.pack li img {
+.packView li small {
+  color: var(--muted);
+  font-size: var(--fs-xs);
+}
+.packViewArt {
+  display: grid;
+  place-items: center;
+  width: 100%;
+  height: 120px;
+}
+.packViewArt img {
+  max-width: 100px;
+  max-height: 100px;
   object-fit: contain;
 }
+.packViewArt img.wide {
+  max-width: 100%;
+  max-height: 80px;
+}
 .packValue {
+  margin: 0;
   color: var(--muted);
   text-align: center;
 }
@@ -807,7 +875,7 @@
   display: grid;
   justify-items: center;
   gap: 1px;
-  padding: 9px;
+  padding: 10px;
   border: 0;
   border-radius: 8px;
   background: var(--accent);
@@ -821,14 +889,4 @@
 }
 .packBuy small {
   font-size: var(--fs-xs);
-}
-@media (max-width: 1100px) {
-  .packGrid {
-    grid-template-columns: repeat(2, minmax(0, 1fr));
-  }
-}
-@media (max-width: 520px) {
-  .packGrid {
-    grid-template-columns: minmax(0, 1fr);
-  }
 }
