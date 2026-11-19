@@ -41,3 +41,8 @@ Règles permanentes : skill `takoras-da` (à relire avant chaque changement visi
 | 21 | Offres | Packs et cosmétiques mélangés ; packs dans le désordre | ✅ Packs = pièces, potions, sabliers (9, du moins cher au plus cher) |
 | 22 | Photos de profil | Zoom de 108 % : le bord du dessin (Dragon) était coupé | ✅ taille réelle partout |
 | 23 | Accessibilité | Textes trop pâles : chance des jetons sombres sur l'accueil, « Bientôt » du passe, « Acheter » sans assez de pièces | ✅ lisibles |
+| 24 | Fiche du jeton | Colonne de droite vide (ancien pouvoir de combat) | ✅ description de chaque jeton (FR + EN), cachée tant qu'il n'est pas trouvé |
+| 25 | Textes | Détecteur automatique sur 10 pages, FR + EN, ordi + téléphone, pseudo long : aucun texte coupé ni débordant | ✅ |
+| 26 | Qualité « patate » | Aucune animation en boucle sur l'accueil, l'inventaire, la boutique et le passe | ✅ |
+| 27 | Ouverture mutée | Étiquette OMBRE identique dans la cinématique et sur la fiche | ✅ |
+| 28 | Market (serveur) | La colonne `hype` garde une précision infinie : chaque tirage allonge le nombre (déjà des milliers de chiffres) | à valider avec toi (arrondi en base) |
