@@ -108,37 +108,36 @@ const OFFERS: Offer[] = [
     cat: 'pack',
     name: ['Trésor', 'Treasure'],
     price: 19.99,
-    lines: [c(200000), p(250, 4), p(500, 3), h(5)],
-    tag: 'hot',
+    lines: [c(260000), p(250, 5), p(500, 4), h(10)],
   },
   {
-    id: 'b_lava',
+    id: 'p25',
     cat: 'pack',
-    name: ['Bundle Lave', 'Lava bundle'],
-    price: 14.99,
-    lines: [k('n_lava'), k('au_lava'), c(80000), p(100, 6), h(5)],
+    name: ['Caisse', 'Crate'],
+    price: 7.99,
+    lines: [c(35000), p(100, 3), p(250, 1), h(2)],
   },
   {
-    id: 'b_galaxy',
+    id: 'p30',
     cat: 'pack',
-    name: ['Bundle Galaxie', 'Galaxy bundle'],
-    price: 17.99,
-    lines: [k('au_galaxy'), k('fx_galaxy'), c(120000), p(250, 5), h(6)],
+    name: ['Réserve', 'Stockpile'],
+    price: 12.99,
+    lines: [c(80000), p(250, 3), p(500, 1), h(4)],
   },
   {
-    id: 'b_dragon',
+    id: 'p45',
     cat: 'pack',
-    name: ['Bundle Dragon', 'Dragon bundle'],
+    name: ['Gros butin', 'Big loot'],
+    price: 16.99,
+    lines: [c(220000), p(250, 5), p(500, 3), h(8)],
+  },
+  {
+    id: 'p5',
+    cat: 'pack',
+    name: ['Trésor royal', 'Royal treasure'],
     price: 19.99,
-    lines: [k('a_dragon'), k('b_dragon'), c(150000), p(500, 4), h(8)],
+    lines: [c(320000), p(250, 6), p(500, 5), h(12)],
     tag: 'best',
-  },
-  {
-    id: 'b_aurora',
-    cat: 'pack',
-    name: ['Bundle Aurore', 'Aurora bundle'],
-    price: 19.99,
-    lines: [k('n_aurora'), k('fx_aurora'), c(200000), p(500, 3), p(250, 3), h(8)],
   },
   { id: 'h1', cat: 'other', name: ['Sabliers', 'Hourglasses'], price: 2.99, lines: [h(5)] },
   { id: 'h2', cat: 'other', name: ['Caisse de sabliers', 'Hourglass crate'], price: 6.99, lines: [h(15)], tag: 'best' },
@@ -254,7 +253,8 @@ export function Packs() {
   const list = OFFERS.filter((o) => o.cat === cat);
   // la grosse promo : la meilleure offre du rayon, sinon la plus populaire
   const promo = list.find((o) => o.tag === 'best') ?? list.find((o) => o.tag === 'hot') ?? list[0];
-  const rest = list.filter((o) => o !== promo);
+  // les petites offres, de la moins chère à la plus chère
+  const rest = list.filter((o) => o !== promo).sort((a, b) => a.price - b.price);
   const rc = (o: Offer) => {
     const r = bestRar(o);
     return r ? rarCol(r) : 'var(--gold)';
