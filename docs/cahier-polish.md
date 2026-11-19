@@ -45,4 +45,4 @@ Règles permanentes : skill `takoras-da` (à relire avant chaque changement visi
 | 25 | Textes | Détecteur automatique sur 10 pages, FR + EN, ordi + téléphone, pseudo long : aucun texte coupé ni débordant | ✅ |
 | 26 | Qualité « patate » | Aucune animation en boucle sur l'accueil, l'inventaire, la boutique et le passe | ✅ |
 | 27 | Ouverture mutée | Étiquette OMBRE identique dans la cinématique et sur la fiche | ✅ |
-| 28 | Market (serveur) | La colonne `hype` garde une précision infinie : chaque tirage allonge le nombre (déjà des milliers de chiffres) | à valider avec toi (arrondi en base) |
+| 28 | Market (serveur) | 11 colonnes en précision infinie (hype jusqu'à 3 760 chiffres) | ✅ précision fixe, prix inchangés, achat et revente testés |
