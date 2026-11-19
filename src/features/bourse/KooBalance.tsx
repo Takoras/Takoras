@@ -32,7 +32,7 @@ export function KooBalance({ className }: { className?: string }) {
   return (
     <span className={s.wrap}>
       <NavLink to="/market" className={className} data-koo-target>
-        <img className="px" src="/img/koo.png" alt={t('ui.bs_koo')} width={20} height={20} />
+        <img className="px" src="/img/market-coin.png" alt={t('ui.bs_koo')} width={20} height={20} />
         <Tween value={me.value} ms={900} pow={5} format={n} />
       </NavLink>
       <dl className={s.panel}>

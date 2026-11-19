@@ -23,7 +23,7 @@ export default function Home() {
   const t = useT();
   const [pi, setPi] = useState(0);
   const pull: { name: string; img: string; soon?: boolean } = PULLS[pi] ??
-    PULLS[0] ?? { name: 'Takoras', img: '/img/jetons/takoras.png' };
+    PULLS[0] ?? { name: 'Takoras', img: '/img/tokens/takoras.png' };
   const user = useAuth((x) => x.user);
   const me = useMe();
   const admin = !!me.data?.admin; // Bodako : ouvrable par les admins seulement pour l'instant

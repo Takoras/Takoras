@@ -21,7 +21,7 @@ export const ITEMS: [string, string][] = [
   ['potion250', 'Potion ×250 (10 tirages)'],
   ['potion500', 'Potion ×500 (5 tirages)'],
   ['hourglass', 'Sablier 1 h'],
-  ['a_etoile', 'Photo animée Étoile'],
+  ['a_star', 'Photo animée Étoile'],
   ...Object.keys(BANNER_IMG).map((b): [string, string] => [`b_${b}`, `Bannière ${bannerName(b, 'fr')}`]),
 ];
 export const itemLabel = (id: string) => ITEMS.find(([k]) => k === id)?.[1] ?? id;

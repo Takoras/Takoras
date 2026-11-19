@@ -19,7 +19,7 @@ import s from './Home.module.css';
 import { Bump } from '@/ui/motion';
 import { Tween } from '@/ui/Tween';
 
-const Coin = () => <img className="px" src="/img/piece.png" alt="" width={16} height={16} />;
+const Coin = () => <img className="px" src="/img/coin.png" alt="" width={16} height={16} />;
 
 // Stock de pulls, boutons d'ouverture et améliorations (stock max, recharge)
 export function Actions({ serie = 'Takoras' }: { serie?: string } = {}) {
@@ -59,7 +59,7 @@ export function Actions({ serie = 'Takoras' }: { serie?: string } = {}) {
         {coin ? (
           <div className={s.stock} role="status">
             <span className={s.coinPrice}>
-              <img className="px" src="/img/piece.png" alt="" width={28} height={28} />
+              <img className="px" src="/img/coin.png" alt="" width={28} height={28} />
               {COIN_PULL.one.toLocaleString(locale(lang))}
             </span>
             <span className="muted">{t('ui.coin_pull_each')}</span>
@@ -92,7 +92,7 @@ export function Actions({ serie = 'Takoras' }: { serie?: string } = {}) {
             >
               <span className={s.openLbl}>{t('ui.open1')}</span>
               <span className={s.openPrice}>
-                <img className="px" src="/img/piece.png" alt="" width={18} height={18} />
+                <img className="px" src="/img/coin.png" alt="" width={18} height={18} />
                 {COIN_PULL.one.toLocaleString(locale(lang))}
               </span>
             </button>
@@ -154,7 +154,7 @@ export function Upgrades() {
   return (
     <div className={s.ups} aria-label={t('ui.upgrades')} role="group">
       <Up
-        icon="/img/objets/recharge.png"
+        icon="/img/items/recharge.png"
         title={t('ui.up_stock')}
         now={String(e.max)}
         next={e.max < TOP_MAX ? String(nextMax(e.max)) : null}
@@ -166,7 +166,7 @@ export function Upgrades() {
         onUp={() => void upgrade('stock')}
       />
       <Up
-        icon="/img/objets/sablier.png"
+        icon="/img/items/hourglass.png"
         title={t('ui.up_regen')}
         now={mmss(e.regen * 1000)}
         next={e.regen > 60 ? mmss((e.regen - 10) * 1000) : null}

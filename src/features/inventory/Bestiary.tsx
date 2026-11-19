@@ -42,7 +42,7 @@ import s from './Inventory.module.css';
 import { Presence, Skeleton } from '@/ui/motion';
 
 const SORTS: Sort[] = ['rarity', 'count', 'recent', 'name'];
-const Coin = () => <img className={`px ${s.coin}`} src="/img/piece.png" alt="" width={14} height={14} />;
+const Coin = () => <img className={`px ${s.coin}`} src="/img/coin.png" alt="" width={14} height={14} />;
 
 // Les deux onglets du menu Inventaire
 export function InvTabs() {

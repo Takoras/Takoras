@@ -269,7 +269,7 @@ function Card({
             onKeyDown={(e) => e.key === 'Enter' && (e.currentTarget as HTMLInputElement).blur()}
             aria-label={`Prix de ${it.id}`}
           />
-          <img className="px" src="/img/piece.png" alt="" width={16} height={16} />
+          <img className="px" src="/img/coin.png" alt="" width={16} height={16} />
         </div>
       </div>
       <div className={s.chips}>

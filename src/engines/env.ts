@@ -93,9 +93,9 @@ export const serieTheme = (name?: string) => SERIE_THEME[name ?? ''] ?? TAKORAS_
 
 // Le seul type de pull (même objet que l'ancien site)
 export const PULLS = [
-  { group: '', name: 'Takoras', color: 'takoras', price: 100, free: true, img: '/img/jetons/takoras.png' },
+  { group: '', name: 'Takoras', color: 'takoras', price: 100, free: true, img: '/img/tokens/takoras.png' },
   // Bodako : on peut la choisir et voir sa collection ; l'ouverture attend le tirage par série côté serveur
-  { group: '', name: 'Bodako', color: 'bodako', price: 300, free: false, img: '/img/jetons/bodako.png', soon: true },
+  { group: '', name: 'Bodako', color: 'bodako', price: 300, free: false, img: '/img/tokens/bodako.png', soon: true },
 ] as { group: string; name: string; color: string; price: number; free: boolean; img: string; soon?: boolean }[];
 
 // Crochets : ce que le moteur demande au reste du site (économie, historique…). React les branche au démarrage.

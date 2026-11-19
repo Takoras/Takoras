@@ -60,9 +60,9 @@ const isHidden = (x: Slot): x is Hidden => !!(x as Hidden).hidden;
 const slotOf = (x: Slot, i: number) => x.slot ?? i + 1;
 // rayons de la boutique (l'icône est un objet du rayon)
 const CATS: { k: string; label: Key; icon: string }[] = [
-  { k: 'potion', label: 'ui.cat_potions', icon: '/img/potions/chance-10.png' },
-  { k: 'util', label: 'ui.cat_pulls', icon: '/img/objets/sablier.png' },
-  { k: 'banner', label: 'ui.cat_cosm', icon: '/img/pp/bleu.png' },
+  { k: 'potion', label: 'ui.cat_potions', icon: '/img/potions/luck-10.png' },
+  { k: 'util', label: 'ui.cat_pulls', icon: '/img/items/hourglass.png' },
+  { k: 'banner', label: 'ui.cat_cosm', icon: '/img/avatars/blue.png' },
 ];
 const catOf = (it: Slot) =>
   isHidden(it)
@@ -82,7 +82,7 @@ const kooPrice = (p: number, kind: string) =>
   Math.max(5, Math.ceil((Math.sqrt(p) * (kind === 'banner' || kind === 'avatar' || isCosmetic(kind) ? 4 : 1)) / 5) * 5);
 const Pay = createContext({ koo: false, black: false, spend: 0 });
 const KooIcon = ({ size = 14 }: { size?: number }) => (
-  <img className="px" src="/img/koo.png" alt="" width={size} height={size} />
+  <img className="px" src="/img/market-coin.png" alt="" width={size} height={size} />
 );
 // la pièce gagnée en ouvrant une case : pièce du jeu, ou Market Coin au Black Market
 const RevealCoin = ({ size }: { size: number }) => {
@@ -90,7 +90,7 @@ const RevealCoin = ({ size }: { size: number }) => {
   return black ? <KooIcon size={size} /> : <Coin size={size} />;
 };
 const Coin = ({ size = 14 }: { size?: number }) => (
-  <img className="px" src="/img/piece.png" alt="" width={size} height={size} />
+  <img className="px" src="/img/coin.png" alt="" width={size} height={size} />
 );
 
 // Boutique mystère, renouvelée chaque jour à minuit : chaque objet en stock est caché dans une case. La révéler est
@@ -482,7 +482,7 @@ export default function Shop() {
         setTimeout(
           () =>
             (black0
-              ? (land: () => void) => flyIcons(rect, '/img/koo.png', 1, '[data-koo-target]', land)
+              ? (land: () => void) => flyIcons(rect, '/img/market-coin.png', 1, '[data-koo-target]', land)
               : (land: () => void) => flyCoins(rect, 3, land))(() => {
               sfx.pop();
               if (landed) return;

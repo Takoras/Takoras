@@ -31,7 +31,7 @@ export function Effects({ reserve = false }: { reserve?: boolean }) {
       ))}
       {fast ? (
         <li>
-          <img className="px" src="/img/objets/sablier.png" alt="" width={18} height={18} /> Sablier actif ·{' '}
+          <img className="px" src="/img/items/hourglass.png" alt="" width={18} height={18} /> Sablier actif ·{' '}
           {t('ui.fx_fast', { t: hms(fast) })}
         </li>
       ) : null}

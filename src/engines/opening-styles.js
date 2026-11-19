@@ -103,7 +103,7 @@ const MASK = new Uint8Array(G * G).fill(1);
       // image illisible : on garde tout le carré
     }
   };
-  im.src = '/img/jetons/mystere.png';
+  im.src = '/img/tokens/mystery.png';
 }
 const inCoin = (x, y) => x >= 0 && y >= 0 && x < G && y < G && MASK[y * G + x] === 1;
 // une fissure : marche en escalier (pas de diagonale lisse) qui part d'un point et peut se diviser

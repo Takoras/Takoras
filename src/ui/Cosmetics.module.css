@@ -27,15 +27,15 @@
     background-position: 0 0;
   }
 }
-.n_or {
+.n_gold {
   --c: #f2c230;
   --l: #fff7d1;
 }
-.n_celeste {
+.n_celestial {
   --c: #dbeaff;
   --l: #fff;
 }
-.n_ombre {
+.n_shadow {
   --c: #a66bff;
   --l: #f3e8ff;
 }
@@ -43,23 +43,23 @@
 .flat {
   color: var(--c);
 }
-.n_rouge {
+.n_red {
   --c: #ff6b6b;
 }
-.n_menthe {
+.n_mint {
   --c: #5eead4;
 }
-.n_lilas {
+.n_lilac {
   --c: #c4b5fd;
 }
-.n_ciel {
+.n_sky {
   --c: #7dd3fc;
 }
-.n_peche {
+.n_peach {
   --c: #fdba74;
 }
 /* contour (rare) : texte blanc cerné d'un trait pixel net de 2 px, comme les logos dessinés */
-.n_contour {
+.n_outline {
   --c: #fff;
   text-shadow:
     2px 0 0 #2140b8,
@@ -72,7 +72,7 @@
     -2px -2px 0 #2140b8;
 }
 /* relief (épique) : lettres en volume, des marches de pixels dessous, qui sautillent un peu */
-.n_relief {
+.n_emboss {
   --c: #fde68a;
   display: inline-block;
   text-shadow:
@@ -136,7 +136,7 @@
   }
 }
 /* lave (légendaire) : bandes jaune / orange / rouge qui coulent en diagonale, par crans */
-.n_lave {
+.n_lava {
   background-image: repeating-linear-gradient(
     120deg,
     #ffe08a 0 0.3em,
@@ -154,7 +154,7 @@
   }
 }
 /* aurore (mythique) : rubans turquoise, violet, rose qui ondulent, un reflet blanc qui passe, cerné d'un trait net */
-.n_aurore {
+.n_aurora {
   background-image:
     linear-gradient(110deg, transparent 0 46%, #fff 46% 50%, transparent 50% 100%),
     repeating-linear-gradient(
@@ -325,7 +325,7 @@
 }
 @media (prefers-reduced-motion: reduce) {
   .name,
-  .n_relief,
+  .n_emboss,
   .n_glitch {
     animation: none;
   }

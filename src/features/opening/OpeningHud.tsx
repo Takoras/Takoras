@@ -97,7 +97,7 @@ function Hud({ on, shown, serie }: { on: boolean; shown: boolean; serie: string 
     <div ref={ref} className={`${s.hud} ${shown ? s.on : ''}`} aria-hidden={!shown}>
       {/* à gauche : le prochain tirage ×10 de cette série */}
       <div className={`${s.box} ${s.left} ${pityIn <= 1 ? s.ready : ''}`} style={{ '--i': 0 } as React.CSSProperties}>
-        <img data-depth className={`px ${s.big}`} src="/img/potions/chance-100.png" alt="" />
+        <img data-depth className={`px ${s.big}`} src="/img/potions/luck-100.png" alt="" />
         <span data-depth className={s.col}>
           <small>{T.pity}</small>
           <b className={s.num}>{pityIn <= 1 ? T.pityNow : T.pityIn.replace('{n}', fmt(pityIn))}</b>
@@ -110,7 +110,7 @@ function Hud({ on, shown, serie }: { on: boolean; shown: boolean; serie: string 
       <div className={`${s.box} ${s.right}`} style={{ '--i': 1 } as React.CSSProperties}>
         {paid ? (
           <span data-depth className={s.row}>
-            <img className="px" src="/img/piece.png" alt="" />
+            <img className="px" src="/img/coin.png" alt="" />
             <span className={s.col}>
               <small>{T.coins}</small>
               <b className={s.num}>
@@ -123,7 +123,7 @@ function Hud({ on, shown, serie }: { on: boolean; shown: boolean; serie: string 
           </span>
         ) : (
           <span data-depth className={s.row}>
-            <img className="px" src="/img/jetons/takoras.png" alt="" />
+            <img className="px" src="/img/tokens/takoras.png" alt="" />
             <span className={s.col}>
               <small>{T.pulls}</small>
               <b className={s.num}>
@@ -135,7 +135,7 @@ function Hud({ on, shown, serie }: { on: boolean; shown: boolean; serie: string 
         )}
         <hr className={s.sep} />
         <span data-depth className={s.row}>
-          <img className="px" src="/img/potions/chance-10.png" alt="" />
+          <img className="px" src="/img/potions/luck-10.png" alt="" />
           <span className={s.col}>
             <small>{T.luck}</small>
             <b className={`${s.num} ${e.luck > 1 ? s.lucky : ''}`}>{luckTxt}</b>

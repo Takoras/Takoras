@@ -8,7 +8,7 @@ import { LOCALE, SERIES, jn, sfx, texOf, t, vCls, vOdds } from './env';
 import FILES from '../data/sounds.json';
 import './cinema.css';
 
-const MYSTERE = '/img/jetons/mystere.png';
+const MYSTERE = '/img/tokens/mystery.png';
 
 const tr = t; // traductions (dans les films, « t » est le temps)
 
@@ -49,7 +49,7 @@ const CINE = (() => {
   const tc = tintCv.getContext('2d'); tc.imageSmoothingEnabled = false;
   function coin(x, im, cx, cy, size, o = {}) {
     if (!im || !im.complete || !im.naturalWidth || size < 1) return;
-    if (im.src && im.src.includes('/img/jetons/serie-')) size *= 1.25; // dessin 80×80 : le corps garde sa taille
+    if (im.src && im.src.includes('/img/tokens/series-')) size *= 1.25; // dessin 80×80 : le corps garde sa taille
     const { ang = 0, alpha = 1, tint, tintA = 0, rot = 0 } = o;
     const c = Math.max(.05, Math.abs(Math.cos(ang)));
     let src = im;

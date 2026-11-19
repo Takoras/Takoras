@@ -97,7 +97,7 @@ export function screenFlash(color: string, power: number, ms: number) {
 
 // Pièces qui jaillissent de la case et s'envolent vers le solde (en haut à droite), en ralentissant à l'arrivée.
 export function flyCoins(from: DOMRect, n: number, onLand: (i: number) => void) {
-  flyIcons(from, '/img/piece.png', n, '[data-coin-target]', onLand);
+  flyIcons(from, '/img/coin.png', n, '[data-coin-target]', onLand);
 }
 
 // moment du dernier vol (rewardFx : pas de deuxième vol pour le même gain)

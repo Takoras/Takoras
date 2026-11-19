@@ -6,6 +6,6 @@ import { GRID } from '@/data/jetons';
 // (Le jeton 3D de l'ouverture et la fiche s'agrandissent en entier : exclus ici.) Spécificité nulle (:where) : toute
 // règle de page peut la compléter.
 export function installGridCss() {
-  const css = `img:where([src*="/img/jetons/serie-"]):not(:where(.spin img, .jm-coin img)){--ts:${GRID / 64};scale:var(--ts)}`;
+  const css = `img:where([src*="/img/tokens/series-"]):not(:where(.spin img, .jm-coin img)){--ts:${GRID / 64};scale:var(--ts)}`;
   document.head.appendChild(Object.assign(document.createElement('style'), { textContent: css }));
 }

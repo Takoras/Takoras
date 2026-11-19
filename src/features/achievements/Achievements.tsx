@@ -33,17 +33,17 @@ export type Ach = {
 };
 const CATS = ['pull', 'coll', 'rare', 'mut', 'eco', 'shop', 'pass', 'quest', 'social', 'cosm', 'time'] as const;
 const CAT_IMG: Record<string, string> = {
-  pull: '/img/jetons/mystere.png',
+  pull: '/img/tokens/mystery.png',
   coll: texOf(jetonOf('Mobu')),
   rare: texOf(jetonOf('Takoras')),
   mut: '/img/stamps/ombre.png',
-  eco: '/img/piece.png',
-  shop: '/img/potions/chance-10.png',
+  eco: '/img/coin.png',
+  shop: '/img/potions/luck-10.png',
   pass: '/img/ui/ico/star.png',
-  quest: '/img/objets/recharge.png',
-  social: '/img/pp/bleu.png',
-  cosm: '/img/pp/yeux.png',
-  time: '/img/objets/sablier.png',
+  quest: '/img/items/recharge.png',
+  social: '/img/avatars/blue.png',
+  cosm: '/img/avatars/eyes.png',
+  time: '/img/items/hourglass.png',
 };
 // l'image d'un succès : celle de sa catégorie, ou plus précise (le jeton de cette rareté, le tampon de la mutation…)
 const RARE_TOKEN: Record<string, string> = {
@@ -60,9 +60,9 @@ const imgOf = (a: Ach) => {
   if (a.stat === 'gold' || a.stat === 'celeste' || a.stat === 'ombre') return `/img/stamps/${a.stat}.png`;
   if (a.stat === 'takoras_ombre') return texOf(jetonOf('Takoras'));
   if (a.stat === 'bodako') return texOf(jetonOf('Ronce'));
-  if (a.stat === 'bought') return '/img/potions/chance-2.png';
-  if (a.stat === 'banner') return '/img/bannieres/plaine.png';
-  return CAT_IMG[a.cat] ?? '/img/jetons/mystere.png';
+  if (a.stat === 'bought') return '/img/potions/luck-2.png';
+  if (a.stat === 'banner') return '/img/banners/plains.png';
+  return CAT_IMG[a.cat] ?? '/img/tokens/mystery.png';
 };
 
 export function useAchievements() {
@@ -288,7 +288,7 @@ export default function Achievements() {
                           {fmt(a.value)}/{fmt(a.target)}
                         </small>
                         <span className={s.reward}>
-                          +{fmt(a.coins)} <img className="px" src="/img/piece.png" alt="" width={16} height={16} />
+                          +{fmt(a.coins)} <img className="px" src="/img/coin.png" alt="" width={16} height={16} />
                         </span>
                       </span>
                       {r ? (

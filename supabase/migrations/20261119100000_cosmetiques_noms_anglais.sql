@@ -1,0 +1,4 @@
+-- Appliquée via MCP (cosmetiques_noms_anglais). Identifiants des cosmétiques et clés des photos / bannières passés en
+-- anglais (ex. au_rubis -> au_ruby, a_etoile -> a_star, bleu -> blue, plaine -> plains) dans shop_items, user_items,
+-- achats, profils (cosmetics, avatar(s), banner(s), name_fx, aura, banner_fx, name_font) et dans les fonctions
+-- sandbox_me, _bourse_close, _bp_reward, update_profile, sandbox_randomize, admin_debug. Table complète : scripts du 2026-11-19.

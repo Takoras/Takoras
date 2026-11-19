@@ -44,6 +44,6 @@ def pad_gif(f):
                 transparency=0, disposal=2, optimize=False)
     return True
 
-for f in sorted(glob.glob('public/img/jetons/serie-*/*.*')):
+for f in sorted(glob.glob('public/img/tokens/series-*/*.*')):
     done = pad_gif(f) if f.endswith('.gif') else pad_png(f)
     print(('agrandi  ' if done else 'déjà 80  ') + f)

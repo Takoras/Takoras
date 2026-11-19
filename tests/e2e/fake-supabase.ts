@@ -562,7 +562,7 @@ export async function fakeSupabase(
           bought: 2,
           owned: false,
         },
-        { id: 'b_plaine', kind: 'banner', data: {}, price: 5000, base_price: 5000, stock: 1, bought: 0, owned: true },
+        { id: 'b_plains', kind: 'banner', data: {}, price: 5000, base_price: 5000, stock: 1, bought: 0, owned: true },
         revealed
           ? {
               slot: 5,
@@ -727,18 +727,18 @@ export async function fakeSupabase(
           avatar: prof.avatar,
           bio: prof.bio,
           banner: prof.banner,
-          banners: ['plaine'],
+          banners: ['plains'],
           avatars: [],
           cosmetics: [
-            'n_or',
-            'n_celeste',
-            'n_ombre',
-            'n_rouge',
-            'n_contour',
-            'n_relief',
+            'n_gold',
+            'n_celestial',
+            'n_shadow',
+            'n_red',
+            'n_outline',
+            'n_emboss',
             'n_glitch',
-            'n_lave',
-            'n_aurore',
+            'n_lava',
+            'n_aurora',
             'nf_silk',
             'nf_pixelify',
             'nf_press',
@@ -749,15 +749,15 @@ export async function fakeSupabase(
             'nf_pacifico',
             'nf_playfair',
             'nf_gothic',
-            'au_inconnu',
-            'fx_inconnu',
-            'au_bleue',
-            'au_or',
-            'au_etoile',
-            'au_flamme',
-            'au_ombre',
-            'fx_neige',
-            'fx_braises',
+            'au_unknown',
+            'fx_unknown',
+            'au_blue',
+            'au_gold',
+            'au_star',
+            'au_flame',
+            'au_shadow',
+            'fx_snow',
+            'fx_embers',
             ...(process.env.SC_ALL ? process.env.SC_ALL.split(',') : []),
           ],
           email: 'test@example.com',
@@ -778,9 +778,9 @@ export async function fakeSupabase(
           pseudo: 'Ami',
           bio: 'Salut !',
           // cosmétiques portés (boutique)
-          name_fx: 'n_arc',
-          aura: process.env.SC_AU ?? 'au_flamme',
-          banner_fx: process.env.SC_FX ?? 'fx_etoiles',
+          name_fx: 'n_rainbow',
+          aura: process.env.SC_AU ?? 'au_flame',
+          banner_fx: process.env.SC_FX ?? 'fx_stars',
           showcase: [
             { id: 99, jeton: 'Mobu', odds: 2, variant: 'gold' },
             { id: 98, jeton: 'Vyolis', odds: 1000, variant: 'ombre' },
@@ -902,9 +902,9 @@ export async function fakeSupabase(
           free: (i + 1) % 5 ? { coins: 100 } : { item: 'hourglass', qty: 1 },
           prem:
             i + 1 === 30
-              ? { item: 'b_yeux', qty: 1 }
+              ? { item: 'b_eyes', qty: 1 }
               : i + 1 === 50
-                ? { item: 'a_oeil', qty: 1 }
+                ? { item: 'a_eye', qty: 1 }
                 : i + 1 === 2
                   ? { item: 'potion10', qty: 3 }
                   : { item: 'potion10', qty: 1 },
@@ -1228,7 +1228,7 @@ export async function fakeSupabase(
           active: true,
         },
         {
-          id: 'n_or',
+          id: 'n_gold',
           kind: 'name',
           data: {},
           price: 3000,
@@ -1239,7 +1239,7 @@ export async function fakeSupabase(
           active: true,
         },
         {
-          id: 'au_flamme',
+          id: 'au_flame',
           kind: 'aura',
           data: {},
           price: 15000,
@@ -1250,7 +1250,7 @@ export async function fakeSupabase(
           active: false,
         },
         {
-          id: 'a_oeil',
+          id: 'a_eye',
           kind: 'avatar',
           data: { pass_only: true },
           price: 20000,

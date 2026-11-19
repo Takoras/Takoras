@@ -45,8 +45,8 @@ const ITEMS: Record<string, ShopItem & { price: number }> = {
   potion100: { id: 'potion100', kind: 'potion', data: { mult: 100, rolls: 10 }, price: 31000 },
   hourglass: { id: 'hourglass', kind: 'hourglass', data: { minutes: 60 }, price: 700 },
   // exclusifs du passe premium (saison 1) : jamais vendus en boutique
-  a_oeil: { id: 'a_oeil', kind: 'avatar', data: {}, price: 20000 },
-  b_yeux: { id: 'b_yeux', kind: 'banner', data: {}, price: 15000 },
+  a_eye: { id: 'a_eye', kind: 'avatar', data: {}, price: 20000 },
+  b_eyes: { id: 'b_eyes', kind: 'banner', data: {}, price: 15000 },
 };
 const worth = (r: Reward) => (!r ? 0 : r.coins ? r.coins : (ITEMS[r.item ?? '']?.price ?? 0) * (r.qty ?? 1));
 const isCosmetic = (r: Reward) => !!r?.item && (r.item.startsWith('b_') || r.item.startsWith('a_'));
@@ -66,7 +66,7 @@ const rewardLook = (r: Reward, prem: boolean) => {
   return prem ? { color: base.color, odds: Math.max(1000, base.odds * 30) } : base;
 };
 const icon = (r: Reward) =>
-  r?.coins ? '/img/piece.png' : itemImg(ITEMS[r?.item ?? ''] ?? { id: 'hourglass', kind: 'hourglass' }).src;
+  r?.coins ? '/img/coin.png' : itemImg(ITEMS[r?.item ?? ''] ?? { id: 'hourglass', kind: 'hourglass' }).src;
 const GOLD = 'rgb(242 194 48)';
 const BLUE = 'rgb(142 170 255)';
 const wait = (ms: number) => new Promise((ok) => setTimeout(ok, ms));
@@ -609,11 +609,11 @@ export default function Pass() {
               {/* le premium de la saison : la photo exclusive flotte, la valeur des deux pistes comparée */}
               <button type="button" className={s.prem} onClick={() => setPremOpen(true)}>
                 <span className={s.ppWrap}>
-                  <img className={`px ${s.premPp}`} src="/img/pp/oeil.png" alt="" />
+                  <img className={`px ${s.premPp}`} src="/img/avatars/eye.png" alt="" />
                 </span>
                 <b>{t('ui.bp_prem')}</b>
                 <span className={s.premVal}>
-                  <img className="px" src="/img/piece.png" alt="" width={18} height={18} />
+                  <img className="px" src="/img/coin.png" alt="" width={18} height={18} />
                   {n(vPrem)}
                   <em>×{Math.max(1, Math.round(vPrem / Math.max(1, vFree)))}</em>
                 </span>
@@ -693,13 +693,13 @@ export default function Pass() {
               <div className={s.premium}>
                 <div className={s.premShow}>
                   <figure>
-                    <img className="px" src="/img/pp/oeil.png" alt="" />
+                    <img className="px" src="/img/avatars/eye.png" alt="" />
                     <figcaption>
                       {t('ui.bp_ex_photo')} <small>{t('ui.bp_ex_tier', { n: 50 })}</small>
                     </figcaption>
                   </figure>
                   <figure>
-                    <img className={`px ${s.premBan}`} src="/img/bannieres/yeux.png" alt="" />
+                    <img className={`px ${s.premBan}`} src="/img/banners/eyes.png" alt="" />
                     <figcaption>
                       {t('ui.bp_ex_banner')} <small>{t('ui.bp_ex_tier', { n: 30 })}</small>
                     </figcaption>
@@ -709,7 +709,7 @@ export default function Pass() {
                   <span>
                     <small>{t('ui.bp_free')}</small>
                     <b>
-                      <img className="px" src="/img/piece.png" alt="" width={18} height={18} /> {n(vFree)}
+                      <img className="px" src="/img/coin.png" alt="" width={18} height={18} /> {n(vFree)}
                     </b>
                   </span>
                   <span className={s.vs} aria-hidden>
@@ -718,7 +718,7 @@ export default function Pass() {
                   <span className={s.big}>
                     <small>{t('ui.bp_prem_short')}</small>
                     <b>
-                      <img className="px" src="/img/piece.png" alt="" width={22} height={22} /> {n(vPrem)}
+                      <img className="px" src="/img/coin.png" alt="" width={22} height={22} /> {n(vPrem)}
                     </b>
                   </span>
                   <span className={s.mult}>×{Math.max(1, Math.round(vPrem / Math.max(1, vFree)))}</span>

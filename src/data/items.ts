@@ -5,25 +5,25 @@ import { cosmName, cosmRar, isCosmetic, picRar, RAR_ODDS, type CRar } from '@/ui
 
 // Objets de la boutique / de l'inventaire : image et textes (mêmes règles que l'ancien site)
 export const BANNER_IMG: Record<string, string> = {
-  plaine: '/img/bannieres/plaine.png',
-  doodle: '/img/bannieres/doodle.png',
-  yeux: '/img/bannieres/yeux.png', // passe premium, saison 1
-  eau: '/img/bannieres/eau.webp',
-  tele: '/img/bannieres/tele.webp',
-  dragon: '/img/bannieres/dragon.webp',
+  plains: '/img/banners/plains.png',
+  doodle: '/img/banners/doodle.png',
+  eyes: '/img/banners/eyes.png', // passe premium, saison 1
+  water: '/img/banners/water.webp',
+  tv: '/img/banners/tv.webp',
+  dragon: '/img/banners/dragon.webp',
 };
-const POTION5 = '/img/potions/chance-5.png';
+const POTION5 = '/img/potions/luck-5.png';
 export const ITEM_IMG: Record<string, { src: string; tint?: string }> = {
-  potion1: { src: '/img/potions/chance-1-3.png' },
-  potion2: { src: '/img/potions/chance-2.png' },
+  potion1: { src: '/img/potions/luck-1-3.png' },
+  potion2: { src: '/img/potions/luck-2.png' },
   potion3: { src: POTION5 },
-  potion10: { src: '/img/potions/chance-10.png' },
-  potion25: { src: '/img/potions/chance-25.png' },
-  potion50: { src: '/img/potions/chance-50.png' },
-  potion100: { src: '/img/potions/chance-100.png' },
-  potion250: { src: '/img/potions/chance-250.png' },
-  potion500: { src: '/img/potions/chance-500.png' },
-  hourglass: { src: '/img/objets/sablier.png' },
+  potion10: { src: '/img/potions/luck-10.png' },
+  potion25: { src: '/img/potions/luck-25.png' },
+  potion50: { src: '/img/potions/luck-50.png' },
+  potion100: { src: '/img/potions/luck-100.png' },
+  potion250: { src: '/img/potions/luck-250.png' },
+  potion500: { src: '/img/potions/luck-500.png' },
+  hourglass: { src: '/img/items/hourglass.png' },
 };
 export type ShopItem = {
   id: string;

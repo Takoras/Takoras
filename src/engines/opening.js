@@ -254,7 +254,7 @@ function steps(X, fresh = false) {
 
 let run = null;
 const opCoin = $('op-coin');
-const MYSTERE = '/img/jetons/mystere.png';
+const MYSTERE = '/img/tokens/mystery.png';
 new Image().src = MYSTERE; // déjà en mémoire quand le jeton se change en « ? » en plein vol
 
 // Le « ? » apparaît tout petit et grossit en douceur
@@ -441,8 +441,8 @@ function fillInfo(j, variant = '') {
     `<div class="op-row"><img class="px" src="${img}" alt=""><span><small>${label}</small><b class="${cls}">${value}</b></span></div>`;
   $('op-stats').innerHTML =
     (left ? row(left.img, left.label, left.value) : '') +
-    row('/img/potions/chance-10.png', t('op_luck'), '×' + fmtLuck(Math.max(1, lk)), lk > 1 ? 'op-st-up' : '') +
-    (todo ? row('/img/jetons/mystere.png', t('op_todo'), todo.toLocaleString(LOCALE())) : '');
+    row('/img/potions/luck-10.png', t('op_luck'), '×' + fmtLuck(Math.max(1, lk)), lk > 1 ? 'op-st-up' : '') +
+    (todo ? row('/img/tokens/mystery.png', t('op_todo'), todo.toLocaleString(LOCALE())) : '');
 }
 
 // Pause finale : le haut disparaît, zoom sur le jeton qui tremble, on clique pour révéler

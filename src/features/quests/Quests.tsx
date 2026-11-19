@@ -97,7 +97,7 @@ export function Quests() {
           </div>
           {d.available ? (
             <Button variant="gold" size="sm" onClick={(e) => void claimDaily(e.currentTarget)}>
-              +{n(d.amount)} <img className="px" src="/img/piece.png" alt="" width={14} height={14} />
+              +{n(d.amount)} <img className="px" src="/img/coin.png" alt="" width={14} height={14} />
             </Button>
           ) : (
             <Bump v={d.available} kind="stamp" className={s.check} label="OK">
@@ -128,7 +128,7 @@ export function Quests() {
                   <span className={s.rew}>
                     {x.coins ? (
                       <>
-                        {n(x.coins)} <img className="px" src="/img/piece.png" alt="" width={12} height={12} />
+                        {n(x.coins)} <img className="px" src="/img/coin.png" alt="" width={12} height={12} />
                       </>
                     ) : null}
                     {item ? (

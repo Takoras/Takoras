@@ -98,7 +98,7 @@ const SERIE_LOGO: Record<string, string> = { Takoras: '/img/logo-takoras.png?v=2
 
 // La pièce de la Bourse
 function Koo({ size = 16 }: { size?: number }) {
-  return <img className={`px ${s.koo}`} src="/img/koo.png" alt="" width={size} height={size} />;
+  return <img className={`px ${s.koo}`} src="/img/market-coin.png" alt="" width={size} height={size} />;
 }
 
 // Graphique : axe des prix à droite, dernier prix marqué, réticule sous la souris.
@@ -534,7 +534,7 @@ function Gate({ serie, have, need }: { serie: string; have?: number; need?: numb
   return (
     <section className={s.page}>
       <div className={`${s.box} ${s.gate}`}>
-        <img className="px" src="/img/koo.png" alt="" width={72} height={72} />
+        <img className="px" src="/img/market-coin.png" alt="" width={72} height={72} />
         <h1>{t('ui.nav_bourse')}</h1>
         {logo ? <img className={`px ${s.serie}`} src={logo} alt={serie} /> : <b>{serie}</b>}
         {need ? (
@@ -641,7 +641,7 @@ function Ranks({
       </aside>
       <div className={s.boardCol}>
         <div className={`${s.box} ${s.reward}`}>
-          <img className="px" src="/img/pp/etoile.gif" alt="" width={36} height={36} />
+          <img className="px" src="/img/avatars/star.gif" alt="" width={36} height={36} />
           <b>{t('ui.bs_reward')}</b>
         </div>
         {q.isLoading ? <Skeleton n={3} h={140} min={160} /> : null}

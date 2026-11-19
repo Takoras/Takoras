@@ -9,15 +9,15 @@ import s from './Shop.module.css';
 type Line = { img: string; n: number; key: Key; m?: number; worth: number };
 const POTION_PRICE: Record<number, number> = { 25: 4500, 50: 10000, 100: 30000, 250: 60000, 500: 65000 };
 const pot = (m: number, n: number): Line => ({
-  img: `/img/potions/chance-${m}.png`,
+  img: `/img/potions/luck-${m}.png`,
   n,
   key: 'ui.pay_potion',
   m,
   worth: POTION_PRICE[m] ?? 0,
 });
-const glass = (n: number): Line => ({ img: '/img/objets/sablier.png', n, key: 'ui.pay_glass', worth: 600 });
+const glass = (n: number): Line => ({ img: '/img/items/hourglass.png', n, key: 'ui.pay_glass', worth: 600 });
 // cosmétique propre aux packs : dessin à venir, il ne compte pas dans la valeur affichée
-const cosm: Line = { img: '/img/jetons/mystere.png', n: 1, key: 'ui.pay_cosm', worth: 0 };
+const cosm: Line = { img: '/img/tokens/mystery.png', n: 1, key: 'ui.pay_cosm', worth: 0 };
 const PACKS: { name: Key; price: number; coins: number; lines: Line[]; best?: boolean }[] = [
   { name: 'ui.pay_p1', price: 2.99, coins: 8000, lines: [pot(25, 2), pot(50, 1), glass(1)] },
   { name: 'ui.pay_p2', price: 4.99, coins: 20000, lines: [pot(50, 2), pot(100, 1), glass(2)] },
@@ -43,7 +43,7 @@ export function Packs() {
             {p.best ? <span className={s.packTag}>{t('ui.pay_best')}</span> : null}
             <h3>{t(p.name)}</h3>
             <p className={s.packCoins}>
-              <img className="px" src="/img/piece.png" alt="" width={22} height={22} />
+              <img className="px" src="/img/coin.png" alt="" width={22} height={22} />
               {n(p.coins)}
             </p>
             <ul>

@@ -264,7 +264,7 @@ function ServerView({ id, onGone }: { id: number; onGone: () => void }) {
         <section className={a.box}>
           <h3>Événements</h3>
           <div className={`${s.event} ${weekendNow ? s.eventOn : ''}`}>
-            <img className="px" src="/img/potions/chance-50.png" alt="" />
+            <img className="px" src="/img/potions/luck-50.png" alt="" />
             <div>
               <b>Week-end boosté</b>
               <span className={weekendNow ? s.pillOn : s.pill}>{weekendNow ? 'Actif maintenant' : 'Inactif'}</span>

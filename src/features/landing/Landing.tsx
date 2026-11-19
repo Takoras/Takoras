@@ -228,16 +228,16 @@ export function Landing() {
         <ul className={s.shop}>
           <li className={`${s.card} ${s.item}`}>
             <span className={s.sale}>−40%</span>
-            <img className="px" src="/img/potions/chance-10.png" alt="" />
+            <img className="px" src="/img/potions/luck-10.png" alt="" />
             <b>{lang === 'en' ? 'Luck ×10' : 'Chance ×10'}</b>
             <small>
-              <img className="px" src="/img/piece.png" alt="" width={14} height={14} /> 900
+              <img className="px" src="/img/coin.png" alt="" width={14} height={14} /> 900
             </small>
           </li>
           {[0, 1, 2].map((i) => (
             <li key={i} className={`${s.card} ${s.cover}`}>
               <span>
-                +100 <img className="px" src="/img/piece.png" alt="" width={16} height={16} />
+                +100 <img className="px" src="/img/coin.png" alt="" width={16} height={16} />
               </span>
             </li>
           ))}
@@ -248,11 +248,11 @@ export function Landing() {
       <Sec k="pass">
         <ol className={s.track}>
           {[
-            ['/img/piece.png', '100', true],
-            ['/img/potions/chance-2.png', '×2', true],
-            ['/img/piece.png', '300', false],
-            ['/img/objets/sablier.png', '', false],
-            ['/img/pp/oeil.png', '', false],
+            ['/img/coin.png', '100', true],
+            ['/img/potions/luck-2.png', '×2', true],
+            ['/img/coin.png', '300', false],
+            ['/img/items/hourglass.png', '', false],
+            ['/img/avatars/eye.png', '', false],
           ].map(([src, n, done], i) => (
             <li key={i} className={done ? s.done : undefined}>
               <span className={`${s.tile} ${i === 4 ? s.excl : ''}`}>
@@ -273,7 +273,7 @@ export function Landing() {
           </div>
           <div className={s.pfId}>
             <span className={s.pfPp}>
-              <img className="px" src="/img/pp/bleu.png" alt="" />
+              <img className="px" src="/img/avatars/blue.png" alt="" />
             </span>
             <b>Takoras</b>
             <img className={`px ${s.pfRank}`} src="/img/ranks/rank10.png" alt="" />

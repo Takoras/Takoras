@@ -425,7 +425,7 @@ function Bestiaries({
             <button key={name} type="button" aria-pressed={open === name} onClick={() => onOpen(name)}>
               <img
                 className="px"
-                src={name === 'Takoras' ? '/img/jetons/takoras.png' : texOf(all[0] ?? jetonOf('Mobu'))}
+                src={name === 'Takoras' ? '/img/tokens/takoras.png' : texOf(all[0] ?? jetonOf('Mobu'))}
                 alt=""
               />
               <span>
@@ -897,7 +897,7 @@ function EditProfile({ p, onClose }: { p: Prof; onClose: () => void }) {
     ],
     [
       'name',
-      <b key="i" className={`${lk.shAa} ${nameCls(nameFx || 'n_or')}`}>
+      <b key="i" className={`${lk.shAa} ${nameCls(nameFx || 'n_gold')}`}>
         Aa
       </b>,
       t('ui.fx_name'),
@@ -916,7 +916,7 @@ function EditProfile({ p, onClose }: { p: Prof; onClose: () => void }) {
     [
       'aura',
       <span key="i" className={lk.shAura}>
-        <Aura id={auraFx || 'au_or'}>
+        <Aura id={auraFx || 'au_gold'}>
           <span className={lk.shDot} />
         </Aura>
       </span>,
@@ -959,7 +959,7 @@ function EditProfile({ p, onClose }: { p: Prof; onClose: () => void }) {
     lockLabel: t('ui.pp_shop'),
   });
   const ppName = (a: string) => {
-    const k = `ui.pp_${a}` as 'ui.pp_etoile',
+    const k = `ui.pp_${a}` as 'ui.pp_star',
       n = t(k);
     return n === k ? a.charAt(0).toUpperCase() + a.slice(1) : n;
   };

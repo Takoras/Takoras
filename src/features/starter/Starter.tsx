@@ -22,10 +22,10 @@ type StarterData = {
 // Nouveau joueur : choisir son cadeau de départ (chance, tirages, pièces ou un cosmétique), puis la quête tuto
 // (un tirage → la boutique) qui rapporte 500 pièces. Les cadeaux penchent et se balancent comme les rayons de la boutique.
 const GIFT_IMG: Record<string, string> = {
-  luck: '/img/potions/chance-2.png',
-  pulls: '/img/objets/sablier.png',
-  coins: '/img/piece.png',
-  cosm: '/img/pp/yeux.png',
+  luck: '/img/potions/luck-2.png',
+  pulls: '/img/items/hourglass.png',
+  coins: '/img/coin.png',
+  cosm: '/img/avatars/eyes.png',
 };
 export function Starter() {
   const t = useT();

@@ -48,7 +48,7 @@ export function JetonPicker({
       <div className={s.jpGrid}>
         {randomLabel ? (
           <button type="button" className={s.jpCell} aria-pressed={value === ''} onClick={() => onChange('')}>
-            <img className="px" src="/img/jetons/mystere.png" alt="" width={48} height={48} />
+            <img className="px" src="/img/tokens/mystery.png" alt="" width={48} height={48} />
             <b>{randomLabel}</b>
           </button>
         ) : null}

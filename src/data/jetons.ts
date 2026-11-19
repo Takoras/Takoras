@@ -3,8 +3,8 @@ import SERIES_JSON from './series.json';
 // Catalogue des jetons et règles d'affichage partagées (mêmes valeurs que le serveur et que l'ancien site).
 export type Jeton = { name: string; odds: number; glow: string; img?: string; grid?: number };
 export const SERIES: Record<string, Jeton[]> = SERIES_JSON;
-export const TEMPLATE = '/img/jetons/template.png';
-export const MYSTERE = '/img/jetons/mystere.png';
+export const TEMPLATE = '/img/tokens/template.png';
+export const MYSTERE = '/img/tokens/mystery.png';
 
 export const texOf = (j: Pick<Jeton, 'img'>) => j.img ?? TEMPLATE;
 // Les dessins de jetons sont sur une grille de 80×80 (le jeton au centre, de la place autour pour ses effets).
@@ -13,7 +13,7 @@ export const texOf = (j: Pick<Jeton, 'img'>) => j.img ?? TEMPLATE;
 export const GRID = 80;
 export const texScale = (j?: Pick<Jeton, 'grid' | 'img'>) => (j?.grid ?? (j?.img ? GRID : 64)) / 64;
 // même chose à partir d'une adresse d'image (canvas, moteurs)
-export const isGridImg = (src?: string) => !!src && src.includes('/img/jetons/serie-');
+export const isGridImg = (src?: string) => !!src && src.includes('/img/tokens/series-');
 export const srcScale = (src?: string) => (isGridImg(src) ? GRID / 64 : 1);
 export const hexRGB = (h: string) => [1, 3, 5].map((i) => parseInt(h.slice(i, i + 2), 16)).join(', ');
 

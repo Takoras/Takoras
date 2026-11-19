@@ -1,15 +1,15 @@
 // Photos de profil : les 5 gratuites + celles de la boutique (même liste que l'ancien site).
 export const AVATARS: Record<string, string> = {
-  bleu: '/img/pp/bleu.png',
-  rouge: '/img/pp/rouge.png',
-  vert: '/img/pp/vert.png',
-  yeux: '/img/pp/yeux.png',
-  dunes: '/img/pp/dunes.png',
-  etoile: '/img/pp/etoile.gif',
-  oeil: '/img/pp/oeil.png', // passe premium, saison 1
-  eau: '/img/pp/eau.png',
-  tele: '/img/pp/tele.png',
-  dragon: '/img/pp/dragon.png',
+  blue: '/img/avatars/blue.png',
+  red: '/img/avatars/red.png',
+  green: '/img/avatars/green.png',
+  eyes: '/img/avatars/eyes.png',
+  dunes: '/img/avatars/dunes.png',
+  star: '/img/avatars/star.gif',
+  eye: '/img/avatars/eye.png', // passe premium, saison 1
+  water: '/img/avatars/water.png',
+  tv: '/img/avatars/tv.png',
+  dragon: '/img/avatars/dragon.png',
 };
 // gratuites : seulement les 4 couleurs (les autres s'obtiennent en boutique ou avec le passe)
-export const FREE_PP = ['bleu', 'rouge', 'vert', 'yeux'];
+export const FREE_PP = ['blue', 'red', 'green', 'eyes'];
