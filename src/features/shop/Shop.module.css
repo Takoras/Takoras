@@ -729,170 +729,6 @@
   font-family: var(--font-display);
   font-size: clamp(24px, 2.4vw, 32px);
 }
-/* une grosse promo à gauche, plein de petites offres à droite */
-.offers {
-  display: grid;
-  grid-template-columns: minmax(0, 1fr) minmax(0, 1.25fr);
-  gap: var(--s-4);
-  padding-top: 10px;
-}
-.promo {
-  position: relative;
-  display: grid;
-  grid-template-rows: 1fr auto;
-  gap: var(--s-4);
-  min-height: 360px;
-  padding: var(--s-6);
-  border: 0;
-  border-radius: 16px;
-  background: color-mix(in srgb, var(--rc) 9%, var(--surface));
-  color: inherit;
-  font: inherit;
-  text-align: left;
-  cursor: pointer;
-  rotate: calc(-0.3deg + var(--swing, 0deg));
-  transform-origin: 50% 0;
-  transition:
-    translate var(--t-fast),
-    background-color var(--t-fast);
-}
-.promo:hover {
-  translate: 0 -3px;
-  background: color-mix(in srgb, var(--rc) 14%, var(--surface));
-}
-.promoArt {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: var(--s-4);
-  min-height: 190px;
-  animation: bob 3.6s ease-in-out infinite;
-}
-.promoArt > span {
-  display: grid;
-  place-items: center;
-  min-width: 0;
-}
-.promoArt img {
-  width: clamp(110px, 11vw, 160px);
-  height: clamp(110px, 11vw, 160px);
-  object-fit: contain;
-}
-.promoArt img.wide {
-  width: clamp(180px, 20vw, 300px);
-  height: auto;
-}
-.promoInfo {
-  display: grid;
-  justify-items: start;
-  gap: var(--s-2);
-}
-.promoName {
-  font-family: var(--font-display);
-  font-size: clamp(28px, 2.8vw, 40px);
-  line-height: 1.05;
-}
-.promoLines {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 6px;
-}
-.promoLines small {
-  padding: 3px 10px;
-  border-radius: var(--r-pill);
-  background: rgb(255 255 255 / 6%);
-  color: var(--text-2);
-  font-size: var(--fs-xs);
-  font-weight: 700;
-}
-.promoPrice {
-  margin-top: var(--s-2);
-  padding: 8px 22px;
-  border-radius: var(--r-pill);
-  background: var(--accent);
-  color: #fff;
-  font-family: var(--font-display);
-  font-size: var(--fs-xl);
-}
-.offerGrid {
-  display: grid;
-  grid-template-columns: repeat(var(--cols, 5), minmax(0, 1fr));
-  grid-auto-rows: 1fr;
-  gap: var(--s-3);
-}
-.pack {
-  --tilt: -0.6deg;
-  position: relative;
-  display: grid;
-  grid-template-rows: minmax(76px, 1fr) auto auto;
-  justify-items: center;
-  gap: 4px;
-  padding: var(--s-3) var(--s-2);
-  border: 0;
-  border-radius: 12px;
-  background: var(--surface);
-  color: inherit;
-  font: inherit;
-  text-align: center;
-  cursor: pointer;
-  rotate: calc(var(--tilt) + var(--swing, 0deg));
-  transform-origin: 50% 0;
-  transition:
-    translate var(--t-fast),
-    background-color var(--t-fast);
-}
-.pack:nth-child(2n) {
-  --tilt: 0.5deg;
-}
-.pack:hover {
-  translate: 0 -3px;
-  background: var(--surface-2);
-}
-.packBest {
-  outline: 2px solid var(--gold);
-  outline-offset: -2px;
-}
-.packArt {
-  position: relative;
-  display: grid;
-  place-items: center;
-  width: 100%;
-  height: 100%;
-  overflow: hidden;
-  border-radius: 8px;
-  background: color-mix(in srgb, var(--rc) 12%, transparent);
-}
-.packArt img {
-  width: clamp(60px, 40%, 120px);
-  max-height: 80%;
-  object-fit: contain;
-}
-.packArt img.wide {
-  width: 92%;
-  max-height: 60%;
-}
-.packMore {
-  position: absolute;
-  right: 8px;
-  bottom: 6px;
-  padding: 1px 7px;
-  border-radius: var(--r-pill);
-  background: var(--surface-3);
-  font-size: var(--fs-xs);
-}
-.packName {
-  font-size: var(--fs-sm);
-  line-height: 1.2;
-}
-.packPrice {
-  margin-top: 2px;
-  padding: 3px 12px;
-  font-size: var(--fs-sm);
-  border-radius: var(--r-pill);
-  background: var(--accent);
-  color: #fff;
-  font-weight: 800;
-}
 .packView {
   display: grid;
   gap: var(--s-4);
@@ -945,8 +781,8 @@
   padding: 10px;
   border: 0;
   border-radius: 8px;
-  background: var(--accent);
-  color: #fff;
+  background: var(--gold);
+  color: #241a02;
   font: inherit;
   opacity: 0.6;
   cursor: default;
@@ -958,24 +794,135 @@
   font-size: var(--fs-xs);
 }
 
-:global(html.reduce-fx) .promoArt {
-  animation: none;
+/* offres en euros : mêmes cases que la boutique, prix et boutons dorés */
+.offers {
+  display: grid;
+  gap: var(--s-6);
+  padding-top: 10px;
 }
-@media (max-width: 900px) {
-  .offers {
-    grid-template-columns: 1fr;
-  }
-  .promo {
-    min-height: 0;
-  }
+/* le prix et le bouton toujours en bas, alignés d'une case à l'autre */
+.offers .box {
+  grid-template-rows: auto auto auto 1fr auto;
 }
-@media (max-width: 760px) {
-  .offerGrid {
-    grid-template-columns: repeat(3, minmax(0, 1fr));
-    grid-auto-rows: auto;
-  }
-  .promoArt img {
-    width: 96px;
-    height: 96px;
-  }
+.offerHero {
+  background: color-mix(in srgb, var(--rc) 8%, rgb(255 255 255 / 3%));
+}
+.offerHero .heroArt {
+  min-width: 0;
+}
+.badgeIn {
+  padding: 0 8px;
+  border-radius: var(--r-pill);
+  background: var(--surface-3);
+  font-size: var(--fs-sm);
+  font-weight: 700;
+}
+.offerTag {
+  position: absolute;
+  top: 10px;
+  left: 10px;
+  padding: 0 8px;
+  border-radius: var(--r-pill);
+  background: rgb(242 194 48 / 16%);
+  color: var(--gold-hi);
+  font-size: var(--fs-xs);
+  font-weight: 800;
+}
+.offerLines {
+  display: grid;
+  gap: 2px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  color: var(--text-2);
+  font-size: var(--fs-xs);
+}
+.offerHero .offerLines {
+  font-size: var(--fs-sm);
+}
+.offerWorth {
+  color: var(--gold-hi);
+  font-weight: 700;
+}
+.eur {
+  color: var(--gold-hi);
+}
+.offerStack {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.offerStack img {
+  width: 64px !important;
+  height: 64px !important;
+  margin: 0 -6px;
+}
+.offerHero .offerStack img {
+  width: clamp(90px, 9vw, 130px) !important;
+  height: clamp(90px, 9vw, 130px) !important;
+}
+
+/* aperçu d'un set porté : bannière, photo et aura, pseudo stylé */
+.setCard {
+  display: grid;
+  width: 190px;
+  max-width: 100%;
+}
+.setBanner {
+  position: relative;
+  display: block;
+  overflow: hidden;
+  aspect-ratio: 3;
+  border-radius: 8px;
+  background: color-mix(in srgb, var(--rc, var(--accent)) 16%, var(--surface-2));
+}
+.setBanner img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+.setId {
+  position: relative;
+  z-index: 2;
+  display: flex;
+  align-items: flex-end;
+  gap: 6px;
+  min-width: 0;
+  margin-top: -20px;
+  padding-left: 8px;
+}
+.setPp {
+  flex: none;
+  padding: 3px;
+  border-radius: 50%;
+  background: var(--bg, #0b0b0f);
+}
+.setId b {
+  overflow: hidden;
+  padding-bottom: 2px;
+  font-size: var(--fs-sm);
+  white-space: nowrap;
+}
+.setLg {
+  width: 400px;
+}
+.setLg .setBanner {
+  border-radius: 14px;
+}
+.setLg .setId {
+  gap: var(--s-3);
+  margin-top: -44px;
+  padding-left: var(--s-4);
+}
+.setLg .setPp {
+  padding: 5px;
+}
+.setLg .setId b {
+  padding-bottom: 6px;
+  font-size: var(--fs-xl);
+}
+.packViewSet {
+  display: grid;
+  place-items: center;
+  padding: var(--s-4) 0;
 }

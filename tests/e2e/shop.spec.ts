@@ -24,7 +24,7 @@ test('boutique : catégories, stock, achat, prix modifié, code promo', async ({
   await expect(page.getByText('Épuisé').first()).toBeVisible();
   // filtre « Cosmétiques »
   await page.getByRole('button', { name: 'Cosmétiques' }).click();
-  await expect(page.locator('li h3')).toHaveCount(1);
+  await expect(page.locator('li[data-key] h3')).toHaveCount(1);
   // code promo invalide puis valide
   const code = page.getByRole('textbox', { name: 'Code promo' });
   await code.fill('FAUX');

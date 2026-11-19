@@ -1,13 +1,16 @@
 import { useRef, useState, type CSSProperties } from 'react';
-import { itemImg, itemText, type ShopItem } from '@/data/items';
+import { BANNER_IMG, itemImg, itemText, type ShopItem } from '@/data/items';
+import { useMe } from '@/api/queries';
+import { Avatar } from '@/ui/Avatar';
 import { sfx } from '@/engines/sound.js';
 import { useT } from '@/i18n/useT';
 import type { Key } from '@/i18n';
 import { locale, useSettings } from '@/lib/settings';
-import { CosmeticPreview, cosmRar, picRar, rarCol, rarKey, RANK, type CRar } from '@/ui/Cosmetics';
+import { Aura, BannerFx, cosmRar, nameCls, picRar, rarCol, rarKey, RANK, type CRar } from '@/ui/Cosmetics';
 import { Modal } from '@/ui/Modal';
 import { Segmented } from '@/ui/Segmented';
 import { Swap } from '@/ui/Swap';
+import { Button } from '@/ui/Button';
 import { useSwingAll } from '@/ui/useSwing';
 import s from './Shop.module.css';
 
@@ -162,17 +165,44 @@ const bestRar = (o: Offer) =>
     return !b || RANK[r] > RANK[b] ? r : b;
   }, null);
 
-// l'image d'un élément : aperçu vivant pour un cosmétique, sinon l'objet en pixel art
-function Art({ l, big }: { l: Line; big?: boolean }) {
+// l'image d'un objet (pièces, potion, sablier)
+function Art({ l }: { l: Line }) {
   if (l.kind === 'coins') return <img className="px" src="/img/coin.png" alt="" />;
   if (l.kind === 'potion') return <img className="px" src={`/img/potions/luck-${l.m}.png`} alt="" />;
   if (l.kind === 'hourglass') return <img className="px" src="/img/items/hourglass.png" alt="" />;
-  if (l.id.startsWith('a_') || l.id.startsWith('b_')) {
-    const im = itemImg(itemOf(l));
-    return <img className={`px ${im.wide ? s.wide : ''}`} src={im.src} alt="" />;
-  }
-  return <CosmeticPreview id={l.id} big={big} />;
+  const im = itemImg(itemOf(l));
+  return <img className={`px ${im.wide ? s.wide : ''}`} src={im.src} alt="" />;
 }
+
+const isCosmOffer = (o: Offer) => o.lines.some((l) => l.kind === 'cosm');
+
+// un set cosmétique porté : bannière, photo avec son aura, pseudo du joueur avec son style (comme sur le profil)
+function SetCard({ o, pseudo, lg }: { o: Offer; pseudo: string; lg?: boolean }) {
+  const ids = o.lines.flatMap((l) => (l.kind === 'cosm' ? [l.id] : []));
+  const pick = (p: string) => ids.find((i) => i.startsWith(p));
+  const av = pick('a_')?.slice(2);
+  const bn = pick('b_')?.slice(2);
+  const bsrc = bn ? BANNER_IMG[bn] : undefined;
+  return (
+    <span className={`${s.setCard} ${lg ? s.setLg : ''}`}>
+      <span className={s.setBanner}>
+        {bsrc ? <img className="px" src={bsrc} alt="" /> : null}
+        <BannerFx id={pick('fx_')} />
+      </span>
+      <span className={s.setId}>
+        <span className={s.setPp}>
+          <Aura id={pick('au_')}>
+            <Avatar pseudo={pseudo} avatar={av ?? (pseudo ? undefined : 'blue')} size={lg ? 88 : 40} />
+          </Aura>
+        </span>
+        <b className={nameCls(pick('n_'), pick('nf_'))}>{pseudo || 'Takoras'}</b>
+      </span>
+    </span>
+  );
+}
+
+// le nom affiché : pour une offre d'un seul objet, le même nom que dans la boutique (« Potion de chance ×100 »)
+const single = (o: Offer) => (o.lines.length === 1 && o.lines[0]?.kind !== 'cosm' ? o.lines[0] : undefined);
 
 export function Packs() {
   const t = useT();
@@ -180,24 +210,68 @@ export function Packs() {
   const root = useRef<HTMLDivElement>(null);
   const [cat, setCat] = useState<Cat>('cosm');
   const [open, setOpen] = useState<Offer | null>(null);
-  useSwingAll(root, `.${s.pack}`, 0.3, cat);
+  const pseudo = useMe().data?.pseudo ?? '';
+  useSwingAll(root, `.${s.box}`, 0.35, cat);
   const loc = locale(lang);
   const n = (v: number) => v.toLocaleString(loc);
   const eur = (v: number) => v.toLocaleString(loc, { style: 'currency', currency: 'EUR' });
-  const name = (o: Offer) => o.name[lang === 'en' ? 1 : 0];
-  const label = (l: Line) =>
-    l.kind === 'coins'
-      ? t('ui.pay_coins_n', { n: n(l.n) })
-      : `${l.kind === 'cosm' ? '' : `${l.n} × `}${itemText(itemOf(l), lang)[0]}`;
+  const itemName = (l: Line) =>
+    l.kind === 'coins' ? t('ui.pay_coins_n', { n: n(l.n) }) : itemText(itemOf(l), lang)[0];
+  const name = (o: Offer) => {
+    const one = single(o);
+    return one ? itemName(one) : o.name[lang === 'en' ? 1 : 0];
+  };
+  const label = (l: Line) => (l.kind === 'potion' || l.kind === 'hourglass' ? `${l.n} × ${itemName(l)}` : itemName(l));
   const list = OFFERS.filter((o) => o.cat === cat);
   // la grosse promo : la meilleure offre du rayon, sinon la plus populaire
   const promo = list.find((o) => o.tag === 'best') ?? list.find((o) => o.tag === 'hot') ?? list[0];
   const rest = list.filter((o) => o !== promo);
-  const cols = rest.length <= 4 ? 2 : rest.length <= 6 ? 3 : 5;
   const rc = (o: Offer) => {
     const r = bestRar(o);
     return r ? rarCol(r) : 'var(--gold)';
   };
+  // tout ce qu'il faut savoir sans ouvrir l'offre : contenu, effet, rareté, valeur
+  const info = (o: Offer) => {
+    const one = single(o);
+    const r = bestRar(o);
+    const w = worth(o);
+    return (
+      <>
+        <p className={s.rar} style={r ? { color: rarCol(r) } : undefined}>
+          {r ? t(rarKey(r)) : '\u00a0'}
+        </p>
+        <ul className={s.offerLines}>
+          {one ? (
+            one.kind !== 'coins' ? (
+              <li>{itemText(itemOf(one), lang)[1]}</li>
+            ) : null
+          ) : (
+            o.lines.map((l, i) => <li key={i}>{label(l)}</li>)
+          )}
+          {w && (!one || one.kind !== 'coins') ? (
+            <li className={s.offerWorth}>{t('ui.pay_value', { n: n(w) })}</li>
+          ) : null}
+        </ul>
+      </>
+    );
+  };
+  const visual = (o: Offer, lg?: boolean) => {
+    if (isCosmOffer(o)) return <SetCard o={o} pseudo={pseudo} lg={lg} />;
+    const one = single(o);
+    if (one) return <Art l={one} />;
+    return (
+      <span className={s.offerStack}>
+        {o.lines.slice(0, 3).map((l, i) => (
+          <Art key={i} l={l} />
+        ))}
+      </span>
+    );
+  };
+  const qty = (o: Offer) => {
+    const one = single(o);
+    return one && one.kind !== 'coins' ? one.n : 0;
+  };
+  const see = (o: Offer) => (sfx.click(), setOpen(o));
   return (
     <section className={s.packs} aria-labelledby="packs-t">
       <div className={s.packHead}>
@@ -212,68 +286,67 @@ export function Packs() {
       <Swap k={cat}>
         <div ref={root} className={s.offers}>
           {promo ? (
-            <button
-              type="button"
-              className={s.promo}
-              style={{ '--rc': rc(promo) } as CSSProperties}
-              onClick={() => (sfx.click(), setOpen(promo ?? null))}
-            >
-              <span className={s.promoArt}>
-                {promo.lines.slice(0, 3).map((l, i) => (
-                  <span key={i}>
-                    <Art l={l} big />
+            <div className={`${s.hero} ${s.offerHero}`} style={{ '--rc': rc(promo) } as CSSProperties}>
+              <div className={s.heroArt}>{visual(promo, true)}</div>
+              <div className={s.heroInfo}>
+                <span className={s.featRow}>
+                  <span className={s.feat}>
+                    {t(promo.tag === 'hot' ? 'ui.pay_hot' : promo.tag === 'best' ? 'ui.pay_best' : 'ui.shop_feat')}
                   </span>
-                ))}
-              </span>
-              <span className={s.promoInfo}>
-                <span className={s.feat}>
-                  {t(promo.tag === 'hot' ? 'ui.pay_hot' : promo.tag === 'best' ? 'ui.pay_best' : 'ui.shop_feat')}
+                  {qty(promo) ? <span className={s.badgeIn}>×{qty(promo)}</span> : null}
                 </span>
-                <b className={s.promoName}>{name(promo)}</b>
-                <span className={s.promoLines}>
-                  {promo.lines.map((l, i) => (
-                    <small key={i}>{label(l)}</small>
-                  ))}
-                </span>
-                <span className={s.promoPrice}>{eur(promo.price)}</span>
-              </span>
-            </button>
+                <h2>{name(promo)}</h2>
+                {info(promo)}
+                <div className={s.buy}>
+                  <b className={`${s.price} ${s.eur}`}>{eur(promo.price)}</b>
+                  <Button variant="gold" onClick={() => see(promo)}>
+                    {t('ui.pay_see')}
+                  </Button>
+                </div>
+              </div>
+            </div>
           ) : null}
-          <div className={s.offerGrid} style={{ '--cols': cols } as CSSProperties}>
-            {rest.map((o) => {
-              const first =
-                o.lines.find((l) => l.kind === 'cosm') ?? o.lines.find((l) => l.kind !== 'coins') ?? o.lines[0];
-              return (
-                <button
-                  key={o.id}
-                  type="button"
-                  className={`${s.pack} ${o.tag === 'best' ? s.packBest : ''}`}
-                  style={{ '--rc': rc(o) } as CSSProperties}
-                  onClick={() => (sfx.click(), setOpen(o))}
-                >
-                  <span className={s.packArt}>
-                    {first ? <Art l={first} /> : null}
-                    {o.lines.length > 1 ? <b className={s.packMore}>+{o.lines.length - 1}</b> : null}
-                  </span>
-                  <b className={s.packName}>{name(o)}</b>
-                  <span className={s.packPrice}>{eur(o.price)}</span>
-                </button>
-              );
-            })}
-          </div>
+          <ul className={s.grid}>
+            {rest.map((o) => (
+              <li key={o.id} className={`${s.card} ${o.tag === 'best' ? s.bmDeal : ''}`}>
+                <div className={s.box} style={{ '--rc': rc(o) } as CSSProperties}>
+                  {qty(o) ? <span className={s.badge}>×{qty(o)}</span> : null}
+                  {o.tag ? (
+                    <span className={s.offerTag}>{t(o.tag === 'best' ? 'ui.pay_best' : 'ui.pay_hot')}</span>
+                  ) : null}
+                  <div className={s.art}>{visual(o)}</div>
+                  <h3>{name(o)}</h3>
+                  {info(o)}
+                  <div className={s.buy}>
+                    <b className={`${s.price} ${s.eur}`}>{eur(o.price)}</b>
+                    <Button size="sm" variant="gold" onClick={() => see(o)}>
+                      {t('ui.pay_see')}
+                    </Button>
+                  </div>
+                </div>
+              </li>
+            ))}
+          </ul>
         </div>
       </Swap>
       <Modal open={!!open} onClose={() => setOpen(null)} title={open ? name(open) : ''} wide>
         {open ? (
           <div className={s.packView}>
+            {isCosmOffer(open) ? (
+              <div className={s.packViewSet} style={{ '--rc': rc(open) } as CSSProperties}>
+                <SetCard o={open} pseudo={pseudo} lg />
+              </div>
+            ) : null}
             <ul>
               {open.lines.map((l, i) => {
                 const rr = l.kind === 'cosm' ? rarOf(l.id) : null;
                 return (
                   <li key={i} style={{ '--rc': rr ? rarCol(rr) : 'var(--gold)' } as CSSProperties}>
-                    <span className={s.packViewArt}>
-                      <Art l={l} big />
-                    </span>
+                    {l.kind !== 'cosm' ? (
+                      <span className={s.packViewArt}>
+                        <Art l={l} />
+                      </span>
+                    ) : null}
                     <b>{label(l)}</b>
                     {rr ? <small style={{ color: rarCol(rr) }}>{t(rarKey(rr))}</small> : null}
                     {l.kind !== 'coins' ? <small>{itemText(itemOf(l), lang)[1]}</small> : null}
