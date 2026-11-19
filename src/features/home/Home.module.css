@@ -44,7 +44,6 @@
   animation: logoFloat 4.6s ease-in-out infinite;
   white-space: nowrap; /* « Tirage » + logo sur une seule ligne */
   font-size: clamp(2.2rem, calc(6.5vw / var(--z, 1)), 3.6rem);
-  text-shadow: 0 0 40px rgb(61 107 255 / 45%);
 }
 
 /* Jeton héros */
@@ -292,7 +291,7 @@
 .upBar i {
   display: block;
   height: 100%;
-  background: linear-gradient(90deg, #f2c230, #fbbf24);
+  background: #f2c230;
 }
 :global(html.reduce-fx) .upCan {
   animation: none;
@@ -323,7 +322,7 @@
   content: '';
   flex: 1;
   height: 2px;
-  background: linear-gradient(90deg, rgb(255 255 255 / 12%), transparent);
+  background: rgb(255 255 255 / 8%);
 }
 
 .hist {

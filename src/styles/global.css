@@ -43,9 +43,7 @@ html::-webkit-scrollbar {
 
 body {
   min-height: 100dvh;
-  /* lueurs douces comme l'ancien Takoras (violet en haut à droite, orange à gauche) */
-  background: radial-gradient(900px 500px at 85% -10%, rgb(61 107 255 / 6%), transparent 70%), var(--bg);
-  background-attachment: fixed;
+  background: var(--bg);
   color: var(--text);
   font-family: var(--font-body);
   font-size: var(--fs-md);

@@ -568,7 +568,7 @@
     justify-items: center;
     gap: var(--s-3);
     padding: var(--s-6);
-    background: radial-gradient(circle at 50% 40%, #1d2440, #0e0e11 70%);
+    background: #0e0e11;
     text-align: center;
   }
   /* la page est rendue sur 1280 px puis réduite : on écrit en grand (en vw) pour que ce soit lisible */
@@ -585,7 +585,6 @@
     margin-bottom: var(--s-4);
     border: calc(1vw / var(--z, 1)) solid #8eaaff;
     border-radius: calc(2vw / var(--z, 1));
-    box-shadow: 0 0 24px rgb(61 107 255 / 50%);
     animation: turnPhone 2.4s ease-in-out infinite;
   }
 }

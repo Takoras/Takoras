@@ -190,9 +190,10 @@ export default function Profile() {
         <Bump as="div" v={`${p.banner}|${p.banner_fx}`} kind="fade" className={s.banner}>
           {bannerSrc ? (
             <img className="px" src={bannerSrc} alt="" />
-          ) : bestBanner ? (
-            <PixelBg className={s.bannerBg} odds={bp?.eff ?? 1} glow={tone} still={reducedFx()} />
-          ) : null}
+          ) : (
+            // sans bannière achetée : le fond pixel du site à la couleur de son meilleur jeton (jamais un rectangle vide)
+            <PixelBg className={s.bannerBg} odds={bestBanner ? (bp?.eff ?? 1) : 1} glow={tone} still={reducedFx()} />
+          )}
           <BannerFx id={p.banner_fx} />
         </Bump>
       </div>

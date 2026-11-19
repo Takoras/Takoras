@@ -496,8 +496,6 @@
   border-radius: 18px;
   background: var(--fc, #fff);
   pointer-events: none;
-  /* une lueur de la couleur de la rareté au moment où ça « explose » (filtre : les ombres sont coupées sur le site) */
-  filter: drop-shadow(0 0 14px var(--fc, #fff));
 }
 .gainTag {
   display: inline-flex;
@@ -577,7 +575,8 @@
     translate 0.1s;
 }
 .poor {
-  opacity: 0.55;
+  /* pas assez de pièces : le bouton s'assombrit, son texte reste lisible */
+  filter: brightness(0.7) saturate(0.7);
 }
 /* même pastille que « Nouveau stock dans » */
 .wallet {

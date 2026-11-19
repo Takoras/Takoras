@@ -231,8 +231,8 @@
   list-style: none;
 }
 .odds small {
-  color: rgba(var(--g), 1);
-  filter: brightness(1.25);
+  /* la couleur du jeton éclaircie : lisible même pour les jetons sombres (Kraïos) */
+  color: color-mix(in srgb, rgb(var(--g)) 55%, #fff);
 }
 
 /* inventaire : le bestiaire, avec des jetons pas encore trouvés */
@@ -426,7 +426,7 @@
   color: #fff;
 }
 .track .done::after {
-  background: linear-gradient(90deg, #3966f7, #8eaaff);
+  background: #3966f7;
 }
 
 /* profil : une petite carte de joueur */
