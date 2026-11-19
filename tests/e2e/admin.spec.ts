@@ -109,6 +109,11 @@ test('admin : pas de problème d’accessibilité grave', async ({ page }) => {
     .click();
   await page.getByRole('button', { name: 'Alice' }).click();
   await expect(page.getByText('alice@example.com')).toBeVisible();
+  // le pied de page apparaît en fondu : on mesure les contrastes une fois qu'il est affiché pour de bon
+  await page
+    .locator('[class*="siteFoot"]')
+    .evaluate((el) => Promise.all(el.getAnimations().map((x) => x.finished)))
+    .catch(() => {});
   const a11y = await new AxeBuilder({ page }).analyze();
   expect(
     a11y.violations

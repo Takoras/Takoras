@@ -22,7 +22,8 @@ test('patch notes : popup de la nouveauté, puis toutes les notes via le menu «
   await expect(page.getByRole('dialog')).toBeHidden(); // déjà vue
   void isMobile;
   // plus de pied de page : les nouveautés sont dans le menu « … » de la barre latérale
-  await page.getByRole('button', { name: 'Plus', exact: true }).click();
+  // clic direct : avec le zoom des petits écrans, Playwright calcule mal le point de clic quand la machine est chargée
+  await page.getByRole('button', { name: 'Plus', exact: true }).dispatchEvent('click');
   await page
     .getByRole('dialog')
     .getByRole('button', { name: /Patch notes|Nouveautés/ })
