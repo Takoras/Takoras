@@ -84,7 +84,31 @@ export function Layout() {
       void import('@/features/inventory/Bestiary');
       void import('@/features/inventory/inv').then((m) => qc.prefetchQuery(m.invQuery(uid)));
     }, 1500);
-    return () => clearTimeout(id);
+    // puis le code des autres pages, une à une pendant les temps morts : changer de page n'attend plus le réseau
+    // (avec leurs données pour la boutique, le passe et les succès : ces pages s'ouvrent déjà remplies)
+    const pages = [
+      () => import('@/features/shop/Shop').then((m) => m.prefetch(qc)),
+      () => import('@/features/pass/Pass').then((m) => m.prefetch(qc, uid)),
+      () => import('@/features/profile/Profile'),
+      () => import('@/features/inventory/Items'),
+      () => import('@/features/achievements/Achievements').then((m) => m.prefetch(qc, uid)),
+      () => import('@/features/board/Board'),
+      () => import('@/features/bourse/Bourse'),
+      () => import('@/features/social/Friends'),
+    ];
+    const idle = (f: () => void) =>
+      'requestIdleCallback' in window ? requestIdleCallback(f, { timeout: 2000 }) : setTimeout(f, 300);
+    let i = 0;
+    const next = () => {
+      const load = pages[i++];
+      if (load) void load().finally(() => idle(next));
+    };
+    const id2 = setTimeout(() => idle(next), 3500);
+    return () => {
+      clearTimeout(id);
+      clearTimeout(id2);
+      i = pages.length; // page quittée : on arrête la file
+    };
   }, [uid]);
   useEffect(installDoodleVisibility, []);
   useEffect(installDoodleFrames, []); // doodle précalculé : plus de filtre en direct (fini le lag avec beaucoup de jetons) // le doodle ne tourne que sur les images à l'écran

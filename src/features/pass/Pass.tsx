@@ -1,5 +1,5 @@
 import { useEffect, useLayoutEffect, useRef, useState, type CSSProperties } from 'react';
-import { useQuery, useQueryClient } from '@tanstack/react-query';
+import { useQuery, useQueryClient, type QueryClient } from '@tanstack/react-query';
 import { errorText, passApi } from '@/api';
 import { itemImg, itemText, type ShopItem, itemGlow, itemOdds, rgbHex } from '@/data/items';
 import { sfx } from '@/engines/sound.js';
@@ -75,6 +75,13 @@ const frame = () => new Promise((ok) => requestAnimationFrame(() => requestAnima
 // Passe de combat, même DA que la boutique : en haut ta progression (grand palier, barre d'XP, prochaine récompense)
 // et le premium ; dessous la route des 50 paliers (premium en haut, gratuit en bas) sur une ligne de progression
 // continue. Récupérer : éclair, onde de choc, et la récompense file vers le solde (pièces) ou l'inventaire (objets).
+// l'état du passe : la même requête pour la page et pour le chargement d'avance (Layout)
+const passQ = (uid?: string) => ({
+  queryKey: ['pass', uid],
+  queryFn: async () => (await passApi.state()) as unknown as PassState,
+});
+export const prefetch = (qc: QueryClient, uid: string) => qc.prefetchQuery(passQ(uid));
+
 export default function Pass() {
   const t = useT();
   const lang = useSettings((x) => x.lang);
@@ -86,11 +93,7 @@ export default function Pass() {
   const [premOpen, setPremOpen] = useState(false);
   const [info, setInfo] = useState<{ t: number; prem: boolean } | null>(null);
   const [busy, setBusy] = useState(false);
-  const q = useQuery({
-    queryKey: ['pass', user?.id],
-    enabled: !!user,
-    queryFn: async () => (await passApi.state()) as unknown as PassState,
-  });
+  const q = useQuery({ ...passQ(user?.id), enabled: !!user });
   useWeekly(); // les missions sont prêtes avant d'ouvrir l'onglet : rien n'arrive après coup
   const d = q.data;
   const tier = d ? Math.min(50, Math.floor(d.xp / XP_TIER)) : 0;
@@ -817,7 +820,12 @@ function Weekly() {
                     ✓
                   </Bump>
                 ) : (
-                  <Button size="sm" variant={ok ? 'primary' : 'ghost'} disabled={!ok} onClick={(e) => void claim(x.id, e.currentTarget)}>
+                  <Button
+                    size="sm"
+                    variant={ok ? 'primary' : 'ghost'}
+                    disabled={!ok}
+                    onClick={(e) => void claim(x.id, e.currentTarget)}
+                  >
                     {ok ? t('ui.bp_claim') : `${x.value}/${x.target}`}
                   </Button>
                 )}

@@ -7,7 +7,7 @@ import {
   type CSSProperties,
   type FormEvent,
 } from 'react';
-import { useQuery, useQueryClient } from '@tanstack/react-query';
+import { useQuery, useQueryClient, type QueryClient } from '@tanstack/react-query';
 import { bourseApi, errorText, publicApi, shopApi } from '@/api';
 import { useMe } from '@/api/queries';
 import { bannerName, hms, itemImg, itemText, type ShopItem, itemGlow, itemOdds, rgbHex } from '@/data/items';
@@ -96,6 +96,13 @@ const Coin = ({ size = 14 }: { size?: number }) => (
 // Boutique mystère, renouvelée chaque jour à minuit : chaque objet en stock est caché dans une case. La révéler est
 // gratuit et rapporte 100 pièces (une fois par objet et par jour) ; ensuite on peut l'acheter. En haut, l'objet à la
 // une (sa réduction se voit, pas ce que c'est), sur le fond pixel des fiches de jetons. Pas d'argent réel.
+// la boutique du jour : la même requête pour la page et pour le chargement d'avance (Layout)
+const shopQ = () => ({
+  queryKey: ['shop'],
+  queryFn: async () => ({ ...((await publicApi.shopToday()) as unknown as ShopData), at: Date.now() }),
+});
+export const prefetch = (qc: QueryClient) => qc.prefetchQuery(shopQ());
+
 export default function Shop() {
   const t = useT();
   const lang = useSettings((x) => x.lang);
@@ -105,10 +112,7 @@ export default function Shop() {
   const now = useNow();
   const [cat, setCat] = useState('potion');
   const [money, setMoney] = useState<'coins' | 'koo' | 'black'>('coins');
-  const shop = useQuery({
-    queryKey: ['shop'],
-    queryFn: async () => ({ ...((await publicApi.shopToday()) as unknown as ShopData), at: Date.now() }),
-  });
+  const shop = useQuery(shopQ());
   const wallet = useQuery({
     queryKey: ['bourse-shop', user?.id],
     enabled: !!user,

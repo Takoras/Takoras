@@ -1,5 +1,5 @@
 import { useLayoutEffect, useRef, useState, type CSSProperties } from 'react';
-import { useQuery, useQueryClient } from '@tanstack/react-query';
+import { useQuery, useQueryClient, type QueryClient } from '@tanstack/react-query';
 import { achApi, errorText } from '@/api';
 import { jetonOf, texOf } from '@/data/jetons';
 import { sfx } from '@/engines/sound.js';
@@ -67,13 +67,15 @@ const imgOf = (a: Ach) => {
 
 export function useAchievements() {
   const uid = useAuth((x) => x.user?.id);
-  return useQuery({
-    queryKey: ['ach', uid],
-    enabled: !!uid,
-    staleTime: 60_000,
-    queryFn: async () => ((await achApi.mine()) as { list: Ach[] }).list,
-  });
+  return useQuery({ ...achQ(uid), enabled: !!uid });
 }
+const achQ = (uid?: string) => ({
+  queryKey: ['ach', uid],
+  staleTime: 60_000,
+  queryFn: async () => ((await achApi.mine()) as { list: Ach[] }).list,
+});
+// chargement d'avance (Layout) : la page des succès s'ouvre déjà remplie
+export const prefetch = (qc: QueryClient, uid: string) => qc.prefetchQuery(achQ(uid));
 type Sort = 'ready' | 'gain' | 'easy' | 'hard';
 export const isReady = (a: Ach) => !a.claimed && a.value >= a.target;
 
