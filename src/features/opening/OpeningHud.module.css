@@ -48,6 +48,15 @@
   scale: 1;
   pointer-events: auto;
 }
+/* jeton révélé (ordinateur) : la boîte de droite ne bouge pas, la fiche du jeton arrive à gauche */
+@media (min-width: 761px) {
+  .rev .right {
+    opacity: 1;
+    translate: 0 -50%;
+    scale: 1;
+    pointer-events: auto;
+  }
+}
 /* la dérive : flotte doucement et suit un peu la souris (--mpx/--mpy écrits par mouseDepth.ts) */
 .box > * {
   animation: bob var(--dur) ease-in-out calc(var(--i) * -2s) infinite;

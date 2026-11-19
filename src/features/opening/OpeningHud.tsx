@@ -16,14 +16,37 @@ import s from './OpeningHud.module.css';
 // le solde et combien de tirages il paie encore. Elles penchent, dérivent doucement et suivent un peu la souris. Elles arrivent des côtés, se balancent au survol,
 // les nombres défilent quand ils changent, et elles s'écartent quand le jeton est révélé (sa fiche prend la place).
 const TXT = {
-  fr: { pulls: 'Tirages', next: '+1 dans {t}', full: 'Stock plein', luck: 'Chance', pity: 'Chance ×10', pityIn: 'dans {n} tirages', pityNow: 'au prochain tirage', coins: 'Pièces', buy: 'Tirages payables', none: 'Aucune potion' },
-  en: { pulls: 'Pulls', next: '+1 in {t}', full: 'Stock full', luck: 'Luck', pity: 'Luck ×10', pityIn: 'in {n} pulls', pityNow: 'on the next pull', coins: 'Coins', buy: 'Affordable pulls', none: 'No potion' },
+  fr: {
+    pulls: 'Tirages',
+    next: '+1 dans {t}',
+    full: 'Stock plein',
+    luck: 'Chance',
+    pity: 'Chance ×10',
+    pityIn: 'dans {n} tirages',
+    pityNow: 'au prochain tirage',
+    coins: 'Pièces',
+    buy: 'Tirages payables',
+    none: 'Aucune potion',
+  },
+  en: {
+    pulls: 'Pulls',
+    next: '+1 in {t}',
+    full: 'Stock full',
+    luck: 'Luck',
+    pity: 'Luck ×10',
+    pityIn: 'in {n} pulls',
+    pityNow: 'on the next pull',
+    coins: 'Coins',
+    buy: 'Affordable pulls',
+    none: 'No potion',
+  },
 };
 
 export function OpeningHud() {
   const [host, setHost] = useState<HTMLElement | null>(null);
   const [on, setOn] = useState(false);
   const [shown, setShown] = useState(false);
+  const [rev, setRev] = useState(false);
   const [serie, setSerie] = useState('Takoras');
   // l'écran d'ouverture est créé au premier tirage : on l'attend, puis on suit son ouverture et sa fermeture
   useEffect(() => {
@@ -35,6 +58,8 @@ export function OpeningHud() {
         if (v) setSerie(openingSerie());
         setOn(v);
         setShown(v && !el.classList.contains('revealed') && !el.classList.contains('recap'));
+        // jeton révélé : la boîte de droite (tirages, chance) RESTE en place, seule celle du ×10 laisse la place à la fiche
+        setRev(v && el.classList.contains('revealed') && !el.classList.contains('recap'));
       };
       sync();
       mo?.disconnect();
@@ -62,16 +87,33 @@ export function OpeningHud() {
       {/* fond de la page pendant le jeton mystère : le fond pixel Takoras le plus simple (une bande douce), sobre */}
       {on ? (
         <div className={`${s.pageBg} ${shown ? s.pageBgOn : ''}`} aria-hidden>
-          <PixelBg className={s.pageBgPx} odds={1} glow={serie === 'Bodako' ? '#1f6b3a' : '#2c4a9e'} still={reducedFx() || !shown} />
+          <PixelBg
+            className={s.pageBgPx}
+            odds={1}
+            glow={serie === 'Bodako' ? '#1f6b3a' : '#2c4a9e'}
+            still={reducedFx() || !shown}
+          />
         </div>
       ) : null}
-      <Hud on={on} shown={shown} serie={serie} />
+      <Hud on={on} shown={shown} rev={rev} serie={serie} host={host} />
     </>,
     host,
   );
 }
 
-function Hud({ on, shown, serie }: { on: boolean; shown: boolean; serie: string }) {
+function Hud({
+  on,
+  shown,
+  rev,
+  serie,
+  host,
+}: {
+  on: boolean;
+  shown: boolean;
+  rev: boolean;
+  serie: string;
+  host: HTMLElement;
+}) {
   const lang = useSettings((x) => x.lang);
   const T = TXT[lang === 'en' ? 'en' : 'fr'];
   const me = useMe();
@@ -82,6 +124,31 @@ function Hud({ on, shown, serie }: { on: boolean; shown: boolean; serie: string 
     return () => clearInterval(id);
   }, [on]);
   const ref = useRef<HTMLDivElement>(null);
+  const right = useRef<HTMLDivElement>(null);
+  // les boutons de la fiche révélée se posent juste sous la boîte de droite (même largeur, même bord droit)
+  useEffect(() => {
+    const el = right.current;
+    if (!el) return;
+    const place = () => {
+      const main = host.querySelector<HTMLElement>('.op-main');
+      if (!main) return;
+      // la boîte : centrée sur la hauteur de l'écran d'ouverture ; .op-main : le bloc où vivent les boutons
+      const hr = host.getBoundingClientRect();
+      const mr = main.getBoundingClientRect();
+      const boxRight = hr.width - (el.offsetLeft + el.offsetWidth);
+      host.style.setProperty('--act-top', `${hr.height / 2 + el.offsetHeight / 2 + 24 - (mr.top - hr.top)}px`);
+      host.style.setProperty('--act-right', `${boxRight - (hr.right - mr.right)}px`);
+      host.style.setProperty('--act-w', `${el.offsetWidth}px`);
+    };
+    const raf = requestAnimationFrame(place);
+    const ro = new ResizeObserver(place);
+    ro.observe(el);
+    ro.observe(host);
+    return () => {
+      cancelAnimationFrame(raf);
+      ro.disconnect();
+    };
+  }, [host, me.data, rev]);
   useSwingAll(ref, `.${s.box}`, 0.8, `${on}|${serie}`);
   if (!me.data) return null;
   const e = predictEco(me.data, me.dataUpdatedAt, now);
@@ -94,7 +161,7 @@ function Hud({ on, shown, serie }: { on: boolean; shown: boolean; serie: string 
   );
   const luckTxt = '×' + String(Math.round(e.luck * 100) / 100).replace('.', lang === 'en' ? '.' : ',');
   return (
-    <div ref={ref} className={`${s.hud} ${shown ? s.on : ''}`} aria-hidden={!shown}>
+    <div ref={ref} className={`${s.hud} ${shown ? s.on : ''} ${rev ? s.rev : ''}`} aria-hidden={!shown && !rev}>
       {/* à gauche : le prochain tirage ×10 de cette série */}
       <div className={`${s.box} ${s.left} ${pityIn <= 1 ? s.ready : ''}`} style={{ '--i': 0 } as React.CSSProperties}>
         <img data-depth className={`px ${s.big}`} src="/img/potions/luck-100.png" alt="" />
@@ -107,7 +174,7 @@ function Hud({ on, shown, serie }: { on: boolean; shown: boolean; serie: string 
         </span>
       </div>
       {/* à droite, dans une seule boîte : ce qui permet d'ouvrir encore (tirages ou pièces), puis la chance */}
-      <div className={`${s.box} ${s.right}`} style={{ '--i': 1 } as React.CSSProperties}>
+      <div ref={right} className={`${s.box} ${s.right}`} style={{ '--i': 1 } as React.CSSProperties}>
         {paid ? (
           <span data-depth className={s.row}>
             <img className="px" src="/img/coin.png" alt="" />

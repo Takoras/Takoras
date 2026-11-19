@@ -156,15 +156,6 @@ html.reduce-fx .op-coin .spin img.face, html.reduce-fx .op-coin .spin img.back {
 img.v-gold, .opening.v-gold .op-coin .spin img.face, .opening.v-gold .op-coin .spin img.back { animation: vGold .9s steps(1) infinite !important; }
 img.v-celeste, .opening.v-celeste .op-coin .spin img.face, .opening.v-celeste .op-coin .spin img.back { animation: vCeleste .9s steps(1) infinite !important; }
 img.v-ombre, .opening.v-ombre .op-coin .spin img.face, .opening.v-ombre .op-coin .spin img.back { animation: vOmbre .9s steps(1) infinite !important; }
-.v-pop { position: absolute; left: 50%; top: calc(16% + env(safe-area-inset-top)); translate: -50% 0; z-index: 30; display: flex; flex-direction: column; align-items: center; gap: 4px;
-  pointer-events: none; white-space: nowrap; animation: vPop 1.8s cubic-bezier(.2, .8, .3, 1) forwards; }
-.v-pop b { font-family: var(--font-display); font-size: clamp(22px, 4.5vw, 34px); font-weight: 700; letter-spacing: .42em; padding-left: .42em; text-transform: uppercase;
-  background: var(--vg); -webkit-background-clip: text; background-clip: text; color: transparent; filter: drop-shadow(0 0 14px var(--vc)); }
-.v-pop small { font-size: 12px; font-weight: 600; letter-spacing: .3em; color: var(--vc); opacity: .9; }
-.v-pop i { width: 0; height: 1px; background: linear-gradient(90deg, transparent, var(--vc), transparent); animation: vLine 1.8s cubic-bezier(.2, .8, .3, 1) forwards; }
-.v-pop.v-gold { --vg: linear-gradient(90deg, #fef3c7, #fbbf24, #fef3c7); --vc: rgba(251, 191, 36, .9); }
-.v-pop.v-celeste { --vg: linear-gradient(90deg, #ffffff, #c7d2fe, #ffffff); --vc: rgba(199, 210, 254, .95); }
-.v-pop.v-ombre { --vg: linear-gradient(90deg, #f3e8ff, #a855f7, #f3e8ff); --vc: rgba(168, 85, 247, .95); }
 .op-rarity small, #op-rarity small { font-size: .6em; opacity: .8; }
 .glare, .op-coin .glare {
   --h1: #ff9ecf; --h2: #ffe39a; --h3: #9dffd8; --h4: #9ccfff; --h5: #d3a8ff;
@@ -267,8 +258,6 @@ html.reduce-fx .opening.turbo::before { display: none; }
   33% { filter: url(#dd1) url(#vombre) drop-shadow(0 0 2px #c084fc) drop-shadow(0 0 11px rgba(124, 58, 237, .9)); }
   66% { filter: url(#dd2) url(#vombre) drop-shadow(0 0 2px #c084fc) drop-shadow(0 0 11px rgba(124, 58, 237, .9)); }
 }
-@keyframes vPop { 0% { opacity: 0; filter: blur(8px); transform: translateY(10px); } 14% { opacity: 1; filter: blur(0); transform: none; } 72% { opacity: 1; } 100% { opacity: 0; transform: translateY(-12px); } }
-@keyframes vLine { 0% { width: 0; } 30% { width: 220px; } 100% { width: 260px; opacity: 0; } }
 @keyframes annPulse { 50% { opacity: .55; } }
 @keyframes warp { 0% { transform: scale(1) rotate(0); opacity: .7; } 100% { transform: scale(1.18) rotate(2deg); opacity: .35; } }
 @keyframes turboGlow { 0% { opacity: 1; transform: scale(1.25); } 100% { opacity: .6; transform: scale(1); } }
@@ -460,3 +449,11 @@ html.q-calm .op-bg, html.q-calm .op-main { animation: none; }
 .op-row small { color: var(--muted); font-size: 15px; font-weight: 700; }
 .op-row b { font-family: var(--font-display); font-size: clamp(28px, 2.6vw, 40px); line-height: 1.05; font-variant-numeric: tabular-nums; }
 .op-row b.op-st-up { color: #4ade80; }
+
+/* ordinateur : la boîte de droite de l'ouverture (OpeningHud) reste affichée une fois le jeton révélé ; la fiche
+   n'en refait pas une deuxième, ses boutons se posent juste sous elle */
+@media (min-width: 761px) {
+  .op-stats { display: none; }
+  .op-actions { position: absolute; grid-area: auto; top: var(--act-top, 70%); right: var(--act-right, 0); width: var(--act-w, 340px);
+    justify-content: center; margin: 0; }
+}

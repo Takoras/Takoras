@@ -36,9 +36,11 @@
 .cine-live { position: absolute; image-rendering: pixelated; pointer-events: none; will-change: transform; }
 
 /* jeton muté : tampon + nom de la mutation sous le nom du jeton */
-.cine-mut { display: inline-flex; align-items: center; gap: 8px; padding: 4px 14px 4px 6px; border-radius: 999px; background: rgba(255, 255, 255, .08);
-  font: 800 clamp(13px, 2vw, 16px) / 1 var(--font-display); letter-spacing: .08em; text-transform: uppercase; color: #fff; }
-.cine-mut i { width: 26px; height: 26px; background: center / contain no-repeat; image-rendering: pixelated; }
+/* la même étiquette que partout (VTag : pilule, police du texte, tampon avec son ombre), seulement plus grande */
+.cine-mut { display: inline-flex; align-items: center; gap: 6px; padding: 3px 12px; border-radius: 999px; background: rgba(255, 255, 255, .08);
+  font: 800 clamp(13px, 2vw, 16px) / 1.5 var(--font-body); letter-spacing: .06em; text-transform: uppercase; color: #fff; }
+.cine-mut i { width: 22px; height: 22px; margin-left: -6px; background: center / contain no-repeat; image-rendering: pixelated;
+  filter: drop-shadow(0 0 2px rgb(0 0 0 / 50%)); }
 .cine-mut-gold { color: var(--mut-gold-fg); background: var(--mut-gold-bg); }
 .cine-mut-celeste { color: var(--mut-celeste-fg); background: var(--mut-celeste-bg); }
 .cine-mut-ombre { color: var(--mut-ombre-fg); background: var(--mut-ombre-bg); }

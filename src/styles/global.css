@@ -14,7 +14,6 @@
   initial-value: 0;
 }
 
-
 /* double-tap sans zoom (le zoom aux doigts reste possible, RGAA) */
 html {
   touch-action: manipulation;
@@ -45,8 +44,7 @@ html::-webkit-scrollbar {
 body {
   min-height: 100dvh;
   /* lueurs douces comme l'ancien Takoras (violet en haut à droite, orange à gauche) */
-  background:
-    radial-gradient(900px 500px at 85% -10%, rgb(61 107 255 / 6%), transparent 70%), var(--bg);
+  background: radial-gradient(900px 500px at 85% -10%, rgb(61 107 255 / 6%), transparent 70%), var(--bg);
   background-attachment: fixed;
   color: var(--text);
   font-family: var(--font-body);
@@ -159,8 +157,10 @@ html.lock body {
   height: 16px !important;
   background: center / contain no-repeat;
   font-style: normal;
-  margin: 0 0.3em 0 -0.35em;
-  vertical-align: -0.28em;
+  margin: 0 4px 0 -4px;
+  vertical-align: -3px;
+  /* même tampon que l'étiquette React (VTag) : même ombre */
+  filter: drop-shadow(0 0 2px rgb(0 0 0 / 50%));
 }
 
 /* Boutons violets des écrans de jeu (Ring, ouverture) : même texture dessinée que les boutons du site */
