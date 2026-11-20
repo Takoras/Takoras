@@ -67,7 +67,7 @@ type Locked = { locked: true; have: number; need: number; season: State['season'
 type Row = { pseudo: string; rank: number; score: number; value: number; elo: number; me: boolean };
 
 const FEE = 0.01;
-const MAX_ORDER = 0.1; // part de la réserve par ordre (le serveur vérifie aussi)
+const MAX_ORDER = 0.25; // part de la réserve par ordre (le serveur vérifie aussi)
 const buyCost = (a: Asset, q: number) => (a.k / (a.shares - q) - a.k / a.shares) * (1 + FEE);
 const sellGain = (a: Asset, q: number) => (a.k / a.shares - a.k / (a.shares + q)) * (1 - FEE);
 const floor3 = (n: number) => Math.max(0, Math.floor(n * 1000) / 1000);
