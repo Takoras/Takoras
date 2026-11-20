@@ -1,0 +1,9 @@
+-- Appliquées via MCP (« bourse_somme_nulle », « bourse_dividendes_depuis_la_caisse », « bourse_dividendes_fix_nom ») :
+-- Market à somme nulle. Total d'une saison = pièces des joueurs + réserves du marché + caisse (bourse_seasons.pot).
+-- * _bourse_norm(saison, total) : remet le total des réserves à une valeur donnée (même rapport pour tous les jetons).
+-- * _bourse_tick : les tirages et ventes bougent toujours les prix, puis le total des réserves est remis à son niveau
+--   d'avant (un jeton qui monte fait baisser les autres d'autant) ; l'ancienne « dérive » qui détruisait des pièces est retirée.
+-- * bourse_trade : les frais (1 %) vont dans la caisse.
+-- * _bourse_settle : les dividendes partagent la caisse chaque jour (plus de 20 × joueurs créés de nulle part).
+-- * bourse_claim_pay : la paie (25) est prise sur les réserves du marché.
+-- Vérifié (transaction annulée) : total identique après achat, vente, mise à jour des prix, dividendes et paie.
