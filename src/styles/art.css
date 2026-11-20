@@ -205,3 +205,12 @@ html img.px[src*='.gif']:not(.v-gold, .v-celeste, .v-ombre) {
 html .dd-card img.px[src*='.gif']:not(.v-gold, .v-celeste, .v-ombre) {
   animation: doodle 0.9s steps(1) infinite !important;
 }
+
+/* Téléphone : pas de doodle calculé en direct (filtre SVG redessiné à chaque pas, lourd pendant un changement de
+   page) ; l'image reste nette jusqu'à ce que son doodle précalculé soit prêt. Les mutations gardent leur palette. */
+@media (pointer: coarse) {
+  img.px:not(.dd-on, .v-gold, .v-celeste, .v-ombre) {
+    animation: none;
+    filter: var(--df, none);
+  }
+}

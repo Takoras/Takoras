@@ -23,6 +23,14 @@ import './styles/global.css';
 import './styles/art.css';
 import './styles/flat.css'; // essai « à plat » (sans ombres ni contours) : retirer cette ligne pour annuler
 
+// Code d'une ancienne version introuvable (mise en ligne pendant qu'on joue) : on recharge une fois sur la nouvelle
+window.addEventListener('vite:preloadError', (e) => {
+  if (sessionStorage.getItem('takoras-chunk-reload')) return;
+  e.preventDefault();
+  sessionStorage.setItem('takoras-chunk-reload', '1');
+  location.reload();
+});
+
 // Anciens liens #… → nouvelle adresse, avant le premier affichage
 const legacy = redirectLegacyHash();
 if (legacy) history.replaceState(null, '', legacy);
@@ -58,23 +66,25 @@ const root = document.getElementById('root');
 if (!root) throw new Error('#root introuvable');
 // Joueur en anglais : on attend le dictionnaire avant d'afficher (pas d'éclair de français)
 const ready = useSettings.getState().lang === 'en' ? loadEn() : Promise.resolve();
-void ready.finally(() =>
-  createRoot(root).render(
-    <StrictMode>
-      <QueryClientProvider client={qc}>
-        <RouterProvider router={router} />
-        <AccountModal />
-        <SettingsModal />
-        <InfoGate />
-        <ConfirmHost />
-        <ToastHost />
-      </QueryClientProvider>
-    </StrictMode>,
-  ),
-).then(() => {
-  // l'écran de chargement s'efface en fondu par-dessus le site déjà affiché, puis disparaît
-  const boot = document.getElementById('boot');
-  if (!boot) return;
-  requestAnimationFrame(() => requestAnimationFrame(() => boot.classList.add('out')));
-  setTimeout(() => boot.remove(), 600);
-});
+void ready
+  .finally(() =>
+    createRoot(root).render(
+      <StrictMode>
+        <QueryClientProvider client={qc}>
+          <RouterProvider router={router} />
+          <AccountModal />
+          <SettingsModal />
+          <InfoGate />
+          <ConfirmHost />
+          <ToastHost />
+        </QueryClientProvider>
+      </StrictMode>,
+    ),
+  )
+  .then(() => {
+    // l'écran de chargement s'efface en fondu par-dessus le site déjà affiché, puis disparaît
+    const boot = document.getElementById('boot');
+    if (!boot) return;
+    requestAnimationFrame(() => requestAnimationFrame(() => boot.classList.add('out')));
+    setTimeout(() => boot.remove(), 600);
+  });

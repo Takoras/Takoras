@@ -4,10 +4,23 @@ import AdminGate from '@/features/admin/AdminGate';
 import NotFound from '@/pages/NotFound';
 import { Layout } from './Layout';
 
-// Pages chargées à la demande (seul l'accueil est dans le premier téléchargement)
-const page = (load: () => Promise<{ default: React.ComponentType }>) => async () => ({
-  Component: (await load()).default,
-});
+// Pages chargées à la demande (seul l'accueil est dans le premier téléchargement).
+// Juste après une mise en ligne, le code de l'ancienne version n'existe plus sur le serveur : au lieu de rester
+// bloqué, on recharge tout de suite la page demandée sur la nouvelle version (une seule fois, pour ne pas boucler).
+const page = (load: () => Promise<{ default: React.ComponentType }>) => async () => {
+  try {
+    const m = await load();
+    sessionStorage.removeItem('takoras-chunk-reload');
+    return { Component: m.default };
+  } catch (e) {
+    if (!sessionStorage.getItem('takoras-chunk-reload')) {
+      sessionStorage.setItem('takoras-chunk-reload', '1');
+      location.reload();
+      await new Promise(() => undefined); // la page se recharge
+    }
+    throw e;
+  }
+};
 const bestiary = page(() => import('@/features/inventory/Bestiary'));
 const profile = page(() => import('@/features/profile/Profile'));
 
