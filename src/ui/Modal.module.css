@@ -122,3 +122,9 @@
   scale: 1.08;
   background: rgb(0 0 0 / 70%);
 }
+
+/* fiche sans cadre (jeton, offre) : pas de contour de focus autour de toute la fenêtre */
+.noRise:focus,
+.noRise:focus-visible {
+  outline: none;
+}

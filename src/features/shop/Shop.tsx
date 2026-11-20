@@ -546,14 +546,10 @@ export default function Shop() {
     <div ref={shelvesRef} className={s.shelves} role="group" aria-label={t('ui.shop_title')}>
       {CATS.map((c) => {
         // les rayons restent toujours accessibles, même vides aujourd'hui
-        const inCat = items.filter((it) => catOf(it) === c.k);
         return (
           <button key={c.k} type="button" className={s.shelf} aria-pressed={cat === c.k} onClick={() => pick(c.k)}>
             <img className="px" src={c.icon} alt="" />
-            <span>
-              <b>{t(c.label)}</b>
-              <small>{t('ui.shop_n', { n: inCat.length })}</small>
-            </span>
+            <b>{t(c.label)}</b>
           </button>
         );
       })}
@@ -713,16 +709,16 @@ function Buy({
         {changed ? <span className={`${s.deal} ${pct > 0 ? s.up : ''}`}>{`${pct > 0 ? '+' : ''}${pct}%`}</span> : null}
       </b>
       {it.owned ? (
-        <Button size={big ? 'md' : 'sm'} disabled>
+        <Button size="md" disabled>
           {t('ui.owned')}
         </Button>
       ) : stockLeft <= 0 ? (
-        <Button size={big ? 'md' : 'sm'} disabled>
+        <Button size="md" disabled>
           {hms(left)}
         </Button>
       ) : (
         <Button
-          size={big ? 'md' : 'sm'}
+          size="md"
           variant="primary"
           className={can ? s.can : s.poor}
           disabled={!logged}
@@ -748,7 +744,7 @@ function Hero(p: CardProps & { off: number; slot: number }) {
   useSwing(ref, 0.12); // il se balance un peu quand la souris passe dessus
   const { black } = useContext(Pay); // Black Market : trois vedettes côte à côte, aperçus à taille normale
   const art = useRef<HTMLDivElement>(null);
-  const [name, desc] = itemText(it, lang),
+  const [name] = itemText(it, lang),
     img = itemImg(it);
   const stockLeft = Math.max(0, it.stock - it.bought);
   const glow = glowOf(it);
@@ -756,6 +752,20 @@ function Hero(p: CardProps & { off: number; slot: number }) {
     <div ref={ref} className={s.hero} data-slot={p.slot} style={{ '--g': glow } as CSSProperties}>
       {/* fond selon la rareté de l'objet (comme les jetons), à sa couleur */}
       <PixelBg className={s.heroBg} odds={oddsOf(it)} glow={hexOf(glow)} center={art} still={reducedFx()} />
+      {/* en haut : à la une, la réduction et le stock ; au milieu l'objet ; en bas son nom et le prix */}
+      <span className={`${s.featRow} ${s.heroTop}`}>
+        <span className={s.feat}>{t('ui.shop_feat')}</span>
+        {off > 0 ? <b className={s.off}>−{off}%</b> : null}
+        {it.owned ? (
+          <span className={`${s.badgeIn} ${s.heroOk}`}>{t('ui.unlocked_b')}</span>
+        ) : stockLeft ? (
+          <span className={s.badgeIn}>×{stockLeft}</span>
+        ) : (
+          <span className={s.badgeIn}>
+            {t('ui.sold_out')} · {hms(left)}
+          </span>
+        )}
+      </span>
       <div ref={art} className={s.heroArt}>
         {isCosmetic(it.kind) ? (
           <span className={s.heroCosm}>
@@ -771,24 +781,12 @@ function Hero(p: CardProps & { off: number; slot: number }) {
         )}
       </div>
       <div className={s.heroInfo}>
-        <span className={s.featRow}>
-          <span className={s.feat}>{t('ui.shop_feat')}</span>
-          {off > 0 ? <b className={s.off}>−{off}%</b> : null}
-        </span>
         <h2>{name}</h2>
-        {it.kind === 'potion' ? <p>{desc}</p> : null}
         {isCosmetic(it.kind) ? (
           <p className={s.rar} style={{ color: rarCol(cosmRar(it.id)) }}>
             {t(rarKey(cosmRar(it.id)))}
           </p>
         ) : null}
-        <span className={s.stock}>
-          {it.owned
-            ? t('ui.unlocked_b')
-            : stockLeft
-              ? t('ui.stock_n', { n: stockLeft })
-              : `${t('ui.sold_out')} · ${hms(left)}`}
-        </span>
         <Buy {...p} card={() => ref.current} big />
       </div>
     </div>
@@ -801,7 +799,7 @@ function Card(p: CardProps & { slot: number }) {
   const lang = useSettings((x) => x.lang);
   const { it, slot } = p;
   const ref = useRef<HTMLLIElement>(null);
-  const [name, desc] = itemText(it, lang),
+  const [name] = itemText(it, lang),
     img = itemImg(it);
   const stockLeft = Math.max(0, it.stock - it.bought),
     out = it.owned || stockLeft <= 0;
@@ -833,14 +831,12 @@ function Card(p: CardProps & { slot: number }) {
           )}
         </div>
         <h3>{name}</h3>
-        {/* ligne réservée même sans description : toutes les cases gardent la même taille */}
+        {/* seulement la rareté d'un cosmétique : l'effet d'une potion se lit dans l'inventaire */}
         {isCosmetic(it.kind) ? (
           <p className={s.rar} style={{ color: rarCol(cosmRar(it.id)) }}>
             {t(rarKey(cosmRar(it.id)))}
           </p>
-        ) : (
-          <p className="muted">{it.kind === 'potion' ? desc : '\u00a0'}</p>
-        )}
+        ) : null}
         <Buy {...p} card={() => ref.current} />
       </div>
     </li>

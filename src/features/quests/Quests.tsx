@@ -94,9 +94,8 @@ export function Quests() {
         <div className={`${s.daily} ${d.available ? s.on : ''} ${just === 'daily' ? s.just : ''}`} id="daily">
           <div>
             <b>{t('ui.daily_title')}</b>
-            <small className="muted">
-              {d.available ? t('ui.daily_streak', { n: d.next_streak }) : t('ui.daily_tomorrow', { n: n(d.tomorrow) })}
-            </small>
+            {/* une seule info utile : ce que rapporte demain une fois récupéré (plus de « Jour 3 de suite ») */}
+            {d.available ? null : <small className="muted">{t('ui.daily_tomorrow', { n: n(d.tomorrow) })}</small>}
           </div>
           {d.available ? (
             <Button variant="gold" size="sm" onClick={(e) => void claimDaily(e.currentTarget)}>

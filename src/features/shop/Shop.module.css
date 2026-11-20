@@ -28,6 +28,13 @@
   flex-wrap: wrap;
   gap: var(--s-4);
 }
+/* « Probas & infos » reste en bout de ligne même quand le solde est fermé */
+.head > :last-child {
+  margin-left: auto;
+}
+.walletOn + :last-child {
+  margin-left: 0;
+}
 .head h1 {
   margin: 0;
   font-family: var(--font-display);
@@ -554,9 +561,13 @@
 .walletSlot {
   flex: none;
   margin-left: auto;
+  /* fermé, il ne prend plus de place (le texte plus gros ne tenait plus sur une ligne) : il s'ouvre en glissant */
+  max-width: 0;
+  overflow: hidden;
   opacity: 0;
   visibility: hidden;
   transition:
+    max-width 0.32s var(--ease-out),
     opacity 0.22s var(--ease-out),
     visibility 0.22s;
 }
@@ -564,6 +575,7 @@
   margin-left: 0;
 }
 .walletOn {
+  max-width: 460px;
   opacity: 1;
   visibility: visible;
 }
@@ -737,74 +749,6 @@
   font-family: var(--font-display);
   font-size: clamp(24px, 2.4vw, 32px);
 }
-.packView {
-  display: grid;
-  gap: var(--s-4);
-}
-.packView ul {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(min(120px, 100%), 1fr));
-  gap: var(--s-3);
-  margin: 0;
-  padding: 0;
-  list-style: none;
-}
-.packView li {
-  position: relative;
-  display: grid;
-  justify-items: center;
-  gap: 4px;
-  padding: var(--s-3);
-  border-radius: 12px;
-  background: color-mix(in srgb, var(--rc) 10%, var(--surface));
-  text-align: center;
-}
-.packView li small {
-  color: var(--muted);
-  font-size: var(--fs-xs);
-}
-.packViewArt {
-  display: grid;
-  place-items: center;
-  width: 100%;
-  height: 120px;
-}
-.packViewArt img {
-  max-width: 100px;
-  max-height: 100px;
-  object-fit: contain;
-}
-.packViewArt img.wide {
-  max-width: 100%;
-  max-height: 80px;
-}
-.packValue {
-  margin: 0;
-  color: var(--muted);
-  text-align: center;
-}
-.packBuy {
-  position: sticky; /* le bouton reste visible même quand l'aperçu défile */
-  bottom: 0;
-  z-index: 2;
-  display: grid;
-  justify-items: center;
-  gap: 1px;
-  padding: 10px;
-  border: 0;
-  border-radius: 8px;
-  background: var(--gold);
-  color: #241a02;
-  font: inherit;
-  opacity: 0.6;
-  cursor: default;
-}
-.packBuy b {
-  font-size: var(--fs-lg);
-}
-.packBuy small {
-  font-size: var(--fs-xs);
-}
 
 /* offres en euros : mêmes cases que la boutique, prix et boutons dorés */
 .offers {
@@ -957,13 +901,302 @@
   padding-bottom: 6px;
   font-size: var(--fs-xl);
 }
-.packViewSet {
-  display: grid;
-  place-items: center;
-  padding: var(--s-4) 0;
+@media (max-width: 900px) {
+  .offerCards {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+/* ================= Lisibilité (refonte) : tout plus grand, moins de texte =================
+   La vedette se lit de haut en bas : à la une + réduction, l'objet en grand, son nom et le prix. */
+.hero {
+  grid-template-columns: minmax(0, 1fr);
+  grid-template-rows: auto minmax(0, 1fr) auto;
+  justify-items: center;
+  text-align: center;
+  height: 500px;
+  padding: var(--s-6) var(--s-8) var(--s-8);
+}
+.heroTop {
+  justify-self: center;
+}
+.heroTop .feat,
+.heroTop .badgeIn {
+  font-size: var(--fs-md);
+  padding: 4px 14px;
+}
+.heroTop .off {
+  font-size: var(--fs-xl);
+  padding: 4px 16px;
+}
+.heroOk {
+  background: rgb(74 222 128 / 16%);
+  color: #bbf7d0;
+}
+.heroArt img {
+  width: clamp(190px, 19vw, 270px);
+  height: clamp(190px, 19vw, 270px);
+}
+.heroInfo {
+  justify-items: center;
+}
+.heroInfo h2 {
+  font-size: clamp(38px, 3.6vw, 56px);
+}
+.hero .buy {
+  justify-content: center;
+  margin-top: var(--s-2);
+}
+.hero .price {
+  font-size: var(--fs-2xl);
+}
+.top {
+  align-items: stretch;
+}
+/* les rayons : grosses étiquettes, sans le « X en stock » */
+.shelf {
+  padding: var(--s-5) var(--s-6);
+}
+.shelf b {
+  font-size: var(--fs-lg);
+}
+.shelf img {
+  width: 52px;
+  height: 52px;
+}
+/* les cases : plus grandes, image et prix en gros */
+.grid {
+  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+}
+.box {
+  gap: var(--s-2);
+  padding: var(--s-6) var(--s-5) var(--s-5);
+}
+.art {
+  height: 150px;
+}
+.art img {
+  width: 132px;
+  height: 132px;
+}
+.box h3 {
+  font-size: var(--fs-lg);
+}
+.box .price {
+  font-size: var(--fs-xl);
+}
+.badge {
+  padding: 2px 10px;
+  font-size: var(--fs-sm);
+}
+/* Black Market : ses trois vedettes gardent leur taille, avec la ligne du haut en plus */
+.bm .top .hero {
+  grid-template-rows: auto 130px auto;
+  height: 460px;
+}
+@media (max-width: 760px) {
+  .hero {
+    height: auto;
+    min-height: 420px;
+  }
+}
+
+/* ---------- offres en euros : 3 ou 4 grandes cases par ligne ---------- */
+.offerCards {
+  grid-template-columns: repeat(var(--oc, 3), minmax(0, 1fr));
+}
+.offers .setCard {
+  width: 240px;
+}
+.offerHero .offerLines {
+  font-size: var(--fs-lg);
+  gap: 6px;
+}
+.offerHero .heroInfo h2 {
+  font-size: clamp(40px, 3.8vw, 60px);
 }
 @media (max-width: 900px) {
   .offerCards {
     grid-template-columns: repeat(2, minmax(0, 1fr));
   }
+}
+
+/* ---------- aperçu d'une offre : la mise en scène de la fiche d'un jeton ---------- */
+.os {
+  position: relative;
+  isolation: isolate;
+  overflow: hidden;
+  display: grid;
+  justify-items: center;
+  gap: var(--s-8);
+  max-height: inherit;
+  overflow-y: auto;
+  padding: var(--s-10) var(--s-8) var(--s-8);
+  border: 1px solid rgb(255 255 255 / 12%);
+  border-radius: 16px;
+  background: var(--surface-2);
+  text-align: center;
+}
+.osBg {
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  width: 100%;
+  height: 100%;
+  opacity: 0.45;
+  pointer-events: none;
+}
+.osX {
+  position: absolute;
+  top: 16px;
+  right: 16px;
+  z-index: 2;
+  display: grid;
+  place-items: center;
+  width: 52px;
+  height: 52px;
+  border: 0;
+  border-radius: 50%;
+  background: rgb(0 0 0 / 50%);
+  color: var(--text);
+  cursor: pointer;
+  transition: scale var(--t-fast);
+}
+.osX:hover {
+  scale: 1.08;
+}
+.osHead {
+  display: grid;
+  justify-items: center;
+  gap: var(--s-2);
+}
+.osHead h2 {
+  margin: 0;
+  font-family: var(--font-display);
+  font-size: clamp(44px, 4.6vw, 72px);
+  line-height: 1;
+}
+.osHead .feat {
+  font-size: var(--fs-md);
+  padding: 4px 14px;
+}
+.osHead .rar {
+  font-size: var(--fs-lg);
+}
+.osSet {
+  --rc: var(--gold);
+}
+.osSet .setCard {
+  width: min(560px, 80vw);
+}
+.osItems {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: var(--s-6);
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+/* une boîte par objet : penchée, elle se balance au survol (accrochée en haut), comme les rayons du site */
+.osItem {
+  --tilt: -2deg;
+  position: relative;
+  display: grid;
+  justify-items: center;
+  gap: var(--s-2);
+  width: 220px;
+  padding: var(--s-6) var(--s-4) var(--s-5);
+  border: 1px solid rgb(255 255 255 / 12%);
+  border-radius: 12px;
+  background: rgb(20 20 30 / 82%);
+  box-shadow: 0 16px 34px rgb(0 0 0 / 45%);
+  rotate: calc(var(--tilt) + var(--swing, 0deg));
+  transform-origin: 50% 0;
+  animation: osIn 0.5s cubic-bezier(0.2, 1.15, 0.3, 1) both;
+}
+.osItem:nth-child(2n) {
+  --tilt: 2deg;
+}
+.osItem:nth-child(2) {
+  animation-delay: 0.06s;
+}
+.osItem:nth-child(3) {
+  animation-delay: 0.12s;
+}
+.osItem:nth-child(4) {
+  animation-delay: 0.18s;
+}
+.osItem:nth-child(n + 5) {
+  animation-delay: 0.24s;
+}
+@keyframes osIn {
+  from {
+    opacity: 0;
+    translate: 0 18px;
+    scale: 0.92;
+  }
+}
+.osItem b {
+  font-size: var(--fs-lg);
+  line-height: 1.2;
+}
+.osArt {
+  display: grid;
+  place-items: center;
+  height: 130px;
+}
+.osArt img {
+  width: 120px;
+  height: 120px;
+  object-fit: contain;
+  animation: bob 3.6s ease-in-out infinite;
+}
+.osQty {
+  position: absolute;
+  top: 10px;
+  right: 10px;
+  padding: 2px 12px;
+  border-radius: var(--r-pill);
+  background: var(--gold);
+  color: #241a02;
+  font-family: var(--font-display);
+  font-size: var(--fs-lg);
+  font-weight: 800;
+}
+.osBuy {
+  /* toujours visible, même quand l'aperçu défile (téléphone) */
+  position: sticky;
+  bottom: 0;
+  z-index: 2;
+  display: grid;
+  justify-items: center;
+  gap: 2px;
+  min-width: min(420px, 100%);
+  padding: var(--s-4) var(--s-10);
+  border: 0;
+  border-radius: 12px;
+  background: var(--gold);
+  color: #241a02;
+  font: inherit;
+  opacity: 0.85;
+  cursor: default;
+}
+.osBuy b {
+  font-family: var(--font-display);
+  font-size: var(--fs-2xl);
+  line-height: 1.1;
+}
+.osBuy small {
+  font-size: var(--fs-md);
+  font-weight: 700;
+}
+:global(html.reduce-fx) .osItem,
+:global(html.reduce-fx) .osArt img {
+  animation: none;
+}
+
+.offerHero {
+  height: auto;
+  min-height: 500px;
 }

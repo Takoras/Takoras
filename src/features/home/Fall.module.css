@@ -25,12 +25,7 @@
       #000 calc(var(--cut, 100vh) - 140px),
       transparent var(--cut, 100vh)
     ),
-    radial-gradient(
-      circle at 50% 48%,
-      rgb(0 0 0 / 22%) 0,
-      rgb(0 0 0 / 38%) 34vmax,
-      rgb(0 0 0 / 62%) 62vmax
-    );
+    radial-gradient(circle at 50% 48%, rgb(0 0 0 / 22%) 0, rgb(0 0 0 / 38%) 34vmax, rgb(0 0 0 / 62%) 62vmax);
   mask-composite: intersect;
 }
 
@@ -245,5 +240,12 @@
 @keyframes rainOut {
   to {
     opacity: 0;
+  }
+}
+
+/* écran bas (téléphone tourné) : le jeton rapetisse pour que le compteur et « Ouvrir » restent visibles sans défiler */
+@media (max-height: 560px) {
+  .fall {
+    width: clamp(130px, 30dvh, 170px);
   }
 }

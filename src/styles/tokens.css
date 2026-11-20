@@ -89,11 +89,12 @@
   /* Outfit partout (OFL). Échelle du cahier : H1 32/700, H2 22/700, texte 15-16, petit 13 */
   --font-display: 'Outfit Variable', 'Outfit', system-ui, sans-serif;
   --font-body: 'Outfit Variable', 'Outfit', system-ui, sans-serif;
-  --fs-xs: 0.875rem; /* 14 (lisibilité : avant 12) */
-  --fs-sm: 0.9375rem; /* 15 (avant 13) */
-  --fs-md: 1.0625rem; /* 17 (avant 15) */
-  --fs-lg: 1.25rem; /* 20 (avant 18) */
-  --fs-xl: 1.5rem; /* 24 (avant 22) */
+  /* lisibilité (demande du joueur) : on doit pouvoir lire sans se concentrer, même sur téléphone */
+  --fs-xs: 0.9375rem; /* 15 */
+  --fs-sm: 1rem; /* 16 */
+  --fs-md: 1.125rem; /* 18 */
+  --fs-lg: 1.3125rem; /* 21 */
+  --fs-xl: 1.625rem; /* 26 */
   --fs-2xl: 2.25rem; /* 36 (avant 32) */
   --fs-3xl: 2.75rem; /* 44 */
   --lh-tight: 1.1;

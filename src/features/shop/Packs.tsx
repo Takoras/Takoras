@@ -1,4 +1,6 @@
 import { useRef, useState, type CSSProperties } from 'react';
+import { PixelBg } from '@/ui/PixelBg';
+import { reducedFx } from '@/lib/settings';
 import { BANNER_IMG, itemImg, itemText, type ShopItem } from '@/data/items';
 import { useMe } from '@/api/queries';
 import { Avatar } from '@/ui/Avatar';
@@ -6,7 +8,7 @@ import { sfx } from '@/engines/sound.js';
 import { useT } from '@/i18n/useT';
 import type { Key } from '@/i18n';
 import { locale, useSettings } from '@/lib/settings';
-import { Aura, BannerFx, cosmRar, nameCls, picRar, rarCol, rarKey, RANK, type CRar } from '@/ui/Cosmetics';
+import { Aura, BannerFx, cosmRar, nameCls, picRar, RAR_ODDS, rarCol, rarKey, RANK, type CRar } from '@/ui/Cosmetics';
 import { Modal } from '@/ui/Modal';
 import { Segmented } from '@/ui/Segmented';
 import { Swap } from '@/ui/Swap';
@@ -171,19 +173,6 @@ const itemOf = (l: Line): ShopItem =>
       : { id: 'hourglass', kind: 'hourglass', data: { minutes: 60 } };
 const rarOf = (id: string): CRar =>
   id.startsWith('a_') ? picRar('pp', id.slice(2)) : id.startsWith('b_') ? picRar('banner', id.slice(2)) : cosmRar(id);
-const worth = (o: Offer) =>
-  o.lines.reduce(
-    (v, l) =>
-      v +
-      (l.kind === 'coins'
-        ? l.n
-        : l.kind === 'potion'
-          ? l.n * (POTION[l.m]?.price ?? 0)
-          : l.kind === 'hourglass'
-            ? l.n * 600
-            : 0),
-    0,
-  );
 const bestRar = (o: Offer) =>
   o.lines.reduce<CRar | null>((b, l) => {
     if (l.kind !== 'cosm') return b;
@@ -260,10 +249,9 @@ export function Packs() {
     return r ? rarCol(r) : 'var(--gold)';
   };
   // tout ce qu'il faut savoir sans ouvrir l'offre : contenu, effet, rareté, valeur
+  // grosse promo : la rareté, puis ce qu'il y a dedans (une offre d'un seul objet : son nom suffit)
   const info = (o: Offer) => {
-    const one = single(o);
     const r = bestRar(o);
-    const w = worth(o);
     return (
       <>
         {r ? (
@@ -271,48 +259,28 @@ export function Packs() {
             {t(rarKey(r))}
           </p>
         ) : null}
-        <ul className={s.offerLines}>
-          {one ? (
-            one.kind !== 'coins' ? (
-              <li>{itemText(itemOf(one), lang)[1]}</li>
-            ) : null
-          ) : (
-            o.lines.map((l, i) => (
+        {single(o) ? null : (
+          <ul className={s.offerLines}>
+            {o.lines.map((l, i) => (
               <li key={i}>
                 {itemName(l)}
                 {many(l) ? <span className={s.badgeIn}>×{many(l)}</span> : null}
               </li>
-            ))
-          )}
-          {w && (!one || one.kind !== 'coins') ? (
-            <li className={s.offerWorth}>{t('ui.pay_value', { n: n(w) })}</li>
-          ) : null}
-        </ul>
+            ))}
+          </ul>
+        )}
       </>
     );
   };
   // petite case : une seule ligne (rareté, effet, ou le gros du contenu)
+  // petite case : seulement la rareté d'un cosmétique (rien d'autre à lire)
   const short = (o: Offer) => {
     const r = bestRar(o);
-    if (r)
-      return (
-        <p className={s.rar} style={{ color: rarCol(r) }}>
-          {t(rarKey(r))}
-        </p>
-      );
-    const one = single(o);
-    const head = o.lines[0];
-    return (
-      <p className={s.offerShort}>
-        {one
-          ? one.kind === 'coins'
-            ? '\u00a0'
-            : itemText(itemOf(one), lang)[1]
-          : head
-            ? t('ui.pay_worth', { n: n(worth(o)) })
-            : '\u00a0'}
+    return r ? (
+      <p className={s.rar} style={{ color: rarCol(r) }}>
+        {t(rarKey(r))}
       </p>
-    );
+    ) : null;
   };
   const visual = (o: Offer, lg?: boolean) => {
     if (isCosmOffer(o)) return <SetCard o={o} pseudo={pseudo} av={myAv} lg={lg} />;
@@ -346,14 +314,15 @@ export function Packs() {
         <div ref={root} className={s.offers}>
           {promo ? (
             <div className={`${s.hero} ${s.offerHero}`} style={{ '--rc': rc(promo) } as CSSProperties}>
+              {/* comme la vedette de la boutique : l'étiquette en haut, l'objet au milieu, le nom et le prix en bas */}
+              <span className={`${s.featRow} ${s.heroTop}`}>
+                <span className={s.feat}>
+                  {t(promo.tag === 'hot' ? 'ui.pay_hot' : promo.tag === 'best' ? 'ui.pay_best' : 'ui.shop_feat')}
+                </span>
+                {qty(promo) ? <span className={s.badgeIn}>×{qty(promo)}</span> : null}
+              </span>
               <div className={s.heroArt}>{visual(promo, true)}</div>
               <div className={s.heroInfo}>
-                <span className={s.featRow}>
-                  <span className={s.feat}>
-                    {t(promo.tag === 'hot' ? 'ui.pay_hot' : promo.tag === 'best' ? 'ui.pay_best' : 'ui.shop_feat')}
-                  </span>
-                  {qty(promo) ? <span className={s.badgeIn}>×{qty(promo)}</span> : null}
-                </span>
                 <h2>{name(promo)}</h2>
                 {info(promo)}
                 <div className={s.buy}>
@@ -365,7 +334,11 @@ export function Packs() {
               </div>
             </div>
           ) : null}
-          <ul className={`${s.grid} ${s.offerCards}`}>
+          {/* 4 par ligne quand ça tombe juste (aucune case seule en bas), sinon 3 */}
+          <ul
+            className={`${s.grid} ${s.offerCards}`}
+            style={{ '--oc': rest.length % 4 === 0 ? 4 : 3 } as CSSProperties}
+          >
             {rest.map((o) => (
               <li key={o.id} className={`${s.card} ${o.tag === 'best' ? s.bmDeal : ''}`}>
                 <div className={s.box} style={{ '--rc': rc(o) } as CSSProperties}>
@@ -388,40 +361,85 @@ export function Packs() {
           </ul>
         </div>
       </Swap>
-      <Modal open={!!open} onClose={() => setOpen(null)} title={open ? name(open) : ''} wide>
-        {open ? (
-          <div className={s.packView}>
-            {isCosmOffer(open) ? (
-              <div className={s.packViewSet} style={{ '--rc': rc(open) } as CSSProperties}>
-                <SetCard o={open} pseudo={pseudo} av={myAv} lg />
-              </div>
-            ) : null}
-            <ul>
-              {open.lines.map((l, i) => {
-                const rr = l.kind === 'cosm' ? rarOf(l.id) : null;
-                return (
-                  <li key={i} style={{ '--rc': rr ? rarCol(rr) : 'var(--gold)' } as CSSProperties}>
-                    {l.kind !== 'cosm' ? (
-                      <span className={s.packViewArt}>
-                        <Art l={l} />
-                      </span>
-                    ) : null}
-                    {many(l) ? <span className={s.badge}>×{many(l)}</span> : null}
-                    <b>{itemName(l)}</b>
-                    {rr ? <small style={{ color: rarCol(rr) }}>{t(rarKey(rr))}</small> : null}
-                    {l.kind !== 'coins' ? <small>{itemText(itemOf(l), lang)[1]}</small> : null}
-                  </li>
-                );
-              })}
-            </ul>
-            {worth(open) ? <p className={s.packValue}>{t('ui.pay_value', { n: n(worth(open)) })}</p> : null}
-            <button type="button" className={s.packBuy} disabled title={t('ui.packs_soon')}>
-              <b>{eur(open.price)}</b>
-              <small>{t('ui.pk_soon')}</small>
-            </button>
-          </div>
-        ) : null}
+      {/* l'aperçu : la même mise en scène que la fiche d'un jeton (fond pixel à sa couleur, boîtes penchées) */}
+      <Modal open={!!open} onClose={() => setOpen(null)} wide bare noX>
+        {open ? <OfferSheet o={open} pseudo={pseudo} av={myAv} close={() => setOpen(null)} /> : null}
       </Modal>
     </section>
+  );
+}
+
+// couleur de la rareté en hexadécimal (fond pixel) ; une offre sans cosmétique est dorée
+const RAR_HEX: Record<string, string> = {
+  common: '#cbd5e1',
+  rare: '#38bdf8',
+  epic: '#b79bff',
+  legend: '#fbbf24',
+  myth: '#f0abfc',
+  secret: '#f0abfc',
+};
+function OfferSheet({ o, pseudo, av, close }: { o: Offer; pseudo: string; av: string; close: () => void }) {
+  const t = useT();
+  const lang = useSettings((x) => x.lang);
+  const loc = locale(lang);
+  const n = (v: number) => v.toLocaleString(loc);
+  const eur = (v: number) => v.toLocaleString(loc, { style: 'currency', currency: 'EUR' });
+  const root = useRef<HTMLDivElement>(null);
+  useSwingAll(root, `.${s.osItem}`, 0.6, o.id);
+  const r = bestRar(o);
+  const hex = r ? (RAR_HEX[r] ?? '#f2c230') : '#f2c230';
+  const nm = o.name[lang === 'en' ? 1 : 0];
+  const one = single(o);
+  const title = one
+    ? one.kind === 'coins'
+      ? t('ui.pay_coins_n', { n: n(one.n) })
+      : itemText(itemOf(one), lang)[0]
+    : nm;
+  const many = (l: Line) => (l.kind === 'potion' || l.kind === 'hourglass' ? l.n : 0);
+  const lineName = (l: Line) =>
+    l.kind === 'coins' ? t('ui.pay_coins_n', { n: n(l.n) }) : itemText(itemOf(l), lang)[0];
+  return (
+    <div ref={root} className={s.os} style={{ '--rc': r ? rarCol(r) : 'var(--gold)' } as CSSProperties}>
+      <PixelBg className={s.osBg} odds={r ? RAR_ODDS[r] : 5000} glow={hex} still={reducedFx()} />
+      <button type="button" className={s.osX} onClick={close} aria-label={t('ui.close')}>
+        <svg viewBox="0 0 24 24" width="22" height="22" aria-hidden>
+          <path d="M6 6l12 12M18 6 6 18" stroke="currentColor" strokeWidth="2.6" strokeLinecap="round" />
+        </svg>
+      </button>
+      <header className={s.osHead}>
+        {o.tag ? <span className={s.feat}>{t(o.tag === 'best' ? 'ui.pay_best' : 'ui.pay_hot')}</span> : null}
+        <h2>{title}</h2>
+        {r ? (
+          <p className={s.rar} style={{ color: rarCol(r) }}>
+            {t(rarKey(r))}
+          </p>
+        ) : null}
+      </header>
+      {isCosmOffer(o) ? (
+        <div className={s.osSet}>
+          <SetCard o={o} pseudo={pseudo} av={av} lg />
+        </div>
+      ) : null}
+      {/* ce qu'il y a dedans : une grosse boîte penchée par objet, l'image en grand et sa quantité */}
+      {o.lines.some((l) => l.kind !== 'cosm') ? (
+        <ul className={s.osItems}>
+          {o.lines
+            .filter((l) => l.kind !== 'cosm')
+            .map((l, i) => (
+              <li key={i} className={s.osItem}>
+                {many(l) ? <span className={s.osQty}>×{many(l)}</span> : null}
+                <span className={s.osArt}>
+                  <Art l={l} />
+                </span>
+                <b>{lineName(l)}</b>
+              </li>
+            ))}
+        </ul>
+      ) : null}
+      <button type="button" className={s.osBuy} disabled title={t('ui.packs_soon')}>
+        <b>{eur(o.price)}</b>
+        <small>{t('ui.pk_soon')}</small>
+      </button>
+    </div>
   );
 }
