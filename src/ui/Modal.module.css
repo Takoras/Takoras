@@ -83,8 +83,9 @@
 /* fiche jeton : grande, presque tout l'écran sur téléphone ; même taille sur toutes les pages (on annule le
    zoom propre à la page --pz et on garde celui de l'inventaire) */
 .noRise.wide {
-  zoom: calc(0.9 / var(--pz, 1));
-  width: min(100% - 2 * var(--gutter), 1040px);
+  /* fiche d'un jeton : elle prend la place (seul le zoom propre à la page est annulé) */
+  zoom: calc(1 / var(--pz, 1));
+  width: min(100% - 2 * var(--gutter), 1280px);
 }
 
 @media (max-height: 520px) {

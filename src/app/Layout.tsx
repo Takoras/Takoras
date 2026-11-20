@@ -56,6 +56,8 @@ const PAGE_ZOOM: [string, number][] = [
 ];
 // la boutique est plus large que les autres pages (la vitrine respire sur PC)
 function pageZoom(path: string) {
+  // téléphone : jamais de réduction en plus (l'écran est déjà petit, il faut pouvoir lire)
+  if (document.documentElement.classList.contains('phone')) return 1;
   if (path === '/') return 0.9;
   return PAGE_ZOOM.find(([p]) => path.startsWith(p))?.[1] ?? 1;
 }

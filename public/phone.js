@@ -1,8 +1,9 @@
 // Taille du site selon l'écran.
-// - PC : le site est conçu pour ~1440 px de large ; sur un grand écran il grossit (1920 px → ×1,33, comme un zoom 133 %),
+// - PC : le site est conçu pour ~1360 px de large ; sur un grand écran il grossit (1920 px → ×1,41),
 //   jamais plus petit que la taille normale. Échelle posée sur <html> en --z, appliquée à #root (global.css).
 // - Téléphone à l'horizontale : même mise en page que sur PC, réduite. La largeur de rendu est choisie pour que
-//   la hauteur visible fasse ~640 px (largeur = 640 × largeur/hauteur de l'écran), recalculée quand la taille change.
+//   la hauteur visible fasse ~520 px (largeur = 520 × largeur/hauteur de l'écran), recalculée quand la taille change.
+//   (640 px rendait tout trop petit : textes illisibles en jouant.)
 //   La classe « phone » sert au message « tourne ton téléphone » et au plein écran au premier toucher.
 (function () {
   // www.takoras.com → takoras.com (une seule adresse : la connexion Discord ne revient que sur celle-là)
@@ -17,7 +18,7 @@
   if (!phone) {
     var last = 0;
     var fitPc = function () {
-      var z = Math.round(Math.min(1.6, Math.max(1, innerWidth / 1440)) * 1000) / 1000;
+      var z = Math.round(Math.min(1.6, Math.max(1, innerWidth / 1360)) * 1000) / 1000;
       if (z === last) return;
       last = z;
       d.style.setProperty('--z', String(z));
@@ -29,14 +30,14 @@
   }
 
   d.classList.add('phone');
-  var H = 640;
+  var H = 520;
   var m = document.querySelector('meta[name="viewport"]');
   var W = 0;
   function fit() {
     if (!m || !innerHeight) return;
     var land = innerWidth > innerHeight;
     var w = land ? Math.round((H * innerWidth) / innerHeight) : 1280;
-    w = Math.max(1100, Math.min(2200, w));
+    w = Math.max(960, Math.min(2200, w));
     if (Math.abs(w - W) < 24) return; // pas de petits changements en boucle
     W = w;
     // zoom aux doigts autorisé (RGAA 10.4) ; le double-tap ne zoome pas (touch-action: manipulation dans global.css)

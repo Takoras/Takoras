@@ -4,6 +4,7 @@ import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { bourseApi, errorText } from '@/api';
 import { NeedLogin } from '@/app/NeedLogin';
 import { jetonOf, MYSTERE, texOf } from '@/data/jetons';
+import { useJn } from '@/lib/names';
 import { sfx } from '@/engines/sound.js';
 import { useT } from '@/i18n/useT';
 import type { Key } from '@/i18n';
@@ -202,6 +203,7 @@ function Chart({ a, loc }: { a: Asset; loc: string }) {
 }
 
 export default function Bourse() {
+  const jn = useJn(); // noms des jetons traduits (anglais)
   const t = useT();
   const lang = useSettings((x) => x.lang);
   const uid = useAuth((x) => x.user?.id);
@@ -244,7 +246,7 @@ export default function Bourse() {
     `${v >= 0 ? '+' : ''}${v.toLocaleString(loc, { minimumFractionDigits: 1, maximumFractionDigits: 1 })} %`;
   const cl = (v: number) => (v >= 0 ? s.up : s.down);
   const change = (a: Asset) => (a.price / a.p0 - 1) * 100;
-  const label = (a: Asset) => a.name ?? '???';
+  const label = (a: Asset) => (a.name ? jn(a.name) : '???');
   const img = (a: Asset) => (a.name ? texOf(jetonOf(a.name, d.season.serie)) : MYSTERE);
   // ce que rapporterait ou coûterait la position si on vendait tout maintenant (frais compris)
   const result = (a: Asset) => {
@@ -482,7 +484,7 @@ export default function Bourse() {
                         <Link to={`/profile/${encodeURIComponent(f.pseudo)}`}>{f.pseudo}</Link>{' '}
                         <span className={f.kind === 'buy' || f.kind === 'pull' ? s.up : s.down}>{feedText(f)}</span>{' '}
                         {f.shares ? `${f.shares.toLocaleString(loc)} ` : ''}
-                        {f.jeton}
+                        {jn(f.jeton)}
                         {f.pct !== null ? <b className={cl(f.pct)}> {pct(f.pct)}</b> : null}
                       </li>
                     ))}

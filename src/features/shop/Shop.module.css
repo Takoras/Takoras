@@ -900,6 +900,19 @@
   height: 100%;
   object-fit: cover;
 }
+/* les images d'un set (bannière, photo) gardent la taille de leur boîte : les règles des cases et de l'objet à la
+   une (« .art img », « .heroArt img » : 92 à 220 px, zoom au survol) ne doivent jamais les toucher, sinon la photo
+   est agrandie dans son rond, coupée et décalée (on voyait le dessin en double) */
+.setCard img:global(.px) {
+  width: 100%;
+  height: 100%;
+  max-width: none;
+  max-height: none;
+  object-fit: cover;
+  scale: none;
+  translate: none;
+  margin: 0;
+}
 .setId {
   position: relative;
   z-index: 2;
@@ -912,9 +925,6 @@
 }
 .setPp {
   flex: none;
-  padding: 3px;
-  border-radius: 50%;
-  background: var(--bg, #0b0b0f);
 }
 .setId b {
   min-width: 0;
@@ -933,9 +943,6 @@
   gap: var(--s-3);
   margin-top: -44px;
   padding-left: var(--s-4);
-}
-.setLg .setPp {
-  padding: 5px;
 }
 .setLg .setId b {
   padding-bottom: 6px;

@@ -14,5 +14,5 @@ test('tampon de mutation : taille fixe partout (étiquettes du jeu et du site)',
     document.body.appendChild(d);
   });
   const box = await page.locator('#op-test .vstamp').boundingBox();
-  expect(box?.width ?? 999).toBeLessThanOrEqual(16);
+  expect(box?.width ?? 999).toBeLessThanOrEqual(16.5); // 16 px (marge : arrondi du zoom téléphone)
 });

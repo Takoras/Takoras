@@ -195,7 +195,7 @@
 .sheet .power > .lore {
   --tilt: 3deg;
   --fl: 7.5s;
-  max-width: 340px;
+  width: min(100%, 400px);
 }
 .sheet .power > .rs {
   --tilt: 3deg;
@@ -312,21 +312,24 @@
 }
 .stage {
   display: grid;
-  grid-template-columns: 1fr minmax(260px, 340px) 1fr;
+  /* les deux boîtes aussi larges l'une que l'autre, bien écartées du jeton, le tout centré */
+  grid-template-columns: minmax(0, 1fr) minmax(300px, 380px) minmax(0, 1fr);
   align-items: center;
-  gap: var(--s-5);
+  gap: var(--s-10);
 }
 
 /* --- Nom, chance, ce que tu en as */
 .id {
   align-self: center;
+  justify-self: end;
+  width: min(100%, 400px);
 }
 .facts {
   list-style: none;
   display: grid;
-  gap: 6px;
-  margin-top: var(--s-2);
-  font-size: var(--fs-sm);
+  gap: 8px;
+  margin-top: var(--s-3);
+  font-size: var(--fs-md);
   color: var(--text-2);
 }
 .facts li {
@@ -742,4 +745,16 @@
   color: var(--muted);
   font-size: var(--fs-xs);
   font-weight: 700;
+}
+
+/* la description : à gauche de sa colonne, comme la fiche du nom est à droite de la sienne (le jeton au milieu) */
+.power {
+  display: grid;
+  justify-items: start;
+}
+.sheet .id :global(h2) {
+  font-size: clamp(44px, 4.6vw, 72px);
+}
+.sheet .lore p {
+  font-size: var(--fs-lg);
 }

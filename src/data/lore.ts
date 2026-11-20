@@ -77,8 +77,8 @@ export const LORE: Record<string, [fr: string, en: string]> = {
     'A shard of an ancient tree, hard as stone. It still smells of the forest.',
   ],
   Virus: [
-    'Une chose verte qui s’enroule et se multiplie. Les cristaux violets, c’est ce qu’il a déjà dévoré.',
-    'A green thing that coils and multiplies. The purple crystals are what it has already eaten.',
+    'Une chose verte qui s’enroule et se multiplie. Partout où elle passe, des champignons violets poussent.',
+    'A green thing that coils and multiplies. Wherever it goes, purple mushrooms sprout.',
   ],
   Ronce: [
     'Elle griffe ceux qui la cueillent. Les plus patients finissent par l’avoir.',
