@@ -31,8 +31,7 @@ function filterId(seed: number, small: boolean, dpr: number) {
     document.body.appendChild(svgHost);
   }
   const freq = (small ? 0.07 : 0.04) / dpr;
-  // amplitude réduite de moitié : sur les gros sprites, l'ancien tremblement (3 px) se voyait trop
-  const scale = (small ? 0.8 : 1.5) * dpr;
+  const scale = (small ? 1.4 : 3) * dpr;
   svgHost.insertAdjacentHTML(
     'beforeend',
     `<filter id="${id}" x="0" y="0" width="100%" height="100%" color-interpolation-filters="linearRGB"><feTurbulence type="fractalNoise" baseFrequency="${freq}" numOctaves="1" seed="${seed}"/><feDisplacementMap in="SourceGraphic" scale="${scale}" xChannelSelector="R" yChannelSelector="G"/></filter>`,
@@ -94,7 +93,7 @@ async function render(
   const full = total > 0 && opaque / total > 0.9;
   // (un rond qui frôle le bord en 4 points, comme les jetons, reste en dessin précalculé : la coupe ne se voit pas)
   if (!full && opaque / Math.max(1, total) > 0.3) return null;
-  const m = full ? Math.ceil((small ? 0.8 : 1.5) * dpr) : 0;
+  const m = full ? Math.ceil((small ? 1.4 : 3) * dpr) : 0;
   const ow = cw + m * 2,
     oh = ch + m * 2;
   const src = document.createElement('canvas');

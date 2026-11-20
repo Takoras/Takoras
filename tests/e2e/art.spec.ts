@@ -2,7 +2,7 @@ import { test, expect } from '@playwright/test';
 import { fakeSupabase } from './fake-supabase';
 
 // Les jetons gardent l'effet doodle et la couleur de leur variante sur toutes les pages (pas seulement pendant l'ouverture)
-test('doodle partout et variantes visibles (vitrine, bestiaire)', async ({ page, isMobile }) => {
+test('doodle partout et variantes visibles (vitrine, bestiaire)', async ({ page }) => {
   await fakeSupabase(page);
   await page.goto('/profile/Ami');
   const gold = page.locator('ul li img.v-gold').first(); // Mobu Doré dans la vitrine
@@ -10,13 +10,10 @@ test('doodle partout et variantes visibles (vitrine, bestiaire)', async ({ page,
   expect(await gold.evaluate((el) => getComputedStyle(el).animationName)).toBe('vGold');
   // une image normale (bestiaire du joueur, affiché directement sous ses séries) a le doodle
   const normal = page.getByRole('button', { name: /#01 Mobu 1\/2/ }).locator('img');
-  // téléphone : pas de doodle calculé en direct (trop lourd) ; seulement le doodle précalculé, quand il est prêt
-  if (!isMobile) {
-    expect(await normal.evaluate((el) => getComputedStyle(el).animationName)).toBe('doodle');
-    // le filtre est vraiment appliqué (une couleur invalide dans --df l'annulait sans bruit)
-    const applied = async (sel: ReturnType<typeof page.locator>) => sel.evaluate((el) => getComputedStyle(el).filter);
-    expect(await applied(normal)).toMatch(/url\(.*#dd\d.*drop-shadow/);
-  }
+  expect(await normal.evaluate((el) => getComputedStyle(el).animationName)).toBe('doodle');
+  // le filtre est vraiment appliqué (une couleur invalide dans --df l'annulait sans bruit)
+  const applied = async (sel: ReturnType<typeof page.locator>) => sel.evaluate((el) => getComputedStyle(el).filter);
+  expect(await applied(normal)).toMatch(/url\(.*#dd\d.*drop-shadow/);
   // un jeton jamais eu n'est pas dévoilé dans la vitrine d'un autre joueur
   await expect(page.getByRole('button', { name: /Nyx/ })).toHaveCount(0);
   // le logo reste fixe
@@ -26,18 +23,10 @@ test('doodle partout et variantes visibles (vitrine, bestiaire)', async ({ page,
   // les filtres SVG existent dans la page
   await expect(page.locator('filter#dd0')).toHaveCount(1);
   await page.goto('/inventory');
-  const mobu = page
-    .getByRole('button', { name: /×5 Mobu/ })
-    .locator('img')
-    .first();
+  const mobu = page.getByRole('button', { name: /×5 Mobu/ }).locator('img').first();
   // doodle de l'inventaire : filtre en direct, puis images précalculées (dd-on) dès qu'elles sont prêtes
   await expect
-    .poll(
-      () => mobu.evaluate((el) => el.classList.contains('dd-on') || /url\(.*#dd\d/.test(getComputedStyle(el).filter)),
-      {
-        timeout: 15_000,
-      },
-    )
+    .poll(() => mobu.evaluate((el) => el.classList.contains('dd-on') || /url\(.*#dd\d/.test(getComputedStyle(el).filter)))
     .toBe(true);
 });
 
