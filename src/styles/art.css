@@ -142,13 +142,13 @@ html.no-svgfx:not(.reduce-fx) img.px {
 }
 @keyframes doodleT {
   0% {
-    transform: translate(0.5px, 0) rotate(0.6deg);
+    transform: translate(0.25px, 0) rotate(0.3deg);
   }
   33% {
-    transform: translate(-0.5px, 0.5px) rotate(-0.5deg);
+    transform: translate(-0.25px, 0.25px) rotate(-0.25deg);
   }
   66% {
-    transform: translate(0, -0.5px) rotate(0.3deg);
+    transform: translate(0, -0.25px) rotate(0.15deg);
   }
 }
 html.no-svgfx img.v-gold {
