@@ -656,6 +656,7 @@ export const fr = {
     bs_trades: 'Transactions',
     bs_ends: 'Fin',
     bs_koo: 'Market Coin',
+    bm_locked: 'Réservé aux joueurs du Market',
     bs_need: '{n}/{m} jetons différents',
     bs_go_pull: 'Ouvrir des tirages',
     bs_no_token: 'Aucun jeton de cette série pour l’instant',

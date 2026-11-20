@@ -460,6 +460,9 @@ export async function fakeSupabase(
     }
     if (rpc === 'bourse_shop') return json({ spendable: 5000, koo: 6000, reserved: 1000 });
     if (rpc === 'bourse_shop_buy') return json({ spendable: 4900, state: {} });
+    if (rpc === 'black_market' && opts.bourseHave !== undefined && opts.bourseHave < 10)
+      // comme le vrai serveur : Market pas débloqué, aucun contenu
+      return json({ open: true, locked: true, have: opts.bourseHave, need: 10, items: [], feats: [] });
     if (rpc === 'black_market' || rpc === 'black_market_buy' || rpc === 'black_market_reveal') {
       if (rpc === 'black_market_buy') bs.bmBought = 1;
       if (rpc === 'black_market_reveal') bs.bmSeen = true;

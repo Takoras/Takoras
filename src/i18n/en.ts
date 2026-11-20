@@ -654,6 +654,7 @@ export const en: Dict = {
     bs_trades: 'Trades',
     bs_ends: 'Ends',
     bs_koo: 'Market Coin',
+    bm_locked: 'Market players only',
     bs_need: '{n}/{m} different tokens',
     bs_go_pull: 'Open pulls',
     bs_no_token: 'No token from this series yet',

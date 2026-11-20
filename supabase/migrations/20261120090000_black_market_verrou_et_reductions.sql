@@ -1,0 +1,4 @@
+-- Appliquées via MCP (« black_market_verrou_et_reductions » puis « black_market_reduction_arrondi ») :
+-- black_market() ne renvoie plus aucun contenu si le Market n'est pas débloqué (moins de 10 jetons différents) ;
+-- _bm_items() : affaires du jour (3 par rayon) à -5 à -40 % (par pas de 5, tirées au sort chaque jour), prix arrondi
+-- à l'unité et toujours au moins 1 de moins que le prix normal ; les autres objets au prix normal en Market Coins.

@@ -631,12 +631,21 @@
 .bmLocked {
   display: grid;
   justify-items: center;
-  gap: var(--s-3);
-  padding: var(--s-8) 0;
+  align-content: center;
+  gap: var(--s-4);
+  min-height: 420px;
+  padding: var(--s-10) 0;
   text-align: center;
+}
+.bmLocked h2 {
+  margin: 0;
+  font-family: var(--font-display);
+  font-size: clamp(28px, 2.8vw, 40px);
 }
 .bmLocked p {
   margin: 0;
+  color: var(--text-2);
+  font-size: var(--fs-lg);
 }
 
 /* ---------- Black Market seulement : les 3 objets à la une, côte à côte en haut ---------- */

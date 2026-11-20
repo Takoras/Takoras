@@ -7,6 +7,7 @@ import {
   type CSSProperties,
   type FormEvent,
 } from 'react';
+import { useNavigate } from 'react-router';
 import { useQuery, useQueryClient, type QueryClient } from '@tanstack/react-query';
 import { bourseApi, errorText, publicApi, shopApi } from '@/api';
 import { useMe } from '@/api/queries';
@@ -126,6 +127,8 @@ export default function Shop() {
   });
   const bmOpen = !!bm.data?.open;
   const inBlack = money === 'black' && bmOpen; // fermé pendant qu'on regarde : retour à la boutique
+  const bmLocked = inBlack && !!bm.data?.locked; // Market pas débloqué : le Black Market reste fermé
+  const navigate = useNavigate();
   const inKoo = money === 'koo';
   const shopKey = inBlack ? ['black-market', user?.id] : ['shop'];
   const modeRef = useRef(money);
@@ -571,10 +574,14 @@ export default function Shop() {
             <span aria-hidden>{t('ui.bs_bm')}</span>
             <Fade text={t(inBlack ? 'ui.bs_bm' : inKoo ? 'ui.shop_title_koo' : 'ui.shop_title')} />
           </h1>
-          <span className={s.restock}>
+          {/* Black Market fermé (Market pas débloqué) : ni minuteur ni portefeuille, la place reste gardée */}
+          <span className={s.restock} style={bmLocked ? { visibility: 'hidden' } : undefined}>
             <Fade text={t(inBlack ? 'ui.bs_bm_ends' : 'ui.shop_reset')} /> <b>{hms(inBlack ? bmLeft : left)}</b>
           </span>
-          <div className={`${s.walletSlot} ${inKoo || inBlack ? s.walletOn : ''}`} aria-hidden={!inKoo && !inBlack}>
+          <div
+            className={`${s.walletSlot} ${(inKoo || inBlack) && !bmLocked ? s.walletOn : ''}`}
+            aria-hidden={(!inKoo && !inBlack) || bmLocked}
+          >
             <Wallet w={wallet.data} />
           </div>
           <Button size="sm" variant="ghost" onClick={openInfo}>
@@ -584,8 +591,12 @@ export default function Shop() {
         <Swap k={inBlack ? 'black' : 'shop'}>
           {inBlack && bm.data?.locked ? (
             <div className={s.bmLocked}>
-              <KooIcon size={56} />
+              <KooIcon size={88} />
+              <h2>{t('ui.bm_locked')}</h2>
               <p>{t('ui.bs_need', { n: bm.data.have ?? 0, m: bm.data.need ?? 10 })}</p>
+              <Button variant="primary" onClick={() => void navigate('/market')}>
+                Market
+              </Button>
             </div>
           ) : data ? (
             <div className={`${s.coinView} ${inBlack ? s.bm : ''}`}>
