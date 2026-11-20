@@ -914,7 +914,7 @@
   grid-template-rows: auto minmax(0, 1fr) auto;
   justify-items: center;
   text-align: center;
-  height: 500px;
+  height: 440px;
   padding: var(--s-6) var(--s-8) var(--s-8);
 }
 .heroTop {
@@ -934,14 +934,14 @@
   color: #bbf7d0;
 }
 .heroArt img {
-  width: clamp(190px, 19vw, 270px);
-  height: clamp(190px, 19vw, 270px);
+  width: clamp(170px, 16vw, 230px);
+  height: clamp(170px, 16vw, 230px);
 }
 .heroInfo {
   justify-items: center;
 }
 .heroInfo h2 {
-  font-size: clamp(38px, 3.6vw, 56px);
+  font-size: clamp(34px, 3.2vw, 48px);
 }
 .hero .buy {
   justify-content: center;
@@ -955,29 +955,29 @@
 }
 /* les rayons : grosses étiquettes, sans le « X en stock » */
 .shelf {
-  padding: var(--s-5) var(--s-6);
+  padding: var(--s-4) var(--s-5);
 }
 .shelf b {
   font-size: var(--fs-lg);
 }
 .shelf img {
-  width: 52px;
-  height: 52px;
+  width: 44px;
+  height: 44px;
 }
 /* les cases : plus grandes, image et prix en gros */
 .grid {
-  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+  grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
 }
 .box {
   gap: var(--s-2);
   padding: var(--s-6) var(--s-5) var(--s-5);
 }
 .art {
-  height: 150px;
+  height: 130px;
 }
 .art img {
-  width: 132px;
-  height: 132px;
+  width: 114px;
+  height: 114px;
 }
 .box h3 {
   font-size: var(--fs-lg);
@@ -1198,5 +1198,5 @@
 
 .offerHero {
   height: auto;
-  min-height: 500px;
+  min-height: 440px;
 }

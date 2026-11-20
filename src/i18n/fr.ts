@@ -700,6 +700,7 @@ export const fr = {
     bs_market: 'Marché',
     bs_ranks: 'Classement',
     bs_owned: '{n} en main',
+    bs_worth: 'Valeur',
     bs_own: 'En main',
     bs_activity: 'Activité du jour',
     bs_divs: 'Dividendes reçus',

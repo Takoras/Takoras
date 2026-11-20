@@ -698,6 +698,7 @@ export const en: Dict = {
     bs_market: 'Market',
     bs_ranks: 'Ranking',
     bs_owned: '{n} held',
+    bs_worth: 'Worth',
     bs_own: 'Held',
     bs_activity: 'Today’s activity',
     bs_divs: 'Dividends received',

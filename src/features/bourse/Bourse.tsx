@@ -254,6 +254,8 @@ export default function Bourse() {
     return { gain, pct: a.cost > 0 ? (gain / a.cost) * 100 : 0 };
   };
   const mine = result(cur);
+  // nombre d'actions : entier dès 10, sinon une décimale (plus de 12,347)
+  const nq = (v: number) => v.toLocaleString(loc, { maximumFractionDigits: v >= 10 ? 0 : 1 });
   const days = Math.max(1, Math.ceil((new Date(d.season.ends_at).getTime() - q.dataUpdatedAt) / 86_400_000));
   const amount = floor3(Number(qty.replace(',', '.')) || 0);
   const bMax = maxBuy(cur, d.me.koo);
@@ -364,9 +366,10 @@ export default function Bourse() {
                       <img className="px" src={img(a)} alt="" width={36} height={36} />
                       <span className={s.tokName}>
                         <b>{label(a)}</b>
+                        {/* ce que tu as de ce jeton, en gros : une pastille dorée */}
                         {a.own > 0 ? (
                           <small>
-                            ×{a.own.toLocaleString(loc)}{' '}
+                            <b className={s.ownPill}>×{nq(a.own)}</b>{' '}
                             <span className={cl(result(a).gain)}>{pct(result(a).pct)}</span>
                           </small>
                         ) : null}
@@ -394,15 +397,6 @@ export default function Bourse() {
                     <Fade text={cur.odds ? `1/${cur.odds.toLocaleString(loc)}` : ''} />
                   </small>
                 </div>
-                <Presence show={cur.own > 0}>
-                  <div className={`${s.result} ${mine.gain >= 0 ? s.resultUp : s.resultDown}`}>
-                    <Fade text={t(mine.gain >= 0 ? 'ui.bs_win' : 'ui.bs_lose')} />
-                    <b>
-                      <Roll text={n2(Math.abs(mine.gain))} />
-                    </b>
-                    <Koo size={16} />
-                  </div>
-                </Presence>
                 <div className={s.last}>
                   <b>
                     <Roll text={n2(cur.price)} />
@@ -411,6 +405,31 @@ export default function Bourse() {
                   <Roll text={pct(change(cur))} className={cl(change(cur))} />
                 </div>
               </div>
+              {/* ce que tu as de ce jeton, sans calcul à faire : combien, ce que ça vaut, ce que tu gagnes */}
+              <Presence show={cur.own > 0}>
+                <div className={s.holding}>
+                  <span className={s.hold}>
+                    <small>{t('ui.bs_own')}</small>
+                    <b className={s.ownBig}>
+                      ×<Roll text={nq(cur.own)} />
+                    </b>
+                  </span>
+                  <span className={s.hold}>
+                    <small>{t('ui.bs_worth')}</small>
+                    <b>
+                      <Roll text={n2(sellGain(cur, cur.own))} /> <Koo size={18} />
+                    </b>
+                  </span>
+                  <span className={`${s.hold} ${mine.gain >= 0 ? s.resultUp : s.resultDown}`}>
+                    <small>
+                      <Fade text={t(mine.gain >= 0 ? 'ui.bs_win' : 'ui.bs_lose')} />
+                    </small>
+                    <b>
+                      <Roll text={n2(Math.abs(mine.gain))} /> <Koo size={18} />
+                    </b>
+                  </span>
+                </div>
+              </Presence>
               <Swap k={cur.id} className={s.chartSwap}>
                 <Chart a={cur} loc={loc} />
               </Swap>

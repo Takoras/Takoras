@@ -780,3 +780,44 @@
     display: none;
   }
 }
+
+/* ce que tu as d'un jeton : pastille dorée dans la liste, bande en gros au-dessus du graphique */
+.ownPill {
+  padding: 1px 8px;
+  border-radius: var(--r-pill);
+  background: var(--gold);
+  color: #241a02;
+  font-weight: 800;
+}
+.holding {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: var(--s-3);
+}
+.hold {
+  display: grid;
+  gap: 2px;
+  padding: var(--s-3) var(--s-4);
+  border-radius: 8px;
+  background: rgb(255 255 255 / 5%);
+}
+.hold small {
+  color: var(--text-2);
+  font-size: var(--fs-sm);
+  font-weight: 700;
+}
+.hold b {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-family: var(--font-display);
+  font-size: var(--fs-xl);
+  font-variant-numeric: tabular-nums;
+}
+.hold.resultUp small,
+.hold.resultDown small {
+  color: inherit;
+}
+.ownBig {
+  color: var(--gold-hi);
+}

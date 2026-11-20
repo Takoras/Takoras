@@ -28,14 +28,17 @@ test('bestiaire : grille, filtres, fiche, vente, verrou', async ({ page }) => {
   await page.keyboard.press('Escape');
   await expect(page.getByRole('button', { name: /×4 Mobu/ })).toBeVisible(); // 1 vendu
 
-  // verrouiller Vyolis (une fois la fiche de Mobu refermée)
+  // plus de verrou : la fiche n'a plus ce bouton
   await expect(page.getByRole('dialog')).toHaveCount(0);
   await page.getByRole('button', { name: /×1 Vyolis/ }).click({ force: true });
-  await page
-    .getByRole('dialog')
-    .getByRole('button', { name: /Verrouiller/ })
-    .dispatchEvent('click'); // la fiche se déplie et flotte (animation continue) : clic direct sur le bouton
-  await expect.poll(() => calls.includes('lock_pulls')).toBe(true);
+  await expect(
+    page
+      .getByRole('dialog')
+      .getByRole('button', { name: /Vendre/ })
+      .first(),
+  ).toBeVisible();
+  await expect(page.getByRole('dialog').getByRole('button', { name: /Verrouiller/ })).toHaveCount(0);
+  void calls;
 });
 
 test('bestiaire : sélection multiple et vente d’un rare avec confirmation', async ({ page }) => {

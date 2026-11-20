@@ -386,15 +386,6 @@ export default function Bestiary() {
                 // la fiche reste ouverte et se met à jour (Tu en as N…)
                 if (await sell(ids)) await refresh(true);
               }}
-              onLock={async (g, lock) => {
-                try {
-                  await invApi.lock(g.ids, lock);
-                  toast(lock ? t('ui.locked_ok') : t('ui.unlocked'));
-                } catch (e) {
-                  toast(errorText(e, lang), true);
-                }
-                await refresh(false);
-              }}
             />
           ) : null}
         </JetonModal>
@@ -428,19 +419,16 @@ function CardView({
   const fmt = (n: number) => n.toLocaleString(locale(lang));
   const { j, g } = c,
     n = c.total,
-    locked = !!g && !g.free.length,
     all = [g, ...Object.values(c.vs)].filter((x): x is Group => !!x);
   // jamais trouvé : mystère total (fond gris neutre, pas de numéro, pas de rareté, pas de nom)
   const known = n > 0 || c.seen;
-  const badge = all.some((x) => x.shown) ? ['', t('ui.in_showcase')] : locked ? ['', t('ui.lock')] : null;
+  const badge = all.some((x) => x.shown) ? ['', t('ui.in_showcase')] : null;
   return (
     <li
       data-key={c.j.name}
-      data-sig={`${n}|${locked}|${badge?.[1] ?? ''}`}
+      data-sig={`${n}|${badge?.[1] ?? ''}`}
       style={(known ? glowVars(j) : { '--g': '113, 113, 122' }) as CSSProperties}
-      className={['dd-card', s.card, !n && (c.seen ? s.gone : s.unk), q && s.sel, locked && s.locked]
-        .filter(Boolean)
-        .join(' ')}
+      className={['dd-card', s.card, !n && (c.seen ? s.gone : s.unk), q && s.sel].filter(Boolean).join(' ')}
     >
       <button
         type="button"
@@ -489,16 +477,8 @@ function CardView({
   );
 }
 
-// Boutons de la fiche dans le bestiaire : vendre, vendre les doublons, verrouiller
-function Sheet({
-  g,
-  onSell,
-  onLock,
-}: {
-  g: Group;
-  onSell: (ids: number[]) => Promise<void>;
-  onLock: (g: Group, lock: boolean) => Promise<void>;
-}) {
+// Boutons de la fiche dans le bestiaire : vendre, vendre les doublons (plus de verrou : fonction retirée)
+function Sheet({ g, onSell }: { g: Group; onSell: (ids: number[]) => Promise<void> }) {
   const t = useT();
   const lang = useSettings((x) => x.lang);
   const [busy, setBusy] = useState('');
@@ -508,7 +488,6 @@ function Sheet({
     await f();
     setBusy('');
   };
-  const allLocked = !g.free.length;
   return (
     <>
       {g.free.length && g.free[0] !== undefined ? (
@@ -521,9 +500,6 @@ function Sheet({
           {t('ui.sell_dupes', { n: g.ids.length - 1 })}
         </Button>
       ) : null}
-      <Button loading={busy === 'lock'} onClick={run('lock', () => onLock(g, !allLocked))}>
-        {allLocked ? t('ui.unlock') : t('ui.lock')}
-      </Button>
     </>
   );
 }
