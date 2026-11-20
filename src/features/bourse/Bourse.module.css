@@ -47,13 +47,13 @@
   align-items: center;
   justify-content: space-between;
   margin: 0;
-  font-size: var(--fs-sm);
+  font-size: var(--fs-md);
 }
 .none {
   margin: 0;
   padding: var(--s-3) 0;
   color: var(--muted);
-  font-size: var(--fs-sm);
+  font-size: var(--fs-md);
 }
 /* ---------- bandeau ---------- */
 .bar {
@@ -74,7 +74,7 @@
 .brand h1 {
   margin: 0;
   font-family: var(--font-display);
-  font-size: 26px;
+  font-size: 32px;
   line-height: 1;
 }
 .serie {
@@ -84,7 +84,7 @@
 }
 .brand span {
   color: var(--accent-hi);
-  font-size: var(--fs-sm);
+  font-size: var(--fs-md);
   font-weight: 700;
 }
 .strip {
@@ -98,13 +98,13 @@
 .mini dt,
 .meStats dt {
   color: var(--muted);
-  font-size: 11px;
+  font-size: var(--fs-xs);
 }
 .strip dd,
 .mini dd,
 .meStats dd {
   margin: 0;
-  font-size: var(--fs-sm);
+  font-size: var(--fs-md);
   font-weight: 700;
   white-space: nowrap;
 }
@@ -140,7 +140,7 @@
   background: none;
   color: inherit;
   font: inherit;
-  font-size: var(--fs-sm);
+  font-size: var(--fs-md);
   text-align: left;
   cursor: pointer;
   transition:
@@ -206,7 +206,7 @@
   display: grid;
 }
 .quoteName h2 {
-  font-size: var(--fs-lg);
+  font-size: var(--fs-xl);
 }
 .quoteName small {
   color: var(--muted);
@@ -217,7 +217,7 @@
   gap: 6px;
   padding: 6px 10px;
   border-radius: 6px;
-  font-size: var(--fs-sm);
+  font-size: var(--fs-md);
   font-weight: 700;
   white-space: nowrap;
   transition:
@@ -240,7 +240,7 @@
   white-space: nowrap;
 }
 .last b {
-  font-size: 28px;
+  font-size: 34px;
 }
 .chartSwap {
   flex: 1;
@@ -327,12 +327,12 @@
   padding: 1px 5px;
   border-radius: 3px;
   background: var(--surface-3);
-  font-size: 11px;
+  font-size: var(--fs-xs);
 }
 .axis {
   position: relative;
   color: var(--muted);
-  font-size: 11px;
+  font-size: var(--fs-xs);
 }
 .axis > * {
   position: absolute;
@@ -388,7 +388,7 @@
 }
 .stepper .max {
   padding: 0 10px;
-  font-size: var(--fs-xs);
+  font-size: var(--fs-sm);
 }
 .stepper button:disabled,
 .submit:disabled {
@@ -439,7 +439,7 @@
   margin: 0;
   padding: 0;
   list-style: none;
-  font-size: var(--fs-xs);
+  font-size: var(--fs-sm);
 }
 .pay li {
   display: flex;
@@ -449,7 +449,7 @@
 .paid {
   margin: 0;
   color: var(--ok);
-  font-size: var(--fs-xs);
+  font-size: var(--fs-sm);
   font-weight: 800;
   text-align: center;
 }
@@ -483,7 +483,7 @@
   background: none;
   color: var(--muted);
   font: inherit;
-  font-size: 11px;
+  font-size: var(--fs-xs);
   text-decoration: underline;
   cursor: pointer;
   transition: color 0.15s;
@@ -503,17 +503,17 @@
 }
 .how h3 {
   margin: 0 0 4px;
-  font-size: var(--fs-sm);
+  font-size: var(--fs-md);
 }
 .how p {
   margin: 0;
   color: var(--text-2);
-  font-size: var(--fs-sm);
+  font-size: var(--fs-md);
 }
 .how .howLegal {
   grid-column: 1 / -1;
   color: var(--muted);
-  font-size: var(--fs-xs);
+  font-size: var(--fs-sm);
 }
 @media (max-width: 560px) {
   .how {
@@ -532,7 +532,7 @@
 .gate h1 {
   margin: 0;
   font-family: var(--font-display);
-  font-size: 34px;
+  font-size: 40px;
   line-height: 1;
 }
 .gate p {
@@ -577,7 +577,7 @@
 }
 .meName {
   font-family: var(--font-display);
-  font-size: var(--fs-lg);
+  font-size: var(--fs-xl);
 }
 .elo {
   color: var(--muted);
@@ -585,7 +585,7 @@
 .eloN {
   color: var(--text);
   font-family: var(--font-display);
-  font-size: 38px;
+  font-size: 44px;
   font-weight: 800;
   line-height: 1.1;
 }
@@ -635,7 +635,7 @@
   align-items: center;
   gap: var(--s-2);
   padding: 8px 12px;
-  font-size: var(--fs-sm);
+  font-size: var(--fs-md);
 }
 .reward img {
   border-radius: 50%;
@@ -674,7 +674,7 @@
 }
 .podN {
   font-family: var(--font-display);
-  font-size: 22px;
+  font-size: 26px;
   line-height: 1;
 }
 .pod.mine,
@@ -701,7 +701,7 @@
   gap: var(--s-2);
   padding: 6px 10px;
   border-bottom: 1px solid var(--line);
-  font-size: var(--fs-sm);
+  font-size: var(--fs-md);
   transition: background-color 0.15s;
 }
 .list li:last-child {
@@ -763,7 +763,7 @@
   .submit {
     min-width: 0;
     padding: 0 4px;
-    font-size: var(--fs-sm);
+    font-size: var(--fs-md);
   }
   .term,
   .ranks,
