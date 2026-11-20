@@ -630,6 +630,15 @@
   width: 100%;
   margin: 0;
 }
+.meStats .bestRow {
+  grid-column: 1 / -1;
+}
+.bestRank {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--s-2);
+}
 .reward {
   display: flex;
   align-items: center;
@@ -820,4 +829,13 @@
 }
 .ownBig {
   color: var(--gold-hi);
+}
+
+/* gain + pièce sur la même ligne */
+.gainV {
+  display: inline-flex !important;
+  align-items: center;
+  justify-content: center;
+  gap: 4px;
+  white-space: nowrap;
 }

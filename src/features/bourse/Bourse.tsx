@@ -23,6 +23,7 @@ import { Tween } from '@/ui/Tween';
 import { useSwingAll } from '@/ui/useSwing';
 import { useStaggerIn } from '@/ui/useStaggerIn';
 import s from './Bourse.module.css';
+import { ELO_0, ELO_STEP, rankName, rankOf, TIERS } from './ranks';
 
 type Asset = {
   id: number;
@@ -48,6 +49,7 @@ type State = {
     score: number;
     rank: number | null;
     elo: number;
+    best: number;
     players: number;
   };
   quests: { pulls: number; sold: number; quest: number; paid: boolean };
@@ -73,21 +75,6 @@ const maxBuy = (a: Asset, koo: number) =>
   floor3(Math.min(a.shares * MAX_ORDER, a.shares - a.k / (a.k / a.shares + koo / (1 + FEE))));
 const maxSell = (a: Asset) => floor3(Math.min(a.own, a.shares * MAX_ORDER));
 
-// Les rangs : 6 paliers de 3 divisions (dessins public/img/ranks), 70 Elo par division
-const TIERS: Key[] = [
-  'ui.bs_t_bronze',
-  'ui.bs_t_silver',
-  'ui.bs_t_plat',
-  'ui.bs_t_gold',
-  'ui.bs_t_diamond',
-  'ui.bs_t_legend',
-];
-const ELO_0 = 800,
-  ELO_STEP = 70;
-const rankOf = (elo: number) => {
-  const r = Math.max(0, Math.min(17, Math.floor((elo - ELO_0) / ELO_STEP)));
-  return { r, tier: Math.floor(r / 3), div: (r % 3) + 1, img: `/img/ranks/rank${r + 1}.png` };
-};
 const HOW: [Key, Key][] = [
   ['ui.bs_how_t1', 'ui.bs_how_p1'],
   ['ui.bs_how_t2', 'ui.bs_how_p2'],
@@ -515,7 +502,7 @@ export default function Bourse() {
             </aside>
           </div>
         ) : (
-          <Ranks me={d.me} pct={pct} cl={cl} n0={n0} />
+          <Ranks me={d.me} cl={cl} n0={n0} />
         )}
       </Swap>
       <button type="button" className={s.legal} onClick={() => (sfx.click(), setHelp(true))}>
@@ -592,17 +579,7 @@ function RankBadge({ elo, size }: { elo: number; size: number }) {
   );
 }
 
-function Ranks({
-  me,
-  pct,
-  cl,
-  n0,
-}: {
-  me: State['me'];
-  pct: (v: number) => string;
-  cl: (v: number) => string | undefined;
-  n0: (v: number) => string;
-}) {
+function Ranks({ me, cl, n0 }: { me: State['me']; cl: (v: number) => string | undefined; n0: (v: number) => string }) {
   const t = useT();
   const root = useRef<HTMLDivElement>(null);
   const q = useBoard(true);
@@ -610,7 +587,9 @@ function Ranks({
   useFlip(root, rows.map((r) => r.pseudo).join());
   useSwingAll(root, `.${s.box}, .${s.pod}`, 0.05, rows.length);
   const k = rankOf(me.elo);
-  const name = (r: number) => `${t(TIERS[Math.floor(r / 3)] ?? 'ui.bs_t_bronze')} ${'I'.repeat((r % 3) + 1)}`;
+  const best = rankOf(Math.max(me.best ?? 0, me.elo));
+  const gain = (v: number) => `${v >= 0 ? '+' : '−'}${n0(Math.abs(v))}`;
+  const name = (r: number) => rankName(t, r);
   const floorElo = ELO_0 + k.r * ELO_STEP;
   const top = k.r === 17;
   const filled = top ? 10 : Math.max(0, Math.floor(((me.elo - floorElo) / ELO_STEP) * 10));
@@ -654,9 +633,18 @@ function Ranks({
             <dt>{t('ui.bs_place')}</dt>
             <dd>{me.rank ? `#${me.rank}` : '-'}</dd>
           </div>
+          <div className={s.bestRow}>
+            <dt>{t('ui.bs_best')}</dt>
+            <dd className={s.bestRank}>
+              <img className="px" src={best.img} alt="" width={22} height={22} />
+              {name(best.r)}
+            </dd>
+          </div>
           <div>
             <dt>{t('ui.bs_score')}</dt>
-            <dd className={cl(me.score)}>{pct(me.score)}</dd>
+            <dd className={`${cl(me.score) ?? ''} ${s.gainV}`}>
+              {gain(me.score)} <Koo size={16} />
+            </dd>
           </div>
         </dl>
       </aside>
@@ -682,7 +670,9 @@ function Ranks({
                   <b>{r.pseudo}</b>
                   <RankBadge elo={r.elo} size={i ? 40 : 52} />
                   <small>{n0(r.elo)} Elo</small>
-                  <b className={cl(r.score)}>{pct(r.score)}</b>
+                  <b className={`${cl(r.score) ?? ''} ${s.gainV}`}>
+                    {gain(r.score)} <Koo size={14} />
+                  </b>
                 </Link>
               ) : null;
             })}
@@ -698,7 +688,9 @@ function Ranks({
               </Link>
               <RankBadge elo={r.elo} size={28} />
               <span>{n0(r.elo)}</span>
-              <b className={cl(r.score)}>{pct(r.score)}</b>
+              <b className={`${cl(r.score) ?? ''} ${s.gainV}`}>
+                {gain(r.score)} <Koo size={14} />
+              </b>
             </li>
           ))}
         </ol>

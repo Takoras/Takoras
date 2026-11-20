@@ -57,6 +57,7 @@ import { NeedLogin } from '@/app/NeedLogin';
 import { Icon } from '@/app/Icon';
 import { FriendButton } from '../social/FriendButton';
 import { ReportButton } from './ReportButton';
+import { rankName, rankOf } from '../bourse/ranks';
 import iv from '../inventory/Inventory.module.css';
 import { Swap } from '@/ui/Swap';
 import s from './Profile.module.css';
@@ -91,6 +92,8 @@ export type Prof = {
   aura?: string | null;
   banner_fx?: string | null;
   cosmetics?: string[] | null;
+  /** rang au Market : actuel (null hors saison) et meilleur rang jamais atteint */
+  mk?: { elo: number | null; best: number } | null;
 };
 
 // Profil d'un joueur, même DA que la boutique et le passe : bannière (ou fond pixel à la couleur de son meilleur
@@ -228,6 +231,28 @@ export default function Profile() {
         </div>
         {/* à droite : ses chiffres */}
         <div className={s.rankCol}>
+          {p.mk ? (
+            <div className={s.mkRanks}>
+              {(p.mk.elo !== null
+                ? ([
+                    ['ui.bs_rank_now', p.mk.elo],
+                    ['ui.bs_best', p.mk.best],
+                  ] as const)
+                : ([['ui.bs_best', p.mk.best]] as const)
+              ).map(([k, elo]) => {
+                const r = rankOf(elo);
+                return (
+                  <div key={k} className={s.mkRank}>
+                    <img className="px" src={r.img} alt="" width={56} height={56} />
+                    <span>
+                      <small>{t(k)}</small>
+                      <b>{rankName(t, r.r)}</b>
+                    </span>
+                  </div>
+                );
+              })}
+            </div>
+          ) : null}
           <ul className={s.strip}>
             <li>
               <b>{fmt(p.pulls)}</b> {t('ui.st_pulls')}

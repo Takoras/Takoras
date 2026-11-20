@@ -245,6 +245,32 @@
   min-width: 0;
   max-width: 460px;
 }
+.mkRanks {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: flex-end;
+  gap: var(--s-2);
+}
+.mkRank {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--s-3);
+  padding: var(--s-2) var(--s-4) var(--s-2) var(--s-2);
+  border-radius: var(--r-md);
+  background: rgb(255 255 255 / 5%);
+}
+.mkRank span {
+  display: grid;
+  line-height: 1.15;
+}
+.mkRank small {
+  color: var(--muted);
+  font-size: var(--fs-sm);
+}
+.mkRank b {
+  font-family: var(--font-display);
+  font-size: var(--fs-lg);
+}
 .strip {
   display: flex;
   flex-wrap: wrap;
