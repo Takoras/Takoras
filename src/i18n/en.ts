@@ -1203,6 +1203,7 @@ export const en: Dict = {
     Ronce: 'Bramble',
     Coton: 'Cotton',
     Écorce: 'Bark',
+    Nid: 'Nest',
     Belladone: 'Belladonna',
   },
   app: {

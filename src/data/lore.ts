@@ -76,9 +76,17 @@ export const LORE: Record<string, [fr: string, en: string]> = {
     'Un éclat d’arbre ancien, dur comme la pierre. Il sent encore la forêt.',
     'A shard of an ancient tree, hard as stone. It still smells of the forest.',
   ],
+  Nid: [
+    'Trois œufs tièdes posés dans les brindilles. Personne ne sait ce qui en sortira.',
+    'Three warm eggs resting in the twigs. Nobody knows what will hatch.',
+  ],
   Virus: [
     'Une chose verte qui s’enroule et se multiplie. Partout où elle passe, des champignons violets poussent.',
     'A green thing that coils and multiplies. Wherever it goes, purple mushrooms sprout.',
+  ],
+  Terrarium: [
+    'Une forêt entière tient dans cette bulle de verre. Les pousses grandissent un peu chaque nuit.',
+    'A whole forest fits in this glass bubble. The sprouts grow a little every night.',
   ],
   Ronce: [
     'Elle griffe ceux qui la cueillent. Les plus patients finissent par l’avoir.',
