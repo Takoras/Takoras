@@ -847,3 +847,25 @@
   font-size: 0.6em;
   font-weight: 700;
 }
+
+/* bougies : vert si ça monte sur la période, rouge sinon */
+.cUp line,
+.cDown line {
+  stroke-width: 1.2;
+}
+.cUp line {
+  stroke: var(--ok);
+}
+.cUp rect {
+  fill: var(--ok);
+}
+.cDown line {
+  stroke: #f87171;
+}
+.cDown rect {
+  fill: #f87171;
+}
+.rangeRow {
+  display: flex;
+  justify-content: flex-end;
+}

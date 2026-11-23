@@ -518,6 +518,19 @@ export async function fakeSupabase(
     }
     if (rpc === 'admin_events' || rpc === 'admin_set_event')
       return json({ weekend: { mode: 'auto', on: false }, blackmarket: { mode: 'on', on: true } });
+    if (rpc === 'bourse_candles') {
+      const r = (JSON.parse(route.request().postData() ?? '{}') as { p_range: string }).p_range;
+      const n = r === '1h' ? 12 : r === '7d' ? 28 : 24;
+      let p = 10;
+      return json(
+        Array.from({ length: n }, (_, i) => {
+          const o = p;
+          const c = Math.max(4, o * (1 + Math.sin(i * 1.7 + n) * 0.06));
+          p = c;
+          return { t: '', o, c, h: Math.max(o, c) * 1.02, l: Math.min(o, c) * 0.98 };
+        }),
+      );
+    }
     if (rpc === 'bourse_board')
       return json(
         ['Kaz', 'Mira', 'Lumi', 'Testeur'].map((pseudo, i) => ({

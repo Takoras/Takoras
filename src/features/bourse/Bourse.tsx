@@ -97,70 +97,73 @@ function Koo({ size = 16 }: { size?: number }) {
 
 // Graphique : axe des prix à droite, dernier prix marqué, réticule sous la souris.
 // Quand un ordre arrive, la courbe grandit et l'échelle glisse vers leur nouvelle place.
-type View = { pts: number[]; lo: number; hi: number; n: number };
+// Graphique en bougies : chaque bougie = ouverture, plus haut, plus bas, fermeture sur une période
+export type Range = '1h' | '24h' | '7d';
+type Candle = { o: number; h: number; l: number; c: number };
+type View = { cs: Candle[]; lo: number; hi: number };
 const TICKS = [0, 1, 2, 3, 4];
-const yOf = (p: number, v: View) => 6 + ((v.hi - p) / (v.hi - v.lo)) * 108;
-function Chart({ a, loc }: { a: Asset; loc: string }) {
+const yOf = (p: number, v: View) => 6 + ((v.hi - p) / (v.hi - v.lo || 1)) * 108;
+const RANGE_N: Record<Range, number> = { '1h': 12, '24h': 24, '7d': 28 };
+function useCandles(a: Asset, range: Range) {
+  const uid = useAuth((x) => x.user?.id);
+  return useQuery({
+    queryKey: ['candles', uid, a.id, range],
+    enabled: !!uid,
+    queryFn: async () => (await bourseApi.candles(a.id, range)) as Candle[],
+    refetchInterval: potatoFx() ? 30_000 : 10_000,
+    placeholderData: (prev) => prev,
+  });
+}
+function Chart({ a, loc, range }: { a: Asset; loc: string; range: Range }) {
   const fmt = useMemo(
     () => (v: number) => v.toLocaleString(loc, { minimumFractionDigits: 2, maximumFractionDigits: 2 }),
     [loc],
   );
+  const q = useCandles(a, range);
   const box = useRef<HTMLDivElement>(null);
   const tip = useRef<HTMLElement>(null);
-  const area = useRef<SVGPathElement>(null);
-  const stroke = useRef<SVGPathElement>(null);
-  const axis = useRef<HTMLDivElement>(null);
-  const last = useRef<HTMLElement>(null);
+  const [view, setView] = useState<View | null>(null);
   const shown = useRef<View | null>(null);
-  const series = [a.p0, ...a.h, a.price].join();
-  const up = a.price >= a.p0;
+  // la dernière bougie suit le prix en direct
+  const target = useMemo<View>(() => {
+    const raw = q.data?.length
+      ? q.data
+      : Array.from({ length: RANGE_N[range] }, () => ({ o: a.price, h: a.price, l: a.price, c: a.price }));
+    const cs = raw.map((x, i) =>
+      i === raw.length - 1 ? { o: x.o, c: a.price, h: Math.max(x.h, x.o, a.price), l: Math.min(x.l, x.o, a.price) } : x,
+    );
+    const lo = Math.min(...cs.map((x) => x.l)),
+      hi = Math.max(...cs.map((x) => x.h)),
+      pad = Math.max((hi - lo) * 0.08, hi * 0.02);
+    return { cs, lo: lo - pad, hi: hi + pad };
+  }, [q.data, a.price, range]);
   useLayoutEffect(() => {
-    const pts = series.split(',').map(Number);
-    const start = pts[0] ?? 0;
-    const to: View = {
-      pts,
-      lo: Math.min(...pts, start * 0.97),
-      hi: Math.max(...pts, start * 1.03),
-      n: pts.length - 1,
-    };
-    const draw = (v: View) => {
-      shown.current = v;
-      const X = (i: number) => Math.min(1, i / Math.max(1, v.n)) * 300;
-      const d = v.pts.reduce(
-        (o, p, i) => (i ? `${o}H${X(i).toFixed(1)}V${yOf(p, v).toFixed(1)}` : `M0 ${yOf(p, v).toFixed(1)}`),
-        '',
-      );
-      stroke.current?.setAttribute('d', d);
-      area.current?.setAttribute('d', `${d}H300V120H0Z`);
-      axis.current?.querySelectorAll('span').forEach((e, i) => {
-        e.textContent = fmt(v.hi - ((v.hi - v.lo) * i) / 4);
-      });
-      const end = v.pts[v.pts.length - 1] ?? 0;
-      if (last.current) {
-        last.current.textContent = fmt(end);
-        last.current.style.top = `${(yOf(end, v) / 120) * 100}%`;
-      }
-    };
     const from = shown.current;
-    if (!from || reducedFx()) return draw(to);
+    const set = (v: View) => {
+      shown.current = v;
+      setView(v);
+    };
+    if (!from || reducedFx()) return set(target);
     const t0 = performance.now();
-    const fromEnd = from.pts[from.pts.length - 1] ?? start;
+    const lastF = from.cs[from.cs.length - 1];
     let raf = 0;
     const step = (now: number) => {
       const k = Math.min(1, (now - t0) / 520),
         e = 1 - (1 - k) ** 4,
         mix = (x: number, y: number) => x + (y - x) * e;
-      draw({
-        pts: pts.map((p, i) => mix(from.pts[i] ?? fromEnd, p)),
-        lo: mix(from.lo, to.lo),
-        hi: mix(from.hi, to.hi),
-        n: mix(from.n, to.n),
+      set({
+        cs: target.cs.map((c, i) => {
+          const f = from.cs[i] ?? lastF ?? c;
+          return { o: mix(f.o, c.o), h: mix(f.h, c.h), l: mix(f.l, c.l), c: mix(f.c, c.c) };
+        }),
+        lo: mix(from.lo, target.lo),
+        hi: mix(from.hi, target.hi),
       });
       if (k < 1) raf = requestAnimationFrame(step);
     };
     raf = requestAnimationFrame(step);
     return () => cancelAnimationFrame(raf);
-  }, [series, fmt]);
+  }, [target]);
   const move = (e: PointerEvent<HTMLDivElement>) => {
     const el = box.current,
       v = shown.current;
@@ -171,6 +174,11 @@ function Chart({ a, loc }: { a: Asset; loc: string }) {
     el.style.setProperty('--cy', `${y}px`);
     if (tip.current) tip.current.textContent = fmt(v.hi - (((y / r.height) * 120 - 6) / 108) * (v.hi - v.lo));
   };
+  const v = view ?? target;
+  const n = v.cs.length,
+    w = 300 / n,
+    end = v.cs[n - 1]?.c ?? a.price,
+    up = end >= (v.cs[0]?.o ?? end);
   return (
     <div className={s.plot}>
       <div className={s.plotArea} ref={box} onPointerMove={move}>
@@ -178,18 +186,33 @@ function Chart({ a, loc }: { a: Asset; loc: string }) {
           {TICKS.map((i) => (
             <line key={i} x1="0" x2="300" y1={6 + 27 * i} y2={6 + 27 * i} className={s.grid} />
           ))}
-          <path ref={area} className={up ? s.areaUp : s.areaDown} />
-          <path ref={stroke} className={up ? s.lineUp : s.lineDown} />
+          {v.cs.map((c, i) => {
+            const x = i * w + w / 2,
+              yo = yOf(c.o, v),
+              yc = yOf(c.c, v),
+              top = Math.min(yo, yc),
+              bh = Math.max(0.8, Math.abs(yc - yo));
+            return (
+              <g key={i} className={c.c >= c.o ? s.cUp : s.cDown}>
+                <line x1={x} x2={x} y1={yOf(c.h, v)} y2={yOf(c.l, v)} />
+                <rect x={x - w * 0.32} width={w * 0.64} y={top} height={bh} />
+              </g>
+            );
+          })}
         </svg>
         <i className={s.crossX} />
         <i className={s.crossY} />
         <b className={s.crossTip} ref={tip} />
       </div>
-      <div className={s.axis} ref={axis} aria-hidden>
+      <div className={s.axis} aria-hidden>
         {TICKS.map((i) => (
-          <span key={i} style={{ top: `${((6 + 27 * i) / 120) * 100}%` }} />
+          <span key={i} style={{ top: `${((6 + 27 * i) / 120) * 100}%` }}>
+            {fmt(v.hi - ((v.hi - v.lo) * i) / 4)}
+          </span>
         ))}
-        <b ref={last} className={up ? s.lastUp : s.lastDown} />
+        <b className={up ? s.lastUp : s.lastDown} style={{ top: `${(yOf(end, v) / 120) * 100}%` }}>
+          {fmt(end)}
+        </b>
       </div>
     </div>
   );
@@ -206,6 +229,7 @@ export default function Bourse() {
   const [sel, setSel] = useState<number | null>(null);
   const [qty, setQty] = useState('10');
   const [busy, setBusy] = useState(false);
+  const [range, setRange] = useState<Range>('24h');
   // 5 s entre deux ordres (le serveur vérifie aussi) : les boutons comptent à rebours
   const [cool, setCool] = useState(0);
   useEffect(() => {
@@ -434,8 +458,20 @@ export default function Bourse() {
                   </span>
                 </div>
               </Presence>
+              <div className={s.rangeRow}>
+                <Segmented
+                  value={range}
+                  onChange={setRange}
+                  label={t('ui.bs_range')}
+                  options={[
+                    ['1h', t('ui.bs_r1h')],
+                    ['24h', t('ui.bs_r24h')],
+                    ['7d', t('ui.bs_r7d')],
+                  ]}
+                />
+              </div>
               <Swap k={cur.id} className={s.chartSwap}>
-                <Chart a={cur} loc={loc} />
+                <Chart a={cur} loc={loc} range={range} />
               </Swap>
               <div className={s.order}>
                 <div className={s.stepper}>

@@ -127,6 +127,7 @@ const rpcLoose = rpc as unknown as (name: string, args?: Record<string, unknown>
 export const bourseApi = {
   state: () => rpcLoose('bourse_state'),
   board: () => rpcLoose('bourse_board'),
+  candles: (p_asset: number, p_range: string) => rpcLoose('bourse_candles', { p_asset, p_range }),
   trade: (p_asset: number, p_buy: boolean, p_shares: number) => rpcLoose('bourse_trade', { p_asset, p_buy, p_shares }),
   claimPay: () => rpcLoose('bourse_claim_pay'),
   shop: () => rpcLoose('bourse_shop'),
