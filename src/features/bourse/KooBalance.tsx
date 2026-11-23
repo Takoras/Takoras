@@ -9,7 +9,7 @@ import s from './KooBalance.module.css';
 
 type Me = { koo: number; value: number; paid: number };
 
-// Solde du Market à côté des pièces : tout ce que le joueur possède, avec le détail au survol
+// Solde du Market à côté des pièces : les pièces qu'on peut dépenser (acheter fait baisser ce chiffre), le détail au survol
 export function KooBalance({ className }: { className?: string }) {
   const t = useT();
   const lang = useSettings((x) => x.lang);
@@ -33,7 +33,7 @@ export function KooBalance({ className }: { className?: string }) {
     <span className={s.wrap}>
       <NavLink to="/market" className={className} data-koo-target>
         <img className="px" src="/img/market-coin.png" alt={t('ui.bs_koo')} width={20} height={20} />
-        <Tween value={me.value} ms={900} pow={5} format={n} />
+        <Tween value={me.koo} ms={900} pow={5} format={n} />
       </NavLink>
       <dl className={s.panel}>
         {rows.map(([label, v]) => (

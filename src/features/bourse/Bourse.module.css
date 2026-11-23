@@ -839,3 +839,11 @@
   gap: 4px;
   white-space: nowrap;
 }
+
+/* plafond par jeton, à côté de ×N : « ×10 /100 » */
+.capN {
+  margin-left: 4px;
+  color: var(--muted);
+  font-size: 0.6em;
+  font-weight: 700;
+}

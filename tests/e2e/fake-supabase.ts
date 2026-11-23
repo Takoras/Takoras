@@ -165,7 +165,6 @@ export async function fakeSupabase(
         const g = a.own ? a.k / a.shares - a.k / (a.shares + a.own) : 0;
         return v + g - Math.max(0, g - a.cost) * 0.1;
       }, 0);
-    const recent = Date.now() - bs.boughtAt < 60_000;
     return {
       season: { id: 1, serie: 'Takoras', ends_at: new Date(Date.now() + 9 * 864e5).toISOString() },
       me: {
@@ -177,13 +176,11 @@ export async function fakeSupabase(
         rank: 4,
         elo: 842,
         best: 1080,
-        buy_left: recent ? Math.max(0, 500 - bs.bought) : 500,
-        buy_wait: recent ? Math.ceil((bs.boughtAt + 60_000 - Date.now()) / 1000) : 0,
         players: 4,
       },
       quests: { pulls: 3, sold: 1, quest: 1, paid: bs.paid > 0 },
       assets: [
-        ...bs.assets.map((a) => ({ ...a, price: a.k / a.shares / a.shares })),
+        ...bs.assets.map((a) => ({ ...a, price: a.k / a.shares / a.shares, cap: 100 })),
         { id: 3, name: null, price: null, own: 0, h: [] },
       ],
       feed: [{ at: '2026-11-18T10:00:00Z', pseudo: 'Kaz', kind: 'pull', shares: null, jeton: 'Mobu', pct: 0.6 }],
