@@ -435,7 +435,7 @@ export const en: Dict = {
       'A confirmation link was sent to {e}. Click it to activate your account (check spam), you’ll come back here logged in.',
     acc_link_reset: 'A link was sent to {e}. Click it to choose a new password.',
     acc_go_login: 'Done, log me in',
-    acc_need: 'Log in to open pulls.',
+    acc_need: 'Log in to play.',
     acc_with: 'Continue with {p}',
     acc_choose_pseudo: 'Pick your username',
     acc_choose_pseudo_p: 'You can change it once a month.',

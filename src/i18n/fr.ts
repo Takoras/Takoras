@@ -437,7 +437,7 @@ export const fr = {
       'Un lien de confirmation a été envoyé à {e}. Clique dessus pour activer ton compte (pense aux spams), tu reviendras ici connecté.',
     acc_link_reset: 'Un lien a été envoyé à {e}. Clique dessus pour choisir un nouveau mot de passe.',
     acc_go_login: 'C’est fait, me connecter',
-    acc_need: 'Connecte-toi pour ouvrir des tirages.',
+    acc_need: 'Connecte-toi pour jouer.',
     acc_with: 'Continuer avec {p}',
     acc_choose_pseudo: 'Choisis ton pseudo',
     acc_choose_pseudo_p: 'Modifiable une fois par mois.',
