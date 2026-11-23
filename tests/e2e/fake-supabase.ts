@@ -125,6 +125,8 @@ export async function fakeSupabase(
   const bs = {
     koo: 1000,
     paid: 0,
+    bought: 0,
+    boughtAt: 0,
     bmBought: 0,
     bmSeen: false,
     assets: [
@@ -158,7 +160,12 @@ export async function fakeSupabase(
   };
   const bourse = () => {
     const value =
-      bs.koo + bs.assets.reduce((v, a) => v + (a.own ? (a.k / a.shares - a.k / (a.shares + a.own)) * 0.99 : 0), 0);
+      bs.koo +
+      bs.assets.reduce((v, a) => {
+        const g = a.own ? a.k / a.shares - a.k / (a.shares + a.own) : 0;
+        return v + g - Math.max(0, g - a.cost) * 0.1;
+      }, 0);
+    const recent = Date.now() - bs.boughtAt < 60_000;
     return {
       season: { id: 1, serie: 'Takoras', ends_at: new Date(Date.now() + 9 * 864e5).toISOString() },
       me: {
@@ -170,6 +177,8 @@ export async function fakeSupabase(
         rank: 4,
         elo: 842,
         best: 1080,
+        buy_left: recent ? Math.max(0, 500 - bs.bought) : 500,
+        buy_wait: recent ? Math.ceil((bs.boughtAt + 60_000 - Date.now()) / 1000) : 0,
         players: 4,
       },
       quests: { pulls: 3, sold: 1, quest: 1, paid: bs.paid > 0 },
@@ -445,7 +454,12 @@ export async function fakeSupabase(
       const q = Number(body.p_shares);
       if (a) {
         const t = a.shares + (body.p_buy ? -q : q);
-        const x = body.p_buy ? (a.k / t - a.k / a.shares) * 1.01 : (a.k / a.shares - a.k / t) * 0.99;
+        const g = body.p_buy ? a.k / t - a.k / a.shares : a.k / a.shares - a.k / t;
+        const x = body.p_buy ? g : g - Math.max(0, g - (a.cost * q) / a.own) * 0.1;
+        if (body.p_buy) {
+          bs.bought += x;
+          bs.boughtAt = Date.now();
+        }
         bs.koo += body.p_buy ? -x : x;
         a.cost = body.p_buy ? a.cost + x : a.cost * (1 - q / a.own);
         a.own += body.p_buy ? q : -q;

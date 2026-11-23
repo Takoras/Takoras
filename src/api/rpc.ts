@@ -59,6 +59,7 @@ const ERR: Record<string, Key> = {
   bourse_no_koo: 'ui.bs_err_koo',
   bourse_no_shares: 'ui.bs_err_shares',
   bourse_too_big: 'ui.bs_err_big',
+  bourse_rate_koo: 'ui.bs_err_rate',
   bourse_closed: 'ui.bs_err_closed',
   bp_locked: 'ui.err_bp_locked',
   bp_premium: 'ui.err_bp_premium',

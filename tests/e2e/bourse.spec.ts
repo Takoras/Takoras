@@ -9,7 +9,7 @@ test('bourse : acheter, vendre, paie du jour et classement', async ({ page, isMo
   await expect(page.getByRole('option', { name: /\?\?\?/ })).toHaveAttribute('aria-disabled', 'true'); // jeton jamais eu
   await page.getByRole('button', { name: /^Acheter/ }).click();
   await expect(page.getByRole('option', { name: /Mobu/ })).toContainText('×10');
-  await expect(page.getByText('Tu perds')).toBeVisible(); // juste après l'achat, les frais sont à payer
+  await expect(page.getByText('Tu gagnes')).toBeVisible(); // acheter est gratuit : juste après l'achat, on est à 0
   await page.getByRole('button', { name: /^Vendre/ }).click();
   await expect.poll(() => calls.filter((c) => c === 'bourse_trade').length).toBe(2);
   await page.getByRole('button', { name: 'Récupérer' }).click();

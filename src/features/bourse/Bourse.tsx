@@ -1,4 +1,4 @@
-import { useLayoutEffect, useMemo, useRef, useState, type PointerEvent } from 'react';
+import { useEffect, useLayoutEffect, useMemo, useRef, useState, type PointerEvent } from 'react';
 import { Link } from 'react-router';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { bourseApi, errorText } from '@/api';
@@ -51,6 +51,8 @@ type State = {
     elo: number;
     best: number;
     players: number;
+    buy_left?: number;
+    buy_wait?: number;
   };
   quests: { pulls: number; sold: number; quest: number; paid: boolean };
   assets: (Asset | Hidden)[] | null;
@@ -66,13 +68,18 @@ type State = {
 type Locked = { locked: true; have: number; need: number; season: State['season'] };
 type Row = { pseudo: string; rank: number; score: number; value: number; elo: number; me: boolean };
 
-const FEE = 0.01;
+const TAX = 0.1; // revendre en gain : 10 % du bénéfice (acheter est gratuit)
+const PER_MIN = 500; // pièces d'achat max par minute (le serveur vérifie aussi)
 const MAX_ORDER = 0.9; // garde du serveur : la réserve ne tombe jamais à zéro (en pratique, Max = toutes tes pièces)
-const buyCost = (a: Asset, q: number) => (a.k / (a.shares - q) - a.k / a.shares) * (1 + FEE);
-const sellGain = (a: Asset, q: number) => (a.k / a.shares - a.k / (a.shares + q)) * (1 - FEE);
+const buyCost = (a: Asset, q: number) => a.k / (a.shares - q) - a.k / a.shares;
+const sellGain = (a: Asset, q: number) => {
+  const g = a.k / a.shares - a.k / (a.shares + q);
+  const basis = a.own > 0 ? (a.cost * q) / a.own : 0;
+  return g - Math.max(0, g - basis) * TAX;
+};
 const floor3 = (n: number) => Math.max(0, Math.floor(n * 1000) / 1000);
 const maxBuy = (a: Asset, koo: number) =>
-  floor3(Math.min(a.shares * MAX_ORDER, a.shares - a.k / (a.k / a.shares + koo / (1 + FEE))));
+  floor3(Math.min(a.shares * MAX_ORDER, a.shares - a.k / (a.k / a.shares + koo)));
 const maxSell = (a: Asset) => floor3(a.own);
 
 const HOW: [Key, Key][] = [
@@ -201,6 +208,7 @@ export default function Bourse() {
   const [qty, setQty] = useState('10');
   const [busy, setBusy] = useState(false);
   const [help, setHelp] = useState(false);
+  const [now, setNow] = useState(() => Date.now());
   const key = useMemo(() => ['bourse', uid], [uid]);
   const q = useQuery({
     queryKey: key,
@@ -209,6 +217,20 @@ export default function Bourse() {
     refetchInterval: potatoFx() ? 15_000 : 4_000,
   });
   const d = q.data;
+  // limite de 500 pièces par minute : compte à rebours qui tourne seulement quand on attend
+  const waitEnd =
+    d && !('locked' in d) && (d.me.buy_left ?? PER_MIN) < PER_MIN ? q.dataUpdatedAt + (d.me.buy_wait ?? 0) * 1000 : 0;
+  useEffect(() => {
+    if (!waitEnd || waitEnd <= Date.now()) return;
+    const id = setInterval(() => {
+      setNow(Date.now());
+      if (Date.now() >= waitEnd) {
+        clearInterval(id);
+        void qc.invalidateQueries({ queryKey: key });
+      }
+    }, 1000);
+    return () => clearInterval(id);
+  }, [waitEnd, qc, key]);
   useBoard(false, !!d && !('locked' in d)); // le classement est prêt avant d'ouvrir l'onglet : rien n'arrive après coup
   useStaggerIn(pageRef, `.${s.bar}, .${s.term} > *`, !!d);
   // seuls les petits blocs bougent, à peine : sur le grand graphique ou le bandeau, le moindre angle se voit trop
@@ -235,7 +257,7 @@ export default function Bourse() {
   const change = (a: Asset) => (a.price / a.p0 - 1) * 100;
   const label = (a: Asset) => (a.name ? jn(a.name) : '???');
   const img = (a: Asset) => (a.name ? texOf(jetonOf(a.name, d.season.serie)) : MYSTERE);
-  // ce que rapporterait ou coûterait la position si on vendait tout maintenant (frais compris)
+  // ce que rapporterait ou coûterait la position si on vendait tout maintenant (taxe sur le bénéfice comprise)
   const result = (a: Asset) => {
     const gain = sellGain(a, a.own) - a.cost;
     return { gain, pct: a.cost > 0 ? (gain / a.cost) * 100 : 0 };
@@ -245,7 +267,9 @@ export default function Bourse() {
   const nq = (v: number) => v.toLocaleString(loc, { maximumFractionDigits: v >= 10 ? 0 : 1 });
   const days = Math.max(1, Math.ceil((new Date(d.season.ends_at).getTime() - q.dataUpdatedAt) / 86_400_000));
   const amount = floor3(Number(qty.replace(',', '.')) || 0);
-  const bMax = maxBuy(cur, d.me.koo);
+  const waitS = waitEnd > now ? Math.ceil((waitEnd - now) / 1000) : 0;
+  const left = waitS ? (d.me.buy_left ?? PER_MIN) : PER_MIN;
+  const bMax = maxBuy(cur, Math.min(d.me.koo, left));
   const toSell = Math.min(amount, maxSell(cur)); // « Vendre » vend au plus ce que tu as
   const cost = amount > 0 && amount < cur.shares ? buyCost(cur, amount) : 0;
   const gain = toSell > 0 ? sellGain(cur, toSell) : 0;
@@ -441,10 +465,16 @@ export default function Bourse() {
                 <button
                   type="button"
                   className={`${s.submit} ${s.submitBuy}`}
-                  disabled={busy || amount <= 0 || amount > bMax}
+                  disabled={busy || amount <= 0 || cost > Math.min(d.me.koo, left) + 0.0001}
                   onClick={(e) => void trade(true, e.currentTarget)}
                 >
-                  {t('ui.bs_buy')} <Roll text={n2(cost)} />
+                  {cost > left + 0.0001 && cost <= d.me.koo ? (
+                    <Fade text={t('ui.bs_wait', { n: waitS })} />
+                  ) : (
+                    <>
+                      {t('ui.bs_buy')} <Roll text={n2(cost)} />
+                    </>
+                  )}
                 </button>
                 <button
                   type="button"
