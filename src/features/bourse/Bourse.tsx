@@ -1,4 +1,4 @@
-import { useLayoutEffect, useMemo, useRef, useState, type PointerEvent } from 'react';
+import { useEffect, useLayoutEffect, useMemo, useRef, useState, type PointerEvent } from 'react';
 import { Link } from 'react-router';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { bourseApi, errorText } from '@/api';
@@ -206,6 +206,13 @@ export default function Bourse() {
   const [sel, setSel] = useState<number | null>(null);
   const [qty, setQty] = useState('10');
   const [busy, setBusy] = useState(false);
+  // 5 s entre deux ordres (le serveur vérifie aussi) : les boutons comptent à rebours
+  const [cool, setCool] = useState(0);
+  useEffect(() => {
+    if (cool <= 0) return;
+    const id = setTimeout(() => setCool((c) => c - 1), 1000);
+    return () => clearTimeout(id);
+  }, [cool]);
   const [help, setHelp] = useState(false);
   const key = useMemo(() => ['bourse', uid], [uid]);
   const q = useQuery({
@@ -266,6 +273,7 @@ export default function Bourse() {
       burstAt(el, buy ? '#4ade80' : '#f87171', 0.5);
       sfx.upgrade();
       void qc.invalidateQueries({ queryKey: ['bourse-board'] });
+      setCool(5);
     } catch (e) {
       sfx.deny();
       toast(errorText(e, lang), true);
@@ -450,10 +458,12 @@ export default function Bourse() {
                 <button
                   type="button"
                   className={`${s.submit} ${s.submitBuy}`}
-                  disabled={busy || amount <= 0 || cost > d.me.koo + 0.0001 || amount > room + 0.0001}
+                  disabled={busy || cool > 0 || amount <= 0 || cost > d.me.koo + 0.0001 || amount > room + 0.0001}
                   onClick={(e) => void trade(true, e.currentTarget)}
                 >
-                  {amount > room + 0.0001 ? (
+                  {cool > 0 ? (
+                    <Fade text={t('ui.bs_wait', { n: cool })} />
+                  ) : amount > room + 0.0001 ? (
                     <Fade text={full ? t('ui.bs_full') : t('ui.bs_room', { n: nq(room) })} />
                   ) : (
                     <>
@@ -464,10 +474,16 @@ export default function Bourse() {
                 <button
                   type="button"
                   className={`${s.submit} ${s.submitSell}`}
-                  disabled={busy || toSell <= 0}
+                  disabled={busy || cool > 0 || toSell <= 0}
                   onClick={(e) => void trade(false, e.currentTarget)}
                 >
-                  {t('ui.bs_sell')} <Roll text={n2(gain)} />
+                  {cool > 0 ? (
+                    <Fade text={t('ui.bs_wait', { n: cool })} />
+                  ) : (
+                    <>
+                      {t('ui.bs_sell')} <Roll text={n2(gain)} />
+                    </>
+                  )}
                 </button>
               </div>
             </section>

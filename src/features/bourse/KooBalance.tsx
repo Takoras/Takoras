@@ -27,7 +27,7 @@ export function KooBalance({ className }: { className?: string }) {
   const rows: [string, number][] = [
     [t('ui.bs_avail'), me.koo],
     [t('ui.bs_in_shares'), Math.max(0, me.value - me.koo)],
-    [t('ui.bs_spendable'), Math.max(0, me.koo - 1000 - me.paid)],
+    [t('ui.bs_total'), me.value],
   ];
   return (
     <span className={s.wrap}>
