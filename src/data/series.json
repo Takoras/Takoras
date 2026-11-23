@@ -117,22 +117,16 @@
       "img": "/img/tokens/series-bodako/ecorce.png?g=80"
     },
     {
-      "name": "Nid",
-      "odds": 50,
-      "glow": "#e8c49a",
-      "img": "/img/tokens/series-bodako/nid.png?g=80"
+      "name": "Capsule",
+      "odds": 220,
+      "glow": "#a8e07a",
+      "img": "/img/tokens/series-bodako/capsule.png?g=80"
     },
     {
       "name": "Virus",
       "odds": 500,
       "glow": "#8fc46a",
       "img": "/img/tokens/series-bodako/virus.png?g=80"
-    },
-    {
-      "name": "Terrarium",
-      "odds": 1500,
-      "glow": "#a8e07a",
-      "img": "/img/tokens/series-bodako/terrarium.png?g=80"
     },
     {
       "name": "Ronce",
@@ -145,6 +139,12 @@
       "odds": 10000,
       "glow": "#f2c4b6",
       "img": "/img/tokens/series-bodako/coton.gif?g=80"
+    },
+    {
+      "name": "Nid",
+      "odds": 10000,
+      "glow": "#e8c49a",
+      "img": "/img/tokens/series-bodako/nid.png?g=80"
     },
     {
       "name": "Belladone",

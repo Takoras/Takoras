@@ -84,9 +84,9 @@ export const LORE: Record<string, [fr: string, en: string]> = {
     'Une chose verte qui s’enroule et se multiplie. Partout où elle passe, des champignons violets poussent.',
     'A green thing that coils and multiplies. Wherever it goes, purple mushrooms sprout.',
   ],
-  Terrarium: [
-    'Une forêt entière tient dans cette bulle de verre. Les pousses grandissent un peu chaque nuit.',
-    'A whole forest fits in this glass bubble. The sprouts grow a little every night.',
+  Capsule: [
+    'Une capsule de verre où tient un bout de forêt. Les pousses grandissent un peu chaque nuit.',
+    'A glass capsule holding a piece of forest. The sprouts grow a little every night.',
   ],
   Ronce: [
     'Elle griffe ceux qui la cueillent. Les plus patients finissent par l’avoir.',
