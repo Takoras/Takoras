@@ -78,9 +78,9 @@ const oddsOf = (it: Item) => itemOdds(it);
 const glowOf = (it: Item) => itemGlow(it);
 const hexOf = rgbHex;
 type KooWallet = { spendable: number; koo: number; reserved: number; locked?: boolean; have?: number; need?: number };
-// même règle que le serveur : les prix en Koo sont bien plus bas que les prix en pièces
+// même règle que le serveur (_koo_price) : les prix en pièces ont été divisés par 5, ceux en Koo n'ont pas bougé
 const kooPrice = (p: number, kind: string) =>
-  Math.max(5, Math.ceil((Math.sqrt(p) * (kind === 'banner' || kind === 'avatar' || isCosmetic(kind) ? 4 : 1)) / 5) * 5);
+  Math.max(5, Math.ceil((Math.sqrt(p * 5) * (kind === 'banner' || kind === 'avatar' || isCosmetic(kind) ? 4 : 1)) / 5) * 5);
 const Pay = createContext({ koo: false, black: false, spend: 0 });
 const KooIcon = ({ size = 14 }: { size?: number }) => (
   <img className="px" src="/img/market-coin.png" alt="" width={size} height={size} />

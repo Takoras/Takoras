@@ -82,7 +82,7 @@ export const ACC = {
 // Couleurs de chaque série (même DA, autre teinte) : fond de l'ouverture, pluie de l'accueil, cubes de transition.
 // main / clair / second, en « r g b » pour les mettre dans rgb(var(--serie) / x%)
 // Séries payées en pièces (pas de stock de tirages) : prix d'un tirage, et prix des 10 (-10 %)
-export const COIN_PULL = { one: 300, ten: 2700 };
+export const COIN_PULL = { one: 30, ten: 270 }; // même prix que le serveur (take_pulls_serie)
 
 export const SERIE_THEME: Record<string, { main: string; hi: string; alt: string }> = {
   Takoras: { main: '39 71 181', hi: '71 194 234', alt: '61 107 255' },

@@ -1134,15 +1134,15 @@ export const fr = {
       ],
       [
         'Recharge',
-        'Tu gagnes 1 tirage toutes les 3 min (améliorable sur l’accueil : −10 s à chaque fois, jusqu’à 1 min, de 300 à 26 300 pièces) jusqu’à ton stock max (5 au départ). Le sablier double la vitesse (1 tirage toutes les 1 min 30) ; plusieurs sabliers rallongent la durée.',
+        'Tu gagnes 1 tirage toutes les 10 secondes, jusqu’à 500 tirages en stock. Le sablier double la vitesse (1 tirage toutes les 5 s) ; plusieurs sabliers rallongent la durée.',
       ],
       [
         'Stock max',
-        'Améliorable de 5 à 50, +1 à chaque fois : 100 pièces pour passer à 6, 950 pour 10, 4 450 pour 20, 9 050 pour 30, 14 500 pour 40 et 20 650 pour 50. La recharge avec le temps s’arrête à ton stock max, mais les codes promo et les remboursements peuvent te faire dépasser 50 tirages.',
+        '500 tirages pour tout le monde. La recharge s’arrête à 500, mais les codes promo et les remboursements peuvent te faire dépasser ce nombre.',
       ],
       [
         'Revente',
-        'Un jeton se revend la moitié de sa rareté : 1/2 → 1 pièce, 1/1 000 → 500, 1/1 000 000 → 500 000. Les variantes multiplient ce prix (Doré ×3, Céleste ×10, Ombre ×25). Les jetons verrouillés, en vitrine ou dans le deck ne peuvent pas être vendus.',
+        'Un jeton se revend un dixième de sa rareté : 1/2 → 1 pièce, 1/1 000 → 100, 1/1 000 000 → 100 000. Les variantes multiplient ce prix (Doré ×3, Céleste ×10, Ombre ×25). Les jetons verrouillés, en vitrine ou dans le deck ne peuvent pas être vendus.',
       ],
       [
         'Variantes',
@@ -1179,7 +1179,7 @@ export const fr = {
     [
       'img/tokens/mystery.png',
       'Tes tirages',
-      'Tu gagnes <b>1 tirage toutes les 3 minutes</b>, même quand tu n’es pas là. Ton stock se remplit tout seul : reviens l’ouvrir. Tu peux agrandir ton stock et accélérer la recharge avec des pièces, sur l’accueil.',
+      'Tu gagnes <b>1 tirage toutes les 10 secondes</b>, même quand tu n’es pas là, jusqu’à 500 en stock. Ton stock se remplit tout seul : reviens l’ouvrir.',
     ],
     [
       'img/tokens/series-takoras/lumis.png',

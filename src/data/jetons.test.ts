@@ -1,6 +1,6 @@
 import fs from 'node:fs';
 import vm from 'node:vm';
-import { SERIES, sellValue, tierKey, vOdds } from './jetons';
+import { isWeekend, SERIES, sellValue, tierKey, vOdds } from './jetons';
 
 // Mêmes règles que l'ancien site (et donc que le serveur)
 const legacy = (() => {
@@ -21,15 +21,23 @@ test('catalogue : 17 jetons Takoras, chemins d’images absolus', () => {
   expect(SERIES.Takoras).toHaveLength(17);
   for (const j of SERIES.Takoras ?? []) if (j.img) expect(j.img.startsWith('/img/')).toBe(true);
 });
-test('rareté et revente identiques à l’ancien site', () => {
+test('rareté identique à l’ancien site, revente à 1/10', () => {
   for (const odds of [1, 2, 59, 60, 999, 1000, 9999, 10000, 99999, 100000, 1e6]) {
     expect(tierKey(odds)).toBe(legacy.tierKey(odds));
-    for (const v of ['', 'gold', 'celeste', 'ombre']) expect(sellValue(odds, v)).toBe(legacy.sellValue(odds, v));
+    // revente : 1/10 de la rareté (nov. 2026), variantes ×3 / ×10 / ×25
+    const base = Math.max(1, Math.round(odds * 0.1));
+    const wk = isWeekend() ? 1.2 : 1;
+    for (const [v, m] of [
+      ['', 1],
+      ['gold', 3],
+      ['celeste', 10],
+      ['ombre', 25],
+    ] as const)
+      expect(sellValue(odds, v)).toBe(Math.round(base * m * wk));
   }
   expect(vOdds(1000, 'ombre')).toBe(500_000);
 });
 
-import { isWeekend } from './jetons';
 import { test as t2, expect as e2 } from 'vitest';
 t2('week-end : vendredi 12 h → dimanche minuit (Paris)', () => {
   e2(isWeekend(new Date('2026-11-20T10:59:00Z'))).toBe(false); // ven 11:59 Paris

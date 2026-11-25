@@ -1118,15 +1118,15 @@ export const en: Dict = {
       ],
       [
         'Recharge',
-        'You get 1 pull every 3 min (upgradable on the home page: −10 s each time, down to 1 min, from 300 to 26,300 coins) up to your max stock (5 at first). The hourglass doubles the speed (1 pull every 1 min 30); several hourglasses extend the duration.',
+        'You get 1 pull every 10 seconds, up to 500 pulls in stock. The hourglass doubles the speed (1 pull every 5 s); several hourglasses extend the duration.',
       ],
       [
         'Max stock',
-        'Upgradable from 5 to 50, +1 each time: 100 coins to reach 6, 950 for 10, 4,450 for 20, 9,050 for 30, 14,500 for 40 and 20,650 for 50. Refilling over time stops at your max stock, but promo codes and refunds can take you above 50 pulls.',
+        '500 pulls for everyone. Refilling over time stops at 500, but promo codes and refunds can take you above that.',
       ],
       [
         'Selling',
-        'A token sells for half its rarity: 1/2 → 1 coin, 1/1,000 → 500, 1/1,000,000 → 500,000. Variants multiply that price (Golden ×3, Celestial ×10, Shadow ×25). Locked, showcased or deck tokens can’t be sold.',
+        'A token sells for a tenth of its rarity: 1/2 → 1 coin, 1/1,000 → 100, 1/1,000,000 → 100,000. Variants multiply that price (Golden ×3, Celestial ×10, Shadow ×25). Locked, showcased or deck tokens can’t be sold.',
       ],
       [
         'Variants',
@@ -1160,7 +1160,7 @@ export const en: Dict = {
     [
       'img/tokens/mystery.png',
       'Your pulls',
-      'You get <b>1 pull every 3 minutes</b>, even when you’re away. Your stock fills up by itself: come back to open it. You can grow your stock and speed up the recharge with coins, on the home page.',
+      'You get <b>1 pull every 10 seconds</b>, even when you’re away, up to 500 in stock. Your stock fills up by itself: come back to open it.',
     ],
     [
       'img/tokens/series-takoras/lumis.png',

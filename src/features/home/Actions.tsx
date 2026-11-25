@@ -1,16 +1,12 @@
 import { useEffect, useLayoutEffect, useRef, useState, type ReactNode } from 'react';
 import { COIN_PULL } from '@/engines/env';
-import { useQueryClient } from '@tanstack/react-query';
-import { ecoApi, errorText } from '@/api';
 import { useAuth } from '@/lib/auth';
 import { useMe } from '@/api/queries';
 import { locale, useSettings } from '@/lib/settings';
 import { useT } from '@/i18n/useT';
-import { sfx } from '@/engines/sound.js';
 import { openUI } from '@/app/ui-store';
 import { Button } from '@/ui/Button';
-import { toast } from '@/ui/toast';
-import { mmss, nextMax, regenCost, TOP_MAX, upgradeCost, useEco } from '../eco/eco';
+import { mmss, useEco } from '../eco/eco';
 import { openPulls } from '../eco/openPulls';
 import { openInfo } from '../info/store';
 import { Effects } from './Effects';
@@ -19,9 +15,7 @@ import s from './Home.module.css';
 import { Bump } from '@/ui/motion';
 import { Tween } from '@/ui/Tween';
 
-const Coin = () => <img className="px" src="/img/coin.png" alt="" width={16} height={16} />;
-
-// Stock de pulls, boutons d'ouverture et améliorations (stock max, recharge)
+// Stock de pulls (1 toutes les 10 s, 500 max) et boutons d'ouverture
 export function Actions({ serie = 'Takoras' }: { serie?: string } = {}) {
   const t = useT();
   const user = useAuth((x) => x.user);
@@ -115,113 +109,8 @@ export function Actions({ serie = 'Takoras' }: { serie?: string } = {}) {
       {coin && !canCoin ? <p className={s.soonNote}>{t('ui.serie_open_soon')}</p> : null}
       {/* stock max et recharge ne servent qu'à la série Takoras (tirages gratuits) : juste sous les boutons,
           et ils tombent et disparaissent quand on choisit une série payée en pièces */}
-      <DropSwap k={coin ? 'coin' : 'stock'}>{coin ? <span /> : <Upgrades />}</DropSwap>
       <Effects />
       {info}
-    </div>
-  );
-}
-
-// Améliorations (stock max, recharge) : sous les boutons sur petit écran, dans la colonne de gauche sur grand écran
-export function Upgrades() {
-  const t = useT();
-  const lang = useSettings((x) => x.lang);
-  const user = useAuth((x) => x.user);
-  const e = useEco();
-  const qc = useQueryClient();
-  const upBusy = useRef(false);
-  if (!user || !e) return null;
-  const n = (v: number) => v.toLocaleString(locale(lang));
-  const upCost = upgradeCost(nextMax(e.max)),
-    rgCost = regenCost(e.regen - 10);
-  // une amélioration à la fois (spammer le bouton envoyait plusieurs achats et un message d'erreur bizarre),
-  // et pas de message en cas de réussite : la tuile change, c'est suffisant
-  const upgrade = async (kind: 'stock' | 'regen') => {
-    if (upBusy.current) return;
-    upBusy.current = true;
-    try {
-      const st = kind === 'stock' ? await ecoApi.upgradeStock() : await ecoApi.upgradeRegen();
-      sfx.upgrade();
-      qc.setQueryData(['me', user.id], st);
-    } catch (err) {
-      sfx.deny();
-      const code = String((err as { message?: string })?.message ?? '');
-      if (!/rate|max_reached/.test(code)) toast(errorText(err, lang), true);
-    } finally {
-      upBusy.current = false;
-    }
-  };
-  return (
-    <div className={s.ups} aria-label={t('ui.upgrades')} role="group">
-      <Up
-        icon="/img/items/recharge.png"
-        title={t('ui.up_stock')}
-        now={String(e.max)}
-        next={e.max < TOP_MAX ? String(nextMax(e.max)) : null}
-        pct={(e.max - 5) / (TOP_MAX - 5)}
-        top={t('ui.stock_top', { n: TOP_MAX })}
-        cost={upCost}
-        coins={e.coins}
-        fmt={n}
-        onUp={() => void upgrade('stock')}
-      />
-      <Up
-        icon="/img/items/hourglass.png"
-        title={t('ui.up_regen')}
-        now={mmss(e.regen * 1000)}
-        next={e.regen > 60 ? mmss((e.regen - 10) * 1000) : null}
-        pct={(180 - e.regen) / 120}
-        top={t('ui.regen_top')}
-        cost={rgCost}
-        coins={e.coins}
-        fmt={n}
-        onUp={() => void upgrade('regen')}
-      />
-    </div>
-  );
-}
-
-// Une amélioration : icône, valeur actuelle → suivante, barre jusqu'au max, bouton avec le prix (il brille quand on peut payer)
-function Up(p: {
-  icon: string;
-  title: string;
-  now: string;
-  next: string | null;
-  pct: number;
-  top: string;
-  cost: number;
-  coins: number;
-  fmt: (n: number) => string;
-  onUp: () => void;
-}) {
-  const can = !!p.next && p.coins >= p.cost;
-  const ref = useRef<HTMLDivElement>(null);
-  useSwing(ref, 0.12); // se balance un peu au passage de la souris, comme les blocs autour
-  return (
-    <div ref={ref} className={`${s.up} ${can ? s.upCan : ''}`}>
-      <img className="px" src={p.icon} alt="" width={40} height={40} />
-      <div className={s.upBody}>
-        <b>{p.title}</b>
-        <Bump v={p.now} className={s.upVal}>
-          {p.now}
-          {p.next ? (
-            <>
-              {' '}
-              → <em>{p.next}</em>
-            </>
-          ) : null}
-        </Bump>
-        <span className={s.upBar}>
-          <i style={{ width: `${Math.max(3, Math.min(100, p.pct * 100))}%` }} />
-        </span>
-      </div>
-      {p.next ? (
-        <Button size="sm" variant={can ? 'primary' : undefined} disabled={!can} onClick={p.onUp}>
-          {p.fmt(p.cost)} <Coin />
-        </Button>
-      ) : (
-        <small className="muted">{p.top}</small>
-      )}
     </div>
   );
 }

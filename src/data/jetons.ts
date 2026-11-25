@@ -61,9 +61,9 @@ export const glowVars = (j: { glow: string; odds: number }, v?: string | null) =
     '--ga': j.odds >= 100000 || isVariant(v) ? 1 : 0,
   }) as Record<string, string | number>;
 export const vOdds = (odds: number, v?: string | null) => odds * (isVariant(v) ? VARIANTS[v].odds : 1);
-// Valeur de revente : même règle que le serveur (_sell_value × multiplicateur de variante)
+// Valeur de revente : même règle que le serveur (_sell_value = 1/10 de la rareté × multiplicateur de variante)
 export const sellValue = (odds: number, v?: string | null) =>
-  Math.round(Math.max(1, Math.round(odds * 0.5)) * (isVariant(v) ? VARIANTS[v].mult : 1) * (isWeekend() ? 1.2 : 1));
+  Math.round(Math.max(1, Math.round(odds * 0.1)) * (isVariant(v) ? VARIANTS[v].mult : 1) * (isWeekend() ? 1.2 : 1));
 // Week-end boosté (comme le serveur) : du vendredi 12 h au dimanche minuit, heure de Paris
 export function isWeekend(d = new Date()) {
   const p = new Intl.DateTimeFormat('en-GB', { timeZone: 'Europe/Paris', weekday: 'short', hour: 'numeric', hourCycle: 'h23' }).formatToParts(d);
