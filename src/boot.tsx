@@ -25,7 +25,8 @@ import './styles/flat.css'; // essai « à plat » (sans ombres ni contours) : r
 
 // Code d'une ancienne version introuvable (mise en ligne pendant qu'on joue) : on recharge une fois sur la nouvelle
 window.addEventListener('vite:preloadError', (e) => {
-  if (sessionStorage.getItem('takoras-chunk-reload')) return;
+  // pendant un changement de page, c'est le routeur qui recharge (sur la page demandée, pas celle d'avant)
+  if (window.__routeLoading || sessionStorage.getItem('takoras-chunk-reload')) return;
   e.preventDefault();
   sessionStorage.setItem('takoras-chunk-reload', '1');
   location.reload();

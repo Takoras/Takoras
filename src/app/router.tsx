@@ -6,8 +6,10 @@ import { Layout } from './Layout';
 
 // Pages chargées à la demande (seul l'accueil est dans le premier téléchargement).
 // Juste après une mise en ligne, le code de l'ancienne version n'existe plus sur le serveur : au lieu de rester
-// bloqué, on recharge tout de suite la page demandée sur la nouvelle version (une seule fois, pour ne pas boucler).
+// bloqué, on recharge sur la nouvelle version (une seule fois, pour ne pas boucler) — et sur la page DEMANDÉE :
+// pendant le changement de page, l'adresse affichée est encore celle d'avant, la recharger renverrait en arrière.
 const page = (load: () => Promise<{ default: React.ComponentType }>) => async () => {
+  window.__routeLoading = (window.__routeLoading ?? 0) + 1;
   try {
     const m = await load();
     sessionStorage.removeItem('takoras-chunk-reload');
@@ -15,10 +17,13 @@ const page = (load: () => Promise<{ default: React.ComponentType }>) => async ()
   } catch (e) {
     if (!sessionStorage.getItem('takoras-chunk-reload')) {
       sessionStorage.setItem('takoras-chunk-reload', '1');
-      location.reload();
+      const to = router.state.navigation.location;
+      location.assign(to ? to.pathname + to.search + to.hash : location.href);
       await new Promise(() => undefined); // la page se recharge
     }
     throw e;
+  } finally {
+    window.__routeLoading = (window.__routeLoading ?? 1) - 1;
   }
 };
 const bestiary = page(() => import('@/features/inventory/Bestiary'));
