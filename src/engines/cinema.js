@@ -362,6 +362,107 @@ const CINE = (() => {
         vignette(x, w, h, bg, .75);
       },
     },
+    // ---------------------------------------------------------------- Nid (Bodako, 1/10 000) : l'œuf qui éclot.
+    // La nuit, la lune, une branche. Un gros œuf posé sur son nid, le jeton caché dedans. Toc… toc… toc, de plus en plus vite :
+    // à chaque coup l'œuf bascule et une fissure s'ajoute, des éclats tombent et laissent voir la lumière dorée de l'intérieur.
+    // À la fin la coquille éclate en morceaux (pas d'écran blanc). Rien ne tourne autour du jeton : c'est l'œuf, le héros.
+    Nid: {
+      R: 6.6, c: ['#090b14', '#5a3b24', '#f2c46a', '#fff4dc'],
+      KN: [1.5, 2.5, 3.2, 3.8, 4.3, 4.75, 5.1, 5.4, 5.65, 5.85, 6.02, 6.18],
+      init(c) {
+        c.st.stars = Array.from({ length: 60 }, () => ({ x: rnd(0, c.w), y: rnd(0, c.h * .6), p: rnd(0, 9), s: rnd(0, 1) < .15 ? 2 : 1 }));
+        // une fissure par coup : un départ sur la coquille, puis un zigzag
+        c.st.cracks = this.KN.map((_, i) => {
+          const a = rnd(-2.6, -.5), pts = [], len = Math.round(rnd(6, 12));
+          let u = Math.cos(a) * .8, v = Math.sin(a) * .7, dir = rnd(0, TAU);
+          for (let s = 0; s < len; s++) { pts.push([u, v]); dir += rnd(-1, 1); u += Math.cos(dir) * .07; v += Math.sin(dir) * .06; }
+          return { pts, chip: i >= 4 && i % 2 === 0 ? [pts[(len / 2) | 0][0], pts[(len / 2) | 0][1]] : null };
+        });
+        c.st.leaves = Array.from({ length: 9 }, (_, i) => ({ u: (i + .5) / 9, side: i % 2 ? 1 : -1, p: rnd(0, 9) }));
+        c.st.shards = Array.from({ length: 26 }, () => ({ a: rnd(0, TAU), v: rnd(.6, 1.4), s: Math.round(rnd(3, 7)), spin: rnd(-6, 6) }));
+      },
+      music(m, R) {
+        const r = 220;
+        // nappe de nuit très calme, quelques notes de cloche, puis les coups contre la coquille
+        m.I.pad(chordHz(m, r, [0, 7, 12], -1), m.T(.1), R - .4, .022, 700);
+        [12, 16, 19, 16, 14, 12].forEach((d, i) => m.I.bell(m.hz(r, d), m.T(.4 + i * .5), .03, 1.8));
+        this.KN.forEach((k, i) => {
+          m.I.taiko(m.T(k), .12 + i * .02);
+          m.I.koto(m.hz(r, 24 + [0, 3, 5, 7, 10][i % 5]), m.T(k + .02), .03 + i * .004);
+        });
+        m.I.strings(chordHz(m, r, [0, 4, 7, 12]), m.T(R - 2.2), 2, .026);
+        m.I.swell(m.T(R - 1), .9, .09);
+        revealHit(m, R, r, [0, 4, 7, 12, 19], 'bell');
+      },
+      scene(c) {
+        const { x, w, h, cx, cy, M, t, st } = c, [bg, dk, ac, li] = this.c, R = this.R, KN = this.KN;
+        const shell = '#f1e2cc', shade = '#cdb394', speck = '#9c7a5a', crackC = '#2a1a10', twig = '#8a6038';
+        const done = KN.filter(k => t >= k).length, k = seg(t, 0, R);
+        x.fillStyle = bg; x.fillRect(0, 0, w, h);
+        // le ciel : étoiles qui scintillent et un croissant de lune
+        st.stars.forEach(s => P(x, s.x, s.y, s.s, rgba(li, .25 + .35 * (.5 + .5 * Math.sin(t * 2 + s.p)))));
+        const mx = w * .82, my = h * .18, mr = M * .07;
+        for (let dy = -mr; dy <= mr; dy += 2) for (let dx = -mr; dx <= mr; dx += 2) {
+          if (dx * dx + dy * dy > mr * mr) continue;
+          const ox = dx + mr * .45, oy = dy - mr * .2;
+          if (ox * ox + oy * oy < mr * mr * .8) continue;
+          P(x, mx + dx, my + dy, 2, li);
+        }
+        // la branche en bas, avec ses feuilles qui bougent un peu
+        const by = u => h * .9 - Math.sin(u * Math.PI) * h * .05;
+        for (let X = 0; X < w; X += 2) { const u = X / w; P(x, X, by(u), 4, dk); P(x, X, by(u) - 2, 2, twig); }
+        st.leaves.forEach(l => { const X = l.u * w, Y = by(l.u) + l.side * 6 + Math.sin(t * 1.2 + l.p) * 2; P(x, X - 4, Y - 2, 8, '#3f7a45'); P(x, X - 2, Y - 3, 4, '#6fbf7a'); });
+        // l'œuf : basculé par chaque coup (la secousse s'éteint vite), posé sur le nid
+        const ew = Math.round(M * .2), eh = Math.round(M * .27), ex = cx, ey = cy + M * .04;
+        let rot = 0;
+        KN.forEach((kk, i) => { if (t >= kk) rot += Math.sin((t - kk) * 22) * Math.exp(-(t - kk) * 6) * (.08 + i * .016); });
+        const burst = t > R - .22;
+        const glowIn = clamp(done / KN.length);
+        glow(x, ex, ey, M * (.22 + glowIn * .3), ac, glowIn * .55);
+        if (!burst) {
+          const cr = Math.cos(rot), sr = Math.sin(rot), bx = ex, byy = ey + eh;
+          const put = (dx, dy, col, sz = 2) => P(x, bx + dx * cr - (dy - eh) * sr, byy + dx * sr + (dy - eh) * cr, sz, col);
+          for (let dy = -eh; dy <= eh; dy += 2) for (let dx = -ew; dx <= ew; dx += 2) {
+            const ny = dy / eh, nx = dx / (ew * (dy < 0 ? .78 + .22 * (1 + ny) : 1)), d2 = nx * nx + ny * ny;
+            if (d2 > 1) continue;
+            // lumière de la lune en haut à droite : reflet doux, ombre arrondie en bas à gauche
+            const lit = -nx * .55 + ny * .65 + d2 * .35, hl = (nx - .32) ** 2 + (ny + .5) ** 2;
+            const hash = ((dx * 73856093) ^ (dy * 19349663)) >>> 0;
+            const col = hl < .035 ? li : lit > .62 ? '#b89a7a' : lit > .38 ? shade : hash % 29 === 0 ? speck : shell;
+            put(dx, dy, col);
+          }
+          // les fissures (elles se dessinent vite après chaque coup) et les éclats tombés qui montrent la lumière
+          st.cracks.forEach((cc, i) => {
+            if (t < KN[i]) return;
+            const g = clamp((t - KN[i]) / .15), n = Math.max(1, Math.round(cc.pts.length * g));
+            for (let s = 1; s < n; s++) {
+              const [u0, v0] = cc.pts[s - 1], [u1, v1] = cc.pts[s], steps = 6;
+              for (let q = 0; q <= steps; q++) {
+                const uu = u0 + (u1 - u0) * q / steps, vv = v0 + (v1 - v0) * q / steps, wx = uu / (vv < 0 ? .78 + .22 * (1 + vv) : 1);
+                if (wx * wx + vv * vv < .86) put(uu * ew, vv * eh, crackC, 3); // la fissure reste sur la coquille
+              }
+            }
+            if (cc.chip && g >= 1) { const [u0, v0] = cc.chip, sc = Math.min(1, .7 / Math.hypot(u0, v0)), u = u0 * sc, v = v0 * sc, rr = 9; /* l'éclat reste bien sur la coquille */ for (let dy = -rr; dy <= rr; dy += 2) for (let dx = -rr - 2; dx <= rr + 2; dx += 2) { const d = dx * dx / 1.3 + dy * dy; if (d < rr * rr) put(u * ew + dx, v * eh + dy, d < rr * rr * .3 ? li : d < rr * rr * .75 ? ac : crackC); } }
+          });
+        } else {
+          // l'éclosion : les morceaux de coquille partent dans tous les sens
+          const q = (t - (R - .22)) / .22;
+          st.shards.forEach(sh => { const X = ex + Math.cos(sh.a) * M * .6 * sh.v * q, Y = ey + Math.sin(sh.a) * M * .5 * sh.v * q + q * q * 30; P(x, X, Y, sh.s, sh.v > 1 ? shade : shell); });
+        }
+        // le nid : un bol de brindilles croisées qui enveloppe le bas de l'œuf
+        for (let i = 0; i < 46; i++) {
+          const u = i / 45, a = Math.PI * (1.05 - u * 1.1), rr = ew * (1.25 + (i % 3) * .08);
+          const X0 = ex + Math.cos(a) * rr, Y0 = ey + eh * .72 + Math.abs(Math.sin(a)) * eh * .26 + (i % 4) * 2, tilt = (i % 2 ? .45 : -.45) + Math.sin(i * 1.7) * .2;
+          for (let s = -11; s < 11; s++) P(x, X0 + s, Y0 + s * tilt, 3, i % 4 === 0 ? '#a7794a' : i % 2 ? dk : twig);
+        }
+        // le jeton n'apparaît qu'à l'éclosion
+        if (burst) coin(x, c.mys, ex, ey, M * .25, { tint: ac, tintA: .3 });
+        const hit = KN.some(kk => t >= kk && t - kk < .08);
+        c.fx.shake(hit ? 1.5 + done * .25 : 0);
+        if (t > R - .18) c.fx.flash(ac, .75);
+        vignette(x, w, h, bg, .78);
+      },
+    },
     // ---------------------------------------------------------------- Vyolis : une salle de verre, des reflets partout
     Vyolis: {
       R: 6.2, c: ['#0b0614', '#5b3a8c', '#c9a6f2', '#ffffff'],

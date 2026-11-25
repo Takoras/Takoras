@@ -24,7 +24,8 @@ export function Tests() {
       <h3>Cinématiques</h3>
       <p className="muted">Revoir une cinématique directement, sans tirage.</p>
       <div className={s.row}>
-        {(SERIES.Takoras ?? [])
+        {Object.values(SERIES)
+          .flat()
           .filter((j) => j.odds >= 1000)
           .map((j) => (
             <Button key={j.name} size="sm" onClick={() => void CINE.play(j)}>
