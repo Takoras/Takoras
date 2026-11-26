@@ -509,7 +509,7 @@ export const en: Dict = {
     auto_quit: 'Back to menu',
     err_too_many: 'Maximum 50 pulls at once',
     regen_up: 'Recharge {a} → {b}',
-    regen_top: 'Recharge maxed (1 pull / min)',
+    regen_top: 'Max recharge (1 pull / 10 s)',
     regen_ok: 'Faster recharge: 1 pull every {s} s',
     err_max_reached: 'Already maxed',
     auto_quit_ok: '{n} unopened pull(s) put back in your stock',
@@ -1118,11 +1118,11 @@ export const en: Dict = {
       ],
       [
         'Recharge',
-        'You get 1 pull every 10 seconds, up to 500 pulls in stock. The hourglass doubles the speed (1 pull every 5 s); several hourglasses extend the duration.',
+        'You get 1 pull every 2 min at first, up to your max stock. Upgradable on the home page: −10 s each time, down to 10 s (from 100 to 7,490 coins). The hourglass doubles the speed; several hourglasses extend the duration.',
       ],
       [
         'Max stock',
-        '500 pulls for everyone. Refilling over time stops at 500, but promo codes and refunds can take you above that.',
+        '10 at first, +10 per upgrade up to 500 (from 50 to 17,150 coins). Refilling over time stops at your max stock, but promo codes and refunds can take you above that.',
       ],
       [
         'Selling',
@@ -1160,7 +1160,7 @@ export const en: Dict = {
     [
       'img/tokens/mystery.png',
       'Your pulls',
-      'You get <b>1 pull every 10 seconds</b>, even when you’re away, up to 500 in stock. Your stock fills up by itself: come back to open it.',
+      'You get <b>pulls over time</b>, even when you’re away. Your stock fills up by itself: come back to open it. On the home page, grow your stock (up to 500) and speed up the recharge (down to 1 pull every 10 s) with coins.',
     ],
     [
       'img/tokens/series-takoras/lumis.png',

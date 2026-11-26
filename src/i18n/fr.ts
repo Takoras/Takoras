@@ -511,7 +511,7 @@ export const fr = {
     auto_quit: 'Retour au menu',
     err_too_many: 'Maximum 50 tirages d’un coup',
     regen_up: 'Recharge {a} → {b}',
-    regen_top: 'Recharge au max (1 tirage / min)',
+    regen_top: 'Recharge au max (1 tirage / 10 s)',
     regen_ok: 'Recharge plus rapide : 1 tirage toutes les {s} s',
     err_max_reached: 'Déjà au maximum',
     auto_quit_ok: '{n} tirage(s) pas ouverts remis dans ton stock',
@@ -1134,11 +1134,11 @@ export const fr = {
       ],
       [
         'Recharge',
-        'Tu gagnes 1 tirage toutes les 10 secondes, jusqu’à 500 tirages en stock. Le sablier double la vitesse (1 tirage toutes les 5 s) ; plusieurs sabliers rallongent la durée.',
+        'Tu gagnes 1 tirage toutes les 2 min au départ, jusqu’à ton stock max. Améliorable sur l’accueil : −10 s à chaque fois, jusqu’à 10 s (de 100 à 7 490 pièces). Le sablier double la vitesse ; plusieurs sabliers rallongent la durée.',
       ],
       [
         'Stock max',
-        '500 tirages pour tout le monde. La recharge s’arrête à 500, mais les codes promo et les remboursements peuvent te faire dépasser ce nombre.',
+        '10 au départ, +10 à chaque amélioration jusqu’à 500 (de 50 à 17 150 pièces). La recharge s’arrête à ton stock max, mais les codes promo et les remboursements peuvent te faire dépasser ce nombre.',
       ],
       [
         'Revente',
@@ -1179,7 +1179,7 @@ export const fr = {
     [
       'img/tokens/mystery.png',
       'Tes tirages',
-      'Tu gagnes <b>1 tirage toutes les 10 secondes</b>, même quand tu n’es pas là, jusqu’à 500 en stock. Ton stock se remplit tout seul : reviens l’ouvrir.',
+      'Tu gagnes <b>des tirages avec le temps</b>, même quand tu n’es pas là. Ton stock se remplit tout seul : reviens l’ouvrir. Sur l’accueil, agrandis ton stock (jusqu’à 500) et accélère la recharge (jusqu’à 1 tirage toutes les 10 s) avec des pièces.',
     ],
     [
       'img/tokens/series-takoras/lumis.png',

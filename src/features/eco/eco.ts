@@ -2,14 +2,17 @@ import { useEffect, useState } from 'react';
 import { useMe } from '@/api/queries';
 
 // Coûts identiques au serveur (_upgrade_cost, _regen_cost) : affichage seulement, le serveur décide.
-export const BASE_MAX = 5,
+export const BASE_MAX = 10,
   TOP_MAX = 500,
-  MAX_OPEN = 1000;
-export const nextMax = (m: number) => Math.min(TOP_MAX, m + 1);
+  MAX_OPEN = 1000,
+  REGEN_BASE = 120,
+  REGEN_MIN = 10;
+// stock : +10 par niveau ; recharge : −10 s par niveau
+export const nextMax = (m: number) => Math.min(TOP_MAX, m + 10);
 export const upgradeCost = (target: number) =>
-  Math.max(100, Math.round((100 * Math.max(1, target - BASE_MAX) ** 1.4) / 50) * 50);
+  Math.max(50, Math.round((50 * Math.max(1, (target - 10) / 10) ** 1.5) / 10) * 10);
 export const regenCost = (target: number) =>
-  Math.round((300 * Math.max(1, Math.floor((180 - target) / 10)) ** 1.8) / 50) * 50;
+  Math.max(100, Math.round((100 * Math.max(1, (REGEN_BASE - target) / 10) ** 1.8) / 10) * 10);
 export const mmss = (ms: number) => {
   const s = Math.max(0, Math.ceil(ms / 1000));
   return `${String(Math.floor(s / 60)).padStart(2, '0')}:${String(s % 60).padStart(2, '0')}`;

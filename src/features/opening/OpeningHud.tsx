@@ -21,7 +21,7 @@ const TXT = {
     next: '+1 dans {t}',
     full: 'Stock plein',
     luck: 'Chance',
-    pity: 'Chance ×10',
+    pity: 'Chance ×{m}',
     pityIn: 'dans {n} tirages',
     pityNow: 'au prochain tirage',
     coins: 'Pièces',
@@ -33,7 +33,7 @@ const TXT = {
     next: '+1 in {t}',
     full: 'Stock full',
     luck: 'Luck',
-    pity: 'Luck ×10',
+    pity: 'Luck ×{m}',
     pityIn: 'in {n} pulls',
     pityNow: 'on the next pull',
     coins: 'Coins',
@@ -159,17 +159,26 @@ function Hud({
     1,
     Number(paid ? ((me.data.pity_s as Record<string, number> | undefined)?.[serie] ?? 100) : (me.data.pity_in ?? 100)),
   );
+  // deux paliers : ×10 au 50e tirage, ×25 au 100e ; la boîte montre le prochain
+  const half = pityIn > 50,
+    pityN = half ? pityIn - 50 : pityIn,
+    pityM = half ? 10 : 25;
   const luckTxt = '×' + String(Math.round(e.luck * 100) / 100).replace('.', lang === 'en' ? '.' : ',');
   return (
     <div ref={ref} className={`${s.hud} ${shown ? s.on : ''} ${rev ? s.rev : ''}`} aria-hidden={!shown && !rev}>
       {/* à gauche : le prochain tirage ×10 de cette série */}
-      <div className={`${s.box} ${s.left} ${pityIn <= 1 ? s.ready : ''}`} style={{ '--i': 0 } as React.CSSProperties}>
-        <img data-depth className={`px ${s.big}`} src="/img/potions/luck-100.png" alt="" />
+      <div className={`${s.box} ${s.left} ${pityN <= 1 ? s.ready : ''}`} style={{ '--i': 0 } as React.CSSProperties}>
+        <img
+          data-depth
+          className={`px ${s.big}`}
+          src={pityM === 25 ? '/img/potions/luck-25.png' : '/img/potions/luck-10.png'}
+          alt=""
+        />
         <span data-depth className={s.col}>
-          <small>{T.pity}</small>
-          <b className={s.num}>{pityIn <= 1 ? T.pityNow : T.pityIn.replace('{n}', fmt(pityIn))}</b>
+          <small>{T.pity.replace('{m}', String(pityM))}</small>
+          <b className={s.num}>{pityN <= 1 ? T.pityNow : T.pityIn.replace('{n}', fmt(pityN))}</b>
           <i className={s.bar}>
-            <i style={{ width: `${100 - pityIn}%` }} />
+            <i style={{ width: `${((50 - pityN) / 50) * 100}%` }} />
           </i>
         </span>
       </div>

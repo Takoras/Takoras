@@ -1,10 +1,12 @@
 import { predictEco, regenCost, upgradeCost } from './eco';
 
-test('coûts identiques au serveur (bornes connues de l’ancien site)', () => {
-  expect(upgradeCost(6)).toBe(100);
-  expect(upgradeCost(50)).toBe(20650);
-  expect(regenCost(170)).toBe(300);
-  expect(regenCost(60)).toBe(26300);
+test('coûts identiques au serveur', () => {
+  // mêmes valeurs que _upgrade_cost / _regen_cost (nov. 2026)
+  expect(upgradeCost(20)).toBe(50);
+  expect(upgradeCost(110)).toBe(1580);
+  expect(upgradeCost(500)).toBe(17150);
+  expect(regenCost(110)).toBe(100);
+  expect(regenCost(10)).toBe(7490);
 });
 
 test('le stock remonte tout seul entre deux lectures du serveur', () => {
