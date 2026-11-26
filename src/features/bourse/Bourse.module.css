@@ -869,3 +869,35 @@
   display: flex;
   justify-content: flex-end;
 }
+
+/* ============ Téléphone debout ============ */
+@media (max-width: 760px) {
+  /* en-tête : le titre, puis les trois chiffres côte à côte, puis les onglets sur toute la largeur */
+  .bar {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: var(--s-3);
+    padding: var(--s-3);
+  }
+  .strip {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: var(--s-2);
+  }
+  .strip dd {
+    font-size: var(--fs-lg);
+  }
+  .bar > :last-child {
+    width: 100%;
+  }
+  .bar > :last-child button {
+    flex: 1;
+  }
+  /* graphique plus haut, boutons d'ordre plus gros sous le pouce */
+  .chartSwap {
+    min-height: 260px;
+  }
+  .submit {
+    min-height: 54px;
+  }
+}

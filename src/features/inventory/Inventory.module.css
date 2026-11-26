@@ -1072,3 +1072,30 @@
   font-weight: 800;
   font-variant-numeric: tabular-nums;
 }
+
+/* ============ Téléphone debout ============ */
+@media (max-width: 760px) {
+  /* séries : deux par ligne, rien ne sort de l'écran */
+  .shelves {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    overflow: visible;
+    margin: 0;
+    padding: 0;
+    gap: var(--s-2);
+  }
+  .shelf {
+    min-width: 0;
+    padding: var(--s-2) var(--s-3);
+    gap: var(--s-2);
+  }
+  .shelf img {
+    width: 40px;
+    height: 40px;
+  }
+  /* objets : deux colonnes sur toute la largeur */
+  .items {
+    grid-template-columns: 1fr 1fr;
+    gap: var(--s-2);
+  }
+}

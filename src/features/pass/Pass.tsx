@@ -19,6 +19,7 @@ import { useSwingAll } from '@/ui/useSwing';
 import { useStaggerIn } from '@/ui/useStaggerIn';
 import { RewardSheet } from './RewardSheet';
 import s from './Pass.module.css';
+import { isNarrow } from '@/lib/useNarrow';
 import { Bump, Presence, Skeleton } from '@/ui/motion';
 import { Swap } from '@/ui/Swap';
 
@@ -237,10 +238,11 @@ export default function Pass() {
       el.removeEventListener('click', click, true);
     };
   }, [tab, d]);
-  // téléphone : la page du passe ne défile pas, on fait juste glisser la route
+  // téléphone à l'horizontale (mise en page PC) : la page du passe ne défile pas, on fait juste glisser la route.
+  // Téléphone debout : la route est verticale, c'est la page qui défile (surtout ne pas la bloquer).
   useEffect(() => {
     const h = document.documentElement;
-    if (!h.classList.contains('phone')) return;
+    if (!h.classList.contains('phone') || isNarrow()) return;
     h.classList.add('lockScroll');
     return () => h.classList.remove('lockScroll');
   }, []);

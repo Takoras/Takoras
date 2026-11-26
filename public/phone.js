@@ -80,7 +80,7 @@
       '</p>';
     var css = document.createElement('style');
     css.textContent =
-      '#gate{position:fixed;left:50%;bottom:3vmin;transform:translateX(-50%);z-index:10000;display:grid;grid-template-columns:auto 1fr auto auto;align-items:center;gap:2.2vmin;' +
+      '#gate{position:fixed;left:50%;bottom:calc(3vmin + (var(--tabh, 0px)));transform:translateX(-50%);z-index:10000;display:grid;grid-template-columns:auto 1fr auto auto;align-items:center;gap:2.2vmin;' +
       'width:min(92vw,120vmin);padding:2.2vmin 2.6vmin;border-radius:3vmin;background:#151a2b;border:.4vmin solid #28304d;box-shadow:0 2vmin 6vmin rgba(0,0,0,.55);' +
       'color:#f2f2f5;font-family:system-ui,-apple-system,sans-serif;animation:gateIn .5s cubic-bezier(.2,1.2,.4,1) both}' +
       '@keyframes gateIn{from{opacity:0;transform:translate(-50%,4vmin)}}' +

@@ -1055,3 +1055,32 @@ button.tile:focus-visible {
 :global(html.reduce-fx) .tile {
   animation: none;
 }
+
+/* ============ Téléphone debout : tout en une colonne, rien ne sort à droite ============ */
+@media (max-width: 760px) {
+  .head {
+    flex-wrap: wrap;
+    gap: var(--s-2);
+  }
+  .tabs {
+    margin-left: 0;
+  }
+  .hero {
+    grid-template-columns: 1fr;
+    gap: var(--s-3);
+    padding: var(--s-4);
+  }
+  .nexts {
+    grid-column: auto;
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: var(--s-2);
+  }
+  .nx {
+    width: auto;
+    height: 128px;
+  }
+  .xpTxt span {
+    margin-left: 0;
+  }
+}

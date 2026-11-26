@@ -1200,3 +1200,101 @@
   height: auto;
   min-height: 440px;
 }
+
+/* ============ Téléphone debout (après les règles « lisibilité » ci-dessus, qui sont pensées pour le PC) ============ */
+@media (max-width: 760px) {
+  .head {
+    flex-wrap: wrap;
+    gap: var(--s-2);
+  }
+  /* vedette : moins haute, l'objet reste grand (la case mystère garde sa place) */
+  .hero,
+  .offerHero {
+    min-height: 300px;
+    height: auto;
+    padding: var(--s-5) var(--s-4);
+  }
+  .heroArt img {
+    width: min(44vw, 180px);
+    height: min(44vw, 180px);
+  }
+  .heroInfo h2 {
+    font-size: 30px;
+  }
+  /* rayons : trois côte à côte, l'image au-dessus du nom (rien n'est coupé) */
+  .shelves {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: var(--s-2);
+  }
+  .shelf {
+    flex-direction: column;
+    justify-content: center;
+    gap: 4px;
+    padding: var(--s-3) var(--s-1);
+    text-align: center;
+    rotate: none;
+  }
+  .shelf b {
+    font-size: var(--fs-sm);
+    line-height: 1.15;
+  }
+  .shelf img {
+    width: 40px;
+    height: 40px;
+  }
+  /* cases : deux par ligne, elles se resserrent (le nom et le prix passent à la ligne au lieu de dépasser) */
+  .grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: var(--s-2);
+  }
+  .grid > *,
+  .box {
+    min-width: 0;
+  }
+  .box {
+    padding: var(--s-4) var(--s-2) var(--s-3);
+  }
+  .box h3 {
+    font-size: var(--fs-md);
+    overflow-wrap: anywhere;
+  }
+  .box .buy {
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 2px 6px;
+  }
+  .box .price {
+    font-size: var(--fs-lg);
+  }
+  .box .btn,
+  .box button {
+    max-width: 100%;
+  }
+  .art {
+    height: 100px;
+  }
+  .art img {
+    width: 88px;
+    height: 88px;
+  }
+  .offerCards {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+  .offers .setCard {
+    width: auto;
+  }
+}
+
+/* téléphone : les étiquettes de la vedette (À la une, réduction) restent sur une ligne */
+@media (max-width: 760px) {
+  .heroTop {
+    flex-wrap: wrap;
+    justify-content: center;
+  }
+  .heroTop .feat,
+  .heroTop .badgeIn,
+  .heroTop .off {
+    white-space: nowrap;
+    font-size: var(--fs-sm);
+  }
+}

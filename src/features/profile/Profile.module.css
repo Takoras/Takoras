@@ -1248,3 +1248,30 @@ ul.collGrid {
 :global(html.reduce-fx) .showcase > li {
   animation: none;
 }
+
+/* téléphone debout : la carte du joueur centrée (photo, pseudo, boutons, rangs et chiffres en dessous) */
+@media (max-width: 760px) {
+  .head {
+    justify-items: center;
+    text-align: center;
+    gap: var(--s-3);
+  }
+  .id {
+    justify-items: center;
+    padding-top: 0;
+  }
+  .headActions {
+    justify-content: center;
+  }
+  .rankCol {
+    justify-items: center;
+    max-width: 100%;
+  }
+  .mkRanks,
+  .strip {
+    justify-content: center;
+  }
+  .duo {
+    grid-template-columns: 1fr;
+  }
+}
