@@ -150,12 +150,21 @@ export function Layout() {
               viewTransition={!reducedFx()}
               data-inv-target={n.to === '/inventory' ? '' : undefined}
               end={n.to === '/'}
-              className={({ isActive }) => `${s.railItem} ${isActive ? s.on : ''}`}
+              className={({ isActive }) => `${s.railItem} ${n.tab ? s.tab : ''} ${isActive ? s.on : ''}`}
             >
               <span className={s.railIco}>
                 <Icon name={n.icon} size={24} />
               </span>
-              <span className={s.railTxt}>{t(n.key)}</span>
+              <span className={s.railTxt}>
+                {n.short ? (
+                  <>
+                    <span className={s.longTxt}>{t(n.key)}</span>
+                    <span className={s.shortTxt}>{t(n.short)}</span>
+                  </>
+                ) : (
+                  t(n.key)
+                )}
+              </span>
               {n.to === '/friends' ? <Badge n={frN} /> : null}
               {n.to === '/achievements' ? <Badge n={achN} /> : null}
             </NavLink>
@@ -178,6 +187,14 @@ export function Layout() {
             <Icon name="more" />
           </button>
         </div>
+        {/* téléphone debout : 5e onglet « Plus » (Market, Succès, Amis…), avec la somme de leurs pastilles */}
+        <button type="button" className={`${s.railItem} ${s.tab} ${s.tabMore}`} onClick={() => openUI('more')}>
+          <span className={s.railIco}>
+            <Icon name="more" size={24} />
+          </span>
+          <span className={s.railTxt}>{t('ui.more')}</span>
+          <Badge n={frN + achN + annN} />
+        </button>
       </nav>
 
       {/* en haut à droite : bêta, pièces, profil (pas de grande barre) */}
@@ -252,13 +269,6 @@ export function Layout() {
         ) : null}
       </main>
 
-      {/* téléphone tenu debout : le jeu se joue à l'horizontale */}
-      <div className={s.rotate} role="alert">
-        <span className={s.rotatePhone} aria-hidden />
-        <b>{t('ui.rotate_title')}</b>
-        <small>{t('ui.rotate_txt')}</small>
-      </div>
-
       <SocialLayer />
       <BetaLayer />
       {/* admins : Ctrl+Q ouvre le menu debug de la page */}
@@ -266,6 +276,44 @@ export function Layout() {
 
       <Modal open={more} onClose={() => openUI('more', false)} title={t('ui.more')}>
         <div className={s.sheet}>
+          {/* téléphone debout : les pages qui ne tiennent pas dans la barre du bas */}
+          {NAV.filter((n) => !n.tab).map((n) => (
+            <NavLink key={n.to} to={n.to} className={s.sheetPhone}>
+              <Icon name={n.icon} />
+              {t(n.key)}
+              {n.to === '/friends' ? <Badge n={frN} /> : null}
+              {n.to === '/achievements' ? <Badge n={achN} /> : null}
+            </NavLink>
+          ))}
+          <button
+            type="button"
+            className={s.sheetPhone}
+            onClick={() => {
+              openUI('more', false);
+              openAnnHistory();
+            }}
+          >
+            <Icon name="bell" />
+            {t('ui.ann_hist')}
+            <Badge n={annN} />
+          </button>
+          <button
+            type="button"
+            className={s.sheetPhone}
+            onClick={() => {
+              openUI('more', false);
+              openFeedback();
+            }}
+          >
+            <Icon name="bulb" />
+            {t('ui.fb_btn')}
+          </button>
+          {me.data?.admin || me.data?.mod ? (
+            <NavLink to="/admin" className={s.sheetPhone}>
+              <Icon name="shield" />
+              Admin
+            </NavLink>
+          ) : null}
           <button
             type="button"
             onClick={() => {

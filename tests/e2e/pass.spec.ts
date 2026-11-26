@@ -7,7 +7,10 @@ test('passe de combat : palier, récupérer une récompense gratuite, premium pa
   await expect(page.getByRole('heading', { name: 'Passe de combat' })).toBeVisible();
   await expect(page.getByText('Encore 500 XP pour le palier 4')).toBeVisible();
   // premium : on touche le panneau, la fenêtre montre les exclusivités ; pas de prix affiché, pas encore achetable
-  await page.getByRole('button', { name: /premium/i }).first().click();
+  await page
+    .getByRole('button', { name: /premium/i })
+    .first()
+    .click();
   const pd = page.getByRole('dialog', { name: 'Passe premium' });
   await expect(pd.getByText('Photo « Œil »')).toBeVisible();
   await expect(pd.getByRole('button', { name: /Débloquer/ })).toBeDisabled();
@@ -15,7 +18,10 @@ test('passe de combat : palier, récupérer une récompense gratuite, premium pa
   await page.keyboard.press('Escape');
   await expect(pd).toBeHidden();
   // un clic sur la case ouvre sa fiche ; « Récupérer » dedans la prend
-  await page.getByRole('button', { name: /^Récupérer ·/ }).first().click({ force: true });
+  await page
+    .getByRole('button', { name: /^Récupérer ·/ })
+    .first()
+    .click({ force: true });
   await page.getByRole('dialog').getByRole('button', { name: 'Récupérer' }).click();
   // plus de notification : la case éclate et la récompense file vers le solde ou l'inventaire
   await expect.poll(() => calls).toContain('bp_claim');

@@ -6,9 +6,13 @@ test('amis : pastille, accepter une demande, plus de chat', async ({ page, isMob
   await page.goto('/friends');
   await expect(page.getByRole('heading', { level: 1 })).toBeVisible();
   // 1 demande (les messages ne comptent plus : le chat est retiré)
-  // Amis est dans la barre latérale (PC et téléphone) : la pastille est sur son icône
-  void isMobile;
+  // PC : Amis est dans la barre latérale. Téléphone debout : dans l'onglet « Plus » (qui montre la pastille aussi)
+  if (isMobile) {
+    await expect(page.getByRole('button', { name: /^Plus/ })).toContainText(/\d/); // somme des pastilles (amis + succès…)
+    await page.getByRole('button', { name: /^Plus/ }).dispatchEvent('click');
+  }
   await expect(page.getByRole('link', { name: /Amis/ }).first()).toContainText('1');
+  if (isMobile) await page.keyboard.press('Escape');
   await page.getByRole('button', { name: /Accepter/ }).click();
   // plus de notification : la demande part de la liste
   await expect(page.getByRole('heading', { name: /Demandes reçues/ })).toHaveCount(0);

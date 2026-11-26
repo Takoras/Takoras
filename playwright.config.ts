@@ -14,11 +14,11 @@ export default defineConfig({
         { command: 'npx vite --port 5174 --strictPort', port: 5174, reuseExistingServer: true },
       ],
   projects: [
-    // téléphone tenu à l'horizontale (le jeu se joue en paysage)
+    // téléphone tenu debout (le jeu se joue à une main)
     {
       name: 'mobile',
       testIgnore: /(lab|match)\.spec/,
-      use: { ...devices['Pixel 7 landscape'], viewport: { width: 812, height: 375 } },
+      use: { ...devices['Pixel 7'] },
     },
     {
       name: 'desktop',

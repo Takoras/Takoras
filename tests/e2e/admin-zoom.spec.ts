@@ -13,7 +13,8 @@ test('zoom de la courbe', async ({ page, isMobile }) => {
   await page.mouse.move(b.x + b.width * 0.7, b.y + b.height * 0.5, { steps: 8 });
   await page.mouse.up();
   await expect(page.getByRole('button', { name: 'Tout voir' })).toBeVisible();
-  if (process.env.SHOTS) await page.screenshot({ path: 'test-results/shots/zoom.png', clip: { x: 440, y: 360, width: 600, height: 320 } });
+  if (process.env.SHOTS)
+    await page.screenshot({ path: 'test-results/shots/zoom.png', clip: { x: 440, y: 360, width: 600, height: 320 } });
   await page.getByRole('button', { name: 'Tout voir' }).click();
   await expect(page.getByRole('button', { name: 'Tout voir' })).toHaveCount(0);
 });

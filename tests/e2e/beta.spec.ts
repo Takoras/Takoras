@@ -23,7 +23,7 @@ test('patch notes : popup de la nouveauté, puis toutes les notes via le menu «
   void isMobile;
   // plus de pied de page : les nouveautés sont dans le menu « … » de la barre latérale
   // clic direct : avec le zoom des petits écrans, Playwright calcule mal le point de clic quand la machine est chargée
-  await page.getByRole('button', { name: 'Plus', exact: true }).dispatchEvent('click');
+  await page.getByRole('button', { name: /^Plus/ }).first().dispatchEvent('click');
   await page
     .getByRole('dialog')
     .getByRole('button', { name: /Patch notes|Nouveautés/ })
@@ -31,9 +31,10 @@ test('patch notes : popup de la nouveauté, puis toutes les notes via le menu «
   await expect(page.getByRole('dialog').getByText('Version 0.12')).toBeVisible();
 });
 
-test('donner un avis', async ({ page }) => {
+test('donner un avis', async ({ page, isMobile }) => {
   const { calls } = await fakeSupabase(page);
   await page.goto('/');
+  if (isMobile) await page.getByRole('button', { name: /^Plus/ }).dispatchEvent('click'); // téléphone debout : dans « Plus »
   // bouton en bas à gauche (bulle 💡 sur téléphone)
   await page.getByRole('button', { name: /Donner un avis/ }).click();
   const d = page.getByRole('dialog');

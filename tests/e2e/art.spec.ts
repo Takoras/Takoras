@@ -23,10 +23,15 @@ test('doodle partout et variantes visibles (vitrine, bestiaire)', async ({ page 
   // les filtres SVG existent dans la page
   await expect(page.locator('filter#dd0')).toHaveCount(1);
   await page.goto('/inventory');
-  const mobu = page.getByRole('button', { name: /×5 Mobu/ }).locator('img').first();
+  const mobu = page
+    .getByRole('button', { name: /×5 Mobu/ })
+    .locator('img')
+    .first();
   // doodle de l'inventaire : filtre en direct, puis images précalculées (dd-on) dès qu'elles sont prêtes
   await expect
-    .poll(() => mobu.evaluate((el) => el.classList.contains('dd-on') || /url\(.*#dd\d/.test(getComputedStyle(el).filter)))
+    .poll(() =>
+      mobu.evaluate((el) => el.classList.contains('dd-on') || /url\(.*#dd\d/.test(getComputedStyle(el).filter)),
+    )
     .toBe(true);
 });
 

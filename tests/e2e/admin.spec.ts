@@ -122,13 +122,16 @@ test('admin : pas de problème d’accessibilité grave', async ({ page }) => {
   ).toEqual([]);
 });
 
-test('admin : aperçu du site comme un joueur, puis retour', async ({ page }) => {
+test('admin : aperçu du site comme un joueur, puis retour', async ({ page, isMobile }) => {
   await fakeSupabase(page, {}, [], { admin: true });
   await page.goto('/admin');
   await page.getByRole('button', { name: /comme un joueur/ }).click();
-  // plus rien d'admin : le bouclier disparaît, la page admin n'existe plus
+  // plus rien d'admin : le bouclier disparaît, la page admin n'existe plus (téléphone : il est dans « Plus »)
+  if (isMobile) await page.getByRole('button', { name: /^Plus/ }).dispatchEvent('click');
   await expect(page.getByRole('link', { name: 'Admin' })).toHaveCount(0);
+  if (isMobile) await page.keyboard.press('Escape');
   await expect(page.getByText(/n’existe pas/)).toBeVisible();
   await page.getByRole('button', { name: /revenir admin/ }).click();
+  if (isMobile) await page.getByRole('button', { name: /^Plus/ }).dispatchEvent('click');
   await expect(page.getByRole('link', { name: 'Admin' })).toHaveCount(1);
 });

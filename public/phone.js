@@ -1,10 +1,7 @@
 // Taille du site selon l'écran.
 // - PC : le site est conçu pour ~1440 px de large ; sur un grand écran il grossit (1920 px → ×1,33),
 //   jamais plus petit que la taille normale. Échelle posée sur <html> en --z, appliquée à #root (global.css).
-// - Téléphone à l'horizontale : même mise en page que sur PC, réduite. La largeur de rendu est choisie pour que
-//   la hauteur visible fasse ~490 px (largeur = 490 × largeur/hauteur de l'écran), recalculée quand la taille change.
-//   (640 px rendait tout trop petit : textes illisibles en jouant.)
-//   La classe « phone » sert au message « tourne ton téléphone » et au plein écran au premier toucher.
+// - Téléphone : tenu debout, à sa vraie largeur, avec sa propre mise en page (une main, gros boutons).
 (function () {
   // www.takoras.com → takoras.com (une seule adresse : la connexion Discord ne revient que sur celle-là)
   if (location.hostname === 'www.takoras.com') {
@@ -29,51 +26,31 @@
     return;
   }
 
+  // Téléphone debout : vraie largeur de l'écran (mise en page dédiée < 760 px, à une main).
+  // Téléphone à l'horizontale : la mise en page PC, réduite (largeur de rendu ≈ 490 px de haut visibles).
+  // La classe « phone » sert aux réglages téléphone (fond allégé, etc.).
   d.classList.add('phone');
-  var H = 490;
   var m = document.querySelector('meta[name="viewport"]');
-  var W = 0;
+  var cur = '';
   function fit() {
     if (!m || !innerHeight) return;
     var land = innerWidth > innerHeight;
-    var w = land ? Math.round((H * innerWidth) / innerHeight) : 1280;
-    w = Math.max(940, Math.min(2200, w));
-    if (Math.abs(w - W) < 24) return; // pas de petits changements en boucle
-    W = w;
-    // zoom aux doigts autorisé (RGAA 10.4) ; le double-tap ne zoome pas (touch-action: manipulation dans global.css)
-    m.setAttribute('content', 'width=' + W + ', viewport-fit=cover');
+    var c = 'width=device-width, initial-scale=1, viewport-fit=cover';
+    if (land) c = 'width=' + Math.max(940, Math.min(2200, Math.round((490 * innerWidth) / innerHeight))) + ', viewport-fit=cover';
+    if (c === cur) return;
+    cur = c;
+    m.setAttribute('content', c);
   }
   fit();
   addEventListener('resize', fit);
   addEventListener('orientationchange', function () {
     setTimeout(fit, 250);
   });
-  document.addEventListener('fullscreenchange', function () {
-    setTimeout(function () {
-      W = 0;
-      fit();
-      // certains navigateurs ignorent la largeur de rendu en plein écran (tout devient énorme) : on réessaie,
-      // et seulement si ça reste énorme, on en ressort
-      setTimeout(function () {
-        if (!document.fullscreenElement) return;
-        W = 0;
-        fit();
-        setTimeout(function () {
-          if (document.fullscreenElement && innerWidth > innerHeight && innerWidth < 1000) {
-            noFs = true;
-            document.exitFullscreen().catch(function () {});
-          }
-        }, 900);
-      }, 400);
-    }, 150);
-  });
 
-  // au premier toucher (le navigateur exige un geste) : plein écran, et l'écran reste en paysage
-  var noFs = false;
   var standalone =
     (window.matchMedia && matchMedia('(display-mode: fullscreen), (display-mode: standalone)').matches) ||
     navigator.standalone === true;
-  // Sur téléphone, une petite carte propose d'installer Takoras (raccourci sur l'écran d'accueil : plein écran, en paysage).
+  // Sur téléphone, une petite carte propose d'installer Takoras (raccourci sur l'écran d'accueil, en plein écran).
   // Android : le bouton « Installer » ouvre directement l'installation. iPhone : Apple ne le permet pas à un site,
   // le bouton montre alors les 2 étapes (Partager → Sur l'écran d'accueil).
   var installEvt = null;
@@ -133,15 +110,4 @@
   }
   if (document.body) gate();
   else document.addEventListener('DOMContentLoaded', gate);
-  function go() {
-    if (standalone || noFs || document.fullscreenElement) return;
-    if (innerWidth <= innerHeight) return;
-    if (!d.requestFullscreen) return;
-    Promise.resolve(d.requestFullscreen({ navigationUI: 'hide' }))
-      .then(function () {
-        if (screen.orientation && screen.orientation.lock) return screen.orientation.lock('landscape');
-      })
-      .catch(function () {});
-  }
-  document.addEventListener('pointerup', go, { passive: true });
 })();
