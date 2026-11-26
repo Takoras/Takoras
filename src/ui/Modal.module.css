@@ -128,3 +128,35 @@
 .noRise:focus-visible {
   outline: none;
 }
+
+/* Téléphone debout : chaque fenêtre prend tout l'écran (pas de petite carte au milieu), gros bouton fermer */
+@media (max-width: 760px) {
+  .dialog,
+  .wide,
+  .xl,
+  .noRise.wide {
+    zoom: 1;
+    width: 100%;
+    max-width: 100%;
+    height: 100dvh;
+    max-height: 100dvh;
+    margin: 0;
+  }
+  .card {
+    height: 100%;
+    border: 0;
+    border-radius: 0;
+    padding: var(--s-5) var(--s-4) calc(var(--s-6) + env(safe-area-inset-bottom, 0px));
+  }
+  .bare {
+    height: 100%;
+  }
+  .title {
+    font-size: var(--fs-2xl, 26px);
+    padding-right: 56px;
+  }
+  .close {
+    width: 48px;
+    height: 48px;
+  }
+}

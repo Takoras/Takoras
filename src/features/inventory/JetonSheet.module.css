@@ -758,3 +758,39 @@
 .sheet .lore p {
   font-size: var(--fs-lg);
 }
+
+/* Téléphone debout : la fiche prend tout l'écran, le jeton en grand, le texte en dessous (on fait défiler) */
+@media (max-width: 760px) {
+  .sheet {
+    height: 100%;
+    max-height: 100dvh;
+    overflow-y: auto;
+    border-radius: 0;
+    padding: 64px var(--s-4) calc(var(--s-6) + env(safe-area-inset-bottom, 0px));
+  }
+  .x {
+    width: 48px;
+    height: 48px;
+  }
+  .coin {
+    width: min(64vw, 260px);
+    height: min(64vw, 260px);
+  }
+  .coin img {
+    width: min(56vw, 230px);
+    height: min(56vw, 230px);
+  }
+  .rays {
+    width: min(92vw, 380px);
+    height: min(92vw, 380px);
+    top: calc(45px + min(32vw, 130px));
+  }
+  .aura {
+    width: min(72vw, 290px);
+    height: min(72vw, 290px);
+    top: calc(45px + min(32vw, 130px));
+  }
+  .sparks {
+    height: min(70vw, 290px);
+  }
+}

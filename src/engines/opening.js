@@ -726,8 +726,9 @@ function updateActions() {
   $('op-next').hidden = last;
   $('op-next').innerHTML = t('next', { a: sess.idx + 2, b: sess.total });
   $('op-recap').hidden = !(last && multi);
-  // un par un : seulement « Retour » (on rouvre en cliquant au milieu, sur le jeton) ; plus de bouton « Ouvrir encore »
-  $('op-again').hidden = true;
+  // un par un : sur PC seulement « Retour » (on rouvre en cliquant au milieu, sur le jeton) ;
+  // téléphone debout : en plus un gros « Ouvrir encore · reste N » sous le pouce
+  $('op-again').hidden = !(last && !multi && matchMedia('(max-width: 760px)').matches);
   $('op-back').hidden = !(last && !multi);
   if (last && !multi) $('op-hint').textContent = '';
 }

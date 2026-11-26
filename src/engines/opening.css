@@ -450,3 +450,21 @@ html.q-calm .op-bg, html.q-calm .op-main { animation: none; }
 
 /* reflet holographique qui suivait la souris sur le jeton : retiré (effet « IA ») */
 .glare, .op-coin .glare { display: none !important; }
+
+/* Téléphone debout : le jeton en grand, tout centré, et deux gros boutons en bas (à portée de pouce) :
+   « Ouvrir encore · reste N » et « Retour » */
+@media (max-width: 760px) {
+  .opening { --coin: min(64vw, 280px); }
+  .opening.revealed .op-coin { width: min(46vw, 200px); }
+  .op-info { width: calc(100vw - 32px); max-width: 460px; }
+  .op-main { gap: 12px; }
+  /* tirages restants et chance : côte à côte (moins haut, rien ne sort de l'écran) */
+  .op-stats { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; text-align: left; }
+  .op-stats .op-row img { width: 40px; height: 40px; }
+  .op-id { justify-items: center; text-align: center; }
+  .op-id .op-serie { margin-inline: auto; }
+  .op-name { font-size: 40px; }
+  #opening .op-id .op-rarity { justify-self: center !important; margin-inline: auto; font-size: 26px; }
+  .op-actions { display: grid; grid-template-columns: 1fr; gap: 10px; margin-top: 14px; }
+  .op-actions .btn { min-height: 58px; width: 100%; font-size: 18px; }
+}

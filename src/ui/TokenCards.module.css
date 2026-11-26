@@ -127,6 +127,11 @@
 @media (max-width: 760px) {
   .id {
     padding: 14px 18px;
+    justify-items: center;
+    text-align: center;
+  }
+  .rarity {
+    justify-self: center;
   }
 }
 
