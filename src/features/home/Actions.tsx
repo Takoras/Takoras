@@ -98,21 +98,24 @@ export function Actions({ serie = 'Takoras' }: { serie?: string } = {}) {
             </button>
           </Float>
         ) : (
-          // Takoras : un seul bouton ; spammer le jeton fait défiler l'ouverture très vite
-          <Float className={s.rowOne} tilt={-1.5} fl={5.5}>
-            <button
-              type="button"
-              className={s.openOne}
-              disabled={!e.stock}
-              onClick={() => void openPulls(1, serie)}
-              data-nosound
-            >
-              <span className={s.openLbl}>{t('ui.open1')}</span>
-            </button>
-          </Float>
+          // Takoras : Stock max à gauche, Ouvrir 1 au milieu, Recharge à droite
+          <Upgrades
+            center={
+              <Float className={s.rowOne} tilt={-1.5} fl={5.5}>
+                <button
+                  type="button"
+                  className={s.openOne}
+                  disabled={!e.stock}
+                  onClick={() => void openPulls(1, serie)}
+                  data-nosound
+                >
+                  <span className={s.openLbl}>{t('ui.open1')}</span>
+                </button>
+              </Float>
+            }
+          />
         )}
       </DropSwap>
-      <DropSwap k={coin ? 'coin' : 'stock'}>{coin ? <span /> : <Upgrades />}</DropSwap>
       {coin && !canCoin ? <p className={s.soonNote}>{t('ui.serie_open_soon')}</p> : null}
       {/* stock max et recharge ne servent qu'à la série Takoras (tirages gratuits) : juste sous les boutons,
           et ils tombent et disparaissent quand on choisit une série payée en pièces */}
@@ -123,7 +126,7 @@ export function Actions({ serie = 'Takoras' }: { serie?: string } = {}) {
 }
 
 // Améliorations (stock max, recharge) : sous les boutons sur petit écran, dans la colonne de gauche sur grand écran
-export function Upgrades() {
+export function Upgrades({ center }: { center?: ReactNode }) {
   const t = useT();
   const lang = useSettings((x) => x.lang);
   const user = useAuth((x) => x.user);
@@ -152,31 +155,36 @@ export function Upgrades() {
     }
   };
   return (
-    <div className={s.ups} aria-label={t('ui.upgrades')} role="group">
-      <Up
-        icon="/img/items/recharge.png"
-        title={t('ui.up_stock')}
-        now={String(e.max)}
-        next={e.max < TOP_MAX ? String(nextMax(e.max)) : null}
-        pct={(e.max - BASE_MAX) / (TOP_MAX - BASE_MAX)}
-        top={t('ui.stock_top', { n: TOP_MAX })}
-        cost={upCost}
-        coins={e.coins}
-        fmt={n}
-        onUp={() => void upgrade('stock')}
-      />
-      <Up
-        icon="/img/items/hourglass.png"
-        title={t('ui.up_regen')}
-        now={mmss(e.regen * 1000)}
-        next={e.regen > REGEN_MIN ? mmss((e.regen - 10) * 1000) : null}
-        pct={(REGEN_BASE - e.regen) / (REGEN_BASE - REGEN_MIN)}
-        top={t('ui.regen_top')}
-        cost={rgCost}
-        coins={e.coins}
-        fmt={n}
-        onUp={() => void upgrade('regen')}
-      />
+    <div className={s.upsRow} aria-label={t('ui.upgrades')} role="group">
+      <div className={`${s.upSlot} ${s.upLeft}`}>
+        <Up
+          icon="/img/items/recharge.png"
+          title={t('ui.up_stock')}
+          now={String(e.max)}
+          next={e.max < TOP_MAX ? String(nextMax(e.max)) : null}
+          pct={(e.max - BASE_MAX) / (TOP_MAX - BASE_MAX)}
+          top={t('ui.stock_top', { n: TOP_MAX })}
+          cost={upCost}
+          coins={e.coins}
+          fmt={n}
+          onUp={() => void upgrade('stock')}
+        />
+      </div>
+      {center}
+      <div className={`${s.upSlot} ${s.upRight}`}>
+        <Up
+          icon="/img/items/hourglass.png"
+          title={t('ui.up_regen')}
+          now={mmss(e.regen * 1000)}
+          next={e.regen > REGEN_MIN ? mmss((e.regen - 10) * 1000) : null}
+          pct={(REGEN_BASE - e.regen) / (REGEN_BASE - REGEN_MIN)}
+          top={t('ui.regen_top')}
+          cost={rgCost}
+          coins={e.coins}
+          fmt={n}
+          onUp={() => void upgrade('regen')}
+        />
+      </div>
     </div>
   );
 }

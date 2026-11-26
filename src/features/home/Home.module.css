@@ -240,6 +240,28 @@
   width: min(100%, 560px);
   margin-top: var(--s-2);
 }
+/* Stock max | Ouvrir 1 | Recharge : le bouton garde sa place au milieu, une amélioration posée de chaque côté
+   (hors du flux : le reste de l'accueil ne bouge pas) */
+.upsRow {
+  position: relative;
+  display: grid;
+  justify-items: center;
+}
+.upSlot {
+  position: absolute;
+  top: 50%;
+  translate: 0 -50%;
+  width: 230px;
+}
+.upLeft {
+  right: calc(100% + var(--s-5));
+}
+.upLeft .up {
+  --tilt: 1.5deg;
+}
+.upRight {
+  left: calc(100% + var(--s-5));
+}
 /* une amélioration : tuile chaude, qui brille quand on peut l'acheter */
 .up {
   --tilt: -1deg;
@@ -1060,4 +1082,39 @@
 }
 .upBar i {
   transition: width 0.6s cubic-bezier(0.2, 0.7, 0.3, 1);
+}
+
+/* téléphone : la colonne du jeton est étroite (les quêtes sont juste à droite) : les deux améliorations passent
+   sous le bouton, côte à côte */
+:global(html.phone) .upsRow {
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+  gap: var(--s-3);
+  width: 100%;
+}
+:global(html.phone) .upsRow > :not(.upSlot) {
+  grid-column: 1 / -1;
+  grid-row: 1;
+}
+:global(html.phone) .upSlot {
+  position: static;
+  translate: none;
+  width: auto;
+  grid-row: 2;
+}
+:global(html.phone) .upSlot .up {
+  grid-template-columns: 1fr;
+}
+:global(html.phone) .upSlot .up > img {
+  display: none;
+}
+:global(html.phone) .upSlot .upBody b,
+:global(html.phone) .upSlot .upVal {
+  white-space: nowrap;
+}
+
+:global(html.phone) .upSlot .upVal {
+  font-size: var(--fs-sm);
+}
+:global(html.phone) .upSlot .up {
+  padding: var(--s-3);
 }
