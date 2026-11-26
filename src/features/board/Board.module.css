@@ -286,3 +286,24 @@
     opacity: 0;
   }
 }
+
+/* téléphone debout : le podium tient dans l'écran (marches à la largeur de leur colonne), moins de vide au-dessus */
+@media (max-width: 760px) {
+  .podium {
+    min-height: 0;
+    padding-top: var(--s-8);
+    gap: var(--s-2);
+  }
+  .p1 .step,
+  .p2 .step,
+  .p3 .step {
+    width: 100%;
+    max-width: 150px;
+  }
+  .p1 .step {
+    max-width: 170px;
+  }
+  .pod > span:first-child {
+    margin-bottom: 0;
+  }
+}

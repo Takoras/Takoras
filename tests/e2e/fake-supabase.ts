@@ -1321,7 +1321,20 @@ export async function fakeSupabase(
         },
       ]);
     if (rpc?.startsWith('admin_')) return json(rpc === 'admin_give' || rpc === 'admin_reset' ? 2 : null);
-    if (rpc === 'live_feed' || rpc === 'avatars_of') return json([]);
+    if (rpc === 'live_feed')
+      return json(
+        process.env.LIVE
+          ? ['Kaz', 'Mira', 'Lumi', 'Alpha', 'Bravo', 'Delta', 'Echo', 'Nova'].map((pseudo, i) => ({
+              pseudo,
+              jeton: ['Nyx', 'Vyolis', 'Takoras', 'Mobu', 'Pikko', 'Nyx', 'Vyolis', 'Mobu'][i],
+              serie: 'Takoras',
+              odds: [5000, 1000, 1000000, 2, 4, 5000, 1000, 2][i],
+              variant: i === 3 ? 'gold' : i === 7 ? 'ombre' : null,
+              created_at: '2026-11-26T10:00:00Z',
+            }))
+          : [],
+      );
+    if (rpc === 'avatars_of') return json([]);
     if (url.includes('/rest/v1/pulls')) return json([]);
     return json(null);
   });

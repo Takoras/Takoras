@@ -249,18 +249,21 @@
 }
 .upSlot {
   position: absolute;
+  z-index: 3; /* toujours au-dessus des panneaux voisins (quêtes, séries) */
   top: 50%;
-  translate: 0 -50%;
-  width: 230px;
+  /* comme les satellites : glisse un tout petit peu à l'opposé de la souris (--px/--py posés sur la scène) */
+  translate: calc(var(--px, 0) * -8px) calc(-50% + var(--py, 0) * -6px);
+  transition: translate 600ms var(--ease-out);
+  width: 214px;
 }
 .upLeft {
-  right: calc(100% + var(--s-5));
+  right: calc(100% + var(--s-4));
 }
 .upLeft .up {
   --tilt: 1.5deg;
 }
 .upRight {
-  left: calc(100% + var(--s-5));
+  left: calc(100% + var(--s-4));
 }
 /* une amélioration : tuile chaude, qui brille quand on peut l'acheter */
 .up {
@@ -1182,5 +1185,26 @@
   }
   .upSlot .upBody b {
     font-size: var(--fs-md);
+  }
+}
+
+/* téléphone debout : « En direct » sur toute la largeur, droit (pas en biais), le titre au-dessus de la bande */
+@media (max-width: 760px) {
+  .liveDiag {
+    rotate: none;
+    margin: var(--s-8) -14px var(--s-6);
+    padding: var(--s-3) 0;
+  }
+  .liveDiag .live {
+    flex-direction: column;
+    align-items: stretch;
+    gap: var(--s-2);
+    padding: 0 14px;
+  }
+  .liveDiag .liveHead {
+    font-size: var(--fs-sm);
+  }
+  .liveDiag .track li {
+    font-size: var(--fs-sm);
   }
 }

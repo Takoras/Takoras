@@ -34,6 +34,9 @@ html {
 
 html {
   -webkit-text-size-adjust: 100%;
+  /* rien ne dépasse jamais sur le côté : sur téléphone, un élément qui s'anime hors de l'écran élargissait la page
+     (le navigateur dézoomait, la barre du bas « bougeait ») */
+  overflow-x: clip;
   /* pas de grande barre de défilement sur la page : on défile à la molette / au doigt */
   scrollbar-width: none;
 }
