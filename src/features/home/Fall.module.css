@@ -249,3 +249,11 @@
     width: clamp(130px, 30dvh, 170px);
   }
 }
+
+/* téléphone debout : le jeton est le gros bouton de l'accueil */
+@media (max-width: 760px) {
+  .fall {
+    width: min(62vw, 34dvh, 290px);
+    margin: var(--s-2) 0 0;
+  }
+}

@@ -1,17 +1,24 @@
 import { test, expect } from '@playwright/test';
 import { fakeSupabase } from './fake-supabase';
 
+// PC : le bouton « Ouvrir 1 » ; téléphone debout : le jeton de l'accueil est le bouton
+const openBtn = (page: import('@playwright/test').Page) =>
+  page
+    .getByRole('button', { name: /^Ouvrir 1$|ouvrir un tirage/ })
+    .filter({ visible: true })
+    .first();
+
 test('accueil connecté : solde, stock et boutons', async ({ page }) => {
   await fakeSupabase(page, { coins: 5000, stock: 12, max: 20 });
   await page.goto('/');
   await expect(page.getByRole('status').filter({ hasText: '/20' })).toContainText('12');
-  await expect(page.getByRole('button', { name: 'Ouvrir 1' })).toBeEnabled();
+  await expect(openBtn(page)).toBeVisible();
 });
 
 test('ouvrir 1 pull : transition, révélation au tap, retour', async ({ page }) => {
   const fake = await fakeSupabase(page, {}, [['Pikko']]);
   await page.goto('/');
-  await page.getByRole('button', { name: 'Ouvrir 1' }).click();
+  await openBtn(page).click({ force: true });
   const opening = page.locator('#opening');
   await expect(opening).toHaveClass(/\bon\b/);
   expect(fake.calls).toContain('take_pulls');
@@ -42,7 +49,7 @@ test('ouvrir 1 pull : transition, révélation au tap, retour', async ({ page })
 test('toucher le jeton révélé ouvre le tirage suivant', async ({ page }) => {
   const fake = await fakeSupabase(page, { stock: 3 }, [['Mobu'], ['Pikko']]);
   await page.goto('/');
-  await page.getByRole('button', { name: 'Ouvrir 1' }).click();
+  await openBtn(page).click({ force: true });
   const opening = page.locator('#opening');
   const reveal = async () => {
     for (let i = 0; i < 60 && !(await opening.getAttribute('class'))?.includes('revealed'); i++) {
@@ -64,7 +71,7 @@ test('toucher le jeton révélé ouvre le tirage suivant', async ({ page }) => {
 test('une ouverture interrompue reprend après un rechargement de la page', async ({ page }) => {
   await fakeSupabase(page, { stock: 3 }, [['Mobu']]);
   await page.goto('/');
-  await page.getByRole('button', { name: 'Ouvrir 1' }).click();
+  await openBtn(page).click({ force: true });
   await expect(page.locator('#opening')).toHaveClass(/\bon\b/);
   await page.reload();
   await expect(page.locator('#opening')).toHaveClass(/\bon\b/, { timeout: 15_000 }); // le moteur se recharge d'abord

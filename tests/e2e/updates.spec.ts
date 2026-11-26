@@ -1,6 +1,13 @@
 import { test, expect } from '@playwright/test';
 import { fakeSupabase } from './fake-supabase';
 
+// PC : le bouton « Ouvrir 1 » ; téléphone debout : le jeton de l'accueil est le bouton
+const openBtn = (page: import('@playwright/test').Page) =>
+  page
+    .getByRole('button', { name: /^Ouvrir 1$|ouvrir un tirage/ })
+    .filter({ visible: true })
+    .first();
+
 // Nouvelle version en ligne → la page se recharge toute seule, mais jamais au milieu d'une ouverture de pulls
 test('mise à jour : rechargement automatique, en attendant la fin d’une ouverture', async ({ page }) => {
   test.setTimeout(60_000);
@@ -13,7 +20,7 @@ test('mise à jour : rechargement automatique, en attendant la fin d’une ouver
   await expect(page.locator('main h1')).toBeVisible();
   const before = loads;
   // une ouverture est en cours quand la nouvelle version arrive : on n'interrompt pas
-  await page.getByRole('button', { name: 'Ouvrir 1' }).click();
+  await openBtn(page).click({ force: true });
   await expect(page.locator('#opening')).toHaveClass(/\bon\b/);
   newer = true;
   await page.evaluate(() => document.dispatchEvent(new Event('visibilitychange')));

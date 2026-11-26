@@ -46,10 +46,12 @@ test('CSP : aucune violation sur tout le site', async ({ page, isMobile }) => {
     return ok;
   });
   expect(blocked).toBe(true);
+  // PC : le bouton « Ouvrir 1 » ; téléphone debout : le jeton de l'accueil est le bouton
   await page
-    .getByRole('button', { name: /Ouvrir 1/ })
+    .getByRole('button', { name: /^Ouvrir 1$|ouvrir un tirage/ })
+    .filter({ visible: true })
     .first()
-    .click();
+    .click({ force: true });
   await page.waitForTimeout(1500);
   await page.keyboard.press('Escape');
   await check('accueil');

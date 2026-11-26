@@ -758,9 +758,12 @@
   display: none !important;
 }
 @media (max-width: 760px) {
-  :root {
+  :global(html:root) {
     --tabh: 74px; /* hauteur de la barre du bas : les barres fixes des pages (Vendre, messages) se posent au-dessus */
     --tabbar: calc(var(--tabh) + env(safe-area-inset-bottom, 0px));
+    /* quand la page défile jusqu'à un élément (clavier, lien), il ne se cache pas sous la barre du bas */
+    scroll-padding-bottom: calc(var(--tabbar) + 12px);
+    scroll-padding-top: 70px;
   }
   .rail {
     inset: auto 0 0 0;

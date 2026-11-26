@@ -15,6 +15,7 @@ import { useAuth } from '@/lib/auth';
 import { useMe, useQuests } from '@/api/queries';
 import { useStaggerIn } from '@/ui/useStaggerIn';
 import { reducedFx } from '@/lib/settings';
+import { useNarrow } from '@/lib/useNarrow';
 import { Landing } from '../landing/Landing';
 import s from './Home.module.css';
 
@@ -39,6 +40,7 @@ export default function Home() {
     !!user && !me.isPending && !quests.isPending,
   );
   const ready = useAuth((x) => x.ready);
+  const narrow = useNarrow(); // téléphone debout : pas de pluie de jetons (lourde, et inutile sur un petit écran)
   useEffect(installOpeningHost, []);
   // la souris donne de la profondeur : les satellites glissent un peu à l'opposé (variables CSS, pas de rendu React)
   const parallax = (e: React.PointerEvent<HTMLDivElement>) => {
@@ -57,7 +59,7 @@ export default function Home() {
   return (
     <div ref={homeRef} className={s.homeRoot}>
       {/* la pluie de jetons est le décor le plus lourd : retirée en qualité basse et patate */}
-      {reducedFx() ? null : <FallRain serie={pull.name} />}
+      {reducedFx() || narrow ? null : <FallRain serie={pull.name} />}
       <div ref={stageRef} className={s.stage} onPointerMove={parallax} onPointerLeave={unParallax}>
         <div className={s.center} data-tour="pull">
           <FallCoin img={pull.img} label={pull.name} serie={pull.name} disabled={!!pull.soon && !admin} />
