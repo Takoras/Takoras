@@ -1,6 +1,6 @@
 // Taille du site selon l'écran.
-// - PC : le site est conçu pour ~1440 px de large ; sur un grand écran il grossit (1920 px → ×1,33),
-//   jamais plus petit que la taille normale. Échelle posée sur <html> en --z, appliquée à #root (global.css).
+// - PC : le site est conçu pour ~1360 px de large ; il est toujours au moins à ×1,08 et grossit sur un grand écran
+//   (1920 px → ×1,41). Échelle posée sur <html> en --z, appliquée à #root (global.css).
 // - Téléphone : tenu debout, à sa vraie largeur, avec sa propre mise en page (une main, gros boutons).
 (function () {
   // www.takoras.com → takoras.com (une seule adresse : la connexion Discord ne revient que sur celle-là)
@@ -15,7 +15,7 @@
   if (!phone) {
     var last = 0;
     var fitPc = function () {
-      var z = Math.round(Math.min(1.6, Math.max(1, innerWidth / 1440)) * 1000) / 1000;
+      var z = Math.round(Math.min(1.6, Math.max(1.08, innerWidth / 1360)) * 1000) / 1000; // un peu plus grand partout (1280 px → ×1,08, 1920 px → ×1,41)
       if (z === last) return;
       last = z;
       d.style.setProperty('--z', String(z));

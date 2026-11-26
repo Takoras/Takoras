@@ -34,7 +34,8 @@
   position: relative;
   display: grid;
   place-items: center;
-  width: clamp(200px, calc(42vw / var(--z, 1)), 300px);
+  /* le jeton, emblème de l'accueil : bien gros sur PC, mais il suit aussi la hauteur (Ouvrir reste toujours visible) */
+  width: clamp(190px, calc(min(42vw, 35dvh) / var(--z, 1)), 350px);
   aspect-ratio: 1;
   margin: var(--s-6) 0 var(--s-2);
 }
