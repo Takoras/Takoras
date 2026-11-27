@@ -1208,3 +1208,25 @@
     font-size: var(--fs-sm);
   }
 }
+
+/* PC étroit (moins de 1380 px) : pas la place sur les côtés sans toucher les quêtes, les deux améliorations passent
+   côte à côte juste sous « Ouvrir » (elles ne recouvrent plus rien) */
+@media (min-width: 761px) and (max-width: 1380px) {
+  .upsRow {
+    grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+    justify-items: stretch;
+    gap: var(--s-3);
+    width: min(460px, 92vw);
+  }
+  .upsRow > :not(.upSlot) {
+    grid-column: 1 / -1;
+    grid-row: 1;
+    justify-self: center;
+  }
+  .upSlot {
+    position: static;
+    translate: calc(var(--px, 0) * -8px) calc(var(--py, 0) * -6px);
+    width: auto;
+    grid-row: 2;
+  }
+}

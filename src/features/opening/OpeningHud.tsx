@@ -6,6 +6,8 @@ import { locale, useSettings } from '@/lib/settings';
 import { PixelBg } from '@/ui/PixelBg';
 import { reducedFx } from '@/lib/settings';
 import { Tween } from '@/ui/Tween';
+import { VTag } from '@/ui/VTag';
+import { LORE } from '@/data/lore';
 import { useSwingAll } from '@/ui/useSwing';
 import { mmss, predictEco } from '../eco/eco';
 import { openingSerie } from '../eco/openPulls';
@@ -42,12 +44,37 @@ const TXT = {
   },
 };
 
+// jeton révélé, repris de la fiche que le moteur d'ouverture vient de remplir (texte seulement, jamais de HTML)
+type Tok = { key: string; name: string; variant: string | null; odds: string; luck: string; logo: string };
+function readTok(el: HTMLElement): Tok {
+  const name = el.querySelector('#op-name'),
+    rar = el.querySelector('#op-rarity');
+  const vt = name?.querySelector('.vtag');
+  const variant = vt ? ([...vt.classList].find((c) => c.startsWith('v-'))?.slice(2) ?? null) : null;
+  const luck = rar?.querySelector('.op-luck')?.textContent?.trim() ?? '';
+  const nameTxt = [...(name?.childNodes ?? [])]
+    .filter((n) => n.nodeType === Node.TEXT_NODE)
+    .map((n) => n.textContent)
+    .join('')
+    .trim();
+  const odds = (rar?.textContent ?? '').replace(luck, '').trim();
+  return {
+    key: el.dataset.jeton ?? '',
+    name: nameTxt,
+    variant,
+    odds,
+    luck,
+    logo: el.querySelector('.op-serie')?.getAttribute('src') ?? '',
+  };
+}
+
 export function OpeningHud() {
   const [host, setHost] = useState<HTMLElement | null>(null);
   const [on, setOn] = useState(false);
   const [shown, setShown] = useState(false);
   const [rev, setRev] = useState(false);
   const [serie, setSerie] = useState('Takoras');
+  const [tok, setTok] = useState<Tok | null>(null);
   // l'écran d'ouverture est créé au premier tirage : on l'attend, puis on suit son ouverture et sa fermeture
   useEffect(() => {
     let mo: MutationObserver | null = null;
@@ -59,7 +86,10 @@ export function OpeningHud() {
         setOn(v);
         setShown(v && !el.classList.contains('revealed') && !el.classList.contains('recap'));
         // jeton révélé : la boîte de droite (tirages, chance) RESTE en place, seule celle du ×10 laisse la place à la fiche
-        setRev(v && el.classList.contains('revealed') && !el.classList.contains('recap'));
+        const r = v && el.classList.contains('revealed') && !el.classList.contains('recap');
+        setRev(r);
+        // jeton révélé : la boîte de gauche reprend son logo, son nom et sa chance (remplis juste avant par le moteur)
+        if (r) setTok(readTok(el));
       };
       sync();
       mo?.disconnect();
@@ -95,7 +125,7 @@ export function OpeningHud() {
           />
         </div>
       ) : null}
-      <Hud on={on} shown={shown} rev={rev} serie={serie} host={host} />
+      <Hud on={on} shown={shown} rev={rev} serie={serie} host={host} tok={tok} />
     </>,
     host,
   );
@@ -107,12 +137,14 @@ function Hud({
   rev,
   serie,
   host,
+  tok,
 }: {
   on: boolean;
   shown: boolean;
   rev: boolean;
   serie: string;
   host: HTMLElement;
+  tok: Tok | null;
 }) {
   const lang = useSettings((x) => x.lang);
   const T = TXT[lang === 'en' ? 'en' : 'fr'];
@@ -163,61 +195,94 @@ function Hud({
   const half = pityIn > 50,
     pityN = half ? pityIn - 50 : pityIn,
     pityM = half ? 10 : 25;
+  // description du jeton révélé (français ou anglais) ; sans description, la boîte garde ses chiffres
+  const lore = tok ? (LORE[tok.key]?.[lang === 'en' ? 1 : 0] ?? '') : '';
+  const desc = rev && !!lore;
   const luckTxt = '×' + String(Math.round(e.luck * 100) / 100).replace('.', lang === 'en' ? '.' : ',');
   return (
     <div ref={ref} className={`${s.hud} ${shown ? s.on : ''} ${rev ? s.rev : ''}`} aria-hidden={!shown && !rev}>
-      {/* à gauche : le prochain tirage ×10 de cette série */}
-      <div className={`${s.box} ${s.left} ${pityN <= 1 ? s.ready : ''}`} style={{ '--i': 0 } as React.CSSProperties}>
-        <img
-          data-depth
-          className={`px ${s.big}`}
-          src={pityM === 25 ? '/img/potions/luck-25.png' : '/img/potions/luck-10.png'}
-          alt=""
-        />
-        <span data-depth className={s.col}>
-          <small>{T.pity.replace('{m}', String(pityM))}</small>
-          <b className={s.num}>{pityN <= 1 ? T.pityNow : T.pityIn.replace('{n}', fmt(pityN))}</b>
-          <i className={s.bar}>
-            <i style={{ width: `${((50 - pityN) / 50) * 100}%` }} />
-          </i>
-        </span>
+      {/* à gauche : UNE seule boîte qui ne bouge jamais. Pendant l'ouverture : le prochain palier de chance ;
+          à la révélation, son contenu se change sur place en logo, nom et chance du jeton (fondu, même taille) */}
+      <div
+        className={`${s.box} ${s.left} ${!rev && pityN <= 1 ? s.ready : ''}`}
+        style={{ '--i': 0 } as React.CSSProperties}
+      >
+        <div className={s.layers}>
+          <div className={`${s.layer} ${rev ? s.layerOff : ''}`} aria-hidden={rev}>
+            <img
+              data-depth
+              className={`px ${s.big}`}
+              src={pityM === 25 ? '/img/potions/luck-25.png' : '/img/potions/luck-10.png'}
+              alt=""
+            />
+            <span data-depth className={s.col}>
+              <small>{T.pity.replace('{m}', String(pityM))}</small>
+              <b className={s.num}>{pityN <= 1 ? T.pityNow : T.pityIn.replace('{n}', fmt(pityN))}</b>
+              <i className={s.bar}>
+                <i style={{ width: `${((50 - pityN) / 50) * 100}%` }} />
+              </i>
+            </span>
+          </div>
+          <div className={`${s.layer} ${s.tok} ${rev ? '' : s.layerOff}`} aria-hidden={!rev}>
+            {tok?.logo ? <img className={`px ${s.tokLogo}`} src={tok.logo} alt="" /> : null}
+            <b className={s.tokName}>
+              {tok?.name} <VTag v={tok?.variant} />
+            </b>
+            <span className={s.tokRar}>
+              {tok?.odds}
+              {tok?.luck ? <small className={s.tokLuck}> {tok.luck}</small> : null}
+            </span>
+          </div>
+        </div>
       </div>
       {/* à droite, dans une seule boîte : ce qui permet d'ouvrir encore (tirages ou pièces), puis la chance */}
-      <div ref={right} className={`${s.box} ${s.right}`} style={{ '--i': 1 } as React.CSSProperties}>
-        {paid ? (
-          <span data-depth className={s.row}>
-            <img className="px" src="/img/coin.png" alt="" />
-            <span className={s.col}>
-              <small>{T.coins}</small>
-              <b className={s.num}>
-                <Tween value={e.coins} ms={900} pow={4} format={fmt} />
-              </b>
-              <em>
-                {T.buy} : {fmt(Math.floor(e.coins / COIN_PULL.one))}
-              </em>
+      <div
+        ref={right}
+        className={`${s.box} ${s.right} ${rev ? s.bump : ''}`}
+        style={{ '--i': 1 } as React.CSSProperties}
+      >
+        <div className={s.layers}>
+          <div className={`${s.layer} ${desc ? s.layerOff : ''}`} aria-hidden={!!desc}>
+            {paid ? (
+              <span data-depth className={s.row}>
+                <img className="px" src="/img/coin.png" alt="" />
+                <span className={s.col}>
+                  <small>{T.coins}</small>
+                  <b className={s.num}>
+                    <Tween value={e.coins} ms={900} pow={4} format={fmt} />
+                  </b>
+                  <em>
+                    {T.buy} : {fmt(Math.floor(e.coins / COIN_PULL.one))}
+                  </em>
+                </span>
+              </span>
+            ) : (
+              <span data-depth className={s.row}>
+                <img className="px" src="/img/tokens/takoras.png" alt="" />
+                <span className={s.col}>
+                  <small>{T.pulls}</small>
+                  <b className={s.num}>
+                    <Tween value={e.stock} format={fmt} />
+                  </b>
+                  <em>{e.full ? T.full : T.next.replace('{t}', mmss(e.nextIn))}</em>
+                </span>
+              </span>
+            )}
+            <hr className={s.sep} />
+            <span data-depth className={s.row}>
+              <img className="px" src="/img/potions/luck-10.png" alt="" />
+              <span className={s.col}>
+                <small>{T.luck}</small>
+                <b className={`${s.num} ${e.luck > 1 ? s.lucky : ''}`}>{luckTxt}</b>
+                {e.luck <= 1 ? <em>{T.none}</em> : null}
+              </span>
             </span>
-          </span>
-        ) : (
-          <span data-depth className={s.row}>
-            <img className="px" src="/img/tokens/takoras.png" alt="" />
-            <span className={s.col}>
-              <small>{T.pulls}</small>
-              <b className={s.num}>
-                <Tween value={e.stock} format={fmt} />
-              </b>
-              <em>{e.full ? T.full : T.next.replace('{t}', mmss(e.nextIn))}</em>
-            </span>
-          </span>
-        )}
-        <hr className={s.sep} />
-        <span data-depth className={s.row}>
-          <img className="px" src="/img/potions/luck-10.png" alt="" />
-          <span className={s.col}>
-            <small>{T.luck}</small>
-            <b className={`${s.num} ${e.luck > 1 ? s.lucky : ''}`}>{luckTxt}</b>
-            {e.luck <= 1 ? <em>{T.none}</em> : null}
-          </span>
-        </span>
+          </div>
+          {/* jeton révélé : sa description, sur place (la boîte ne se répète plus) */}
+          <div className={`${s.layer} ${s.desc} ${desc ? '' : s.layerOff}`} aria-hidden={!desc}>
+            <p>{lore}</p>
+          </div>
+        </div>
       </div>
     </div>
   );

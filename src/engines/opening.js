@@ -430,6 +430,7 @@ function effects(v) {
 
 // Fiche du jeton (stats provisoires : plus il est rare, plus elles sont hautes)
 function fillInfo(j, variant = '') {
+  opening.dataset.jeton = j.name; // la boîte de droite (OpeningHud) y lit le jeton pour afficher sa description
   $('op-name').innerHTML = jnH(j.name) + vTag(variant);
   const lk = +(sess.lucks || [])[sess.idx] || 0; // chance active quand ce jeton a été tiré
   $('op-rarity').innerHTML = '1/' + vOdds(j.odds, variant).toLocaleString(LOCALE()) + (lk > 1 ? ` <span class="op-luck">×${fmtLuck(lk)}</span>` : '');

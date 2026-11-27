@@ -48,8 +48,9 @@
   scale: 1;
   pointer-events: auto;
 }
-/* jeton révélé (ordinateur) : la boîte de droite ne bouge pas, la fiche du jeton arrive à gauche */
+/* jeton révélé (ordinateur) : les DEUX boîtes restent en place ; celle de gauche change de contenu sur place */
 @media (min-width: 761px) {
+  .rev .left,
   .rev .right {
     opacity: 1;
     translate: 0 -50%;
@@ -206,4 +207,98 @@
   width: 100%;
   height: 100%;
   display: block;
+}
+
+/* ---------- boîte de gauche : deux contenus superposés (palier de chance / jeton révélé), fondu sur place ---------- */
+.layers {
+  display: grid;
+}
+.layer {
+  grid-area: 1 / 1;
+  display: grid;
+  gap: 14px;
+  align-content: center;
+  transition:
+    opacity 0.35s var(--ease-out),
+    translate 0.45s cubic-bezier(0.2, 1.15, 0.3, 1);
+}
+.layerOff {
+  opacity: 0;
+  translate: 0 10px;
+  pointer-events: none;
+}
+.tok {
+  gap: 8px;
+}
+.tokLogo {
+  height: 48px;
+  width: auto;
+  justify-self: start;
+}
+.tokName {
+  font-family: var(--font-display);
+  font-size: clamp(44px, 4.4vw, 70px);
+  line-height: 1.05;
+  overflow-wrap: anywhere;
+}
+.tokRar {
+  justify-self: start;
+  padding: 2px 14px;
+  border-radius: 6px;
+  background: rgba(var(--tier, 255, 255, 255), 0.14);
+  color: rgb(var(--tier, 255, 255, 255));
+  font-family: var(--font-display);
+  font-size: clamp(26px, 2.3vw, 36px);
+  font-weight: 700;
+}
+.tokLuck {
+  color: #4ade80;
+  font-size: 0.7em;
+}
+/* boîte de droite : un petit coup quand le jeton est révélé (elle vit avec le tirage) */
+.bump {
+  animation: hudBump 0.55s cubic-bezier(0.2, 1.4, 0.4, 1);
+}
+@keyframes hudBump {
+  35% {
+    transform: scale(1.05);
+  }
+}
+
+/* ---------- PC : boîtes et textes plus gros ---------- */
+@media (min-width: 761px) {
+  .box {
+    width: min(420px, 29vw);
+    padding: 30px 32px;
+    gap: 18px;
+  }
+  .big {
+    width: 116px;
+    height: 116px;
+  }
+  .row img {
+    width: 76px;
+    height: 76px;
+  }
+  .num {
+    font-size: clamp(34px, 3.1vw, 52px);
+  }
+  .box small {
+    font-size: var(--fs-md);
+  }
+  .box em {
+    font-size: var(--fs-md);
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .bump {
+    animation: none;
+  }
+}
+/* description du jeton révélé dans la boîte de droite */
+.desc p {
+  margin: 0;
+  color: var(--text);
+  font-size: var(--fs-xl);
+  line-height: 1.45;
 }
