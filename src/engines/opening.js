@@ -308,7 +308,8 @@ function tint(power = .35, ms = 450) {
 const SAVE_KEY = 'takoras-session';
 let sess = null;
 function save() { try { sess ? localStorage.setItem(SAVE_KEY, JSON.stringify(sess)) : localStorage.removeItem(SAVE_KEY); } catch {} }
-function startSession(n, plan = null, vars = null, lucks = null, ids = null) { const tg = $('op-tag'); if (tg) tg.innerHTML = ''; sess = { pull: current, total: n, idx: 0, results: [], rvars: [], cur: null, plan, vars, lucks, ids }; save(); }
+// pity : pour chaque tirage, le palier de chance qu'il reçoit (10 ou 25), ou 0
+function startSession(n, plan = null, vars = null, lucks = null, ids = null, pity = null) { const tg = $('op-tag'); if (tg) tg.innerHTML = ''; sess = { pull: current, total: n, idx: 0, results: [], rvars: [], cur: null, plan, vars, lucks, ids, pity }; save(); }
 function endSession() { sess = null; save(); }
 const seriesOf = () => SERIES[PULLS[sess.pull].name] || SERIES.Takoras;
 const findJeton = name => seriesOf().find(j => j.name === name);
@@ -328,6 +329,7 @@ function startOpening() {
     save();
   }
   const c = sess.cur, p = PULLS[sess.pull];
+  opening.dataset.pity = String((sess.pity || [])[sess.idx] || ''); // ce tirage a le palier ×10 / ×25 : la boîte de droite le montre
   opening.style.setProperty('--serie', serieTheme(p?.name).main); // teinte du fond selon la série
   run = { result: findJeton(c.name), variant: c.variant || '', queue: c.queue, n0: c.n0 || c.queue.length || 1, shown: c.shown, done: false };
   // en haut : le logo de la série (et la position dans la série d'ouvertures)
@@ -978,7 +980,7 @@ addEventListener('keydown', e => {
   tap();
 });
 
-function buy(n, plan = null, vars = null, lucks = null, ids = null, pull = 0) {
+function buy(n, plan = null, vars = null, lucks = null, ids = null, pull = 0, pity = null) {
   current = pull; // série du tirage (0 = Takoras)
   // Tirage suivant depuis l'écran d'ouverture (un par un) : pas de nouvelle chute depuis l'accueil.
   // Le jeton qu'on vient d'avoir se retourne sur place, le « ? » revient, le compteur repart à 1/1 — sans coupure.
@@ -993,7 +995,7 @@ function buy(n, plan = null, vars = null, lucks = null, ids = null, pull = 0) {
       swapping = false;
       // le nouveau tirage repart propre (les infos réapparaîtront normalement à sa révélation)
       requestAnimationFrame(() => fades.forEach(a => a.cancel()));
-      endSession(); startSession(n, plan, vars, lucks, ids);
+      endSession(); startSession(n, plan, vars, lucks, ids, pity);
       skipSpawn = true;
       startOpening();
       sfx.spawn();
@@ -1002,7 +1004,7 @@ function buy(n, plan = null, vars = null, lucks = null, ids = null, pull = 0) {
     });
     return;
   }
-  closeOpening(); startSession(n, plan, vars, lucks, ids);
+  closeOpening(); startSession(n, plan, vars, lucks, ids, pity);
   runTransition();
 }
 $('op-next')?.addEventListener('click', next);

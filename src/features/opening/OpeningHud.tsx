@@ -29,6 +29,7 @@ const TXT = {
     coins: 'Pièces',
     buy: 'Tirages payables',
     none: 'Aucune potion',
+    pityHit: 'Palier ×{m} sur ce tirage',
   },
   en: {
     pulls: 'Pulls',
@@ -41,6 +42,7 @@ const TXT = {
     coins: 'Coins',
     buy: 'Affordable pulls',
     none: 'No potion',
+    pityHit: 'Milestone ×{m} on this pull',
   },
 };
 
@@ -75,6 +77,8 @@ export function OpeningHud() {
   const [rev, setRev] = useState(false);
   const [serie, setSerie] = useState('Takoras');
   const [tok, setTok] = useState<Tok | null>(null);
+  const [ending, setEnding] = useState(false); // pause juste avant la révélation : le contenu des boîtes s'efface
+  const [pityNow, setPityNow] = useState(0); // ce tirage a le palier ×10 / ×25 (posé par le moteur)
   // l'écran d'ouverture est créé au premier tirage : on l'attend, puis on suit son ouverture et sa fermeture
   useEffect(() => {
     let mo: MutationObserver | null = null;
@@ -86,6 +90,8 @@ export function OpeningHud() {
         setOn(v);
         setShown(v && !el.classList.contains('revealed') && !el.classList.contains('recap'));
         // jeton révélé : la boîte de droite (tirages, chance) RESTE en place, seule celle du ×10 laisse la place à la fiche
+        setPityNow(Number(el.dataset.pity) || 0);
+        setEnding(v && el.classList.contains('hold') && !el.classList.contains('revealed'));
         const r = v && el.classList.contains('revealed') && !el.classList.contains('recap');
         setRev(r);
         // jeton révélé : la boîte de gauche reprend son logo, son nom et sa chance (remplis juste avant par le moteur)
@@ -94,7 +100,7 @@ export function OpeningHud() {
       sync();
       mo?.disconnect();
       mo = new MutationObserver(sync);
-      mo.observe(el, { attributes: true, attributeFilter: ['class'] });
+      mo.observe(el, { attributes: true, attributeFilter: ['class', 'data-pity'] });
     };
     const found = document.getElementById('opening');
     if (found) watch(found);
@@ -125,7 +131,7 @@ export function OpeningHud() {
           />
         </div>
       ) : null}
-      <Hud on={on} shown={shown} rev={rev} serie={serie} host={host} tok={tok} />
+      <Hud on={on} shown={shown} rev={rev} ending={ending} serie={serie} host={host} tok={tok} pityNow={pityNow} />
     </>,
     host,
   );
@@ -135,16 +141,20 @@ function Hud({
   on,
   shown,
   rev,
+  ending,
   serie,
   host,
   tok,
+  pityNow,
 }: {
   on: boolean;
   shown: boolean;
   rev: boolean;
+  ending: boolean;
   serie: string;
   host: HTMLElement;
   tok: Tok | null;
+  pityNow: number;
 }) {
   const lang = useSettings((x) => x.lang);
   const T = TXT[lang === 'en' ? 'en' : 'fr'];
@@ -164,13 +174,15 @@ function Hud({
     const place = () => {
       const main = host.querySelector<HTMLElement>('.op-main');
       if (!main) return;
-      // la boîte : centrée sur la hauteur de l'écran d'ouverture ; .op-main : le bloc où vivent les boutons
+      // place de la boîte sans ses animations (offset*), corrigée de son agrandissement avec le site (zoom)
+      const z = parseFloat(getComputedStyle(el).zoom) || 1;
       const hr = host.getBoundingClientRect();
       const mr = main.getBoundingClientRect();
-      const boxRight = hr.width - (el.offsetLeft + el.offsetWidth);
-      host.style.setProperty('--act-top', `${hr.height / 2 + el.offsetHeight / 2 + 24 - (mr.top - hr.top)}px`);
+      const w = el.offsetWidth * z,
+        boxRight = hr.width - (el.offsetLeft * z + w);
+      host.style.setProperty('--act-top', `${hr.height / 2 + (el.offsetHeight * z) / 2 + 24 - (mr.top - hr.top)}px`);
       host.style.setProperty('--act-right', `${boxRight - (hr.right - mr.right)}px`);
-      host.style.setProperty('--act-w', `${el.offsetWidth}px`);
+      host.style.setProperty('--act-w', `${w}px`);
     };
     const raf = requestAnimationFrame(place);
     const ro = new ResizeObserver(place);
@@ -198,17 +210,18 @@ function Hud({
   // description du jeton révélé (français ou anglais) ; sans description, la boîte garde ses chiffres
   const lore = tok ? (LORE[tok.key]?.[lang === 'en' ? 1 : 0] ?? '') : '';
   const desc = rev && !!lore;
-  const luckTxt = '×' + String(Math.round(e.luck * 100) / 100).replace('.', lang === 'en' ? '.' : ',');
+  const luckOf = (v: number) => '×' + String(Math.round(v * 100) / 100).replace('.', lang === 'en' ? '.' : ',');
+  const luckTxt = luckOf(e.luck);
   return (
     <div ref={ref} className={`${s.hud} ${shown ? s.on : ''} ${rev ? s.rev : ''}`} aria-hidden={!shown && !rev}>
       {/* à gauche : UNE seule boîte qui ne bouge jamais. Pendant l'ouverture : le prochain palier de chance ;
           à la révélation, son contenu se change sur place en logo, nom et chance du jeton (fondu, même taille) */}
       <div
-        className={`${s.box} ${s.left} ${!rev && pityN <= 1 ? s.ready : ''}`}
+        className={`${s.box} ${s.left} ${rev ? s.bump : ''} ${!rev && (pityN <= 1 || pityNow) ? s.ready : ''}`}
         style={{ '--i': 0 } as React.CSSProperties}
       >
         <div className={s.layers}>
-          <div className={`${s.layer} ${rev ? s.layerOff : ''}`} aria-hidden={rev}>
+          <div className={`${s.layer} ${rev || ending ? s.layerOff : ''}`} aria-hidden={rev}>
             <img
               data-depth
               className={`px ${s.big}`}
@@ -242,7 +255,7 @@ function Hud({
         style={{ '--i': 1 } as React.CSSProperties}
       >
         <div className={s.layers}>
-          <div className={`${s.layer} ${desc ? s.layerOff : ''}`} aria-hidden={!!desc}>
+          <div className={`${s.layer} ${desc || ending ? s.layerOff : ''}`} aria-hidden={!!desc}>
             {paid ? (
               <span data-depth className={s.row}>
                 <img className="px" src="/img/coin.png" alt="" />
@@ -273,14 +286,22 @@ function Hud({
               <img className="px" src="/img/potions/luck-10.png" alt="" />
               <span className={s.col}>
                 <small>{T.luck}</small>
-                <b className={`${s.num} ${e.luck > 1 ? s.lucky : ''}`}>{luckTxt}</b>
-                {e.luck <= 1 ? <em>{T.none}</em> : null}
+                <b className={`${s.num} ${e.luck > 1 || pityNow ? s.lucky : ''} ${pityNow ? s.pityHit : ''}`}>
+                  {pityNow ? luckOf(e.luck * pityNow) : luckTxt}
+                </b>
+                {pityNow ? (
+                  <em className={s.pityTag}>{T.pityHit.replace('{m}', String(pityNow))}</em>
+                ) : e.luck <= 1 ? (
+                  <em>{T.none}</em>
+                ) : null}
               </span>
             </span>
           </div>
           {/* jeton révélé : sa description, sur place (la boîte ne se répète plus) */}
           <div className={`${s.layer} ${s.desc} ${desc ? '' : s.layerOff}`} aria-hidden={!desc}>
-            <p>{lore}</p>
+            <p>
+              <b className={s.dSerie}>{serie}</b> — <i>« {lore} »</i>
+            </p>
           </div>
         </div>
       </div>

@@ -472,10 +472,10 @@ html.q-calm .op-bg, html.q-calm .op-main { animation: none; }
 /* PC : le jeton plus gros au milieu, pendant le comptage comme une fois révélé ; la fiche du jeton est affichée
    par la boîte de gauche (OpeningHud), qui ne bouge pas : l'ancienne fiche du moteur est masquée */
 @media (min-width: 761px) {
-  .opening { --coin: clamp(240px, 23vw, 360px); }
-  .opening.revealed .op-coin { width: clamp(300px, 28vw, 430px); }
+  .opening { --coin: clamp(230px, 22vw, calc(350px * var(--zg, 1))); }
+  .opening.revealed .op-coin { width: clamp(280px, 25vw, calc(410px * var(--zg, 1))); }
   .opening .op-id { display: none !important; }
   /* boutons sous la boîte de droite : de sa largeur, bien gros */
   .op-actions { display: grid; grid-template-columns: 1fr; gap: 10px; }
-  .op-actions .btn { width: 100%; min-height: 58px; font-size: 18px; }
+  .op-actions .btn { width: 100%; min-height: calc(68px * var(--zg, 1)); font-size: calc(20px * var(--zg, 1)); }
 }

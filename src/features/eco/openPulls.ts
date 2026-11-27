@@ -21,6 +21,18 @@ const eco = () => {
 };
 
 let busy = false;
+// Paliers de chance : ×10 au 50e tirage, ×25 au 100e (compteur par série, comme le serveur). Pour chaque tirage
+// marqué par le serveur (pities, 1 = premier), on retrouve lequel des deux il a reçu.
+function pityMults(before: number, n: number, pities: number[] | undefined) {
+  const out = Array.from({ length: n }, () => 0);
+  let pc = before;
+  for (let i = 1; i <= n; i++) {
+    pc++;
+    if (pities?.includes(i)) out[i - 1] = pc >= 100 ? 25 : 10;
+    if (pc >= 100) pc = 0;
+  }
+  return out;
+}
 // avant chaque ouverture : les jetons (et mutations) que le joueur a déjà, pour sauter l'animation des doublons
 function snapKnown() {
   const inv = qc.getQueryData<InvData>(['inv', useAuth.getState().user?.id]);
@@ -45,6 +57,7 @@ export async function openPulls(n: number | 'all', serie = 'Takoras') {
   if (!count) return sfx.deny();
   busy = true;
   snapKnown();
+  const pityBefore = 100 - Number(me.pity_in ?? 100); // tirages déjà comptés vers le prochain palier
   try {
     const { debug, buy } = await engine();
     const test = me.admin || me.tester; // tirages de test : seulement admin et testeurs (le serveur vérifie aussi)
@@ -59,9 +72,18 @@ export async function openPulls(n: number | 'all', serie = 'Takoras') {
       ids?: (number | null)[];
       capped?: number;
       capped_coins?: number;
+      pities?: number[];
     };
     qc.setQueryData(meKey(), (old: object | undefined) => ({ ...old, ...(data.state as object) })); // garde admin, testeur… (absents de la réponse)
-    buy(data.results.length, data.results, data.variants ?? null, data.lucks ?? null, data.ids ?? null);
+    buy(
+      data.results.length,
+      data.results,
+      data.variants ?? null,
+      data.lucks ?? null,
+      data.ids ?? null,
+      0,
+      pityMults(pityBefore, data.results.length, data.pities),
+    );
     // limite de 500 exemplaires par jeton : le surplus est vendu tout de suite
     if (data.capped)
       toast(translate(useSettings.getState().lang, 'ui.dup_sold', { n: data.capped, c: data.capped_coins ?? 0 }));
@@ -136,6 +158,7 @@ async function openCoinPulls(n: number, serie: string) {
   if (e.coins < cost) return sfx.deny();
   busy = true;
   snapKnown();
+  const pityBefore = 100 - Number((me.pity_s as Record<string, number> | undefined)?.[serie] ?? 100);
   try {
     const { debug, buy } = await engine();
     const data = (await ecoApi.takePullsSerie(
@@ -144,7 +167,14 @@ async function openCoinPulls(n: number, serie: string) {
       me.admin || me.tester
         ? { force: debug.force || undefined, luck: debug.luck, p_variant: debug.variant || undefined }
         : {},
-    )) as { state: Me; results: string[]; variants?: (string | null)[]; lucks?: number[]; ids?: (number | null)[] };
+    )) as {
+      state: Me;
+      results: string[];
+      variants?: (string | null)[];
+      lucks?: number[];
+      ids?: (number | null)[];
+      pities?: number[];
+    };
     qc.setQueryData(meKey(), (old: object | undefined) => ({ ...old, ...(data.state as object) })); // garde admin, testeur… (absents de la réponse)
     buy(
       data.results.length,
@@ -156,6 +186,7 @@ async function openCoinPulls(n: number, serie: string) {
         0,
         PULLS.findIndex((p) => p.name === serie),
       ),
+      pityMults(pityBefore, data.results.length, data.pities),
     );
   } catch (err) {
     sfx.deny();
